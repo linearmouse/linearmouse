@@ -16,8 +16,11 @@
         margin: 40px;
       }
       h1 {
+        background: url(favicon.svg) left center no-repeat;
+        background-size: 1em;
         font-size: 2rem;
         font-weight: 300;
+        padding-left: 1.5em;
         margin: 1em 0;
       }
       h2 {
@@ -62,9 +65,9 @@
             matchMedia &&
             matchMedia("(prefers-color-scheme: dark)").matches
           ) {
-            favicon.href = "/favicon-dark.svg";
+            favicon.href = "favicon-dark.svg";
           } else {
-            favicon.href = "/favicon.svg";
+            favicon.href = "favicon.svg";
           }
           document.head.append(favicon);
         };
