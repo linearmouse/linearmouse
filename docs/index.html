@@ -5,31 +5,54 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LinearMouse</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=fallback"
+      rel="stylesheet"
+    />
     <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
       html {
         color: #333;
-        font: 14px/1.5 sans-serif;
+        font: 14px/1.5 "Roboto", sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
       }
       body {
-        margin: 40px;
+        padding-bottom: 2em;
+      }
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 2em;
       }
       h1 {
         background: url(favicon.svg) left center no-repeat;
         background-size: 1em;
         font-size: 2rem;
-        font-weight: 300;
+        font-weight: 400;
         padding-left: 1.5em;
         margin: 1em 0;
       }
       h2 {
         font-size: 1.5rem;
         font-weight: 500;
-        margin: 2em 0 1em;
+        margin: 1em 0;
+      }
+      header {
+        background-color: #f5f6f7;
+        margin-bottom: 2em;
+        padding: 2em 0;
+      }
+      header p {
+        margin: 0 0 1em;
       }
       nav {
-        margin: 2em 0;
+        margin-top: 1.5em;
         overflow: hidden;
       }
       nav a {
@@ -43,11 +66,14 @@
       nav a:not(:first-child) {
         margin-left: 5px;
       }
-      nav .btn {
+      .btn {
         background-color: #00324e;
         color: #fff;
       }
-      p,
+      .btn:hover,
+      .btn:active {
+        background-color: #004166;
+      }
       ul {
         margin: 1em 0;
       }
@@ -55,47 +81,29 @@
         padding: 0 0 0 2em;
       }
     </style>
-    <script>
-      {
-        const favicon = document.createElement("link");
-        favicon.rel = "icon";
-        favicon.type = "image/svg+xml";
-        const updateFavicon = () => {
-          if (
-            matchMedia &&
-            matchMedia("(prefers-color-scheme: dark)").matches
-          ) {
-            favicon.href = "favicon-dark.svg";
-          } else {
-            favicon.href = "favicon.svg";
-          }
-          document.head.append(favicon);
-        };
-        updateFavicon();
-        matchMedia("(prefers-color-scheme: dark)").addEventListener(
-          "change",
-          () => void updateFavicon()
-        );
-      }
-    </script>
+    <script async type="module" src="favicon.js"></script>
   </head>
   <body>
-    <h1>LinearMouse</h1>
-    <p>
-      A minimal macOS app to achieve a Windows-style mouse scrolling experience.
-    </p>
-    <nav>
-      <a
-        class="btn"
-        href="https://github.com/lujjjh/LinearMouse/releases/download/v0.1/LinearMouse.dmg"
-        >Download</a
-      >
-      <a href="https://github.com/lujjjh/LinearMouse">GitHub</a>
-    </nav>
-    <h2>Features</h2>
-    <ul>
-      <li>Reverse the direction of scrolling.</li>
-      <li>Disable scrolling acceleration.</li>
-    </ul>
+    <div class="container">
+      <h1>LinearMouse</h1>
+    </div>
+    <header>
+      <div class="container">
+        <p>A minimal macOS app to achieve a Windows-style mouse scrolling experience.</p>
+        <nav>
+          <a class="btn" href="https://github.com/lujjjh/LinearMouse/releases/latest/download/LinearMouse.dmg">
+            Download latest
+          </a>
+          <a href="https://github.com/lujjjh/LinearMouse">GitHub</a>
+        </nav>
+      </div>
+    </header>
+    <div class="container">
+      <h2>Features</h2>
+      <ul>
+        <li>Reverse the direction of scrolling.</li>
+        <li>Disable scrolling acceleration.</li>
+      </ul>
+    </div>
   </body>
 </html>
