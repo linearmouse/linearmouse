@@ -11,7 +11,7 @@
 
 You can download pre-compiled binaries from [Releases](https://github.com/lujjjh/LinearMouse/releases).
 
-## Compile
+## Compiling
 
 Xcode is required.
 
