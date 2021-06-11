@@ -1,12 +1,20 @@
 # LinearMouse
 
-> A minimal macOS app to achieve a Windows-style mouse scrolling experience.
+> A minimal app for better mouse scrolling experience on macOS.
 
 ## Features
 
 - Reverse the direction of scrolling.
-- Disable scrolling acceleration.
+- Linear scrolling.
 
 ## Downloads
 
 You can download pre-compiled binaries from [Releases](https://github.com/lujjjh/LinearMouse/releases).
+
+## Compile
+
+Xcode is required.
+
+```sh
+$ make
+```
