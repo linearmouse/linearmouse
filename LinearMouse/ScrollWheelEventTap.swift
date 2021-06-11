@@ -17,12 +17,14 @@ class ScrollWheelEventTap {
         let isContinuous = event.getIntegerValueField(.scrollWheelEventIsContinuous)
         // trackpad events are continuous and we simply ignore them
         if isContinuous == 0 {
-            event.setIntegerValueField(.scrollWheelEventDeltaAxis1, value: -event.getIntegerValueField(.scrollWheelEventDeltaAxis1))
-            event.setIntegerValueField(.scrollWheelEventDeltaAxis1, value: event.getIntegerValueField(.scrollWheelEventDeltaAxis1).signum() * mouseScrollLines)
+            event.setIntegerValueField(
+                .scrollWheelEventDeltaAxis1,
+                value: -event.getIntegerValueField(.scrollWheelEventDeltaAxis1).signum() * mouseScrollLines
+            )
         }
         return Unmanaged.passUnretained(event)
     }
-    
+
     init() {
         eventTap = CGEvent.tapCreate(
             tap: .cghidEventTap,

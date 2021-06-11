@@ -41,7 +41,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         completion()
     }
 
-
     @objc func quit() {
         // remove the start entry if the user quits LinearMouse manually
         AutoStartManager.disable()
