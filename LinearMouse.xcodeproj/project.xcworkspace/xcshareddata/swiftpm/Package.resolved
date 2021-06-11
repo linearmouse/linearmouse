@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "LoginServiceKit",
+        "repositoryURL": "https://github.com/Clipy/LoginServiceKit",
+        "state": {
+          "branch": null,
+          "revision": "e35be754ca2409ceada3825ac80461ecbad3c11f",
+          "version": "2.2.1"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
