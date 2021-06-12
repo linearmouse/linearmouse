@@ -8,19 +8,26 @@
 import Foundation
 
 class ScrollWheelEventTap {
-    static let mouseScrollLines = Int64(3)
-
     var eventTap: CFMachPort?
     var runLoopSource: CFRunLoopSource?
 
     let scrollEventCallback: CGEventTapCallBack = { (proxy: CGEventTapProxy, type: CGEventType, event: CGEvent, refcon) in
+        let defaults = AppDefaults.shared
         let isContinuous = event.getIntegerValueField(.scrollWheelEventIsContinuous)
         // trackpad events are continuous and we simply ignore them
         if isContinuous == 0 {
-            event.setIntegerValueField(
-                .scrollWheelEventDeltaAxis1,
-                value: -event.getIntegerValueField(.scrollWheelEventDeltaAxis1).signum() * mouseScrollLines
-            )
+            if defaults.reverseScrollingOn {
+                event.setIntegerValueField(
+                    .scrollWheelEventDeltaAxis1,
+                    value: -event.getIntegerValueField(.scrollWheelEventDeltaAxis1)
+                )
+            }
+            if defaults.linearScrollingOn {
+                event.setIntegerValueField(
+                    .scrollWheelEventDeltaAxis1,
+                    value: event.getIntegerValueField(.scrollWheelEventDeltaAxis1).signum() * Int64(defaults.scrollLines)
+                )
+            }
         }
         return Unmanaged.passUnretained(event)
     }

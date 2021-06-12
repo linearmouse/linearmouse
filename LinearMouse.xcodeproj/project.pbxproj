@@ -12,6 +12,13 @@
 		B75A06202671E9DA00BEAF77 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B75A061F2671E9DA00BEAF77 /* Assets.xcassets */; };
 		B75A06232671E9DA00BEAF77 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B75A06222671E9DA00BEAF77 /* Preview Assets.xcassets */; };
 		B75A06262671E9DA00BEAF77 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B75A06242671E9DA00BEAF77 /* Main.storyboard */; };
+		B77A160C26744DB400E99A5D /* StatusItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160B26744DB400E99A5D /* StatusItem.swift */; };
+		B77A160E2674B3DD00E99A5D /* LinearMouse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160D2674B3DD00E99A5D /* LinearMouse.swift */; };
+		B77A16102674B85300E99A5D /* AppDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160F2674B85300E99A5D /* AppDefaults.swift */; };
+		B77A16122674C21600E99A5D /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A16112674C21600E99A5D /* PreferencesView.swift */; };
+		B77A16152674C44100E99A5D /* AppStorage in Frameworks */ = {isa = PBXBuildFile; productRef = B77A16142674C44100E99A5D /* AppStorage */; };
+		B77A16172674D88E00E99A5D /* PreferencesWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A16162674D88E00E99A5D /* PreferencesWindow.swift */; };
+		B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A161A2674EF0E00E99A5D /* HyperLink.swift */; };
 		B7BD51812672FEB5001FE742 /* ScrollWheelEventTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BD51802672FEB5001FE742 /* ScrollWheelEventTap.swift */; };
 		B7BD5183267300DC001FE742 /* AutoStartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BD5182267300DC001FE742 /* AutoStartManager.swift */; };
 		B7DD796426730A800067F1AD /* LoginServiceKit in Frameworks */ = {isa = PBXBuildFile; productRef = B7DD796326730A800067F1AD /* LoginServiceKit */; };
@@ -25,6 +32,12 @@
 		B75A06252671E9DA00BEAF77 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B75A06272671E9DA00BEAF77 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B75A06282671E9DA00BEAF77 /* LinearMouse.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LinearMouse.entitlements; sourceTree = "<group>"; };
+		B77A160B26744DB400E99A5D /* StatusItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItem.swift; sourceTree = "<group>"; };
+		B77A160D2674B3DD00E99A5D /* LinearMouse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearMouse.swift; sourceTree = "<group>"; };
+		B77A160F2674B85300E99A5D /* AppDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDefaults.swift; sourceTree = "<group>"; };
+		B77A16112674C21600E99A5D /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
+		B77A16162674D88E00E99A5D /* PreferencesWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesWindow.swift; sourceTree = "<group>"; };
+		B77A161A2674EF0E00E99A5D /* HyperLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HyperLink.swift; sourceTree = "<group>"; };
 		B7BD51802672FEB5001FE742 /* ScrollWheelEventTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollWheelEventTap.swift; sourceTree = "<group>"; };
 		B7BD5182267300DC001FE742 /* AutoStartManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoStartManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -34,6 +47,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B77A16152674C44100E99A5D /* AppStorage in Frameworks */,
 				B7DD796426730A800067F1AD /* LoginServiceKit in Frameworks */,
 				B71392F426731645004C0173 /* LoginServiceKit in Frameworks */,
 			);
@@ -61,6 +75,7 @@
 		B75A061A2671E9D800BEAF77 /* LinearMouse */ = {
 			isa = PBXGroup;
 			children = (
+				B77A161A2674EF0E00E99A5D /* HyperLink.swift */,
 				B75A061B2671E9D800BEAF77 /* AppDelegate.swift */,
 				B75A061F2671E9DA00BEAF77 /* Assets.xcassets */,
 				B75A06242671E9DA00BEAF77 /* Main.storyboard */,
@@ -69,6 +84,11 @@
 				B75A06212671E9DA00BEAF77 /* Preview Content */,
 				B7BD51802672FEB5001FE742 /* ScrollWheelEventTap.swift */,
 				B7BD5182267300DC001FE742 /* AutoStartManager.swift */,
+				B77A160B26744DB400E99A5D /* StatusItem.swift */,
+				B77A160D2674B3DD00E99A5D /* LinearMouse.swift */,
+				B77A160F2674B85300E99A5D /* AppDefaults.swift */,
+				B77A16112674C21600E99A5D /* PreferencesView.swift */,
+				B77A16162674D88E00E99A5D /* PreferencesWindow.swift */,
 			);
 			path = LinearMouse;
 			sourceTree = "<group>";
@@ -100,6 +120,7 @@
 			packageProductDependencies = (
 				B7DD796326730A800067F1AD /* LoginServiceKit */,
 				B71392F326731645004C0173 /* LoginServiceKit */,
+				B77A16142674C44100E99A5D /* AppStorage */,
 			);
 			productName = LinearMouse;
 			productReference = B75A06182671E9D800BEAF77 /* LinearMouse.app */;
@@ -130,6 +151,7 @@
 			mainGroup = B75A060F2671E9D800BEAF77;
 			packageReferences = (
 				B71392F226731645004C0173 /* XCRemoteSwiftPackageReference "LoginServiceKit" */,
+				B77A16132674C44100E99A5D /* XCRemoteSwiftPackageReference "AppStorage" */,
 			);
 			productRefGroup = B75A06192671E9D800BEAF77 /* Products */;
 			projectDirPath = "";
@@ -158,9 +180,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B77A16102674B85300E99A5D /* AppDefaults.swift in Sources */,
+				B77A160C26744DB400E99A5D /* StatusItem.swift in Sources */,
+				B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */,
 				B7BD5183267300DC001FE742 /* AutoStartManager.swift in Sources */,
+				B77A160E2674B3DD00E99A5D /* LinearMouse.swift in Sources */,
+				B77A16172674D88E00E99A5D /* PreferencesWindow.swift in Sources */,
 				B75A061C2671E9D800BEAF77 /* AppDelegate.swift in Sources */,
 				B7BD51812672FEB5001FE742 /* ScrollWheelEventTap.swift in Sources */,
+				B77A16122674C21600E99A5D /* PreferencesView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -310,7 +338,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.2;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = plus.programming.LinearMouse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -333,7 +361,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.2;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = plus.programming.LinearMouse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -372,6 +400,14 @@
 				minimumVersion = 2.2.1;
 			};
 		};
+		B77A16132674C44100E99A5D /* XCRemoteSwiftPackageReference "AppStorage" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/xavierLowmiller/AppStorage.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.4;
+			};
+		};
 		B7DD796226730A800067F1AD /* XCRemoteSwiftPackageReference "LoginServiceKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Clipy/LoginServiceKit";
@@ -387,6 +423,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B71392F226731645004C0173 /* XCRemoteSwiftPackageReference "LoginServiceKit" */;
 			productName = LoginServiceKit;
+		};
+		B77A16142674C44100E99A5D /* AppStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B77A16132674C44100E99A5D /* XCRemoteSwiftPackageReference "AppStorage" */;
+			productName = AppStorage;
 		};
 		B7DD796326730A800067F1AD /* LoginServiceKit */ = {
 			isa = XCSwiftPackageProductDependency;
