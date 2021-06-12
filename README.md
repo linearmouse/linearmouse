@@ -1,6 +1,6 @@
 # LinearMouse
 
-> A minimal app for better mouse scrolling experience on macOS.
+> A minimal app to get rid of scrolling acceleration on macOS.
 
 ## Features
 
