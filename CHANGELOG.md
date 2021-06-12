@@ -7,3 +7,6 @@
 ## [0.2.0] - 2021-06-11
 
 - Launch at login.
+
+[0.2.1]: https://github.com/lujjjh/LinearMouse/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/lujjjh/LinearMouse/tree/v0.2.0
