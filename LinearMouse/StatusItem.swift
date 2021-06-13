@@ -60,12 +60,12 @@ class StatusItem {
             statusView,
             .separator(),
             .init(
-                title: "\(LinearMouse.appName) Preferences...",
+                title: String(format: NSLocalizedString("%@ Preferences...", comment: ""), LinearMouse.appName),
                 action: #selector(openPreferencesAction),
                 keyEquivalent: ""),
             .separator(),
             .init(
-                title: "Quit \(LinearMouse.appName)",
+                title: String(format: NSLocalizedString("Quit %@", comment: ""), LinearMouse.appName),
                 action: #selector(quitAction),
                 keyEquivalent: "q")
         ]

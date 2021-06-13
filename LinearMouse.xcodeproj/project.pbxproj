@@ -12,6 +12,7 @@
 		B75A06202671E9DA00BEAF77 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B75A061F2671E9DA00BEAF77 /* Assets.xcassets */; };
 		B75A06232671E9DA00BEAF77 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B75A06222671E9DA00BEAF77 /* Preview Assets.xcassets */; };
 		B75A06262671E9DA00BEAF77 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B75A06242671E9DA00BEAF77 /* Main.storyboard */; };
+		B76173442675AD8700CC9412 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = B76173462675AD8700CC9412 /* Localizable.strings */; };
 		B77A160C26744DB400E99A5D /* StatusItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160B26744DB400E99A5D /* StatusItem.swift */; };
 		B77A160E2674B3DD00E99A5D /* LinearMouse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160D2674B3DD00E99A5D /* LinearMouse.swift */; };
 		B77A16102674B85300E99A5D /* AppDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160F2674B85300E99A5D /* AppDefaults.swift */; };
@@ -32,6 +33,7 @@
 		B75A06252671E9DA00BEAF77 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B75A06272671E9DA00BEAF77 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B75A06282671E9DA00BEAF77 /* LinearMouse.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LinearMouse.entitlements; sourceTree = "<group>"; };
+		B76173452675AD8700CC9412 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		B77A160B26744DB400E99A5D /* StatusItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItem.swift; sourceTree = "<group>"; };
 		B77A160D2674B3DD00E99A5D /* LinearMouse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearMouse.swift; sourceTree = "<group>"; };
 		B77A160F2674B85300E99A5D /* AppDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDefaults.swift; sourceTree = "<group>"; };
@@ -40,6 +42,7 @@
 		B77A161A2674EF0E00E99A5D /* HyperLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HyperLink.swift; sourceTree = "<group>"; };
 		B7BD51802672FEB5001FE742 /* ScrollWheelEventTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollWheelEventTap.swift; sourceTree = "<group>"; };
 		B7BD5182267300DC001FE742 /* AutoStartManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoStartManager.swift; sourceTree = "<group>"; };
+		B7E897E22675B1D9003C7058 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +92,7 @@
 				B77A160F2674B85300E99A5D /* AppDefaults.swift */,
 				B77A16112674C21600E99A5D /* PreferencesView.swift */,
 				B77A16162674D88E00E99A5D /* PreferencesWindow.swift */,
+				B76173462675AD8700CC9412 /* Localizable.strings */,
 			);
 			path = LinearMouse;
 			sourceTree = "<group>";
@@ -147,6 +151,8 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
+				"zh-Hant",
 			);
 			mainGroup = B75A060F2671E9D800BEAF77;
 			packageReferences = (
@@ -168,6 +174,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B75A06262671E9DA00BEAF77 /* Main.storyboard in Resources */,
+				B76173442675AD8700CC9412 /* Localizable.strings in Resources */,
 				B75A06232671E9DA00BEAF77 /* Preview Assets.xcassets in Resources */,
 				B75A06202671E9DA00BEAF77 /* Assets.xcassets in Resources */,
 			);
@@ -203,6 +210,15 @@
 			name = Main.storyboard;
 			sourceTree = "<group>";
 		};
+		B76173462675AD8700CC9412 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B76173452675AD8700CC9412 /* zh-Hans */,
+				B7E897E22675B1D9003C7058 /* zh-Hant */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
@@ -210,6 +226,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -271,6 +288,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
