@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2.2] - 2021-06-13
+
+- Localization: Add Chinese translations.
+
 ## [0.2.1] - 2021-06-12
 
 - Functionalities such as reverse scrolling and linear scrolling can be tweaked in Preferences.
