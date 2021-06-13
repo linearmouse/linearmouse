@@ -61,7 +61,7 @@ struct PreferencesView: View {
 
             HStack {
                 HyperLink(URL(string: "https://linearmouse.lujjjh.com/")!) {
-                    Text("Website")
+                    Text("Homepage")
                 }
                 HyperLink(URL(string: "https://github.com/lujjjh/LinearMouse")!) {
                     Text("GitHub")

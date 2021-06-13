@@ -1,0 +1,18 @@
+/* 
+  Localizable.strings
+  LinearMouse
+
+  Created by lujjjh on 2021/6/13.
+  
+*/
+
+"Reverse scrolling:" = "Reverse scrolling:"
+"Linear scrolling:" = "Linear scrolling:"
+"on" = "on"
+"off" = "off"
+"line" = "line"
+"lines" = "lines"
+"%@ Preferences..." = "%@ Preferences..."
+"Quit %@" = "Quit %@"
+
+"Version: %@" = "Version: %@"
