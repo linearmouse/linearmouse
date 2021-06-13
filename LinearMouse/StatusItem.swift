@@ -34,6 +34,10 @@ fileprivate struct StatusView: View {
                         Text("off")
                     }
                 }
+                HStack {
+                    Text("Linear movement:")
+                    Text(defaults.linearMovementOn ? "on" : "off")
+                }
             }
             .font(.system(size: 12))
             .foregroundColor(.secondary)
