@@ -49,19 +49,22 @@
         margin: 0 0 1em;
       }
       nav {
+        display: flex;
         margin-top: 1.5em;
         overflow: hidden;
       }
       nav a {
-        float: left;
+        align-items: center;
+        box-sizing: border-box;
         color: #00324e;
+        display: flex;
         font-size: 13px;
-        line-height: 35px;
+        height: 32px;
         padding: 0 15px;
         text-decoration: none;
       }
       nav a:not(:first-child) {
-        margin-left: 5px;
+        margin-left: 10px;
       }
       .btn {
         background-color: #00324e;
@@ -70,6 +73,20 @@
       .btn:hover,
       .btn:active {
         background-color: #004166;
+      }
+      .star {
+        background-color: #fff;
+        border: 1px solid #ccc;
+      }
+      .star::before {
+        align-items: center;
+        background-color: #f5f6f7;
+        content: "Star";
+        display: flex;
+        margin-left: -15px;
+        margin-right: 10px;
+        padding: 0 10px 0 15px;
+        height: 100%;
       }
       ul {
         margin: 1em 0;
@@ -83,6 +100,12 @@
       }
     </style>
     <script async type="module" src="favicon.js"></script>
+    <script>
+      window.updateRepoInfo = (repo) => void (window.repo = repo);
+      window.updateLatestRelease = (release) => void (window.release = release);
+    </script>
+    <script src="https://api.github.com/repos/lujjjh/LinearMouse?callback=updateRepoInfo"></script>
+    <script src="https://api.github.com/repos/lujjjh/LinearMouse/releases/latest?callback=updateLatestRelease"></script>
   </head>
   <body>
     <div class="container">
@@ -93,14 +116,21 @@
         <p>A minimal app to get rid of scrolling acceleration on macOS.</p>
         <nav>
           <a class="btn" href="https://github.com/lujjjh/LinearMouse/releases/latest/download/LinearMouse.dmg">
-            Download latest
+            Download
+            <script>
+              document.write(window.release?.data?.tag_name ?? "latest");
+            </script>
           </a>
-          <a href="https://github.com/lujjjh/LinearMouse">GitHub</a>
+          <a class="star" href="https://github.com/lujjjh/LinearMouse">
+            <script>
+              document.write(window.repo?.data?.stargazers_count ?? "NaN");
+            </script>
+          </a>
         </nav>
       </div>
     </header>
     <div class="container">
-      <img src="preview.png" width="512" height="440" />
+      <img src="preview.png" width="512" height="440" alt="LinearMouse Preferences" />
     </div>
   </body>
 </html>
