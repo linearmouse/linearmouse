@@ -18,7 +18,7 @@ class PreferencesWindow: NSWindow {
 
         isReleasedWhenClosed = false
 
-        title = "\(LinearMouse.appName) Preferences"
+        title = String(format: NSLocalizedString("%@ Preferences", comment: ""), LinearMouse.appName)
 
         contentView = NSHostingView(rootView: PreferencesView())
 

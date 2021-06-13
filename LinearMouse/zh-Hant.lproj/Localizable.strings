@@ -15,6 +15,8 @@
 "%@ Preferences..." = "%@ 偏好設定…";
 "Quit %@" = "退出 %@";
 
+"%@ Preferences" = "%@ 偏好設定";
+
 "Version: %@" = "版本號：%@";
 "Reverse scrolling" = "翻轉捲動";
 "Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad." = "對滑鼠翻轉捲動，保留軌跡板的捲動方向。";
