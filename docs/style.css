@@ -1,0 +1,120 @@
+:root {
+  --background-color: #fff;
+  --text-color: #333;
+  --secondary-background-color: #f5f6f7;
+  --accent-color: #00324e;
+  --accent-hover-color: #004166;
+  --border-color: #ccc;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: #22211f;
+    --text-color: #ccc;
+    --secondary-background-color: #292826;
+    --accent-color: #0089d8;
+    --accent-hover-color: #0096ec;
+    --border-color: #333;
+  }
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+html {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font: 15px/1.5 "Lato", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+body {
+  padding-bottom: 2em;
+}
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 2em;
+}
+h1 {
+  background: url(favicon.svg) left center no-repeat;
+  background-size: 1em;
+  font-size: 2rem;
+  font-weight: 400;
+  padding-left: 1.5em;
+  margin: 1em 0;
+}
+@media (prefers-color-scheme: dark) {
+  h1 {
+    background-image: url(favicon-dark.svg);
+  }
+}
+h2 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin: 1em 0;
+}
+header {
+  background-color: var(--secondary-background-color);
+  margin-bottom: 2em;
+  padding: 2em 0;
+}
+header p {
+  margin: 0 0 1em;
+}
+nav {
+  display: flex;
+  margin-top: 1.5em;
+  overflow: hidden;
+}
+a {
+  align-items: center;
+  box-sizing: border-box;
+  color: var(--accent-color);
+  display: flex;
+  font-size: 13px;
+  height: 32px;
+  padding: 0 15px;
+  text-decoration: none;
+}
+a:hover,
+a:active {
+  color: var(--accent-hover-color);
+}
+nav a:not(:first-child) {
+  margin-left: 10px;
+}
+.btn,
+.btn:hover,
+.btn:active {
+  background-color: var(--accent-color);
+  color: #fff;
+}
+.btn:hover,
+.btn:active {
+  background-color: var(--accent-hover-color);
+}
+.star {
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+}
+.star::before {
+  align-items: center;
+  background-color: var(--secondary-background-color);
+  content: "Star";
+  display: flex;
+  margin-left: -15px;
+  margin-right: 10px;
+  padding: 0 10px 0 15px;
+  height: 100%;
+}
+ul {
+  margin: 1em 0;
+}
+ul {
+  padding: 0 0 0 2em;
+}
+img {
+  max-width: 100%;
+  height: auto;
+}

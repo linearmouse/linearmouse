@@ -7,98 +7,7 @@
     <title>LinearMouse</title>
     <link rel="preconnect" href="https://fonts.gstatic.com" />
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400&display=fallback" rel="stylesheet" />
-    <style>
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-      }
-      html {
-        color: #333;
-        font: 15px/1.5 "Lato", sans-serif;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
-      body {
-        padding-bottom: 2em;
-      }
-      .container {
-        max-width: 1000px;
-        margin: 0 auto;
-        padding: 0 2em;
-      }
-      h1 {
-        background: url(favicon.svg) left center no-repeat;
-        background-size: 1em;
-        font-size: 2rem;
-        font-weight: 400;
-        padding-left: 1.5em;
-        margin: 1em 0;
-      }
-      h2 {
-        font-size: 1.5rem;
-        font-weight: 500;
-        margin: 1em 0;
-      }
-      header {
-        background-color: #f5f6f7;
-        margin-bottom: 2em;
-        padding: 2em 0;
-      }
-      header p {
-        margin: 0 0 1em;
-      }
-      nav {
-        display: flex;
-        margin-top: 1.5em;
-        overflow: hidden;
-      }
-      nav a {
-        align-items: center;
-        box-sizing: border-box;
-        color: #00324e;
-        display: flex;
-        font-size: 13px;
-        height: 32px;
-        padding: 0 15px;
-        text-decoration: none;
-      }
-      nav a:not(:first-child) {
-        margin-left: 10px;
-      }
-      .btn {
-        background-color: #00324e;
-        color: #fff;
-      }
-      .btn:hover,
-      .btn:active {
-        background-color: #004166;
-      }
-      .star {
-        background-color: #fff;
-        border: 1px solid #ccc;
-      }
-      .star::before {
-        align-items: center;
-        background-color: #f5f6f7;
-        content: "Star";
-        display: flex;
-        margin-left: -15px;
-        margin-right: 10px;
-        padding: 0 10px 0 15px;
-        height: 100%;
-      }
-      ul {
-        margin: 1em 0;
-      }
-      ul {
-        padding: 0 0 0 2em;
-      }
-      img {
-        max-width: 100%;
-        height: auto;
-      }
-    </style>
+    <link rel="stylesheet" href="style.css" />
     <script async type="module" src="favicon.js"></script>
     <script>
       window.updateRepoInfo = (repo) => void (window.repo = repo);
@@ -130,7 +39,10 @@
       </div>
     </header>
     <div class="container">
-      <img src="preview.png" width="512" height="440" alt="LinearMouse Preferences" />
+      <picture>
+        <source srcset="preview-dark.png" media="(prefers-color-scheme: dark)" />
+        <img src="preview.png" width="512" height="440" alt="LinearMouse Preferences" />
+      </picture>
     </div>
   </body>
 </html>
