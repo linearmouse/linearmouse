@@ -31,6 +31,10 @@ html {
 body {
   padding-bottom: 2em;
 }
+html[lang|="en"] [lang]:not([lang="en"]),
+html[lang|="zh"] [lang]:not([lang="zh"]) {
+  display: none;
+}
 .container {
   max-width: 1000px;
   margin: 0 auto;

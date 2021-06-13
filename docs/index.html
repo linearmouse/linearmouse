@@ -16,6 +16,16 @@
     </script>
     <script src="https://api.github.com/repos/lujjjh/LinearMouse?callback=updateRepoInfo"></script>
     <script src="https://api.github.com/repos/lujjjh/LinearMouse/releases/latest?callback=updateLatestRelease"></script>
+    <script>
+      delete window.updateRepoInfo;
+      delete window.updateLatestRelease;
+      {
+        const lang = /^(?:en|zh)\b/.exec(navigator.language);
+        if (lang) {
+          document.documentElement.lang = lang[0];
+        }
+      }
+    </script>
   </head>
   <body>
     <div class="container">
@@ -23,10 +33,13 @@
     </div>
     <header>
       <div class="container">
-        <p>A minimal app to get rid of scrolling acceleration on macOS.</p>
+        <p lang="en">A minimal app to get rid of scrolling acceleration on macOS.</p>
+        <p lang="zh">告别 macOS 的滚动加速。</p>
         <nav>
           <a class="btn" href="https://github.com/lujjjh/LinearMouse/releases/latest/download/LinearMouse.dmg">
-            Download
+            <span lang="en">Download</span>
+            <span lang="zh">下载</span>
+            <span>&nbsp;</span>
             <script>
               document.write(window.release?.data?.tag_name ?? "latest");
             </script>
@@ -40,9 +53,13 @@
       </div>
     </header>
     <div class="container">
-      <picture>
+      <picture lang="en">
         <source srcset="preview-dark.png" media="(prefers-color-scheme: dark)" />
         <img src="preview.png" width="512" height="440" alt="LinearMouse Preferences" />
+      </picture>
+      <picture lang="zh">
+        <source srcset="preview-dark-zh.png" media="(prefers-color-scheme: dark)" />
+        <img src="preview-zh.png" width="512" height="440" alt="LinearMouse 偏好设置" />
       </picture>
     </div>
   </body>
