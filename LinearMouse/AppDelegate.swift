@@ -6,18 +6,42 @@
 //
 
 import SwiftUI
+import Combine
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
     let statusItem = StatusItem()
+
+    let mouseAcceleration = MouseAcceleration()
+    var linearMovementOn: Bool = false {
+        didSet {
+            guard oldValue != linearMovementOn else { return }
+            if linearMovementOn {
+                mouseAcceleration.disable()
+            } else {
+                mouseAcceleration.enable()
+            }
+        }
+    }
+
+    var defaultsSubscription: AnyCancellable!
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         withAccessibilityPermission {
             // register the start entry if the user grants the permission
             AutoStartManager.enable()
 
-            // the core functionality
+            // scrolling functionalities
             ScrollWheelEventTap().enable()
+
+            // subscribe to the user settings
+            let defaults = AppDefaults.shared
+            self.defaultsSubscription = defaults.objectWillChange.sink { _ in
+                DispatchQueue.main.async {
+                    self.update(defaults)
+                }
+            }
+            self.update(defaults)
         }
     }
 
@@ -30,5 +54,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         completion()
+    }
+
+    func update(_ defaults: AppDefaults) {
+        linearMovementOn = defaults.linearMovementOn
     }
 }

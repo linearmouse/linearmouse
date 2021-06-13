@@ -8,6 +8,7 @@
 
 "Reverse scrolling:" = "翻轉捲動：";
 "Linear scrolling:" = "線性捲動：";
+"Linear movement:" = "線性移動：";
 "on" = "啟用";
 "off" = "禁用";
 "line" = "行";
@@ -23,6 +24,8 @@
 "Enable linear scrolling" = "啟用線性捲動";
 "Disable mouse scrolling acceleration." = "禁用滑鼠捲動加速度。";
 "Scroll" = "捲動";
+"Enable linear movement" = "啟用線性移動";
+"Disable cursor acceleration." = "禁用游標加速度。";
 
 "Homepage" = "主頁";
 "GitHub" = "GitHub";

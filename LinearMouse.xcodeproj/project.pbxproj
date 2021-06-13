@@ -23,6 +23,7 @@
 		B7BD51812672FEB5001FE742 /* ScrollWheelEventTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BD51802672FEB5001FE742 /* ScrollWheelEventTap.swift */; };
 		B7BD5183267300DC001FE742 /* AutoStartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BD5182267300DC001FE742 /* AutoStartManager.swift */; };
 		B7DD796426730A800067F1AD /* LoginServiceKit in Frameworks */ = {isa = PBXBuildFile; productRef = B7DD796326730A800067F1AD /* LoginServiceKit */; };
+		B7E897E42675EBB0003C7058 /* MouseAcceleration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E897E32675EBB0003C7058 /* MouseAcceleration.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +44,7 @@
 		B7BD51802672FEB5001FE742 /* ScrollWheelEventTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollWheelEventTap.swift; sourceTree = "<group>"; };
 		B7BD5182267300DC001FE742 /* AutoStartManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoStartManager.swift; sourceTree = "<group>"; };
 		B7E897E22675B1D9003C7058 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		B7E897E32675EBB0003C7058 /* MouseAcceleration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseAcceleration.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,6 +95,7 @@
 				B77A16112674C21600E99A5D /* PreferencesView.swift */,
 				B77A16162674D88E00E99A5D /* PreferencesWindow.swift */,
 				B76173462675AD8700CC9412 /* Localizable.strings */,
+				B7E897E32675EBB0003C7058 /* MouseAcceleration.swift */,
 			);
 			path = LinearMouse;
 			sourceTree = "<group>";
@@ -188,6 +191,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B77A16102674B85300E99A5D /* AppDefaults.swift in Sources */,
+				B7E897E42675EBB0003C7058 /* MouseAcceleration.swift in Sources */,
 				B77A160C26744DB400E99A5D /* StatusItem.swift in Sources */,
 				B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */,
 				B7BD5183267300DC001FE742 /* AutoStartManager.swift in Sources */,

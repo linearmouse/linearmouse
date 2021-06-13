@@ -17,8 +17,6 @@ struct PreferencesView: View {
                 .font(.footnote)
                 .foregroundColor(.secondary)
 
-            Spacer()
-
             Toggle(isOn: $defaults.reverseScrollingOn) {
                 VStack(alignment: .leading) {
                     Text("Reverse scrolling")
@@ -57,7 +55,18 @@ struct PreferencesView: View {
                 .disabled(!defaults.linearScrollingOn)
             }
 
-            Spacer()
+            Toggle(isOn: $defaults.linearMovementOn) {
+                VStack(alignment: .leading) {
+                    Text("Enable linear movement")
+                    Text("""
+                        Disable cursor acceleration.
+                        """)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
+            Divider()
 
             HStack {
                 HyperLink(URL(string: "https://linearmouse.lujjjh.com/")!) {
@@ -72,7 +81,7 @@ struct PreferencesView: View {
             }
         }
         .padding(.all, 30)
-        .frame(width: 400, height: 300)
+        .frame(width: 400)
     }
 }
 

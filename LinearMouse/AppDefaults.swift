@@ -28,4 +28,10 @@ class AppDefaults: ObservableObject {
             objectWillChange.send()
         }
     }
+
+    @AppStorageCompat(wrappedValue: true, "linearMovementOn") var linearMovementOn: Bool {
+        willSet {
+            objectWillChange.send()
+        }
+    }
 }
