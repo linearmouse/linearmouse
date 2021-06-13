@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+
+- Add linear movement. Now you can disable mouse (cursor) acceleration.
+
 ## [0.2.2] - 2021-06-13
 
 - Localization: Add Chinese translations.
@@ -12,6 +16,7 @@
 
 - Launch at login.
 
+[unreleased]: https://github.com/lujjjh/LinearMouse/compare/v0.2.2...HEAD
 [0.2.2]: https://github.com/lujjjh/LinearMouse/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/lujjjh/LinearMouse/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/lujjjh/LinearMouse/tree/v0.2.0
