@@ -1,11 +1,12 @@
 # LinearMouse
 
-> A minimal app to get rid of scrolling acceleration on macOS.
+> A minimal app to get rid of mouse acceleration on macOS.
 
 ## Features
 
 - Reverse the direction of scrolling.
-- Linear scrolling.
+- Linear scrolling (disable scrolling acceleration).
+- Linear movement (disable cursor acceleration).
 
 ## Downloads
 
