@@ -26,6 +26,8 @@
 "Scroll" = "捲動";
 "Enable linear movement" = "啟用線性移動";
 "Disable cursor acceleration." = "禁用游標加速度。";
+"Show in menu bar" = "在選單列中顯示";
+"To show the preferences, launch %@ again." = "要顯示偏好設定，再次運行 %@。";
 
 "Homepage" = "主頁";
 "GitHub" = "GitHub";

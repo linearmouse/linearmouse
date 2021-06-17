@@ -5,8 +5,8 @@
 //  Created by lujjjh on 2021/6/10.
 //
 
-import SwiftUI
 import Combine
+import SwiftUI
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {

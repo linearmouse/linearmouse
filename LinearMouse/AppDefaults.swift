@@ -34,4 +34,10 @@ class AppDefaults: ObservableObject {
             objectWillChange.send()
         }
     }
+
+    @AppStorageCompat(wrappedValue: true, "showInMenuBar") var showInMenuBar: Bool {
+        willSet {
+            objectWillChange.send()
+        }
+    }
 }

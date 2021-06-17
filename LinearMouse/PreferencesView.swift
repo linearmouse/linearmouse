@@ -66,6 +66,18 @@ struct PreferencesView: View {
                 }
             }
 
+            Toggle(isOn: $defaults.showInMenuBar) {
+                VStack(alignment: .leading) {
+                    Text("Show in menu bar")
+                    Text("""
+                        To show the preferences, launch \
+                        \(LinearMouse.appName) again.
+                        """)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
             Divider()
 
             HStack {
