@@ -5,6 +5,7 @@
 //  Created by lujjjh on 2021/6/12.
 //
 
+import Combine
 import SwiftUI
 
 fileprivate struct StatusView: View {
@@ -79,9 +80,39 @@ class StatusItem {
 
     lazy var preferencesWindow = PreferencesWindow()
 
+    var defaultsSubscription: AnyCancellable!
+
     init() {
         statusItem.button?.image = NSImage(named: "MenuIcon")
         statusItem.menu = menu
+
+        // If the user launches the program when the application is already
+        // launched, macOS will activate the application (by default).
+        //
+        // We simply show the preferences in case that the user has hidden
+        // tha menu bar icon but want to adjust some settings.
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(applicationDidBecomeActive),
+            name: NSApplication.didBecomeActiveNotification,
+            object: nil)
+
+        // Subscribe to the user settings and show / hide the menu icon.
+        let defaults = AppDefaults.shared
+        defaultsSubscription = defaults.objectWillChange.sink { _ in
+            DispatchQueue.main.async {
+                self.update(defaults)
+            }
+        }
+        self.update(defaults)
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: NSApplication.didBecomeActiveNotification, object: nil)
+    }
+
+    @objc func applicationDidBecomeActive() {
+        preferencesWindow.makeKeyAndOrderFront(nil)
     }
 
     @objc func openPreferencesAction() {
@@ -94,5 +125,9 @@ class StatusItem {
         AutoStartManager.disable()
 
         NSApp.terminate(nil)
+    }
+
+    func update(_ defaults: AppDefaults) {
+        statusItem.isVisible = defaults.showInMenuBar
     }
 }
