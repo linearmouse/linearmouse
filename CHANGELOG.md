@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.2.4] - 2021-06-17
+
+- Add option to hide LinearMouse in the menu bar.
+
 ## [0.2.3] - 2021-06-13
 
 - Add linear movement. Now you can disable mouse (cursor) acceleration.
@@ -18,7 +22,8 @@
 
 - Launch at login.
 
-[unreleased]: https://github.com/lujjjh/LinearMouse/compare/v0.2.3...HEAD
+[unreleased]: https://github.com/lujjjh/LinearMouse/compare/v0.2.4...HEAD
+[0.2.4]: https://github.com/lujjjh/LinearMouse/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/lujjjh/LinearMouse/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/lujjjh/LinearMouse/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/lujjjh/LinearMouse/compare/v0.2.0...v0.2.1
