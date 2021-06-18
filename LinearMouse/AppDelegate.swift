@@ -59,4 +59,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func update(_ defaults: AppDefaults) {
         linearMovementOn = defaults.linearMovementOn
     }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if flag {
+            return true
+        }
+        statusItem.openPreferencesAction()
+        return false
+    }
 }
