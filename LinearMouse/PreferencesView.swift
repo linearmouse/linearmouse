@@ -9,7 +9,7 @@ import SwiftUI
 import AppStorage
 
 struct PreferencesView: View {
-    @StateObject var defaults = AppDefaults.shared
+    @ObservedObject var defaults = AppDefaults.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {

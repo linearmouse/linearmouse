@@ -9,7 +9,7 @@ import Combine
 import SwiftUI
 
 fileprivate struct StatusView: View {
-    @StateObject var defaults = AppDefaults.shared
+    @ObservedObject var defaults = AppDefaults.shared
 
     var body: some View {
         VStack(alignment: .leading) {
