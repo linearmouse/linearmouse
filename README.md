@@ -1,21 +1,26 @@
-# LinearMouse
+<p align="center">
+  <img src="/docs/favicon.svg" width="96" height="96" />
+  <a href="https://linearmouse.lujjjh.com/">
+    <h1 align="center">LinearMouse</h1>
+  </a>
+</p>
 
-> A minimal app to get rid of mouse acceleration on macOS.
+<p align="center">
+  <a href="https://github.com/lujjjh/LinearMouse/releases/latest"><img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/lujjjh/LinearMouse?sort=semver&style=for-the-badge"></a>
+  <a href="https://github.com/lujjjh/LinearMouse/releases/latest/download/LinearMouse.dmg"><img src="https://img.shields.io/github/downloads/lujjjh/LinearMouse/total?style=for-the-badge" alt="Downloads" /></a>
+  <img src="https://img.shields.io/github/license/lujjjh/LinearMouse?style=for-the-badge" alt="MIT License" />
+</p>
+
+<p align="center">
+  <img src="https://linearmouse.lujjjh.com/preview.png" width="512" height="440" alt="A minimal app to get rid of mouse acceleration on macOS." />
+</p>
 
 ## Features
 
-- Reverse the direction of scrolling.
-- Linear scrolling (disable scrolling acceleration).
-- Linear movement (disable cursor acceleration).
+- ↕️ Reverse scrolling
+- 📜 Linear scrolling
+- 🖱️ Linear movement
 
-## Downloads
+## Download
 
-You can download pre-compiled binaries from [Releases](https://github.com/lujjjh/LinearMouse/releases).
-
-## Compiling
-
-Xcode is required.
-
-```sh
-$ make
-```
+[Download the latest release](https://github.com/lujjjh/LinearMouse/releases/latest/download/LinearMouse.dmg), or [view history releases](https://github.com/lujjjh/LinearMouse/releases).
