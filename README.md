@@ -1,6 +1,6 @@
 <p align="center">
-  <img src="/docs/favicon.svg" width="96" height="96" />
   <a href="https://linearmouse.lujjjh.com/">
+    <img src="/docs/favicon.svg" width="96" height="96" />
     <h1 align="center">LinearMouse</h1>
   </a>
 </p>
