@@ -17,6 +17,10 @@
   </a>
 </p>
 
+<p align="center">
+  <a href="https://www.producthunt.com/posts/linearmouse?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-linearmouse" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=299681&theme=light" alt="LinearMouse - A minimal app to get rid of mouse acceleration on macOS. | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+</p>
+
 ## Features
 
 - ↕️ Reverse scrolling
