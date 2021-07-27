@@ -12,7 +12,9 @@
 </p>
 
 <p align="center">
-  <img src="https://linearmouse.lujjjh.com/preview.png" width="512" height="440" alt="A minimal app to get rid of mouse acceleration on macOS." />
+  <a href="https://linearmouse.lujjjh.com/">
+    <img src="https://linearmouse.lujjjh.com/preview.png" width="512" height="440" alt="A minimal app to get rid of mouse acceleration on macOS." />
+  </a>
 </p>
 
 ## Features
