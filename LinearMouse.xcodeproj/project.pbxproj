@@ -17,9 +17,11 @@
 		B77A160E2674B3DD00E99A5D /* LinearMouse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160D2674B3DD00E99A5D /* LinearMouse.swift */; };
 		B77A16102674B85300E99A5D /* AppDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160F2674B85300E99A5D /* AppDefaults.swift */; };
 		B77A16122674C21600E99A5D /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A16112674C21600E99A5D /* PreferencesView.swift */; };
-		B77A16152674C44100E99A5D /* AppStorage in Frameworks */ = {isa = PBXBuildFile; productRef = B77A16142674C44100E99A5D /* AppStorage */; };
 		B77A16172674D88E00E99A5D /* PreferencesWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A16162674D88E00E99A5D /* PreferencesWindow.swift */; };
 		B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A161A2674EF0E00E99A5D /* HyperLink.swift */; };
+		B7B1D08D26B2FD6C00F48176 /* AppStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7B1D08C26B2FD6C00F48176 /* AppStorage.swift */; };
+		B7B6D83C26B2726B00B0D247 /* ModifierKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7B6D83B26B2726B00B0D247 /* ModifierKeys.swift */; };
+		B7B6D83E26B2745300B0D247 /* ModifierKeyActionPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7B6D83D26B2745300B0D247 /* ModifierKeyActionPicker.swift */; };
 		B7BD51812672FEB5001FE742 /* ScrollWheelEventTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BD51802672FEB5001FE742 /* ScrollWheelEventTap.swift */; };
 		B7BD5183267300DC001FE742 /* AutoStartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BD5182267300DC001FE742 /* AutoStartManager.swift */; };
 		B7DD796426730A800067F1AD /* LoginServiceKit in Frameworks */ = {isa = PBXBuildFile; productRef = B7DD796326730A800067F1AD /* LoginServiceKit */; };
@@ -41,6 +43,9 @@
 		B77A16112674C21600E99A5D /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
 		B77A16162674D88E00E99A5D /* PreferencesWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesWindow.swift; sourceTree = "<group>"; };
 		B77A161A2674EF0E00E99A5D /* HyperLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HyperLink.swift; sourceTree = "<group>"; };
+		B7B1D08C26B2FD6C00F48176 /* AppStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStorage.swift; sourceTree = "<group>"; };
+		B7B6D83B26B2726B00B0D247 /* ModifierKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierKeys.swift; sourceTree = "<group>"; };
+		B7B6D83D26B2745300B0D247 /* ModifierKeyActionPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierKeyActionPicker.swift; sourceTree = "<group>"; };
 		B7BD51802672FEB5001FE742 /* ScrollWheelEventTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollWheelEventTap.swift; sourceTree = "<group>"; };
 		B7BD5182267300DC001FE742 /* AutoStartManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoStartManager.swift; sourceTree = "<group>"; };
 		B7E897E22675B1D9003C7058 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
@@ -52,7 +57,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B77A16152674C44100E99A5D /* AppStorage in Frameworks */,
 				B7DD796426730A800067F1AD /* LoginServiceKit in Frameworks */,
 				B71392F426731645004C0173 /* LoginServiceKit in Frameworks */,
 			);
@@ -96,6 +100,9 @@
 				B77A16162674D88E00E99A5D /* PreferencesWindow.swift */,
 				B76173462675AD8700CC9412 /* Localizable.strings */,
 				B7E897E32675EBB0003C7058 /* MouseAcceleration.swift */,
+				B7B6D83B26B2726B00B0D247 /* ModifierKeys.swift */,
+				B7B6D83D26B2745300B0D247 /* ModifierKeyActionPicker.swift */,
+				B7B1D08C26B2FD6C00F48176 /* AppStorage.swift */,
 			);
 			path = LinearMouse;
 			sourceTree = "<group>";
@@ -127,7 +134,6 @@
 			packageProductDependencies = (
 				B7DD796326730A800067F1AD /* LoginServiceKit */,
 				B71392F326731645004C0173 /* LoginServiceKit */,
-				B77A16142674C44100E99A5D /* AppStorage */,
 			);
 			productName = LinearMouse;
 			productReference = B75A06182671E9D800BEAF77 /* LinearMouse.app */;
@@ -160,7 +166,6 @@
 			mainGroup = B75A060F2671E9D800BEAF77;
 			packageReferences = (
 				B71392F226731645004C0173 /* XCRemoteSwiftPackageReference "LoginServiceKit" */,
-				B77A16132674C44100E99A5D /* XCRemoteSwiftPackageReference "AppStorage" */,
 			);
 			productRefGroup = B75A06192671E9D800BEAF77 /* Products */;
 			projectDirPath = "";
@@ -193,8 +198,11 @@
 				B77A16102674B85300E99A5D /* AppDefaults.swift in Sources */,
 				B7E897E42675EBB0003C7058 /* MouseAcceleration.swift in Sources */,
 				B77A160C26744DB400E99A5D /* StatusItem.swift in Sources */,
+				B7B1D08D26B2FD6C00F48176 /* AppStorage.swift in Sources */,
 				B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */,
+				B7B6D83E26B2745300B0D247 /* ModifierKeyActionPicker.swift in Sources */,
 				B7BD5183267300DC001FE742 /* AutoStartManager.swift in Sources */,
+				B7B6D83C26B2726B00B0D247 /* ModifierKeys.swift in Sources */,
 				B77A160E2674B3DD00E99A5D /* LinearMouse.swift in Sources */,
 				B77A16172674D88E00E99A5D /* PreferencesWindow.swift in Sources */,
 				B75A061C2671E9D800BEAF77 /* AppDelegate.swift in Sources */,
@@ -422,14 +430,6 @@
 				minimumVersion = 2.2.1;
 			};
 		};
-		B77A16132674C44100E99A5D /* XCRemoteSwiftPackageReference "AppStorage" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/xavierLowmiller/AppStorage.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.4;
-			};
-		};
 		B7DD796226730A800067F1AD /* XCRemoteSwiftPackageReference "LoginServiceKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Clipy/LoginServiceKit";
@@ -445,11 +445,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B71392F226731645004C0173 /* XCRemoteSwiftPackageReference "LoginServiceKit" */;
 			productName = LoginServiceKit;
-		};
-		B77A16142674C44100E99A5D /* AppStorage */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B77A16132674C44100E99A5D /* XCRemoteSwiftPackageReference "AppStorage" */;
-			productName = AppStorage;
 		};
 		B7DD796326730A800067F1AD /* LoginServiceKit */ = {
 			isa = XCSwiftPackageProductDependency;

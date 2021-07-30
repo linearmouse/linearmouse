@@ -28,6 +28,19 @@ class ScrollWheelEventTap {
                     value: event.getIntegerValueField(.scrollWheelEventDeltaAxis1).signum() * Int64(defaults.scrollLines)
                 )
             }
+            let modifierActions: [(CGEventFlags.Element, ModifierKeyAction)] = [
+                (.maskCommand, defaults.modifiersCommandAction),
+                (.maskShift, defaults.modifiersShiftAction),
+                (.maskAlternate, defaults.modifiersAlternateAction),
+                (.maskControl, defaults.modifiersControlAction),
+            ]
+            for case (let flag, let action) in modifierActions {
+                if event.flags.contains(flag) {
+                    if handleModifierKeyAction(for: event, action: action) {
+                        event.flags.remove(flag)
+                    }
+                }
+            }
         }
         return Unmanaged.passUnretained(event)
     }
@@ -56,5 +69,33 @@ class ScrollWheelEventTap {
         if let eventTap = eventTap {
             CGEvent.tapEnable(tap: eventTap, enable: false)
         }
+    }
+
+    static func handleModifierKeyAction(for event: CGEvent, action: ModifierKeyAction) -> Bool {
+        switch action.type {
+        case .noAction:
+            return false
+        case .alterOrientation:
+            alterOrientation(for: event)
+        case .changeSpeed:
+            changeSpeed(for: event, factor: action.speedFactor)
+        }
+        return true
+    }
+
+    static func alterOrientation(for event: CGEvent) {
+        let axis1 = event.getIntegerValueField(.scrollWheelEventDeltaAxis1)
+        let axis2 = event.getIntegerValueField(.scrollWheelEventDeltaAxis2)
+        event.setIntegerValueField(.scrollWheelEventDeltaAxis1, value: axis2)
+        event.setIntegerValueField(.scrollWheelEventDeltaAxis2, value: axis1)
+    }
+
+    static func changeSpeed(for event: CGEvent, factor: Double) {
+        var axis1 = event.getIntegerValueField(.scrollWheelEventDeltaAxis1)
+        var axis2 = event.getIntegerValueField(.scrollWheelEventDeltaAxis2)
+        axis1 = axis1.signum() * max(1, abs(Int64((Double(axis1) * factor).rounded())))
+        axis2 = axis2.signum() * max(1, abs(Int64((Double(axis2) * factor).rounded())))
+        event.setIntegerValueField(.scrollWheelEventDeltaAxis1, value: axis1)
+        event.setIntegerValueField(.scrollWheelEventDeltaAxis2, value: axis2)
     }
 }
