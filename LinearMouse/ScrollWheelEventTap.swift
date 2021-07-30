@@ -21,11 +21,19 @@ class ScrollWheelEventTap {
                     .scrollWheelEventDeltaAxis1,
                     value: -event.getIntegerValueField(.scrollWheelEventDeltaAxis1)
                 )
+                event.setIntegerValueField(
+                    .scrollWheelEventDeltaAxis2,
+                    value: -event.getIntegerValueField(.scrollWheelEventDeltaAxis2)
+                )
             }
             if defaults.linearScrollingOn {
                 event.setIntegerValueField(
                     .scrollWheelEventDeltaAxis1,
                     value: event.getIntegerValueField(.scrollWheelEventDeltaAxis1).signum() * Int64(defaults.scrollLines)
+                )
+                event.setIntegerValueField(
+                    .scrollWheelEventDeltaAxis2,
+                    value: event.getIntegerValueField(.scrollWheelEventDeltaAxis2).signum() * Int64(defaults.scrollLines)
                 )
             }
             let modifierActions: [(CGEventFlags.Element, ModifierKeyAction)] = [
@@ -72,9 +80,15 @@ class ScrollWheelEventTap {
     }
 
     static func handleModifierKeyAction(for event: CGEvent, action: ModifierKeyAction) -> Bool {
+        guard action.type != .noAction else { return false }
+        // fix orientation on Catalina
+        // TODO: is there a better way?
+        if event.getIntegerValueField(.scrollWheelEventDeltaAxis1) == 0 {
+            alterOrientation(for: event)
+        }
         switch action.type {
-        case .noAction:
-            return false
+        case .noAction: // make the compiler happy
+            break
         case .alterOrientation:
             alterOrientation(for: event)
         case .changeSpeed:
