@@ -18,6 +18,10 @@
 
 "%@ Preferences" = "%@ 偏好设置";
 
+"General" = "通用";
+"Modifier Keys" = "修饰键";
+"About" = "关于";
+
 "Version: %@" = "版本号：%@";
 "Reverse scrolling" = "翻转滚动";
 "Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad." = "对鼠标翻转滚动，保留触控板的滚动方向。";
@@ -28,6 +32,11 @@
 "Disable cursor acceleration." = "禁用光标加速度。";
 "Show in menu bar" = "在菜单栏中显示";
 "To show the preferences, launch %@ again." = "要显示偏好设置，再次运行 %@。";
+
+"Speed factor" = "速度因子";
+"No action" = "无动作";
+"Alter orientation" = "改变方向";
+"Change speed" = "变更速度";
 
 "Homepage" = "主页";
 "GitHub" = "GitHub";

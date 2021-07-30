@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Add options to modify scrolling behavior while modifier keys are hold (#9).
+
 ## [0.2.5] - 2021-07-24
 
 - Fix crashes on macOS Catalina.

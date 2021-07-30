@@ -2,15 +2,6 @@
   "object": {
     "pins": [
       {
-        "package": "AppStorage",
-        "repositoryURL": "https://github.com/xavierLowmiller/AppStorage.git",
-        "state": {
-          "branch": null,
-          "revision": "dfc26527f7c1ea1880b1913053bc5f380e63eaa1",
-          "version": "1.0.4"
-        }
-      },
-      {
         "package": "LoginServiceKit",
         "repositoryURL": "https://github.com/Clipy/LoginServiceKit",
         "state": {

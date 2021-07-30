@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import AppStorage
 
 class AppDefaults: ObservableObject {
     public static let shared = AppDefaults()
@@ -36,6 +35,30 @@ class AppDefaults: ObservableObject {
     }
 
     @AppStorageCompat(wrappedValue: true, "showInMenuBar") var showInMenuBar: Bool {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+
+    @AppStorageCompat("modifiers.command.action") var modifiersCommandAction = ModifierKeyAction(type: .noAction, speedFactor: 5.0) {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+
+    @AppStorageCompat("modifiers.shift.action") var modifiersShiftAction = ModifierKeyAction(type: .noAction, speedFactor: 2.0) {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+
+    @AppStorageCompat("modifiers.alternate.action") var modifiersAlternateAction = ModifierKeyAction(type: .noAction, speedFactor: 1.0) {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+
+    @AppStorageCompat("modifiers.control.action") var modifiersControlAction = ModifierKeyAction(type: .noAction, speedFactor: 0.2) {
         willSet {
             objectWillChange.send()
         }
