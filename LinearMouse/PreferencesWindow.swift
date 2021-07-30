@@ -11,7 +11,7 @@ import SwiftUI
 class PreferencesWindow: NSWindow {
     init() {
         super.init(
-            contentRect: .zero,
+            contentRect: .init(x: 0, y: 0, width: 500, height: 450),
             styleMask: [.titled, .closable, .fullSizeContentView],
             backing: .buffered,
             defer: false)

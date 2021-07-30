@@ -20,7 +20,6 @@
 
 "General" = "通用";
 "Modifier Keys" = "修饰键";
-"About" = "关于";
 
 "Version: %@" = "版本号：%@";
 "Reverse scrolling" = "翻转滚动";
@@ -37,6 +36,7 @@
 "No action" = "无动作";
 "Alter orientation" = "改变方向";
 "Change speed" = "变更速度";
+"to" = "到";
 
 "Homepage" = "主页";
 "GitHub" = "GitHub";

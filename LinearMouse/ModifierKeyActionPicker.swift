@@ -22,13 +22,13 @@ struct ModifierKeyActionPicker: View {
 
         if action.type == .changeSpeed {
             HStack {
+                Text("to")
                 Slider(value: $action.speedFactor,
                     in: 0.1...5.0,
-                    step: 0.1) {
-                    Text("Speed factor")
-                }
-                Text(String(format: "%.1f", action.speedFactor))
+                    step: 0.1)
+                Text(String(format: "%.1f×", action.speedFactor))
             }
+            .padding(.bottom, 20)
         }
     }
 }

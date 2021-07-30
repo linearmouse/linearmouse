@@ -20,7 +20,6 @@
 
 "General" = "通用";
 "Modifier Keys" = "修飾鍵";
-"About" = "關於";
 
 "Version: %@" = "版本號：%@";
 "Reverse scrolling" = "翻轉捲動";
@@ -37,6 +36,7 @@
 "No action" = "無動作";
 "Alter orientation" = "改變方向";
 "Change speed" = "變更速度";
+"to" = "到";
 
 "Homepage" = "主頁";
 "GitHub" = "GitHub";

@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Tweak the preferences UI.
+
 ## [0.2.6] - 2021-07-30
 
 - Add options to modify scrolling behavior while modifier keys are hold (#9).
