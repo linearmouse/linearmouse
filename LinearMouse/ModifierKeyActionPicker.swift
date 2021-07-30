@@ -15,7 +15,7 @@ struct ModifierKeyActionPicker: View {
 
     var body: some View {
         Picker(label, selection: $action.type) {
-            ForEach(allModifierKeyActionTypes, id: \.self) {
+            ForEach(ModifierKeyActionType.allCases, id: \.self) {
                 Text(NSLocalizedString($0.rawValue, comment: "")).tag($0)
             }
         }

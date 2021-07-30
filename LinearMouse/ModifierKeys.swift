@@ -12,22 +12,8 @@ struct ModifierKeyAction: Codable {
     var speedFactor: Double
 }
 
-enum ModifierKeyActionType: String, Codable {
+enum ModifierKeyActionType: String, Codable, CaseIterable {
     case noAction = "No action"
     case alterOrientation = "Alter orientation"
     case changeSpeed = "Change speed"
-}
-
-let allModifierKeyActionTypes: [ModifierKeyActionType] = [
-    .noAction,
-    .alterOrientation,
-    .changeSpeed,
-]
-
-extension ModifierKeyAction {
-    func duplicate(completion: ((inout Self) -> Void)?) -> Self {
-        var new = self
-        completion?(&new)
-        return new
-    }
 }
