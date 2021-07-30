@@ -26,7 +26,7 @@
 - ↕️ Reverse scrolling
 - 📜 Linear scrolling
 - 🖱️ Linear movement
-- ⬆️ Customizable modifer keys
+- ⬆️ Customizable modifier keys
 
 ## Download
 
