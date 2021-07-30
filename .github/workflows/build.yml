@@ -3,7 +3,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: macos-11
+    runs-on: macos-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2

@@ -42,11 +42,11 @@ class MouseAcceleration {
 
             var typeRef: Unmanaged<CFTypeRef>?
             guard IOHIDCopyCFTypeParameter(handle, kIOHIDMouseAccelerationType as CFString?, &typeRef) == KERN_SUCCESS else { return 0 }
-            guard let typeRef = typeRef else { return 0 }
-            defer { typeRef.release() }
+            guard let typeRefUnwrapped = typeRef else { return 0 }
+            defer { typeRefUnwrapped.release() }
 
             var acceleration = 0
-            CFNumberGetValue((typeRef.takeUnretainedValue() as! CFNumber), CFNumberType.sInt32Type, &acceleration)
+            CFNumberGetValue((typeRefUnwrapped.takeUnretainedValue() as! CFNumber), CFNumberType.sInt32Type, &acceleration)
             return acceleration
         }
 
