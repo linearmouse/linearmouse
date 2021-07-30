@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.2.6] - 2021-07-30
+
 - Add options to modify scrolling behavior while modifier keys are hold (#9).
 
 ## [0.2.5] - 2021-07-24
@@ -28,7 +30,8 @@
 
 - Launch at login.
 
-[unreleased]: https://github.com/lujjjh/LinearMouse/compare/v0.2.5...HEAD
+[unreleased]: https://github.com/lujjjh/LinearMouse/compare/v0.2.6...HEAD
+[0.2.6]: https://github.com/lujjjh/LinearMouse/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/lujjjh/LinearMouse/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/lujjjh/LinearMouse/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/lujjjh/LinearMouse/compare/v0.2.2...v0.2.3
