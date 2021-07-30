@@ -9,3 +9,9 @@ jobs:
         uses: actions/checkout@v2
       - name: Build
         run: make
+      - name: Upload dmg
+        uses: "actions/upload-artifact@v2"
+        with:
+          name: LinearMouse.dmg
+          path: build/LinearMouse.dmg
+          retention-days: 7
