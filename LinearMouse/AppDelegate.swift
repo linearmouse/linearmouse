@@ -32,7 +32,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             AutoStartManager.enable()
 
             // scrolling functionalities
-            ScrollWheelEventTap().enable()
+            EventTap().enable()
 
             // subscribe to the user settings
             let defaults = AppDefaults.shared
