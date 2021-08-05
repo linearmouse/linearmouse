@@ -26,8 +26,13 @@
 - ↕️ Reverse scrolling
 - 📜 Linear scrolling
 - 🖱️ Linear movement
+- 🔧 Universal back and forward support (for side buttons)
 - ⬆️ Customizable modifier keys
 
 ## Download
 
 [Download the latest release](https://github.com/lujjjh/LinearMouse/releases/latest/download/LinearMouse.dmg), or [view history releases](https://github.com/lujjjh/LinearMouse/releases).
+
+## Credits
+
+- [Touch](https://github.com/calftrail/Touch/) (GPLv2)

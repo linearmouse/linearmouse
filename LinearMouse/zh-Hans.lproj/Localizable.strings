@@ -9,6 +9,7 @@
 "Reverse scrolling:" = "翻转滚动：";
 "Linear scrolling:" = "线性滚动：";
 "Linear movement:" = "线性移动：";
+"Universal back and forward:" = "全局后退、前进：";
 "on" = "启用";
 "off" = "禁用";
 "line" = "行";
@@ -29,6 +30,8 @@
 "Scroll" = "滚动";
 "Enable linear movement" = "启用线性移动";
 "Disable cursor acceleration." = "禁用光标加速度。";
+"Enable universal back and forward" = "启用全局后退、前进";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "将后退、前进侧键转换为滑动手势，以全局启用后退、前进支持。";
 "Show in menu bar" = "在菜单栏中显示";
 "To show the preferences, launch %@ again." = "要显示偏好设置，再次运行 %@。";
 

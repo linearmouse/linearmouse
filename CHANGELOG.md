@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 - Tweak the preferences UI.
+- Add universal back and forward support for side buttons (#12).
 
 ## [0.2.6] - 2021-07-30
 

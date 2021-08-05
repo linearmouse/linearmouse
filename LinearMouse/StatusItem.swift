@@ -39,6 +39,10 @@ fileprivate struct StatusView: View {
                     Text("Linear movement:")
                     Text(defaults.linearMovementOn ? "on" : "off")
                 }
+                HStack {
+                    Text("Universal back and forward:")
+                    Text(defaults.universalBackForwardOn ? "on" : "off")
+                }
             }
             .font(.system(size: 12))
             .foregroundColor(.secondary)
