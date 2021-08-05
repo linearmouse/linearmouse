@@ -26,6 +26,7 @@
 - ↕️ Reverse scrolling
 - 📜 Linear scrolling
 - 🖱️ Linear movement
+- 🔧 Universal back and forward support (for side buttons)
 - ⬆️ Customizable modifier keys
 
 ## Download
