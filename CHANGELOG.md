@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.2.7] - 2021-08-05
+
 - Tweak the preferences UI.
 - Add universal back and forward support for side buttons (#12).
 
@@ -33,7 +35,8 @@
 
 - Launch at login.
 
-[unreleased]: https://github.com/lujjjh/LinearMouse/compare/v0.2.6...HEAD
+[unreleased]: https://github.com/lujjjh/LinearMouse/compare/v0.2.7...HEAD
+[0.2.7]: https://github.com/lujjjh/LinearMouse/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/lujjjh/LinearMouse/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/lujjjh/LinearMouse/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/lujjjh/LinearMouse/compare/v0.2.3...v0.2.4
