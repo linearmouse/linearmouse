@@ -63,6 +63,20 @@ struct GeneralView: View {
                 }
             }
 
+            Toggle(isOn: $defaults.universalBackForwardOn) {
+                VStack(alignment: .leading) {
+                    Text("Enable universal back and forward")
+                    Text("""
+                        Convert the back and forward side buttons to \
+                        swiping gestures to allow universal back and \
+                        forward functionality.
+                        """)
+                        .controlSize(.small)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
             Toggle(isOn: $defaults.showInMenuBar) {
                 VStack(alignment: .leading) {
                     Text("Show in menu bar")

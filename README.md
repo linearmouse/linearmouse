@@ -31,3 +31,7 @@
 ## Download
 
 [Download the latest release](https://github.com/lujjjh/LinearMouse/releases/latest/download/LinearMouse.dmg), or [view history releases](https://github.com/lujjjh/LinearMouse/releases).
+
+## Credits
+
+- [Touch](https://github.com/calftrail/Touch/) (GPLv2)

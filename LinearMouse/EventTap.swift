@@ -12,15 +12,30 @@ class EventTap {
     var runLoopSource: CFRunLoopSource?
 
     let eventTapCallback: CGEventTapCallBack = { (proxy, type, event, refcon) in
-        return Unmanaged.passUnretained(MouseWheelEvent(event).transformed)
+        if let transformed: CGEvent = {
+            switch type {
+            case .scrollWheel:
+                return MouseWheelEvent(event).transformed
+            case .otherMouseUp:
+                return fixSideButtonsEvent(event)
+            default:
+                return event
+            }
+        }() {
+            return Unmanaged.passUnretained(transformed)
+        }
+        return nil
     }
 
     init() {
+        let eventsOfInterest: CGEventMask =
+            1 << CGEventType.scrollWheel.rawValue
+            | 1 << CGEventType.otherMouseUp.rawValue
         eventTap = CGEvent.tapCreate(
             tap: .cghidEventTap,
             place: .tailAppendEventTap,
             options: .defaultTap,
-            eventsOfInterest: CGEventMask(1 << CGEventType.scrollWheel.rawValue),
+            eventsOfInterest: eventsOfInterest,
             callback: eventTapCallback,
             userInfo: nil
         )
