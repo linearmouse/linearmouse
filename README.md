@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://linearmouse.lujjjh.com/">
+  <a href="https://linearmouse.org/">
     <img src="/docs/favicon.svg" width="96" height="96" />
     <h1 align="center">LinearMouse</h1>
   </a>
@@ -12,8 +12,8 @@
 </p>
 
 <p align="center">
-  <a href="https://linearmouse.lujjjh.com/">
-    <img src="https://linearmouse.lujjjh.com/preview.png" width="512" height="440" alt="A minimal app to get rid of mouse acceleration on macOS." />
+  <a href="https://linearmouse.org/">
+    <img src="https://linearmouse.org/preview.png" width="512" height="440" alt="A minimal app to get rid of mouse acceleration on macOS." />
   </a>
 </p>
 
