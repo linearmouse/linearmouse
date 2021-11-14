@@ -13,16 +13,20 @@ func fixSideButtonsEvent(_ event: CGEvent) -> CGEvent? {
         return event
     }
 
-    guard event.type == .otherMouseUp else {
+    guard event.type == .otherMouseDown || event.type == .otherMouseUp else {
         return event
     }
 
     switch event.getIntegerValueField(.mouseEventButtonNumber) {
     case 3: // back
-        simulateSwipeLeft()
+        if event.type == .otherMouseDown {
+            simulateSwipeLeft()
+        }
         return nil
     case 4: // forward
-        simulateSwipeRight()
+        if event.type == .otherMouseDown {
+            simulateSwipeRight()
+        }
         return nil
     default:
         return event

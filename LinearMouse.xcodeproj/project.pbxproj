@@ -480,8 +480,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Clipy/LoginServiceKit";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.2.1;
+				kind = revision;
+				revision = 04a1379908432bc4e304b38c831d573b1943b3fa;
 			};
 		};
 		B7DD796226730A800067F1AD /* XCRemoteSwiftPackageReference "LoginServiceKit" */ = {
