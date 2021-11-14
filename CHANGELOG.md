@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.2.8] - 2021-11-14
+
+- Fix universal back & forward hanging (#20).
+
 ## [0.2.7] - 2021-08-05
 
 - Tweak the preferences UI.
@@ -35,7 +39,8 @@
 
 - Launch at login.
 
-[unreleased]: https://github.com/lujjjh/LinearMouse/compare/v0.2.7...HEAD
+[unreleased]: https://github.com/lujjjh/LinearMouse/compare/v0.2.8...HEAD
+[0.2.8]: https://github.com/lujjjh/LinearMouse/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/lujjjh/LinearMouse/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/lujjjh/LinearMouse/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/lujjjh/LinearMouse/compare/v0.2.4...v0.2.5

@@ -420,8 +420,8 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.2.7;
-				PRODUCT_BUNDLE_IDENTIFIER = plus.programming.LinearMouse;
+				MARKETING_VERSION = 0.2.8;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lujjjh.LinearMouse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "LinearMouse/LinearMouse-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -444,8 +444,8 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.2.7;
-				PRODUCT_BUNDLE_IDENTIFIER = plus.programming.LinearMouse;
+				MARKETING_VERSION = 0.2.8;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lujjjh.LinearMouse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "LinearMouse/LinearMouse-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
