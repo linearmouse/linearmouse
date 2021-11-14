@@ -16,7 +16,8 @@ class EventTap {
             switch type {
             case .scrollWheel:
                 return MouseWheelEvent(event).transformed
-            case .otherMouseUp:
+            case .otherMouseDown, .otherMouseUp:
+                print(event.getIntegerValueField(.mouseEventButtonNumber), event.type.rawValue)
                 return fixSideButtonsEvent(event)
             default:
                 return event
@@ -30,6 +31,7 @@ class EventTap {
     init() {
         let eventsOfInterest: CGEventMask =
             1 << CGEventType.scrollWheel.rawValue
+            | 1 << CGEventType.otherMouseDown.rawValue
             | 1 << CGEventType.otherMouseUp.rawValue
         eventTap = CGEvent.tapCreate(
             tap: .cghidEventTap,
