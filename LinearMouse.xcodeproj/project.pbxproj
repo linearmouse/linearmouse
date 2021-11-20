@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		B71392F426731645004C0173 /* LoginServiceKit in Frameworks */ = {isa = PBXBuildFile; productRef = B71392F326731645004C0173 /* LoginServiceKit */; };
 		B716F15E26BC10300052F551 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = B716F15D26BC10300052F551 /* LICENSE */; };
-		B716F16026BC10B80052F551 /* SideButtonsFixer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B716F15F26BC10B80052F551 /* SideButtonsFixer.swift */; };
+		B716F16026BC10B80052F551 /* UniversalBackForward.swift in Sources */ = {isa = PBXBuildFile; fileRef = B716F15F26BC10B80052F551 /* UniversalBackForward.swift */; };
 		B75A061C2671E9D800BEAF77 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B75A061B2671E9D800BEAF77 /* AppDelegate.swift */; };
 		B75A06202671E9DA00BEAF77 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B75A061F2671E9DA00BEAF77 /* Assets.xcassets */; };
 		B75A06232671E9DA00BEAF77 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B75A06222671E9DA00BEAF77 /* Preview Assets.xcassets */; };
@@ -21,9 +21,17 @@
 		B77A16122674C21600E99A5D /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A16112674C21600E99A5D /* PreferencesView.swift */; };
 		B77A16172674D88E00E99A5D /* PreferencesWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A16162674D88E00E99A5D /* PreferencesWindow.swift */; };
 		B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A161A2674EF0E00E99A5D /* HyperLink.swift */; };
+		B77BA0F227480AA500E3BC5C /* EventTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77BA0F127480AA500E3BC5C /* EventTransformer.swift */; };
 		B794BFE026BC0A73003B11EF /* TouchEvents.c in Sources */ = {isa = PBXBuildFile; fileRef = B794BFDC26BC0A73003B11EF /* TouchEvents.c */; };
 		B794BFE426BC0E5D003B11EF /* TouchSimulate.m in Sources */ = {isa = PBXBuildFile; fileRef = B794BFE326BC0E5D003B11EF /* TouchSimulate.m */; };
-		B7A9397526B6D75600CFFFB8 /* MouseWheelEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7A9397426B6D75600CFFFB8 /* MouseWheelEvent.swift */; };
+		B7ADF97F2748991D0005B02D /* ReverseScrolling.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF97E2748991D0005B02D /* ReverseScrolling.swift */; };
+		B7ADF98127489CB00005B02D /* MouseDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF98027489CB00005B02D /* MouseDetector.swift */; };
+		B7ADF9832748B12B0005B02D /* LinearScrolling.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF9822748B12B0005B02D /* LinearScrolling.swift */; };
+		B7ADF9852748B25A0005B02D /* ModifierActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF9842748B25A0005B02D /* ModifierActions.swift */; };
+		B7ADF9882748B6390005B02D /* DefaultMouseDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF9872748B6390005B02D /* DefaultMouseDetector.swift */; };
+		B7ADF98B2748D7460005B02D /* OrientNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF98A2748D7460005B02D /* OrientNormalizer.swift */; };
+		B7ADF98D2748E5010005B02D /* ScrollWheelEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF98C2748E5010005B02D /* ScrollWheelEventView.swift */; };
+		B7ADF98F2748E6400005B02D /* MouseEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF98E2748E6400005B02D /* MouseEventView.swift */; };
 		B7B1D08D26B2FD6C00F48176 /* AppStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7B1D08C26B2FD6C00F48176 /* AppStorage.swift */; };
 		B7B1D08F26B3EC4F00F48176 /* GeneralView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7B1D08E26B3EC4F00F48176 /* GeneralView.swift */; };
 		B7B1D09126B3ECC500F48176 /* ModifierKeysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7B1D09026B3ECC500F48176 /* ModifierKeysView.swift */; };
@@ -37,7 +45,7 @@
 
 /* Begin PBXFileReference section */
 		B716F15D26BC10300052F551 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
-		B716F15F26BC10B80052F551 /* SideButtonsFixer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideButtonsFixer.swift; sourceTree = "<group>"; };
+		B716F15F26BC10B80052F551 /* UniversalBackForward.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniversalBackForward.swift; sourceTree = "<group>"; };
 		B716F16126BC18920052F551 /* CHANGELOG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		B716F16226BC18AB0052F551 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		B716F16326BC19350052F551 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
@@ -55,6 +63,7 @@
 		B77A16112674C21600E99A5D /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
 		B77A16162674D88E00E99A5D /* PreferencesWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesWindow.swift; sourceTree = "<group>"; };
 		B77A161A2674EF0E00E99A5D /* HyperLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HyperLink.swift; sourceTree = "<group>"; };
+		B77BA0F127480AA500E3BC5C /* EventTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTransformer.swift; sourceTree = "<group>"; };
 		B794BFDC26BC0A73003B11EF /* TouchEvents.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TouchEvents.c; sourceTree = "<group>"; };
 		B794BFDD26BC0A73003B11EF /* TouchEvents.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TouchEvents.h; sourceTree = "<group>"; };
 		B794BFDE26BC0A73003B11EF /* IOHIDEventData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IOHIDEventData.h; sourceTree = "<group>"; };
@@ -62,7 +71,14 @@
 		B794BFE126BC0B2F003B11EF /* LinearMouse-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "LinearMouse-Bridging-Header.h"; sourceTree = "<group>"; };
 		B794BFE226BC0E45003B11EF /* TouchSimulate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TouchSimulate.h; sourceTree = "<group>"; };
 		B794BFE326BC0E5D003B11EF /* TouchSimulate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TouchSimulate.m; sourceTree = "<group>"; };
-		B7A9397426B6D75600CFFFB8 /* MouseWheelEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseWheelEvent.swift; sourceTree = "<group>"; };
+		B7ADF97E2748991D0005B02D /* ReverseScrolling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReverseScrolling.swift; sourceTree = "<group>"; };
+		B7ADF98027489CB00005B02D /* MouseDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseDetector.swift; sourceTree = "<group>"; };
+		B7ADF9822748B12B0005B02D /* LinearScrolling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearScrolling.swift; sourceTree = "<group>"; };
+		B7ADF9842748B25A0005B02D /* ModifierActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierActions.swift; sourceTree = "<group>"; };
+		B7ADF9872748B6390005B02D /* DefaultMouseDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultMouseDetector.swift; sourceTree = "<group>"; };
+		B7ADF98A2748D7460005B02D /* OrientNormalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientNormalizer.swift; sourceTree = "<group>"; };
+		B7ADF98C2748E5010005B02D /* ScrollWheelEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollWheelEventView.swift; sourceTree = "<group>"; };
+		B7ADF98E2748E6400005B02D /* MouseEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseEventView.swift; sourceTree = "<group>"; };
 		B7B1D08C26B2FD6C00F48176 /* AppStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStorage.swift; sourceTree = "<group>"; };
 		B7B1D08E26B3EC4F00F48176 /* GeneralView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralView.swift; sourceTree = "<group>"; };
 		B7B1D09026B3ECC500F48176 /* ModifierKeysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierKeysView.swift; sourceTree = "<group>"; };
@@ -110,30 +126,24 @@
 		B75A061A2671E9D800BEAF77 /* LinearMouse */ = {
 			isa = PBXGroup;
 			children = (
+				B7ADF9862748B61D0005B02D /* MouseDetector */,
+				B7ADF9902748EAB80005B02D /* MouseEventView */,
+				B77BA0F027480A9700E3BC5C /* Event */,
+				B7ADF9892748B65D0005B02D /* UI */,
 				B794BFE126BC0B2F003B11EF /* LinearMouse-Bridging-Header.h */,
-				B77A161A2674EF0E00E99A5D /* HyperLink.swift */,
 				B75A061B2671E9D800BEAF77 /* AppDelegate.swift */,
 				B75A061F2671E9DA00BEAF77 /* Assets.xcassets */,
-				B75A06242671E9DA00BEAF77 /* Main.storyboard */,
 				B75A06272671E9DA00BEAF77 /* Info.plist */,
 				B75A06282671E9DA00BEAF77 /* LinearMouse.entitlements */,
 				B75A06212671E9DA00BEAF77 /* Preview Content */,
 				B7BD51802672FEB5001FE742 /* EventTap.swift */,
-				B7A9397426B6D75600CFFFB8 /* MouseWheelEvent.swift */,
 				B7BD5182267300DC001FE742 /* AutoStartManager.swift */,
-				B77A160B26744DB400E99A5D /* StatusItem.swift */,
 				B77A160D2674B3DD00E99A5D /* LinearMouse.swift */,
 				B77A160F2674B85300E99A5D /* AppDefaults.swift */,
-				B77A16112674C21600E99A5D /* PreferencesView.swift */,
-				B77A16162674D88E00E99A5D /* PreferencesWindow.swift */,
 				B76173462675AD8700CC9412 /* Localizable.strings */,
 				B7E897E32675EBB0003C7058 /* MouseAcceleration.swift */,
 				B7B6D83B26B2726B00B0D247 /* ModifierKeys.swift */,
-				B7B6D83D26B2745300B0D247 /* ModifierKeyActionPicker.swift */,
 				B7B1D08C26B2FD6C00F48176 /* AppStorage.swift */,
-				B7B1D08E26B3EC4F00F48176 /* GeneralView.swift */,
-				B7B1D09026B3ECC500F48176 /* ModifierKeysView.swift */,
-				B716F15F26BC10B80052F551 /* SideButtonsFixer.swift */,
 			);
 			path = LinearMouse;
 			sourceTree = "<group>";
@@ -144,6 +154,19 @@
 				B75A06222671E9DA00BEAF77 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		B77BA0F027480A9700E3BC5C /* Event */ = {
+			isa = PBXGroup;
+			children = (
+				B77BA0F127480AA500E3BC5C /* EventTransformer.swift */,
+				B7ADF98A2748D7460005B02D /* OrientNormalizer.swift */,
+				B7ADF97E2748991D0005B02D /* ReverseScrolling.swift */,
+				B7ADF9822748B12B0005B02D /* LinearScrolling.swift */,
+				B716F15F26BC10B80052F551 /* UniversalBackForward.swift */,
+				B7ADF9842748B25A0005B02D /* ModifierActions.swift */,
+			);
+			path = Event;
 			sourceTree = "<group>";
 		};
 		B794BFDB26BC0A73003B11EF /* Touch */ = {
@@ -158,6 +181,39 @@
 				B716F15D26BC10300052F551 /* LICENSE */,
 			);
 			path = Touch;
+			sourceTree = "<group>";
+		};
+		B7ADF9862748B61D0005B02D /* MouseDetector */ = {
+			isa = PBXGroup;
+			children = (
+				B7ADF98027489CB00005B02D /* MouseDetector.swift */,
+				B7ADF9872748B6390005B02D /* DefaultMouseDetector.swift */,
+			);
+			path = MouseDetector;
+			sourceTree = "<group>";
+		};
+		B7ADF9892748B65D0005B02D /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				B75A06242671E9DA00BEAF77 /* Main.storyboard */,
+				B77A161A2674EF0E00E99A5D /* HyperLink.swift */,
+				B77A160B26744DB400E99A5D /* StatusItem.swift */,
+				B7B1D08E26B3EC4F00F48176 /* GeneralView.swift */,
+				B7B1D09026B3ECC500F48176 /* ModifierKeysView.swift */,
+				B7B6D83D26B2745300B0D247 /* ModifierKeyActionPicker.swift */,
+				B77A16162674D88E00E99A5D /* PreferencesWindow.swift */,
+				B77A16112674C21600E99A5D /* PreferencesView.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		B7ADF9902748EAB80005B02D /* MouseEventView */ = {
+			isa = PBXGroup;
+			children = (
+				B7ADF98E2748E6400005B02D /* MouseEventView.swift */,
+				B7ADF98C2748E5010005B02D /* ScrollWheelEventView.swift */,
+			);
+			path = MouseEventView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -241,24 +297,32 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B7A9397526B6D75600CFFFB8 /* MouseWheelEvent.swift in Sources */,
 				B77A16102674B85300E99A5D /* AppDefaults.swift in Sources */,
 				B7E897E42675EBB0003C7058 /* MouseAcceleration.swift in Sources */,
+				B7ADF98127489CB00005B02D /* MouseDetector.swift in Sources */,
+				B7ADF98B2748D7460005B02D /* OrientNormalizer.swift in Sources */,
+				B77BA0F227480AA500E3BC5C /* EventTransformer.swift in Sources */,
+				B7ADF9882748B6390005B02D /* DefaultMouseDetector.swift in Sources */,
 				B77A160C26744DB400E99A5D /* StatusItem.swift in Sources */,
 				B7B1D08D26B2FD6C00F48176 /* AppStorage.swift in Sources */,
 				B794BFE426BC0E5D003B11EF /* TouchSimulate.m in Sources */,
+				B7ADF98D2748E5010005B02D /* ScrollWheelEventView.swift in Sources */,
+				B7ADF9852748B25A0005B02D /* ModifierActions.swift in Sources */,
 				B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */,
+				B7ADF97F2748991D0005B02D /* ReverseScrolling.swift in Sources */,
 				B794BFE026BC0A73003B11EF /* TouchEvents.c in Sources */,
 				B7B6D83E26B2745300B0D247 /* ModifierKeyActionPicker.swift in Sources */,
 				B7BD5183267300DC001FE742 /* AutoStartManager.swift in Sources */,
 				B7B1D08F26B3EC4F00F48176 /* GeneralView.swift in Sources */,
 				B7B6D83C26B2726B00B0D247 /* ModifierKeys.swift in Sources */,
 				B77A160E2674B3DD00E99A5D /* LinearMouse.swift in Sources */,
-				B716F16026BC10B80052F551 /* SideButtonsFixer.swift in Sources */,
+				B716F16026BC10B80052F551 /* UniversalBackForward.swift in Sources */,
 				B77A16172674D88E00E99A5D /* PreferencesWindow.swift in Sources */,
+				B7ADF98F2748E6400005B02D /* MouseEventView.swift in Sources */,
 				B7B1D09126B3ECC500F48176 /* ModifierKeysView.swift in Sources */,
 				B75A061C2671E9D800BEAF77 /* AppDelegate.swift in Sources */,
 				B7BD51812672FEB5001FE742 /* EventTap.swift in Sources */,
+				B7ADF9832748B12B0005B02D /* LinearScrolling.swift in Sources */,
 				B77A16122674C21600E99A5D /* PreferencesView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
