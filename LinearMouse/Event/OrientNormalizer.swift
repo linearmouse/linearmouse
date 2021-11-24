@@ -43,7 +43,11 @@ class OrientNormalizer: EventTransformer {
     }
 
     func transform(_ event: CGEvent) -> CGEvent? {
-        if !enabled {
+        guard enabled else {
+            return event
+        }
+
+        guard event.type == .scrollWheel else {
             return event
         }
 
