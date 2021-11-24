@@ -15,15 +15,15 @@ import Foundation
  However, after macOS Big Sur, those values won't be swapped in that case.
  This transformer is to normalize the behavior to Big Sur's.
 
- This transformer has 2 phrases:
+ This transformer has 2 phases:
  1. Check if the event should be normalized by swapping deltaX and deltaY. (Usually before all other transformers.)
- 2. Restore deltaX and deltaY if they were swapped in the first phrase. (Usually after all other transformers.)
+ 2. Restore deltaX and deltaY if they were swapped in the first phase. (Usually after all other transformers.)
  */
 class OrientNormalizer: EventTransformer {
     private let _enabled: Bool?
 
-    private enum Phrase { case first, second }
-    private var phrase: Phrase = .first
+    private enum Phase { case first, second }
+    private var phase: Phase = .first
 
     private var enabled: Bool {
         if let value = _enabled {
@@ -48,13 +48,13 @@ class OrientNormalizer: EventTransformer {
         }
 
         let view = ScrollWheelEventView(event)
-        switch phrase {
+        switch phase {
         case .first:
             if view.deltaY == 0 {
                 view.swapDeltaXY()
                 hasSwapped = true
             }
-            phrase = .second
+            phase = .second
         case .second:
             if hasSwapped {
                 view.swapDeltaXY()
