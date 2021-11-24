@@ -11,19 +11,11 @@ class EventTap {
     var eventTap: CFMachPort?
     var runLoopSource: CFRunLoopSource?
 
+    private static let mouseDetector = DefaultMouseDetector()
+
     let eventTapCallback: CGEventTapCallBack = { (proxy, type, event, refcon) in
-        if let transformed: CGEvent = {
-            switch type {
-            case .scrollWheel:
-                return MouseWheelEvent(event).transformed
-            case .otherMouseDown, .otherMouseUp:
-                print(event.getIntegerValueField(.mouseEventButtonNumber), event.type.rawValue)
-                return fixSideButtonsEvent(event)
-            default:
-                return event
-            }
-        }() {
-            return Unmanaged.passUnretained(transformed)
+        if let event = transformEvent(appDefaults: AppDefaults.shared, mouseDetector: mouseDetector, event: event) {
+            return Unmanaged.passUnretained(event)
         }
         return nil
     }

@@ -2,10 +2,13 @@ BUILD_DIR = $(CURDIR)/build
 TARGET_DIR = $(CURDIR)/build/target
 TARGET_DMG = $(CURDIR)/build/LinearMouse.dmg
 
-all: clean package
+all: clean test package
+
+test:
+	xcodebuild test -project LinearMouse.xcodeproj -scheme LinearMouse
 
 build:
-	xcodebuild -configuration Release -alltargets SYMROOT='$(BUILD_DIR)'
+	xcodebuild -configuration Release -target LinearMouse SYMROOT='$(BUILD_DIR)'
 
 clean:
 	rm -fr build
