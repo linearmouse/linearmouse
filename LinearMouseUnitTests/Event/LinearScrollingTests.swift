@@ -10,7 +10,7 @@ import XCTest
 
 class LinearScrollingTests: XCTestCase {
     private func assertChanged(_ transformer: EventTransformer) {
-        var event = CGEvent(scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 2, wheel1: 42, wheel2: 42, wheel3: 0)!
+        var event = CGEvent(scrollWheelEvent2Source: nil, units: .line, wheelCount: 2, wheel1: 42, wheel2: 42, wheel3: 0)!
         event = transformer.transform(event)!
         let view = ScrollWheelEventView(event)
         XCTAssertEqual(view.deltaX, 3)
@@ -18,7 +18,7 @@ class LinearScrollingTests: XCTestCase {
     }
 
     private func assertNotChanged(_ transformer: EventTransformer) {
-        var event = CGEvent(scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 2, wheel1: 42, wheel2: 42, wheel3: 0)!
+        var event = CGEvent(scrollWheelEvent2Source: nil, units: .line, wheelCount: 2, wheel1: 42, wheel2: 42, wheel3: 0)!
         event = transformer.transform(event)!
         let view = ScrollWheelEventView(event)
         XCTAssertEqual(view.deltaX, 42)
