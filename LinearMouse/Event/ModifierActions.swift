@@ -8,12 +8,19 @@
 import Foundation
 
 class ModifierActions: EventTransformer {
-    private let appDefaults: AppDefaults
     private let mouseDetector: MouseDetector
+    private let commandAction: ModifierKeyAction
+    private let shiftAction: ModifierKeyAction
+    private let alternateAction: ModifierKeyAction
+    private let controlAction: ModifierKeyAction
 
-    init(appDefaults: AppDefaults, mouseDetector: MouseDetector) {
-        self.appDefaults = appDefaults
+    init(mouseDetector: MouseDetector, commandAction: ModifierKeyAction, shiftAction: ModifierKeyAction,
+         alternateAction: ModifierKeyAction, controlAction: ModifierKeyAction) {
         self.mouseDetector = mouseDetector
+        self.commandAction = commandAction
+        self.shiftAction = shiftAction
+        self.alternateAction = alternateAction
+        self.controlAction = controlAction
     }
 
     func transform(_ event: CGEvent) -> CGEvent? {
@@ -26,10 +33,10 @@ class ModifierActions: EventTransformer {
         }
 
         let actions: [(CGEventFlags.Element, ModifierKeyAction)] = [
-            (.maskCommand, appDefaults.modifiersCommandAction),
-            (.maskShift, appDefaults.modifiersShiftAction),
-            (.maskAlternate, appDefaults.modifiersAlternateAction),
-            (.maskControl, appDefaults.modifiersControlAction),
+            (.maskCommand, commandAction),
+            (.maskShift, shiftAction),
+            (.maskAlternate, alternateAction),
+            (.maskControl, controlAction),
         ]
         for case (let flag, let action) in actions {
             if event.flags.contains(flag) {

@@ -20,12 +20,30 @@ import Foundation
  2. Restore deltaX and deltaY if they were swapped in the first phrase. (Usually after all other transformers.)
  */
 class OrientNormalizer: EventTransformer {
+    private let _enabled: Bool?
+
     private enum Phrase { case first, second }
     private var phrase: Phrase = .first
+
+    private var enabled: Bool {
+        if let value = _enabled {
+            return value
+        }
+        if #available(macOS 10.16, *) {
+            return true
+        } else {
+            return false
+        }
+    }
+
     private var hasSwapped = false
 
+    init(enabled: Bool? = nil) {
+        self._enabled = enabled
+    }
+
     func transform(_ event: CGEvent) -> CGEvent? {
-        if #available(macOS 10.16, *) {
+        if !enabled {
             return event
         }
 

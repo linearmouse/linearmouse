@@ -8,20 +8,16 @@
 import Foundation
 
 class LinearScrolling: EventTransformer {
-    private let appDefaults: AppDefaults
     private let mouseDetector: MouseDetector
+    private let scrollLines: Int
 
-    init(appDefaults: AppDefaults, mouseDetector: MouseDetector) {
-        self.appDefaults = appDefaults
+    init(mouseDetector: MouseDetector, scrollLines: Int) {
         self.mouseDetector = mouseDetector
+        self.scrollLines = scrollLines
     }
 
     func transform(_ event: CGEvent) -> CGEvent? {
         guard event.type == .scrollWheel else {
-            return event
-        }
-
-        guard appDefaults.linearScrollingOn else {
             return event
         }
 
@@ -30,9 +26,8 @@ class LinearScrolling: EventTransformer {
         }
 
         let view = ScrollWheelEventView(event)
-        let scrollLines = Int64(appDefaults.scrollLines)
-        view.deltaX = view.deltaX.signum() * scrollLines
-        view.deltaY = view.deltaY.signum() * scrollLines
+        view.deltaX = view.deltaX.signum() * Int64(scrollLines)
+        view.deltaY = view.deltaY.signum() * Int64(scrollLines)
         return event
     }
 }

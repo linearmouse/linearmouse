@@ -7,21 +7,25 @@
 
 import Foundation
 
+protocol ReverseScrollingConfig {
+    func isOn() -> Bool
+}
+
+extension AppDefaults: ReverseScrollingConfig {
+    func isOn() -> Bool {
+        return reverseScrollingOn
+    }
+}
+
 class ReverseScrolling: EventTransformer {
-    private let appDefaults: AppDefaults
     private let mouseDetector: MouseDetector
 
-    init(appDefaults: AppDefaults, mouseDetector: MouseDetector) {
-        self.appDefaults = appDefaults
+    init(mouseDetector: MouseDetector) {
         self.mouseDetector = mouseDetector
     }
 
     func transform(_ event: CGEvent) -> CGEvent? {
         guard event.type == .scrollWheel else {
-            return event
-        }
-
-        guard appDefaults.reverseScrollingOn else {
             return event
         }
 

@@ -13,18 +13,8 @@ extension CGMouseButton {
 }
 
 class UniversalBackForward: EventTransformer {
-    private let appDefaults: AppDefaults
-
-    init(appDefaults: AppDefaults) {
-        self.appDefaults = appDefaults
-    }
-
     func transform(_ event: CGEvent) -> CGEvent? {
         guard event.type == .otherMouseDown || event.type == .otherMouseUp else {
-            return event
-        }
-
-        guard appDefaults.universalBackForwardOn else {
             return event
         }
 
