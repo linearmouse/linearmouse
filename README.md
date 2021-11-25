@@ -1,9 +1,12 @@
-<p align="center">
-  <a href="https://linearmouse.org/">
+<p align="center" href="#gh-light-mode-only">
+  <a href="https://linearmouse.org/#gh-light-mode-only">
     <img src="/docs/favicon.svg" width="96" height="96" />
-    <h1 align="center">LinearMouse</h1>
+  </a>
+  <a href="https://linearmouse.org/#gh-dark-mode-only">
+    <img src="/docs/favicon-dark.svg" width="96" height="96" />
   </a>
 </p>
+<h1 align="center">LinearMouse</h1>
 
 <p align="center">
   <a href="https://github.com/lujjjh/LinearMouse/releases/latest"><img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/lujjjh/LinearMouse?sort=semver&style=for-the-badge"></a>
@@ -12,13 +15,21 @@
 </p>
 
 <p align="center">
-  <a href="https://linearmouse.org/">
+  <a href="https://linearmouse.org/#gh-light-mode-only">
     <img src="https://linearmouse.org/preview.png" width="512" height="440" alt="A minimal app to get rid of mouse acceleration on macOS." />
+  </a>
+  <a href="https://linearmouse.org/#gh-dark-mode-only">
+    <img src="https://linearmouse.org/preview-dark.png" width="512" height="440" alt="A minimal app to get rid of mouse acceleration on macOS." />
   </a>
 </p>
 
 <p align="center">
-  <a href="https://www.producthunt.com/posts/linearmouse?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-linearmouse" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=299681&theme=light" alt="LinearMouse - A minimal app to get rid of mouse acceleration on macOS. | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+  <a href="https://www.producthunt.com/posts/linearmouse?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-linearmouse#gh-light-mode-only" target="_blank">
+    <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=299681&theme=light" alt="LinearMouse - A minimal app to get rid of mouse acceleration on macOS. | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" />
+  </a>
+  <a href="https://www.producthunt.com/posts/linearmouse?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-linearmouse#gh-dark-mode-only" target="_blank">
+    <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=299681&theme=dark" alt="LinearMouse - A minimal app to get rid of mouse acceleration on macOS. | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" />
+  </a>
 </p>
 
 ## Features
