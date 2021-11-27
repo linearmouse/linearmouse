@@ -1,4 +1,4 @@
-<p align="center" href="#gh-light-mode-only">
+<p align="center">
   <a href="https://linearmouse.org/#gh-light-mode-only">
     <img src="/docs/favicon.svg" width="96" height="96" />
   </a>
