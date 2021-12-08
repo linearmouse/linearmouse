@@ -30,6 +30,7 @@
 "Scroll" = "捲動";
 "Enable linear movement" = "啟用線性移動";
 "Disable cursor acceleration." = "禁用游標加速度。";
+"Disable cursor acceleration. This will also lock the tracking speed in System Preference." = "禁用游標加速度。同時也會鎖定系統偏好設定中的軌跡速度。";
 "Enable universal back and forward" = "啟用全局後退、前進";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "將後退、前進側鍵轉換為滑動手勢，以全局啟用後退、前進支持。";
 "Show in menu bar" = "在選單列中顯示";

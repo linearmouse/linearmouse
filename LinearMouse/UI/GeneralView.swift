@@ -55,7 +55,8 @@ struct GeneralView: View {
                 VStack(alignment: .leading) {
                     Text("Enable linear movement")
                     Text("""
-                        Disable cursor acceleration.
+                        Disable cursor acceleration. This will also \
+                        lock the tracking speed in System Preference.
                         """)
                         .controlSize(.small)
                         .foregroundColor(.secondary)

@@ -29,7 +29,7 @@
 "Disable mouse scrolling acceleration." = "禁用鼠标滚动加速度。";
 "Scroll" = "滚动";
 "Enable linear movement" = "启用线性移动";
-"Disable cursor acceleration." = "禁用光标加速度。";
+"Disable cursor acceleration. This will also lock the tracking speed in System Preference." = "禁用光标加速度。同时也会锁定系统偏好设置中的跟踪速度。";
 "Enable universal back and forward" = "启用全局后退、前进";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "将后退、前进侧键转换为滑动手势，以全局启用后退、前进支持。";
 "Show in menu bar" = "在菜单栏中显示";
