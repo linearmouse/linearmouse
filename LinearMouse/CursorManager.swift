@@ -33,15 +33,7 @@ let defaultSensitivity = Int(1600)
 class CursorManager {
     static var shared = CursorManager()
 
-    private let client: IOHIDEventSystemClient = {
-        let client = eventSystemClientCreate(kCFAllocatorDefault)
-        let match = [
-            kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop,
-            kIOHIDDeviceUsageKey: kHIDUsage_GD_Mouse,
-        ]
-        eventSystemClientSetMatching(client, match as CFDictionary)
-        return client
-    }()
+    private let client: IOHIDEventSystemClient = eventSystemClientCreate(kCFAllocatorDefault)
 
     var disableAccelerationAndSensitivity = false
 
@@ -81,6 +73,11 @@ class CursorManager {
     }
 
     func update() {
+        let match = [
+            kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop,
+            kIOHIDDeviceUsageKey: kHIDUsage_GD_Mouse,
+        ]
+        eventSystemClientSetMatching(client, match as CFDictionary)
         guard let services = IOHIDEventSystemClientCopyServices(client) as? [IOHIDServiceClient] else {
             return
         }
@@ -92,10 +89,10 @@ class CursorManager {
                 continue
             }
             guard let _ = IOHIDServiceClientCopyProperty(service, kIOHIDMouseAccelerationTypeKey as CFString) else {
-                logger.debug("\(product) is skipped as it might be a trackpad")
+                logger.debug("\(product, privacy: .public) is skipped as it might be a trackpad")
                 continue
             }
-            logger.debug("updating sensitivity and acceleration for \(product)")
+            logger.debug("updating sensitivity and acceleration for \(product, privacy: .public)")
             var value = resolutionValue
             IOHIDServiceClientSetProperty(
                 service, kIOHIDPointerResolutionKey as CFString,
