@@ -11,7 +11,7 @@ struct GeneralView: View {
     @ObservedObject var defaults = AppDefaults.shared
 
     var body: some View {
-        VStack (alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 20) {
             Toggle(isOn: $defaults.reverseScrollingOn) {
                 VStack(alignment: .leading) {
                     Text("Reverse scrolling")
@@ -49,19 +49,6 @@ struct GeneralView: View {
                 .controlSize(.small)
                 .padding(.leading, 18)
                 .disabled(!defaults.linearScrollingOn)
-            }
-
-            Toggle(isOn: $defaults.linearMovementOn) {
-                VStack(alignment: .leading) {
-                    Text("Enable linear movement")
-                    Text("""
-                        Disable cursor acceleration. This will also \
-                        lock the tracking speed in System Preference.
-                        """)
-                        .controlSize(.small)
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
             }
 
             Toggle(isOn: $defaults.universalBackForwardOn) {

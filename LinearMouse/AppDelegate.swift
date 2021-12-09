@@ -12,17 +12,7 @@ import SwiftUI
 class AppDelegate: NSObject, NSApplicationDelegate {
     let statusItem = StatusItem()
 
-    let mouseAcceleration = MouseAcceleration()
-    var linearMovementOn: Bool = false {
-        didSet {
-            guard oldValue != linearMovementOn else { return }
-            if linearMovementOn {
-                mouseAcceleration.disable()
-            } else {
-                mouseAcceleration.enable()
-            }
-        }
-    }
+    let cursorManager = CursorManager.shared
 
     var defaultsSubscription: AnyCancellable!
 
@@ -42,6 +32,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
             self.update(defaults)
+            self.cursorManager.start()
         }
     }
 
@@ -57,7 +48,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func update(_ defaults: AppDefaults) {
-        linearMovementOn = defaults.linearMovementOn
+        cursorManager.disableAccelerationAndSensitivity = defaults.linearMovementOn
+        cursorManager.acceleration = defaults.cursorAcceleration
+        cursorManager.sensitivity = defaults.cursorSensitivity
+        cursorManager.update()
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {

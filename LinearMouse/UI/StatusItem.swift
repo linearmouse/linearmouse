@@ -36,10 +36,6 @@ fileprivate struct StatusView: View {
                     }
                 }
                 HStack {
-                    Text("Linear movement:")
-                    Text(defaults.linearMovementOn ? "on" : "off")
-                }
-                HStack {
                     Text("Universal back and forward:")
                     Text(defaults.universalBackForwardOn ? "on" : "off")
                 }
@@ -108,6 +104,11 @@ class StatusItem {
     @objc func quitAction() {
         // remove the start entry if the user quits LinearMouse manually
         AutoStartManager.disable()
+
+        // revert cursor settings to system defaults
+        let cursorManager = CursorManager.shared
+        cursorManager.stop()
+        cursorManager.revertToSystemDefaults()
 
         NSApp.terminate(nil)
     }

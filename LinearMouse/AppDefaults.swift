@@ -28,12 +28,6 @@ class AppDefaults: ObservableObject {
         }
     }
 
-    @AppStorageCompat(wrappedValue: true, "linearMovementOn") var linearMovementOn: Bool {
-        willSet {
-            objectWillChange.send()
-        }
-    }
-
     @AppStorageCompat(wrappedValue: true, "universalBackForwardOn") var universalBackForwardOn: Bool {
         willSet {
             objectWillChange.send()
@@ -41,6 +35,24 @@ class AppDefaults: ObservableObject {
     }
 
     @AppStorageCompat(wrappedValue: true, "showInMenuBar") var showInMenuBar: Bool {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+
+    @AppStorageCompat(wrappedValue: false, "linearMovementOn") var linearMovementOn: Bool {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+
+    @AppStorageCompat(wrappedValue: 0.6875, "cursor.acceleration") var cursorAcceleration: Double {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+
+    @AppStorageCompat(wrappedValue: 1600, "cursor.sensitivity") var cursorSensitivity: Int {
         willSet {
             objectWillChange.send()
         }

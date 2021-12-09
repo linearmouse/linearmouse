@@ -17,6 +17,8 @@
 		B75A06232671E9DA00BEAF77 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B75A06222671E9DA00BEAF77 /* Preview Assets.xcassets */; };
 		B75A06262671E9DA00BEAF77 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B75A06242671E9DA00BEAF77 /* Main.storyboard */; };
 		B76173442675AD8700CC9412 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = B76173462675AD8700CC9412 /* Localizable.strings */; };
+		B7618A0E27620B5D00527C1A /* CursorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7618A0D27620B5D00527C1A /* CursorManager.swift */; };
+		B7618A1027621EDF00527C1A /* CursorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7618A0F27621EDF00527C1A /* CursorView.swift */; };
 		B77A160C26744DB400E99A5D /* StatusItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160B26744DB400E99A5D /* StatusItem.swift */; };
 		B77A160E2674B3DD00E99A5D /* LinearMouse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160D2674B3DD00E99A5D /* LinearMouse.swift */; };
 		B77A16102674B85300E99A5D /* AppDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160F2674B85300E99A5D /* AppDefaults.swift */; };
@@ -45,7 +47,6 @@
 		B7BD51812672FEB5001FE742 /* EventTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BD51802672FEB5001FE742 /* EventTap.swift */; };
 		B7BD5183267300DC001FE742 /* AutoStartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BD5182267300DC001FE742 /* AutoStartManager.swift */; };
 		B7DD796426730A800067F1AD /* LoginServiceKit in Frameworks */ = {isa = PBXBuildFile; productRef = B7DD796326730A800067F1AD /* LoginServiceKit */; };
-		B7E897E42675EBB0003C7058 /* MouseAcceleration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E897E32675EBB0003C7058 /* MouseAcceleration.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,6 +75,8 @@
 		B75A06272671E9DA00BEAF77 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B75A06282671E9DA00BEAF77 /* LinearMouse.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LinearMouse.entitlements; sourceTree = "<group>"; };
 		B76173452675AD8700CC9412 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		B7618A0D27620B5D00527C1A /* CursorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorManager.swift; sourceTree = "<group>"; };
+		B7618A0F27621EDF00527C1A /* CursorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorView.swift; sourceTree = "<group>"; };
 		B77A160B26744DB400E99A5D /* StatusItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItem.swift; sourceTree = "<group>"; };
 		B77A160D2674B3DD00E99A5D /* LinearMouse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearMouse.swift; sourceTree = "<group>"; };
 		B77A160F2674B85300E99A5D /* AppDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDefaults.swift; sourceTree = "<group>"; };
@@ -108,7 +111,6 @@
 		B7BD51802672FEB5001FE742 /* EventTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTap.swift; sourceTree = "<group>"; };
 		B7BD5182267300DC001FE742 /* AutoStartManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoStartManager.swift; sourceTree = "<group>"; };
 		B7E897E22675B1D9003C7058 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
-		B7E897E32675EBB0003C7058 /* MouseAcceleration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseAcceleration.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -171,8 +173,8 @@
 				B77A160D2674B3DD00E99A5D /* LinearMouse.swift */,
 				B77A160F2674B85300E99A5D /* AppDefaults.swift */,
 				B76173462675AD8700CC9412 /* Localizable.strings */,
-				B7E897E32675EBB0003C7058 /* MouseAcceleration.swift */,
 				B7B6D83B26B2726B00B0D247 /* ModifierKeys.swift */,
+				B7618A0D27620B5D00527C1A /* CursorManager.swift */,
 				B7B1D08C26B2FD6C00F48176 /* AppStorage.swift */,
 			);
 			path = LinearMouse;
@@ -229,6 +231,7 @@
 				B77A161A2674EF0E00E99A5D /* HyperLink.swift */,
 				B77A160B26744DB400E99A5D /* StatusItem.swift */,
 				B7B1D08E26B3EC4F00F48176 /* GeneralView.swift */,
+				B7618A0F27621EDF00527C1A /* CursorView.swift */,
 				B7B1D09026B3ECC500F48176 /* ModifierKeysView.swift */,
 				B7B6D83D26B2745300B0D247 /* ModifierKeyActionPicker.swift */,
 				B77A16162674D88E00E99A5D /* PreferencesWindow.swift */,
@@ -386,10 +389,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				B77A16102674B85300E99A5D /* AppDefaults.swift in Sources */,
-				B7E897E42675EBB0003C7058 /* MouseAcceleration.swift in Sources */,
 				B7ADF98127489CB00005B02D /* MouseDetector.swift in Sources */,
 				B7ADF98B2748D7460005B02D /* OrientNormalizer.swift in Sources */,
 				B77BA0F227480AA500E3BC5C /* EventTransformer.swift in Sources */,
+				B7618A1027621EDF00527C1A /* CursorView.swift in Sources */,
 				B7ADF9882748B6390005B02D /* DefaultMouseDetector.swift in Sources */,
 				B77A160C26744DB400E99A5D /* StatusItem.swift in Sources */,
 				B7B1D08D26B2FD6C00F48176 /* AppStorage.swift in Sources */,
@@ -400,6 +403,7 @@
 				B7ADF97F2748991D0005B02D /* ReverseScrolling.swift in Sources */,
 				B794BFE026BC0A73003B11EF /* TouchEvents.c in Sources */,
 				B7B6D83E26B2745300B0D247 /* ModifierKeyActionPicker.swift in Sources */,
+				B7618A0E27620B5D00527C1A /* CursorManager.swift in Sources */,
 				B7BD5183267300DC001FE742 /* AutoStartManager.swift in Sources */,
 				B7B1D08F26B3EC4F00F48176 /* GeneralView.swift in Sources */,
 				B7B6D83C26B2726B00B0D247 /* ModifierKeys.swift in Sources */,
@@ -591,7 +595,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 0.2.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lujjjh.LinearMouse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -615,7 +619,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 0.2.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lujjjh.LinearMouse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -639,7 +643,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lujjjh.LinearMouseUnitTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -664,7 +668,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lujjjh.LinearMouseUnitTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -8,7 +8,6 @@
 
 "Reverse scrolling:" = "翻轉捲動：";
 "Linear scrolling:" = "線性捲動：";
-"Linear movement:" = "線性移動：";
 "Universal back and forward:" = "全局後退、前進：";
 "on" = "啟用";
 "off" = "禁用";
@@ -28,13 +27,17 @@
 "Enable linear scrolling" = "啟用線性捲動";
 "Disable mouse scrolling acceleration." = "禁用滑鼠捲動加速度。";
 "Scroll" = "捲動";
-"Enable linear movement" = "啟用線性移動";
-"Disable cursor acceleration." = "禁用游標加速度。";
-"Disable cursor acceleration. This will also lock the tracking speed in System Preference." = "禁用游標加速度。同時也會鎖定系統偏好設定中的軌跡速度。";
 "Enable universal back and forward" = "啟用全局後退、前進";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "將後退、前進側鍵轉換為滑動手勢，以全局啟用後退、前進支持。";
 "Show in menu bar" = "在選單列中顯示";
 "To show the preferences, launch %@ again." = "要顯示偏好設定，再次運行 %@。";
+
+"Cursor" = "遊標";
+"Acceleration" = "加速度";
+"Sensitivity" = "靈敏度";
+"Revert to system defaults" = "回退到系統預設值";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "你也可以按下 ⌃⇧⌘Z 來回退到系統預設值。";
+"Disable cursor acceleration & sensitivity" = "禁用遊標加速度和靈敏度";
 
 "Speed factor" = "速度因子";
 "No action" = "無動作";
