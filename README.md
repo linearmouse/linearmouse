@@ -36,8 +36,8 @@
 
 - ↕️ Reverse scrolling
 - 📜 Linear scrolling
-- 🖱️ Linear movement
-- 🔧 Universal back and forward support (for side buttons)
+- 🔧 Universal back and forward with side buttons
+- 🖱️ Cursor acceleration & sensitivity
 - ⬆️ Customizable modifier keys
 
 ## Download
@@ -47,3 +47,4 @@
 ## Credits
 
 - [Touch](https://github.com/calftrail/Touch/) (GPLv2)
+- [Mac Mouse Fix](https://github.com/noah-nuebling/mac-mouse-fix)

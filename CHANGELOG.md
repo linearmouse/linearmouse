@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Support cursor acceleration & sensitivity.
+
 ## [0.2.8] - 2021-11-14
 
 - Fix universal back & forward hanging (#20).
