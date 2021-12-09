@@ -28,7 +28,7 @@ let defaultSensitivity = Int(1600)
 /**
  Configures mouse acceleration and sensitivity.
 
- Greatly inspired from [mac-mouse-fix](https://github.com/noah-nuebling/mac-mouse-fix/blob/7a52439679ab242a891d0071443512b23f73dbe4/Helper/Pointer/PointerSpeed.m#L33).
+ Greatly inspired by [mac-mouse-fix](https://github.com/noah-nuebling/mac-mouse-fix/blob/7a52439679ab242a891d0071443512b23f73dbe4/Helper/Pointer/PointerSpeed.m#L33).
  */
 class CursorManager {
     static var shared = CursorManager()
