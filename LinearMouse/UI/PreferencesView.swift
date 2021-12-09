@@ -18,14 +18,18 @@ struct PreferencesView: View {
                 .padding(.horizontal, 30)
                 .tabItem { Text("General") }
                 .tag(0)
-
+            CursorView()
+                .padding(.vertical, 20)
+                .padding(.horizontal, 30)
+                .tabItem { Text("Cursor") }
+                .tag(1)
             ScrollView {
                 ModifierKeysView()
                     .padding(.vertical, 20)
                     .padding(.horizontal, 30)
             }
             .tabItem { Text("Modifier Keys") }
-            .tag(1)
+            .tag(2)
         }
         .padding(30)
         .frame(minWidth: 0,
