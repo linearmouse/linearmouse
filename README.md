@@ -14,35 +14,43 @@
   <img src="https://img.shields.io/github/license/lujjjh/LinearMouse?style=for-the-badge" alt="MIT License" />
 </p>
 
-<p align="center">
-  <a href="https://linearmouse.org/#gh-light-mode-only">
-    <img src="https://linearmouse.org/preview.png" width="512" height="440" alt="A minimal app to get rid of mouse acceleration on macOS." />
-  </a>
-  <a href="https://linearmouse.org/#gh-dark-mode-only">
-    <img src="https://linearmouse.org/preview-dark.png" width="512" height="440" alt="A minimal app to get rid of mouse acceleration on macOS." />
-  </a>
-</p>
+<table>
+  <tbody>
+    <tr>
+      <td>
+        <img width="612" alt="General" src="https://user-images.githubusercontent.com/3000535/145600150-59edf92c-2911-42e3-b525-29d50aa937d6.png#gh-light-mode-only">
+        <img width="612" alt="General" src="https://user-images.githubusercontent.com/3000535/145601535-41053260-f262-4e68-a81f-4b73b990570f.png#gh-dark-mode-only">
+      </td>
+      <td>
+        <img width="612" alt="Cursor" src="https://user-images.githubusercontent.com/3000535/145600298-24a75b1a-2e15-4ebd-aa22-a30f8eb5b6db.png#gh-light-mode-only">
+        <img width="612" alt="Cursor" src="https://user-images.githubusercontent.com/3000535/145601559-81e19237-1eca-4dc0-beaa-4c2028298fc7.png#gh-dark-mode-only">
+      </td>
+      <td>
+        <img width="612" alt="Modifier keys" src="https://user-images.githubusercontent.com/3000535/145600467-6c579420-6c3e-49d4-a8ad-e1a0bd3d52c0.png#gh-light-mode-only">
+        <img width="612" alt="Modifier keys" src="https://user-images.githubusercontent.com/3000535/145601581-295bd047-b0e1-4e3e-90b5-a246481c72b3.png#gh-dark-mode-only">
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <th>Reverse scrolling, Linear scrolling, Universal back & forward</th>
+      <th>Cursor acceleration & sensitivity</th>
+      <th>Modifier keys functionality</th>
+    </tr>
+  </tfoot>
+</table>
+
+## Getting started
+
+1. Download [LinearMouse](https://github.com/lujjjh/LinearMouse/releases/latest/download/LinearMouse.dmg).
+2. Open LinearMouse.dmg, drag & drop LinearMouse to Applications.
+3. Open Applications. Right click LinearMouse and choose Open (to make [Gatekeeper](https://support.apple.com/en-us/HT202491) happy).
+4. Grant accessibility permission for LinearMouse (find LinearMouse in the list and toggle it on).
 
 <p align="center">
-  <a href="https://www.producthunt.com/posts/linearmouse?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-linearmouse#gh-light-mode-only" target="_blank">
-    <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=299681&theme=light" alt="LinearMouse - A minimal app to get rid of mouse acceleration on macOS. | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" />
-  </a>
-  <a href="https://www.producthunt.com/posts/linearmouse?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-linearmouse#gh-dark-mode-only" target="_blank">
-    <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=299681&theme=dark" alt="LinearMouse - A minimal app to get rid of mouse acceleration on macOS. | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" />
-  </a>
+  <img width="400" alt="Accessibility permission" src="https://user-images.githubusercontent.com/3000535/145603505-beabcd40-8316-4769-b83c-9d607011fe00.png#gh-light-mode-only">
+  <img width="400" alt="Accessibility permission" src="https://user-images.githubusercontent.com/3000535/145603976-e73e09b5-3440-4747-9a4e-647904dcdab2.png#gh-dark-mode-only">
 </p>
-
-## Features
-
-- ↕️ Reverse scrolling
-- 📜 Linear scrolling
-- 🔧 Universal back and forward with side buttons
-- 🖱️ Cursor acceleration & sensitivity
-- ⬆️ Customizable modifier keys
-
-## Download
-
-[Download the latest release](https://github.com/lujjjh/LinearMouse/releases/latest/download/LinearMouse.dmg), or [view history releases](https://github.com/lujjjh/LinearMouse/releases).
 
 ## Credits
 
