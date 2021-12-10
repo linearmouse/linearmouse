@@ -33,10 +33,8 @@
 		B7ADF9832748B12B0005B02D /* LinearScrolling.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF9822748B12B0005B02D /* LinearScrolling.swift */; };
 		B7ADF9852748B25A0005B02D /* ModifierActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF9842748B25A0005B02D /* ModifierActions.swift */; };
 		B7ADF9882748B6390005B02D /* DefaultMouseDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF9872748B6390005B02D /* DefaultMouseDetector.swift */; };
-		B7ADF98B2748D7460005B02D /* OrientNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF98A2748D7460005B02D /* OrientNormalizer.swift */; };
 		B7ADF98D2748E5010005B02D /* ScrollWheelEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF98C2748E5010005B02D /* ScrollWheelEventView.swift */; };
 		B7ADF98F2748E6400005B02D /* MouseEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF98E2748E6400005B02D /* MouseEventView.swift */; };
-		B7ADF9982748ED620005B02D /* OrientNormalizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF9972748ED620005B02D /* OrientNormalizerTests.swift */; };
 		B7ADF99F274918540005B02D /* ReverseScrollingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF99E274918540005B02D /* ReverseScrollingTests.swift */; };
 		B7ADF9A427491AA30005B02D /* FakeMouseDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF9A327491AA30005B02D /* FakeMouseDetector.swift */; };
 		B7B1D08D26B2FD6C00F48176 /* AppStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7B1D08C26B2FD6C00F48176 /* AppStorage.swift */; };
@@ -62,7 +60,6 @@
 /* Begin PBXFileReference section */
 		B716F15D26BC10300052F551 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		B716F15F26BC10B80052F551 /* UniversalBackForward.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniversalBackForward.swift; sourceTree = "<group>"; };
-		B716F16126BC18920052F551 /* CHANGELOG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		B716F16226BC18AB0052F551 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		B716F16326BC19350052F551 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		B754147D274E3AB0003CDAD0 /* LinearScrollingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearScrollingTests.swift; sourceTree = "<group>"; };
@@ -96,11 +93,9 @@
 		B7ADF9822748B12B0005B02D /* LinearScrolling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearScrolling.swift; sourceTree = "<group>"; };
 		B7ADF9842748B25A0005B02D /* ModifierActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierActions.swift; sourceTree = "<group>"; };
 		B7ADF9872748B6390005B02D /* DefaultMouseDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultMouseDetector.swift; sourceTree = "<group>"; };
-		B7ADF98A2748D7460005B02D /* OrientNormalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientNormalizer.swift; sourceTree = "<group>"; };
 		B7ADF98C2748E5010005B02D /* ScrollWheelEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollWheelEventView.swift; sourceTree = "<group>"; };
 		B7ADF98E2748E6400005B02D /* MouseEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseEventView.swift; sourceTree = "<group>"; };
 		B7ADF9952748ED620005B02D /* LinearMouseUnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LinearMouseUnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		B7ADF9972748ED620005B02D /* OrientNormalizerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientNormalizerTests.swift; sourceTree = "<group>"; };
 		B7ADF99E274918540005B02D /* ReverseScrollingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReverseScrollingTests.swift; sourceTree = "<group>"; };
 		B7ADF9A327491AA30005B02D /* FakeMouseDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeMouseDetector.swift; sourceTree = "<group>"; };
 		B7B1D08C26B2FD6C00F48176 /* AppStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStorage.swift; sourceTree = "<group>"; };
@@ -138,7 +133,6 @@
 			children = (
 				B75A061A2671E9D800BEAF77 /* LinearMouse */,
 				B794BFDB26BC0A73003B11EF /* Touch */,
-				B716F16126BC18920052F551 /* CHANGELOG.md */,
 				B716F16326BC19350052F551 /* LICENSE */,
 				B716F16226BC18AB0052F551 /* README.md */,
 				B7ADF9962748ED620005B02D /* LinearMouseUnitTests */,
@@ -192,7 +186,6 @@
 			isa = PBXGroup;
 			children = (
 				B77BA0F127480AA500E3BC5C /* EventTransformer.swift */,
-				B7ADF98A2748D7460005B02D /* OrientNormalizer.swift */,
 				B7ADF97E2748991D0005B02D /* ReverseScrolling.swift */,
 				B7ADF9822748B12B0005B02D /* LinearScrolling.swift */,
 				B716F15F26BC10B80052F551 /* UniversalBackForward.swift */,
@@ -261,7 +254,6 @@
 		B7ADF9A02749187A0005B02D /* Event */ = {
 			isa = PBXGroup;
 			children = (
-				B7ADF9972748ED620005B02D /* OrientNormalizerTests.swift */,
 				B7ADF99E274918540005B02D /* ReverseScrollingTests.swift */,
 				B754147D274E3AB0003CDAD0 /* LinearScrollingTests.swift */,
 				B754147F274E3CEF003CDAD0 /* ModifierActionsTests.swift */,
@@ -390,7 +382,6 @@
 			files = (
 				B77A16102674B85300E99A5D /* AppDefaults.swift in Sources */,
 				B7ADF98127489CB00005B02D /* MouseDetector.swift in Sources */,
-				B7ADF98B2748D7460005B02D /* OrientNormalizer.swift in Sources */,
 				B77BA0F227480AA500E3BC5C /* EventTransformer.swift in Sources */,
 				B7618A1027621EDF00527C1A /* CursorView.swift in Sources */,
 				B7ADF9882748B6390005B02D /* DefaultMouseDetector.swift in Sources */,
@@ -426,7 +417,6 @@
 				B754147E274E3AB0003CDAD0 /* LinearScrollingTests.swift in Sources */,
 				B7541480274E3CEF003CDAD0 /* ModifierActionsTests.swift in Sources */,
 				B7ADF99F274918540005B02D /* ReverseScrollingTests.swift in Sources */,
-				B7ADF9982748ED620005B02D /* OrientNormalizerTests.swift in Sources */,
 				B7ADF9A427491AA30005B02D /* FakeMouseDetector.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
