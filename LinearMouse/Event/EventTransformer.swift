@@ -12,10 +12,7 @@ protocol EventTransformer {
 }
 
 func getTransformers(appDefaults: AppDefaults, mouseDetector: MouseDetector) -> [EventTransformer] {
-    let orientNormalizer = OrientNormalizer()
-
     let transformers: [(Bool, () -> EventTransformer)] = [
-        (true,                                  { orientNormalizer }),
         (appDefaults.reverseScrollingOn,        { ReverseScrolling(mouseDetector: mouseDetector) }),
         (appDefaults.linearScrollingOn,         { LinearScrolling(mouseDetector: mouseDetector,
                                                                   scrollLines: appDefaults.scrollLines) }),
@@ -25,7 +22,6 @@ func getTransformers(appDefaults: AppDefaults, mouseDetector: MouseDetector) -> 
                                                                   shiftAction: appDefaults.modifiersShiftAction,
                                                                   alternateAction: appDefaults.modifiersAlternateAction,
                                                                   controlAction: appDefaults.modifiersControlAction) }),
-        (true,                                  { orientNormalizer }),
     ]
 
     return transformers.filter { $0.0 }.map { $0.1() }
