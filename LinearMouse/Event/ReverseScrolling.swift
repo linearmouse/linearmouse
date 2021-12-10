@@ -7,16 +7,6 @@
 
 import Foundation
 
-protocol ReverseScrollingConfig {
-    func isOn() -> Bool
-}
-
-extension AppDefaults: ReverseScrollingConfig {
-    func isOn() -> Bool {
-        return reverseScrollingOn
-    }
-}
-
 class ReverseScrolling: EventTransformer {
     private let mouseDetector: MouseDetector
 
