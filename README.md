@@ -52,6 +52,42 @@
   <img width="400" alt="Accessibility permission" src="https://user-images.githubusercontent.com/3000535/145603976-e73e09b5-3440-4747-9a4e-647904dcdab2.png#gh-dark-mode-only">
 </p>
 
+## Features
+
+### Reverse scrolling
+
+LinearMouse will reverse the scrolling direction for mice but keep the direction for trackpads.
+
+This is useful if you use both mice and trackpads.
+
+### Linear scrolling
+
+LinearMouse will disable the scrolling acceleration and provide a linear and discrete scrolling
+experience, just like in Windows.
+
+If your mouse doesn't have a smooth wheel, you'll like this feature.
+
+### Universal back & forward
+
+Side buttons on mice do not always work well in macOS, for example, in Safari and Xcode.
+
+LinearMouse translates side button clicks to swipe gestures so that most apps can recognize
+back & forward actions correctly.
+
+### Cursor acceleration & sensitivity
+
+macOS only provides the ability to configure cursor acceleration which is called tracking speed
+in System Preferences. Regardless of how you adjust the tracking speed, the speed curve of cursor
+movement may still appear strange.
+
+LinearMouse allows you to customize both cursor acceleration and sensitivity, or even completely
+disable cursor acceleration and sensitivity.
+
+### Modifier keys functionality
+
+You may empower your modifier keys with additional functionality, such as modifying the scrolling
+speed or altering the scrolling oriention.
+
 ## Credits
 
 - [Touch](https://github.com/calftrail/Touch/) (GPLv2)
