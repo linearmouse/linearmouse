@@ -88,11 +88,19 @@ class CursorManager {
             guard let product = productRef as? String else {
                 continue
             }
-            guard let _ = IOHIDServiceClientCopyProperty(service, kIOHIDMouseAccelerationTypeKey as CFString) else {
-                logger.debug("\(product, privacy: .public) is skipped as it might be a trackpad")
+            guard let accelerationKeyRef = IOHIDServiceClientCopyProperty(service, kIOHIDPointerAccelerationTypeKey as CFString) else {
+                logger.debug("[skip] \(product, privacy: .public) is skipped as kIOHIDPointerAccelerationTypeKey is not found")
                 continue
             }
-            logger.debug("updating sensitivity and acceleration for \(product, privacy: .public)")
+            guard let accelerationKey = accelerationKeyRef as? String else {
+                logger.debug("[skip] \(product, privacy: .public) is skipped as kIOHIDPointerAccelerationTypeKey is not a String")
+                continue
+            }
+            guard IOHIDServiceClientConformsTo(service, UInt32(kHIDPage_Digitizer), UInt32(kHIDUsage_Dig_TouchPad)) == 0 else {
+                logger.debug("[skip] \(product, privacy: .public) is skipped as it reports itself as a trackpad")
+                continue
+            }
+            logger.debug("[update] updating sensitivity and acceleration for \(product, privacy: .public)")
             var value = resolutionValue
             IOHIDServiceClientSetProperty(
                 service, kIOHIDPointerResolutionKey as CFString,
@@ -101,7 +109,7 @@ class CursorManager {
             // So I put the acceleration changes below.
             value = accelerationValue
             IOHIDServiceClientSetProperty(
-                service, kIOHIDMouseAccelerationTypeKey as CFString,
+                service, accelerationKey as CFString,
                 CFNumberCreate(kCFAllocatorDefault, .sInt32Type, &value))
         }
     }
