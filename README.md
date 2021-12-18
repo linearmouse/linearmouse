@@ -42,10 +42,28 @@
 
 ## Getting started
 
+### Installation
+
+#### Homebrew
+
+```sh
+$ brew install --cask linearmouse --no-quarantine
+```
+
+#### Manually
+
 1. Download [LinearMouse](https://github.com/lujjjh/LinearMouse/releases/latest/download/LinearMouse.dmg).
 2. Open LinearMouse.dmg, drag & drop LinearMouse to Applications.
-3. Open Applications. Right click LinearMouse and choose Open (to make [Gatekeeper](https://support.apple.com/en-us/HT202491) happy).
-4. Grant accessibility permission for LinearMouse (find LinearMouse in the list and toggle it on).
+3. Open Applications. **Right click** LinearMouse and choose Open (to make [Gatekeeper](https://support.apple.com/en-us/HT202491) happy).
+
+### Accessibility permission
+
+LinearMouse requires accessibility features to work properly.
+You will see an alert when LinearMouse first launches.
+
+1. Click "Open System Preferences".
+2. Click the lock to make changes.
+2. Find LinearMouse in the list and toggle it on.
 
 <p align="center">
   <img width="400" alt="Accessibility permission" src="https://user-images.githubusercontent.com/3000535/145603505-beabcd40-8316-4769-b83c-9d607011fe00.png#gh-light-mode-only">
