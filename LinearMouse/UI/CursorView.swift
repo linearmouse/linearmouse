@@ -85,18 +85,27 @@ struct CursorView: View {
 
                 Spacer()
 
-                Text("You may also press ⌃⇧⌘Z to revert to system defaults.")
-                    .controlSize(.small)
-                    .foregroundColor(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                if #available(macOS 11.0, *) {
+                    Text("You may also press ⌃⇧⌘Z to revert to system defaults.")
+                        .controlSize(.small)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
 
-                Button("Revert to system defaults") {
-                    cursorManager.revertToSystemDefaults()
-                    defaults.cursorAcceleration = cursorManager.acceleration
-                    defaults.cursorSensitivity = cursorManager.sensitivity
+                    Button("Revert to system defaults") {
+                        cursorManager.revertToSystemDefaults()
+                        defaults.cursorAcceleration = cursorManager.acceleration
+                        defaults.cursorSensitivity = cursorManager.sensitivity
+                    }
+                    .keyboardShortcut("z", modifiers: [.control, .command, .shift])
+                    .disabled(defaults.linearMovementOn)
+                } else {
+                    Button("Revert to system defaults") {
+                        cursorManager.revertToSystemDefaults()
+                        defaults.cursorAcceleration = cursorManager.acceleration
+                        defaults.cursorSensitivity = cursorManager.sensitivity
+                    }
+                    .disabled(defaults.linearMovementOn)
                 }
-                .keyboardShortcut("z", modifiers: [.control, .command, .shift])
-                .disabled(defaults.linearMovementOn)
             }
         }
     }
