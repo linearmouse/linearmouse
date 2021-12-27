@@ -7,7 +7,7 @@
 
 import Foundation
 import IOKit
-import os
+import os.log
 
 typealias IOHIDEventSystemClientCreate = @convention(c) (_ allocator: CFAllocator?) -> IOHIDEventSystemClient
 typealias IOHIDEventSystemClientSetMatching = @convention(c) (
@@ -20,11 +20,6 @@ let eventSystemClientCreate = unsafeBitCast(
 let eventSystemClientSetMatching = unsafeBitCast(
     dlsym(handle, "IOHIDEventSystemClientSetMatching"), to: IOHIDEventSystemClientSetMatching.self)
 
-let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "CursorManager")
-
-let defaultAcceleration = Double(0.6875)
-let defaultSensitivity = Int(1600)
-
 /**
  Configures mouse acceleration and sensitivity.
 
@@ -32,6 +27,10 @@ let defaultSensitivity = Int(1600)
  */
 class CursorManager {
     static var shared = CursorManager()
+
+    static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "CursorManager")
+    static let defaultAcceleration = Double(0.6875)
+    static let defaultSensitivity = Int(1600)
 
     private let client: IOHIDEventSystemClient = eventSystemClientCreate(kCFAllocatorDefault)
 
@@ -89,10 +88,10 @@ class CursorManager {
                 continue
             }
             guard let _ = IOHIDServiceClientCopyProperty(service, kIOHIDMouseAccelerationTypeKey as CFString) else {
-                logger.debug("\(product, privacy: .public) is skipped as it might be a trackpad")
+                os_log("%{public}@ is skipped as it might be a trackpad", log: Self.log, type: .debug, product)
                 continue
             }
-            logger.debug("updating sensitivity and acceleration for \(product, privacy: .public)")
+            os_log("updating sensitivity and acceleration for %{public}@", log: Self.log, type: .debug, product)
             var value = resolutionValue
             IOHIDServiceClientSetProperty(
                 service, kIOHIDPointerResolutionKey as CFString,
@@ -108,8 +107,8 @@ class CursorManager {
 
     func revertToSystemDefaults() {
         disableAccelerationAndSensitivity = false
-        acceleration = defaultAcceleration
-        sensitivity = defaultSensitivity
+        acceleration = Self.defaultAcceleration
+        sensitivity = Self.defaultSensitivity
         update()
     }
 }
