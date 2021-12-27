@@ -1,9 +1,9 @@
 <p align="center">
   <a href="https://linearmouse.org/#gh-light-mode-only">
-    <img src="/docs/favicon.svg" width="96" height="96" />
+    <img src="/logo.svg" width="96" height="96" />
   </a>
   <a href="https://linearmouse.org/#gh-dark-mode-only">
-    <img src="/docs/favicon-dark.svg" width="96" height="96" />
+    <img src="/logo-dark.svg" width="96" height="96" />
   </a>
 </p>
 <h1 align="center">LinearMouse</h1>
