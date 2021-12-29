@@ -6,6 +6,8 @@
 //
 
 #include <IOKit/hidsystem/IOHIDEventSystemClient.h>
+#include <JavaScriptCore/JSObjectRef.h>
+#include <JavaScriptCore/JSValueRef.h>
 #include "../Touch/TouchSimulate.h"
 
 typedef void (^IOHIDServiceClientBlock)(void *, void *, IOHIDServiceClientRef);
@@ -25,3 +27,7 @@ void IOHIDServiceClientRegisterRemovalBlock(IOHIDServiceClientRef, IOHIDServiceC
 
 typedef void (*IOHIDEventSystemClientPropertyChangedCallback)(void* target, void* context, CFStringRef property, CFTypeRef value);
 void IOHIDEventSystemClientRegisterPropertyChangedCallback(IOHIDEventSystemClientRef client, CFStringRef property, IOHIDEventSystemClientPropertyChangedCallback callback, void* target, void *context);
+
+typedef bool (*JSShouldTerminateCallback)(JSContextRef ctx, void* context);
+JS_EXPORT void JSContextGroupSetExecutionTimeLimit(JSContextGroupRef group, double limit, JSShouldTerminateCallback callback, void* context) CF_AVAILABLE(10_6, 7_0);
+JS_EXPORT void JSContextGroupClearExecutionTimeLimit(JSContextGroupRef group) CF_AVAILABLE(10_6, 7_0);
