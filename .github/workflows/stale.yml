@@ -19,5 +19,5 @@ jobs:
           days-before-pr-close: 10
           stale-issue-label: stale
           stale-pr-label: stale
-          exempt-issue-labels: help-wanted
+          exempt-issue-labels: help wanted
           exempt-draft-pr: true
