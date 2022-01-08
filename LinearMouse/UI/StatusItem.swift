@@ -105,11 +105,6 @@ class StatusItem {
         // remove the start entry if the user quits LinearMouse manually
         AutoStartManager.disable()
 
-        // revert cursor settings to system defaults
-        let cursorManager = CursorManager.shared
-        cursorManager.stop()
-        cursorManager.revertToSystemDefaults()
-
         NSApp.terminate(nil)
     }
 
