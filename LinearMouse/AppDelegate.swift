@@ -61,4 +61,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem.openPreferencesAction()
         return false
     }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        // revert cursor settings to system defaults
+        cursorManager.stop()
+        cursorManager.revertToSystemDefaults()
+    }
 }
