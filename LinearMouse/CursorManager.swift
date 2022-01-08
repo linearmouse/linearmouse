@@ -9,17 +9,6 @@ import Foundation
 import IOKit
 import os.log
 
-typealias IOHIDEventSystemClientCreate = @convention(c) (_ allocator: CFAllocator?) -> IOHIDEventSystemClient
-typealias IOHIDEventSystemClientSetMatching = @convention(c) (
-    _ client: IOHIDEventSystemClient?, _ matches: CFDictionary?
-) -> Void
-
-let handle = dlopen("/System/Library/Frameworks/IOKit.framework/IOKit", 2)
-let eventSystemClientCreate = unsafeBitCast(
-    dlsym(handle, "IOHIDEventSystemClientCreate"), to: IOHIDEventSystemClientCreate.self)
-let eventSystemClientSetMatching = unsafeBitCast(
-    dlsym(handle, "IOHIDEventSystemClientSetMatching"), to: IOHIDEventSystemClientSetMatching.self)
-
 /**
  Configures mouse acceleration and sensitivity.
 
@@ -31,8 +20,6 @@ class CursorManager {
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "CursorManager")
     static let defaultAcceleration = Double(0.6875)
     static let defaultSensitivity = Int(1600)
-
-    private let client: IOHIDEventSystemClient = eventSystemClientCreate(kCFAllocatorDefault)
 
     var disableAccelerationAndSensitivity = false
 
@@ -50,7 +37,53 @@ class CursorManager {
     }
     private var resolutionValue: Int { (2000 - _sensitivity) << 16 }
 
+    private let client: IOHIDEventSystemClient = IOHIDEventSystemClientCreate(kCFAllocatorDefault).takeRetainedValue()
+    private var services = Set<IOHIDServiceClient>()
     private var timer: Timer?
+
+    init() {
+        let match = [
+            kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop,
+            kIOHIDDeviceUsageKey: kHIDUsage_GD_Mouse,
+        ]
+        IOHIDEventSystemClientSetMatching(client, match as CFDictionary)
+        IOHIDEventSystemClientRegisterDeviceMatchingBlock(client, { _, _, service in
+            if let service = service {
+                self.add(service: service)
+            }
+        }, nil, nil)
+        guard let services = IOHIDEventSystemClientCopyServices(client) as? [IOHIDServiceClient] else {
+            return
+        }
+        for service in services {
+            add(service: service)
+        }
+        IOHIDEventSystemClientScheduleWithDispatchQueue(client, DispatchQueue.main)
+    }
+
+    deinit {
+        stop()
+        IOHIDEventSystemClientUnregisterDeviceMatchingBlock(client)
+    }
+
+    private func add(service: IOHIDServiceClient) {
+        if services.contains(service) {
+            return
+        }
+        guard let productRef = IOHIDServiceClientCopyProperty(service, kIOHIDProductKey as CFString) else {
+            return
+        }
+        guard let product = productRef as? String else {
+            return
+        }
+        IOHIDServiceClientRegisterRemovalBlock(service, { _, _, _ in
+            self.services.remove(service)
+            os_log("device removed: %{public}@", log: Self.log, type: .debug, product)
+        }, nil, nil)
+        services.insert(service)
+        os_log("device added: %{public}@", log: Self.log, type: .debug, product)
+        update()
+    }
 
     func start() {
         stop()
@@ -67,17 +100,8 @@ class CursorManager {
         }
     }
 
-    deinit {
-        stop()
-    }
-
     func update() {
-        let match = [
-            kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop,
-            kIOHIDDeviceUsageKey: kHIDUsage_GD_Mouse,
-        ]
-        eventSystemClientSetMatching(client, match as CFDictionary)
-        guard let services = IOHIDEventSystemClientCopyServices(client) as? [IOHIDServiceClient] else {
+        guard timer != nil else {
             return
         }
         for service in services {
