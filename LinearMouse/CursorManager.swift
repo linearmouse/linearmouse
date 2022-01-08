@@ -87,7 +87,7 @@ class CursorManager {
 
     func start() {
         stop()
-        timer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { _ in
             self.update()
         }
         self.update()
