@@ -39,9 +39,12 @@ class CursorManager {
 
     private let client: IOHIDEventSystemClient = IOHIDEventSystemClientCreate(kCFAllocatorDefault).takeRetainedValue()
     private var services = Set<IOHIDServiceClient>()
-    private var timer: Timer?
+    private var timer: Timer! = nil
 
     init() {
+        timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { _ in
+            self.update()
+        }
         let match = [
             kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop,
             kIOHIDDeviceUsageKey: kHIDUsage_GD_Mouse,
@@ -62,8 +65,8 @@ class CursorManager {
     }
 
     deinit {
-        stop()
         IOHIDEventSystemClientUnregisterDeviceMatchingBlock(client)
+        timer.invalidate()
     }
 
     private func add(service: IOHIDServiceClient) {
@@ -82,22 +85,7 @@ class CursorManager {
         }, nil, nil)
         services.insert(service)
         os_log("device added: %{public}@", log: Self.log, type: .debug, product)
-        updateIfStarted()
-    }
-
-    func start() {
-        stop()
-        timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { _ in
-            self.updateIfStarted()
-        }
         update()
-    }
-
-    func stop() {
-        if let timer = timer {
-            self.timer = nil
-            timer.invalidate()
-        }
     }
 
     func update() {
@@ -124,13 +112,6 @@ class CursorManager {
                 service, kIOHIDMouseAccelerationTypeKey as CFString,
                 CFNumberCreate(kCFAllocatorDefault, .sInt32Type, &value))
         }
-    }
-
-    private func updateIfStarted() {
-        guard timer != nil else {
-            return
-        }
-        update()
     }
 
     func revertToSystemDefaults() {

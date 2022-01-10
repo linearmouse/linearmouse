@@ -32,7 +32,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
             self.update(defaults)
-            self.cursorManager.start()
         }
     }
 
@@ -64,7 +63,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         // revert cursor settings to system defaults
-        cursorManager.stop()
         cursorManager.revertToSystemDefaults()
     }
 }
