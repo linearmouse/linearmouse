@@ -82,15 +82,15 @@ class CursorManager {
         }, nil, nil)
         services.insert(service)
         os_log("device added: %{public}@", log: Self.log, type: .debug, product)
-        update()
+        updateIfStarted()
     }
 
     func start() {
         stop()
         timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { _ in
-            self.update()
+            self.updateIfStarted()
         }
-        self.update()
+        update()
     }
 
     func stop() {
@@ -101,9 +101,6 @@ class CursorManager {
     }
 
     func update() {
-        guard timer != nil else {
-            return
-        }
         for service in services {
             guard let productRef = IOHIDServiceClientCopyProperty(service, kIOHIDProductKey as CFString) else {
                 continue
@@ -127,6 +124,13 @@ class CursorManager {
                 service, kIOHIDMouseAccelerationTypeKey as CFString,
                 CFNumberCreate(kCFAllocatorDefault, .sInt32Type, &value))
         }
+    }
+
+    private func updateIfStarted() {
+        guard timer != nil else {
+            return
+        }
+        update()
     }
 
     func revertToSystemDefaults() {
