@@ -21,7 +21,6 @@
 "General" = "通用";
 "Modifier Keys" = "修飾鍵";
 
-"Version: %@" = "版本號：%@";
 "Reverse scrolling" = "翻轉捲動";
 "Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad." = "對滑鼠翻轉捲動，保留軌跡板的捲動方向。";
 "Enable linear scrolling" = "啟用線性捲動";
@@ -31,6 +30,11 @@
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "將後退、前進側鍵轉換為滑動手勢，以全局啟用後退、前進支持。";
 "Show in menu bar" = "在選單列中顯示";
 "To show the preferences, launch %@ again." = "要顯示偏好設定，再次運行 %@。";
+"Check for Updates..." = "檢查更新…";
+"Version: %@" = "版本號：%@";
+"Homepage" = "主頁";
+"GitHub" = "GitHub";
+"Feedback" = "反饋";
 
 "Cursor" = "遊標";
 "Acceleration" = "加速度";
@@ -44,7 +48,3 @@
 "Alter orientation" = "改變方向";
 "Change speed" = "變更速度";
 "to" = "到";
-
-"Homepage" = "主頁";
-"GitHub" = "GitHub";
-"Feedback" = "反饋";

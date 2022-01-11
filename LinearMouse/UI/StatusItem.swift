@@ -49,6 +49,8 @@ fileprivate struct StatusView: View {
 }
 
 class StatusItem {
+    static let shared = StatusItem()
+
     lazy var statusItem: NSStatusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
     lazy var statusView: NSMenuItem = {

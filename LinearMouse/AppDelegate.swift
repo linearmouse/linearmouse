@@ -10,11 +10,10 @@ import SwiftUI
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
-    let statusItem = StatusItem()
-
-    let cursorManager = CursorManager.shared
-
-    var defaultsSubscription: AnyCancellable!
+    private let autoUpdateManager = AutoUpdateManager.shared
+    private let statusItem = StatusItem.shared
+    private let cursorManager = CursorManager.shared
+    private var defaultsSubscription: AnyCancellable!
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         withAccessibilityPermission {
