@@ -26,6 +26,9 @@
 		B77A16172674D88E00E99A5D /* PreferencesWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A16162674D88E00E99A5D /* PreferencesWindow.swift */; };
 		B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A161A2674EF0E00E99A5D /* HyperLink.swift */; };
 		B77BA0F227480AA500E3BC5C /* EventTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77BA0F127480AA500E3BC5C /* EventTransformer.swift */; };
+		B7842925278D985600D207F0 /* AutoUpdateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7842924278D985600D207F0 /* AutoUpdateManager.swift */; };
+		B7842927278D9BBC00D207F0 /* CheckForUpdatesButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7842926278D9BBC00D207F0 /* CheckForUpdatesButton.swift */; };
+		B784292D278DB06600D207F0 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = B784292C278DB06600D207F0 /* Sparkle */; };
 		B794BFE026BC0A73003B11EF /* TouchEvents.c in Sources */ = {isa = PBXBuildFile; fileRef = B794BFDC26BC0A73003B11EF /* TouchEvents.c */; };
 		B794BFE426BC0E5D003B11EF /* TouchSimulate.m in Sources */ = {isa = PBXBuildFile; fileRef = B794BFE326BC0E5D003B11EF /* TouchSimulate.m */; };
 		B7ADF97F2748991D0005B02D /* ReverseScrolling.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF97E2748991D0005B02D /* ReverseScrolling.swift */; };
@@ -81,6 +84,8 @@
 		B77A16162674D88E00E99A5D /* PreferencesWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesWindow.swift; sourceTree = "<group>"; };
 		B77A161A2674EF0E00E99A5D /* HyperLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HyperLink.swift; sourceTree = "<group>"; };
 		B77BA0F127480AA500E3BC5C /* EventTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTransformer.swift; sourceTree = "<group>"; };
+		B7842924278D985600D207F0 /* AutoUpdateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoUpdateManager.swift; sourceTree = "<group>"; };
+		B7842926278D9BBC00D207F0 /* CheckForUpdatesButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckForUpdatesButton.swift; sourceTree = "<group>"; };
 		B794BFDC26BC0A73003B11EF /* TouchEvents.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TouchEvents.c; sourceTree = "<group>"; };
 		B794BFDD26BC0A73003B11EF /* TouchEvents.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TouchEvents.h; sourceTree = "<group>"; };
 		B794BFDE26BC0A73003B11EF /* IOHIDEventData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IOHIDEventData.h; sourceTree = "<group>"; };
@@ -113,6 +118,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B784292D278DB06600D207F0 /* Sparkle in Frameworks */,
 				B7DD796426730A800067F1AD /* LoginServiceKit in Frameworks */,
 				B71392F426731645004C0173 /* LoginServiceKit in Frameworks */,
 			);
@@ -170,6 +176,7 @@
 				B7B6D83B26B2726B00B0D247 /* ModifierKeys.swift */,
 				B7618A0D27620B5D00527C1A /* CursorManager.swift */,
 				B7B1D08C26B2FD6C00F48176 /* AppStorage.swift */,
+				B7842924278D985600D207F0 /* AutoUpdateManager.swift */,
 			);
 			path = LinearMouse;
 			sourceTree = "<group>";
@@ -229,6 +236,7 @@
 				B7B6D83D26B2745300B0D247 /* ModifierKeyActionPicker.swift */,
 				B77A16162674D88E00E99A5D /* PreferencesWindow.swift */,
 				B77A16112674C21600E99A5D /* PreferencesView.swift */,
+				B7842926278D9BBC00D207F0 /* CheckForUpdatesButton.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -288,6 +296,7 @@
 			packageProductDependencies = (
 				B7DD796326730A800067F1AD /* LoginServiceKit */,
 				B71392F326731645004C0173 /* LoginServiceKit */,
+				B784292C278DB06600D207F0 /* Sparkle */,
 			);
 			productName = LinearMouse;
 			productReference = B75A06182671E9D800BEAF77 /* LinearMouse.app */;
@@ -342,6 +351,7 @@
 			mainGroup = B75A060F2671E9D800BEAF77;
 			packageReferences = (
 				B71392F226731645004C0173 /* XCRemoteSwiftPackageReference "LoginServiceKit" */,
+				B784292B278DB06600D207F0 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			productRefGroup = B75A06192671E9D800BEAF77 /* Products */;
 			projectDirPath = "";
@@ -392,6 +402,7 @@
 				B7ADF9852748B25A0005B02D /* ModifierActions.swift in Sources */,
 				B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */,
 				B7ADF97F2748991D0005B02D /* ReverseScrolling.swift in Sources */,
+				B7842927278D9BBC00D207F0 /* CheckForUpdatesButton.swift in Sources */,
 				B794BFE026BC0A73003B11EF /* TouchEvents.c in Sources */,
 				B7B6D83E26B2745300B0D247 /* ModifierKeyActionPicker.swift in Sources */,
 				B7618A0E27620B5D00527C1A /* CursorManager.swift in Sources */,
@@ -401,6 +412,7 @@
 				B77A160E2674B3DD00E99A5D /* LinearMouse.swift in Sources */,
 				B716F16026BC10B80052F551 /* UniversalBackForward.swift in Sources */,
 				B77A16172674D88E00E99A5D /* PreferencesWindow.swift in Sources */,
+				B7842925278D985600D207F0 /* AutoUpdateManager.swift in Sources */,
 				B7ADF98F2748E6400005B02D /* MouseEventView.swift in Sources */,
 				B7B1D09126B3ECC500F48176 /* ModifierKeysView.swift in Sources */,
 				B75A061C2671E9D800BEAF77 /* AppDelegate.swift in Sources */,
@@ -579,6 +591,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 0.3.4;
 				DEVELOPMENT_ASSET_PATHS = "\"LinearMouse/Preview Content\"";
 				DEVELOPMENT_TEAM = C5686NKYJ7;
 				ENABLE_PREVIEWS = YES;
@@ -606,6 +619,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 0.3.4;
 				DEVELOPMENT_ASSET_PATHS = "\"LinearMouse/Preview Content\"";
 				DEVELOPMENT_TEAM = C5686NKYJ7;
 				ENABLE_PREVIEWS = YES;
@@ -715,6 +729,14 @@
 				revision = 04a1379908432bc4e304b38c831d573b1943b3fa;
 			};
 		};
+		B784292B278DB06600D207F0 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/lujjjh/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 		B7DD796226730A800067F1AD /* XCRemoteSwiftPackageReference "LoginServiceKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Clipy/LoginServiceKit";
@@ -730,6 +752,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B71392F226731645004C0173 /* XCRemoteSwiftPackageReference "LoginServiceKit" */;
 			productName = LoginServiceKit;
+		};
+		B784292C278DB06600D207F0 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B784292B278DB06600D207F0 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 		B7DD796326730A800067F1AD /* LoginServiceKit */ = {
 			isa = XCSwiftPackageProductDependency;

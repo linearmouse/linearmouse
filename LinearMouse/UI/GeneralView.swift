@@ -81,7 +81,12 @@ struct GeneralView: View {
             Spacer()
 
             VStack(alignment: .leading) {
+                CheckForUpdatesButton()
+                    .padding(.vertical, 10)
+
                 Text("Version: \(LinearMouse.appVersion)")
+                    .controlSize(.small)
+                    .foregroundColor(.secondary)
 
                 HStack {
                     HyperLink(URL(string: "https://linearmouse.lujjjh.com/")!) {
@@ -94,9 +99,9 @@ struct GeneralView: View {
                         Text("Feedback")
                     }
                 }
+                .controlSize(.small)
+                .foregroundColor(.secondary)
             }
-            .controlSize(.small)
-            .foregroundColor(.secondary)
         }
         .frame(minWidth: 0, maxWidth: .infinity,
                minHeight: 0, maxHeight: .infinity,
