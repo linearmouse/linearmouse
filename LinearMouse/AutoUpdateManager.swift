@@ -18,6 +18,12 @@ class AutoUpdateManager: NSObject {
 
     override init() {
         super.init()
-        _controller = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+        _controller = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: self, userDriverDelegate: nil)
+    }
+}
+
+extension AutoUpdateManager: SPUUpdaterDelegate {
+    func allowedChannels(for updater: SPUUpdater) -> Set<String> {
+        []
     }
 }

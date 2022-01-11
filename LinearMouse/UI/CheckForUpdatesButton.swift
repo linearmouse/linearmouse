@@ -12,10 +12,9 @@ import Sparkle
 final class UpdaterViewModel: ObservableObject {
     static let shared = UpdaterViewModel()
 
-    private let controller = AutoUpdateManager.shared.controller
-
     @Published var canCheckForUpdates = false
 
+    private let controller = AutoUpdateManager.shared.controller
     private var subscription: AnyCancellable! = nil
 
     init() {
