@@ -66,8 +66,8 @@ You will see an alert when LinearMouse first launches.
 2. Find LinearMouse in the list and toggle it on.
 
 <p align="center">
-  <img width="400" alt="Accessibility permission" src="https://user-images.githubusercontent.com/3000535/145603505-beabcd40-8316-4769-b83c-9d607011fe00.png#gh-light-mode-only">
-  <img width="400" alt="Accessibility permission" src="https://user-images.githubusercontent.com/3000535/145603976-e73e09b5-3440-4747-9a4e-647904dcdab2.png#gh-dark-mode-only">
+  <img width="400" alt="Accessibility permission" src="https://user-images.githubusercontent.com/62953110/149927571-b9837b0c-6881-4ac5-88da-2a55e58caf27.png#gh-light-mode-only">
+<img width="400" alt="Accessibility permission" src="https://user-images.githubusercontent.com/62953110/149927673-cd20dc90-7809-4bc4-9cbc-051f9c79c597.png#gh-dark-mode-only">
 </p>
 
 ## Features
