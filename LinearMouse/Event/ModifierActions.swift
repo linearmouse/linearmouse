@@ -8,15 +8,13 @@
 import Foundation
 
 class ModifierActions: EventTransformer {
-    private let mouseDetector: MouseDetector
     private let commandAction: ModifierKeyAction
     private let shiftAction: ModifierKeyAction
     private let alternateAction: ModifierKeyAction
     private let controlAction: ModifierKeyAction
 
-    init(mouseDetector: MouseDetector, commandAction: ModifierKeyAction, shiftAction: ModifierKeyAction,
+    init(commandAction: ModifierKeyAction, shiftAction: ModifierKeyAction,
          alternateAction: ModifierKeyAction, controlAction: ModifierKeyAction) {
-        self.mouseDetector = mouseDetector
         self.commandAction = commandAction
         self.shiftAction = shiftAction
         self.alternateAction = alternateAction
@@ -25,10 +23,6 @@ class ModifierActions: EventTransformer {
 
     func transform(_ event: CGEvent) -> CGEvent? {
         guard event.type == .scrollWheel else {
-            return event
-        }
-
-        guard mouseDetector.isMouseEvent(event) else {
             return event
         }
 

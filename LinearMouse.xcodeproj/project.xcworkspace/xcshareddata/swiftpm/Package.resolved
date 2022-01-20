@@ -11,6 +11,15 @@
         }
       },
       {
+        "package": "LRUCache",
+        "repositoryURL": "https://github.com/nicklockwood/LRUCache.git",
+        "state": {
+          "branch": null,
+          "revision": "40039c212a82a044c0e2aff5c9f1daaf1f1f0624",
+          "version": "1.0.2"
+        }
+      },
+      {
         "package": "Sparkle",
         "repositoryURL": "https://github.com/lujjjh/Sparkle",
         "state": {
