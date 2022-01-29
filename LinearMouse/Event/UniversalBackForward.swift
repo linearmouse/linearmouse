@@ -28,6 +28,7 @@ class UniversalBackForward: EventTransformer {
         "com.parallels.desktop.console",
         "com.vmware.fusion",
         "org.virtualbox.app.VirtualBox",
+        "tv.parsec.www",
     ]
 
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "EventTransformer")
