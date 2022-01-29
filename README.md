@@ -7,23 +7,28 @@
 </h1>
 
 <p align="center">
-  <a href="https://github.com/lujjjh/LinearMouse/releases/latest"><img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/lujjjh/LinearMouse?sort=semver&style=for-the-badge"></a>
-  <a href="https://github.com/lujjjh/LinearMouse/releases/latest/download/LinearMouse.dmg"><img src="https://img.shields.io/github/downloads/lujjjh/LinearMouse/total?style=for-the-badge" alt="Downloads" /></a>
-  <img src="https://img.shields.io/github/license/lujjjh/LinearMouse?style=for-the-badge" alt="MIT License" />
+  <a href="https://github.com/lujjjh/LinearMouse/releases/latest"><img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/lujjjh/LinearMouse?sort=semver"></a>
+  <a href="https://github.com/lujjjh/LinearMouse/releases/latest/download/LinearMouse.dmg"><img src="https://img.shields.io/github/downloads/lujjjh/LinearMouse/total" alt="Downloads" /></a>
+  <img src="https://img.shields.io/github/license/lujjjh/LinearMouse" alt="MIT License" />
 </p>
+
+LinearMouse is a free and open-source utility for macOS which aims to
+improve the experience and functionality of third-party mice.
+
+## Screenshots
 
 <table>
   <tbody>
     <tr>
-      <td>
+      <td width="33%">
         <img width="612" alt="General" src="https://user-images.githubusercontent.com/3000535/145600150-59edf92c-2911-42e3-b525-29d50aa937d6.png#gh-light-mode-only">
         <img width="612" alt="General" src="https://user-images.githubusercontent.com/3000535/145601535-41053260-f262-4e68-a81f-4b73b990570f.png#gh-dark-mode-only">
       </td>
-      <td>
+      <td width="33%">
         <img width="612" alt="Cursor" src="https://user-images.githubusercontent.com/3000535/145600298-24a75b1a-2e15-4ebd-aa22-a30f8eb5b6db.png#gh-light-mode-only">
         <img width="612" alt="Cursor" src="https://user-images.githubusercontent.com/3000535/145601559-81e19237-1eca-4dc0-beaa-4c2028298fc7.png#gh-dark-mode-only">
       </td>
-      <td>
+      <td width="33%">
         <img width="612" alt="Modifier keys" src="https://user-images.githubusercontent.com/3000535/145600467-6c579420-6c3e-49d4-a8ad-e1a0bd3d52c0.png#gh-light-mode-only">
         <img width="612" alt="Modifier keys" src="https://user-images.githubusercontent.com/3000535/145601581-295bd047-b0e1-4e3e-90b5-a246481c72b3.png#gh-dark-mode-only">
       </td>
