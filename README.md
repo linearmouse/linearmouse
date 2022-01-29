@@ -1,9 +1,6 @@
 <p align="center">
-  <a href="https://linearmouse.org/#gh-light-mode-only">
-    <img src="/logo.svg" width="96" height="96" />
-  </a>
-  <a href="https://linearmouse.org/#gh-dark-mode-only">
-    <img src="/logo-dark.svg" width="96" height="96" />
+  <a href="https://linearmouse.org/">
+    <img src="logo.png" width="128" height="128" />
   </a>
 </p>
 <h1 align="center">LinearMouse</h1>
