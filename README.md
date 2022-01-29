@@ -1,9 +1,10 @@
-<p align="center">
+<h1 align="center">
   <a href="https://linearmouse.org/">
-    <img src="logo.png" width="128" height="128" />
+    <img src="logo.svg" width="128" height="128" />
+    <br />
+    LinearMouse
   </a>
-</p>
-<h1 align="center">LinearMouse</h1>
+</h1>
 
 <p align="center">
   <a href="https://github.com/lujjjh/LinearMouse/releases/latest"><img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/lujjjh/LinearMouse?sort=semver&style=for-the-badge"></a>
