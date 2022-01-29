@@ -24,6 +24,7 @@ class UniversalBackForward: EventTransformer {
      */
     private static let ignoreSet: Set = [
         "com.microsoft.VSCode",
+        "com.microsoft.rdc.macos",
         "com.parallels.desktop.console",
         "com.vmware.fusion",
         "org.virtualbox.app.VirtualBox",
