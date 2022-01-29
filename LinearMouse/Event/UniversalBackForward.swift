@@ -24,7 +24,9 @@ class UniversalBackForward: EventTransformer {
      */
     private static let ignoreSet: Set = [
         "com.microsoft.VSCode",
+        "com.parallels.desktop.console",
         "com.vmware.fusion",
+        "org.virtualbox.app.VirtualBox",
     ]
 
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "EventTransformer")
