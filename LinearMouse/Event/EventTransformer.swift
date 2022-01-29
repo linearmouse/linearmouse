@@ -11,14 +11,12 @@ protocol EventTransformer {
     func transform(_ event: CGEvent) -> CGEvent?
 }
 
-func getTransformers(appDefaults: AppDefaults, mouseDetector: MouseDetector) -> [EventTransformer] {
+func getTransformers(appDefaults: AppDefaults) -> [EventTransformer] {
     let transformers: [(Bool, () -> EventTransformer)] = [
-        (appDefaults.reverseScrollingOn,        { ReverseScrolling(mouseDetector: mouseDetector) }),
-        (appDefaults.linearScrollingOn,         { LinearScrolling(mouseDetector: mouseDetector,
-                                                                  scrollLines: appDefaults.scrollLines) }),
+        (appDefaults.reverseScrollingOn,        { ReverseScrolling() }),
+        (appDefaults.linearScrollingOn,         { LinearScrolling(scrollLines: appDefaults.scrollLines) }),
         (appDefaults.universalBackForwardOn,    { UniversalBackForward() }),
-        (true,                                  { ModifierActions(mouseDetector: mouseDetector,
-                                                                  commandAction: appDefaults.modifiersCommandAction,
+        (true,                                  { ModifierActions(commandAction: appDefaults.modifiersCommandAction,
                                                                   shiftAction: appDefaults.modifiersShiftAction,
                                                                   alternateAction: appDefaults.modifiersAlternateAction,
                                                                   controlAction: appDefaults.modifiersControlAction) }),
@@ -28,8 +26,12 @@ func getTransformers(appDefaults: AppDefaults, mouseDetector: MouseDetector) -> 
 }
 
 func transformEvent(appDefaults: AppDefaults, mouseDetector: MouseDetector, event: CGEvent) -> CGEvent? {
+    guard mouseDetector.isMouseEvent(event) else {
+        return event
+    }
+
     var transformed: CGEvent? = event
-    let transformers = getTransformers(appDefaults: appDefaults, mouseDetector: mouseDetector)
+    let transformers = getTransformers(appDefaults: appDefaults)
     for transformer in transformers {
         if let transformedEvent = transformed {
             transformed = transformer.transform(transformedEvent)

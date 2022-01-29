@@ -39,7 +39,6 @@
 		B7ADF98D2748E5010005B02D /* ScrollWheelEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF98C2748E5010005B02D /* ScrollWheelEventView.swift */; };
 		B7ADF98F2748E6400005B02D /* MouseEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF98E2748E6400005B02D /* MouseEventView.swift */; };
 		B7ADF99F274918540005B02D /* ReverseScrollingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF99E274918540005B02D /* ReverseScrollingTests.swift */; };
-		B7ADF9A427491AA30005B02D /* FakeMouseDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF9A327491AA30005B02D /* FakeMouseDetector.swift */; };
 		B7B1D08D26B2FD6C00F48176 /* AppStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7B1D08C26B2FD6C00F48176 /* AppStorage.swift */; };
 		B7B1D08F26B3EC4F00F48176 /* GeneralView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7B1D08E26B3EC4F00F48176 /* GeneralView.swift */; };
 		B7B1D09126B3ECC500F48176 /* ModifierKeysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7B1D09026B3ECC500F48176 /* ModifierKeysView.swift */; };
@@ -48,6 +47,7 @@
 		B7BD51812672FEB5001FE742 /* EventTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BD51802672FEB5001FE742 /* EventTap.swift */; };
 		B7BD5183267300DC001FE742 /* AutoStartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BD5182267300DC001FE742 /* AutoStartManager.swift */; };
 		B7DD796426730A800067F1AD /* LoginServiceKit in Frameworks */ = {isa = PBXBuildFile; productRef = B7DD796326730A800067F1AD /* LoginServiceKit */; };
+		B7F6C5F827A4F6A800E5400B /* LRUCache in Frameworks */ = {isa = PBXBuildFile; productRef = B7F6C5F727A4F6A800E5400B /* LRUCache */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -102,7 +102,6 @@
 		B7ADF98E2748E6400005B02D /* MouseEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseEventView.swift; sourceTree = "<group>"; };
 		B7ADF9952748ED620005B02D /* LinearMouseUnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LinearMouseUnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7ADF99E274918540005B02D /* ReverseScrollingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReverseScrollingTests.swift; sourceTree = "<group>"; };
-		B7ADF9A327491AA30005B02D /* FakeMouseDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeMouseDetector.swift; sourceTree = "<group>"; };
 		B7B1D08C26B2FD6C00F48176 /* AppStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStorage.swift; sourceTree = "<group>"; };
 		B7B1D08E26B3EC4F00F48176 /* GeneralView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralView.swift; sourceTree = "<group>"; };
 		B7B1D09026B3ECC500F48176 /* ModifierKeysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierKeysView.swift; sourceTree = "<group>"; };
@@ -121,6 +120,7 @@
 				B784292D278DB06600D207F0 /* Sparkle in Frameworks */,
 				B7DD796426730A800067F1AD /* LoginServiceKit in Frameworks */,
 				B71392F426731645004C0173 /* LoginServiceKit in Frameworks */,
+				B7F6C5F827A4F6A800E5400B /* LRUCache in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -253,7 +253,6 @@
 		B7ADF9962748ED620005B02D /* LinearMouseUnitTests */ = {
 			isa = PBXGroup;
 			children = (
-				B7ADF9A127491A750005B02D /* MouseDetector */,
 				B7ADF9A02749187A0005B02D /* Event */,
 			);
 			path = LinearMouseUnitTests;
@@ -267,14 +266,6 @@
 				B754147F274E3CEF003CDAD0 /* ModifierActionsTests.swift */,
 			);
 			path = Event;
-			sourceTree = "<group>";
-		};
-		B7ADF9A127491A750005B02D /* MouseDetector */ = {
-			isa = PBXGroup;
-			children = (
-				B7ADF9A327491AA30005B02D /* FakeMouseDetector.swift */,
-			);
-			path = MouseDetector;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -297,6 +288,7 @@
 				B7DD796326730A800067F1AD /* LoginServiceKit */,
 				B71392F326731645004C0173 /* LoginServiceKit */,
 				B784292C278DB06600D207F0 /* Sparkle */,
+				B7F6C5F727A4F6A800E5400B /* LRUCache */,
 			);
 			productName = LinearMouse;
 			productReference = B75A06182671E9D800BEAF77 /* LinearMouse.app */;
@@ -352,6 +344,7 @@
 			packageReferences = (
 				B71392F226731645004C0173 /* XCRemoteSwiftPackageReference "LoginServiceKit" */,
 				B784292B278DB06600D207F0 /* XCRemoteSwiftPackageReference "Sparkle" */,
+				B7F6C5F627A4F6A800E5400B /* XCRemoteSwiftPackageReference "LRUCache" */,
 			);
 			productRefGroup = B75A06192671E9D800BEAF77 /* Products */;
 			projectDirPath = "";
@@ -745,6 +738,14 @@
 				minimumVersion = 2.2.1;
 			};
 		};
+		B7F6C5F627A4F6A800E5400B /* XCRemoteSwiftPackageReference "LRUCache" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nicklockwood/LRUCache.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -762,6 +763,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B7DD796226730A800067F1AD /* XCRemoteSwiftPackageReference "LoginServiceKit" */;
 			productName = LoginServiceKit;
+		};
+		B7F6C5F727A4F6A800E5400B /* LRUCache */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B7F6C5F627A4F6A800E5400B /* XCRemoteSwiftPackageReference "LRUCache" */;
+			productName = LRUCache;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -8,18 +8,8 @@
 import Foundation
 
 class ReverseScrolling: EventTransformer {
-    private let mouseDetector: MouseDetector
-
-    init(mouseDetector: MouseDetector) {
-        self.mouseDetector = mouseDetector
-    }
-
     func transform(_ event: CGEvent) -> CGEvent? {
         guard event.type == .scrollWheel else {
-            return event
-        }
-
-        guard mouseDetector.isMouseEvent(event) else {
             return event
         }
 

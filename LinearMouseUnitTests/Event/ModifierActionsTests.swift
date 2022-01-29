@@ -9,10 +9,9 @@ import XCTest
 @testable import LinearMouse
 
 class ModifierActionsTests: XCTestCase {
-    func testPositive() throws {
+    func testModifierActions() throws {
         var event = CGEvent(scrollWheelEvent2Source: nil, units: .line, wheelCount: 2, wheel1: 1, wheel2: 2, wheel3: 0)!
-        let transformer = ModifierActions(mouseDetector: FakeMouseDetector(isMouse: true),
-                                          commandAction: .init(type: .noAction, speedFactor: 0),
+        let transformer = ModifierActions(commandAction: .init(type: .noAction, speedFactor: 0),
                                           shiftAction: .init(type: .alterOrientation, speedFactor: 0),
                                           alternateAction: .init(type: .changeSpeed, speedFactor: 2),
                                           controlAction: .init(type: .changeSpeed, speedFactor: 3))
@@ -33,22 +32,5 @@ class ModifierActionsTests: XCTestCase {
         view = ScrollWheelEventView(event)
         XCTAssertEqual(view.deltaX, 2)
         XCTAssertEqual(view.deltaY, 4)
-    }
-
-    func testNegative() throws {
-        var event = CGEvent(scrollWheelEvent2Source: nil, units: .line, wheelCount: 2, wheel1: 1, wheel2: 2, wheel3: 0)!
-        let transformer = ModifierActions(mouseDetector: FakeMouseDetector(isMouse: false),
-                                          commandAction: .init(type: .noAction, speedFactor: 0),
-                                          shiftAction: .init(type: .alterOrientation, speedFactor: 0),
-                                          alternateAction: .init(type: .changeSpeed, speedFactor: 2),
-                                          controlAction: .init(type: .changeSpeed, speedFactor: 3))
-        event.flags.insert(.maskCommand)
-        event.flags.insert(.maskShift)
-        event.flags.insert(.maskAlternate)
-        event.flags.insert(.maskControl)
-        event = transformer.transform(event)!
-        let view = ScrollWheelEventView(event)
-        XCTAssertEqual(view.deltaX, 2)
-        XCTAssertEqual(view.deltaY, 1)
     }
 }
