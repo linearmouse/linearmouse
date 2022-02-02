@@ -42,19 +42,16 @@ class ModifierActions: EventTransformer {
         return event
     }
 
-    func handleModifierKeyAction(for event: CGEvent, action: ModifierKeyAction) -> Bool {
+    private func handleModifierKeyAction(for event: CGEvent, action: ModifierKeyAction) -> Bool {
         let view = ScrollWheelEventView(event)
 
         switch action.type {
         case .noAction:
             return false
         case .alterOrientation:
-            view.swapDeltaXY()
+            view.swapXY()
         case .changeSpeed:
-            let factor = action.speedFactor
-            let scale = { (delta: Int64, factor: Double) in Int64((Double(delta) * factor).rounded()) }
-            view.deltaX = view.deltaX.signum() * max(1, abs(scale(view.deltaX, factor)))
-            view.deltaY = view.deltaY.signum() * max(1, abs(scale(view.deltaY, factor)))
+            view.scale(factor: action.speedFactor)
         }
 
         return true

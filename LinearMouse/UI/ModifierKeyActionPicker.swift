@@ -13,6 +13,22 @@ struct ModifierKeyActionPicker: View {
 
     @Binding var action: ModifierKeyAction
 
+    private var speedFactor: Binding<Double> {
+        Binding<Double>(get: {
+            return action.speedFactor
+        }, set: {
+            if $0 < 0 {
+                action.speedFactor = $0.rounded()
+            } else if 0..<0.1 ~= $0 {
+                action.speedFactor = ($0 * 20).rounded() / 20
+            } else if 0.1..<1 ~= $0 {
+                action.speedFactor = ($0 * 10).rounded() / 10
+            } else {
+                action.speedFactor = ($0 * 2).rounded() / 2
+            }
+        })
+    }
+
     var body: some View {
         Picker(label, selection: $action.type) {
             ForEach(ModifierKeyActionType.allCases, id: \.self) {
@@ -23,10 +39,13 @@ struct ModifierKeyActionPicker: View {
         if action.type == .changeSpeed {
             HStack {
                 Text("to")
-                Slider(value: $action.speedFactor,
-                    in: 0.1...5.0,
-                    step: 0.1)
-                Text(String(format: "%.1f×", action.speedFactor))
+                Slider(value: speedFactor,
+                       in: 0.05...10.00)
+                HStack(spacing: 5) {
+                    Text(String(format: "%0.2f ×", action.speedFactor))
+                }
+                .frame(width: 60, alignment: .trailing)
+
             }
             .padding(.bottom, 20)
         }
