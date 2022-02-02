@@ -14,8 +14,7 @@ class ReverseScrolling: EventTransformer {
         }
 
         let view = ScrollWheelEventView(event)
-        view.deltaX = -view.deltaX
-        view.deltaY = -view.deltaY
+        view.negate()
         return event
     }
 }
