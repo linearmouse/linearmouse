@@ -42,7 +42,7 @@ struct ModifierKeyActionPicker: View {
                 Slider(value: speedFactor,
                        in: 0.05...10.00)
                 HStack(spacing: 5) {
-                    Text(String(format: "%0.2f", action.speedFactor))
+                    Text(String(format: "%0.2f ×", action.speedFactor))
                 }
                 .frame(width: 60, alignment: .trailing)
 
