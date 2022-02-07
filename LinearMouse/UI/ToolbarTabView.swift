@@ -23,6 +23,8 @@ struct ToolbarTabView: NSViewControllerRepresentable {
             let t = NSTabViewItem(viewController: NSHostingController(rootView: item.content()))
             if #available(macOS 11.0, *) {
                 t.image = NSImage(systemSymbolName: item.imageName, accessibilityDescription: nil)
+            } else {
+                // TODO: Add images on macOS 10.x.
             }
             t.label = NSLocalizedString(item.label, comment: "")
             t.identifier = item.identifier
