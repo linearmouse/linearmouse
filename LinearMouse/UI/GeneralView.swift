@@ -94,14 +94,17 @@ struct GeneralView: View {
                 Spacer()
 
                 HStack {
-                    HyperLink(URL(string: "https://linearmouse.lujjjh.com/")!) {
+                    HyperLink(URL(string: "https://linearmouse.org")!) {
                         Text("Homepage")
                     }
-                    HyperLink(URL(string: "https://github.com/lujjjh/LinearMouse")!) {
+                    HyperLink(URL(string: "https://github.com/linearmouse/linearmouse")!) {
                         Text("GitHub")
                     }
-                    HyperLink(URL(string: "https://github.com/lujjjh/LinearMouse/discussions/new")!) {
+                    HyperLink(URL(string: "https://github.com/linearmouse/linearmouse/issues")!) {
                         Text("Feedback")
+                    }
+                    HyperLink(URL(string: "mailto:feedback@linearmouse.org")!) {
+                        Text("Contact")
                     }
                 }
                 .controlSize(.small)
