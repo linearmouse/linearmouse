@@ -39,6 +39,8 @@ struct CursorView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
+            Spacer()
+
             Form {
                 Slider(value: $defaults.cursorAcceleration,
                        in: 0.0...20.0) {
@@ -78,13 +80,13 @@ struct CursorView: View {
 
             Spacer()
 
+            Toggle(isOn: $defaults.linearMovementOn) {
+                Text("Disable cursor acceleration & sensitivity")
+            }
+
+            Spacer()
+
             VStack(alignment: .leading) {
-                Toggle(isOn: $defaults.linearMovementOn) {
-                    Text("Disable cursor acceleration & sensitivity")
-                }
-
-                Spacer()
-
                 if #available(macOS 11.0, *) {
                     Text("You may also press ⌃⇧⌘Z to revert to system defaults.")
                         .controlSize(.small)
@@ -107,7 +109,11 @@ struct CursorView: View {
                     .disabled(defaults.linearMovementOn)
                 }
             }
+
+            Spacer()
         }
+        .padding(20)
+        .frame(width: 400)
     }
 }
 

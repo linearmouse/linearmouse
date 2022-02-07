@@ -14,7 +14,8 @@ class PreferencesWindow: NSWindow {
             contentRect: .init(x: 0, y: 0, width: 500, height: 550),
             styleMask: [.titled, .closable, .fullSizeContentView],
             backing: .buffered,
-            defer: false)
+            defer: false
+        )
 
         isReleasedWhenClosed = false
 
