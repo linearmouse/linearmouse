@@ -9,39 +9,39 @@ import SwiftUI
 
 struct PreferencesView: View {
     @ObservedObject var defaults = AppDefaults.shared
-    @State var selectedTab = 0
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            GeneralView()
-                .padding(.vertical, 20)
-                .padding(.horizontal, 30)
-                .tabItem { Text("General") }
-                .tag(0)
-            CursorView()
-                .padding(.vertical, 20)
-                .padding(.horizontal, 30)
-                .tabItem { Text("Cursor") }
-                .tag(1)
-            ScrollView {
-                ModifierKeysView()
-                    .padding(.vertical, 20)
-                    .padding(.horizontal, 30)
-            }
-            .tabItem { Text("Modifier Keys") }
-            .tag(2)
-        }
-        .padding(30)
-        .frame(minWidth: 0,
-               maxWidth: .infinity,
-               minHeight: 0,
-               maxHeight: .infinity,
-               alignment: .topLeading)
+        ToolbarTabView(tabs: [
+            (
+                imageName: "gearshape",
+                label: "General",
+                identifier: "general",
+                content: {
+                    AnyView(GeneralView())
+                }
+            ),
+            (
+                imageName: "cursorarrow.motionlines",
+                label: "Cursor",
+                identifier: "cursor",
+                content: {
+                    AnyView(CursorView())
+                }
+            ),
+            (
+                imageName: "command",
+                label: "Modifier Keys",
+                identifier: "modifier.keys",
+                content: {
+                    AnyView(ModifierKeysView())
+                }
+            )
+        ])
     }
 }
 
 struct PreferencesView_Previews: PreviewProvider {
     static var previews: some View {
-        PreferencesView(selectedTab: 1)
+        PreferencesView()
     }
 }

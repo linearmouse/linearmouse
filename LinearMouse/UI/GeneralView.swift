@@ -12,44 +12,49 @@ struct GeneralView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Toggle(isOn: $defaults.reverseScrollingOn) {
-                VStack(alignment: .leading) {
-                    Text("Reverse scrolling")
-                    Text("""
-                        Reverse the scroll direction for a mouse \
-                        but won't reverse the scroll direction \
-                        for a Trackpad.
-                        """)
-                        .controlSize(.small)
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
+            Spacer()
 
             VStack(alignment: .leading) {
-                Toggle(isOn: $defaults.linearScrollingOn) {
+                Toggle(isOn: $defaults.reverseScrollingOn) {
                     VStack(alignment: .leading) {
-                        Text("Enable linear scrolling")
+                        Text("Reverse scrolling")
                         Text("""
-                            Disable mouse scrolling acceleration.
+                            Reverse the scroll direction for a mouse \
+                            but won't reverse the scroll direction \
+                            for a Trackpad.
                             """)
                             .controlSize(.small)
                             .foregroundColor(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
+            }
+
+            Toggle(isOn: $defaults.linearScrollingOn) {
+                VStack(alignment: .leading) {
+                    Text("Enable linear scrolling")
+                    Text("""
+                        Disable mouse scrolling acceleration.
+                        """)
+                        .controlSize(.small)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            HStack {
+                Text("Scroll")
                 Stepper(
                     value: $defaults.scrollLines,
                     in: 1...10,
                     step: 1) {
-                    Text("Scroll")
                     Text(String(defaults.scrollLines))
-                    Text(defaults.scrollLines == 1 ? "line" : "lines")
                 }
-                .controlSize(.small)
-                .padding(.leading, 18)
-                .disabled(!defaults.linearScrollingOn)
+                Text(defaults.scrollLines == 1 ? "line" : "lines")
             }
+            .controlSize(.small)
+            .padding(.leading, 18)
+            .padding(.top, -20)
+            .disabled(!defaults.linearScrollingOn)
 
             Toggle(isOn: $defaults.universalBackForwardOn) {
                 VStack(alignment: .leading) {
@@ -81,12 +86,12 @@ struct GeneralView: View {
             Spacer()
 
             VStack(alignment: .leading) {
-                CheckForUpdatesButton()
-                    .padding(.vertical, 10)
-
                 Text("Version: \(LinearMouse.appVersion)")
                     .controlSize(.small)
                     .foregroundColor(.secondary)
+                CheckForUpdatesButton()
+
+                Spacer()
 
                 HStack {
                     HyperLink(URL(string: "https://linearmouse.lujjjh.com/")!) {
@@ -102,10 +107,11 @@ struct GeneralView: View {
                 .controlSize(.small)
                 .foregroundColor(.secondary)
             }
+
+            Spacer()
         }
-        .frame(minWidth: 0, maxWidth: .infinity,
-               minHeight: 0, maxHeight: .infinity,
-               alignment: .topLeading)
+        .padding(20)
+        .frame(width: 400)
     }
 }
 

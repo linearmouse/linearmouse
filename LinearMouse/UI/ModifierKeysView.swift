@@ -20,9 +20,8 @@ struct ModifierKeysView: View {
 
             ModifierKeyActionPicker(label: "⌃ (Control)", action: $defaults.modifiersControlAction)
         }
-        .frame(minWidth: 0, maxWidth: .infinity,
-               minHeight: 0, maxHeight: .infinity,
-               alignment: .topLeading)
+        .padding(20)
+        .frame(width: 400)
     }
 }
 

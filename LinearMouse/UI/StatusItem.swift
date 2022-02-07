@@ -69,7 +69,7 @@ class StatusItem {
             .init(
                 title: String(format: NSLocalizedString("%@ Preferences...", comment: ""), LinearMouse.appName),
                 action: #selector(openPreferencesAction),
-                keyEquivalent: ""),
+                keyEquivalent: ","),
             .separator(),
             .init(
                 title: String(format: NSLocalizedString("Quit %@", comment: ""), LinearMouse.appName),
