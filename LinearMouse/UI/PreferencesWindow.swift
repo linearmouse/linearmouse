@@ -8,15 +8,6 @@
 import Foundation
 import SwiftUI
 
-extension NSToolbar.Identifier {
-    static let main = NSToolbar.Identifier("MainToolbar")
-}
-
-extension NSToolbarItem.Identifier {
-    static let general = NSToolbarItem.Identifier("general")
-    static let cursor = NSToolbarItem.Identifier("cursor")
-}
-
 class PreferencesWindow: NSWindow {
     init() {
         super.init(
