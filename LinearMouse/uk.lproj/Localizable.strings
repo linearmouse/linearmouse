@@ -1,0 +1,50 @@
+/* 
+  Localizable.strings
+  LinearMouse
+
+  Created by lujjjh on 2021/6/13.
+  
+*/
+
+"Reverse scrolling:" = "Reverse scrolling:";
+"Linear scrolling:" = "Linear scrolling:";
+"Universal back and forward:" = "Universal back and forward:";
+"on" = "on";
+"off" = "off";
+"line" = "line";
+"lines" = "lines";
+"%@ Preferences..." = "%@ Preferences...";
+"Quit %@" = "Quit %@";
+
+"%@ Preferences" = "%@ Preferences";
+
+"General" = "General";
+"Modifier Keys" = "Modifier Keys";
+
+"Reverse scrolling" = "Reverse scrolling";
+"Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad." = "Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad.";
+"Enable linear scrolling" = "Enable linear scrolling";
+"Disable mouse scrolling acceleration." = "Disable mouse scrolling acceleration.";
+"Scroll" = "Scroll";
+"Enable universal back and forward" = "Enable universal back and forward";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
+"Show in menu bar" = "Show in menu bar";
+"To show the preferences, launch %@ again." = "To show the preferences, launch %@ again.";
+"Check for Updates..." = "Check for Updates...";
+"Version: %@" = "Version: %@";
+"Homepage" = "Homepage";
+"GitHub" = "GitHub";
+"Feedback" = "Feedback";
+"Contact" = "Contact";
+
+"Cursor" = "Cursor";
+"Acceleration" = "Acceleration";
+"Sensitivity" = "Sensitivity";
+"Revert to system defaults" = "Revert to system defaults";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
+"Disable cursor acceleration & sensitivity" = "Disable cursor acceleration & sensitivity";
+
+"No action" = "No action";
+"Alter orientation" = "Alter orientation";
+"Change speed" = "Change speed";
+"to" = "to";
