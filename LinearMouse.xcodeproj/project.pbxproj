@@ -592,7 +592,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 0.4.1;
+				CURRENT_PROJECT_VERSION = 0.4.2;
 				DEVELOPMENT_ASSET_PATHS = "\"LinearMouse/Preview Content\"";
 				DEVELOPMENT_TEAM = C5686NKYJ7;
 				ENABLE_PREVIEWS = YES;
@@ -602,7 +602,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.4.1;
+				MARKETING_VERSION = 0.4.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lujjjh.LinearMouse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -620,7 +620,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 0.4.1;
+				CURRENT_PROJECT_VERSION = 0.4.2;
 				DEVELOPMENT_ASSET_PATHS = "\"LinearMouse/Preview Content\"";
 				DEVELOPMENT_TEAM = C5686NKYJ7;
 				ENABLE_PREVIEWS = YES;
@@ -630,7 +630,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.4.1;
+				MARKETING_VERSION = 0.4.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lujjjh.LinearMouse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
