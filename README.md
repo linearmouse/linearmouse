@@ -10,6 +10,7 @@
   <a href="https://github.com/lujjjh/LinearMouse/releases/latest"><img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/lujjjh/LinearMouse?sort=semver"></a>
   <a href="https://github.com/lujjjh/LinearMouse/releases/latest/download/LinearMouse.dmg"><img src="https://img.shields.io/github/downloads/lujjjh/LinearMouse/total" alt="Downloads" /></a>
   <img src="https://img.shields.io/github/license/lujjjh/LinearMouse" alt="MIT License" />
+  <a href="https://crowdin.com/project/linearmouse"><img src="https://badges.crowdin.net/linearmouse/localized.svg" alt="Crowdin" /></a>
 </p>
 
 LinearMouse is a free and open-source utility for macOS which aims to
