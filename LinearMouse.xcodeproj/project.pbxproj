@@ -111,6 +111,8 @@
 		B7BD51802672FEB5001FE742 /* EventTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTap.swift; sourceTree = "<group>"; };
 		B7BD5182267300DC001FE742 /* AutoStartManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoStartManager.swift; sourceTree = "<group>"; };
 		B7BE466F27B0278200168BB9 /* ToolbarTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarTabView.swift; sourceTree = "<group>"; };
+		B7BE467927B28A8600168BB9 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		B7BE467A27B28B8700168BB9 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 		B7E897E22675B1D9003C7058 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -342,6 +344,7 @@
 				Base,
 				"zh-Hans",
 				"zh-Hant",
+				ru,
 			);
 			mainGroup = B75A060F2671E9D800BEAF77;
 			packageReferences = (
@@ -453,6 +456,8 @@
 			children = (
 				B76173452675AD8700CC9412 /* zh-Hans */,
 				B7E897E22675B1D9003C7058 /* zh-Hant */,
+				B7BE467927B28A8600168BB9 /* en */,
+				B7BE467A27B28B8700168BB9 /* ru */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
