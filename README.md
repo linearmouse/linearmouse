@@ -75,39 +75,19 @@ You will see an alert when LinearMouse first launches.
 
 ## Features
 
-### Reverse scrolling
+* **Reverse scrolling**: LinearMouse will reverse the scrolling direction for mice but keep the direction for trackpads. This is useful if you use both mice and trackpads.
 
-LinearMouse will reverse the scrolling direction for mice but keep the direction for trackpads.
+* **Linear scrolling**: LinearMouse will disable the scrolling acceleration and provide a linear and discrete scrolling experience, just like in Windows. If your mouse doesn't have a smooth wheel, you'll like this feature.
 
-This is useful if you use both mice and trackpads.
+* **Universal back & forward**: Side buttons on mice do not always work well in macOS, for example, in Safari and Xcode. LinearMouse translates side button clicks to swipe gestures so that most apps can recognize back & forward actions correctly.
 
-### Linear scrolling
+* **Cursor acceleration & sensitivity**: macOS only provides the ability to configure cursor acceleration which is called tracking speed in System Preferences. Regardless of how you adjust the tracking speed, the speed curve of cursor movement may still appear strange. LinearMouse allows you to customize both cursor acceleration and sensitivity, or even completely disable cursor acceleration and sensitivity.
 
-LinearMouse will disable the scrolling acceleration and provide a linear and discrete scrolling
-experience, just like in Windows.
+* **Modifier keys functionality**: You may empower your modifier keys with additional functionality, such as modifying the scrolling speed or altering the scrolling oriention.
 
-If your mouse doesn't have a smooth wheel, you'll like this feature.
+## Contributing
 
-### Universal back & forward
-
-Side buttons on mice do not always work well in macOS, for example, in Safari and Xcode.
-
-LinearMouse translates side button clicks to swipe gestures so that most apps can recognize
-back & forward actions correctly.
-
-### Cursor acceleration & sensitivity
-
-macOS only provides the ability to configure cursor acceleration which is called tracking speed
-in System Preferences. Regardless of how you adjust the tracking speed, the speed curve of cursor
-movement may still appear strange.
-
-LinearMouse allows you to customize both cursor acceleration and sensitivity, or even completely
-disable cursor acceleration and sensitivity.
-
-### Modifier keys functionality
-
-You may empower your modifier keys with additional functionality, such as modifying the scrolling
-speed or altering the scrolling oriention.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Credits
 
