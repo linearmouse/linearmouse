@@ -1,11 +1,3 @@
-/* 
-  Localizable.strings
-  LinearMouse
-
-  Created by lujjjh on 2021/6/13.
-  
-*/
-
 "Reverse scrolling:" = "翻轉捲動：";
 "Linear scrolling:" = "線性捲動：";
 "Universal back and forward:" = "全局後退、前進：";
