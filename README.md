@@ -90,7 +90,16 @@ You will see an alert when LinearMouse first launches.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+<a href="https://github.com/linearmouse/linearmouse/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=linearmouse/linearmouse" />
+</a>
+
 ## Credits
 
-- [Touch](https://github.com/calftrail/Touch/) (GPLv2)
-- [Mac Mouse Fix](https://github.com/noah-nuebling/mac-mouse-fix)
+* [Touch](https://github.com/calftrail/Touch/) (GPLv2)
+* [Mac Mouse Fix](https://github.com/noah-nuebling/mac-mouse-fix)
+
+## Buy me a coffee
+
+* [Ko-fi](https://ko-fi.com/lujjjh)
+* [爱发电](https://afdian.net/@lujjjh)
