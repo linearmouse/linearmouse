@@ -1,11 +1,3 @@
-/* 
-  Localizable.strings
-  LinearMouse
-
-  Created by rakleed on 2022/2/8.
-  
-*/
-
 "Reverse scrolling:" = "Обратная прокрутка:";
 "Linear scrolling:" = "Линейная прокрутка:";
 "Universal back and forward:" = "Универсальные «назад» и «вперед»:";
@@ -44,7 +36,6 @@
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Вы также можете нажать ⌃⇧⌘Z, чтобы вернуться к системным настройкам по умолчанию.";
 "Disable cursor acceleration & sensitivity" = "Отключить ускорение и чувствительность курсора";
 
-"Speed factor" = "";
 "No action" = "Не задано";
 "Alter orientation" = "Изменить направление";
 "Change speed" = "Изменить скорость";
