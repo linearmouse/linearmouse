@@ -24,3 +24,7 @@ DerivedData/
 
 ## Gcc Patch
 /*.gcno
+
+## Configuration
+/Config.xcconfig
+/Signing.xcconfig
