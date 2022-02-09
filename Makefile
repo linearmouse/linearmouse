@@ -2,7 +2,12 @@ BUILD_DIR = $(CURDIR)/build
 TARGET_DIR = $(CURDIR)/build/target
 TARGET_DMG = $(CURDIR)/build/LinearMouse.dmg
 
-all: clean test package
+all: configure clean test package
+
+configure: Signing.xcconfig
+
+Signing.xcconfig:
+	@./scripts/configure-code-signing
 
 test:
 	xcodebuild test -project LinearMouse.xcodeproj -scheme LinearMouse
@@ -21,4 +26,4 @@ package: build
 	ln -s /Applications '$(TARGET_DIR)/'
 	hdiutil create -fs HFS+ -srcfolder '$(TARGET_DIR)/' -volname LinearMouse '$(TARGET_DMG)'
 
-.PHONY: all build clean
+.PHONY: all configure test build clean package
