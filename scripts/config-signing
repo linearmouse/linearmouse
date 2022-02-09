@@ -17,6 +17,7 @@ if [[ -z "$DEVELOPMENT_TEAM" ]]; then
         no_available_code_signing_certificate
     fi
     echo "Found CN: $CN." >&2
+    certtool y
     DEVELOPMENT_TEAM=$(certtool y | grep "$CN" -A2 | grep OrgUnit | head -1 | awk -F': ' '{ print $2 }')
     if [[ -z "$DEVELOPMENT_TEAM" ]]; then
         no_available_code_signing_certificate
