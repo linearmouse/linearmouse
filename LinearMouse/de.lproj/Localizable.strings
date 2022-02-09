@@ -1,0 +1,42 @@
+"Reverse scrolling:" = "Invertiertes Scrollen:";
+"Linear scrolling:" = "Lineares Scrollen:";
+"Universal back and forward:" = "Universelles Vor und Zurück:";
+"on" = "An";
+"off" = "Aus";
+"line" = "Zeile";
+"lines" = "Zeilen";
+"%@ Preferences..." = "%@ Einstellungen...";
+"Quit %@" = "%@ beenden";
+
+"%@ Preferences" = "%@ Einstellungen";
+
+"General" = "Allgemein";
+"Modifier Keys" = "Tastenkürzel";
+
+"Reverse scrolling" = "Scrollen invertieren";
+"Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad." = "Kehrt die Scrollrichtung für die Maus, aber nicht das Trackpad um.";
+"Enable linear scrolling" = "Lineares Scrollen aktivieren";
+"Disable mouse scrolling acceleration." = "Deaktiviert die Scrollbeschleunigung der Maus.";
+"Scroll" = "Scrolle";
+"Enable universal back and forward" = "Universelles Vor und Zurück aktivieren";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Konvertiert die Vor- und Zurück-Seitentasten in die jeweiligen Wischgesten, um eine universelle Vor- und Zurück-Funktion zu ermöglichen.";
+"Show in menu bar" = "In der Menüleiste anzeigen";
+"To show the preferences, launch %@ again." = "Um die Einstellungen anzuzeigen, öffne %@ erneut.";
+"Check for Updates..." = "Nach Updates suchen...";
+"Version: %@" = "Version: %@";
+"Homepage" = "Homepage";
+"GitHub" = "GitHub";
+"Feedback" = "Feedback";
+"Contact" = "Kontakt";
+
+"Cursor" = "Mauszeiger";
+"Acceleration" = "Beschleunigung";
+"Sensitivity" = "Empfindlichkeit";
+"Revert to system defaults" = "Auf Systemstandards zurücksetzen";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "Durch Drücken des Kürzels ⌃⇧⌘Z kann ebenfalls zu den Systemstandards zurückgekehrt werden.";
+"Disable cursor acceleration & sensitivity" = "Zeigerbeschleunigung & Empfindlichkeit deaktivieren";
+
+"No action" = "Keine Funktion";
+"Alter orientation" = "Scrollorientierung ändern";
+"Change speed" = "Scrollgeschwindigkeit ändern";
+"to" = "zu";
