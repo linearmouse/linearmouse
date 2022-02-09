@@ -94,6 +94,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
   <img src="https://contrib.rocks/image?repo=linearmouse/linearmouse" />
 </a>
 
+## Build
+
+See [BUILD.md](BUILD.md).
+
 ## Credits
 
 * [Touch](https://github.com/calftrail/Touch/) (GPLv2)

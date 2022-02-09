@@ -94,6 +94,7 @@
 		B794BFE126BC0B2F003B11EF /* LinearMouse-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "LinearMouse-Bridging-Header.h"; sourceTree = "<group>"; };
 		B794BFE226BC0E45003B11EF /* TouchSimulate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TouchSimulate.h; sourceTree = "<group>"; };
 		B794BFE326BC0E5D003B11EF /* TouchSimulate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TouchSimulate.m; sourceTree = "<group>"; };
+		B79AC17D27B3BD7A003D9444 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
 		B7ADF97E2748991D0005B02D /* ReverseScrolling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReverseScrolling.swift; sourceTree = "<group>"; };
 		B7ADF98027489CB00005B02D /* MouseDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseDetector.swift; sourceTree = "<group>"; };
 		B7ADF9822748B12B0005B02D /* LinearScrolling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearScrolling.swift; sourceTree = "<group>"; };
@@ -140,7 +141,6 @@
 		B7BE469627B3768B00168BB9 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		B7BE469727B3768B00168BB9 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/Localizable.strings; sourceTree = "<group>"; };
 		B7CD86AB27B38B26006C5C37 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
-		B7CD86AC27B3913C006C5C37 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
 		B7E897E22675B1D9003C7058 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -166,19 +166,11 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		B72D8A1827B3B33800729ECC /* Defaults */ = {
-			isa = PBXGroup;
-			children = (
-				B7CD86AC27B3913C006C5C37 /* Signing.xcconfig */,
-			);
-			path = Defaults;
-			sourceTree = "<group>";
-		};
 		B75A060F2671E9D800BEAF77 = {
 			isa = PBXGroup;
 			children = (
 				B7CD86AB27B38B26006C5C37 /* Config.xcconfig */,
-				B72D8A1827B3B33800729ECC /* Defaults */,
+				B79AC17D27B3BD7A003D9444 /* Signing.xcconfig */,
 				B75A061A2671E9D800BEAF77 /* LinearMouse */,
 				B794BFDB26BC0A73003B11EF /* Touch */,
 				B716F16326BC19350052F551 /* LICENSE */,
