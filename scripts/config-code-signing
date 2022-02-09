@@ -16,10 +16,11 @@ if [[ -z "$DEVELOPMENT_TEAM" ]]; then
     if [[ -z "$CN" ]]; then
         no_available_code_signing_certificate
     fi
-    echo "Found CN: $CN." >&2
+    echo "Found CN: $CN" >&2
     if [[ -z "$KEYCHAIN_PATH" ]]; then
         KEYCHAIN_PATH=login.keychain
     fi
+    echo "KEYCHAIN_PATH: $KEYCHAIN_PATH" >&2
     DEVELOPMENT_TEAM=$(certtool y k="$KEYCHAIN_PATH" | grep "$CN" -A2 | grep OrgUnit | head -1 | awk -F': ' '{ print $2 }')
     if [[ -z "$DEVELOPMENT_TEAM" ]]; then
         no_available_code_signing_certificate
