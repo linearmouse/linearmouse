@@ -20,28 +20,20 @@ improve the experience and functionality of third-party mice.
 
 <table>
   <tbody>
-    <tr>
       <td width="33%">
-        <img width="612" alt="General" src="https://user-images.githubusercontent.com/3000535/145600150-59edf92c-2911-42e3-b525-29d50aa937d6.png#gh-light-mode-only">
-        <img width="612" alt="General" src="https://user-images.githubusercontent.com/3000535/145601535-41053260-f262-4e68-a81f-4b73b990570f.png#gh-dark-mode-only">
+        <img width="100%" alt="General" src="https://user-images.githubusercontent.com/3000535/153178582-1f3ec383-39be-4afb-aa26-84bb5e4d837c.png#gh-light-mode-only">
+        <img width="100%" alt="General" src="https://user-images.githubusercontent.com/3000535/153179006-600e65cf-8c94-497e-959b-48817cf02420.png#gh-dark-mode-only">
       </td>
       <td width="33%">
-        <img width="612" alt="Cursor" src="https://user-images.githubusercontent.com/3000535/145600298-24a75b1a-2e15-4ebd-aa22-a30f8eb5b6db.png#gh-light-mode-only">
-        <img width="612" alt="Cursor" src="https://user-images.githubusercontent.com/3000535/145601559-81e19237-1eca-4dc0-beaa-4c2028298fc7.png#gh-dark-mode-only">
+        <img width="100%" alt="Cursor" src="https://user-images.githubusercontent.com/3000535/153178851-bf06f44f-4e01-4d7b-848d-3e2eb3d46f9f.png#gh-light-mode-only">
+        <img width="100%" alt="Cursor" src="https://user-images.githubusercontent.com/3000535/153179057-c24d8cf0-4ab2-42f2-9a5e-867cc4a8bf57.png#gh-dark-mode-only">
       </td>
       <td width="33%">
-        <img width="612" alt="Modifier keys" src="https://user-images.githubusercontent.com/3000535/145600467-6c579420-6c3e-49d4-a8ad-e1a0bd3d52c0.png#gh-light-mode-only">
-        <img width="612" alt="Modifier keys" src="https://user-images.githubusercontent.com/3000535/145601581-295bd047-b0e1-4e3e-90b5-a246481c72b3.png#gh-dark-mode-only">
+        <img width="100%" alt="Modifier keys" src="https://user-images.githubusercontent.com/3000535/153178909-8eebb0ce-b51c-49b4-8b74-a17919e5a12d.png#gh-light-mode-only">
+        <img width="100%" alt="Modifier keys" src="https://user-images.githubusercontent.com/3000535/153179104-f4230c62-bfec-443a-bfca-32a51cf5d942.png#gh-dark-mode-only">
       </td>
     </tr>
   </tbody>
-  <tfoot>
-    <tr>
-      <th>Reverse scrolling, Linear scrolling, Universal back & forward</th>
-      <th>Cursor acceleration & sensitivity</th>
-      <th>Modifier keys functionality</th>
-    </tr>
-  </tfoot>
 </table>
 
 ## Getting started
