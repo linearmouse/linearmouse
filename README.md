@@ -78,17 +78,19 @@ You will see an alert when LinearMouse first launches.
 
 * **Modifier keys functionality**: You may empower your modifier keys with additional functionality, such as modifying the scrolling speed or altering the scrolling oriention.
 
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-<a href="https://github.com/linearmouse/linearmouse/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=linearmouse/linearmouse" />
-</a>
-
 ## Build
 
 See [BUILD.md](BUILD.md).
+
+## Contributing
+
+Please read the [contribution guide](CONTRIBUTING.md) before making a pull request.
+
+Thank you to all the people who already contributed to LinearMouse!
+
+<a href="https://github.com/linearmouse/linearmouse/graphs/contributors">
+  <img src="https://opencollective.com/linearmouse/contributors.svg" />
+</a>
 
 ## Credits
 
