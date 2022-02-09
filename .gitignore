@@ -26,5 +26,4 @@ DerivedData/
 /*.gcno
 
 ## Configuration
-/Config.xcconfig
 /Signing.xcconfig

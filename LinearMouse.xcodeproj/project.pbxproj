@@ -166,11 +166,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B72D8A1827B3B33800729ECC /* Defaults */ = {
+			isa = PBXGroup;
+			children = (
+				B7CD86AC27B3913C006C5C37 /* Signing.xcconfig */,
+			);
+			path = Defaults;
+			sourceTree = "<group>";
+		};
 		B75A060F2671E9D800BEAF77 = {
 			isa = PBXGroup;
 			children = (
 				B7CD86AB27B38B26006C5C37 /* Config.xcconfig */,
-				B7CD86AC27B3913C006C5C37 /* Signing.xcconfig */,
+				B72D8A1827B3B33800729ECC /* Defaults */,
 				B75A061A2671E9D800BEAF77 /* LinearMouse */,
 				B794BFDB26BC0A73003B11EF /* Touch */,
 				B716F16326BC19350052F551 /* LICENSE */,
