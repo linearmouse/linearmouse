@@ -139,6 +139,8 @@
 		B7BE469527B3768B00168BB9 /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fi; path = fi.lproj/Localizable.strings; sourceTree = "<group>"; };
 		B7BE469627B3768B00168BB9 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		B7BE469727B3768B00168BB9 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/Localizable.strings; sourceTree = "<group>"; };
+		B7CD86AB27B38B26006C5C37 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		B7CD86AC27B3913C006C5C37 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
 		B7E897E22675B1D9003C7058 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -167,6 +169,8 @@
 		B75A060F2671E9D800BEAF77 = {
 			isa = PBXGroup;
 			children = (
+				B7CD86AB27B38B26006C5C37 /* Config.xcconfig */,
+				B7CD86AC27B3913C006C5C37 /* Signing.xcconfig */,
 				B75A061A2671E9D800BEAF77 /* LinearMouse */,
 				B794BFDB26BC0A73003B11EF /* Touch */,
 				B716F16326BC19350052F551 /* LICENSE */,
@@ -546,6 +550,7 @@
 /* Begin XCBuildConfiguration section */
 		B75A06292671E9DA00BEAF77 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = B7CD86AB27B38B26006C5C37 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
@@ -608,6 +613,7 @@
 		};
 		B75A062A2671E9DA00BEAF77 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = B7CD86AB27B38B26006C5C37 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
@@ -668,12 +674,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = LinearMouse/LinearMouse.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 0.4.2;
 				DEVELOPMENT_ASSET_PATHS = "\"LinearMouse/Preview Content\"";
-				DEVELOPMENT_TEAM = C5686NKYJ7;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = LinearMouse/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -696,12 +699,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = LinearMouse/LinearMouse.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 0.4.2;
 				DEVELOPMENT_ASSET_PATHS = "\"LinearMouse/Preview Content\"";
-				DEVELOPMENT_TEAM = C5686NKYJ7;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = LinearMouse/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
