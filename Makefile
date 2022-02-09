@@ -26,4 +26,4 @@ package: build
 	ln -s /Applications '$(TARGET_DIR)/'
 	hdiutil create -fs HFS+ -srcfolder '$(TARGET_DIR)/' -volname LinearMouse '$(TARGET_DMG)'
 
-.PHONY: all build clean
+.PHONY: all configure test build clean package
