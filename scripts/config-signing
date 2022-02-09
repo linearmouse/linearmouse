@@ -1,18 +1,26 @@
 #!/bin/bash
 
-no_available_signing_certificate() {
-    echo 'No available signing certificate.' >&2
-    echo 'Create a signing certificate in Xcode (https://help.apple.com/xcode/mac/current/#/dev154b28f09) and re-run this command.' >&2
+pushd $(dirname "$0") > /dev/null
+cd ..
+cp Signing.xcconfig{.tpl,}
+popd > /dev/null
+
+no_available_code_signing_certificate() {
+    echo 'No available code signing certificate. Use ad-hoc certificate.' >&2
+    echo 'If you want to use your own certificate, create a signing certificate in Xcode (https://help.apple.com/xcode/mac/current/#/dev154b28f09) and re-run this command.' >&2
     exit 1
 }
 
-CN=$(security find-identity -vp codesigning | head -1 | awk -F\" '{ print $2 }')
-if [[ -z "$CN" ]]; then
-    no_available_signing_certificate
-fi
-DEVELOPMENT_TEAM=$(certtool y | grep "$CN" -A2 | grep OrgUnit | head -1 | awk -F': ' '{ print $2 }')
 if [[ -z "$DEVELOPMENT_TEAM" ]]; then
-    no_available_signing_certificate
+    CN=$(security find-identity -vp codesigning | head -1 | awk -F\" '{ print $2 }')
+    if [[ -z "$CN" ]]; then
+        no_available_code_signing_certificate
+    fi
+    echo "Found CN: $CN." >&2
+    DEVELOPMENT_TEAM=$(certtool y | grep "$CN" -A2 | grep OrgUnit | head -1 | awk -F': ' '{ print $2 }')
+    if [[ -z "$DEVELOPMENT_TEAM" ]]; then
+        no_available_code_signing_certificate
+    fi
 fi
 
 pushd $(dirname "$0") > /dev/null

@@ -29,9 +29,8 @@ jobs:
           # import certificate to keychain
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
-
-          # setup signing configuration
-          ./scripts/config-signing
+      - name: Configure code signing
+        run: ./scripts/config-signing
       - name: Build
         run: make
       - name: Upload dmg
