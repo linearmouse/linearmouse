@@ -33,7 +33,7 @@ jobs:
           security list-keychain -d user -s $KEYCHAIN_PATH
 
           # re-configure code signing
-          ./scripts/config-code-signing
+          KEYCHAIN_PATH=$KEYCHAIN_PATH ./scripts/config-code-signing
       - name: Build
         run: make
       - name: Upload dmg
