@@ -8,7 +8,7 @@ popd > /dev/null
 no_available_code_signing_certificate() {
     echo 'No available code signing certificate. Use ad-hoc certificate.' >&2
     echo 'If you want to use your own certificate, create a signing certificate in Xcode (https://help.apple.com/xcode/mac/current/#/dev154b28f09) and re-run this command.' >&2
-    exit 1
+    exit 0
 }
 
 if [[ -z "$DEVELOPMENT_TEAM" ]]; then
@@ -17,8 +17,10 @@ if [[ -z "$DEVELOPMENT_TEAM" ]]; then
         no_available_code_signing_certificate
     fi
     echo "Found CN: $CN." >&2
-    certtool y
-    DEVELOPMENT_TEAM=$(certtool y | grep "$CN" -A2 | grep OrgUnit | head -1 | awk -F': ' '{ print $2 }')
+    if [[ -z "$KEYCHAIN_PATH" ]]; then
+        KEYCHAIN_PATH=login.keychain
+    fi
+    DEVELOPMENT_TEAM=$(certtool y k="$KEYCHAIN_PATH" | grep "$CN" -A2 | grep OrgUnit | head -1 | awk -F': ' '{ print $2 }')
     if [[ -z "$DEVELOPMENT_TEAM" ]]; then
         no_available_code_signing_certificate
     fi

@@ -7,6 +7,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Configure code signing
+        run: ./scripts/config-code-signing
       - name: Install the Apple certificate
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
@@ -29,8 +31,9 @@ jobs:
           # import certificate to keychain
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
-      - name: Configure code signing
-        run: ./scripts/config-signing
+
+          # re-configure code signing
+          ./scripts/config-code-signing
       - name: Build
         run: make
       - name: Upload dmg
