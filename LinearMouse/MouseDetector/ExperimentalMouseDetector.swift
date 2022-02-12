@@ -23,12 +23,16 @@ class ExperimentalMouseDetector: MouseDetector {
         let match1 = [
             kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop,
             kIOHIDDeviceUsageKey: kHIDUsage_GD_Mouse
-        ]
+        ] as CFDictionary
         let match2 = [
             kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop,
             kIOHIDDeviceUsageKey: kHIDUsage_GD_Pointer
-        ]
-        IOHIDEventSystemClientSetMatchingMultiple(client, [match1 as CFDictionary, match2 as CFDictionary] as CFArray)
+        ] as CFDictionary
+        let match3 = [
+            kIOHIDDeviceUsagePageKey: kHIDPage_Digitizer,
+            kIOHIDDeviceUsageKey: kHIDUsage_Dig_TouchPad
+        ] as CFDictionary
+        IOHIDEventSystemClientSetMatchingMultiple(client, [match1, match2, match3] as CFArray)
         IOHIDEventSystemClientRegisterEventCallback(client, { target, _, sender, event in
             // TODO: Weak self reference?
             guard let unwrappedTarget = target else {
