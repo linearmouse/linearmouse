@@ -26,7 +26,7 @@ func getTransformers(appDefaults: AppDefaults) -> [EventTransformer] {
 }
 
 func transformEvent(appDefaults: AppDefaults, mouseDetector: MouseDetector, event: CGEvent) -> CGEvent? {
-    guard mouseDetector.isMouseEvent(event) else {
+    guard event.type != .scrollWheel || mouseDetector.isMouseEvent(event) else {
         return event
     }
 
