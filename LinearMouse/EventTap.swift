@@ -11,10 +11,19 @@ class EventTap {
     var eventTap: CFMachPort?
     var runLoopSource: CFRunLoopSource?
 
-    private static let mouseDetector = DefaultMouseDetector()
+    private let defaultMouseDetector = DefaultMouseDetector()
+    private let experimentalMouseDetector = ExperimentalMouseDetector()
+    private var mouseDetector: MouseDetector {
+        AppDefaults.shared.experimentalMouseDetector ? experimentalMouseDetector : defaultMouseDetector
+    }
 
     let eventTapCallback: CGEventTapCallBack = { (proxy, type, event, refcon) in
-        if let event = transformEvent(appDefaults: AppDefaults.shared, mouseDetector: mouseDetector, event: event) {
+        // TODO: Weak self reference?
+        guard let unwrappedRefcon = refcon else {
+            return Unmanaged.passUnretained(event)
+        }
+        let this = Unmanaged<EventTap>.fromOpaque(unwrappedRefcon).takeUnretainedValue()
+        if let event = transformEvent(appDefaults: AppDefaults.shared, mouseDetector: this.mouseDetector, event: event) {
             return Unmanaged.passUnretained(event)
         }
         return nil
@@ -31,7 +40,7 @@ class EventTap {
             options: .defaultTap,
             eventsOfInterest: eventsOfInterest,
             callback: eventTapCallback,
-            userInfo: nil
+            userInfo: Unmanaged.passUnretained(self).toOpaque()
         )
         runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
         CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, CFRunLoopMode.commonModes)

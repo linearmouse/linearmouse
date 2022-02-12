@@ -26,6 +26,7 @@
 		B77A16172674D88E00E99A5D /* PreferencesWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A16162674D88E00E99A5D /* PreferencesWindow.swift */; };
 		B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A161A2674EF0E00E99A5D /* HyperLink.swift */; };
 		B77BA0F227480AA500E3BC5C /* EventTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77BA0F127480AA500E3BC5C /* EventTransformer.swift */; };
+		B77D7C1227B7545000825F54 /* ExperimentalMouseDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77D7C1127B7545000825F54 /* ExperimentalMouseDetector.swift */; };
 		B7842925278D985600D207F0 /* AutoUpdateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7842924278D985600D207F0 /* AutoUpdateManager.swift */; };
 		B7842927278D9BBC00D207F0 /* CheckForUpdatesButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7842926278D9BBC00D207F0 /* CheckForUpdatesButton.swift */; };
 		B784292D278DB06600D207F0 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = B784292C278DB06600D207F0 /* Sparkle */; };
@@ -85,6 +86,7 @@
 		B77A16162674D88E00E99A5D /* PreferencesWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesWindow.swift; sourceTree = "<group>"; };
 		B77A161A2674EF0E00E99A5D /* HyperLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HyperLink.swift; sourceTree = "<group>"; };
 		B77BA0F127480AA500E3BC5C /* EventTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTransformer.swift; sourceTree = "<group>"; };
+		B77D7C1127B7545000825F54 /* ExperimentalMouseDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExperimentalMouseDetector.swift; sourceTree = "<group>"; };
 		B7842924278D985600D207F0 /* AutoUpdateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoUpdateManager.swift; sourceTree = "<group>"; };
 		B7842926278D9BBC00D207F0 /* CheckForUpdatesButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckForUpdatesButton.swift; sourceTree = "<group>"; };
 		B794BFDC26BC0A73003B11EF /* TouchEvents.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TouchEvents.c; sourceTree = "<group>"; };
@@ -254,6 +256,7 @@
 			children = (
 				B7ADF98027489CB00005B02D /* MouseDetector.swift */,
 				B7ADF9872748B6390005B02D /* DefaultMouseDetector.swift */,
+				B77D7C1127B7545000825F54 /* ExperimentalMouseDetector.swift */,
 			);
 			path = MouseDetector;
 			sourceTree = "<group>";
@@ -447,6 +450,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B77A16102674B85300E99A5D /* AppDefaults.swift in Sources */,
+				B77D7C1227B7545000825F54 /* ExperimentalMouseDetector.swift in Sources */,
 				B7ADF98127489CB00005B02D /* MouseDetector.swift in Sources */,
 				B77BA0F227480AA500E3BC5C /* EventTransformer.swift in Sources */,
 				B7618A1027621EDF00527C1A /* CursorView.swift in Sources */,

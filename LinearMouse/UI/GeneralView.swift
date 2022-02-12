@@ -70,6 +70,18 @@ struct GeneralView: View {
                 }
             }
 
+            Toggle(isOn: $defaults.experimentalMouseDetector) {
+                VStack(alignment: .leading) {
+                    Text("Enable experimental mouse detector")
+                    Text("""
+                        Turn on this if the above functionalities do not work with your mouse.
+                        """)
+                        .controlSize(.small)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
             Toggle(isOn: $defaults.showInMenuBar) {
                 VStack(alignment: .leading) {
                     Text("Show in menu bar")

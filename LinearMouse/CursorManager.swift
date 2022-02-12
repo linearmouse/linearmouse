@@ -47,7 +47,7 @@ class CursorManager {
         }
         let match = [
             kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop,
-            kIOHIDDeviceUsageKey: kHIDUsage_GD_Mouse,
+            kIOHIDDeviceUsageKey: kHIDUsage_GD_Mouse
         ]
         IOHIDEventSystemClientSetMatching(client, match as CFDictionary)
         IOHIDEventSystemClientRegisterDeviceMatchingBlock(client, { _, _, service in

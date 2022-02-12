@@ -14,6 +14,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private let statusItem = StatusItem.shared
     private let cursorManager = CursorManager.shared
     private var defaultsSubscription: AnyCancellable!
+    private var eventTap: EventTap?
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         withAccessibilityPermission {
@@ -21,7 +22,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             AutoStartManager.enable()
 
             // scrolling functionalities
-            EventTap().enable()
+            let eventTap = EventTap()
+            eventTap.enable()
+            self.eventTap = eventTap
 
             // subscribe to the user settings
             let defaults = AppDefaults.shared
