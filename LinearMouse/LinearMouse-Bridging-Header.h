@@ -15,9 +15,8 @@ void IOHIDEventSystemClientSetMatching(IOHIDEventSystemClientRef, CFDictionaryRe
 void IOHIDEventSystemClientSetMatchingMultiple(IOHIDEventSystemClientRef, CFArrayRef);
 void IOHIDEventSystemClientRegisterDeviceMatchingBlock(IOHIDEventSystemClientRef, IOHIDServiceClientBlock, void *, void *);
 
-typedef void(*IOHIDEventSystemClientEventCallback)(void* target, void* refcon, IOHIDServiceClientRef sender, void* event);
-void IOHIDEventSystemClientRegisterEventCallback(IOHIDEventSystemClientRef client, IOHIDEventSystemClientEventCallback callback, void* target, void* refcon);
-void IOHIDEventSystemClientUnregisterEventCallback(IOHIDEventSystemClientRef client);
+typedef void(^IOHIDEventSystemClientEventBlock)(void* target, void* refcon, IOHIDServiceClientRef sender, void* event);
+void IOHIDEventSystemClientRegisterEventBlock(IOHIDEventSystemClientRef client, IOHIDEventSystemClientEventBlock callback, void* target, void* refcon);
 
 void IOHIDEventSystemClientUnregisterDeviceMatchingBlock(IOHIDEventSystemClientRef);
 void IOHIDEventSystemClientScheduleWithDispatchQueue(IOHIDEventSystemClientRef, dispatch_queue_t);

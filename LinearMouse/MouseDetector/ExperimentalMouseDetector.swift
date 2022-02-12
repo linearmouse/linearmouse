@@ -11,12 +11,12 @@ import os.log
 class ExperimentalMouseDetector: MouseDetector {
     private let client: IOHIDEventSystemClient = IOHIDEventSystemClientCreate(kCFAllocatorDefault).takeRetainedValue()
     private var lastActiveService: IOHIDServiceClient?
-    private var lastActiveServiceType: DeviceType = .mouse
+    private var lastActiveServiceType: DeviceType = .unknown
 
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ExperimentalMouseDetector")
 
     enum DeviceType {
-        case mouse, trackpad
+        case unknown, trackpad, mouse
     }
 
     init() {
@@ -33,16 +33,11 @@ class ExperimentalMouseDetector: MouseDetector {
             kIOHIDDeviceUsageKey: kHIDUsage_Dig_TouchPad
         ] as CFDictionary
         IOHIDEventSystemClientSetMatchingMultiple(client, [match1, match2, match3] as CFArray)
-        IOHIDEventSystemClientRegisterEventCallback(client, { target, _, sender, event in
-            // TODO: Weak self reference?
-            guard let unwrappedTarget = target else {
-                return
-            }
-            let this = Unmanaged<ExperimentalMouseDetector>.fromOpaque(unwrappedTarget).takeUnretainedValue()
+        IOHIDEventSystemClientRegisterEventBlock(client, { _, _, sender, event in
             guard let service = sender else {
                 return
             }
-            guard service != this.lastActiveService else {
+            guard service != self.lastActiveService else {
                 return
             }
             guard let productRef = IOHIDServiceClientCopyProperty(service, kIOHIDProductKey as CFString) else {
@@ -51,16 +46,16 @@ class ExperimentalMouseDetector: MouseDetector {
             guard let product = productRef as? String else {
                 return
             }
-            this.lastActiveService = service
-            this.lastActiveServiceType = {
+            self.lastActiveService = service
+            self.lastActiveServiceType = {
                 if IOHIDServiceClientConformsTo(service, UInt32(kHIDPage_Digitizer), UInt32(kHIDUsage_Dig_TouchPad)) != 0 {
                     return .trackpad
                 }
                 return .mouse
             }()
             os_log("switched to: %{public}@, reported as %{public}@", log: ExperimentalMouseDetector.log, type: .debug,
-                   product, String(describing: this.lastActiveServiceType))
-        }, Unmanaged.passUnretained(self).toOpaque(), nil)
+                   product, String(describing: self.lastActiveServiceType))
+        }, nil, nil)
         IOHIDEventSystemClientScheduleWithDispatchQueue(client, DispatchQueue.main)
     }
 
