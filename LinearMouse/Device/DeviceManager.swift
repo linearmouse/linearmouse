@@ -71,6 +71,7 @@ class DeviceManager {
         }
     }
 
+    @discardableResult
     private func add(serviceClient: IOHIDServiceClient) -> Device? {
         guard !devices.contains(where: { $0.serviceClientEquals(serviceClient: serviceClient) }) else {
             return nil
@@ -98,10 +99,10 @@ class DeviceManager {
         }
     }
 
-    private func shouldIgnoreSpeedSettings(forDevice: Device) -> Bool {
-        guard forDevice.category == .mouse else {
+    private func shouldIgnoreSpeedSettings(forDevice device: Device) -> Bool {
+        guard device.category == .mouse else {
             os_log("Device ignored for speed settings: %@: Category is %@", log: Self.log, type: .debug,
-                   String(describing: forDevice), String(describing: forDevice.category))
+                   String(describing: device), String(describing: device.category))
             return true
         }
         return false
