@@ -17,7 +17,6 @@
 		B75A06232671E9DA00BEAF77 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B75A06222671E9DA00BEAF77 /* Preview Assets.xcassets */; };
 		B75A06262671E9DA00BEAF77 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B75A06242671E9DA00BEAF77 /* Main.storyboard */; };
 		B76173442675AD8700CC9412 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = B76173462675AD8700CC9412 /* Localizable.strings */; };
-		B7618A0E27620B5D00527C1A /* CursorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7618A0D27620B5D00527C1A /* CursorManager.swift */; };
 		B7618A1027621EDF00527C1A /* CursorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7618A0F27621EDF00527C1A /* CursorView.swift */; };
 		B77A160C26744DB400E99A5D /* StatusItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160B26744DB400E99A5D /* StatusItem.swift */; };
 		B77A160E2674B3DD00E99A5D /* LinearMouse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160D2674B3DD00E99A5D /* LinearMouse.swift */; };
@@ -26,7 +25,11 @@
 		B77A16172674D88E00E99A5D /* PreferencesWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A16162674D88E00E99A5D /* PreferencesWindow.swift */; };
 		B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A161A2674EF0E00E99A5D /* HyperLink.swift */; };
 		B77BA0F227480AA500E3BC5C /* EventTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77BA0F127480AA500E3BC5C /* EventTransformer.swift */; };
-		B77D7C1227B7545000825F54 /* ExperimentalMouseDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77D7C1127B7545000825F54 /* ExperimentalMouseDetector.swift */; };
+		B77D7C1527BA58F300825F54 /* DeviceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77D7C1427BA58F300825F54 /* DeviceManager.swift */; };
+		B77D7C1727BA597E00825F54 /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77D7C1627BA597E00825F54 /* Device.swift */; };
+		B77D7C1B27BA5FE100825F54 /* IOHIDServiceClient+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77D7C1A27BA5FE100825F54 /* IOHIDServiceClient+CustomStringConvertible.swift */; };
+		B77D7C1D27BA64DC00825F54 /* IOHIDServiceClient+Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77D7C1C27BA64DC00825F54 /* IOHIDServiceClient+Property.swift */; };
+		B77D7C1F27BB4D4D00825F54 /* IOHIDServiceClient+Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77D7C1E27BB4D4D00825F54 /* IOHIDServiceClient+Service.swift */; };
 		B7842925278D985600D207F0 /* AutoUpdateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7842924278D985600D207F0 /* AutoUpdateManager.swift */; };
 		B7842927278D9BBC00D207F0 /* CheckForUpdatesButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7842926278D9BBC00D207F0 /* CheckForUpdatesButton.swift */; };
 		B784292D278DB06600D207F0 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = B784292C278DB06600D207F0 /* Sparkle */; };
@@ -77,7 +80,6 @@
 		B75A06272671E9DA00BEAF77 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B75A06282671E9DA00BEAF77 /* LinearMouse.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LinearMouse.entitlements; sourceTree = "<group>"; };
 		B76173452675AD8700CC9412 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
-		B7618A0D27620B5D00527C1A /* CursorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorManager.swift; sourceTree = "<group>"; };
 		B7618A0F27621EDF00527C1A /* CursorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorView.swift; sourceTree = "<group>"; };
 		B77A160B26744DB400E99A5D /* StatusItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItem.swift; sourceTree = "<group>"; };
 		B77A160D2674B3DD00E99A5D /* LinearMouse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearMouse.swift; sourceTree = "<group>"; };
@@ -86,7 +88,11 @@
 		B77A16162674D88E00E99A5D /* PreferencesWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesWindow.swift; sourceTree = "<group>"; };
 		B77A161A2674EF0E00E99A5D /* HyperLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HyperLink.swift; sourceTree = "<group>"; };
 		B77BA0F127480AA500E3BC5C /* EventTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTransformer.swift; sourceTree = "<group>"; };
-		B77D7C1127B7545000825F54 /* ExperimentalMouseDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExperimentalMouseDetector.swift; sourceTree = "<group>"; };
+		B77D7C1427BA58F300825F54 /* DeviceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceManager.swift; sourceTree = "<group>"; };
+		B77D7C1627BA597E00825F54 /* Device.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Device.swift; sourceTree = "<group>"; };
+		B77D7C1A27BA5FE100825F54 /* IOHIDServiceClient+CustomStringConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IOHIDServiceClient+CustomStringConvertible.swift"; sourceTree = "<group>"; };
+		B77D7C1C27BA64DC00825F54 /* IOHIDServiceClient+Property.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IOHIDServiceClient+Property.swift"; sourceTree = "<group>"; };
+		B77D7C1E27BB4D4D00825F54 /* IOHIDServiceClient+Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IOHIDServiceClient+Service.swift"; sourceTree = "<group>"; };
 		B7842924278D985600D207F0 /* AutoUpdateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoUpdateManager.swift; sourceTree = "<group>"; };
 		B7842926278D9BBC00D207F0 /* CheckForUpdatesButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckForUpdatesButton.swift; sourceTree = "<group>"; };
 		B794BFDC26BC0A73003B11EF /* TouchEvents.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TouchEvents.c; sourceTree = "<group>"; };
@@ -198,6 +204,7 @@
 				B7ADF9902748EAB80005B02D /* MouseEventView */,
 				B77BA0F027480A9700E3BC5C /* Event */,
 				B7ADF9892748B65D0005B02D /* UI */,
+				B77D7C1327BA58DB00825F54 /* Device */,
 				B794BFE126BC0B2F003B11EF /* LinearMouse-Bridging-Header.h */,
 				B75A061B2671E9D800BEAF77 /* AppDelegate.swift */,
 				B75A061F2671E9DA00BEAF77 /* Assets.xcassets */,
@@ -210,7 +217,6 @@
 				B77A160F2674B85300E99A5D /* AppDefaults.swift */,
 				B76173462675AD8700CC9412 /* Localizable.strings */,
 				B7B6D83B26B2726B00B0D247 /* ModifierKeys.swift */,
-				B7618A0D27620B5D00527C1A /* CursorManager.swift */,
 				B7B1D08C26B2FD6C00F48176 /* AppStorage.swift */,
 				B7842924278D985600D207F0 /* AutoUpdateManager.swift */,
 			);
@@ -237,6 +243,18 @@
 			path = Event;
 			sourceTree = "<group>";
 		};
+		B77D7C1327BA58DB00825F54 /* Device */ = {
+			isa = PBXGroup;
+			children = (
+				B77D7C1427BA58F300825F54 /* DeviceManager.swift */,
+				B77D7C1627BA597E00825F54 /* Device.swift */,
+				B77D7C1C27BA64DC00825F54 /* IOHIDServiceClient+Property.swift */,
+				B77D7C1A27BA5FE100825F54 /* IOHIDServiceClient+CustomStringConvertible.swift */,
+				B77D7C1E27BB4D4D00825F54 /* IOHIDServiceClient+Service.swift */,
+			);
+			path = Device;
+			sourceTree = "<group>";
+		};
 		B794BFDB26BC0A73003B11EF /* Touch */ = {
 			isa = PBXGroup;
 			children = (
@@ -256,7 +274,6 @@
 			children = (
 				B7ADF98027489CB00005B02D /* MouseDetector.swift */,
 				B7ADF9872748B6390005B02D /* DefaultMouseDetector.swift */,
-				B77D7C1127B7545000825F54 /* ExperimentalMouseDetector.swift */,
 			);
 			path = MouseDetector;
 			sourceTree = "<group>";
@@ -449,8 +466,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B77D7C1727BA597E00825F54 /* Device.swift in Sources */,
 				B77A16102674B85300E99A5D /* AppDefaults.swift in Sources */,
-				B77D7C1227B7545000825F54 /* ExperimentalMouseDetector.swift in Sources */,
 				B7ADF98127489CB00005B02D /* MouseDetector.swift in Sources */,
 				B77BA0F227480AA500E3BC5C /* EventTransformer.swift in Sources */,
 				B7618A1027621EDF00527C1A /* CursorView.swift in Sources */,
@@ -466,15 +483,18 @@
 				B7842927278D9BBC00D207F0 /* CheckForUpdatesButton.swift in Sources */,
 				B794BFE026BC0A73003B11EF /* TouchEvents.c in Sources */,
 				B7B6D83E26B2745300B0D247 /* ModifierKeyActionPicker.swift in Sources */,
-				B7618A0E27620B5D00527C1A /* CursorManager.swift in Sources */,
 				B7BD5183267300DC001FE742 /* AutoStartManager.swift in Sources */,
+				B77D7C1F27BB4D4D00825F54 /* IOHIDServiceClient+Service.swift in Sources */,
 				B7B1D08F26B3EC4F00F48176 /* GeneralView.swift in Sources */,
 				B7B6D83C26B2726B00B0D247 /* ModifierKeys.swift in Sources */,
 				B77A160E2674B3DD00E99A5D /* LinearMouse.swift in Sources */,
+				B77D7C1D27BA64DC00825F54 /* IOHIDServiceClient+Property.swift in Sources */,
 				B716F16026BC10B80052F551 /* UniversalBackForward.swift in Sources */,
 				B77A16172674D88E00E99A5D /* PreferencesWindow.swift in Sources */,
 				B7842925278D985600D207F0 /* AutoUpdateManager.swift in Sources */,
+				B77D7C1527BA58F300825F54 /* DeviceManager.swift in Sources */,
 				B7ADF98F2748E6400005B02D /* MouseEventView.swift in Sources */,
+				B77D7C1B27BA5FE100825F54 /* IOHIDServiceClient+CustomStringConvertible.swift in Sources */,
 				B7B1D09126B3ECC500F48176 /* ModifierKeysView.swift in Sources */,
 				B75A061C2671E9D800BEAF77 /* AppDelegate.swift in Sources */,
 				B7BD51812672FEB5001FE742 /* EventTap.swift in Sources */,

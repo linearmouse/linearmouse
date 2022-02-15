@@ -9,7 +9,6 @@ import SwiftUI
 
 struct CursorView: View {
     @ObservedObject var defaults = AppDefaults.shared
-    let cursorManager = CursorManager.shared
 
     var sensitivityInDouble: Binding<Double> {
         Binding<Double>(get: {
@@ -94,17 +93,13 @@ struct CursorView: View {
                         .fixedSize(horizontal: false, vertical: true)
 
                     Button("Revert to system defaults") {
-                        cursorManager.revertToSystemDefaults()
-                        defaults.cursorAcceleration = cursorManager.acceleration
-                        defaults.cursorSensitivity = cursorManager.sensitivity
+                        revertSpeed()
                     }
                     .keyboardShortcut("z", modifiers: [.control, .command, .shift])
                     .disabled(defaults.linearMovementOn)
                 } else {
                     Button("Revert to system defaults") {
-                        cursorManager.revertToSystemDefaults()
-                        defaults.cursorAcceleration = cursorManager.acceleration
-                        defaults.cursorSensitivity = cursorManager.sensitivity
+                        revertSpeed()
                     }
                     .disabled(defaults.linearMovementOn)
                 }
@@ -114,6 +109,12 @@ struct CursorView: View {
         }
         .padding(20)
         .frame(width: 400)
+    }
+
+    private func revertSpeed() {
+        DeviceManager.shared.revertSpeed()
+        defaults.cursorAcceleration = DeviceManager.shared.defaultAcceleration
+        defaults.cursorSensitivity = DeviceManager.shared.defaultSensitivity
     }
 }
 

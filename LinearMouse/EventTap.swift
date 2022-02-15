@@ -11,13 +11,9 @@ class EventTap {
     var eventTap: CFMachPort?
     var runLoopSource: CFRunLoopSource?
 
-    private let defaultMouseDetector = DefaultMouseDetector()
-    private let experimentalMouseDetector = ExperimentalMouseDetector()
-    private var mouseDetector: MouseDetector {
-        AppDefaults.shared.experimentalMouseDetector ? experimentalMouseDetector : defaultMouseDetector
-    }
+    private let mouseDetector = DefaultMouseDetector()
 
-    let eventTapCallback: CGEventTapCallBack = { (proxy, type, event, refcon) in
+    private let eventTapCallback: CGEventTapCallBack = { (proxy, type, event, refcon) in
         // TODO: Weak self reference?
         guard let unwrappedRefcon = refcon else {
             return Unmanaged.passUnretained(event)
