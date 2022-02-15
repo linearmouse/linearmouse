@@ -9,7 +9,7 @@ import Foundation
 import os.log
 
 class Device {
-    private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "DeviceManager")
+    private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Device")
 
     private let serviceClient: IOHIDServiceClient
     private let pointerResolution: Int
