@@ -34,12 +34,6 @@ class AppDefaults: ObservableObject {
         }
     }
 
-    @AppStorageCompat(wrappedValue: false, "experimentalMouseDetector") var experimentalMouseDetector: Bool {
-        willSet {
-            objectWillChange.send()
-        }
-    }
-
     @AppStorageCompat(wrappedValue: true, "showInMenuBar") var showInMenuBar: Bool {
         willSet {
             objectWillChange.send()
