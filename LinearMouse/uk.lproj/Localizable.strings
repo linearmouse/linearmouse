@@ -20,6 +20,8 @@
 "Scroll" = "Scroll";
 "Enable universal back and forward" = "Enable universal back and forward";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
+"Enable experimental mouse detector" = "Enable experimental mouse detector";
+"Turn on this if the above functionalities do not work with your mouse." = "Turn on this if the above functionalities do not work with your mouse.";
 "Show in menu bar" = "Show in menu bar";
 "To show the preferences, launch %@ again." = "To show the preferences, launch %@ again.";
 "Check for Updates..." = "Check for Updates...";
