@@ -20,8 +20,6 @@
 "Scroll" = "Scrolle";
 "Enable universal back and forward" = "Universelles Vor und Zurück aktivieren";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Konvertiert die Vor- und Zurück-Seitentasten in die jeweiligen Wischgesten, um eine universelle Vor- und Zurück-Funktion zu ermöglichen.";
-"Enable experimental mouse detector" = "Enable experimental mouse detector";
-"Turn on this if the above functionalities do not work with your mouse." = "Turn on this if the above functionalities do not work with your mouse.";
 "Show in menu bar" = "In der Menüleiste anzeigen";
 "To show the preferences, launch %@ again." = "Um die Einstellungen anzuzeigen, öffne %@ erneut.";
 "Check for Updates..." = "Nach Updates suchen...";
