@@ -21,9 +21,9 @@ class DeviceManager {
         this.propertyChangedCallback(property! as String, value)
     }
 
-    private var lastAcceleration: Double?
-    private var lastSensitivity: Int?
-    private var lastDisableAcceleration: Bool?
+    private var lastPointerAcceleration: Double?
+    private var lastPointerSensitivity: Int?
+    private var lastDisablePointerAcceleration: Bool?
 
     private weak var _lastActiveDevice: Device?
     weak var lastActiveDevice: Device? { _lastActiveDevice }
@@ -50,7 +50,7 @@ class DeviceManager {
             DispatchQueue.main.async {
                 if let serviceClient = serviceClient {
                     if let device = self.add(serviceClient: serviceClient) {
-                        self.renewSpeed(forDevice: device)
+                        self.renewPointerSpeed(forDevice: device)
                     }
                 }
             }
@@ -95,7 +95,7 @@ class DeviceManager {
         let valueDesc = value == nil ? "<nil>" : String(describing: value!)
         os_log("Property %@ changed to %@", log: Self.log, type: .debug, property, valueDesc)
         DispatchQueue.main.async {
-            self.renewSpeed()
+            self.renewPointerSpeed()
         }
     }
 
@@ -108,40 +108,40 @@ class DeviceManager {
         return false
     }
 
-    func updateSpeed(acceleration: Double, sensitivity: Int, disableAcceleration: Bool) {
-        lastAcceleration = acceleration
-        lastSensitivity = sensitivity
-        lastDisableAcceleration = disableAcceleration
+    func updatePointerSpeed(acceleration: Double, sensitivity: Int, disableAcceleration: Bool) {
+        lastPointerAcceleration = acceleration
+        lastPointerSensitivity = sensitivity
+        lastDisablePointerAcceleration = disableAcceleration
         for device in devices {
             guard !shouldIgnoreSpeedSettings(forDevice: device) else {
                 continue
             }
-            device.updateSpeed(acceleration: acceleration, sensitivity: sensitivity, disableAcceleration: disableAcceleration)
+            device.updatePointerSpeed(acceleration: acceleration, sensitivity: sensitivity, disableAcceleration: disableAcceleration)
         }
     }
 
-    func renewSpeed() {
-        if let acceleration = lastAcceleration,
-           let sensitivity = lastSensitivity,
-           let disableAcceleration = lastDisableAcceleration {
-            updateSpeed(acceleration: acceleration, sensitivity: sensitivity, disableAcceleration: disableAcceleration)
+    func renewPointerSpeed() {
+        if let acceleration = lastPointerAcceleration,
+           let sensitivity = lastPointerSensitivity,
+           let disableAcceleration = lastDisablePointerAcceleration {
+            updatePointerSpeed(acceleration: acceleration, sensitivity: sensitivity, disableAcceleration: disableAcceleration)
         }
     }
 
-    func renewSpeed(forDevice device: Device) {
-        if let acceleration = lastAcceleration,
-           let sensitivity = lastSensitivity,
-           let disableAcceleration = lastDisableAcceleration {
-            device.updateSpeed(acceleration: acceleration, sensitivity: sensitivity, disableAcceleration: disableAcceleration)
+    func renewPointerSpeed(forDevice device: Device) {
+        if let acceleration = lastPointerAcceleration,
+           let sensitivity = lastPointerSensitivity,
+           let disableAcceleration = lastDisablePointerAcceleration {
+            device.updatePointerSpeed(acceleration: acceleration, sensitivity: sensitivity, disableAcceleration: disableAcceleration)
         }
     }
 
-    func revertSpeed() {
+    func restorePointerSpeedToInitialValue() {
         for device in devices {
             guard !shouldIgnoreSpeedSettings(forDevice: device) else {
                 continue
             }
-            device.revertSpeed()
+            device.restorePointerSpeedToInitialValue()
         }
     }
 
@@ -149,12 +149,38 @@ class DeviceManager {
         devices.first { !shouldIgnoreSpeedSettings(forDevice: $0) }
     }
 
-    var defaultAcceleration: Double {
-        firstAvailableDevice?.acceleration ?? 0.6875
+    var pointerAcceleration: Double {
+        firstAvailableDevice?.pointerAcceleration ?? 0.6875
     }
 
-    var defaultSensitivity: Int {
-        firstAvailableDevice?.sensitivity ?? 1600
+    var pointerSensitivity: Int {
+        firstAvailableDevice?.pointerSensitivity ?? 1600
+    }
+
+    func getSystemProperty<T>(forKey key: String) -> T? {
+        let service = IORegistryEntryFromPath(kIOMasterPortDefault, "\(kIOServicePlane):/IOResources/IOHIDSystem")
+        guard service != .zero else {
+            return nil
+        }
+        defer { IOObjectRelease(service) }
+
+        var handle: io_connect_t = .zero
+        guard IOServiceOpen(service, mach_task_self_, UInt32(kIOHIDParamConnectType), &handle) == KERN_SUCCESS else {
+            return nil
+        }
+        defer { IOServiceClose(handle) }
+
+        var valueRef: Unmanaged<CFTypeRef>?
+        guard IOHIDCopyCFTypeParameter(handle, key as CFString, &valueRef) == KERN_SUCCESS else {
+            return nil
+        }
+        guard let valueRefUnwrapped = valueRef else {
+            return nil
+        }
+        guard let value = valueRefUnwrapped.takeRetainedValue() as? T else {
+            return nil
+        }
+        return value
     }
 
     private func setupEventCallback() {

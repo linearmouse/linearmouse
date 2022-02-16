@@ -112,9 +112,9 @@ struct CursorView: View {
     }
 
     private func revertSpeed() {
-        DeviceManager.shared.revertSpeed()
-        defaults.cursorAcceleration = DeviceManager.shared.defaultAcceleration
-        defaults.cursorSensitivity = DeviceManager.shared.defaultSensitivity
+        DeviceManager.shared.restorePointerSpeedToInitialValue()
+        defaults.cursorAcceleration = DeviceManager.shared.pointerAcceleration
+        defaults.cursorSensitivity = DeviceManager.shared.pointerSensitivity
     }
 }
 

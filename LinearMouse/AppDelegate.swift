@@ -48,7 +48,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func update(_ defaults: AppDefaults) {
-        DeviceManager.shared.updateSpeed(acceleration: defaults.cursorAcceleration, sensitivity: defaults.cursorSensitivity, disableAcceleration: defaults.linearMovementOn)
+        DeviceManager.shared.updatePointerSpeed(acceleration: defaults.cursorAcceleration, sensitivity: defaults.cursorSensitivity, disableAcceleration: defaults.linearMovementOn)
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -60,6 +60,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
-        DeviceManager.shared.revertSpeed()
+        DeviceManager.shared.restorePointerSpeedToInitialValue()
     }
 }
