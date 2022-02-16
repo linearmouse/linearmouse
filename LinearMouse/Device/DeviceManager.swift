@@ -31,7 +31,7 @@ class DeviceManager {
     init() {
         setupServiceClients()
         setupPropertyChangedCallback()
-        setupEventCallback()
+        setupActiveDeviceChangedCallback()
         IOHIDEventSystemClientScheduleWithDispatchQueue(eventSystemClient, DispatchQueue.main)
     }
 
@@ -183,7 +183,8 @@ class DeviceManager {
         return value
     }
 
-    private func setupEventCallback() {
+    private func setupActiveDeviceChangedCallback() {
+        // TODO: Use IOHIDDeviceRegisterInputReportCallback?
         IOHIDEventSystemClientRegisterEventBlock(eventSystemClient, { _, _, sender, event in
             guard let serviceClient = sender else {
                 return
