@@ -12,8 +12,8 @@ import SwiftUI
 class AppDelegate: NSObject, NSApplicationDelegate {
     private let autoUpdateManager = AutoUpdateManager.shared
     private let statusItem = StatusItem.shared
-    private let cursorManager = CursorManager.shared
     private var defaultsSubscription: AnyCancellable!
+    private var eventTap: EventTap?
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         withAccessibilityPermission {
@@ -21,7 +21,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             AutoStartManager.enable()
 
             // scrolling functionalities
-            EventTap().enable()
+            let eventTap = EventTap()
+            eventTap.enable()
+            self.eventTap = eventTap
 
             // subscribe to the user settings
             let defaults = AppDefaults.shared
@@ -46,10 +48,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func update(_ defaults: AppDefaults) {
-        cursorManager.disableAccelerationAndSensitivity = defaults.linearMovementOn
-        cursorManager.acceleration = defaults.cursorAcceleration
-        cursorManager.sensitivity = defaults.cursorSensitivity
-        cursorManager.update()
+        DeviceManager.shared.updatePointerSpeed(acceleration: defaults.cursorAcceleration, sensitivity: defaults.cursorSensitivity, disableAcceleration: defaults.linearMovementOn)
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -61,7 +60,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
-        // revert cursor settings to system defaults
-        cursorManager.revertToSystemDefaults()
+        DeviceManager.shared.restorePointerSpeedToInitialValue()
     }
 }
