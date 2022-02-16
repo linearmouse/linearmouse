@@ -14,6 +14,7 @@ class Device {
     private let serviceClient: IOHIDServiceClient
     private let pointerResolution: Int
     private var pointerAccelerationType: String
+    private let pointerAcceleration: Int
     private var device: IOHIDDevice
 
     init?(serviceClient: IOHIDServiceClient) {
@@ -24,15 +25,18 @@ class Device {
         }
         self.pointerResolution = pointerResolution
         pointerAccelerationType = serviceClient.getProperty(kIOHIDPointerAccelerationTypeKey) ?? "HIDMouseAcceleration"
+        pointerAcceleration = serviceClient.getProperty(pointerAccelerationType) ?? 45056
         guard let device = serviceClient.device else {
             os_log("IOHIDDevice not found: %{public}@", log: Self.log, type: .debug, String(describing: serviceClient))
             return nil
         }
         self.device = device
-        os_log("Device initialized: %{public}@: PointerResolution=%d, PointerAccelerationType=%@", log: Self.log, type: .debug,
+        os_log("Device initialized: %{public}@: HIDPointerResolution=%{public}d, %{public}@=%{public}d",
+               log: Self.log, type: .debug,
                String(describing: serviceClient),
                pointerResolution,
-               pointerAccelerationType)
+               pointerAccelerationType,
+               pointerAcceleration)
     }
 
     func serviceClientEquals(serviceClient: IOHIDServiceClient) -> Bool {
@@ -63,9 +67,7 @@ class Device {
     }()
 
     var acceleration: Double {
-        guard let pointerAcceleration: Int = serviceClient.getProperty(pointerAccelerationType) else {
-            return 0.6875
-        }
+        let pointerAcceleration: Int = serviceClient.getProperty(pointerAccelerationType) ?? self.pointerAcceleration
         return max(0, min(Double(pointerAcceleration) / 65536, 20))
     }
 
@@ -80,16 +82,19 @@ class Device {
         let acceleration = disableAcceleration ? -65536 : Int(acceleration * 65536)
         let sensitivity = max(5, min(sensitivity, 1990))
         let resolution = (2000 - sensitivity) << 16
-        os_log("Update speed for device: %{public}@, PointerAcceleration = %d, PointerResolution = %d", log: Self.log, type: .debug, String(describing: serviceClient), acceleration, resolution)
+        os_log("Update speed for device: %{public}@, %{public}@ = %{public}d, HIDPointerResolution = %{public}d",
+               log: Self.log, type: .debug,
+               String(describing: serviceClient), pointerAccelerationType, acceleration, resolution)
         serviceClient.setProperty(resolution, forKey: kIOHIDPointerResolutionKey)
         serviceClient.setProperty(acceleration, forKey: pointerAccelerationType)
     }
 
     func revertSpeed() {
-        let defaultPointerAcceleration = 45056
-        os_log("Revert speed for device: %{public}@, PointerAcceleration = %d, PointerResolution = %d", log: Self.log, type: .debug, String(describing: serviceClient), defaultPointerAcceleration, pointerResolution)
+        os_log("Revert speed for device: %{public}@, %{public}@ = %{public}d, HIDPointerResolution = %{public}d",
+               log: Self.log, type: .debug,
+               String(describing: serviceClient), pointerAccelerationType, pointerAcceleration, pointerResolution)
         serviceClient.setProperty(pointerResolution, forKey: kIOHIDPointerResolutionKey)
-        serviceClient.setProperty(defaultPointerAcceleration, forKey: pointerAccelerationType)
+        serviceClient.setProperty(pointerAcceleration, forKey: pointerAccelerationType)
     }
 }
 
