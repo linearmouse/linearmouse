@@ -20,8 +20,6 @@
 "Scroll" = "Прокрутка";
 "Enable universal back and forward" = "Включить универсальные «назад» и «вперед»";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Преобразует боковые кнопки «назад» и «вперед» в жесты смахивания, чтобы сделать их работаспособными во всех приложениях.";
-"Enable experimental mouse detector" = "Enable experimental mouse detector";
-"Turn on this if the above functionalities do not work with your mouse." = "Turn on this if the above functionalities do not work with your mouse.";
 "Show in menu bar" = "Показывать в строке меню";
 "To show the preferences, launch %@ again." = "Чтобы настройки отображались, перезапустите %@.";
 "Check for Updates..." = "Проверить наличие обновлений...";
