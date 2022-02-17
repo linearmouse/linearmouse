@@ -231,10 +231,7 @@ class DeviceManager {
             guard lastActiveDevice.category == .mouse else {
                 return false
             }
-            guard AppDefaults.shared.reverseScrollingOn else {
-                return false
-            }
-            return true
+            return AppDefaults.shared.reverseScrollingOn
         }()
         if initialSystemSwipeScrollDirection == .reversed {
             reversed = !reversed
