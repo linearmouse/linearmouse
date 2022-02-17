@@ -99,23 +99,11 @@ class DeviceManager {
         }
     }
 
-    private func shouldIgnoreSpeedSettings(forDevice device: Device) -> Bool {
-        guard device.category == .mouse else {
-            os_log("Device ignored for speed settings: %@: Category is %@", log: Self.log, type: .debug,
-                   String(describing: device), String(describing: device.category))
-            return true
-        }
-        return false
-    }
-
     func updatePointerSpeed(acceleration: Double, sensitivity: Int, disableAcceleration: Bool) {
         lastPointerAcceleration = acceleration
         lastPointerSensitivity = sensitivity
         lastDisablePointerAcceleration = disableAcceleration
         for device in devices {
-            guard !shouldIgnoreSpeedSettings(forDevice: device) else {
-                continue
-            }
             device.updatePointerSpeed(acceleration: acceleration, sensitivity: sensitivity, disableAcceleration: disableAcceleration)
         }
     }
@@ -138,15 +126,12 @@ class DeviceManager {
 
     func restorePointerSpeedToInitialValue() {
         for device in devices {
-            guard !shouldIgnoreSpeedSettings(forDevice: device) else {
-                continue
-            }
             device.restorePointerSpeedToInitialValue()
         }
     }
 
     private var firstAvailableDevice: Device? {
-        devices.first { !shouldIgnoreSpeedSettings(forDevice: $0) }
+        devices.first { $0.shouldApplyPointerSpeedSettings }
     }
 
     var pointerAcceleration: Double {

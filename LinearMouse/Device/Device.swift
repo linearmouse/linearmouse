@@ -77,7 +77,20 @@ class Device {
         return 2000 - (pointerResolution >> 16)
     }
 
+
+    var shouldApplyPointerSpeedSettings: Bool {
+        guard category == .mouse else {
+            os_log("Device ignored for pointer speed settings: %@: Category is %@", log: Self.log, type: .debug,
+                   String(describing: self), String(describing: category))
+            return false
+        }
+        return true
+    }
+
     func updatePointerSpeed(acceleration: Double, sensitivity: Int, disableAcceleration: Bool) {
+        guard shouldApplyPointerSpeedSettings else {
+            return
+        }
         let accelerationInt = disableAcceleration ? -65536 : Int(acceleration * 65536)
         let sensitivity = max(5, min(sensitivity, 1990))
         let resolution = (2000 - sensitivity) << 16
@@ -89,6 +102,9 @@ class Device {
     }
 
     func restorePointerSpeedToInitialValue() {
+        guard shouldApplyPointerSpeedSettings else {
+            return
+        }
         let accelerationInt = DeviceManager.shared.getSystemProperty(forKey: pointerAccelerationType) ?? Self.fallbackPointerAccelerationInt
         let resolution = initialPointerResolution
         os_log("Revert speed for device: %{public}@, %{public}@ = %{public}d, HIDPointerResolution = %{public}d",
