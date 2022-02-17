@@ -5,6 +5,7 @@
 //  Created by Jiahao Lu on 2022/2/14.
 //
 
+import Combine
 import Foundation
 import os.log
 
@@ -28,11 +29,32 @@ class DeviceManager {
     private weak var _lastActiveDevice: Device?
     weak var lastActiveDevice: Device? { _lastActiveDevice }
 
+    enum SwipeScrollDirection {
+        case reversed, natural
+    }
+
+    static var systemSwipeScrollDirection: SwipeScrollDirection {
+        set {
+            let value = newValue == .natural
+            CGSSetSwipeScrollDirection(_CGSDefaultConnection(), value)
+            CFPreferencesSetAppValue("com.apple.swipescrolldirection" as CFString, value as CFPropertyList, kCFPreferencesAnyApplication)
+            CFPreferencesAppSynchronize(kCFPreferencesAnyApplication)
+            DistributedNotificationCenter.default().postNotificationName(NSNotification.Name(rawValue: "SwipeScrollDirectionDidChangeNotification"), object: nil)
+        }
+        get {
+            CFPreferencesGetAppBooleanValue("com.apple.swipescrolldirection" as CFString, kCFPreferencesAnyApplication, nil) ? .natural : .reversed
+        }
+    }
+
+    private let initialSystemSwipeScrollDirection: SwipeScrollDirection
+
     init() {
+        initialSystemSwipeScrollDirection = DeviceManager.systemSwipeScrollDirection
         setupServiceClients()
         setupPropertyChangedCallback()
         setupActiveDeviceChangedCallback()
         IOHIDEventSystemClientScheduleWithDispatchQueue(eventSystemClient, DispatchQueue.main)
+        setupReverseScrollingSubscriber()
     }
 
     private func setupServiceClients() {
@@ -62,7 +84,7 @@ class DeviceManager {
     }
 
     private func setupPropertyChangedCallback() {
-        for property in [kIOHIDMouseAccelerationType, kIOHIDTrackpadAccelerationType, kIOHIDPointerResolutionKey] {
+        for property in [kIOHIDMouseAccelerationType, kIOHIDTrackpadAccelerationType, kIOHIDPointerResolutionKey, "com.apple.swipescrolldirection"] {
             IOHIDEventSystemClientRegisterPropertyChangedCallback(eventSystemClient,
                                                                   property as CFString,
                                                                   propertyChangedCallback,
@@ -184,7 +206,46 @@ class DeviceManager {
                 os_log("Last active device changed: %{public}@, Category=%{public}@",
                        log: Self.log, type: .debug,
                        String(describing: device), String(describing: device.category))
+                self.updateSwipeScrollDirection()
             }
         }, nil, nil)
+    }
+
+    private var appDefaultsSubscription: AnyCancellable?
+    private func setupReverseScrollingSubscriber() {
+        var value = AppDefaults.shared.reverseScrollingOn
+        appDefaultsSubscription = AppDefaults.shared.objectWillChange.sink {
+            let newValue = AppDefaults.shared.reverseScrollingOn
+            if value != newValue {
+                value = newValue
+                self.updateSwipeScrollDirection()
+            }
+        }
+    }
+
+    private func updateSwipeScrollDirection() {
+        var reversed: Bool = {
+            guard let lastActiveDevice = lastActiveDevice else {
+                return false
+            }
+            guard lastActiveDevice.category == .mouse else {
+                return false
+            }
+            guard AppDefaults.shared.reverseScrollingOn else {
+                return false
+            }
+            return true
+        }()
+        if initialSystemSwipeScrollDirection == .reversed {
+            reversed = !reversed
+        }
+        let direction: SwipeScrollDirection = reversed ? .reversed : .natural
+        Self.systemSwipeScrollDirection = direction
+        os_log("SwipeScrollDirection updated to %{public}@", log: Self.log, type: .debug, String(describing: Self.systemSwipeScrollDirection))
+    }
+
+    func restoreSwipeScrollDirection() {
+        Self.systemSwipeScrollDirection = initialSystemSwipeScrollDirection
+        os_log("SwipeScrollDirection restored to %{public}@", log: Self.log, type: .debug, String(describing: Self.systemSwipeScrollDirection))
     }
 }

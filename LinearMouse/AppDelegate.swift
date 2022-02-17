@@ -61,5 +61,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         DeviceManager.shared.restorePointerSpeedToInitialValue()
+        DeviceManager.shared.restoreSwipeScrollDirection()
     }
 }

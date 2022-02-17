@@ -35,7 +35,6 @@
 		B784292D278DB06600D207F0 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = B784292C278DB06600D207F0 /* Sparkle */; };
 		B794BFE026BC0A73003B11EF /* TouchEvents.c in Sources */ = {isa = PBXBuildFile; fileRef = B794BFDC26BC0A73003B11EF /* TouchEvents.c */; };
 		B794BFE426BC0E5D003B11EF /* TouchSimulate.m in Sources */ = {isa = PBXBuildFile; fileRef = B794BFE326BC0E5D003B11EF /* TouchSimulate.m */; };
-		B7ADF97F2748991D0005B02D /* ReverseScrolling.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF97E2748991D0005B02D /* ReverseScrolling.swift */; };
 		B7ADF98127489CB00005B02D /* MouseDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF98027489CB00005B02D /* MouseDetector.swift */; };
 		B7ADF9832748B12B0005B02D /* LinearScrolling.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF9822748B12B0005B02D /* LinearScrolling.swift */; };
 		B7ADF9852748B25A0005B02D /* ModifierActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF9842748B25A0005B02D /* ModifierActions.swift */; };
@@ -103,7 +102,6 @@
 		B794BFE226BC0E45003B11EF /* TouchSimulate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TouchSimulate.h; sourceTree = "<group>"; };
 		B794BFE326BC0E5D003B11EF /* TouchSimulate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TouchSimulate.m; sourceTree = "<group>"; };
 		B79AC17D27B3BD7A003D9444 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
-		B7ADF97E2748991D0005B02D /* ReverseScrolling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReverseScrolling.swift; sourceTree = "<group>"; };
 		B7ADF98027489CB00005B02D /* MouseDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseDetector.swift; sourceTree = "<group>"; };
 		B7ADF9822748B12B0005B02D /* LinearScrolling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearScrolling.swift; sourceTree = "<group>"; };
 		B7ADF9842748B25A0005B02D /* ModifierActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierActions.swift; sourceTree = "<group>"; };
@@ -235,7 +233,6 @@
 			isa = PBXGroup;
 			children = (
 				B77BA0F127480AA500E3BC5C /* EventTransformer.swift */,
-				B7ADF97E2748991D0005B02D /* ReverseScrolling.swift */,
 				B7ADF9822748B12B0005B02D /* LinearScrolling.swift */,
 				B716F15F26BC10B80052F551 /* UniversalBackForward.swift */,
 				B7ADF9842748B25A0005B02D /* ModifierActions.swift */,
@@ -479,7 +476,6 @@
 				B7ADF98D2748E5010005B02D /* ScrollWheelEventView.swift in Sources */,
 				B7ADF9852748B25A0005B02D /* ModifierActions.swift in Sources */,
 				B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */,
-				B7ADF97F2748991D0005B02D /* ReverseScrolling.swift in Sources */,
 				B7842927278D9BBC00D207F0 /* CheckForUpdatesButton.swift in Sources */,
 				B794BFE026BC0A73003B11EF /* TouchEvents.c in Sources */,
 				B7B6D83E26B2745300B0D247 /* ModifierKeyActionPicker.swift in Sources */,

@@ -13,7 +13,6 @@ protocol EventTransformer {
 
 func getTransformers(appDefaults: AppDefaults) -> [EventTransformer] {
     let transformers: [(Bool, () -> EventTransformer)] = [
-        (appDefaults.reverseScrollingOn,        { ReverseScrolling() }),
         (appDefaults.linearScrollingOn,         { LinearScrolling(scrollLines: appDefaults.scrollLines) }),
         (appDefaults.universalBackForwardOn,    { UniversalBackForward() }),
         (true,                                  { ModifierActions(commandAction: appDefaults.modifiersCommandAction,
