@@ -25,3 +25,6 @@ void IOHIDServiceClientRegisterRemovalBlock(IOHIDServiceClientRef, IOHIDServiceC
 
 typedef void (*IOHIDEventSystemClientPropertyChangedCallback)(void* target, void* context, CFStringRef property, CFTypeRef value);
 void IOHIDEventSystemClientRegisterPropertyChangedCallback(IOHIDEventSystemClientRef client, CFStringRef property, IOHIDEventSystemClientPropertyChangedCallback callback, void* target, void *context);
+
+int _CGSDefaultConnection(void);
+void CGSSetSwipeScrollDirection(int cid, BOOL dir);
