@@ -41,7 +41,6 @@
 		B7ADF9882748B6390005B02D /* DefaultMouseDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF9872748B6390005B02D /* DefaultMouseDetector.swift */; };
 		B7ADF98D2748E5010005B02D /* ScrollWheelEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF98C2748E5010005B02D /* ScrollWheelEventView.swift */; };
 		B7ADF98F2748E6400005B02D /* MouseEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF98E2748E6400005B02D /* MouseEventView.swift */; };
-		B7ADF99F274918540005B02D /* ReverseScrollingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF99E274918540005B02D /* ReverseScrollingTests.swift */; };
 		B7B1D08D26B2FD6C00F48176 /* AppStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7B1D08C26B2FD6C00F48176 /* AppStorage.swift */; };
 		B7B1D08F26B3EC4F00F48176 /* GeneralView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7B1D08E26B3EC4F00F48176 /* GeneralView.swift */; };
 		B7B1D09126B3ECC500F48176 /* ModifierKeysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7B1D09026B3ECC500F48176 /* ModifierKeysView.swift */; };
@@ -109,7 +108,6 @@
 		B7ADF98C2748E5010005B02D /* ScrollWheelEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollWheelEventView.swift; sourceTree = "<group>"; };
 		B7ADF98E2748E6400005B02D /* MouseEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseEventView.swift; sourceTree = "<group>"; };
 		B7ADF9952748ED620005B02D /* LinearMouseUnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LinearMouseUnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		B7ADF99E274918540005B02D /* ReverseScrollingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReverseScrollingTests.swift; sourceTree = "<group>"; };
 		B7B1D08C26B2FD6C00F48176 /* AppStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStorage.swift; sourceTree = "<group>"; };
 		B7B1D08E26B3EC4F00F48176 /* GeneralView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralView.swift; sourceTree = "<group>"; };
 		B7B1D09026B3ECC500F48176 /* ModifierKeysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierKeysView.swift; sourceTree = "<group>"; };
@@ -313,7 +311,6 @@
 		B7ADF9A02749187A0005B02D /* Event */ = {
 			isa = PBXGroup;
 			children = (
-				B7ADF99E274918540005B02D /* ReverseScrollingTests.swift */,
 				B754147D274E3AB0003CDAD0 /* LinearScrollingTests.swift */,
 				B754147F274E3CEF003CDAD0 /* ModifierActionsTests.swift */,
 			);
@@ -505,7 +502,6 @@
 			files = (
 				B754147E274E3AB0003CDAD0 /* LinearScrollingTests.swift in Sources */,
 				B7541480274E3CEF003CDAD0 /* ModifierActionsTests.swift in Sources */,
-				B7ADF99F274918540005B02D /* ReverseScrollingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
