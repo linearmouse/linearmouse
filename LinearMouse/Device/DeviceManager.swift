@@ -84,7 +84,7 @@ class DeviceManager {
     }
 
     private func setupPropertyChangedCallback() {
-        for property in [kIOHIDMouseAccelerationType, kIOHIDTrackpadAccelerationType, kIOHIDPointerResolutionKey, "com.apple.swipescrolldirection"] {
+        for property in [kIOHIDMouseAccelerationType, kIOHIDTrackpadAccelerationType, kIOHIDPointerResolutionKey] {
             IOHIDEventSystemClientRegisterPropertyChangedCallback(eventSystemClient,
                                                                   property as CFString,
                                                                   propertyChangedCallback,
