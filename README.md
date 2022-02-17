@@ -7,9 +7,9 @@
 </h1>
 
 <p align="center">
-  <a href="https://github.com/lujjjh/LinearMouse/releases/latest"><img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/lujjjh/LinearMouse?sort=semver"></a>
-  <a href="https://github.com/lujjjh/LinearMouse/releases/latest/download/LinearMouse.dmg"><img src="https://img.shields.io/github/downloads/lujjjh/LinearMouse/total" alt="Downloads" /></a>
-  <img src="https://img.shields.io/github/license/lujjjh/LinearMouse" alt="MIT License" />
+  <a href="https://github.com/linearmouse/linearmouse/releases/latest"><img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/linearmouse/linearmouse?sort=semver"></a>
+  <a href="https://github.com/linearmouse/linearmouse/releases/latest/download/LinearMouse.dmg"><img src="https://img.shields.io/github/downloads/linearmouse/linearmouse/total" alt="Downloads" /></a>
+  <img src="https://img.shields.io/github/license/linearmouse/linearmouse" alt="MIT License" />
   <a href="https://crowdin.com/project/linearmouse"><img src="https://badges.crowdin.net/linearmouse/localized.svg" alt="Crowdin" /></a>
 </p>
 
@@ -48,7 +48,7 @@ $ brew install --cask linearmouse --no-quarantine
 
 #### Manually
 
-1. Download [LinearMouse](https://github.com/lujjjh/LinearMouse/releases/latest/download/LinearMouse.dmg).
+1. Download [LinearMouse](https://github.com/linearmouse/linearmouse/releases/latest/download/LinearMouse.dmg).
 2. Open LinearMouse.dmg, drag & drop LinearMouse to Applications.
 3. Open Applications. **Right click** LinearMouse and choose Open (to make [Gatekeeper](https://support.apple.com/en-us/HT202491) happy).
 
