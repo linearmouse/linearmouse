@@ -18,6 +18,10 @@ class ScrollWheelEventView: MouseEventView {
         set { event.setIntegerValueField(.scrollWheelEventIsContinuous, value: newValue ? 1 : 0) }
     }
 
+    var momentumPhase: CGMomentumScrollPhase {
+        .init(rawValue: UInt32(event.getIntegerValueField(.scrollWheelEventMomentumPhase))) ?? .none
+    }
+
     var deltaX: Int64 {
         get { event.getIntegerValueField(.scrollWheelEventDeltaAxis2) }
         set { event.setIntegerValueField(.scrollWheelEventDeltaAxis2, value: newValue) }
