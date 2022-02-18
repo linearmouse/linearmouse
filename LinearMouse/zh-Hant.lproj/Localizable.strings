@@ -24,10 +24,10 @@
 "To show the preferences, launch %@ again." = "要顯示偏好設定，再次運行 %@。";
 "Version: %@" = "版本：%@";
 "Check for Updates..." = "檢查更新...";
-"Automatically" = "Automatically";
-"Daily" = "Daily";
-"Weekly" = "Weekly";
-"Monthly" = "Monthly";
+"Automatically" = "自動";
+"Daily" = "每天";
+"Weekly" = "每週";
+"Monthly" = "每月";
 "Homepage" = "主頁";
 "GitHub" = "GitHub";
 "Feedback" = "反饋";
