@@ -8,8 +8,11 @@
 import Foundation
 
 class ScrollWheelEventView: MouseEventView {
+    private let ioHidEvent: IOHIDEventRef?
+
     override init(_ event: CGEvent) {
         assert(event.type == .scrollWheel)
+        ioHidEvent = CGEventCopyIOHIDEvent(event)
         super.init(event)
     }
 
@@ -52,20 +55,50 @@ class ScrollWheelEventView: MouseEventView {
         set { event.setDoubleValueField(.scrollWheelEventPointDeltaAxis1, value: newValue) }
     }
 
+    var ioHidScrollX: Double {
+        get {
+            guard let ioHidEvent = ioHidEvent else {
+                return 0
+            }
+            return IOHIDEventGetFloatValue(ioHidEvent, kIOHIDEventFieldScrollX)
+        }
+        set {
+            guard let ioHidEvent = ioHidEvent else {
+                return
+            }
+            return IOHIDEventSetFloatValue(ioHidEvent, kIOHIDEventFieldScrollX, newValue)
+        }
+    }
+
+    var ioHidScrollY: Double {
+        get {
+            guard let ioHidEvent = ioHidEvent else {
+                return 0
+            }
+            return IOHIDEventGetFloatValue(ioHidEvent, kIOHIDEventFieldScrollY)
+        }
+        set {
+            guard let ioHidEvent = ioHidEvent else {
+                return
+            }
+            return IOHIDEventSetFloatValue(ioHidEvent, kIOHIDEventFieldScrollY, newValue)
+        }
+    }
+
     func swapXY() {
-        (deltaX, deltaY, deltaXFixedPt, deltaYFixedPt, deltaXPt, deltaYPt) =
-        (deltaY, deltaX, deltaYFixedPt, deltaXFixedPt, deltaYPt, deltaXPt)
+        (deltaX, deltaY, deltaXFixedPt, deltaYFixedPt, deltaXPt, deltaYPt, ioHidScrollX, ioHidScrollY) =
+        (deltaY, deltaX, deltaYFixedPt, deltaXFixedPt, deltaYPt, deltaXPt, ioHidScrollY, ioHidScrollX)
     }
 
     func negate() {
-        (deltaY, deltaYFixedPt, deltaYPt) = (-deltaY, -deltaYFixedPt, -deltaYPt)
+        (deltaY, deltaYFixedPt, deltaYPt, ioHidScrollX, ioHidScrollY) = (-deltaY, -deltaYFixedPt, -deltaYPt, -ioHidScrollX, -ioHidScrollY)
     }
 
     func scale(factor: Double) {
         let scaleInt = { (value: Int64, factor: Double, minAbs: Int64) -> Int64 in
             value.signum() * max(minAbs, abs(Int64((Double(value) * factor).rounded())))
         }
-        (deltaX, deltaXFixedPt, deltaXPt) = (scaleInt(deltaX, factor, 1), deltaXFixedPt * factor, deltaXPt * factor)
-        (deltaY, deltaYFixedPt, deltaYPt) = (scaleInt(deltaY, factor, 1), deltaYFixedPt * factor, deltaYPt * factor)
+        (deltaX, deltaXFixedPt, deltaXPt, ioHidScrollX) = (scaleInt(deltaX, factor, 1), deltaXFixedPt * factor, deltaXPt * factor, ioHidScrollX * factor)
+        (deltaY, deltaYFixedPt, deltaYPt, ioHidScrollY) = (scaleInt(deltaY, factor, 1), deltaYFixedPt * factor, deltaYPt * factor, ioHidScrollY * factor)
     }
 }
