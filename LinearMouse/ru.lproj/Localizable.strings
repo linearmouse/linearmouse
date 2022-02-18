@@ -22,8 +22,12 @@
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Преобразует боковые кнопки «назад» и «вперед» в жесты смахивания, чтобы сделать их работаспособными во всех приложениях.";
 "Show in menu bar" = "Показывать в строке меню";
 "To show the preferences, launch %@ again." = "Чтобы настройки отображались, перезапустите %@.";
-"Check for Updates..." = "Проверить наличие обновлений...";
 "Version: %@" = "Версия: %@";
+"Check for Updates..." = "Проверить наличие обновлений...";
+"Automatically" = "Automatically";
+"Daily" = "Daily";
+"Weekly" = "Weekly";
+"Monthly" = "Monthly";
 "Homepage" = "Домашняя страница";
 "GitHub" = "GitHub";
 "Feedback" = "Обратная связь";
