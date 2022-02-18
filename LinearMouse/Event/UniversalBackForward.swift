@@ -31,7 +31,7 @@ class UniversalBackForward: EventTransformer {
         "tv.parsec.www",
     ]
 
-    static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "EventTransformer")
+    static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "UniversalBackForward")
 
     private func targetInIgnoreSet(_ view: MouseEventView) -> Bool {
         guard let bundleIdentifier = view.targetBundleIdentifier else {
@@ -53,7 +53,7 @@ class UniversalBackForward: EventTransformer {
         let targetBundleIdentifierString = view.targetBundleIdentifier ?? "(nil)"
         guard !targetInIgnoreSet(view) else {
             if event.type == .otherMouseDown {
-                os_log("[UniversalBackForward]: hit ignore set: %{public}@", log: Self.log, type: .debug, targetBundleIdentifierString)
+                os_log("Hit ignore set: %{public}@", log: Self.log, type: .debug, targetBundleIdentifierString)
             }
             return event
         }
@@ -69,7 +69,7 @@ class UniversalBackForward: EventTransformer {
             return event
         }
 
-        os_log("[UniversalBackForward]: convert to swipe: %{public}@", log: Self.log, type: .debug, targetBundleIdentifierString)
+        os_log("Convert to swipe: %{public}@", log: Self.log, type: .debug, targetBundleIdentifierString)
         switch mouseButton {
         case .back:
             simulateSwipeLeft()

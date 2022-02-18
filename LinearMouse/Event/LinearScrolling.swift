@@ -20,6 +20,9 @@ class LinearScrolling: EventTransformer {
         }
 
         let view = ScrollWheelEventView(event)
+        guard view.momentumPhase == .none else {
+            return nil
+        }
         view.deltaX = view.deltaX.signum() * Int64(scrollLines)
         view.deltaY = view.deltaY.signum() * Int64(scrollLines)
         return event
