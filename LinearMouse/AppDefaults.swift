@@ -16,7 +16,7 @@ class AppDefaults: ObservableObject {
         }
     }
 
-    @AppStorageCompat(wrappedValue: true, "linearScrollingOn") var linearScrollingOn: Bool {
+    @AppStorageCompat(wrappedValue: false, "linearScrollingOn") var linearScrollingOn: Bool {
         willSet {
             objectWillChange.send()
         }
