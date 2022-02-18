@@ -20,6 +20,7 @@ func getTransformers(appDefaults: AppDefaults) -> [EventTransformer] {
                                                                   shiftAction: appDefaults.modifiersShiftAction,
                                                                   alternateAction: appDefaults.modifiersAlternateAction,
                                                                   controlAction: appDefaults.modifiersControlAction) }),
+        (true,                                  { MomentumPhaseFix() })
     ]
 
     return transformers.filter { $0.0 }.map { $0.1() }
