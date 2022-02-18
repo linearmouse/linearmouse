@@ -6,8 +6,11 @@
 //
 
 import Foundation
+import os.log
 
 class MomentumPhaseFix: EventTransformer {
+    static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "MomentumPhaseFix")
+
     func transform(_ event: CGEvent) -> CGEvent? {
         guard event.type == .scrollWheel else {
             return event
@@ -29,6 +32,7 @@ class MomentumPhaseFix: EventTransformer {
                     if value.signum() == view.deltaY.signum() {
                         $0.storeBytes(of: -value, toByteOffset: offset, as: Int16.self)
                         dataModified = true
+                        os_log("Delta updated from %{public}d to %{public}d", log: Self.log, type: .debug, value, -value)
                     }
                 }
             }
