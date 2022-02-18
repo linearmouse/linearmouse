@@ -22,8 +22,12 @@
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
 "Show in menu bar" = "Show in menu bar";
 "To show the preferences, launch %@ again." = "To show the preferences, launch %@ again.";
-"Check for Updates..." = "Check for Updates...";
 "Version: %@" = "Version: %@";
+"Check for Updates..." = "Check for Updates...";
+"Automatically" = "Automatically";
+"Daily" = "Daily";
+"Weekly" = "Weekly";
+"Monthly" = "Monthly";
 "Homepage" = "Homepage";
 "GitHub" = "GitHub";
 "Feedback" = "Feedback";
