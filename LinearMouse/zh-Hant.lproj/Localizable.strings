@@ -22,8 +22,12 @@
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "將後退、前進側鍵轉換為滑動手勢，以全局啟用後退、前進支持。";
 "Show in menu bar" = "在選單列中顯示";
 "To show the preferences, launch %@ again." = "要顯示偏好設定，再次運行 %@。";
-"Check for Updates..." = "檢查更新...";
 "Version: %@" = "版本：%@";
+"Check for Updates..." = "檢查更新...";
+"Automatically" = "Automatically";
+"Daily" = "Daily";
+"Weekly" = "Weekly";
+"Monthly" = "Monthly";
 "Homepage" = "主頁";
 "GitHub" = "GitHub";
 "Feedback" = "反饋";
