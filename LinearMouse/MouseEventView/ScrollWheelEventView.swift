@@ -54,7 +54,6 @@ class ScrollWheelEventView: MouseEventView {
     }
 
     func negate() {
-        (deltaX, deltaXFixedPt, deltaXPt) = (-deltaX, -deltaXFixedPt, -deltaXPt)
         (deltaY, deltaYFixedPt, deltaYPt) = (-deltaY, -deltaYFixedPt, -deltaYPt)
     }
 
