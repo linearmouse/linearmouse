@@ -14,7 +14,7 @@ class ReverseScrollingTests: XCTestCase {
         var event = CGEvent(scrollWheelEvent2Source: nil, units: .line, wheelCount: 2, wheel1: 1, wheel2: 2, wheel3: 0)!
         event = transformer.transform(event)!
         let view = ScrollWheelEventView(event)
-        XCTAssertEqual(view.deltaX, -2)
+        XCTAssertEqual(view.deltaX, 2)
         XCTAssertEqual(view.deltaY, -1)
     }
 }
