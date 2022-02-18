@@ -22,8 +22,12 @@
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Konvertiert die Vor- und Zurück-Seitentasten in die jeweiligen Wischgesten, um eine universelle Vor- und Zurück-Funktion zu ermöglichen.";
 "Show in menu bar" = "In der Menüleiste anzeigen";
 "To show the preferences, launch %@ again." = "Um die Einstellungen anzuzeigen, öffne %@ erneut.";
-"Check for Updates..." = "Nach Updates suchen...";
 "Version: %@" = "Version: %@";
+"Check for Updates..." = "Nach Updates suchen...";
+"Automatically" = "Automatically";
+"Daily" = "Daily";
+"Weekly" = "Weekly";
+"Monthly" = "Monthly";
 "Homepage" = "Homepage";
 "GitHub" = "GitHub";
 "Feedback" = "Feedback";
