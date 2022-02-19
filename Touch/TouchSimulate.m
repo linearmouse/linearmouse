@@ -24,9 +24,6 @@ void simulateSwipe(TLInfoSwipeDirection dir) {
         CGEventRef event1 = tl_CGEventCreateFromGesture((__bridge CFDictionaryRef)(swipeInfo1), (__bridge CFArrayRef)@[]);
         CGEventRef event2 = tl_CGEventCreateFromGesture((__bridge CFDictionaryRef)(swipeInfo2), (__bridge CFArrayRef)@[]);
 
-        CFRetain(event1);
-        CFRetain(event2);
-
         CGEventPost(kCGHIDEventTap, event1);
         CGEventPost(kCGHIDEventTap, event2);
 
