@@ -91,7 +91,7 @@ class ScrollWheelEventView: MouseEventView {
     }
 
     func negate() {
-        (deltaY, deltaYFixedPt, deltaYPt, ioHidScrollX, ioHidScrollY) = (-deltaY, -deltaYFixedPt, -deltaYPt, -ioHidScrollX, -ioHidScrollY)
+        (deltaY, deltaYFixedPt, deltaYPt, ioHidScrollY) = (-deltaY, -deltaYFixedPt, -deltaYPt, -ioHidScrollY)
     }
 
     func scale(factor: Double) {
