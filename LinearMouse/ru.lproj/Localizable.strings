@@ -24,10 +24,10 @@
 "To show the preferences, launch %@ again." = "Чтобы настройки отображались, перезапустите %@.";
 "Version: %@" = "Версия: %@";
 "Check for Updates..." = "Проверить наличие обновлений...";
-"Automatically" = "Автоматически";
-"Daily" = "Ежедневно";
-"Weekly" = "Еженедельно";
-"Monthly" = "Ежемесячно";
+"Automatically" = "Automatically";
+"Daily" = "Daily";
+"Weekly" = "Weekly";
+"Monthly" = "Monthly";
 "Homepage" = "Домашняя страница";
 "GitHub" = "GitHub";
 "Feedback" = "Обратная связь";
