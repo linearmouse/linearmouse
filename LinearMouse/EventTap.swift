@@ -19,8 +19,8 @@ class EventTap {
             return Unmanaged.passUnretained(event)
         }
         let this = Unmanaged<EventTap>.fromOpaque(unwrappedRefcon).takeUnretainedValue()
-        if let newEvent = transformEvent(appDefaults: AppDefaults.shared, mouseDetector: this.mouseDetector, event: event) {
-            return event == newEvent ? Unmanaged.passUnretained(event) : Unmanaged.passRetained(newEvent)
+        if let event = transformEvent(appDefaults: AppDefaults.shared, mouseDetector: this.mouseDetector, event: event) {
+            return Unmanaged.passUnretained(event)
         }
         return nil
     }

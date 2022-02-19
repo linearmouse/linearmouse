@@ -8,11 +8,11 @@
 import Foundation
 
 class ScrollWheelEventView: MouseEventView {
-    private let ioHidEvent: IOHIDEventRef?
+    private let ioHidEvent: IOHIDEvent?
 
     override init(_ event: CGEvent) {
         assert(event.type == .scrollWheel)
-        ioHidEvent = CGEventCopyIOHIDEvent(event)
+        ioHidEvent = CGEventCopyIOHIDEvent(event)?.takeRetainedValue()
         super.init(event)
     }
 
