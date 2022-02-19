@@ -24,6 +24,6 @@ class AutoUpdateManager: NSObject {
 
 extension AutoUpdateManager: SPUUpdaterDelegate {
     func allowedChannels(for updater: SPUUpdater) -> Set<String> {
-        []
+        AppDefaults.shared.betaChannelOn ? ["beta"] :  []
     }
 }
