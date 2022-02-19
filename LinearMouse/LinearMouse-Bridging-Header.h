@@ -39,7 +39,7 @@ enum {
     kIOHIDEventTypeForce = 32,
 };
 typedef uint32_t IOHIDEventType;
-typedef struct __IOHIDEvent * IOHIDEventRef;
+typedef CFTypeRef IOHIDEventRef;
 typedef double IOHIDFloat;
 typedef uint32_t IOHIDEventField;
 
