@@ -31,7 +31,7 @@
 		B77D7C1D27BA64DC00825F54 /* IOHIDServiceClient+Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77D7C1C27BA64DC00825F54 /* IOHIDServiceClient+Property.swift */; };
 		B77D7C1F27BB4D4D00825F54 /* IOHIDServiceClient+Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77D7C1E27BB4D4D00825F54 /* IOHIDServiceClient+Service.swift */; };
 		B7842925278D985600D207F0 /* AutoUpdateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7842924278D985600D207F0 /* AutoUpdateManager.swift */; };
-		B7842927278D9BBC00D207F0 /* CheckForUpdatesButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7842926278D9BBC00D207F0 /* CheckForUpdatesButton.swift */; };
+		B7842927278D9BBC00D207F0 /* CheckForUpdatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7842926278D9BBC00D207F0 /* CheckForUpdatesView.swift */; };
 		B784292D278DB06600D207F0 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = B784292C278DB06600D207F0 /* Sparkle */; };
 		B794BFE026BC0A73003B11EF /* TouchEvents.c in Sources */ = {isa = PBXBuildFile; fileRef = B794BFDC26BC0A73003B11EF /* TouchEvents.c */; };
 		B794BFE426BC0E5D003B11EF /* TouchSimulate.m in Sources */ = {isa = PBXBuildFile; fileRef = B794BFE326BC0E5D003B11EF /* TouchSimulate.m */; };
@@ -94,7 +94,7 @@
 		B77D7C1C27BA64DC00825F54 /* IOHIDServiceClient+Property.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IOHIDServiceClient+Property.swift"; sourceTree = "<group>"; };
 		B77D7C1E27BB4D4D00825F54 /* IOHIDServiceClient+Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IOHIDServiceClient+Service.swift"; sourceTree = "<group>"; };
 		B7842924278D985600D207F0 /* AutoUpdateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoUpdateManager.swift; sourceTree = "<group>"; };
-		B7842926278D9BBC00D207F0 /* CheckForUpdatesButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckForUpdatesButton.swift; sourceTree = "<group>"; };
+		B7842926278D9BBC00D207F0 /* CheckForUpdatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckForUpdatesView.swift; sourceTree = "<group>"; };
 		B794BFDC26BC0A73003B11EF /* TouchEvents.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TouchEvents.c; sourceTree = "<group>"; };
 		B794BFDD26BC0A73003B11EF /* TouchEvents.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TouchEvents.h; sourceTree = "<group>"; };
 		B794BFDE26BC0A73003B11EF /* IOHIDEventData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IOHIDEventData.h; sourceTree = "<group>"; };
@@ -290,7 +290,7 @@
 				B7B6D83D26B2745300B0D247 /* ModifierKeyActionPicker.swift */,
 				B77A16162674D88E00E99A5D /* PreferencesWindow.swift */,
 				B77A16112674C21600E99A5D /* PreferencesView.swift */,
-				B7842926278D9BBC00D207F0 /* CheckForUpdatesButton.swift */,
+				B7842926278D9BBC00D207F0 /* CheckForUpdatesView.swift */,
 				B7BE466F27B0278200168BB9 /* ToolbarTabView.swift */,
 			);
 			path = UI;
@@ -480,7 +480,7 @@
 				B7ADF9852748B25A0005B02D /* ModifierActions.swift in Sources */,
 				B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */,
 				B7ADF97F2748991D0005B02D /* ReverseScrolling.swift in Sources */,
-				B7842927278D9BBC00D207F0 /* CheckForUpdatesButton.swift in Sources */,
+				B7842927278D9BBC00D207F0 /* CheckForUpdatesView.swift in Sources */,
 				B794BFE026BC0A73003B11EF /* TouchEvents.c in Sources */,
 				B7B6D83E26B2745300B0D247 /* ModifierKeyActionPicker.swift in Sources */,
 				B7BD5183267300DC001FE742 /* AutoStartManager.swift in Sources */,

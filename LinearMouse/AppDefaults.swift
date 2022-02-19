@@ -40,6 +40,12 @@ class AppDefaults: ObservableObject {
         }
     }
 
+    @AppStorageCompat(wrappedValue: false, "betaChannelOn") var betaChannelOn: Bool {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+
     @AppStorageCompat(wrappedValue: false, "linearMovementOn") var linearMovementOn: Bool {
         willSet {
             objectWillChange.send()

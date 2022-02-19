@@ -1,5 +1,5 @@
 //
-//  CheckForUpdatesButton.swift
+//  CheckForUpdatesView.swift
 //  LinearMouse
 //
 //  Created by Jiahao Lu on 2022/1/11.
@@ -55,8 +55,9 @@ final class UpdaterViewModel: ObservableObject {
     }
 }
 
-struct CheckForUpdatesButton: View {
+struct CheckForUpdatesView: View {
     @ObservedObject var updaterViewModel = UpdaterViewModel.shared
+    @ObservedObject var defaults = AppDefaults.shared
 
     var body: some View {
         Button("Check for Updates...", action: updaterViewModel.checkForUpdates)
@@ -72,6 +73,9 @@ struct CheckForUpdatesButton: View {
             }
             .frame(width: 120)
             .disabled(!updaterViewModel.automaticallyChecksForUpdates)
+            Toggle(isOn: $defaults.betaChannelOn) {
+                Text("Include beta")
+            }
         }
         .controlSize(.small)
     }

@@ -89,7 +89,7 @@ struct GeneralView: View {
                 Text("Version: \(LinearMouse.appVersion)")
                     .controlSize(.small)
                     .foregroundColor(.secondary)
-                CheckForUpdatesButton()
+                CheckForUpdatesView()
 
                 Spacer()
 
