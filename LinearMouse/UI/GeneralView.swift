@@ -86,9 +86,6 @@ struct GeneralView: View {
             Spacer()
 
             VStack(alignment: .leading) {
-                Text("Version: \(LinearMouse.appVersion)")
-                    .controlSize(.small)
-                    .foregroundColor(.secondary)
                 CheckForUpdatesView()
 
                 Spacer()

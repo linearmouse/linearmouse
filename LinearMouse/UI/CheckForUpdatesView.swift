@@ -60,19 +60,25 @@ struct CheckForUpdatesView: View {
     @ObservedObject var defaults = AppDefaults.shared
 
     var body: some View {
-        Button("Check for Updates...", action: updaterViewModel.checkForUpdates)
-            .disabled(!updaterViewModel.canCheckForUpdates)
-        HStack {
-            Toggle(isOn: $updaterViewModel.automaticallyChecksForUpdates) {
-                Text("Automatically")
+        VStack(alignment: .leading, spacing: 5) {
+            Text("Version: \(LinearMouse.appVersion)")
+                .foregroundColor(.secondary)
+            HStack {
+                Button("Check for Updates...", action: updaterViewModel.checkForUpdates)
+                    .disabled(!updaterViewModel.canCheckForUpdates)
             }
-            Picker("", selection: $updaterViewModel.updateCheckInterval) {
-                Text("Daily").tag(TimeInterval(86400))
-                Text("Weekly").tag(TimeInterval(604800))
-                Text("Monthly").tag(TimeInterval(2629800))
+            HStack {
+                Toggle(isOn: $updaterViewModel.automaticallyChecksForUpdates) {
+                    Text("Automatically")
+                }
+                Picker("", selection: $updaterViewModel.updateCheckInterval) {
+                    Text("Daily").tag(TimeInterval(86400))
+                    Text("Weekly").tag(TimeInterval(604800))
+                    Text("Monthly").tag(TimeInterval(2629800))
+                }
+                .frame(width: 120)
+                .disabled(!updaterViewModel.automaticallyChecksForUpdates)
             }
-            .frame(width: 120)
-            .disabled(!updaterViewModel.automaticallyChecksForUpdates)
             Toggle(isOn: $defaults.betaChannelOn) {
                 Text("Include beta")
             }
