@@ -56,3 +56,4 @@ jobs:
           prerelease: ${{ contains(github.ref, '-') }}
           files: build/LinearMouse.dmg
           fail_on_unmatched_files: true
+          generate_release_notes: true
