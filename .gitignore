@@ -27,3 +27,4 @@ DerivedData/
 
 ## Configuration
 /Signing.xcconfig
+/Version.xcconfig

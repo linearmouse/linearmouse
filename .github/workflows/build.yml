@@ -3,6 +3,8 @@ on:
   push:
     branches-ignore:
       - l10n_main
+    tags:
+      - v*
   pull_request:
     branches-ignore:
       - l10n_main
@@ -46,3 +48,11 @@ jobs:
           name: LinearMouse.dmg
           path: build/LinearMouse.dmg
           retention-days: 7
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: true
+          prerelease: ${{ contains(github.ref, '-') }}
+          files: build/LinearMouse.dmg
+          fail_on_unmatched_files: true

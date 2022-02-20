@@ -4,10 +4,13 @@ TARGET_DMG = $(CURDIR)/build/LinearMouse.dmg
 
 all: configure clean test package
 
-configure: Signing.xcconfig
+configure: Signing.xcconfig Version.xcconfig
 
 Signing.xcconfig:
 	@./scripts/configure-code-signing
+
+Version.xcconfig:
+	@./scripts/configure-version
 
 test:
 	xcodebuild test -project LinearMouse.xcodeproj -scheme LinearMouse
