@@ -10,6 +10,7 @@
 		B71392F426731645004C0173 /* LoginServiceKit in Frameworks */ = {isa = PBXBuildFile; productRef = B71392F326731645004C0173 /* LoginServiceKit */; };
 		B716F15E26BC10300052F551 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = B716F15D26BC10300052F551 /* LICENSE */; };
 		B716F16026BC10B80052F551 /* UniversalBackForward.swift in Sources */ = {isa = PBXBuildFile; fileRef = B716F15F26BC10B80052F551 /* UniversalBackForward.swift */; };
+		B73AC55127C29C7C00F7D3E8 /* Version in Frameworks */ = {isa = PBXBuildFile; productRef = B73AC55027C29C7C00F7D3E8 /* Version */; };
 		B754147E274E3AB0003CDAD0 /* LinearScrollingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B754147D274E3AB0003CDAD0 /* LinearScrollingTests.swift */; };
 		B7541480274E3CEF003CDAD0 /* ModifierActionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B754147F274E3CEF003CDAD0 /* ModifierActionsTests.swift */; };
 		B75A061C2671E9D800BEAF77 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B75A061B2671E9D800BEAF77 /* AppDelegate.swift */; };
@@ -102,7 +103,6 @@
 		B794BFE126BC0B2F003B11EF /* LinearMouse-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "LinearMouse-Bridging-Header.h"; sourceTree = "<group>"; };
 		B794BFE226BC0E45003B11EF /* TouchSimulate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TouchSimulate.h; sourceTree = "<group>"; };
 		B794BFE326BC0E5D003B11EF /* TouchSimulate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TouchSimulate.m; sourceTree = "<group>"; };
-		B79AC17D27B3BD7A003D9444 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
 		B7ADF97E2748991D0005B02D /* ReverseScrolling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReverseScrolling.swift; sourceTree = "<group>"; };
 		B7ADF98027489CB00005B02D /* MouseDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseDetector.swift; sourceTree = "<group>"; };
 		B7ADF9822748B12B0005B02D /* LinearScrolling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearScrolling.swift; sourceTree = "<group>"; };
@@ -160,6 +160,7 @@
 				B784292D278DB06600D207F0 /* Sparkle in Frameworks */,
 				B7DD796426730A800067F1AD /* LoginServiceKit in Frameworks */,
 				B71392F426731645004C0173 /* LoginServiceKit in Frameworks */,
+				B73AC55127C29C7C00F7D3E8 /* Version in Frameworks */,
 				B7F6C5F827A4F6A800E5400B /* LRUCache in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -178,7 +179,6 @@
 			isa = PBXGroup;
 			children = (
 				B7CD86AB27B38B26006C5C37 /* Config.xcconfig */,
-				B79AC17D27B3BD7A003D9444 /* Signing.xcconfig */,
 				B75A061A2671E9D800BEAF77 /* LinearMouse */,
 				B794BFDB26BC0A73003B11EF /* Touch */,
 				B716F16326BC19350052F551 /* LICENSE */,
@@ -344,6 +344,7 @@
 				B71392F326731645004C0173 /* LoginServiceKit */,
 				B784292C278DB06600D207F0 /* Sparkle */,
 				B7F6C5F727A4F6A800E5400B /* LRUCache */,
+				B73AC55027C29C7C00F7D3E8 /* Version */,
 			);
 			productName = LinearMouse;
 			productReference = B75A06182671E9D800BEAF77 /* LinearMouse.app */;
@@ -428,6 +429,7 @@
 				B71392F226731645004C0173 /* XCRemoteSwiftPackageReference "LoginServiceKit" */,
 				B784292B278DB06600D207F0 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				B7F6C5F627A4F6A800E5400B /* XCRemoteSwiftPackageReference "LRUCache" */,
+				B73AC54F27C29C7C00F7D3E8 /* XCRemoteSwiftPackageReference "Version" */,
 			);
 			productRefGroup = B75A06192671E9D800BEAF77 /* Products */;
 			projectDirPath = "";
@@ -825,6 +827,14 @@
 				revision = 04a1379908432bc4e304b38c831d573b1943b3fa;
 			};
 		};
+		B73AC54F27C29C7C00F7D3E8 /* XCRemoteSwiftPackageReference "Version" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mrackwitz/Version.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.8.0;
+			};
+		};
 		B784292B278DB06600D207F0 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/lujjjh/Sparkle";
@@ -856,6 +866,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B71392F226731645004C0173 /* XCRemoteSwiftPackageReference "LoginServiceKit" */;
 			productName = LoginServiceKit;
+		};
+		B73AC55027C29C7C00F7D3E8 /* Version */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B73AC54F27C29C7C00F7D3E8 /* XCRemoteSwiftPackageReference "Version" */;
+			productName = Version;
 		};
 		B784292C278DB06600D207F0 /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;
