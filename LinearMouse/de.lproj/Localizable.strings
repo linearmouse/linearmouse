@@ -24,11 +24,11 @@
 "To show the preferences, launch %@ again." = "Um die Einstellungen anzuzeigen, öffne %@ erneut.";
 "Version: %@" = "Version: %@";
 "Check for Updates..." = "Nach Updates suchen...";
-"Automatically" = "Automatically";
-"Daily" = "Daily";
-"Weekly" = "Weekly";
-"Monthly" = "Monthly";
-"Include beta" = "Include beta";
+"Automatically" = "Automatisch";
+"Daily" = "Täglich";
+"Weekly" = "Wöchentlich";
+"Monthly" = "Monatlich";
+"Include beta" = "An Beta-Versionen teilnehmen";
 "Homepage" = "Homepage";
 "GitHub" = "GitHub";
 "Feedback" = "Feedback";
