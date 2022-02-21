@@ -31,7 +31,7 @@ class UniversalBackForward: EventTransformer {
         "tv.parsec.www",
     ]
 
-    static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "UniversalBackForward")
+    private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "UniversalBackForward")
 
     private func targetInIgnoreSet(_ view: MouseEventView) -> Bool {
         guard let bundleIdentifier = view.targetBundleIdentifier else {

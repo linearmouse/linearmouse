@@ -6,8 +6,12 @@
 //
 
 import Foundation
+import SceneKit
+import os.log
 
 class ScrollWheelEventView: MouseEventView {
+    private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ScrollWheelEventView")
+
     private let ioHidEvent: IOHIDEvent?
 
     override init(_ event: CGEvent) {
@@ -85,20 +89,34 @@ class ScrollWheelEventView: MouseEventView {
         }
     }
 
+    func transform(matrix: double2x2) {
+        let oldValue = double2x4([Double(deltaX), deltaXFixedPt, deltaXPt, ioHidScrollX],
+                                 [Double(deltaY), deltaYFixedPt, deltaYPt, ioHidScrollY])
+        let newValue = oldValue * matrix
+        // In case that Int(deltaX), Int(deltaY) = 0 when 0 < abs(deltaX), abs(deltaY) < 0.5.
+        let deltaXY = newValue.transpose[0]
+        let normalizedDeltaXY = sign(deltaXY) * max(_simd_round_d2(abs(deltaXY)), [1, 1])
+        (deltaX, deltaXFixedPt, deltaXPt, ioHidScrollX) = (Int64(normalizedDeltaXY.x), newValue[0][1], newValue[0][2], newValue[0][3])
+        (deltaY, deltaYFixedPt, deltaYPt, ioHidScrollY) = (Int64(normalizedDeltaXY.y), newValue[1][1], newValue[1][2], newValue[1][3])
+        os_log("transform: oldValue=%@, matrix=%@, newValue=%@", log: Self.log, type: .debug,
+               String(describing: oldValue),
+               String(describing: matrix),
+               String(describing: newValue))
+    }
+
     func swapXY() {
-        (deltaX, deltaY, deltaXFixedPt, deltaYFixedPt, deltaXPt, deltaYPt, ioHidScrollX, ioHidScrollY) =
-        (deltaY, deltaX, deltaYFixedPt, deltaXFixedPt, deltaYPt, deltaXPt, ioHidScrollY, ioHidScrollX)
+        transform(matrix: .init([0, 1], [1, 0]))
     }
 
     func negate() {
-        (deltaY, deltaYFixedPt, deltaYPt, ioHidScrollY) = (-deltaY, -deltaYFixedPt, -deltaYPt, -ioHidScrollY)
+        transform(matrix: .init([1, 0], [0, -1]))
     }
 
     func scale(factor: Double) {
-        let scaleInt = { (value: Int64, factor: Double, minAbs: Int64) -> Int64 in
-            value.signum() * max(minAbs, abs(Int64((Double(value) * factor).rounded())))
-        }
-        (deltaX, deltaXFixedPt, deltaXPt, ioHidScrollX) = (scaleInt(deltaX, factor, 1), deltaXFixedPt * factor, deltaXPt * factor, ioHidScrollX * factor)
-        (deltaY, deltaYFixedPt, deltaYPt, ioHidScrollY) = (scaleInt(deltaY, factor, 1), deltaYFixedPt * factor, deltaYPt * factor, ioHidScrollY * factor)
+        scale(factorX: factor, factorY: factor)
+    }
+
+    func scale(factorX: Double, factorY: Double) {
+        transform(matrix: .init([factorX, 0], [0, factorY]))
     }
 }
