@@ -1,16 +1,16 @@
-"Reverse scrolling:" = "Reverse scrolling:";
-"Linear scrolling:" = "Linear scrolling:";
+"Reverse scrolling:" = "Inverter a rolagem:";
+"Linear scrolling:" = "Rolagem linear:";
 "Universal back and forward:" = "Universal back and forward:";
-"on" = "on";
-"off" = "off";
-"line" = "line";
-"lines" = "lines";
-"%@ Preferences..." = "%@ Preferences...";
-"Quit %@" = "Quit %@";
+"on" = "ligado";
+"off" = "desligado";
+"line" = "linha";
+"lines" = "linhas";
+"%@ Preferences..." = "Preferências...";
+"Quit %@" = "Encerrar %@";
 
-"%@ Preferences" = "%@ Preferences";
+"%@ Preferences" = "Preferências do %@";
 
-"General" = "General";
+"General" = "Geral";
 "Modifier Keys" = "Modifier Keys";
 
 "Reverse scrolling" = "Reverse scrolling";
