@@ -14,7 +14,7 @@
 "Modifier Keys" = "Tastenkürzel";
 
 "Reverse scrolling" = "Scrollen invertieren";
-"Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad." = "Kehrt die Scrollrichtung für die Maus, aber nicht das Trackpad um.";
+"Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad." = "Invertiert die Scrollrichtung für die Maus, aber nicht für das Trackpad.";
 "Enable linear scrolling" = "Lineares Scrollen aktivieren";
 "Disable mouse scrolling acceleration." = "Deaktiviert die Scrollbeschleunigung der Maus.";
 "Scroll" = "Scrolle";
