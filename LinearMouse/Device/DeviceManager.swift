@@ -13,6 +13,7 @@ class DeviceManager {
 
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "DeviceManager")
 
+    private var paused = false
     private let eventSystemClient = IOHIDEventSystemClientCreate(kCFAllocatorDefault).takeRetainedValue()
     private var devices = Set<Device>()
 
@@ -35,6 +36,17 @@ class DeviceManager {
         IOHIDEventSystemClientScheduleWithDispatchQueue(eventSystemClient, DispatchQueue.main)
     }
 
+    func pause() {
+        restorePointerSpeedToInitialValue()
+        paused = true
+    }
+
+    func resume() {
+        paused = false
+        discoverServiceClients()
+        renewPointerSpeed()
+    }
+
     private func setupServiceClients() {
         let usageMouse = [
             kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop,
@@ -55,6 +67,10 @@ class DeviceManager {
                 }
             }
         }, nil, nil)
+        discoverServiceClients()
+    }
+
+    private func discoverServiceClients() {
         let serviceClients = IOHIDEventSystemClientCopyServices(eventSystemClient) as! [IOHIDServiceClient]
         for serviceClient in serviceClients {
             add(serviceClient: serviceClient)
@@ -109,6 +125,9 @@ class DeviceManager {
     }
 
     func renewPointerSpeed() {
+        guard !self.paused else {
+            return
+        }
         if let acceleration = lastPointerAcceleration,
            let sensitivity = lastPointerSensitivity,
            let disableAcceleration = lastDisablePointerAcceleration {
@@ -117,6 +136,9 @@ class DeviceManager {
     }
 
     func renewPointerSpeed(forDevice device: Device) {
+        guard !self.paused else {
+            return
+        }
         if let acceleration = lastPointerAcceleration,
            let sensitivity = lastPointerSensitivity,
            let disableAcceleration = lastDisablePointerAcceleration {

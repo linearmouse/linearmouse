@@ -7,9 +7,12 @@
 
 import Combine
 import SwiftUI
+import os.log
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
+    private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "AppDelegate")
+
     private let autoUpdateManager = AutoUpdateManager.shared
     private let statusItem = StatusItem.shared
     private var defaultsSubscription: AnyCancellable!
@@ -33,6 +36,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
             self.update(defaults)
+
+            NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.sessionDidResignActiveNotification, object: nil,
+                                                              queue: nil, using: { _ in
+                DispatchQueue.main.async {
+                    os_log("Session inactive", log: Self.log, type: .debug)
+                    if let eventTap = self.eventTap {
+                        eventTap.disable()
+                    }
+                    DeviceManager.shared.pause()
+                }
+            })
+
+            NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.sessionDidBecomeActiveNotification, object: nil,
+                                                              queue: nil, using: { _ in
+                DispatchQueue.main.async {
+                    os_log("Session active", log: Self.log, type: .debug)
+                    if let eventTap = self.eventTap {
+                        eventTap.enable()
+                    }
+                    DeviceManager.shared.resume()
+                }
+            })
         }
     }
 
@@ -60,6 +85,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
-        DeviceManager.shared.restorePointerSpeedToInitialValue()
+        DeviceManager.shared.pause()
     }
 }
