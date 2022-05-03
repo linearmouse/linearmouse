@@ -89,16 +89,20 @@ class ScrollWheelEventView: MouseEventView {
         }
     }
 
+    var matrixValue: double2x4 {
+        double2x4([Double(deltaX), deltaXFixedPt, deltaXPt, ioHidScrollX],
+                  [Double(deltaY), deltaYFixedPt, deltaYPt, ioHidScrollY])
+    }
+
     func transform(matrix: double2x2) {
-        let oldValue = double2x4([Double(deltaX), deltaXFixedPt, deltaXPt, ioHidScrollX],
-                                 [Double(deltaY), deltaYFixedPt, deltaYPt, ioHidScrollY])
+        let oldValue = matrixValue
         let newValue = oldValue * matrix
         // In case that Int(deltaX), Int(deltaY) = 0 when 0 < abs(deltaX), abs(deltaY) < 0.5.
         let deltaXY = newValue.transpose[0]
         let normalizedDeltaXY = sign(deltaXY) * max(_simd_round_d2(abs(deltaXY)), [1, 1])
         (deltaX, deltaXFixedPt, deltaXPt, ioHidScrollX) = (Int64(normalizedDeltaXY.x), newValue[0][1], newValue[0][2], newValue[0][3])
         (deltaY, deltaYFixedPt, deltaYPt, ioHidScrollY) = (Int64(normalizedDeltaXY.y), newValue[1][1], newValue[1][2], newValue[1][3])
-        os_log("transform: oldValue=%@, matrix=%@, newValue=%@", log: Self.log, type: .debug,
+        os_log("transform: oldValue=%{public}@, matrix=%{public}@, newValue=%{public}@", log: Self.log, type: .debug,
                String(describing: oldValue),
                String(describing: matrix),
                String(describing: newValue))
