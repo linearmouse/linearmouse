@@ -44,6 +44,10 @@ class ScrollWheelEventView: MouseEventView {
         set { event.setDoubleValueField(.scrollWheelEventPointDeltaAxis2, value: newValue) }
     }
 
+    var deltaXSignum: Int64 {
+        continuous ? Int64(sign(deltaXPt)) : deltaX.signum()
+    }
+
     var deltaY: Int64 {
         get { event.getIntegerValueField(.scrollWheelEventDeltaAxis1) }
         set { event.setIntegerValueField(.scrollWheelEventDeltaAxis1, value: newValue) }
@@ -57,6 +61,10 @@ class ScrollWheelEventView: MouseEventView {
     var deltaYPt: Double {
         get { event.getDoubleValueField(.scrollWheelEventPointDeltaAxis1) }
         set { event.setDoubleValueField(.scrollWheelEventPointDeltaAxis1, value: newValue) }
+    }
+
+    var deltaYSignum: Int64 {
+        continuous ? Int64(sign(deltaYPt)) : deltaY.signum()
     }
 
     var ioHidScrollX: Double {

@@ -27,9 +27,10 @@ class LinearScrolling: EventTransformer {
             return nil
         }
         let (continuous, oldValue) = (view.continuous, view.matrixValue)
+        let (deltaXSignum, deltaYSignum) = (view.deltaXSignum, view.deltaYSignum)
         view.continuous = false
-        view.deltaX = view.deltaX.signum() * Int64(scrollLines)
-        view.deltaY = view.deltaY.signum() * Int64(scrollLines)
+        view.deltaX = deltaXSignum * Int64(scrollLines)
+        view.deltaY = deltaYSignum * Int64(scrollLines)
         os_log("continuous=%{public}@, oldValue=%{public}@, newValue=%{public}@", log: Self.log, type: .debug,
                String(describing: continuous),
                String(describing: oldValue),
