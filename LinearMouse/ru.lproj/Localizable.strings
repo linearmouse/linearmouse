@@ -1,5 +1,7 @@
 "Reverse scrolling:" = "Обратная прокрутка:";
 "Linear scrolling:" = "Линейная прокрутка:";
+"vertically only" = "vertically only";
+"horizontally only" = "horizontally only";
 "Universal back and forward:" = "Универсальные «назад» и «вперед»:";
 "on" = "вкл.";
 "off" = "выкл.";
@@ -14,7 +16,10 @@
 "Modifier Keys" = "Клавиши-модификаторы";
 
 "Reverse scrolling" = "Обратная прокрутка";
+"(vertically)" = "(vertically)";
 "Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad." = "Изменяет направление прокрутки для мыши, не изменяя направление прокрутки для трекпада.";
+"(horizontally)" = "(horizontally)";
+"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
 "Enable linear scrolling" = "Включить линейную прокрутку";
 "Disable mouse scrolling acceleration." = "Отключает ускорение прокрутки мыши.";
 "Scroll" = "Прокрутка";
