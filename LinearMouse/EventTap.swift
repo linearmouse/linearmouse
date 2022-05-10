@@ -32,7 +32,7 @@ class EventTap {
             | 1 << CGEventType.otherMouseUp.rawValue
         eventTap = CGEvent.tapCreate(
             tap: .cghidEventTap,
-            place: .tailAppendEventTap,
+            place: .headInsertEventTap,
             options: .defaultTap,
             eventsOfInterest: eventsOfInterest,
             callback: eventTapCallback,

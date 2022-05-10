@@ -13,13 +13,14 @@ protocol EventTransformer {
 
 func getTransformers(appDefaults: AppDefaults) -> [EventTransformer] {
     let transformers: [(Bool, () -> EventTransformer)] = [
-        (appDefaults.reverseScrollingOn,        { ReverseScrolling() }),
-        (appDefaults.linearScrollingOn,         { LinearScrolling(scrollLines: appDefaults.scrollLines) }),
-        (appDefaults.universalBackForwardOn,    { UniversalBackForward() }),
-        (true,                                  { ModifierActions(commandAction: appDefaults.modifiersCommandAction,
-                                                                  shiftAction: appDefaults.modifiersShiftAction,
-                                                                  alternateAction: appDefaults.modifiersAlternateAction,
-                                                                  controlAction: appDefaults.modifiersControlAction) }),
+        (appDefaults.reverseScrollingVerticallyOn,      { ReverseScrolling(vertically: true) }),
+        (appDefaults.reverseScrollingHorizontallyOn,    { ReverseScrolling(horizontally: true) }),
+        (appDefaults.linearScrollingOn,                 { LinearScrolling(scrollLines: appDefaults.scrollLines) }),
+        (appDefaults.universalBackForwardOn,            { UniversalBackForward() }),
+        (true,                                          { ModifierActions(commandAction: appDefaults.modifiersCommandAction,
+                                                                          shiftAction: appDefaults.modifiersShiftAction,
+                                                                          alternateAction: appDefaults.modifiersAlternateAction,
+                                                                          controlAction: appDefaults.modifiersControlAction) }),
     ]
 
     return transformers.filter { $0.0 }.map { $0.1() }

@@ -11,6 +11,19 @@ import SwiftUI
 fileprivate struct StatusView: View {
     @ObservedObject var defaults = AppDefaults.shared
 
+    var reverseScrollingStatus: some View {
+        if defaults.reverseScrollingVerticallyOn && defaults.reverseScrollingHorizontallyOn {
+            return Text("on")
+        }
+        if defaults.reverseScrollingVerticallyOn {
+            return Text("vertically only")
+        }
+        if defaults.reverseScrollingHorizontallyOn {
+            return Text("horizontally only")
+        }
+        return Text("off")
+    }
+
     var body: some View {
         VStack(alignment: .leading) {
             Text(LinearMouse.appName)
@@ -22,7 +35,7 @@ fileprivate struct StatusView: View {
             ) {
                 HStack {
                     Text("Reverse scrolling:")
-                    Text(defaults.reverseScrollingOn ? "on" : "off")
+                    reverseScrollingStatus
                 }
                 HStack {
                     Text("Linear scrolling:")

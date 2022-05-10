@@ -10,7 +10,13 @@ import SwiftUI
 class AppDefaults: ObservableObject {
     public static let shared = AppDefaults()
 
-    @AppStorageCompat(wrappedValue: true, "reverseScrollingOn") var reverseScrollingOn: Bool {
+    @AppStorageCompat(wrappedValue: true, "reverseScrollingOn") var reverseScrollingVerticallyOn: Bool {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+
+    @AppStorageCompat(wrappedValue: false, "reverseScrollingHorizontallyOn") var reverseScrollingHorizontallyOn: Bool {
         willSet {
             objectWillChange.send()
         }
