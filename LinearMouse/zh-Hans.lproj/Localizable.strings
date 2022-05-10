@@ -1,7 +1,7 @@
 "Reverse scrolling:" = "反向滚动：";
 "Linear scrolling:" = "线性滚动：";
-"vertically only" = "vertically only";
-"horizontally only" = "horizontally only";
+"vertically only" = "仅垂直";
+"horizontally only" = "仅水平";
 "Universal back and forward:" = "全局后退、前进：";
 "on" = "开启";
 "off" = "关闭";
@@ -16,10 +16,10 @@
 "Modifier Keys" = "修饰键";
 
 "Reverse scrolling" = "反向滚动";
-"(vertically)" = "(vertically)";
+"(vertically)" = "(垂直)";
 "Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad." = "反转鼠标滚动方向，但不会反转触控板滚动方向。";
-"(horizontally)" = "(horizontally)";
-"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
+"(horizontally)" = "(水平)";
+"Some gestures, such as swiping back and forward, may stop working." = "某些手势可能无法正常工作，如滑动后退和前进。";
 "Enable linear scrolling" = "启用线性滚动";
 "Disable mouse scrolling acceleration." = "禁用鼠标滚动加速度。";
 "Scroll" = "滚动";
