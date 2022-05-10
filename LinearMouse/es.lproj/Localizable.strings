@@ -1,5 +1,7 @@
 "Reverse scrolling:" = "Reverse scrolling:";
 "Linear scrolling:" = "Linear scrolling:";
+"vertically only" = "vertically only";
+"horizontally only" = "horizontally only";
 "Universal back and forward:" = "Universal back and forward:";
 "on" = "on";
 "off" = "off";
@@ -14,7 +16,10 @@
 "Modifier Keys" = "Modifier Keys";
 
 "Reverse scrolling" = "Reverse scrolling";
+"(vertically)" = "(vertically)";
 "Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad." = "Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad.";
+"(horizontally)" = "(horizontally)";
+"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
 "Enable linear scrolling" = "Enable linear scrolling";
 "Disable mouse scrolling acceleration." = "Disable mouse scrolling acceleration.";
 "Scroll" = "Scroll";
