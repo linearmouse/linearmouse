@@ -15,13 +15,38 @@ struct GeneralView: View {
             Spacer()
 
             VStack(alignment: .leading) {
-                Toggle(isOn: $defaults.reverseScrollingOn) {
+                Toggle(isOn: $defaults.reverseScrollingVerticallyOn) {
                     VStack(alignment: .leading) {
-                        Text("Reverse scrolling")
+                        HStack(alignment: .firstTextBaseline, spacing: 2) {
+                            Text("Reverse scrolling")
+                            Text("(vertically)")
+                                .controlSize(.small)
+                                .foregroundColor(.secondary)
+                        }
                         Text("""
                             Reverse the scroll direction for a mouse \
                             but won't reverse the scroll direction \
                             for a Trackpad.
+                            """)
+                            .controlSize(.small)
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+
+            VStack(alignment: .leading) {
+                Toggle(isOn: $defaults.reverseScrollingHorizontallyOn) {
+                    VStack(alignment: .leading) {
+                        HStack(alignment: .firstTextBaseline, spacing: 2) {
+                            Text("Reverse scrolling")
+                            Text("(horizontally)")
+                                .controlSize(.small)
+                                .foregroundColor(.secondary)
+                        }
+                        Text("""
+                            Some gestures, such as swiping back and forward, \
+                            may stop working.
                             """)
                             .controlSize(.small)
                             .foregroundColor(.secondary)
