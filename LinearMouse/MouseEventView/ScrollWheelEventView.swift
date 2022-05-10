@@ -120,12 +120,8 @@ class ScrollWheelEventView: MouseEventView {
         transform(matrix: .init([0, 1], [1, 0]))
     }
 
-    func negateVertically() {
-        transform(matrix: .init([1, 0], [0, -1]))
-    }
-
-    func negateHorizontally() {
-        transform(matrix: .init([-1, 0], [0, 1]))
+    func negate(vertically: Bool = false, horizontally: Bool = false) {
+        transform(matrix: .init([horizontally ? -1 : 1, 0], [0, vertically ? -1 : 1]))
     }
 
     func scale(factor: Double) {

@@ -22,12 +22,7 @@ class ReverseScrolling: EventTransformer {
         }
 
         let view = ScrollWheelEventView(event)
-        if vertically {
-            view.negateVertically()
-        }
-        if horizontally {
-            view.negateHorizontally()
-        }
+        view.negate(vertically: vertically, horizontally: horizontally)
         return event
     }
 }
