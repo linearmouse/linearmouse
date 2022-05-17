@@ -23,7 +23,7 @@ class DeviceManager {
     }
 
     private var lastPointerAcceleration: Double?
-    private var lastPointerSensitivity: Int?
+    private var lastPointerSensitivity: Double?
     private var lastDisablePointerAcceleration: Bool?
 
     private weak var _lastActiveDevice: Device?
@@ -115,7 +115,7 @@ class DeviceManager {
         }
     }
 
-    func updatePointerSpeed(acceleration: Double, sensitivity: Int, disableAcceleration: Bool) {
+    func updatePointerSpeed(acceleration: Double, sensitivity: Double, disableAcceleration: Bool) {
         lastPointerAcceleration = acceleration
         lastPointerSensitivity = sensitivity
         lastDisablePointerAcceleration = disableAcceleration
@@ -160,7 +160,7 @@ class DeviceManager {
         firstAvailableDevice?.pointerAcceleration ?? 0.6875
     }
 
-    var pointerSensitivity: Int {
+    var pointerSensitivity: Double {
         firstAvailableDevice?.pointerSensitivity ?? 1600
     }
 

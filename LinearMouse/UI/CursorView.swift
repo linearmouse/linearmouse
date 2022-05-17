@@ -11,10 +11,14 @@ struct CursorView: View {
     @ObservedObject var defaults = AppDefaults.shared
 
     var sensitivityInDouble: Binding<Double> {
-        Binding<Double>(get: {
-            return Double(defaults.cursorSensitivity)
+        let low = 1.0 / 1200
+        let high = 1.0 / 40
+
+        return Binding<Double>(get: {
+            (1 / (2000 - defaults.cursorSensitivity) - low) / (high - low)
         }, set: {
-            defaults.cursorSensitivity = Int($0)
+            let value = 1 / (low + (high - low) * $0)
+            defaults.cursorSensitivity = 2000 - value
         })
     }
 
@@ -31,7 +35,7 @@ struct CursorView: View {
         let formatter = NumberFormatter()
         formatter.numberStyle = NumberFormatter.Style.decimal
         formatter.roundingMode = NumberFormatter.RoundingMode.halfUp
-        formatter.maximumFractionDigits = 0
+        formatter.maximumFractionDigits = 4
         formatter.thousandSeparator = ""
         return formatter
     }()
@@ -59,16 +63,16 @@ struct CursorView: View {
                 }
 
                 Slider(value: sensitivityInDouble,
-                           in: 5...1990) {
+                       in: 0...1) {
                     Text("Sensitivity")
                 }.padding(.top)
                 HStack {
-                    Text("(5–1990)")
+                    Text("(0–1)")
                         .controlSize(.small)
                         .foregroundColor(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                     TextField("",
-                              value: $defaults.cursorSensitivity,
+                              value: sensitivityInDouble,
                               formatter: sensitivityFormatter)
                         .textFieldStyle(.roundedBorder)
                         .multilineTextAlignment(.trailing)
