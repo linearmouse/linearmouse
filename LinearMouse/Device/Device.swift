@@ -70,13 +70,12 @@ class Device {
         return max(0, min(Double(pointerAccelerationInt) / 65536, 20))
     }
 
-    var pointerSensitivity: Int {
-        guard let pointerResolution: Int = serviceClient.getProperty(kIOHIDPointerResolutionKey) else {
+    var pointerSensitivity: Double {
+        guard let pointerResolution: Double = serviceClient.getProperty(kIOHIDPointerResolutionKey) else {
             return 1600
         }
-        return 2000 - (pointerResolution >> 16)
+        return 2000 - (pointerResolution / 65536)
     }
-
 
     var shouldApplyPointerSpeedSettings: Bool {
         guard category == .mouse else {
@@ -87,13 +86,13 @@ class Device {
         return true
     }
 
-    func updatePointerSpeed(acceleration: Double, sensitivity: Int, disableAcceleration: Bool) {
+    func updatePointerSpeed(acceleration: Double, sensitivity: Double, disableAcceleration: Bool) {
         guard shouldApplyPointerSpeedSettings else {
             return
         }
         let accelerationInt = disableAcceleration ? -65536 : Int(acceleration * 65536)
         let sensitivity = max(5, min(sensitivity, 1990))
-        let resolution = (2000 - sensitivity) << 16
+        let resolution = Int((2000 - sensitivity) * 65536)
         os_log("Update speed for device: %{public}@, %{public}@ = %{public}d, HIDPointerResolution = %{public}d",
                log: Self.log, type: .debug,
                String(describing: serviceClient), pointerAccelerationType, accelerationInt, resolution)

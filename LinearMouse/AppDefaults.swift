@@ -64,7 +64,7 @@ class AppDefaults: ObservableObject {
         }
     }
 
-    @AppStorageCompat(wrappedValue: 1600, "cursor.sensitivity") var cursorSensitivity: Int {
+    @AppStorageCompat(wrappedValue: 1600, "cursor.sensitivity") var cursorSensitivity: Double {
         willSet {
             objectWillChange.send()
         }
