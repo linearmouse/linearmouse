@@ -35,7 +35,7 @@ struct CursorView: View {
         let formatter = NumberFormatter()
         formatter.numberStyle = NumberFormatter.Style.decimal
         formatter.roundingMode = NumberFormatter.RoundingMode.halfUp
-        formatter.maximumFractionDigits = 4
+        formatter.maximumFractionDigits = 2
         formatter.thousandSeparator = ""
         return formatter
     }()

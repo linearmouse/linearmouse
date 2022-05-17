@@ -92,7 +92,6 @@ class Device {
         }
         let accelerationInt = disableAcceleration ? -65536 : Int(acceleration * 65536)
         let sensitivity = max(5, min(sensitivity, 1990))
-        print("SENSITIVITY", sensitivity, (2000 - sensitivity) * 65536)
         let resolution = Int((2000 - sensitivity) * 65536)
         os_log("Update speed for device: %{public}@, %{public}@ = %{public}d, HIDPointerResolution = %{public}d",
                log: Self.log, type: .debug,
