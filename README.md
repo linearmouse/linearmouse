@@ -21,16 +21,16 @@ improve the experience and functionality of third-party mice.
 <table>
   <tbody>
       <td width="33%">
-        <img width="100%" alt="General" src="https://user-images.githubusercontent.com/3000535/153178582-1f3ec383-39be-4afb-aa26-84bb5e4d837c.png#gh-light-mode-only">
-        <img width="100%" alt="General" src="https://user-images.githubusercontent.com/3000535/153179006-600e65cf-8c94-497e-959b-48817cf02420.png#gh-dark-mode-only">
+        <img width="100%" alt="General" src="https://user-images.githubusercontent.com/3000535/168758303-3312414e-7ad7-4348-ac5f-574085cf9353.png#gh-light-mode-only">
+        <img width="100%" alt="General" src="https://user-images.githubusercontent.com/3000535/168758499-2ea8ce75-c95f-4726-a858-aac6ca07e9df.png#gh-dark-mode-only">
       </td>
       <td width="33%">
-        <img width="100%" alt="Cursor" src="https://user-images.githubusercontent.com/3000535/153178851-bf06f44f-4e01-4d7b-848d-3e2eb3d46f9f.png#gh-light-mode-only">
-        <img width="100%" alt="Cursor" src="https://user-images.githubusercontent.com/3000535/153179057-c24d8cf0-4ab2-42f2-9a5e-867cc4a8bf57.png#gh-dark-mode-only">
+        <img width="100%" alt="Cursor" src="https://user-images.githubusercontent.com/3000535/168758156-ebd8bf0e-afe1-4021-a092-a586cb9148a3.png#gh-light-mode-only">
+        <img width="100%" alt="Cursor" src="https://user-images.githubusercontent.com/3000535/168758533-e01561a5-8a8f-438c-aebf-04974b714229.png#gh-dark-mode-only">
       </td>
       <td width="33%">
-        <img width="100%" alt="Modifier keys" src="https://user-images.githubusercontent.com/3000535/153178909-8eebb0ce-b51c-49b4-8b74-a17919e5a12d.png#gh-light-mode-only">
-        <img width="100%" alt="Modifier keys" src="https://user-images.githubusercontent.com/3000535/153179104-f4230c62-bfec-443a-bfca-32a51cf5d942.png#gh-dark-mode-only">
+        <img width="100%" alt="Modifier keys" src="https://user-images.githubusercontent.com/3000535/168758363-b5a38104-e671-46a6-94a2-bb7538740a8a.png#gh-light-mode-only">
+        <img width="100%" alt="Modifier keys" src="https://user-images.githubusercontent.com/3000535/168758566-fb00c040-6e75-4214-b121-f9f113f388e0.png#gh-dark-mode-only">
       </td>
     </tr>
   </tbody>
