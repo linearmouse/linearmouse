@@ -1,43 +1,40 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "LoginServiceKit",
-        "repositoryURL": "https://github.com/Clipy/LoginServiceKit",
-        "state": {
-          "branch": null,
-          "revision": "04a1379908432bc4e304b38c831d573b1943b3fa",
-          "version": null
-        }
-      },
-      {
-        "package": "LRUCache",
-        "repositoryURL": "https://github.com/nicklockwood/LRUCache.git",
-        "state": {
-          "branch": null,
-          "revision": "40039c212a82a044c0e2aff5c9f1daaf1f1f0624",
-          "version": "1.0.2"
-        }
-      },
-      {
-        "package": "Sparkle",
-        "repositoryURL": "https://github.com/lujjjh/Sparkle",
-        "state": {
-          "branch": null,
-          "revision": "c5bbe104783ab24d31379e22c35c7de0f107dc4a",
-          "version": "2.0.1"
-        }
-      },
-      {
-        "package": "Version",
-        "repositoryURL": "https://github.com/mrackwitz/Version.git",
-        "state": {
-          "branch": null,
-          "revision": "fd4b0eb5756aa7f1c33977fb626cf37d2140a3a0",
-          "version": "0.8.0"
-        }
+  "pins" : [
+    {
+      "identity" : "loginservicekit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Clipy/LoginServiceKit",
+      "state" : {
+        "revision" : "04a1379908432bc4e304b38c831d573b1943b3fa"
       }
-    ]
-  },
-  "version": 1
+    },
+    {
+      "identity" : "lrucache",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/nicklockwood/LRUCache.git",
+      "state" : {
+        "revision" : "40039c212a82a044c0e2aff5c9f1daaf1f1f0624",
+        "version" : "1.0.2"
+      }
+    },
+    {
+      "identity" : "sparkle",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/lujjjh/Sparkle",
+      "state" : {
+        "revision" : "c5bbe104783ab24d31379e22c35c7de0f107dc4a",
+        "version" : "2.0.1"
+      }
+    },
+    {
+      "identity" : "version",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/mrackwitz/Version.git",
+      "state" : {
+        "revision" : "fd4b0eb5756aa7f1c33977fb626cf37d2140a3a0",
+        "version" : "0.8.0"
+      }
+    }
+  ],
+  "version" : 2
 }
