@@ -1,7 +1,7 @@
 "Reverse scrolling:" = "Inverter a rolagem:";
 "Linear scrolling:" = "Rolagem linear:";
-"vertically only" = "vertically only";
-"horizontally only" = "horizontally only";
+"vertically only" = "apenas verticalmente";
+"horizontally only" = "apenas horizontalmente";
 "Universal back and forward:" = "Retorno e avanço universal:";
 "on" = "ligado";
 "off" = "desligado";
@@ -16,10 +16,10 @@
 "Modifier Keys" = "Teclas Modificadoras";
 
 "Reverse scrolling" = "Inverter a rolagem";
-"(vertically)" = "(vertically)";
+"(vertically)" = "(verticalmente)";
 "Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad." = "Inverte a direção de rolagem do mouse, mas não inverterá a direção de rolagem para o trackpad.";
-"(horizontally)" = "(horizontally)";
-"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
+"(horizontally)" = "(horizontalmente)";
+"Some gestures, such as swiping back and forward, may stop working." = "Alguns gestos, como deslizar para a frente e para trás, podem parar de funcionar.";
 "Enable linear scrolling" = "Habilitar rolagem linear";
 "Disable mouse scrolling acceleration." = "Desativa a aceleração de rolagem do mouse.";
 "Scroll" = "Rolar";
