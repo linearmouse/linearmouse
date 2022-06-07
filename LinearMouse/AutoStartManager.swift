@@ -7,15 +7,23 @@
 
 import Foundation
 import LoginServiceKit
+import LaunchAtLogin
 
 class AutoStartManager {
-    @discardableResult
-    static func enable() -> Bool {
-        return LoginServiceKit.addLoginItems()
+    static func enable() {
+        // LoginServiceKit uses some deprecated APIs that
+        // are not functional in macOS Ventura 13.0.
+        //
+        // I use LaunchAtLogin as an alterative. However,
+        // the login items added by LoginServiceKit should
+        // be removed, too. So I'll keep the line below
+        // for several releases.
+        LoginServiceKit.removeLoginItems()
+        LaunchAtLogin.isEnabled = true
     }
 
-    @discardableResult
-    static func disable() -> Bool {
-        return LoginServiceKit.removeLoginItems()
+    static func disable() {
+        LoginServiceKit.removeLoginItems()
+        LaunchAtLogin.isEnabled = false
     }
 }
