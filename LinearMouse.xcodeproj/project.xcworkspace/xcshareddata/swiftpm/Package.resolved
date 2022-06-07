@@ -1,6 +1,15 @@
 {
   "pins" : [
     {
+      "identity" : "launchatlogin",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sindresorhus/LaunchAtLogin",
+      "state" : {
+        "branch" : "main",
+        "revision" : "e8171b3e38a2816f579f58f3dac1522aa39efe41"
+      }
+    },
+    {
       "identity" : "loginservicekit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Clipy/LoginServiceKit",
@@ -13,7 +22,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/nicklockwood/LRUCache.git",
       "state" : {
-        "revision" : "40039c212a82a044c0e2aff5c9f1daaf1f1f0624",
+        "revision" : "b2bd97c3b75e5042c5ab464fdc71fcd8217d11b4",
         "version" : "1.0.2"
       }
     },
