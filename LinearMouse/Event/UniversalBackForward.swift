@@ -26,6 +26,7 @@ class UniversalBackForward: EventTransformer {
         "com.microsoft.VSCode",
         "com.microsoft.rdc.macos",
         "com.parallels.desktop.console",
+        "com.valvesoftware.dota2",
         "com.vmware.fusion",
         "org.virtualbox.app.VirtualBox",
         "tv.parsec.www",
