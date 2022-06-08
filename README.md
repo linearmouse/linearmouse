@@ -43,7 +43,7 @@ improve the experience and functionality of third-party mice.
 #### Homebrew
 
 ```sh
-$ brew install --cask linearmouse --no-quarantine
+$ brew install --cask linearmouse
 ```
 
 #### Manually
