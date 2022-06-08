@@ -11,8 +11,8 @@ no_available_code_signing_certificate() {
     exit 0
 }
 
-if [[ -z "$DEVELOPMENT_TEAM" ]]; then
-    CN=$(security find-identity -vp codesigning | head -1 | awk -F\" '{ print $2 }')
+search_code_signing_certificate() {
+    CN=$(security find-identity -vp codesigning | grep "$1" | head -1 | awk -F\" '{ print $2 }')
     if [[ -z "$CN" ]]; then
         no_available_code_signing_certificate
     fi
@@ -25,12 +25,26 @@ if [[ -z "$DEVELOPMENT_TEAM" ]]; then
     if [[ -z "$DEVELOPMENT_TEAM" ]]; then
         no_available_code_signing_certificate
     fi
+    CODE_SIGN_IDENTITY="$1"
+}
+
+if [[ -z "$DEVELOPMENT_TEAM" ]]; then
+    search_code_signing_certificate "Developer ID Application"
+fi
+if [[ -z "$DEVELOPMENT_TEAM" ]]; then
+    search_code_signing_certificate "Apple Development"
 fi
 
 pushd $(dirname "$0") > /dev/null
 cd ..
 cp Signing.xcconfig{.tpl,}
 sed -i '' "s/DEVELOPMENT_TEAM =/DEVELOPMENT_TEAM = $DEVELOPMENT_TEAM/" Signing.xcconfig
+if [[ -n "$CODE_SIGN_IDENTITY" ]]; then
+    echo "CODE_SIGN_IDENTITY = $CODE_SIGN_IDENTITY" >> Signing.xcconfig
+fi
 popd > /dev/null
 
 echo "DEVELOPMENT_TEAM is configured to $DEVELOPMENT_TEAM." >&2
+if [[ -n "$CODE_SIGN_IDENTITY" ]]; then
+    echo "CODE_SIGN_IDENTITY is configured to $CODE_SIGN_IDENTITY" >&2
+fi
