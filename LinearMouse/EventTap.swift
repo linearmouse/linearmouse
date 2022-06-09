@@ -40,7 +40,6 @@ class EventTap {
         )
         runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
         CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, CFRunLoopMode.commonModes)
-        CFRunLoopRun()
     }
 
     func enable() {

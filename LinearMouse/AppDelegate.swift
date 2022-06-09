@@ -65,6 +65,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): shouldAskForPermission] as CFDictionary
         guard AXIsProcessTrustedWithOptions(options) else {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                os_log("Re-checking accessibility permission", log: Self.log, type: .debug)
                 self.withAccessibilityPermission(shouldAskForPermission: false, completion: completion)
             }
             return
