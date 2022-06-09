@@ -64,9 +64,9 @@ fileprivate struct StatusView: View {
 class StatusItem {
     static let shared = StatusItem()
 
-    lazy var statusItem: NSStatusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+    private lazy var statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
-    lazy var statusView: NSMenuItem = {
+    private lazy var statusView: NSMenuItem = {
         let item = NSMenuItem()
         let view = NSHostingView(rootView: StatusView())
         view.frame.size = view.fittingSize
@@ -74,7 +74,7 @@ class StatusItem {
         return item
     }()
 
-    lazy var menu: NSMenu = {
+    private lazy var menu: NSMenu = {
         let menu = NSMenu()
         menu.items = [
             statusView,
@@ -93,12 +93,34 @@ class StatusItem {
         return menu
     }()
 
-    lazy var preferencesWindow = PreferencesWindow()
+    private lazy var accessibilityPermissionWindow = AccessibilityPermissionWindow()
+
+    private lazy var preferencesWindow = PreferencesWindow()
 
     var defaultsSubscription: AnyCancellable!
 
     init() {
-        statusItem.button?.image = NSImage(named: "MenuIcon")
+        if let button = statusItem.button {
+            button.image = NSImage(named: "MenuIcon")
+            button.action = #selector(self.statusItemAction(sender:))
+            button.target = self
+        }
+
+        guard AccessibilityPermission.enabled else {
+            NSApp.activate(ignoringOtherApps: true)
+            self.accessibilityPermissionWindow.makeKeyAndOrderFront(nil)
+
+            AccessibilityPermission.pollingUntilEnabled {
+                self.setup()
+            }
+
+            return
+        }
+
+        setup()
+    }
+
+    private func setup() {
         statusItem.menu = menu
 
         // Subscribe to the user settings and show / hide the menu icon.
@@ -111,9 +133,30 @@ class StatusItem {
         self.update(defaults)
     }
 
-    @objc func openPreferencesAction() {
+    @objc private func statusItemAction(sender: NSStatusBarButton) {
+        guard !AccessibilityPermission.enabled else {
+            return
+        }
+
+        NSApp.activate(ignoringOtherApps: true)
+        accessibilityPermissionWindow.makeKeyAndOrderFront(nil)
+    }
+
+    func moveAccessibilityWindowToTheTop() {
+        let frame = accessibilityPermissionWindow.frame
+        if let screenFrame = accessibilityPermissionWindow.screen?.visibleFrame {
+            accessibilityPermissionWindow.setFrame(.init(origin: .init(x: frame.origin.x, y: screenFrame.maxY), size: frame.size),
+                                                   display: true, animate: true)
+        }
+    }
+
+    func openPreferences() {
         NSApp.activate(ignoringOtherApps: true)
         preferencesWindow.makeKeyAndOrderFront(nil)
+    }
+
+    @objc private func openPreferencesAction() {
+        openPreferences()
     }
 
     @objc func quitAction() {

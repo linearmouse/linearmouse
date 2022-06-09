@@ -19,7 +19,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var eventTap: EventTap?
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        withAccessibilityPermission {
+        AccessibilityPermission.pollingUntilEnabled {
             // register the start entry if the user grants the permission
             AutoStartManager.enable()
 
@@ -61,18 +61,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    func withAccessibilityPermission(shouldAskForPermission: Bool = true, completion: @escaping () -> Void) {
-        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): shouldAskForPermission] as CFDictionary
-        guard AXIsProcessTrustedWithOptions(options) else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                os_log("Re-checking accessibility permission", log: Self.log, type: .debug)
-                self.withAccessibilityPermission(shouldAskForPermission: false, completion: completion)
-            }
-            return
-        }
-        completion()
-    }
-
     func update(_ defaults: AppDefaults) {
         DeviceManager.shared.updatePointerSpeed(acceleration: defaults.cursorAcceleration, sensitivity: defaults.cursorSensitivity, disableAcceleration: defaults.linearMovementOn)
     }
@@ -81,7 +69,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if flag {
             return true
         }
-        statusItem.openPreferencesAction()
+        statusItem.openPreferences()
         return false
     }
 
