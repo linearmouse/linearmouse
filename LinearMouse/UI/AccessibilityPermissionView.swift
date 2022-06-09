@@ -90,6 +90,8 @@ struct AccessibilityPermissionView: View {
 
         NSApp.activate(ignoringOtherApps: true)
         AccessibilityPermission.prompt()
+
+        StatusItem.shared.moveAccessibilityWindowToTheTop()
     }
 }
 
