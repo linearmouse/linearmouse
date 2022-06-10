@@ -54,17 +54,7 @@ $ brew install --cask linearmouse
 
 ### Accessibility permission
 
-LinearMouse requires accessibility features to work properly.
-You will see an alert when LinearMouse first launches.
-
-1. Click "Open System Preferences".
-2. Click the lock to make changes.
-2. Find LinearMouse in the list and toggle it on.
-
-<p align="center">
-  <img width="400" alt="Accessibility permission" src="https://user-images.githubusercontent.com/62953110/149927571-b9837b0c-6881-4ac5-88da-2a55e58caf27.png#gh-light-mode-only">
-<img width="400" alt="Accessibility permission" src="https://user-images.githubusercontent.com/62953110/149927673-cd20dc90-7809-4bc4-9cbc-051f9c79c597.png#gh-dark-mode-only">
-</p>
+See [ACCESSIBILITY.md](ACCESSIBILITY.md).
 
 ## Features
 
@@ -84,13 +74,17 @@ See [BUILD.md](BUILD.md).
 
 ## Contributing
 
-Please read the [contribution guide](CONTRIBUTING.md) before making a pull request.
+Please read the [contributing guide](CONTRIBUTING.md) before making a pull request.
 
 Thank you to all the people who already contributed to LinearMouse!
 
 <a href="https://github.com/linearmouse/linearmouse/graphs/contributors">
   <img src="https://opencollective.com/linearmouse/contributors.svg" />
 </a>
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=linearmouse/linearmouse&type=Date)](https://star-history.com/#linearmouse/linearmouse&Date)
 
 ## Credits
 
