@@ -740,6 +740,7 @@
 				CODE_SIGN_ENTITLEMENTS = LinearMouse/LinearMouse.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"LinearMouse/Preview Content\"";
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = LinearMouse/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -763,6 +764,7 @@
 				CODE_SIGN_ENTITLEMENTS = LinearMouse/LinearMouse.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"LinearMouse/Preview Content\"";
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = LinearMouse/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (

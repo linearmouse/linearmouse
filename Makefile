@@ -18,15 +18,21 @@ test:
 build:
 	xcodebuild -configuration Release -target LinearMouse SYMROOT='$(BUILD_DIR)'
 
+archive:
+	xcodebuild archive -project LinearMouse.xcodeproj -scheme LinearMouse
+
 clean:
 	rm -fr build
 
-package: build
-	rm -f '$(TARGET_DIR)'
+package: archive
+	rm -rf '$(TARGET_DIR)'
 	rm -f '$(TARGET_DMG)'
 	mkdir '$(TARGET_DIR)'
 	cp -a '$(BUILD_DIR)/Release/LinearMouse.app' '$(TARGET_DIR)'
 	ln -s /Applications '$(TARGET_DIR)/'
-	hdiutil create -fs HFS+ -srcfolder '$(TARGET_DIR)/' -volname LinearMouse '$(TARGET_DMG)'
+	hdiutil create -format UDBZ -srcfolder '$(TARGET_DIR)/' -volname LinearMouse '$(TARGET_DMG)'
+
+prepublish: package
+	@./scripts/sign-and-notarize
 
 .PHONY: all configure test build clean package
