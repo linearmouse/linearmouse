@@ -40,7 +40,7 @@ RESULT=$(xcrun notarytool submit "$DMG_FILE" --apple-id "$APPLE_ID" --password "
 
 echo "$RESULT" | jq .
 
-STATUS=$(echo "$RESULT" | jq .status)
+STATUS=$(echo "$RESULT" | jq -r .status)
 
 if [ "$STATUS" != "Accepted" ]; then
     exit 1
