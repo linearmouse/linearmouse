@@ -89,7 +89,7 @@
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
                title = "Bundle"
-               scriptText = "EXPORT_UUID=`uuidgen`&#10;EXPORT_PATH=&quot;$SRCROOT/build/Release&quot;&#10;&#10;mkdir -p &quot;$EXPORT_PATH&quot;&#10;&#10;/usr/bin/xcodebuild -exportArchive -archivePath &quot;$ARCHIVE_PATH&quot; -exportOptionsPlist &quot;$SRCROOT/ExportOptions.plist&quot; -exportPath &quot;$EXPORT_PATH&quot;&#10;&#10;open &quot;$EXPORT_PATH&quot;&#10;">
+               scriptText = "EXPORT_PATH=&quot;$SRCROOT/build/Release&quot;&#10;&#10;exec &gt; &quot;$EXPORT_PATH/post-archive.log&quot; 2&gt;&amp;1&#10;&#10;mkdir -p &quot;$EXPORT_PATH&quot;&#10;&#10;/usr/bin/xcodebuild -exportArchive -archivePath &quot;$ARCHIVE_PATH&quot; -exportOptionsPlist &quot;$SRCROOT/ExportOptions.plist&quot; -exportPath &quot;$EXPORT_PATH&quot;&#10;&#10;open &quot;$EXPORT_PATH&quot;&#10;">
                <EnvironmentBuildable>
                   <BuildableReference
                      BuildableIdentifier = "primary"

@@ -20,6 +20,7 @@ build:
 
 archive:
 	xcodebuild archive -project LinearMouse.xcodeproj -scheme LinearMouse
+	cat $(BUILD_DIR)/Release/post-archive.log
 
 clean:
 	rm -fr build
