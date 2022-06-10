@@ -12,6 +12,10 @@ on:
 jobs:
   build:
     runs-on: macos-12
+    env:
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      CODE_SIGN_IDENTITY: ${{ secrets.CODE_SIGN_IDENTITY }}
+      DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -39,9 +43,14 @@ jobs:
           security list-keychain -d user -s $KEYCHAIN_PATH
 
           # Configure code signing
-          KEYCHAIN_PATH=$KEYCHAIN_PATH make configure
+          make configure
       - name: Build
         run: make
+      - name: Prepublish
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          NOTARIZATION_PASSWORD: ${{ secrets.NOTARIZATION_PASSWORD }}
+        run: make prepublish
       - name: Upload dmg
         uses: "actions/upload-artifact@v2"
         with:

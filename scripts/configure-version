@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 VERSION=$(echo ${GITHUB_REF#refs/tags/v} | grep '^\d' || echo "sha-$(git rev-parse --short HEAD)")
 

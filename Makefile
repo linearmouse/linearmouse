@@ -1,4 +1,5 @@
 BUILD_DIR = $(CURDIR)/build
+ARCHIVE_PATH = $(CURDIR)/build/LinearMouse.xcarchive
 TARGET_DIR = $(CURDIR)/build/target
 TARGET_DMG = $(CURDIR)/build/LinearMouse.dmg
 
@@ -12,21 +13,27 @@ Signing.xcconfig:
 Version.xcconfig:
 	@./scripts/configure-version
 
-test:
-	xcodebuild test -project LinearMouse.xcodeproj -scheme LinearMouse
-
-build:
-	xcodebuild -configuration Release -target LinearMouse SYMROOT='$(BUILD_DIR)'
-
 clean:
 	rm -fr build
 
-package: build
-	rm -f '$(TARGET_DIR)'
+test:
+	xcodebuild test -project LinearMouse.xcodeproj -scheme LinearMouse
+
+package: $(TARGET_DMG)
+
+$(BUILD_DIR)/Release/LinearMouse.app:
+	xcodebuild archive -project LinearMouse.xcodeproj -scheme LinearMouse -archivePath '$(ARCHIVE_PATH)'
+	xcodebuild -exportArchive -archivePath '$(ARCHIVE_PATH)' -exportOptionsPlist ExportOptions.plist -exportPath '$(BUILD_DIR)/Release'
+
+$(TARGET_DMG): $(BUILD_DIR)/Release/LinearMouse.app
+	rm -rf '$(TARGET_DIR)'
 	rm -f '$(TARGET_DMG)'
 	mkdir '$(TARGET_DIR)'
 	cp -a '$(BUILD_DIR)/Release/LinearMouse.app' '$(TARGET_DIR)'
 	ln -s /Applications '$(TARGET_DIR)/'
-	hdiutil create -fs HFS+ -srcfolder '$(TARGET_DIR)/' -volname LinearMouse '$(TARGET_DMG)'
+	hdiutil create -format UDBZ -srcfolder '$(TARGET_DIR)/' -volname LinearMouse '$(TARGET_DMG)'
+
+prepublish: package
+	@./scripts/sign-and-notarize
 
 .PHONY: all configure test build clean package

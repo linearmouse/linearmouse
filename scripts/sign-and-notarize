@@ -1,0 +1,51 @@
+#!/bin/bash -e
+
+DMG_FILE="build/LinearMouse.dmg"
+
+cd $(dirname "$0")
+cd ..
+
+if [[ -z "$APPLE_ID" ]]; then
+    echo "APPLE_ID not specified" >&2
+    exit 1
+fi
+
+if [[ -z "$NOTARIZATION_PASSWORD" ]]; then
+    echo "NOTARIZATION_PASSWORD not specified" >&2
+    exit 1
+fi
+
+if [[ -z "$DEVELOPMENT_TEAM" ]]; then
+    DEVELOPMENT_TEAM=$(grep 'DEVELOPMENT_TEAM = ' Signing.xcconfig | head -1 | sed 's/^DEVELOPMENT_TEAM = //')
+fi
+
+if [[ -z "$DEVELOPMENT_TEAM" ]]; then
+    echo "DEVELOPMENT_TEAM not specified" >&2
+    exit 1
+fi
+
+if [ ! -f "$DMG_FILE" ]; then
+    echo "$DMG_FILE not found" >&2
+    exit 1
+fi
+
+echo "Code signing $DMG_FILE..."
+
+codesign -fs "$DEVELOPMENT_TEAM" "$DMG_FILE"
+
+echo "Notarizing $DMG_FILE..."
+
+RESULT=$(xcrun notarytool submit "$DMG_FILE" --apple-id "$APPLE_ID" --password "$NOTARIZATION_PASSWORD" --team-id "$DEVELOPMENT_TEAM" \
+    --wait --timeout 2h --output-format json)
+
+echo "$RESULT" | jq .
+
+STATUS=$(echo "$RESULT" | jq -r .status)
+
+if [ "$STATUS" != "Accepted" ]; then
+    exit 1
+fi
+
+echo "Stapling $DMG_FILE..."
+
+xcrun stapler staple $DMG_FILE
