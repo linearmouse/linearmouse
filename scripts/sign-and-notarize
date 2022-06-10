@@ -15,12 +15,12 @@ if [[ -z "$NOTARIZE_PASSWORD" ]]; then
     exit 1
 fi
 
-if [[ -z "$TEAM_ID" ]]; then
-    TEAM_ID=$(grep 'DEVELOPMENT_TEAM = ' Signing.xcconfig | head -1 | sed 's/^DEVELOPMENT_TEAM = //')
+if [[ -z "$DEVELOPMENT_TEAM" ]]; then
+    DEVELOPMENT_TEAM=$(grep 'DEVELOPMENT_TEAM = ' Signing.xcconfig | head -1 | sed 's/^DEVELOPMENT_TEAM = //')
 fi
 
-if [[ -z "$TEAM_ID" ]]; then
-    echo "TEAM_ID not specified" >&2
+if [[ -z "$DEVELOPMENT_TEAM" ]]; then
+    echo "DEVELOPMENT_TEAM not specified" >&2
     exit 1
 fi
 
@@ -31,11 +31,11 @@ fi
 
 echo "Code signing $DMG_FILE..."
 
-codesign -fs "$TEAM_ID" "$DMG_FILE"
+codesign -fs "$DEVELOPMENT_TEAM" "$DMG_FILE"
 
 echo "Notarizing $DMG_FILE..."
 
-RESULT=$(xcrun notarytool submit "$DMG_FILE" --apple-id "$APPLE_ID" --password "$NOTARIZE_PASSWORD" --team-id "$TEAM_ID" \
+RESULT=$(xcrun notarytool submit "$DMG_FILE" --apple-id "$APPLE_ID" --password "$NOTARIZE_PASSWORD" --team-id "$DEVELOPMENT_TEAM" \
     --wait --timeout 2h --output-format json)
 
 echo "$RESULT" | jq .
