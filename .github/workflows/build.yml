@@ -12,6 +12,9 @@ on:
 jobs:
   build:
     runs-on: macos-12
+    env:
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -43,6 +46,8 @@ jobs:
       - name: Build
         run: make
       - name: Prepublish
+        env:
+          NOTARIZATION_PASSWORD: ${{ secrets.NOTARIZATION_PASSWORD }}
         run: make prepublish
       - name: Upload dmg
         uses: "actions/upload-artifact@v2"
