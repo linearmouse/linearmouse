@@ -45,3 +45,7 @@ STATUS=$(echo "$RESULT" | jq -r .status)
 if [ "$STATUS" != "Accepted" ]; then
     exit 1
 fi
+
+echo "Stapling $DMG_FILE..."
+
+xcrun stapler staple $DMG_FILE
