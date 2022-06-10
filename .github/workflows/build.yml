@@ -14,6 +14,7 @@ jobs:
     runs-on: macos-12
     env:
       APPLE_ID: ${{ secrets.APPLE_ID }}
+      CODE_SIGN_IDENTITY: ${{ secrets.CODE_SIGN_IDENTITY }}
       DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
     steps:
       - name: Checkout repository
