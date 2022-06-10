@@ -6,10 +6,12 @@ You need to grant Accessibility permission at first launch.
 ## Upgrade from v0.6.1 or earlier
 
 **Code signing certificate has been updated after v0.6.1. If you upgrade LinearMouse from v0.6.1
-or earlier to a later version, you will also need to re-grant the permission.**
+or earlier to a newer version, you will also need to re-grant the permission.**
 
-Please remove LinearMouse from Accessibility permissions list and
+Please remove LinearMouse from Accessibility permissions and
 re-add it.
+
+https://user-images.githubusercontent.com/3000535/173102429-15e7aad3-e155-4047-9096-a0ab03ab3fb3.mp4
 
 You may also [do a full reset on Accessibility permissions](#reset-accessibility-permissions).
 
