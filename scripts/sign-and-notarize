@@ -10,8 +10,8 @@ if [[ -z "$APPLE_ID" ]]; then
     exit 1
 fi
 
-if [[ -z "$NOTARIZE_PASSWORD" ]]; then
-    echo "NOTARIZE_PASSWORD not specified" >&2
+if [[ -z "$NOTARIZATION_PASSWORD" ]]; then
+    echo "NOTARIZATION_PASSWORD not specified" >&2
     exit 1
 fi
 
@@ -35,7 +35,7 @@ codesign -fs "$DEVELOPMENT_TEAM" "$DMG_FILE"
 
 echo "Notarizing $DMG_FILE..."
 
-RESULT=$(xcrun notarytool submit "$DMG_FILE" --apple-id "$APPLE_ID" --password "$NOTARIZE_PASSWORD" --team-id "$DEVELOPMENT_TEAM" \
+RESULT=$(xcrun notarytool submit "$DMG_FILE" --apple-id "$APPLE_ID" --password "$NOTARIZATION_PASSWORD" --team-id "$DEVELOPMENT_TEAM" \
     --wait --timeout 2h --output-format json)
 
 echo "$RESULT" | jq .
