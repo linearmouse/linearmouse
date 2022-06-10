@@ -19,15 +19,13 @@ clean:
 test:
 	xcodebuild test -project LinearMouse.xcodeproj -scheme LinearMouse
 
-archive: $(BUILD_DIR)/Release/LinearMouse.app
-
 package: $(TARGET_DMG)
 
 $(BUILD_DIR)/Release/LinearMouse.app:
 	xcodebuild archive -project LinearMouse.xcodeproj -scheme LinearMouse -archivePath '$(ARCHIVE_PATH)'
 	xcodebuild -exportArchive -archivePath '$(ARCHIVE_PATH)' -exportOptionsPlist ExportOptions.plist -exportPath '$(BUILD_DIR)/Release'
 
-$(TARGET_DMG):
+$(TARGET_DMG): $(BUILD_DIR)/Release/LinearMouse.app
 	rm -rf '$(TARGET_DIR)'
 	rm -f '$(TARGET_DMG)'
 	mkdir '$(TARGET_DIR)'
