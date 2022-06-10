@@ -26,8 +26,6 @@ jobs:
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
-          security list-keychains -s "$KEYCHAIN_PATH"
-
           # import certificate from secrets
           echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
 
@@ -38,10 +36,10 @@ jobs:
 
           # import certificate to keychain
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH login.keychain
 
           # Configure code signing
-          KEYCHAIN_PATH=$KEYCHAIN_PATH make configure
+          make configure
       - name: Build
         run: make
       - name: Prepublish

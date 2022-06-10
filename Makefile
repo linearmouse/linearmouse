@@ -1,4 +1,5 @@
 BUILD_DIR = $(CURDIR)/build
+ARCHIVE_PATH = $(CURDIR)/build/LinearMouse.xcarchive
 TARGET_DIR = $(CURDIR)/build/target
 TARGET_DMG = $(CURDIR)/build/LinearMouse.dmg
 
@@ -19,8 +20,8 @@ build:
 	xcodebuild -configuration Release -target LinearMouse SYMROOT='$(BUILD_DIR)'
 
 archive:
-	xcodebuild archive -project LinearMouse.xcodeproj -scheme LinearMouse
-	cat $(BUILD_DIR)/Release/post-archive.log
+	xcodebuild archive -project LinearMouse.xcodeproj -scheme LinearMouse -archivePath '$(ARCHIVE_PATH)'
+	xcodebuild -exportArchive -archivePath '$(ARCHIVE_PATH)' -exportOptionsPlist ExportOptions.plist -exportPath '$(TARGET_DIR)/Release'
 
 clean:
 	rm -fr build

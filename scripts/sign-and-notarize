@@ -29,14 +29,9 @@ if [ ! -f "$DMG_FILE" ]; then
     exit 1
 fi
 
-if [[ -z "$KEYCHAIN_PATH" ]]; then
-    KEYCHAIN_PATH=login.keychain
-fi
-echo "KEYCHAIN_PATH: $KEYCHAIN_PATH" >&2
-
 echo "Code signing $DMG_FILE..."
 
-codesign -fs "$TEAM_ID" --keychain "$KEYCHAIN" "$DMG_FILE"
+codesign -fs "$TEAM_ID" "$DMG_FILE"
 
 echo "Notarizing $DMG_FILE..."
 
