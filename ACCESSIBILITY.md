@@ -3,7 +3,13 @@
 LinearMouse requires accessibility features to work properly.
 You need to grant Accessibility permission at first launch.
 
-## Upgrade from v0.6.1 or earlier
+## Grant Accessibility permission
+
+- [Upgrade from v0.6.1 or earlier versions](#upgrade-from-v061-or-earlier-versions)
+- [Fresh install](#fresh-install)
+
+
+### Upgrade from v0.6.1 or earlier versions
 
 **Code signing certificate has been updated after v0.6.1. If you upgrade LinearMouse from v0.6.1
 or earlier to a newer version, you will also need to re-grant the permission.**
@@ -11,19 +17,23 @@ or earlier to a newer version, you will also need to re-grant the permission.**
 Please remove LinearMouse from Accessibility permissions and
 re-add it.
 
-https://user-images.githubusercontent.com/3000535/173102429-15e7aad3-e155-4047-9096-a0ab03ab3fb3.mp4
+1. Click “Open Accessibility”.
+2. Click the lock to make changes.
+3. Select and remove “LinearMouse”.
+4. Click “Open Accessibility” again.
+5. Toggle “LinearMouse” on.
+
+https://user-images.githubusercontent.com/3000535/173173057-ac4c8590-a4fa-48af-8559-dc9953798ce7.mp4
 
 You may also [do a full reset on Accessibility permissions](#reset-accessibility-permissions).
 
-## How to grant Accessibility permission?
+### Fresh install
 
-If the window below pops up when LinearMouse launches, click “Open Accessibility”.
+1. Click “Open Accessibility”.
+2. Click the lock to make changes.
+3. Toggle “LinearMouse” on.
 
-https://user-images.githubusercontent.com/3000535/172860184-b9d2b43a-7630-4e8f-82de-3ca673ca8124.mp4
-
-Unlock and toggle LinearMouse on.
-
-https://user-images.githubusercontent.com/3000535/172860849-f5973c75-c336-47da-abc6-187e97c1e0d1.mp4
+https://user-images.githubusercontent.com/3000535/173173454-b4b8e7ae-5184-4b7a-ba72-f6ce8041f721.mp4
 
 ## Reset Accessibility permissions
 
