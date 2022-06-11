@@ -36,4 +36,24 @@ class AccessibilityPermission {
         }
         completion()
     }
+
+    static func reset() throws {
+        let command = "do shell script \"tccutil reset Accessibility\" with administrator privileges"
+
+        guard let script = NSAppleScript(source: command) else {
+            os_log("Failed to reset Accessibility permissions", log: Self.log, type: .error)
+            return
+        }
+
+        var error: NSDictionary?
+        script.executeAndReturnError(&error)
+
+        if let error = error {
+            throw AccessibilityPermissionError.resetError(error)
+        }
+    }
+}
+
+enum AccessibilityPermissionError: Error {
+    case resetError(NSDictionary)
 }

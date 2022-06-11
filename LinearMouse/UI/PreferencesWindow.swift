@@ -9,6 +9,8 @@ import Foundation
 import SwiftUI
 
 class PreferencesWindow: NSWindow {
+    static var shared = PreferencesWindow()
+
     init() {
         super.init(
             contentRect: .init(x: 0, y: 0, width: 500, height: 600),

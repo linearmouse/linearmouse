@@ -93,10 +93,6 @@ class StatusItem {
         return menu
     }()
 
-    private lazy var accessibilityPermissionWindow = AccessibilityPermissionWindow()
-
-    private lazy var preferencesWindow = PreferencesWindow()
-
     var defaultsSubscription: AnyCancellable!
 
     init() {
@@ -106,21 +102,12 @@ class StatusItem {
             button.target = self
         }
 
-        guard AccessibilityPermission.enabled else {
-            NSApp.activate(ignoringOtherApps: true)
-            self.accessibilityPermissionWindow.makeKeyAndOrderFront(nil)
-
-            AccessibilityPermission.pollingUntilEnabled {
-                self.setup()
-            }
-
-            return
+        AccessibilityPermission.pollingUntilEnabled {
+            self.initMenu()
         }
-
-        setup()
     }
 
-    private func setup() {
+    private func initMenu() {
         statusItem.menu = menu
 
         // Subscribe to the user settings and show / hide the menu icon.
@@ -138,25 +125,11 @@ class StatusItem {
             return
         }
 
-        NSApp.activate(ignoringOtherApps: true)
-        accessibilityPermissionWindow.makeKeyAndOrderFront(nil)
-    }
-
-    func moveAccessibilityWindowToTheTop() {
-        let frame = accessibilityPermissionWindow.frame
-        if let screenFrame = accessibilityPermissionWindow.screen?.visibleFrame {
-            accessibilityPermissionWindow.setFrame(.init(origin: .init(x: frame.origin.x, y: screenFrame.maxY), size: frame.size),
-                                                   display: true, animate: true)
-        }
-    }
-
-    func openPreferences() {
-        NSApp.activate(ignoringOtherApps: true)
-        preferencesWindow.makeKeyAndOrderFront(nil)
+        AccessibilityPermissionWindow.shared.bringToFront()
     }
 
     @objc private func openPreferencesAction() {
-        openPreferences()
+        PreferencesWindow.shared.bringToFront()
     }
 
     @objc func quitAction() {

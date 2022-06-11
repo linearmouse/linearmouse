@@ -19,6 +19,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var eventTap: EventTap?
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        if !AccessibilityPermission.enabled {
+            AccessibilityPermissionWindow.shared.bringToFront()
+        }
+
         AccessibilityPermission.pollingUntilEnabled {
             // register the start entry if the user grants the permission
             AutoStartManager.enable()
@@ -69,7 +73,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if flag {
             return true
         }
-        statusItem.openPreferences()
+
+        PreferencesWindow.shared.bringToFront()
+
         return false
     }
 

@@ -31,7 +31,7 @@
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>SUFeedURL</key>
-	<string>https://app.linearmouse.org/appcast.xml</string>
+	<string>https://staging-app.linearmouse.org/appcast.xml</string>
 	<key>SUScheduledCheckInterval</key>
 	<integer>604800</integer>
 </dict>

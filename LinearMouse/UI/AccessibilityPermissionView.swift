@@ -53,9 +53,8 @@ struct AccessibilityPermissionView: View {
     }
 
     func openAccessibility() {
-        NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
-
-        StatusItem.shared.moveAccessibilityWindowToTheTop()
+        AccessibilityPermission.prompt()
+        AccessibilityPermissionWindow.shared.moveAside()
     }
 
     func resetAllPermissions() {
@@ -75,23 +74,11 @@ struct AccessibilityPermissionView: View {
             return
         }
 
-        let command = "do shell script \"tccutil reset Accessibility\" with administrator privileges"
-
-        guard let script = NSAppleScript(source: command) else {
-            os_log("Failed to reset Accessibility permissions", log: Self.log, type: .error)
+        guard let _ = try? AccessibilityPermission.reset() else {
             return
         }
 
-        var error: NSDictionary?
-        script.executeAndReturnError(&error)
-        guard error == nil else {
-            return
-        }
-
-        NSApp.activate(ignoringOtherApps: true)
-        AccessibilityPermission.prompt()
-
-        StatusItem.shared.moveAccessibilityWindowToTheTop()
+        openAccessibility()
     }
 }
 

@@ -9,6 +9,8 @@ import Foundation
 import SwiftUI
 
 class AccessibilityPermissionWindow: NSWindow {
+    static var shared = AccessibilityPermissionWindow()
+
     init() {
         super.init(
             contentRect: .init(x: 0, y: 0, width: 450, height: 200),
@@ -26,10 +28,19 @@ class AccessibilityPermissionWindow: NSWindow {
         titleVisibility = .hidden
         titlebarAppearsTransparent = true
 
+        level = .floating
+
         center()
 
         AccessibilityPermission.pollingUntilEnabled {
             self.close()
+        }
+    }
+
+    func moveAside() {
+        if let screenFrame = screen?.visibleFrame {
+            let origin = CGPoint(x: screenFrame.maxX - frame.width, y: frame.minY)
+            setFrame(.init(origin: origin, size: frame.size), display: true, animate: true)
         }
     }
 }
@@ -41,6 +52,6 @@ extension AccessibilityPermissionWindow: NSWindowDelegate {
             exit(0)
         }
 
-        StatusItem.shared.openPreferences()
+        PreferencesWindow.shared.bringToFront()
     }
 }
