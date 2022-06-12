@@ -3,10 +3,10 @@
 "Get more help" = "Get more help";
 "Open Accessibility" = "Open Accessibility";
 "Reset all permissions..." = "Reset all permissions...";
-"Are you sure?" = "Are you sure?";
+"Are you sure?" = "Вы уверены?";
 "This will reset all granted Accessibility permissions in the system." = "This will reset all granted Accessibility permissions in the system.";
 "Reset" = "Reset";
-"Cancel" = "Cancel";
+"Cancel" = "Отмена";
 
 "Reverse scrolling:" = "Обратная прокрутка:";
 "Linear scrolling:" = "Линейная прокрутка:";
