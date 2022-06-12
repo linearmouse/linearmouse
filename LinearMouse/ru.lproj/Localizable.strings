@@ -1,17 +1,17 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
-"You need to grant Accessibility permission in System Preferences > Security & Pravicy > Accessibility." = "You need to grant Accessibility permission in System Preferences > Security & Pravicy > Accessibility.";
-"Get more help" = "Get more help";
-"Open Accessibility" = "Open Accessibility";
-"Reset all permissions..." = "Reset all permissions...";
+"LinearMouse needs Accessibility permission" = "LinearMouse требуется разрешение на Универсальный доступ";
+"You need to grant Accessibility permission in System Preferences > Security & Pravicy > Accessibility." = "Вам необходимо предоставить разрешение на Универсальный доступ в Системных настройках > Защита и безопасность > Универсальный доступ.";
+"Get more help" = "Получить дополнительную помощь";
+"Open Accessibility" = "Открыть Универсальный доступ";
+"Reset all permissions..." = "Сбросить все разрешения...";
 "Are you sure?" = "Вы уверены?";
-"This will reset all granted Accessibility permissions in the system." = "This will reset all granted Accessibility permissions in the system.";
-"Reset" = "Reset";
+"This will reset all granted Accessibility permissions in the system." = "Это приведет к сбросу всех предоставленных разрешений на Универсальный доступ в системе.";
+"Reset" = "Сбросить";
 "Cancel" = "Отмена";
 
 "Reverse scrolling:" = "Обратная прокрутка:";
 "Linear scrolling:" = "Линейная прокрутка:";
-"vertically only" = "vertically only";
-"horizontally only" = "horizontally only";
+"vertically only" = "только по вертикали";
+"horizontally only" = "только по горизонтали";
 "Universal back and forward:" = "Универсальные «назад» и «вперед»:";
 "on" = "вкл.";
 "off" = "выкл.";
@@ -26,15 +26,15 @@
 "Modifier Keys" = "Клавиши-модификаторы";
 
 "Reverse scrolling" = "Обратная прокрутка";
-"(vertically)" = "(vertically)";
+"(vertically)" = "(по вертикали)";
 "Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad." = "Изменяет направление прокрутки для мыши, не изменяя направление прокрутки для трекпада.";
-"(horizontally)" = "(horizontally)";
-"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
+"(horizontally)" = "(по горизонтали)";
+"Some gestures, such as swiping back and forward, may stop working." = "Некоторые жесты, такие как смахивание «назад» и «вперед», могут перестать работать.";
 "Enable linear scrolling" = "Включить линейную прокрутку";
 "Disable mouse scrolling acceleration." = "Отключает ускорение прокрутки мыши.";
 "Scroll" = "Прокрутка";
 "Enable universal back and forward" = "Включить универсальные «назад» и «вперед»";
-"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Преобразует боковые кнопки «назад» и «вперед» в жесты смахивания, чтобы сделать их работаспособными во всех приложениях.";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Преобразует боковые кнопки «назад» и «вперед» в жесты смахивания, чтобы сделать их работоспособными во всех приложениях.";
 "Show in menu bar" = "Показывать в строке меню";
 "To show the preferences, launch %@ again." = "Чтобы настройки отображались, перезапустите %@.";
 "Version: %@" = "Версия: %@";
@@ -43,7 +43,7 @@
 "Daily" = "Ежедневно";
 "Weekly" = "Еженедельно";
 "Monthly" = "Ежемесячно";
-"Include beta" = "Include beta";
+"Include beta" = "Включая бета-версии";
 "Homepage" = "Домашняя страница";
 "GitHub" = "GitHub";
 "Feedback" = "Обратная связь";
