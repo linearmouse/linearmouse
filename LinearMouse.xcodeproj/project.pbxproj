@@ -11,9 +11,9 @@
 		972AFD472851E6B0009B0CBF /* AccessibilityPermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972AFD462851E6B0009B0CBF /* AccessibilityPermission.swift */; };
 		972AFD492851E96D009B0CBF /* AccessibilityPermissionWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972AFD482851E96D009B0CBF /* AccessibilityPermissionWindow.swift */; };
 		97A46B17285444BF00C07C9B /* NSWindow+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A46B16285444BF00C07C9B /* NSWindow+Extensions.swift */; };
+		97C5D8FF2856E3CB00CBED2D /* GestureKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C5D8FE2856E3CB00CBED2D /* GestureKit */; };
 		B70A58F6284F987900E5C86E /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = B70A58F5284F987900E5C86E /* LaunchAtLogin */; };
 		B71392F426731645004C0173 /* LoginServiceKit in Frameworks */ = {isa = PBXBuildFile; productRef = B71392F326731645004C0173 /* LoginServiceKit */; };
-		B716F15E26BC10300052F551 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = B716F15D26BC10300052F551 /* LICENSE */; };
 		B716F16026BC10B80052F551 /* UniversalBackForward.swift in Sources */ = {isa = PBXBuildFile; fileRef = B716F15F26BC10B80052F551 /* UniversalBackForward.swift */; };
 		B73AC55127C29C7C00F7D3E8 /* Version in Frameworks */ = {isa = PBXBuildFile; productRef = B73AC55027C29C7C00F7D3E8 /* Version */; };
 		B754147E274E3AB0003CDAD0 /* LinearScrollingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B754147D274E3AB0003CDAD0 /* LinearScrollingTests.swift */; };
@@ -39,8 +39,6 @@
 		B7842925278D985600D207F0 /* AutoUpdateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7842924278D985600D207F0 /* AutoUpdateManager.swift */; };
 		B7842927278D9BBC00D207F0 /* CheckForUpdatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7842926278D9BBC00D207F0 /* CheckForUpdatesView.swift */; };
 		B784292D278DB06600D207F0 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = B784292C278DB06600D207F0 /* Sparkle */; };
-		B794BFE026BC0A73003B11EF /* TouchEvents.c in Sources */ = {isa = PBXBuildFile; fileRef = B794BFDC26BC0A73003B11EF /* TouchEvents.c */; };
-		B794BFE426BC0E5D003B11EF /* TouchSimulate.m in Sources */ = {isa = PBXBuildFile; fileRef = B794BFE326BC0E5D003B11EF /* TouchSimulate.m */; };
 		B7ADF97F2748991D0005B02D /* ReverseScrolling.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF97E2748991D0005B02D /* ReverseScrolling.swift */; };
 		B7ADF98127489CB00005B02D /* MouseDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF98027489CB00005B02D /* MouseDetector.swift */; };
 		B7ADF9832748B12B0005B02D /* LinearScrolling.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF9822748B12B0005B02D /* LinearScrolling.swift */; };
@@ -76,7 +74,7 @@
 		972AFD462851E6B0009B0CBF /* AccessibilityPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermission.swift; sourceTree = "<group>"; };
 		972AFD482851E96D009B0CBF /* AccessibilityPermissionWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermissionWindow.swift; sourceTree = "<group>"; };
 		97A46B16285444BF00C07C9B /* NSWindow+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSWindow+Extensions.swift"; sourceTree = "<group>"; };
-		B716F15D26BC10300052F551 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		97C5D8FD2856E3BE00CBED2D /* GestureKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = GestureKit; sourceTree = "<group>"; };
 		B716F15F26BC10B80052F551 /* UniversalBackForward.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniversalBackForward.swift; sourceTree = "<group>"; };
 		B716F16226BC18AB0052F551 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		B716F16326BC19350052F551 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
@@ -105,13 +103,7 @@
 		B77D7C1E27BB4D4D00825F54 /* IOHIDServiceClient+Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IOHIDServiceClient+Service.swift"; sourceTree = "<group>"; };
 		B7842924278D985600D207F0 /* AutoUpdateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoUpdateManager.swift; sourceTree = "<group>"; };
 		B7842926278D9BBC00D207F0 /* CheckForUpdatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckForUpdatesView.swift; sourceTree = "<group>"; };
-		B794BFDC26BC0A73003B11EF /* TouchEvents.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TouchEvents.c; sourceTree = "<group>"; };
-		B794BFDD26BC0A73003B11EF /* TouchEvents.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TouchEvents.h; sourceTree = "<group>"; };
-		B794BFDE26BC0A73003B11EF /* IOHIDEventData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IOHIDEventData.h; sourceTree = "<group>"; };
-		B794BFDF26BC0A73003B11EF /* IOHIDEventTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IOHIDEventTypes.h; sourceTree = "<group>"; };
 		B794BFE126BC0B2F003B11EF /* LinearMouse-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "LinearMouse-Bridging-Header.h"; sourceTree = "<group>"; };
-		B794BFE226BC0E45003B11EF /* TouchSimulate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TouchSimulate.h; sourceTree = "<group>"; };
-		B794BFE326BC0E5D003B11EF /* TouchSimulate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TouchSimulate.m; sourceTree = "<group>"; };
 		B7ADF97E2748991D0005B02D /* ReverseScrolling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReverseScrolling.swift; sourceTree = "<group>"; };
 		B7ADF98027489CB00005B02D /* MouseDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseDetector.swift; sourceTree = "<group>"; };
 		B7ADF9822748B12B0005B02D /* LinearScrolling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearScrolling.swift; sourceTree = "<group>"; };
@@ -169,6 +161,7 @@
 				B70A58F6284F987900E5C86E /* LaunchAtLogin in Frameworks */,
 				B784292D278DB06600D207F0 /* Sparkle in Frameworks */,
 				B7DD796426730A800067F1AD /* LoginServiceKit in Frameworks */,
+				97C5D8FF2856E3CB00CBED2D /* GestureKit in Frameworks */,
 				B71392F426731645004C0173 /* LoginServiceKit in Frameworks */,
 				B73AC55127C29C7C00F7D3E8 /* Version in Frameworks */,
 				B7F6C5F827A4F6A800E5400B /* LRUCache in Frameworks */,
@@ -185,16 +178,32 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		97C5D8F12856D9FE00CBED2D /* Modules */ = {
+			isa = PBXGroup;
+			children = (
+				97C5D8FD2856E3BE00CBED2D /* GestureKit */,
+			);
+			path = Modules;
+			sourceTree = "<group>";
+		};
+		97C5D8F72856E18900CBED2D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		B75A060F2671E9D800BEAF77 = {
 			isa = PBXGroup;
 			children = (
 				B7CD86AB27B38B26006C5C37 /* Config.xcconfig */,
 				B75A061A2671E9D800BEAF77 /* LinearMouse */,
-				B794BFDB26BC0A73003B11EF /* Touch */,
+				97C5D8F12856D9FE00CBED2D /* Modules */,
 				B716F16326BC19350052F551 /* LICENSE */,
 				B716F16226BC18AB0052F551 /* README.md */,
 				B7ADF9962748ED620005B02D /* LinearMouseUnitTests */,
 				B75A06192671E9D800BEAF77 /* Products */,
+				97C5D8F72856E18900CBED2D /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -264,20 +273,6 @@
 				B77D7C1E27BB4D4D00825F54 /* IOHIDServiceClient+Service.swift */,
 			);
 			path = Device;
-			sourceTree = "<group>";
-		};
-		B794BFDB26BC0A73003B11EF /* Touch */ = {
-			isa = PBXGroup;
-			children = (
-				B794BFDC26BC0A73003B11EF /* TouchEvents.c */,
-				B794BFDD26BC0A73003B11EF /* TouchEvents.h */,
-				B794BFDE26BC0A73003B11EF /* IOHIDEventData.h */,
-				B794BFDF26BC0A73003B11EF /* IOHIDEventTypes.h */,
-				B794BFE226BC0E45003B11EF /* TouchSimulate.h */,
-				B794BFE326BC0E5D003B11EF /* TouchSimulate.m */,
-				B716F15D26BC10300052F551 /* LICENSE */,
-			);
-			path = Touch;
 			sourceTree = "<group>";
 		};
 		B7ADF9862748B61D0005B02D /* MouseDetector */ = {
@@ -361,6 +356,7 @@
 				B7F6C5F727A4F6A800E5400B /* LRUCache */,
 				B73AC55027C29C7C00F7D3E8 /* Version */,
 				B70A58F5284F987900E5C86E /* LaunchAtLogin */,
+				97C5D8FE2856E3CB00CBED2D /* GestureKit */,
 			);
 			productName = LinearMouse;
 			productReference = B75A06182671E9D800BEAF77 /* LinearMouse.app */;
@@ -467,7 +463,6 @@
 				B76173442675AD8700CC9412 /* Localizable.strings in Resources */,
 				B75A06232671E9DA00BEAF77 /* Preview Assets.xcassets in Resources */,
 				B75A06202671E9DA00BEAF77 /* Assets.xcassets in Resources */,
-				B716F15E26BC10300052F551 /* LICENSE in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -515,14 +510,12 @@
 				B7ADF9882748B6390005B02D /* DefaultMouseDetector.swift in Sources */,
 				B77A160C26744DB400E99A5D /* StatusItem.swift in Sources */,
 				B7B1D08D26B2FD6C00F48176 /* AppStorage.swift in Sources */,
-				B794BFE426BC0E5D003B11EF /* TouchSimulate.m in Sources */,
 				B7BE467027B0278200168BB9 /* ToolbarTabView.swift in Sources */,
 				B7ADF98D2748E5010005B02D /* ScrollWheelEventView.swift in Sources */,
 				B7ADF9852748B25A0005B02D /* ModifierActions.swift in Sources */,
 				B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */,
 				B7ADF97F2748991D0005B02D /* ReverseScrolling.swift in Sources */,
 				B7842927278D9BBC00D207F0 /* CheckForUpdatesView.swift in Sources */,
-				B794BFE026BC0A73003B11EF /* TouchEvents.c in Sources */,
 				B7B6D83E26B2745300B0D247 /* ModifierKeyActionPicker.swift in Sources */,
 				B7BD5183267300DC001FE742 /* AutoStartManager.swift in Sources */,
 				B77D7C1F27BB4D4D00825F54 /* IOHIDServiceClient+Service.swift in Sources */,
@@ -914,6 +907,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		97C5D8FE2856E3CB00CBED2D /* GestureKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = GestureKit;
+		};
 		B70A58F5284F987900E5C86E /* LaunchAtLogin */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B70A58F4284F987900E5C86E /* XCRemoteSwiftPackageReference "LaunchAtLogin" */;

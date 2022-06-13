@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import GestureKit
 import os.log
 
 extension CGMouseButton {
@@ -73,9 +74,13 @@ class UniversalBackForward: EventTransformer {
         os_log("Convert to swipe: %{public}@", log: Self.log, type: .debug, targetBundleIdentifierString)
         switch mouseButton {
         case .back:
-            simulateSwipeLeft()
+            if let event = GestureEvent(navigationSwipeSource: nil, direction: .swipeLeft) {
+                event.post(tap: .cghidEventTap)
+            }
         case .forward:
-            simulateSwipeRight()
+            if let event = GestureEvent(navigationSwipeSource: nil, direction: .swipeRight) {
+                event.post(tap: .cghidEventTap)
+            }
         default:
             break
         }

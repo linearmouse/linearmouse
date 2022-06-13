@@ -88,7 +88,6 @@ Thank you to all the people who already contributed to LinearMouse!
 
 ## Credits
 
-* [Touch](https://github.com/calftrail/Touch/) (GPLv2)
 * [Mac Mouse Fix](https://github.com/noah-nuebling/mac-mouse-fix)
 
 ## Buy me a coffee
