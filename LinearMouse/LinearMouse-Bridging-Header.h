@@ -7,7 +7,6 @@
 
 #include <CoreGraphics/CoreGraphics.h>
 #include <IOKit/hidsystem/IOHIDEventSystemClient.h>
-#include "../Touch/TouchSimulate.h"
 
 typedef void (^IOHIDServiceClientBlock)(void *, void *, IOHIDServiceClientRef);
 
