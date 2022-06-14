@@ -7,39 +7,37 @@
 
 import Foundation
 import os.log
+import PointerKit
 
 class Device {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Device")
 
-    private static let fallbackPointerAccelerationInt = 45056
+    private static let fallbackPointerAcceleration = 0.6875
 
-    private let serviceClient: IOHIDServiceClient
-    private let initialPointerResolution: Int
-    private var pointerAccelerationType: String
-    private var device: IOHIDDevice
+    private weak var manager: DeviceManager?
+    let device: PointerDevice
 
-    init?(serviceClient: IOHIDServiceClient) {
-        self.serviceClient = serviceClient
-        guard let pointerResolution: Int = serviceClient.getProperty(kIOHIDPointerResolutionKey) else {
-            os_log("HIDPointerResolution not found: %{public}@", log: Self.log, type: .debug, String(describing: serviceClient))
+    private let initialPointerResolution: Double
+
+    init?(_ manager: DeviceManager, _ device: PointerDevice) {
+        self.manager = manager
+        self.device = device
+
+        guard let pointerResolution = device.pointerResolution else {
+            os_log("HIDPointerResolution not found: %{public}@",
+                   log: Self.log, type: .debug,
+                   String(describing: device))
             return nil
         }
         self.initialPointerResolution = pointerResolution
-        pointerAccelerationType = serviceClient.getProperty(kIOHIDPointerAccelerationTypeKey) ?? "HIDMouseAcceleration"
-        guard let device = serviceClient.device else {
-            os_log("IOHIDDevice not found: %{public}@", log: Self.log, type: .debug, String(describing: serviceClient))
-            return nil
-        }
-        self.device = device
-        os_log("Device initialized: %{public}@: HIDPointerResolution=%{public}d, HIDPointerAccelerationType=%{public}@",
-               log: Self.log, type: .debug,
-               String(describing: serviceClient),
-               pointerResolution,
-               pointerAccelerationType)
-    }
 
-    func serviceClientEquals(serviceClient: IOHIDServiceClient) -> Bool {
-        self.serviceClient == serviceClient
+        device.observeInput(using: inputCallback).tieToLifetime(of: self)
+
+        os_log("Device initialized: %{public}@: HIDPointerResolution=%{public}f, HIDPointerAccelerationType=%{public}@",
+               log: Self.log, type: .debug,
+               String(describing: device),
+               pointerResolution,
+               device.pointerAccelerationType ?? "(unknown)")
     }
 
     enum Category {
@@ -51,35 +49,30 @@ class Device {
     }
 
     lazy var category: Category = {
-        if let vendorID: Int = serviceClient.getProperty(kIOHIDVendorIDKey),
-           let productID: Int = serviceClient.getProperty(kIOHIDProductIDKey) {
+        if let vendorID: Int = device.vendorID,
+           let productID: Int = device.productID {
             if isAppleMagicMouse(vendorID: vendorID, productID: productID) {
                 return .mouse
             }
         }
-        if IOHIDServiceClientConformsTo(serviceClient,
-                                        UInt32(kHIDPage_Digitizer),
-                                        UInt32(kHIDUsage_Dig_TouchPad)) != 0 {
+        if device.confirmsTo(kHIDPage_Digitizer, kHIDUsage_Dig_TouchPad) {
             return .trackpad
         }
         return .mouse
     }()
 
     var pointerAcceleration: Double {
-        let pointerAccelerationInt: Int = serviceClient.getProperty(pointerAccelerationType) ?? Self.fallbackPointerAccelerationInt
-        return max(0, min(Double(pointerAccelerationInt) / 65536, 20))
+        device.pointerAcceleration ?? Self.fallbackPointerAcceleration
     }
 
     var pointerSensitivity: Double {
-        guard let pointerResolution: Double = serviceClient.getProperty(kIOHIDPointerResolutionKey) else {
-            return 1600
-        }
-        return 2000 - (pointerResolution / 65536)
+        device.pointerResolution.map { 2000 - $0 } ?? 1600
     }
 
     var shouldApplyPointerSpeedSettings: Bool {
         guard category == .mouse else {
-            os_log("Device ignored for pointer speed settings: %@: Category is %@", log: Self.log, type: .debug,
+            os_log("Device ignored for pointer speed settings: %@: Category is %@",
+                   log: Self.log, type: .debug,
                    String(describing: self), String(describing: category))
             return false
         }
@@ -90,42 +83,72 @@ class Device {
         guard shouldApplyPointerSpeedSettings else {
             return
         }
-        let accelerationInt = disableAcceleration ? -65536 : Int(acceleration * 65536)
-        let sensitivity = max(5, min(sensitivity, 1990))
-        let resolution = Int((2000 - sensitivity) * 65536)
-        os_log("Update speed for device: %{public}@, %{public}@ = %{public}d, HIDPointerResolution = %{public}d",
-               log: Self.log, type: .debug,
-               String(describing: serviceClient), pointerAccelerationType, accelerationInt, resolution)
-        serviceClient.setProperty(resolution, forKey: kIOHIDPointerResolutionKey)
-        serviceClient.setProperty(accelerationInt, forKey: pointerAccelerationType)
+
+        if disableAcceleration {
+            os_log("Disable acceleration and sensitivity for device: %{public}@",
+                   log: Self.log, type: .debug,
+                   String(describing: device))
+            device.pointerAcceleration = -1
+        } else {
+            os_log("Update speed for device: %{public}@, acceleration = %{public}f, sensitivity = %{public}f",
+                   log: Self.log, type: .debug,
+                   String(describing: device),
+                   acceleration,
+                   sensitivity)
+            device.pointerAcceleration = acceleration
+            device.pointerResolution = 2000 - sensitivity
+        }
     }
 
     func restorePointerSpeedToInitialValue() {
         guard shouldApplyPointerSpeedSettings else {
             return
         }
-        let accelerationInt = DeviceManager.shared.getSystemProperty(forKey: pointerAccelerationType) ?? Self.fallbackPointerAccelerationInt
-        let resolution = initialPointerResolution
-        os_log("Revert speed for device: %{public}@, %{public}@ = %{public}d, HIDPointerResolution = %{public}d",
+
+        let systemPointerAcceleration = (DeviceManager.shared.getSystemProperty(forKey: device.pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey) as IOFixed?)
+            .map { Double($0) / 65536 } ?? Self.fallbackPointerAcceleration
+
+        os_log("Revert speed for device: %{public}@, acceleration = %{public}f, sensitivity = %{public}f",
                log: Self.log, type: .debug,
-               String(describing: serviceClient), pointerAccelerationType, accelerationInt, resolution)
-        serviceClient.setProperty(resolution, forKey: kIOHIDPointerResolutionKey)
-        serviceClient.setProperty(accelerationInt, forKey: pointerAccelerationType)
+               String(describing: device),
+               systemPointerAcceleration,
+               initialPointerResolution)
+
+        device.pointerResolution = initialPointerResolution
+        device.pointerAcceleration = systemPointerAcceleration
+    }
+
+    private func inputCallback(device: PointerDevice, value: IOHIDValue) {
+        guard let manager = manager else {
+            return
+        }
+
+        if let lastActiveDevice = manager._lastActiveDevice {
+            if lastActiveDevice == self {
+                return
+            }
+        }
+
+        manager._lastActiveDevice = self
+
+        os_log("Last active device changed: %{public}@, Category=%{public}@",
+               log: Self.log, type: .debug,
+               String(describing: device), String(describing: category))
     }
 }
 
 extension Device: Hashable {
     static func == (lhs: Device, rhs: Device) -> Bool {
-        lhs.serviceClient == rhs.serviceClient
+        lhs.device == rhs.device
     }
 
     func hash(into hasher: inout Hasher) {
-        hasher.combine(serviceClient)
+        hasher.combine(device)
     }
 }
 
 extension Device: CustomStringConvertible {
     var description: String {
-        serviceClient.description
+        device.description
     }
 }

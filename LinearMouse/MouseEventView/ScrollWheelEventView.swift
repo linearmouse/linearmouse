@@ -16,7 +16,7 @@ class ScrollWheelEventView: MouseEventView {
 
     override init(_ event: CGEvent) {
         assert(event.type == .scrollWheel)
-        ioHidEvent = CGEventCopyIOHIDEvent(event)?.takeRetainedValue()
+        ioHidEvent = CGEventCopyIOHIDEvent(event)
         super.init(event)
     }
 

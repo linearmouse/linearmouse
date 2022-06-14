@@ -1,5 +1,5 @@
 //
-//  CGEventType+Extensions.swift
+//  GestureEvent.swift
 //
 //
 //  Created by Jiahao Lu on 2022/6/13.
