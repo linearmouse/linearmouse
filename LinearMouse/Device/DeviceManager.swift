@@ -7,112 +7,73 @@
 
 import Foundation
 import os.log
+import PointerKit
 
 class DeviceManager {
     static let shared = DeviceManager()
 
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "DeviceManager")
 
-    private var paused = false
-    private let eventSystemClient = IOHIDEventSystemClientCreate(kCFAllocatorDefault).takeRetainedValue()
+    private let manager = PointerDeviceManager()
     private var devices = Set<Device>()
-
-    private let propertyChangedCallback: IOHIDEventSystemClientPropertyChangedCallback = { target, _, property, value in
-        let this = Unmanaged<DeviceManager>.fromOpaque(target!).takeUnretainedValue()
-        this.propertyChangedCallback(property! as String, value)
-    }
 
     private var lastPointerAcceleration: Double?
     private var lastPointerSensitivity: Double?
     private var lastDisablePointerAcceleration: Bool?
 
-    private weak var _lastActiveDevice: Device?
+    weak var _lastActiveDevice: Device?
     weak var lastActiveDevice: Device? { _lastActiveDevice }
 
     init() {
-        setupServiceClients()
-        setupPropertyChangedCallback()
-        setupActiveDeviceChangedCallback()
-        IOHIDEventSystemClientScheduleWithDispatchQueue(eventSystemClient, DispatchQueue.main)
+        manager.observeDeviceAdded(using: deviceAdded).tieToLifetime(of: self)
+        manager.observeDeviceRemoved(using: deviceRemoved).tieToLifetime(of: self)
+
+        for property in [kIOHIDMouseAccelerationType, kIOHIDTrackpadAccelerationType, kIOHIDPointerResolutionKey] {
+            manager.observePropertyChanged(property: property) { [self] _ in
+                os_log("Property %@ changed", log: Self.log, type: .debug, property)
+                renewPointerSpeed()
+            }.tieToLifetime(of: self)
+        }
+
+        resume()
     }
 
     func pause() {
         restorePointerSpeedToInitialValue()
-        paused = true
+        manager.stopObservation()
     }
 
     func resume() {
-        paused = false
-        discoverServiceClients()
+        manager.startObservation()
         renewPointerSpeed()
     }
 
-    private func setupServiceClients() {
-        let usageMouse = [
-            kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop,
-            kIOHIDDeviceUsageKey: kHIDUsage_GD_Mouse
-        ] as CFDictionary
-        let usagePointer = [
-            kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop,
-            kIOHIDDeviceUsageKey: kHIDUsage_GD_Pointer
-        ] as CFDictionary
-        let matches = [usageMouse, usagePointer] as CFArray
-        IOHIDEventSystemClientSetMatchingMultiple(eventSystemClient, matches)
-        IOHIDEventSystemClientRegisterDeviceMatchingBlock(eventSystemClient, { _, _, serviceClient in
-            DispatchQueue.main.async {
-                if let serviceClient = serviceClient {
-                    if let device = self.add(serviceClient: serviceClient) {
-                        self.renewPointerSpeed(forDevice: device)
-                    }
-                }
-            }
-        }, nil, nil)
-        discoverServiceClients()
-    }
+    private func deviceAdded(_: PointerDeviceManager, device: PointerDevice) {
+        guard let device = Device(self, device) else {
+            os_log("Unsupported device: %{public}@",
+                   log: Self.log, type: .debug,
+                   String(describing: device))
+            return
+        }
 
-    private func discoverServiceClients() {
-        let serviceClients = IOHIDEventSystemClientCopyServices(eventSystemClient) as! [IOHIDServiceClient]
-        for serviceClient in serviceClients {
-            add(serviceClient: serviceClient)
-        }
-    }
-
-    private func setupPropertyChangedCallback() {
-        for property in [kIOHIDMouseAccelerationType, kIOHIDTrackpadAccelerationType, kIOHIDPointerResolutionKey] {
-            IOHIDEventSystemClientRegisterPropertyChangedCallback(eventSystemClient,
-                                                                  property as CFString,
-                                                                  propertyChangedCallback,
-                                                                  Unmanaged.passUnretained(self).toOpaque(),
-                                                                  nil)
-        }
-    }
-
-    @discardableResult
-    private func add(serviceClient: IOHIDServiceClient) -> Device? {
-        guard !devices.contains(where: { $0.serviceClientEquals(serviceClient: serviceClient) }) else {
-            return nil
-        }
-        guard let device = Device(serviceClient: serviceClient) else {
-            os_log("Unsupported device: %{public}@", log: Self.log, type: .debug, String(describing: serviceClient))
-            return nil
-        }
-        IOHIDServiceClientRegisterRemovalBlock(serviceClient, { _, _, _ in
-            DispatchQueue.main.async {
-                self.devices.remove(device)
-                os_log("Device removed: %{public}@", log: Self.log, type: .debug, String(describing: device))
-            }
-        }, nil, nil)
         devices.insert(device)
-        os_log("Device added: %{public}@", log: Self.log, type: .debug, String(describing: device))
-        return device
+
+        os_log("Device added: %{public}@",
+               log: Self.log, type: .debug,
+               String(describing: device))
+
+        renewPointerSpeed(forDevice: device)
     }
 
-    private func propertyChangedCallback(_ property: String, _ value: AnyObject?) {
-        let valueDesc = value == nil ? "<nil>" : String(describing: value!)
-        os_log("Property %@ changed to %@", log: Self.log, type: .debug, property, valueDesc)
-        DispatchQueue.main.async {
-            self.renewPointerSpeed()
-        }
+    private func deviceRemoved(_: PointerDeviceManager, device: PointerDevice) {
+        // TODO: Better approach?
+
+        devices.filter { $0.device == device }
+            .forEach { devices.remove($0) }
+
+        os_log("Device removed: %{public}@",
+               log: Self.log, type: .debug,
+               String(describing: device))
     }
 
     func updatePointerSpeed(acceleration: Double, sensitivity: Double, disableAcceleration: Bool) {
@@ -125,9 +86,6 @@ class DeviceManager {
     }
 
     func renewPointerSpeed() {
-        guard !self.paused else {
-            return
-        }
         if let acceleration = lastPointerAcceleration,
            let sensitivity = lastPointerSensitivity,
            let disableAcceleration = lastDisablePointerAcceleration {
@@ -136,9 +94,6 @@ class DeviceManager {
     }
 
     func renewPointerSpeed(forDevice device: Device) {
-        guard !self.paused else {
-            return
-        }
         if let acceleration = lastPointerAcceleration,
            let sensitivity = lastPointerSensitivity,
            let disableAcceleration = lastDisablePointerAcceleration {
@@ -190,23 +145,23 @@ class DeviceManager {
         return value
     }
 
-    private func setupActiveDeviceChangedCallback() {
-        // TODO: Use IOHIDDeviceRegisterInputReportCallback?
-        IOHIDEventSystemClientRegisterEventBlock(eventSystemClient, { _, _, sender, event in
-            guard let serviceClient = sender else {
-                return
-            }
-            if let lastActiveDevice = self._lastActiveDevice {
-                if lastActiveDevice.serviceClientEquals(serviceClient: serviceClient) {
-                    return
-                }
-            }
-            if let device = self.devices.first(where: { $0.serviceClientEquals(serviceClient: serviceClient) }) {
-                self._lastActiveDevice = device
-                os_log("Last active device changed: %{public}@, Category=%{public}@",
-                       log: Self.log, type: .debug,
-                       String(describing: device), String(describing: device.category))
-            }
-        }, nil, nil)
-    }
+//    private func setupActiveDeviceChangedCallback() {
+//        // TODO: Use IOHIDDeviceRegisterInputReportCallback?
+//        IOHIDEventSystemClientRegisterEventBlock(eventSystemClient, { _, _, sender, event in
+//            guard let serviceClient = sender else {
+//                return
+//            }
+//            if let lastActiveDevice = self._lastActiveDevice {
+//                if lastActiveDevice.serviceClientEquals(serviceClient: serviceClient) {
+//                    return
+//                }
+//            }
+//            if let device = self.devices.first(where: { $0.serviceClientEquals(serviceClient: serviceClient) }) {
+//                self._lastActiveDevice = device
+//                os_log("Last active device changed: %{public}@, Category=%{public}@",
+//                       log: Self.log, type: .debug,
+//                       String(describing: device), String(describing: device.category))
+//            }
+//        }, nil, nil)
+//    }
 }
