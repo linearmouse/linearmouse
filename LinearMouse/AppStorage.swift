@@ -1,6 +1,9 @@
 // MIT License
 // Copyright (c) 2021-2022 Jiahao Lu
 
+// Modified from https://github.com/xavierLowmiller/AppStorage/
+// Copyright (c) 2020 Xavier Lowmiller
+
 import SwiftUI
 
 /// A property wrapper type that reflects a value from `UserDefaults` and
