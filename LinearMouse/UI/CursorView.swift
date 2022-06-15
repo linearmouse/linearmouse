@@ -41,78 +41,78 @@ struct CursorView: View {
     }()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Spacer()
-
-            Form {
-                Slider(value: $defaults.cursorAcceleration,
-                       in: 0.0...20.0) {
-                    Text("Acceleration")
-                }
-                HStack {
-                    Text("(0–20)")
-                        .controlSize(.small)
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                    TextField("",
-                         value: $defaults.cursorAcceleration,
-                         formatter: accelerationFormatter)
-                        .textFieldStyle(.roundedBorder)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 80)
-                }
-
-                Slider(value: sensitivityInDouble,
-                       in: 0...1) {
-                    Text("Sensitivity")
-                }.padding(.top)
-                HStack {
-                    Text("(0–1)")
-                        .controlSize(.small)
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                    TextField("",
-                              value: sensitivityInDouble,
-                              formatter: sensitivityFormatter)
-                        .textFieldStyle(.roundedBorder)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 80)
-                }
-            }
-            .disabled(defaults.linearMovementOn)
-
-            Spacer()
-
-            Toggle(isOn: $defaults.linearMovementOn) {
-                Text("Disable cursor acceleration & sensitivity")
-            }
-
-            Spacer()
-
-            VStack(alignment: .leading) {
-                if #available(macOS 11.0, *) {
-                    Text("You may also press ⌃⇧⌘Z to revert to system defaults.")
-                        .controlSize(.small)
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    Button("Revert to system defaults") {
-                        revertSpeed()
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                Form {
+                    Slider(value: $defaults.cursorAcceleration,
+                           in: 0.0...20.0) {
+                        Text("Acceleration")
                     }
-                    .keyboardShortcut("z", modifiers: [.control, .command, .shift])
-                    .disabled(defaults.linearMovementOn)
-                } else {
-                    Button("Revert to system defaults") {
-                        revertSpeed()
+                    HStack {
+                        Text("(0–20)")
+                            .controlSize(.small)
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        TextField("",
+                             value: $defaults.cursorAcceleration,
+                             formatter: accelerationFormatter)
+                            .textFieldStyle(.roundedBorder)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 80)
                     }
-                    .disabled(defaults.linearMovementOn)
+
+                    Slider(value: sensitivityInDouble,
+                           in: 0...1) {
+                        Text("Sensitivity")
+                    }.padding(.top)
+                    HStack {
+                        Text("(0–1)")
+                            .controlSize(.small)
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        TextField("",
+                                  value: sensitivityInDouble,
+                                  formatter: sensitivityFormatter)
+                            .textFieldStyle(.roundedBorder)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 80)
+                    }
+                }
+                .disabled(defaults.linearMovementOn)
+
+                Spacer()
+
+                Toggle(isOn: $defaults.linearMovementOn) {
+                    Text("Disable cursor acceleration & sensitivity")
+                }
+
+                Spacer()
+
+                VStack(alignment: .leading) {
+                    if #available(macOS 11.0, *) {
+                        Text("You may also press ⌃⇧⌘Z to revert to system defaults.")
+                            .controlSize(.small)
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        Button("Revert to system defaults") {
+                            revertSpeed()
+                        }
+                        .keyboardShortcut("z", modifiers: [.control, .command, .shift])
+                        .disabled(defaults.linearMovementOn)
+                    } else {
+                        Button("Revert to system defaults") {
+                            revertSpeed()
+                        }
+                        .disabled(defaults.linearMovementOn)
+                    }
                 }
             }
-
-            Spacer()
         }
-        .padding(20)
-        .frame(width: 400)
+        .padding(40)
+        .frame(minWidth: 500,
+               maxWidth: .infinity,
+               alignment: .topLeading)
     }
 
     private func revertSpeed() {
