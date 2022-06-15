@@ -1,9 +1,5 @@
-//
-//  IOHIDServiceClient+Service.swift
-//  LinearMouse
-//
-//  Created by Jiahao Lu on 2022/2/15.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Foundation
 
@@ -30,7 +26,12 @@ extension IOHIDServiceClient {
             return service
         }
         var iterator = io_iterator_t()
-        guard IORegistryEntryCreateIterator(service, "IOService", IOOptionBits(kIORegistryIterateRecursively | kIORegistryIterateParents), &iterator) == KERN_SUCCESS else {
+        guard IORegistryEntryCreateIterator(
+            service,
+            "IOService",
+            IOOptionBits(kIORegistryIterateRecursively | kIORegistryIterateParents),
+            &iterator
+        ) == KERN_SUCCESS else {
             IOObjectRelease(service)
             return nil
         }

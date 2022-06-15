@@ -1,12 +1,8 @@
-//
-//  Comparable+Extensions.swift
-//  
-//
-//  Created by Jiahao Lu on 2022/6/14.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 extension Comparable {
-    internal func clamp(_ x: Self, _ y: Self) -> Self {
+    func clamp(_ x: Self, _ y: Self) -> Self {
         let low = min(x, y)
         let high = max(x, y)
 

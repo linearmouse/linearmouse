@@ -1,9 +1,5 @@
-//
-//  ModifierActions.swift
-//  LinearMouse
-//
-//  Created by lujjjh on 2021/11/20.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Foundation
 
@@ -30,9 +26,9 @@ class ModifierActions: EventTransformer {
             (.maskCommand, commandAction),
             (.maskShift, shiftAction),
             (.maskAlternate, alternateAction),
-            (.maskControl, controlAction),
+            (.maskControl, controlAction)
         ]
-        for case (let flag, let action) in actions {
+        for case let (flag, action) in actions {
             if event.flags.contains(flag) {
                 if handleModifierKeyAction(for: event, action: action) {
                     event.flags.remove(flag)

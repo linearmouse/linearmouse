@@ -3,7 +3,7 @@ ARCHIVE_PATH = $(CURDIR)/build/LinearMouse.xcarchive
 TARGET_DIR = $(CURDIR)/build/target
 TARGET_DMG = $(CURDIR)/build/LinearMouse.dmg
 
-all: configure clean test package
+all: configure clean lint test package
 
 configure: Signing.xcconfig Version.xcconfig
 
@@ -15,6 +15,10 @@ Version.xcconfig:
 
 clean:
 	rm -fr build
+
+lint:
+	swiftformat --lint .
+	swiftlint .
 
 test:
 	xcodebuild test -project LinearMouse.xcodeproj -scheme LinearMouse

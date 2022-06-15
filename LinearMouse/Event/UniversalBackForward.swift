@@ -1,9 +1,5 @@
-//
-//  SideButtonFixer.swift
-//  LinearMouse
-//
-//  Created by lujjjh on 2021/8/5.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Foundation
 import GestureKit
@@ -30,7 +26,7 @@ class UniversalBackForward: EventTransformer {
         "com.valvesoftware.dota2",
         "com.vmware.fusion",
         "org.virtualbox.app.VirtualBox",
-        "tv.parsec.www",
+        "tv.parsec.www"
     ]
 
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "UniversalBackForward")
@@ -42,6 +38,7 @@ class UniversalBackForward: EventTransformer {
         return Self.ignoreSet.contains(bundleIdentifier)
     }
 
+    // swiftlint:disable cyclomatic_complexity
     func transform(_ event: CGEvent) -> CGEvent? {
         let view = MouseEventView(event)
         guard let mouseButton = view.mouseButton else {

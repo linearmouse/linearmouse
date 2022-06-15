@@ -1,9 +1,5 @@
-//
-//  ObservationToken.swift
-//
-//
-//  Created by Jiahao Lu on 2022/6/14.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 public final class ObservationToken {
     private let cancellationClosure: () -> Void
@@ -16,7 +12,7 @@ public final class ObservationToken {
         cancellationClosure()
     }
 
-    private var lifetimeAssociation: LifetimeAssociation? = nil
+    private var lifetimeAssociation: LifetimeAssociation?
 
     @discardableResult
     public func tieToLifetime(of weaklyHeldObject: AnyObject) -> Self {

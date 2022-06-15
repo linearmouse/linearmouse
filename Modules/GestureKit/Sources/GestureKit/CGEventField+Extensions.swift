@@ -1,17 +1,13 @@
-//
-//  CGEventField+Extensions.swift
-//  
-//
-//  Created by Jiahao Lu on 2022/6/13.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import CoreGraphics
 
 /// - SeeAlso: https://github.com/WebKit/WebKit/blob/ab59722dc517c798f7d88bfe4dcb7b33b8473e7e/Tools/TestRunnerShared/spi/CoreGraphicsTestSPI.h#L39
 extension CGEventField {
-    static let gestureHIDType = Self.init(rawValue: 110)!
-    static let gestureSwipeValue = Self.init(rawValue: 115)!
-    static let gesturePhase = Self.init(rawValue: 132)!
+    static let gestureHIDType = Self(rawValue: 110)!
+    static let gestureSwipeValue = Self(rawValue: 115)!
+    static let gesturePhase = Self(rawValue: 132)!
 }
 
 /// - SeeAlso: https://github.com/WebKit/WebKit/blob/ab59722dc517c798f7d88bfe4dcb7b33b8473e7e/Tools/TestRunnerShared/spi/CoreGraphicsTestSPI.h#L87

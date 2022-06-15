@@ -1,13 +1,9 @@
-//
-//  WheelEventView.swift
-//  LinearMouse
-//
-//  Created by lujjjh on 2021/11/20.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Foundation
-import SceneKit
 import os.log
+import SceneKit
 
 class ScrollWheelEventView: MouseEventView {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ScrollWheelEventView")
@@ -108,8 +104,18 @@ class ScrollWheelEventView: MouseEventView {
         // In case that Int(deltaX), Int(deltaY) = 0 when 0 < abs(deltaX), abs(deltaY) < 0.5.
         let deltaXY = newValue.transpose[0]
         let normalizedDeltaXY = sign(deltaXY) * max(_simd_round_d2(abs(deltaXY)), [1, 1])
-        (deltaX, deltaXFixedPt, deltaXPt, ioHidScrollX) = (Int64(normalizedDeltaXY.x), newValue[0][1], newValue[0][2], newValue[0][3])
-        (deltaY, deltaYFixedPt, deltaYPt, ioHidScrollY) = (Int64(normalizedDeltaXY.y), newValue[1][1], newValue[1][2], newValue[1][3])
+        (deltaX, deltaXFixedPt, deltaXPt, ioHidScrollX) = (
+            Int64(normalizedDeltaXY.x),
+            newValue[0][1],
+            newValue[0][2],
+            newValue[0][3]
+        )
+        (deltaY, deltaYFixedPt, deltaYPt, ioHidScrollY) = (
+            Int64(normalizedDeltaXY.y),
+            newValue[1][1],
+            newValue[1][2],
+            newValue[1][3]
+        )
         os_log("transform: oldValue=%{public}@, matrix=%{public}@, newValue=%{public}@", log: Self.log, type: .debug,
                String(describing: oldValue),
                String(describing: matrix),

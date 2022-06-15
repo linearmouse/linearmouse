@@ -1,9 +1,5 @@
-//
-//  PointerDeviceManager.swift
-//
-//
-//  Created by Jiahao Lu on 2022/6/13.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Foundation
 import PointerKitC
@@ -29,11 +25,10 @@ public final class PointerDeviceManager {
     }
 }
 
-
 // MARK: Observation API
 
-extension PointerDeviceManager {
-    public func observeDeviceAdded(using closure: @escaping DeviceAddedClosure) -> ObservationToken {
+public extension PointerDeviceManager {
+    func observeDeviceAdded(using closure: @escaping DeviceAddedClosure) -> ObservationToken {
         let id = observations.deviceAdded.insert(closure)
 
         return ObservationToken { [weak self] in
@@ -41,7 +36,7 @@ extension PointerDeviceManager {
         }
     }
 
-    public func observeDeviceRemoved(using closure: @escaping DeviceRemovedClosure) -> ObservationToken {
+    func observeDeviceRemoved(using closure: @escaping DeviceRemovedClosure) -> ObservationToken {
         let id = observations.deviceRemoved.insert(closure)
 
         return ObservationToken { [weak self] in
@@ -49,8 +44,8 @@ extension PointerDeviceManager {
         }
     }
 
-    public func observePropertyChanged(property: String,
-                                       using closure: @escaping PropertyChangedClosure) -> ObservationToken {
+    func observePropertyChanged(property: String,
+                                using closure: @escaping PropertyChangedClosure) -> ObservationToken {
         let id = observations.propertyChanged.insert((property: property, closure: closure))
 
         return ObservationToken { [weak self] in
@@ -58,7 +53,6 @@ extension PointerDeviceManager {
         }
     }
 }
-
 
 // MARK: Device observation
 
@@ -79,14 +73,14 @@ extension PointerDeviceManager {
         }
     }
 
-    private static let propertyChangedCallback:
-    IOHIDEventSystemClientPropertyChangedCallback = { target, _, property, value in
-        guard let target = target else { return }
-        guard let property = property else { return }
+    private static let propertyChangedCallback: IOHIDEventSystemClientPropertyChangedCallback =
+        { target, _, property, value in
+            guard let target = target else { return }
+            guard let property = property else { return }
 
-        let this = Unmanaged<PointerDeviceManager>.fromOpaque(target).takeUnretainedValue()
-        this.propertyChangedCallback(property as String, value)
-    }
+            let this = Unmanaged<PointerDeviceManager>.fromOpaque(target).takeUnretainedValue()
+            this.propertyChangedCallback(property as String, value)
+        }
 
     /**
      Start observing device additions and removals.
@@ -117,13 +111,14 @@ extension PointerDeviceManager {
                 }
             }
 
-            for property in observations.propertyChanged.values.map({ $0.property }) {
+            for property in observations.propertyChanged.values.map(\.property) {
                 IOHIDEventSystemClientRegisterPropertyChangedCallback(
                     eventSystemClient,
                     property as CFString,
                     Self.propertyChangedCallback,
                     Unmanaged.passUnretained(self).toOpaque(),
-                    nil)
+                    nil
+                )
             }
         }
     }
@@ -168,12 +163,10 @@ extension PointerDeviceManager {
         }
     }
 
-    private func propertyChangedCallback(_ property: String, _ value: AnyObject?) {
+    private func propertyChangedCallback(_ property: String, _: AnyObject?) {
         queue.async { [self] in
-            for (_, (observingProperty, callback)) in observations.propertyChanged {
-                if property == observingProperty {
-                    callback(self)
-                }
+            for (_, (observingProperty, callback)) in observations.propertyChanged where property == observingProperty {
+                callback(self)
             }
         }
     }

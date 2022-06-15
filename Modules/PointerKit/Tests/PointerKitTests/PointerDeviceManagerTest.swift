@@ -1,12 +1,8 @@
-//
-//  PointerDeviceManagerTest.swift
-//  
-//
-//  Created by Jiahao Lu on 2022/6/14.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
-import XCTest
 @testable import PointerKit
+import XCTest
 
 class PointerDeviceManagerTest: XCTestCase {
     class Scope {}
@@ -41,7 +37,7 @@ class PointerDeviceManagerTest: XCTestCase {
 
                 debugPrint("stopped")
 
-                Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { _ in 
+                Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { _ in
                     debugPrint("restarted")
 
                     manager.startObservation()

@@ -1,9 +1,5 @@
-//
-//  DeviceManager.swift
-//  LinearMouse
-//
-//  Created by Jiahao Lu on 2022/2/14.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Foundation
 import os.log
@@ -81,7 +77,11 @@ class DeviceManager {
         lastPointerSensitivity = sensitivity
         lastDisablePointerAcceleration = disableAcceleration
         for device in devices {
-            device.updatePointerSpeed(acceleration: acceleration, sensitivity: sensitivity, disableAcceleration: disableAcceleration)
+            device.updatePointerSpeed(
+                acceleration: acceleration,
+                sensitivity: sensitivity,
+                disableAcceleration: disableAcceleration
+            )
         }
     }
 
@@ -89,7 +89,11 @@ class DeviceManager {
         if let acceleration = lastPointerAcceleration,
            let sensitivity = lastPointerSensitivity,
            let disableAcceleration = lastDisablePointerAcceleration {
-            updatePointerSpeed(acceleration: acceleration, sensitivity: sensitivity, disableAcceleration: disableAcceleration)
+            updatePointerSpeed(
+                acceleration: acceleration,
+                sensitivity: sensitivity,
+                disableAcceleration: disableAcceleration
+            )
         }
     }
 
@@ -97,7 +101,11 @@ class DeviceManager {
         if let acceleration = lastPointerAcceleration,
            let sensitivity = lastPointerSensitivity,
            let disableAcceleration = lastDisablePointerAcceleration {
-            device.updatePointerSpeed(acceleration: acceleration, sensitivity: sensitivity, disableAcceleration: disableAcceleration)
+            device.updatePointerSpeed(
+                acceleration: acceleration,
+                sensitivity: sensitivity,
+                disableAcceleration: disableAcceleration
+            )
         }
     }
 

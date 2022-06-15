@@ -1,18 +1,14 @@
-//
-//  StatusMenu.swift
-//  LinearMouse
-//
-//  Created by lujjjh on 2021/6/12.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Combine
 import SwiftUI
 
-fileprivate struct StatusView: View {
+private struct StatusView: View {
     @ObservedObject var defaults = AppDefaults.shared
 
     var reverseScrollingStatus: some View {
-        if defaults.reverseScrollingVerticallyOn && defaults.reverseScrollingHorizontallyOn {
+        if defaults.reverseScrollingVerticallyOn, defaults.reverseScrollingHorizontallyOn {
             return Text("on")
         }
         if defaults.reverseScrollingVerticallyOn {
@@ -42,8 +38,8 @@ fileprivate struct StatusView: View {
                     if defaults.linearScrollingOn {
                         Text(String(defaults.scrollLines))
                         Text(defaults.scrollLines == 1
-                                ? "line"
-                                : "lines")
+                            ? "line"
+                            : "lines")
                     } else {
                         Text("off")
                     }
@@ -82,12 +78,14 @@ class StatusItem {
             .init(
                 title: String(format: NSLocalizedString("%@ Preferences...", comment: ""), LinearMouse.appName),
                 action: #selector(openPreferencesAction),
-                keyEquivalent: ","),
+                keyEquivalent: ","
+            ),
             .separator(),
             .init(
                 title: String(format: NSLocalizedString("Quit %@", comment: ""), LinearMouse.appName),
                 action: #selector(quitAction),
-                keyEquivalent: "q")
+                keyEquivalent: "q"
+            )
         ]
         menu.items.forEach { $0.target = self }
         return menu
@@ -98,7 +96,7 @@ class StatusItem {
     init() {
         if let button = statusItem.button {
             button.image = NSImage(named: "MenuIcon")
-            button.action = #selector(self.statusItemAction(sender:))
+            button.action = #selector(statusItemAction(sender:))
             button.target = self
         }
 
@@ -117,10 +115,10 @@ class StatusItem {
                 self.update(defaults)
             }
         }
-        self.update(defaults)
+        update(defaults)
     }
 
-    @objc private func statusItemAction(sender: NSStatusBarButton) {
+    @objc private func statusItemAction(sender _: NSStatusBarButton) {
         guard !AccessibilityPermission.enabled else {
             return
         }

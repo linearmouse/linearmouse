@@ -1,9 +1,5 @@
-//
-//  AccessibilityPermissionWindow.swift
-//  LinearMouse
-//
-//  Created by Jiahao Lu on 2022/6/9.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Foundation
 import SwiftUI
@@ -46,7 +42,7 @@ class AccessibilityPermissionWindow: NSWindow {
 }
 
 extension AccessibilityPermissionWindow: NSWindowDelegate {
-    func windowWillClose(_ notification: Notification) {
+    func windowWillClose(_: Notification) {
         guard AccessibilityPermission.enabled else {
             NSApp.terminate(nil)
             exit(0)

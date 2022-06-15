@@ -1,9 +1,5 @@
-//
-//  HyperLink.swift
-//  LinearMouse
-//
-//  Created by lujjjh on 2021/6/12.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import SwiftUI
 
@@ -20,9 +16,9 @@ struct HyperLink<Content>: View where Content: View {
     var body: some View {
         Button(action: {
             NSWorkspace.shared.open(url)
-        }) {
+        }, label: {
             content()
-        }
+        })
         .foregroundColor(.accentColor)
         .buttonStyle(PlainButtonStyle())
         .onHover(perform: { hovering in

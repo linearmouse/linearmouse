@@ -1,14 +1,10 @@
-//
-//  DefaultMouseDetector.swift
-//  LinearMouse
-//
-//  Created by lujjjh on 2021/11/20.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Foundation
 
 class DefaultMouseDetector: MouseDetector {
-    func isMouseEvent(_ event: CGEvent) -> Bool {
+    func isMouseEvent(_: CGEvent) -> Bool {
         DeviceManager.shared.lastActiveDevice?.category == .mouse
     }
 }

@@ -1,9 +1,5 @@
-//
-//  Dictionary.swift
-//  
-//
-//  Created by Jiahao Lu on 2022/6/14.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Foundation
 

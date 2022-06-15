@@ -1,9 +1,5 @@
-//
-//  GeneralView.swift
-//  LinearMouse
-//
-//  Created by lujjjh on 2021/7/30.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import SwiftUI
 
@@ -23,12 +19,12 @@ struct GeneralView: View {
                                     .foregroundColor(.secondary)
                             }
                             Text("""
-                                Reverse the scroll direction for a mouse \
-                                but won't reverse the scroll direction \
-                                for a Trackpad.
-                                """)
-                                .controlSize(.small)
-                                .foregroundColor(.secondary)
+                            Reverse the scroll direction for a mouse \
+                            but won't reverse the scroll direction \
+                            for a Trackpad.
+                            """)
+                            .controlSize(.small)
+                            .foregroundColor(.secondary)
                         }
                     }
                 }
@@ -43,11 +39,11 @@ struct GeneralView: View {
                                     .foregroundColor(.secondary)
                             }
                             Text("""
-                                Some gestures, such as swiping back and forward, \
-                                may stop working.
-                                """)
-                                .controlSize(.small)
-                                .foregroundColor(.secondary)
+                            Some gestures, such as swiping back and forward, \
+                            may stop working.
+                            """)
+                            .controlSize(.small)
+                            .foregroundColor(.secondary)
                         }
                     }
                 }
@@ -56,18 +52,19 @@ struct GeneralView: View {
                     VStack(alignment: .leading) {
                         Text("Enable linear scrolling")
                         Text("""
-                            Disable mouse scrolling acceleration.
-                            """)
-                            .controlSize(.small)
-                            .foregroundColor(.secondary)
+                        Disable mouse scrolling acceleration.
+                        """)
+                        .controlSize(.small)
+                        .foregroundColor(.secondary)
                     }
                 }
                 HStack {
                     Text("Scroll")
                     Stepper(
                         value: $defaults.scrollLines,
-                        in: 1...10,
-                        step: 1) {
+                        in: 1 ... 10,
+                        step: 1
+                    ) {
                         Text(String(defaults.scrollLines))
                     }
                     Text(defaults.scrollLines == 1 ? "line" : "lines")
@@ -81,10 +78,10 @@ struct GeneralView: View {
                     VStack(alignment: .leading) {
                         Text("Enable universal back and forward")
                         Text("""
-                            Convert the back and forward side buttons to \
-                            swiping gestures to allow universal back and \
-                            forward functionality.
-                            """)
+                        Convert the back and forward side buttons to \
+                        swiping gestures to allow universal back and \
+                        forward functionality.
+                        """)
                         .controlSize(.small)
                         .foregroundColor(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -95,11 +92,11 @@ struct GeneralView: View {
                     VStack(alignment: .leading) {
                         Text("Show in menu bar")
                         Text("""
-                            To show the preferences, launch \
-                            \(LinearMouse.appName) again.
-                            """)
-                            .controlSize(.small)
-                            .foregroundColor(.secondary)
+                        To show the preferences, launch \
+                        \(LinearMouse.appName) again.
+                        """)
+                        .controlSize(.small)
+                        .foregroundColor(.secondary)
                     }
                 }
 
