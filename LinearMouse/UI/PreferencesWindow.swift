@@ -19,6 +19,7 @@ class PreferencesWindow: NSWindow {
 
         title = String(format: NSLocalizedString("%@ Preferences", comment: ""), LinearMouse.appName)
 
+        titleVisibility = .hidden
         titlebarAppearsTransparent = true
 
         level = .floating

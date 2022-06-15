@@ -7,7 +7,7 @@ struct GeneralView: View {
     @ObservedObject var defaults = AppDefaults.shared
 
     var body: some View {
-        ScrollView {
+        DetailView {
             VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading) {
                     Toggle(isOn: $defaults.reverseScrollingVerticallyOn) {
@@ -122,7 +122,6 @@ struct GeneralView: View {
                 }
             }
         }
-        .padding(40)
         .frame(minWidth: 500,
                maxWidth: .infinity,
                alignment: .topLeading)

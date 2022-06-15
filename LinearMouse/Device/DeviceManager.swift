@@ -5,7 +5,7 @@ import Foundation
 import os.log
 import PointerKit
 
-class DeviceManager {
+class DeviceManager: ObservableObject {
     static let shared = DeviceManager()
 
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "DeviceManager")
@@ -17,8 +17,7 @@ class DeviceManager {
     private var lastPointerSensitivity: Double?
     private var lastDisablePointerAcceleration: Bool?
 
-    weak var _lastActiveDevice: Device?
-    weak var lastActiveDevice: Device? { _lastActiveDevice }
+    @Published var lastActiveDevice: Device?
 
     init() {
         manager.observeDeviceAdded(using: deviceAdded).tieToLifetime(of: self)
@@ -65,7 +64,12 @@ class DeviceManager {
         // TODO: Better approach?
 
         devices.filter { $0.device == device }
-            .forEach { devices.remove($0) }
+            .forEach {
+                if lastActiveDevice == $0 {
+                    lastActiveDevice = nil
+                }
+                devices.remove($0)
+            }
 
         os_log("Device removed: %{public}@",
                log: Self.log, type: .debug,
@@ -152,24 +156,4 @@ class DeviceManager {
         }
         return value
     }
-
-//    private func setupActiveDeviceChangedCallback() {
-//        // TODO: Use IOHIDDeviceRegisterInputReportCallback?
-//        IOHIDEventSystemClientRegisterEventBlock(eventSystemClient, { _, _, sender, event in
-//            guard let serviceClient = sender else {
-//                return
-//            }
-//            if let lastActiveDevice = self._lastActiveDevice {
-//                if lastActiveDevice.serviceClientEquals(serviceClient: serviceClient) {
-//                    return
-//                }
-//            }
-//            if let device = self.devices.first(where: { $0.serviceClientEquals(serviceClient: serviceClient) }) {
-//                self._lastActiveDevice = device
-//                os_log("Last active device changed: %{public}@, Category=%{public}@",
-//                       log: Self.log, type: .debug,
-//                       String(describing: device), String(describing: device.category))
-//            }
-//        }, nil, nil)
-//    }
 }

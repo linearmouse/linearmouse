@@ -36,6 +36,10 @@ class Device {
                device.pointerAccelerationType ?? "(unknown)")
     }
 
+    var name: String {
+        device.name
+    }
+
     enum Category {
         case mouse, trackpad
     }
@@ -120,13 +124,13 @@ class Device {
             return
         }
 
-        if let lastActiveDevice = manager._lastActiveDevice {
+        if let lastActiveDevice = manager.lastActiveDevice {
             if lastActiveDevice == self {
                 return
             }
         }
 
-        manager._lastActiveDevice = self
+        manager.lastActiveDevice = self
 
         os_log("Last active device changed: %{public}@, Category=%{public}@",
                log: Self.log, type: .debug,
