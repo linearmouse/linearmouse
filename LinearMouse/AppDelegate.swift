@@ -19,6 +19,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var eventTap: EventTap?
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        guard Environment.isRunningApp else { return }
+
         if !AccessibilityPermission.enabled {
             AccessibilityPermissionWindow.shared.bringToFront()
         }
@@ -70,6 +72,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        guard Environment.isRunningApp else { return true }
+
         if flag {
             return true
         }
@@ -80,6 +84,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        guard Environment.isRunningApp else { return }
+
         DeviceManager.shared.pause()
     }
 }
