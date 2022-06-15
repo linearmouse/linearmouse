@@ -25,6 +25,8 @@ class PreferencesWindow: NSWindow {
 
         titlebarAppearsTransparent = true
 
+        level = .floating
+
         contentView = NSHostingView(rootView: PreferencesView())
 
         center()
