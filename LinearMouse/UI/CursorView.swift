@@ -1,9 +1,5 @@
-//
-//  CursorView.swift
-//  LinearMouse
-//
-//  Created by lujjjh on 2021/12/9.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import SwiftUI
 
@@ -45,7 +41,7 @@ struct CursorView: View {
             VStack(alignment: .leading, spacing: 20) {
                 Form {
                     Slider(value: $defaults.cursorAcceleration,
-                           in: 0.0...20.0) {
+                           in: 0.0 ... 20.0) {
                         Text("Acceleration")
                     }
                     HStack {
@@ -54,15 +50,15 @@ struct CursorView: View {
                             .foregroundColor(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                         TextField("",
-                             value: $defaults.cursorAcceleration,
-                             formatter: accelerationFormatter)
+                                  value: $defaults.cursorAcceleration,
+                                  formatter: accelerationFormatter)
                             .textFieldStyle(.roundedBorder)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 80)
                     }
 
                     Slider(value: sensitivityInDouble,
-                           in: 0...1) {
+                           in: 0 ... 1) {
                         Text("Sensitivity")
                     }.padding(.top)
                     HStack {

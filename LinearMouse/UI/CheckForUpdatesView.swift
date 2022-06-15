@@ -1,13 +1,9 @@
-//
-//  CheckForUpdatesView.swift
-//  LinearMouse
-//
-//  Created by Jiahao Lu on 2022/1/11.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Combine
-import SwiftUI
 import Sparkle
+import SwiftUI
 
 final class UpdaterViewModel: ObservableObject {
     static let shared = UpdaterViewModel()
@@ -18,16 +14,17 @@ final class UpdaterViewModel: ObservableObject {
             controller.updater.automaticallyChecksForUpdates = automaticallyChecksForUpdates
         }
     }
-    @Published var updateCheckInterval: TimeInterval = 604800 {
+
+    @Published var updateCheckInterval: TimeInterval = 604_800 {
         didSet {
             controller.updater.updateCheckInterval = updateCheckInterval
         }
     }
 
     private let controller = AutoUpdateManager.shared.controller
-    private var canCheckForUpdatesSubscription: AnyCancellable! = nil
-    private var automaticallyChecksForUpdatesSubscription: AnyCancellable! = nil
-    private var updateCheckIntervalSubscription: AnyCancellable! = nil
+    private var canCheckForUpdatesSubscription: AnyCancellable!
+    private var automaticallyChecksForUpdatesSubscription: AnyCancellable!
+    private var updateCheckIntervalSubscription: AnyCancellable!
 
     init() {
         canCheckForUpdatesSubscription = controller.updater.publisher(for: \.canCheckForUpdates)
@@ -73,8 +70,8 @@ struct CheckForUpdatesView: View {
                 }
                 Picker("", selection: $updaterViewModel.updateCheckInterval) {
                     Text("Daily").tag(TimeInterval(86400))
-                    Text("Weekly").tag(TimeInterval(604800))
-                    Text("Monthly").tag(TimeInterval(2629800))
+                    Text("Weekly").tag(TimeInterval(604_800))
+                    Text("Monthly").tag(TimeInterval(2_629_800))
                 }
                 .frame(width: 120)
                 .disabled(!updaterViewModel.automaticallyChecksForUpdates)

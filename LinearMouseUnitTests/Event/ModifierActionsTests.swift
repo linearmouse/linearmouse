@@ -1,12 +1,8 @@
-//
-//  ModifierActionsTests.swift
-//  LinearMouseUnitTests
-//
-//  Created by lujjjh on 2021/11/24.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
-import XCTest
 @testable import LinearMouse
+import XCTest
 
 class ModifierActionsTests: XCTestCase {
     func testModifierActions() throws {

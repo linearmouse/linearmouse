@@ -1,9 +1,5 @@
-//
-//  EventView.swift
-//  LinearMouse
-//
-//  Created by lujjjh on 2021/11/20.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import AppKit
 import Foundation
@@ -28,7 +24,7 @@ class MouseEventView {
     var targetBundleIdentifier: String? {
         let pid = pid_t(event.getIntegerValueField(.eventTargetUnixProcessID))
         guard let bundleIdentifier = Self.bundleIdentifierCache.value(forKey: pid)
-                ?? NSRunningApplication(processIdentifier: pid)?.bundleIdentifier
+            ?? NSRunningApplication(processIdentifier: pid)?.bundleIdentifier
         else {
             return nil
         }

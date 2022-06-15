@@ -1,13 +1,9 @@
-//
-//  AppDelegate.swift
-//  LinearMouse
-//
-//  Created by lujjjh on 2021/6/10.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Combine
-import SwiftUI
 import os.log
+import SwiftUI
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -18,7 +14,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var defaultsSubscription: AnyCancellable!
     private var eventTap: EventTap?
 
-    func applicationDidFinishLaunching(_ aNotification: Notification) {
+    func applicationDidFinishLaunching(_: Notification) {
         guard Environment.isRunningApp else { return }
 
         if !AccessibilityPermission.enabled {
@@ -43,35 +39,47 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             self.update(defaults)
 
-            NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.sessionDidResignActiveNotification, object: nil,
-                                                              queue: nil, using: { _ in
-                DispatchQueue.main.async {
-                    os_log("Session inactive", log: Self.log, type: .debug)
-                    if let eventTap = self.eventTap {
-                        eventTap.disable()
+            NSWorkspace.shared.notificationCenter.addObserver(
+                forName: NSWorkspace.sessionDidResignActiveNotification,
+                object: nil,
+                queue: nil,
+                using: { _ in
+                    DispatchQueue.main.async {
+                        os_log("Session inactive", log: Self.log, type: .debug)
+                        if let eventTap = self.eventTap {
+                            eventTap.disable()
+                        }
+                        DeviceManager.shared.pause()
                     }
-                    DeviceManager.shared.pause()
                 }
-            })
+            )
 
-            NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.sessionDidBecomeActiveNotification, object: nil,
-                                                              queue: nil, using: { _ in
-                DispatchQueue.main.async {
-                    os_log("Session active", log: Self.log, type: .debug)
-                    if let eventTap = self.eventTap {
-                        eventTap.enable()
+            NSWorkspace.shared.notificationCenter.addObserver(
+                forName: NSWorkspace.sessionDidBecomeActiveNotification,
+                object: nil,
+                queue: nil,
+                using: { _ in
+                    DispatchQueue.main.async {
+                        os_log("Session active", log: Self.log, type: .debug)
+                        if let eventTap = self.eventTap {
+                            eventTap.enable()
+                        }
+                        DeviceManager.shared.resume()
                     }
-                    DeviceManager.shared.resume()
                 }
-            })
+            )
         }
     }
 
     func update(_ defaults: AppDefaults) {
-        DeviceManager.shared.updatePointerSpeed(acceleration: defaults.cursorAcceleration, sensitivity: defaults.cursorSensitivity, disableAcceleration: defaults.linearMovementOn)
+        DeviceManager.shared.updatePointerSpeed(
+            acceleration: defaults.cursorAcceleration,
+            sensitivity: defaults.cursorSensitivity,
+            disableAcceleration: defaults.linearMovementOn
+        )
     }
 
-    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+    func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         guard Environment.isRunningApp else { return true }
 
         if flag {
@@ -83,7 +91,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return false
     }
 
-    func applicationWillTerminate(_ notification: Notification) {
+    func applicationWillTerminate(_: Notification) {
         guard Environment.isRunningApp else { return }
 
         DeviceManager.shared.pause()

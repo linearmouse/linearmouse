@@ -1,9 +1,5 @@
-//
-//  LifetimeAssociation.swift
-//
-//
-//  Created by Jiahao Lu on 2022/6/13.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 // https://github.com/sindresorhus/Defaults/blob/54f970b9d7c269193756599c7ae5318878dcab1a/Sources/Defaults/util.swift
 
@@ -17,16 +13,22 @@
  The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+ */
 
 import Foundation
 
 final class AssociatedObject<T: Any> {
     subscript(index: Any) -> T? {
         get {
-            return objc_getAssociatedObject(index, Unmanaged.passUnretained(self).toOpaque()) as! T?
+            // swiftlint:disable force_cast
+            objc_getAssociatedObject(index, Unmanaged.passUnretained(self).toOpaque()) as! T?
         } set {
-            objc_setAssociatedObject(index, Unmanaged.passUnretained(self).toOpaque(), newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            objc_setAssociatedObject(
+                index,
+                Unmanaged.passUnretained(self).toOpaque(),
+                newValue,
+                .OBJC_ASSOCIATION_RETAIN_NONATOMIC
+            )
         }
     }
 }
@@ -40,7 +42,7 @@ final class LifetimeAssociation {
         var deinitHandler: () -> Void
 
         init(for weaklyHeldObject: AnyObject, deinitHandler: @escaping () -> Void) {
-            self.object = weaklyHeldObject
+            object = weaklyHeldObject
             self.deinitHandler = deinitHandler
         }
 
@@ -74,7 +76,7 @@ final class LifetimeAssociation {
      - Parameter owner: The object whose lifetime extends the target object's lifetime.
      - Parameter deinitHandler: An optional closure to call when either `owner` or the resulting `LifetimeAssociation` is deallocated.
      */
-    init(of target: AnyObject, with owner: AnyObject, deinitHandler: @escaping () -> Void = { }) {
+    init(of target: AnyObject, with owner: AnyObject, deinitHandler: @escaping () -> Void = {}) {
         let wrappedObject = ObjectLifetimeTracker(for: target, deinitHandler: deinitHandler)
 
         let associatedObjects = LifetimeAssociation.associatedObjects[owner] ?? []

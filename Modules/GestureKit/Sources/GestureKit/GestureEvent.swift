@@ -1,9 +1,5 @@
-//
-//  GestureEvent.swift
-//
-//
-//  Created by Jiahao Lu on 2022/6/13.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import AppKit
 import CoreGraphics

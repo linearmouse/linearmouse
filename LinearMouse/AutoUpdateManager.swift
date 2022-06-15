@@ -1,9 +1,5 @@
-//
-//  AutoUpdateManager.swift
-//  LinearMouse
-//
-//  Created by Jiahao Lu on 2022/1/11.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Foundation
 import Sparkle
@@ -12,23 +8,27 @@ import Version
 class AutoUpdateManager: NSObject {
     static let shared = AutoUpdateManager()
 
-    private var _controller: SPUStandardUpdaterController! = nil
+    private var _controller: SPUStandardUpdaterController!
     var controller: SPUStandardUpdaterController {
         _controller
     }
 
     override init() {
         super.init()
-        _controller = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: self, userDriverDelegate: nil)
+        _controller = SPUStandardUpdaterController(
+            startingUpdater: true,
+            updaterDelegate: self,
+            userDriverDelegate: nil
+        )
     }
 }
 
 extension AutoUpdateManager: SPUUpdaterDelegate {
-    func allowedChannels(for updater: SPUUpdater) -> Set<String> {
-        AppDefaults.shared.betaChannelOn ? ["beta"] :  []
+    func allowedChannels(for _: SPUUpdater) -> Set<String> {
+        AppDefaults.shared.betaChannelOn ? ["beta"] : []
     }
 
-    func versionComparator(for updater: SPUUpdater) -> SUVersionComparison? {
+    func versionComparator(for _: SPUUpdater) -> SUVersionComparison? {
         SemanticVersioningComparator()
     }
 }

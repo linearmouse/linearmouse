@@ -1,9 +1,5 @@
-//
-//  Device.swift
-//  LinearMouse
-//
-//  Created by Jiahao Lu on 2022/2/14.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Foundation
 import os.log
@@ -29,7 +25,7 @@ class Device {
                    String(describing: device))
             return nil
         }
-        self.initialPointerResolution = pointerResolution
+        initialPointerResolution = pointerResolution
 
         device.observeInput(using: inputCallback).tieToLifetime(of: self)
 
@@ -105,7 +101,8 @@ class Device {
             return
         }
 
-        let systemPointerAcceleration = (DeviceManager.shared.getSystemProperty(forKey: device.pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey) as IOFixed?)
+        let systemPointerAcceleration = (DeviceManager.shared
+            .getSystemProperty(forKey: device.pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey) as IOFixed?)
             .map { Double($0) / 65536 } ?? Self.fallbackPointerAcceleration
 
         os_log("Revert speed for device: %{public}@, acceleration = %{public}f, sensitivity = %{public}f",
@@ -118,7 +115,7 @@ class Device {
         device.pointerAcceleration = systemPointerAcceleration
     }
 
-    private func inputCallback(device: PointerDevice, value: IOHIDValue) {
+    private func inputCallback(device: PointerDevice, value _: IOHIDValue) {
         guard let manager = manager else {
             return
         }

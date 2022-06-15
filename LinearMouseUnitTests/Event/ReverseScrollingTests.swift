@@ -1,12 +1,8 @@
-//
-//  ReverseScrollingTests.swift
-//  LinearMouseUnitTests
-//
-//  Created by lujjjh on 2021/11/20.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
-import XCTest
 @testable import LinearMouse
+import XCTest
 
 class ReverseScrollingTests: XCTestCase {
     func testReverseScrollingVertically() throws {

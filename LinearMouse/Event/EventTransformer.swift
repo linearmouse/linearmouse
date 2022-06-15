@@ -1,9 +1,5 @@
-//
-//  Transformer.swift
-//  LinearMouse
-//
-//  Created by lujjjh on 2021/11/20.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Foundation
 
@@ -13,17 +9,19 @@ protocol EventTransformer {
 
 func getTransformers(appDefaults: AppDefaults) -> [EventTransformer] {
     let transformers: [(Bool, () -> EventTransformer)] = [
-        (appDefaults.reverseScrollingVerticallyOn,      { ReverseScrolling(vertically: true) }),
-        (appDefaults.reverseScrollingHorizontallyOn,    { ReverseScrolling(horizontally: true) }),
-        (appDefaults.linearScrollingOn,                 { LinearScrolling(scrollLines: appDefaults.scrollLines) }),
-        (appDefaults.universalBackForwardOn,            { UniversalBackForward() }),
-        (true,                                          { ModifierActions(commandAction: appDefaults.modifiersCommandAction,
-                                                                          shiftAction: appDefaults.modifiersShiftAction,
-                                                                          alternateAction: appDefaults.modifiersAlternateAction,
-                                                                          controlAction: appDefaults.modifiersControlAction) }),
+        (appDefaults.reverseScrollingVerticallyOn, { ReverseScrolling(vertically: true) }),
+        (appDefaults.reverseScrollingHorizontallyOn, { ReverseScrolling(horizontally: true) }),
+        (appDefaults.linearScrollingOn, { LinearScrolling(scrollLines: appDefaults.scrollLines) }),
+        (appDefaults.universalBackForwardOn, { UniversalBackForward() }),
+        (true, { ModifierActions(
+            commandAction: appDefaults.modifiersCommandAction,
+            shiftAction: appDefaults.modifiersShiftAction,
+            alternateAction: appDefaults.modifiersAlternateAction,
+            controlAction: appDefaults.modifiersControlAction
+        ) })
     ]
 
-    return transformers.filter { $0.0 }.map { $0.1() }
+    return transformers.filter(\.0).map { $0.1() }
 }
 
 func transformEvent(appDefaults: AppDefaults, mouseDetector: MouseDetector, event: CGEvent) -> CGEvent? {

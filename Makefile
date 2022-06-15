@@ -3,18 +3,29 @@ ARCHIVE_PATH = $(CURDIR)/build/LinearMouse.xcarchive
 TARGET_DIR = $(CURDIR)/build/target
 TARGET_DMG = $(CURDIR)/build/LinearMouse.dmg
 
-all: configure clean test package
+all: configure clean lint test package
 
-configure: Signing.xcconfig Version.xcconfig
+configure: Signing.xcconfig Version.xcconfig .git/hooks/pre-commit
 
 Signing.xcconfig:
-	@./scripts/configure-code-signing
+	@./Scripts/configure-code-signing
 
 Version.xcconfig:
-	@./scripts/configure-version
+	@./Scripts/configure-version
+
+.git/hooks/pre-commit:
+	cp ./Scripts/pre-commit $@
 
 clean:
 	rm -fr build
+
+lint:
+	swiftformat --lint .
+	swiftlint .
+
+lint-fix:
+	swiftformat .
+	swiftlint --fix .
 
 test:
 	xcodebuild test -project LinearMouse.xcodeproj -scheme LinearMouse
@@ -34,6 +45,6 @@ $(TARGET_DMG): $(BUILD_DIR)/Release/LinearMouse.app
 	hdiutil create -format UDBZ -srcfolder '$(TARGET_DIR)/' -volname LinearMouse '$(TARGET_DMG)'
 
 prepublish: package
-	@./scripts/sign-and-notarize
+	@./Scripts/sign-and-notarize
 
 .PHONY: all configure test build clean package

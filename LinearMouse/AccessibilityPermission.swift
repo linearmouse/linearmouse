@@ -1,23 +1,17 @@
-//
-//  AccessibilityPermission.swift
-//  LinearMouse
-//
-//  Created by Jiahao Lu on 2022/6/9.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Foundation
-import SwiftUI
 import os.log
+import SwiftUI
 
 class AccessibilityPermission {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "AccessibilityPermission")
 
     static var enabled: Bool {
-        get {
-            AXIsProcessTrustedWithOptions([
-                kAXTrustedCheckOptionPrompt.takeUnretainedValue(): false
-            ] as CFDictionary)
-        }
+        AXIsProcessTrustedWithOptions([
+            kAXTrustedCheckOptionPrompt.takeUnretainedValue(): false
+        ] as CFDictionary)
     }
 
     static func prompt() {

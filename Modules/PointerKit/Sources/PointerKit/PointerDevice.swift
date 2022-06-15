@@ -1,12 +1,8 @@
-//
-//  PointerDevice.swift
-//  
-//
-//  Created by Jiahao Lu on 2022/6/14.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
-import PointerKitC
 import Foundation
+import PointerKitC
 
 public class PointerDevice {
     private let client: IOHIDServiceClient
@@ -31,7 +27,7 @@ public class PointerDevice {
 
     init(_ client: IOHIDServiceClient, _ queue: DispatchQueue) {
         self.client = client
-        self.device = client.device
+        device = client.device
         self.queue = queue
 
         if let device = device {
@@ -63,27 +59,26 @@ extension PointerDevice: Hashable {
     }
 }
 
-
 // MARK: Product and vendor information
 
-extension PointerDevice {
-    public var product: String? {
+public extension PointerDevice {
+    var product: String? {
         client.getProperty(kIOHIDProductKey)
     }
 
-    public var name: String {
+    var name: String {
         product ?? "(unknown)"
     }
 
-    public var vendorID: Int? {
+    var vendorID: Int? {
         client.getProperty(kIOHIDVendorIDKey)
     }
 
-    public var productID: Int? {
+    var productID: Int? {
         client.getProperty(kIOHIDProductIDKey)
     }
 
-    public var vendorIDString: String {
+    var vendorIDString: String {
         guard let vendorID = vendorID else {
             return "(null)"
         }
@@ -91,7 +86,7 @@ extension PointerDevice {
         return String(format: "0x%04X", vendorID)
     }
 
-    public var productIDString: String {
+    var productIDString: String {
         guard let productID = productID else {
             return "(null)"
         }
@@ -106,17 +101,16 @@ extension PointerDevice: CustomStringConvertible {
     }
 }
 
-
 // MARK: Pointer resolution and acceleration
 
-extension PointerDevice {
+public extension PointerDevice {
     /**
      Indicates the pointer resolution.
      The lower the value is, the faster the pointer moves.
 
      This value is in the range [10-1995].
      */
-    public var pointerResolution: Double? {
+    var pointerResolution: Double? {
         get { client.getPropertyIOFixed(kIOHIDPointerResolutionKey) }
 
         set {
@@ -127,7 +121,7 @@ extension PointerDevice {
         }
     }
 
-    public var pointerAccelerationType: String? {
+    var pointerAccelerationType: String? {
         get {
             if let pointerAccelerationType = client.getProperty(kIOHIDPointerAccelerationTypeKey) as String? {
                 return pointerAccelerationType
@@ -135,7 +129,7 @@ extension PointerDevice {
 
             // Guess the type...
 
-            if let _ = client.getProperty(kIOHIDPointerAccelerationKey) as IOFixed? {
+            if (client.getProperty(kIOHIDPointerAccelerationKey) as IOFixed?) != nil {
                 return kIOHIDPointerAccelerationKey
             }
 
@@ -152,7 +146,7 @@ extension PointerDevice {
 
      This value is in the range [0, 20] ∪ { -1 }. -1 means acceleration and sensitivity are disabled.
      */
-    public var pointerAcceleration: Double? {
+    var pointerAcceleration: Double? {
         get { client.getPropertyIOFixed(pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey) }
 
         set {
@@ -161,7 +155,6 @@ extension PointerDevice {
         }
     }
 }
-
 
 // MARK: Observe input events
 
@@ -183,11 +176,10 @@ extension PointerDevice {
     }
 }
 
-
 // MARK: Utilities
 
-extension PointerDevice {
-    public func confirmsTo(_ usagePage: Int, _ usage: Int) -> Bool {
+public extension PointerDevice {
+    func confirmsTo(_ usagePage: Int, _ usage: Int) -> Bool {
         IOHIDServiceClientConformsTo(client, UInt32(usagePage), UInt32(usage)) != 0
     }
 }

@@ -1,9 +1,5 @@
-//
-//  ModifierKeyActionPicker.swift
-//  LinearMouse
-//
-//  Created by lujjjh on 2021/7/29.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Foundation
 import SwiftUI
@@ -15,13 +11,13 @@ struct ModifierKeyActionPicker: View {
 
     private var speedFactor: Binding<Double> {
         Binding<Double>(get: {
-            return action.speedFactor
+            action.speedFactor
         }, set: {
             if $0 < 0 {
                 action.speedFactor = $0.rounded()
-            } else if 0..<0.1 ~= $0 {
+            } else if 0 ..< 0.1 ~= $0 {
                 action.speedFactor = ($0 * 20).rounded() / 20
-            } else if 0.1..<1 ~= $0 {
+            } else if 0.1 ..< 1 ~= $0 {
                 action.speedFactor = ($0 * 10).rounded() / 10
             } else {
                 action.speedFactor = ($0 * 2).rounded() / 2
@@ -40,12 +36,11 @@ struct ModifierKeyActionPicker: View {
             HStack {
                 Text("to")
                 Slider(value: speedFactor,
-                       in: 0.05...10.00)
+                       in: 0.05 ... 10.00)
                 HStack(spacing: 5) {
                     Text(String(format: "%0.2f ×", action.speedFactor))
                 }
                 .frame(width: 60, alignment: .trailing)
-
             }
             .padding(.bottom, 20)
         }

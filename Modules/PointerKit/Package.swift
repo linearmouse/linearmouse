@@ -9,7 +9,8 @@ let package = Package(
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "PointerKit",
-            targets: ["PointerKit"]),
+            targets: ["PointerKit"]
+        )
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -18,12 +19,15 @@ let package = Package(
     targets: [
         .target(
             name: "PointerKitC",
-            dependencies: []),
+            dependencies: []
+        ),
         .target(
             name: "PointerKit",
-            dependencies: ["PointerKitC"]),
+            dependencies: ["PointerKitC"]
+        ),
         .testTarget(
             name: "PointerKitTests",
-            dependencies: ["PointerKit"])
+            dependencies: ["PointerKit"]
+        )
     ]
 )

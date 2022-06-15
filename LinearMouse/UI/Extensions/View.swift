@@ -1,20 +1,16 @@
-//
-//  View.swift
-//  LinearMouse
-//
-//  Created by Jiahao Lu on 2022/6/15.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Introspect
 import SwiftUI
 
 extension View {
-    public func introspectSplitView(customize: @escaping (NSSplitView) -> ()) -> some View {
-        return introspect(selector: TargetViewSelector.ancestorOrSiblingOfType, customize: customize)
+    public func introspectSplitView(customize: @escaping (NSSplitView) -> Void) -> some View {
+        introspect(selector: TargetViewSelector.ancestorOrSiblingOfType, customize: customize)
     }
 
     func sidebarThickness(min: CGFloat, max: CGFloat) -> some View {
-        return introspectSplitView { splitView in
+        introspectSplitView { splitView in
             guard let item = (splitView.delegate as? NSSplitViewController)?.splitViewItems.first else { return }
 
             item.minimumThickness = min
@@ -23,7 +19,7 @@ extension View {
     }
 
     func preventSidebarCollapse() -> some View {
-        return introspectSplitView { splitView in
+        introspectSplitView { splitView in
             (splitView.delegate as? NSSplitViewController)?.splitViewItems.first?.canCollapse = false
         }
     }

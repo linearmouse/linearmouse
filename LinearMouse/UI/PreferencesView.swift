@@ -1,9 +1,5 @@
-//
-//  PreferencesView.swift
-//  LinearMouse
-//
-//  Created by lujjjh on 2021/6/12.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Introspect
 import SwiftUI

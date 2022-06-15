@@ -1,0 +1,4 @@
+--commas inline
+--disable wrapMultilineStatementBraces
+--header "MIT License\nCopyright (c) 2021-{year} Jiahao Lu"
+--maxwidth 120

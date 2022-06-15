@@ -1,13 +1,9 @@
-//
-//  AutoStartManager.swift
-//  LinearMouse
-//
-//  Created by lujjjh on 2021/6/11.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Foundation
-import LoginServiceKit
 import LaunchAtLogin
+import LoginServiceKit
 
 class AutoStartManager {
     static func enable() {

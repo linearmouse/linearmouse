@@ -1,5 +1,8 @@
-import XCTest
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
+
 @testable import GestureKit
+import XCTest
 
 final class GestureKitTests: XCTestCase {
     func testNavigationSwipeGesture() throws {

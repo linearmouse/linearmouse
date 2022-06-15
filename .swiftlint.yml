@@ -1,0 +1,5 @@
+disabled_rules:
+  - identifier_name
+  - line_length
+  - opening_brace
+  - todo

@@ -1,12 +1,8 @@
-//
-//  AccessibilityPermissionView.swift
-//  LinearMouse
-//
-//  Created by Jiahao Lu on 2022/6/9.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
-import SwiftUI
 import os.log
+import SwiftUI
 
 struct AccessibilityPermissionView: View {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "AccessibilityPermissionView")
@@ -25,9 +21,10 @@ struct AccessibilityPermissionView: View {
             }
             .padding(.horizontal)
 
-
-            Text("You need to grant Accessibility permission in System Preferences > Security & Pravicy > Accessibility.")
-                .padding(.horizontal)
+            Text(
+                "You need to grant Accessibility permission in System Preferences > Security & Pravicy > Accessibility."
+            )
+            .padding(.horizontal)
 
             HyperLink(URL(string: "https://go.linearmouse.org/accessibility-permission")!) {
                 Text("Get more help")
@@ -61,7 +58,10 @@ struct AccessibilityPermissionView: View {
         let alert = NSAlert()
 
         alert.messageText = NSLocalizedString("Are you sure?", comment: "")
-        alert.informativeText = NSLocalizedString("This will reset all granted Accessibility permissions in the system.", comment: "")
+        alert.informativeText = NSLocalizedString(
+            "This will reset all granted Accessibility permissions in the system.",
+            comment: ""
+        )
         alert.alertStyle = .warning
 
         let reset = alert.addButton(withTitle: NSLocalizedString("Reset", comment: ""))
@@ -74,7 +74,7 @@ struct AccessibilityPermissionView: View {
             return
         }
 
-        guard let _ = try? AccessibilityPermission.reset() else {
+        guard (try? AccessibilityPermission.reset()) != nil else {
             return
         }
 

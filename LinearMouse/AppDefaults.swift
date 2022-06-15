@@ -1,9 +1,5 @@
-//
-//  Settings.swift
-//  LinearMouse
-//
-//  Created by lujjjh on 2021/6/12.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import SwiftUI
 
@@ -70,25 +66,29 @@ class AppDefaults: ObservableObject {
         }
     }
 
-    @AppStorageCompat("modifiers.command.action") var modifiersCommandAction = ModifierKeyAction(type: .noAction, speedFactor: 5.0) {
+    @AppStorageCompat("modifiers.command.action") var modifiersCommandAction = ModifierKeyAction(type: .noAction,
+                                                                                                 speedFactor: 5.0) {
         willSet {
             objectWillChange.send()
         }
     }
 
-    @AppStorageCompat("modifiers.shift.action") var modifiersShiftAction = ModifierKeyAction(type: .noAction, speedFactor: 2.0) {
+    @AppStorageCompat("modifiers.shift.action") var modifiersShiftAction = ModifierKeyAction(type: .noAction,
+                                                                                             speedFactor: 2.0) {
         willSet {
             objectWillChange.send()
         }
     }
 
-    @AppStorageCompat("modifiers.alternate.action") var modifiersAlternateAction = ModifierKeyAction(type: .noAction, speedFactor: 1.0) {
+    @AppStorageCompat("modifiers.alternate.action") var modifiersAlternateAction = ModifierKeyAction(type: .noAction,
+                                                                                                     speedFactor: 1.0) {
         willSet {
             objectWillChange.send()
         }
     }
 
-    @AppStorageCompat("modifiers.control.action") var modifiersControlAction = ModifierKeyAction(type: .noAction, speedFactor: 0.2) {
+    @AppStorageCompat("modifiers.control.action") var modifiersControlAction = ModifierKeyAction(type: .noAction,
+                                                                                                 speedFactor: 0.2) {
         willSet {
             objectWillChange.send()
         }
