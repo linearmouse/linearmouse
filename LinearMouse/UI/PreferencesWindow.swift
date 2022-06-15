@@ -13,7 +13,7 @@ class PreferencesWindow: NSWindow {
 
     init() {
         super.init(
-            contentRect: .init(x: 0, y: 0, width: 500, height: 600),
+            contentRect: .init(x: 0, y: 0, width: 850, height: 600),
             styleMask: [.titled, .closable, .fullSizeContentView],
             backing: .buffered,
             defer: false
@@ -22,6 +22,8 @@ class PreferencesWindow: NSWindow {
         isReleasedWhenClosed = false
 
         title = String(format: NSLocalizedString("%@ Preferences", comment: ""), LinearMouse.appName)
+
+        titlebarAppearsTransparent = true
 
         contentView = NSHostingView(rootView: PreferencesView())
 
