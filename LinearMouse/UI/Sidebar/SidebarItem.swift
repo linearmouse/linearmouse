@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SidebarItem<Destination>: View where Destination: View {
     var imageName: String?
-    var text: String
+    var text: LocalizedStringKey
     var destination: () -> Destination
 
     var body: some View {
