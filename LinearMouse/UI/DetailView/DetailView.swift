@@ -18,7 +18,7 @@ struct DetailView<T>: View where T: View {
                     .padding(.horizontal, 40)
                     .padding(.vertical, 30)
             }
-            .frame(maxWidth: .infinity, alignment: .topLeading)
+            .frame(minWidth: 500, maxWidth: .infinity, alignment: .topLeading)
         }
         .edgesIgnoringSafeArea(.top)
     }

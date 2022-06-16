@@ -75,9 +75,6 @@ struct WheelSettings: View {
                 .disabled(!defaults.linearScrollingOn)
             }
         }
-        .frame(minWidth: 500,
-               maxWidth: .infinity,
-               alignment: .topLeading)
     }
 }
 

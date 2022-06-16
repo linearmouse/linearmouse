@@ -10,6 +10,7 @@ struct Header: View {
         }
         .padding(.horizontal, 10)
         .frame(maxWidth: .infinity, minHeight: 35, maxHeight: 35, alignment: .leading)
+        .controlSize(.small)
     }
 }
 

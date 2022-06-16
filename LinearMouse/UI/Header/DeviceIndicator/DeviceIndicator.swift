@@ -9,12 +9,11 @@ struct DeviceIndicator: View {
     var body: some View {
         Button(action: {}) {
             Text(model.activeDeviceName ?? "Unknown")
-                .frame(maxWidth: 120)
+                .frame(maxWidth: 150)
                 .fixedSize()
                 .lineLimit(1)
         }
         .buttonStyle(SecondaryButtonStyle())
-        .controlSize(.small)
     }
 }
 
