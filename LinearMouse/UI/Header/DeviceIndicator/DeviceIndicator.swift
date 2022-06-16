@@ -7,14 +7,13 @@ struct DeviceIndicator: View {
     @StateObject var model = DeviceIndicatorModel()
 
     var body: some View {
-        HStack {
-            Button(model.activeDeviceName) {}
-                .buttonStyle(SecondaryButtonStyle())
+        Button(action: {}) {
+            Text(model.activeDeviceName ?? "Unknown")
+                .frame(maxWidth: 120)
+                .fixedSize()
                 .lineLimit(1)
-                .frame(maxWidth: 150, alignment: .leading)
         }
-        .padding(.horizontal, 10)
-        .frame(height: 35)
+        .buttonStyle(SecondaryButtonStyle())
         .controlSize(.small)
     }
 }

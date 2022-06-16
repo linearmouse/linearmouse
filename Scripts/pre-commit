@@ -1,3 +1,5 @@
 #!/bin/bash -e
 
 make lint-fix
+
+git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g' | xargs git add

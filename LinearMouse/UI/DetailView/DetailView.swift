@@ -4,17 +4,23 @@
 import SwiftUI
 
 struct DetailView<T>: View where T: View {
+    var showHeader = true
     var content: () -> T
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            ScrollView {
-                content()
-                    .padding(40)
+        VStack(alignment: .leading, spacing: 0) {
+            if showHeader {
+                Header()
             }
 
-            Header()
+            ScrollView {
+                content()
+                    .padding(.horizontal, 40)
+                    .padding(.vertical, 30)
+            }
+            .frame(maxWidth: .infinity, alignment: .topLeading)
         }
+        .edgesIgnoringSafeArea(.top)
     }
 }
 

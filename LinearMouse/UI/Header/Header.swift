@@ -8,8 +8,8 @@ struct Header: View {
         HStack {
             DeviceIndicator()
         }
-        .edgesIgnoringSafeArea(.top)
-        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .padding(.horizontal, 10)
+        .frame(maxWidth: .infinity, minHeight: 35, maxHeight: 35, alignment: .leading)
     }
 }
 

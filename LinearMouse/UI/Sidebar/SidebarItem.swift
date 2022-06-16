@@ -10,12 +10,11 @@ struct SidebarItem<Destination>: View where Destination: View {
 
     var body: some View {
         NavigationLink(destination: destination) {
-            if let imageName = imageName {
-                if #available(macOS 11.0, *) {
-                    Image(systemName: imageName)
-                }
+            if let imageName = imageName, #available(macOS 11.0, *) {
+                Label(text, systemImage: imageName)
+            } else {
+                Text(text)
             }
-            Text(text)
         }
     }
 }

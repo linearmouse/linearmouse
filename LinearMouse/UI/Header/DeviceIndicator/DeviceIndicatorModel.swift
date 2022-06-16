@@ -6,13 +6,13 @@ import PointerKit
 import SwiftUI
 
 class DeviceIndicatorModel: ObservableObject {
-    @Published var activeDeviceName: String = "(Unknown)"
+    @Published var activeDeviceName: String?
 
     private var subscription: AnyCancellable?
 
     init() {
         subscription = DeviceManager.shared.$lastActiveDevice
-            .map { $0?.name ?? "(Unknown)" }
+            .map { $0?.name }
             .assign(to: \.activeDeviceName, on: self)
     }
 }

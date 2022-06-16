@@ -3,7 +3,7 @@
 
 import SwiftUI
 
-struct CursorView: View {
+struct CursorSettings: View {
     @ObservedObject var defaults = AppDefaults.shared
 
     var sensitivityInDouble: Binding<Double> {
@@ -37,7 +37,7 @@ struct CursorView: View {
     }()
 
     var body: some View {
-        ScrollView {
+        DetailView {
             VStack(alignment: .leading, spacing: 20) {
                 Form {
                     Slider(value: $defaults.cursorAcceleration,
@@ -105,10 +105,6 @@ struct CursorView: View {
                 }
             }
         }
-        .padding(40)
-        .frame(minWidth: 500,
-               maxWidth: .infinity,
-               alignment: .topLeading)
     }
 
     private func revertSpeed() {
@@ -118,8 +114,8 @@ struct CursorView: View {
     }
 }
 
-struct CursorView_Previews: PreviewProvider {
+struct CursorSettings_Previews: PreviewProvider {
     static var previews: some View {
-        CursorView()
+        CursorSettings()
     }
 }

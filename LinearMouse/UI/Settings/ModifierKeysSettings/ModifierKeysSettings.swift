@@ -3,11 +3,11 @@
 
 import SwiftUI
 
-struct ModifierKeysView: View {
+struct ModifierKeysSettings: View {
     @ObservedObject var defaults = AppDefaults.shared
 
     var body: some View {
-        ScrollView {
+        DetailView {
             Form {
                 ModifierKeyActionPicker(label: "⌘ (Command)", action: $defaults.modifiersCommandAction)
 
@@ -18,15 +18,11 @@ struct ModifierKeysView: View {
                 ModifierKeyActionPicker(label: "⌃ (Control)", action: $defaults.modifiersControlAction)
             }
         }
-        .padding(40)
-        .frame(minWidth: 500,
-               maxWidth: .infinity,
-               alignment: .topLeading)
     }
 }
 
-struct ModifierKeysView_Previews: PreviewProvider {
+struct ModifierKeysSettings_Previews: PreviewProvider {
     static var previews: some View {
-        ModifierKeysView()
+        ModifierKeysSettings()
     }
 }
