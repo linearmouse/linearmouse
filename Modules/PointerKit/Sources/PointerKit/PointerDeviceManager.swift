@@ -18,7 +18,11 @@ public final class PointerDeviceManager {
         propertyChanged: [UUID: (property: String, closure: PropertyChangedClosure)]()
     )
 
-    public private(set) var devices = Set<PointerDevice>()
+    private var serviceClientToPointerDevice = [IOHIDServiceClient: PointerDevice]()
+
+    public var devices: [PointerDevice] {
+        Array(serviceClientToPointerDevice.values)
+    }
 
     public init(queue: DispatchQueue = DispatchQueue.main) {
         self.queue = queue
@@ -172,11 +176,11 @@ extension PointerDeviceManager {
     }
 
     private func addDevice(forClient client: IOHIDServiceClient) {
+        guard serviceClientToPointerDevice[client] == nil else { return }
+
         let device = PointerDevice(client, queue)
 
-        guard !devices.contains(device) else { return }
-
-        devices.insert(device)
+        serviceClientToPointerDevice[client] = device
 
         for (_, callback) in observations.deviceAdded {
             callback(self, device)
@@ -186,15 +190,13 @@ extension PointerDeviceManager {
     }
 
     private func removeDevice(forClient client: IOHIDServiceClient) {
-        let device = PointerDevice(client, queue)
-
-        guard devices.contains(device) else { return }
+        guard let device = serviceClientToPointerDevice[client] else { return }
 
         removeDevice(device)
     }
 
     private func removeDevice(_ device: PointerDevice) {
-        devices.remove(device)
+        serviceClientToPointerDevice.removeValue(forKey: device.client)
 
         for (_, callback) in observations.deviceRemoved {
             callback(self, device)

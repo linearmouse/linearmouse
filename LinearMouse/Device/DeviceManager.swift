@@ -11,7 +11,11 @@ class DeviceManager: ObservableObject {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "DeviceManager")
 
     private let manager = PointerDeviceManager()
-    private var devices = Set<Device>()
+
+    private var pointerDeviceToDevice = [PointerDevice: Device]()
+    private var devices: [Device] {
+        Array(pointerDeviceToDevice.values)
+    }
 
     private var lastPointerAcceleration: Double?
     private var lastPointerSensitivity: Double?
@@ -43,15 +47,15 @@ class DeviceManager: ObservableObject {
         renewPointerSpeed()
     }
 
-    private func deviceAdded(_: PointerDeviceManager, device: PointerDevice) {
-        guard let device = Device(self, device) else {
+    private func deviceAdded(_: PointerDeviceManager, pointerDevice: PointerDevice) {
+        guard let device = Device(self, pointerDevice) else {
             os_log("Unsupported device: %{public}@",
                    log: Self.log, type: .debug,
-                   String(describing: device))
+                   String(describing: pointerDevice))
             return
         }
 
-        devices.insert(device)
+        pointerDeviceToDevice[pointerDevice] = device
 
         os_log("Device added: %{public}@",
                log: Self.log, type: .debug,
@@ -60,16 +64,14 @@ class DeviceManager: ObservableObject {
         renewPointerSpeed(forDevice: device)
     }
 
-    private func deviceRemoved(_: PointerDeviceManager, device: PointerDevice) {
-        // TODO: Better approach?
+    private func deviceRemoved(_: PointerDeviceManager, pointerDevice: PointerDevice) {
+        guard let device = pointerDeviceToDevice[pointerDevice] else { return }
 
-        devices.filter { $0.device == device }
-            .forEach {
-                if lastActiveDevice == $0 {
-                    lastActiveDevice = nil
-                }
-                devices.remove($0)
-            }
+        if lastActiveDevice == device {
+            lastActiveDevice = nil
+        }
+
+        pointerDeviceToDevice.removeValue(forKey: pointerDevice)
 
         os_log("Device removed: %{public}@",
                log: Self.log, type: .debug,

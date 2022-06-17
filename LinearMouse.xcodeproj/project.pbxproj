@@ -40,7 +40,7 @@
 		B77A160C26744DB400E99A5D /* StatusItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160B26744DB400E99A5D /* StatusItem.swift */; };
 		B77A160E2674B3DD00E99A5D /* LinearMouse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160D2674B3DD00E99A5D /* LinearMouse.swift */; };
 		B77A16102674B85300E99A5D /* AppDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160F2674B85300E99A5D /* AppDefaults.swift */; };
-		B77A16122674C21600E99A5D /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A16112674C21600E99A5D /* PreferencesView.swift */; };
+		B77A16122674C21600E99A5D /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A16112674C21600E99A5D /* Preferences.swift */; };
 		B77A16172674D88E00E99A5D /* PreferencesWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A16162674D88E00E99A5D /* PreferencesWindow.swift */; };
 		B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A161A2674EF0E00E99A5D /* HyperLink.swift */; };
 		B77BA0F227480AA500E3BC5C /* EventTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77BA0F127480AA500E3BC5C /* EventTransformer.swift */; };
@@ -114,7 +114,7 @@
 		B77A160B26744DB400E99A5D /* StatusItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItem.swift; sourceTree = "<group>"; };
 		B77A160D2674B3DD00E99A5D /* LinearMouse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearMouse.swift; sourceTree = "<group>"; };
 		B77A160F2674B85300E99A5D /* AppDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDefaults.swift; sourceTree = "<group>"; };
-		B77A16112674C21600E99A5D /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
+		B77A16112674C21600E99A5D /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		B77A16162674D88E00E99A5D /* PreferencesWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesWindow.swift; sourceTree = "<group>"; };
 		B77A161A2674EF0E00E99A5D /* HyperLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HyperLink.swift; sourceTree = "<group>"; };
 		B77BA0F127480AA500E3BC5C /* EventTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTransformer.swift; sourceTree = "<group>"; };
@@ -425,14 +425,14 @@
 				972DF644285A266C00B83932 /* Header */,
 				972DF64A285A295C00B83932 /* DetailView */,
 				972DF656285AE0CB00B83932 /* Settings */,
+				B77A16112674C21600E99A5D /* Preferences.swift */,
+				B77A16162674D88E00E99A5D /* PreferencesWindow.swift */,
 				97A46B16285444BF00C07C9B /* NSWindow+Extensions.swift */,
 				B75A06242671E9DA00BEAF77 /* Main.storyboard */,
 				B77A161A2674EF0E00E99A5D /* HyperLink.swift */,
 				B77A160B26744DB400E99A5D /* StatusItem.swift */,
 				972AFD482851E96D009B0CBF /* AccessibilityPermissionWindow.swift */,
 				972AFD442851C101009B0CBF /* AccessibilityPermissionView.swift */,
-				B77A16162674D88E00E99A5D /* PreferencesWindow.swift */,
-				B77A16112674C21600E99A5D /* PreferencesView.swift */,
 				B7842926278D9BBC00D207F0 /* CheckForUpdatesView.swift */,
 			);
 			path = UI;
@@ -678,7 +678,7 @@
 				972DF654285ADE9600B83932 /* GeneralSettings.swift in Sources */,
 				972AFD472851E6B0009B0CBF /* AccessibilityPermission.swift in Sources */,
 				B7ADF9832748B12B0005B02D /* LinearScrolling.swift in Sources */,
-				B77A16122674C21600E99A5D /* PreferencesView.swift in Sources */,
+				B77A16122674C21600E99A5D /* Preferences.swift in Sources */,
 				972DF64C285A298600B83932 /* DetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

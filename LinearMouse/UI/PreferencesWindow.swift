@@ -22,7 +22,7 @@ class PreferencesWindow: NSWindow {
         titleVisibility = .hidden
         titlebarAppearsTransparent = true
 
-        contentView = NSHostingView(rootView: PreferencesView())
+        contentView = NSHostingView(rootView: Preferences())
 
         center()
     }

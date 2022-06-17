@@ -5,8 +5,8 @@ import Foundation
 import PointerKitC
 
 public class PointerDevice {
-    private let client: IOHIDServiceClient
-    private let device: IOHIDDevice?
+    internal let client: IOHIDServiceClient
+    internal let device: IOHIDDevice?
     private let queue: DispatchQueue
 
     public typealias InputValueClosure = (PointerDevice, IOHIDValue) -> Void
@@ -92,6 +92,10 @@ public extension PointerDevice {
         }
 
         return String(format: "0x%04X", productID)
+    }
+
+    var serialNumber: String? {
+        client.getProperty(kIOHIDSerialNumberKey)
     }
 }
 
