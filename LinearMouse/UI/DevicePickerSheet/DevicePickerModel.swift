@@ -13,7 +13,6 @@ class DevicePickerModel: ObservableObject {
         DeviceManager.shared.$devices.map {
             $0
                 .map { DeviceModel(device: $0) }
-//                .sorted { $0.name < $1.name }
         }
         .sink { [weak self] value in
             withAnimation {

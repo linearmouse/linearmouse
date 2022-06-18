@@ -11,20 +11,11 @@ struct WheelSettings: View {
             VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading) {
                     Toggle(isOn: $defaults.reverseScrollingVerticallyOn) {
-                        VStack(alignment: .leading) {
-                            HStack(alignment: .firstTextBaseline, spacing: 2) {
-                                Text("Reverse scrolling")
-                                Text("(vertically)")
-                                    .controlSize(.small)
-                                    .foregroundColor(.secondary)
-                            }
-                            Text("""
-                            Reverse the scroll direction for a mouse \
-                            but won't reverse the scroll direction \
-                            for a Trackpad.
-                            """)
-                            .controlSize(.small)
-                            .foregroundColor(.secondary)
+                        HStack(alignment: .firstTextBaseline, spacing: 2) {
+                            Text("Reverse scrolling")
+                            Text("(vertically)")
+                                .controlSize(.small)
+                                .foregroundColor(.secondary)
                         }
                     }
                 }
