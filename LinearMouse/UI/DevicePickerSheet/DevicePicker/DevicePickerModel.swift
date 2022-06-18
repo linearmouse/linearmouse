@@ -1,9 +1,5 @@
-//
-//  DevicePickerModel.swift
-//  LinearMouse
-//
-//  Created by Jiahao Lu on 2022/6/17.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
 import Combine
 import SwiftUI
@@ -51,5 +47,5 @@ extension DeviceModel {
 }
 
 extension DeviceModel: Identifiable {
-    var id: Device { self.device }
+    var id: Device { device }
 }

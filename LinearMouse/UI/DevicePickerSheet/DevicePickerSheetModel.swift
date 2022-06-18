@@ -1,13 +1,9 @@
-//
-//  DevicePickerSheetModel.swift
-//  LinearMouse
-//
-//  Created by Jiahao Lu on 2022/6/18.
-//
+// MIT License
+// Copyright (c) 2021-2022 Jiahao Lu
 
+import Defaults
 import Foundation
 import SwiftUI
-import Defaults
 
 class DevicePickerSheetModel: ObservableObject {
     private let deviceState = DeviceState.shared
