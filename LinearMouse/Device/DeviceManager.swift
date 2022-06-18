@@ -13,7 +13,7 @@ class DeviceManager: ObservableObject {
     private let manager = PointerDeviceManager()
 
     private var pointerDeviceToDevice = [PointerDevice: Device]()
-    private var devices: [Device] {
+    var devices: [Device] {
         Array(pointerDeviceToDevice.values)
     }
 
@@ -55,6 +55,8 @@ class DeviceManager: ObservableObject {
             return
         }
 
+        objectWillChange.send()
+
         pointerDeviceToDevice[pointerDevice] = device
 
         os_log("Device added: %{public}@",
@@ -66,6 +68,8 @@ class DeviceManager: ObservableObject {
 
     private func deviceRemoved(_: PointerDeviceManager, pointerDevice: PointerDevice) {
         guard let device = pointerDeviceToDevice[pointerDevice] else { return }
+
+        objectWillChange.send()
 
         if lastActiveDevice == device {
             lastActiveDevice = nil

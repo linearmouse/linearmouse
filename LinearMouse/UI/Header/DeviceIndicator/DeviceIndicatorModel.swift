@@ -8,11 +8,15 @@ import SwiftUI
 class DeviceIndicatorModel: ObservableObject {
     @Published var activeDeviceName: String?
 
-    private var subscription: AnyCancellable?
+    private var subscriptions = Set<AnyCancellable>()
 
     init() {
-        subscription = DeviceManager.shared.$lastActiveDevice
-            .map { $0?.name }
-            .assign(to: \.activeDeviceName, on: self)
+        deviceState.$currentDevice.sink { [weak self] device in
+            self?.activeDeviceName = device?.name
+        }.store(in: &subscriptions)
     }
+}
+
+extension DeviceIndicatorModel {
+    private var deviceState: DeviceState { DeviceState.shared }
 }

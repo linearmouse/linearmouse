@@ -40,6 +40,18 @@ class Device {
         device.name
     }
 
+    var vendorID: Int? {
+        device.vendorID
+    }
+
+    var productID: Int? {
+        device.productID
+    }
+
+    var serialNumber: String? {
+        device.serialNumber
+    }
+
     enum Category {
         case mouse, trackpad
     }
