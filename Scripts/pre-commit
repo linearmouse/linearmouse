@@ -4,7 +4,7 @@ FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g' | { g
 
 [ -z "$FILES" ] && exit 0
 
-echo $FILES | swiftformat
-echo $FILES | swiftlint --fix
+echo $FILES | xargs swiftformat
+echo $FILES | xargs swiftlint --fix
 
 echo $FILES | xargs git add
