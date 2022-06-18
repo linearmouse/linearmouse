@@ -13,9 +13,7 @@ class DeviceManager: ObservableObject {
     private let manager = PointerDeviceManager()
 
     private var pointerDeviceToDevice = [PointerDevice: Device]()
-    var devices: [Device] {
-        Array(pointerDeviceToDevice.values)
-    }
+    @Published var devices: [Device] = []
 
     private var lastPointerAcceleration: Double?
     private var lastPointerSensitivity: Double?
@@ -58,6 +56,7 @@ class DeviceManager: ObservableObject {
         objectWillChange.send()
 
         pointerDeviceToDevice[pointerDevice] = device
+        devices.append(device)
 
         os_log("Device added: %{public}@",
                log: Self.log, type: .debug,
@@ -76,6 +75,7 @@ class DeviceManager: ObservableObject {
         }
 
         pointerDeviceToDevice.removeValue(forKey: pointerDevice)
+        devices.removeAll { $0 == device }
 
         os_log("Device removed: %{public}@",
                log: Self.log, type: .debug,

@@ -16,7 +16,6 @@
 		972A5E30285D891100CB6440 /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = 972A5E2F285D891100CB6440 /* Defaults */; };
 		972A5E32285D8B5B00CB6440 /* DeviceMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E31285D8B5B00CB6440 /* DeviceMatcher.swift */; };
 		972A5E34285D8E4800CB6440 /* Defaults+Workaround.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E33285D8E4800CB6440 /* Defaults+Workaround.swift */; };
-		972A5E36285D95CA00CB6440 /* DevicePickerSheetModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E35285D95CA00CB6440 /* DevicePickerSheetModel.swift */; };
 		972AFD452851C101009B0CBF /* AccessibilityPermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972AFD442851C101009B0CBF /* AccessibilityPermissionView.swift */; };
 		972AFD472851E6B0009B0CBF /* AccessibilityPermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972AFD462851E6B0009B0CBF /* AccessibilityPermission.swift */; };
 		972AFD492851E96D009B0CBF /* AccessibilityPermissionWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972AFD482851E96D009B0CBF /* AccessibilityPermissionWindow.swift */; };
@@ -37,6 +36,7 @@
 		97C5D8FF2856E3CB00CBED2D /* GestureKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C5D8FE2856E3CB00CBED2D /* GestureKit */; };
 		97F77FA4285DC467007C9C2B /* DevicePickerSectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA3285DC467007C9C2B /* DevicePickerSectionModel.swift */; };
 		97F77FA8285DC828007C9C2B /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA7285DC828007C9C2B /* Environment.swift */; };
+		97F77FAA285E178B007C9C2B /* DevicePickerSectionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA9285E178B007C9C2B /* DevicePickerSectionItem.swift */; };
 		B70A58F6284F987900E5C86E /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = B70A58F5284F987900E5C86E /* LaunchAtLogin */; };
 		B71392F426731645004C0173 /* LoginServiceKit in Frameworks */ = {isa = PBXBuildFile; productRef = B71392F326731645004C0173 /* LoginServiceKit */; };
 		B716F16026BC10B80052F551 /* UniversalBackForward.swift in Sources */ = {isa = PBXBuildFile; fileRef = B716F15F26BC10B80052F551 /* UniversalBackForward.swift */; };
@@ -99,7 +99,6 @@
 		972A5E2C285D882500CB6440 /* DeviceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceState.swift; sourceTree = "<group>"; };
 		972A5E31285D8B5B00CB6440 /* DeviceMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceMatcher.swift; sourceTree = "<group>"; };
 		972A5E33285D8E4800CB6440 /* Defaults+Workaround.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Defaults+Workaround.swift"; sourceTree = "<group>"; };
-		972A5E35285D95CA00CB6440 /* DevicePickerSheetModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSheetModel.swift; sourceTree = "<group>"; };
 		972AFD442851C101009B0CBF /* AccessibilityPermissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermissionView.swift; sourceTree = "<group>"; };
 		972AFD462851E6B0009B0CBF /* AccessibilityPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermission.swift; sourceTree = "<group>"; };
 		972AFD482851E96D009B0CBF /* AccessibilityPermissionWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermissionWindow.swift; sourceTree = "<group>"; };
@@ -120,6 +119,7 @@
 		97C5D8FD2856E3BE00CBED2D /* GestureKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = GestureKit; sourceTree = "<group>"; };
 		97F77FA3285DC467007C9C2B /* DevicePickerSectionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSectionModel.swift; sourceTree = "<group>"; };
 		97F77FA7285DC828007C9C2B /* Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
+		97F77FA9285E178B007C9C2B /* DevicePickerSectionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSectionItem.swift; sourceTree = "<group>"; };
 		B716F15F26BC10B80052F551 /* UniversalBackForward.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniversalBackForward.swift; sourceTree = "<group>"; };
 		B716F16226BC18AB0052F551 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		B716F16326BC19350052F551 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
@@ -225,23 +225,15 @@
 		972A5E1D285CA42500CB6440 /* DevicePickerSheet */ = {
 			isa = PBXGroup;
 			children = (
-				972A5E20285CA47900CB6440 /* DevicePicker */,
 				972A5E1E285CA43D00CB6440 /* DevicePickerSheet.swift */,
-				972A5E35285D95CA00CB6440 /* DevicePickerSheetModel.swift */,
-			);
-			path = DevicePickerSheet;
-			sourceTree = "<group>";
-		};
-		972A5E20285CA47900CB6440 /* DevicePicker */ = {
-			isa = PBXGroup;
-			children = (
 				972A5E21285CA49800CB6440 /* DevicePicker.swift */,
 				972A5E23285CA4AA00CB6440 /* DevicePickerModel.swift */,
 				972A5E27285D4EB500CB6440 /* DevicePickerSection.swift */,
 				97F77FA3285DC467007C9C2B /* DevicePickerSectionModel.swift */,
+				97F77FA9285E178B007C9C2B /* DevicePickerSectionItem.swift */,
 				972A5E29285D5D0100CB6440 /* DeviceButtonStyle.swift */,
 			);
-			path = DevicePicker;
+			path = DevicePickerSheet;
 			sourceTree = "<group>";
 		};
 		972A5E2B285D881700CB6440 /* State */ = {
@@ -730,7 +722,6 @@
 				97F77FA8285DC828007C9C2B /* Environment.swift in Sources */,
 				B7B1D09126B3ECC500F48176 /* ModifierKeysSettings.swift in Sources */,
 				97A46B17285444BF00C07C9B /* NSWindow+Extensions.swift in Sources */,
-				972A5E36285D95CA00CB6440 /* DevicePickerSheetModel.swift in Sources */,
 				972AFD452851C101009B0CBF /* AccessibilityPermissionView.swift in Sources */,
 				B75A061C2671E9D800BEAF77 /* AppDelegate.swift in Sources */,
 				972DF63A285997CD00B83932 /* Sidebar.swift in Sources */,
@@ -744,6 +735,7 @@
 				B77A16122674C21600E99A5D /* Preferences.swift in Sources */,
 				972DF64C285A298600B83932 /* DetailView.swift in Sources */,
 				972A5E2A285D5D0100CB6440 /* DeviceButtonStyle.swift in Sources */,
+				97F77FAA285E178B007C9C2B /* DevicePickerSectionItem.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

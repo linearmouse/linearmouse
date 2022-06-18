@@ -6,7 +6,6 @@ import SwiftUI
 
 struct DevicePickerSheet: View {
     @Environment(\.isPresented) var isPresented
-    @StateObject var model = DevicePickerSheetModel()
     @Default(.autoSelectActiveDevice) var autoSelectActiveDevice
 
     var body: some View {
