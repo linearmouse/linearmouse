@@ -3,14 +3,14 @@
 
 import Defaults
 
-struct PersistedDevice: Codable, Defaults.Serializable {
+struct DeviceMatcher: Codable, Defaults.Serializable {
     let vendorID: Int?
     let productID: Int?
     let serialNumber: String?
 }
 
-extension PersistedDevice {
-    init(fromDevice device: Device) {
+extension DeviceMatcher {
+    init(of device: Device) {
         let vendorID = device.vendorID
         let productID = device.productID
         let serialNumber = device.serialNumber

@@ -4,10 +4,10 @@
 import SwiftUI
 
 struct DeviceButtonStyle: ButtonStyle {
-    var isActive: Bool
+    var isSelected: Bool
 
     private var textColor: Color {
-        isActive ? .accentColor : .primary
+        isSelected ? .accentColor : .primary
     }
 
     private var backgroundColor: Color {
@@ -15,7 +15,7 @@ struct DeviceButtonStyle: ButtonStyle {
     }
 
     private var backgroundColorPressed: Color {
-        (isActive ? Color.accentColor : .gray).opacity(0.3)
+        (isSelected ? Color.accentColor : .gray).opacity(0.3)
     }
 
     func makeBody(configuration: Configuration) -> some View {

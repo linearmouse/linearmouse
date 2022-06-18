@@ -7,19 +7,19 @@ import SwiftUI
 struct DevicePickerSheet: View {
     @Environment(\.isPresented) var isPresented
     @StateObject var model = DevicePickerSheetModel()
-    @Default(.shouldSwitchToActiveDevice) var shouldSwitchToActiveDevice
+    @Default(.autoSelectActiveDevice) var autoSelectActiveDevice
 
     var body: some View {
         VStack(spacing: 10) {
-            if !shouldSwitchToActiveDevice {
+            if !autoSelectActiveDevice {
                 DevicePicker()
                     .frame(minHeight: 300)
             }
 
-            Toggle("Switch to the active device automatically", isOn: $shouldSwitchToActiveDevice.animation())
+            Toggle("Auto select the active device", isOn: $autoSelectActiveDevice.animation())
                 .padding()
 
-            if shouldSwitchToActiveDevice {
+            if autoSelectActiveDevice {
                 Button("OK") {
                     isPresented?.wrappedValue.toggle()
                 }

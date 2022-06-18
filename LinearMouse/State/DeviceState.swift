@@ -5,9 +5,9 @@ import Combine
 import Defaults
 
 extension Defaults.Keys {
-    static let shouldSwitchToActiveDevice = Key<Bool>("shouldSwitchToActiveDevice", default: true)
+    static let autoSelectActiveDevice = Key<Bool>("autoSelectActiveDevice", default: true)
 
-    static let userSelectedDevice = Key<PersistedDevice?>("userSelectedDevice", default: nil)
+    static let selectedDevice = Key<DeviceMatcher?>("selectedDevice", default: nil)
 }
 
 class DeviceState: ObservableObject {
@@ -17,17 +17,24 @@ class DeviceState: ObservableObject {
 
     @Published var currentDevice: Device? {
         didSet {
-            guard !Defaults[.shouldSwitchToActiveDevice] else {
+            guard !Defaults[.autoSelectActiveDevice] else {
                 return
             }
 
-            Defaults[.userSelectedDevice] = currentDevice.map { PersistedDevice(fromDevice: $0) }
+            Defaults[.selectedDevice] = currentDevice.map { DeviceMatcher(of: $0) }
         }
     }
 
     init() {
-        Defaults.observe(keys: .shouldSwitchToActiveDevice, .userSelectedDevice) { [weak self] in
+        Defaults.observe(keys: .autoSelectActiveDevice, .selectedDevice) { [weak self] in
             self?.updateCurrentDevice()
+        }
+        .tieToLifetime(of: self)
+
+        Defaults.observe(.autoSelectActiveDevice) { change in
+            if change.newValue {
+                Defaults[.selectedDevice] = nil
+            }
         }
         .tieToLifetime(of: self)
 
@@ -42,12 +49,12 @@ extension DeviceState {
     private var deviceManager: DeviceManager { DeviceManager.shared }
 
     private func updateCurrentDevice(lastActiveDevice: Device?) {
-        guard !Defaults[.shouldSwitchToActiveDevice] else {
+        guard !Defaults[.autoSelectActiveDevice] else {
             currentDevice = lastActiveDevice
             return
         }
 
-        guard let userSelectedDevice = Defaults[.userSelectedDevice] else {
+        guard let userSelectedDevice = Defaults[.selectedDevice] else {
             currentDevice = lastActiveDevice
             return
         }

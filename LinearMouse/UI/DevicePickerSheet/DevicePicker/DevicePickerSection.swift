@@ -17,10 +17,18 @@ struct DevicePickerSection: View {
                     model.setDevice(device)
                     isPresented?.wrappedValue = false
                 }) {
-                    Text(device.name)
-                        .frame(maxWidth: .infinity, minHeight: 30)
+                    HStack(alignment: .firstTextBaseline, spacing: 5) {
+                        Text(device.name)
+
+                        if device.isActive {
+                            Text("(active)")
+                                .controlSize(.small)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 30)
                 }
-                .buttonStyle(DeviceButtonStyle(isActive: device.isActive))
+                .buttonStyle(DeviceButtonStyle(isSelected: device.isSelected))
                 .transition(.opacity)
             }
         }

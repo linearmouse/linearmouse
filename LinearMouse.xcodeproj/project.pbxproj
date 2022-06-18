@@ -14,7 +14,7 @@
 		972A5E2A285D5D0100CB6440 /* DeviceButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E29285D5D0100CB6440 /* DeviceButtonStyle.swift */; };
 		972A5E2D285D882500CB6440 /* DeviceState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E2C285D882500CB6440 /* DeviceState.swift */; };
 		972A5E30285D891100CB6440 /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = 972A5E2F285D891100CB6440 /* Defaults */; };
-		972A5E32285D8B5B00CB6440 /* PersistedDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E31285D8B5B00CB6440 /* PersistedDevice.swift */; };
+		972A5E32285D8B5B00CB6440 /* DeviceMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E31285D8B5B00CB6440 /* DeviceMatcher.swift */; };
 		972A5E34285D8E4800CB6440 /* Defaults+Workaround.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E33285D8E4800CB6440 /* Defaults+Workaround.swift */; };
 		972A5E36285D95CA00CB6440 /* DevicePickerSheetModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E35285D95CA00CB6440 /* DevicePickerSheetModel.swift */; };
 		972AFD452851C101009B0CBF /* AccessibilityPermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972AFD442851C101009B0CBF /* AccessibilityPermissionView.swift */; };
@@ -97,7 +97,7 @@
 		972A5E27285D4EB500CB6440 /* DevicePickerSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSection.swift; sourceTree = "<group>"; };
 		972A5E29285D5D0100CB6440 /* DeviceButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceButtonStyle.swift; sourceTree = "<group>"; };
 		972A5E2C285D882500CB6440 /* DeviceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceState.swift; sourceTree = "<group>"; };
-		972A5E31285D8B5B00CB6440 /* PersistedDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistedDevice.swift; sourceTree = "<group>"; };
+		972A5E31285D8B5B00CB6440 /* DeviceMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceMatcher.swift; sourceTree = "<group>"; };
 		972A5E33285D8E4800CB6440 /* Defaults+Workaround.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Defaults+Workaround.swift"; sourceTree = "<group>"; };
 		972A5E35285D95CA00CB6440 /* DevicePickerSheetModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSheetModel.swift; sourceTree = "<group>"; };
 		972AFD442851C101009B0CBF /* AccessibilityPermissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermissionView.swift; sourceTree = "<group>"; };
@@ -248,7 +248,7 @@
 			isa = PBXGroup;
 			children = (
 				972A5E2C285D882500CB6440 /* DeviceState.swift */,
-				972A5E31285D8B5B00CB6440 /* PersistedDevice.swift */,
+				972A5E31285D8B5B00CB6440 /* DeviceMatcher.swift */,
 			);
 			path = State;
 			sourceTree = "<group>";
@@ -708,7 +708,7 @@
 				B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */,
 				972A5E34285D8E4800CB6440 /* Defaults+Workaround.swift in Sources */,
 				B7ADF97F2748991D0005B02D /* ReverseScrolling.swift in Sources */,
-				972A5E32285D8B5B00CB6440 /* PersistedDevice.swift in Sources */,
+				972A5E32285D8B5B00CB6440 /* DeviceMatcher.swift in Sources */,
 				B7842927278D9BBC00D207F0 /* CheckForUpdatesView.swift in Sources */,
 				972A5E2D285D882500CB6440 /* DeviceState.swift in Sources */,
 				972DF6312859756700B83932 /* ProcessEnvironment.swift in Sources */,

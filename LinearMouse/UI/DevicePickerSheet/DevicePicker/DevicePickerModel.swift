@@ -5,14 +5,22 @@ import Combine
 import SwiftUI
 
 class DevicePickerModel: ObservableObject {
-    var deviceManagerSubscription: AnyCancellable?
+    var subscriptions = Set<AnyCancellable>()
 
     init() {
-        deviceManagerSubscription = DeviceManager.shared.objectWillChange.sink { [weak self] in
+        DeviceManager.shared.objectWillChange.sink { [weak self] in
             withAnimation(.easeOut(duration: 0.15)) {
                 self?.objectWillChange.send()
             }
         }
+        .store(in: &subscriptions)
+
+        DeviceState.shared.objectWillChange.sink { [weak self] in
+            withAnimation(.easeOut(duration: 0.15)) {
+                self?.objectWillChange.send()
+            }
+        }
+        .store(in: &subscriptions)
     }
 }
 
@@ -39,6 +47,10 @@ extension DeviceModel {
 
     var isActive: Bool {
         DeviceManager.shared.lastActiveDevice == device
+    }
+
+    var isSelected: Bool {
+        DeviceState.shared.currentDevice == device
     }
 
     var isMouse: Bool { device.category == .mouse }
