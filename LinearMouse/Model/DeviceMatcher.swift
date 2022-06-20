@@ -4,15 +4,15 @@
 import Defaults
 
 struct DeviceMatcher: Codable, Defaults.Serializable, Equatable {
-    let vendorID: Int?
-    let productID: Int?
+    let vendorID: HexValue?
+    let productID: HexValue?
     let serialNumber: String?
 }
 
 extension DeviceMatcher {
     init(of device: Device) {
-        let vendorID = device.vendorID
-        let productID = device.productID
+        let vendorID = HexValue(device.vendorID)
+        let productID = HexValue(device.productID)
         let serialNumber = device.serialNumber
 
         self.init(vendorID: vendorID, productID: productID, serialNumber: serialNumber)
@@ -23,8 +23,8 @@ extension DeviceMatcher {
             destination == nil || source == destination
         }
 
-        guard matchValue(vendorID, device.vendorID),
-              matchValue(productID, device.productID),
+        guard matchValue(vendorID?.value, device.vendorID),
+              matchValue(productID?.value, device.productID),
               matchValue(serialNumber, device.serialNumber) else {
             return false
         }

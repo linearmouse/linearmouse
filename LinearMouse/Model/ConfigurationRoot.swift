@@ -20,6 +20,28 @@ enum ConfigurationError: Error {
     case parseError(Error)
 }
 
+extension ConfigurationError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .notImplemented:
+            return NSLocalizedString("Not implemented", comment: "")
+        case let .parseError(underlyingError):
+            if let decodingError = underlyingError as? DecodingError {
+                switch decodingError {
+                case let .typeMismatch(type, context):
+                    return String(format: NSLocalizedString("Type mismatch: expected %1$@ at %2$@", comment: ""),
+                                  String(describing: type),
+                                  String(describing: context.codingPath.map(\.stringValue).joined(separator: ".")))
+                default:
+                    break
+                }
+                return String(describing: underlyingError)
+            }
+            return underlyingError.localizedDescription
+        }
+    }
+}
+
 extension ConfigurationRoot {
     static var shared = ConfigurationRoot()
 
@@ -60,6 +82,7 @@ extension ConfigurationRoot {
     var activeScheme: ConfigurationScheme? {
         // TODO: Backtrace the merge path
         // TODO: Optimize the algorithm
+
         var mergedScheme = ConfigurationScheme()
 
         for scheme in schemes where scheme.isActive {

@@ -25,8 +25,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func setup() {
-        ConfigurationState.shared.$activeScheme.sink { scheme in
-            debugPrint(scheme)
+        ConfigurationState.shared.$activeScheme.sink { _ in
+            // TODO: Apply settings
         }
         .store(in: &subscriptions)
 

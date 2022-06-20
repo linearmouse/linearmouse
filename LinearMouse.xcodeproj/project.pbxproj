@@ -34,6 +34,10 @@
 		97A46B17285444BF00C07C9B /* NSWindow+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A46B16285444BF00C07C9B /* NSWindow+Extensions.swift */; };
 		97A7A39C28587E8C00EE4833 /* PointerKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97A7A39B28587E8C00EE4833 /* PointerKit */; };
 		97B83CDB28607E2600ECF109 /* ConfigurationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97B83CDA28607E2600ECF109 /* ConfigurationState.swift */; };
+		97B83CDD2860B3FD00ECF109 /* ConfigurationScrollingSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97B83CDC2860B3FD00ECF109 /* ConfigurationScrollingSettings.swift */; };
+		97B83CDF2860C56700ECF109 /* HexValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97B83CDE2860C56700ECF109 /* HexValue.swift */; };
+		97B83CE32860CD8200ECF109 /* LinesOrPixels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97B83CE22860CD8200ECF109 /* LinesOrPixels.swift */; };
+		97B83CE52860DA9800ECF109 /* CustomDecodingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97B83CE42860DA9800ECF109 /* CustomDecodingError.swift */; };
 		97C5D8FF2856E3CB00CBED2D /* GestureKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C5D8FE2856E3CB00CBED2D /* GestureKit */; };
 		97F77FA4285DC467007C9C2B /* DevicePickerSectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA3285DC467007C9C2B /* DevicePickerSectionModel.swift */; };
 		97F77FA8285DC828007C9C2B /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA7285DC828007C9C2B /* Environment.swift */; };
@@ -122,6 +126,10 @@
 		97A7A3982857266700EE4833 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		97A7A39928572FB600EE4833 /* PointerKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PointerKit; sourceTree = "<group>"; };
 		97B83CDA28607E2600ECF109 /* ConfigurationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationState.swift; sourceTree = "<group>"; };
+		97B83CDC2860B3FD00ECF109 /* ConfigurationScrollingSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationScrollingSettings.swift; sourceTree = "<group>"; };
+		97B83CDE2860C56700ECF109 /* HexValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HexValue.swift; sourceTree = "<group>"; };
+		97B83CE22860CD8200ECF109 /* LinesOrPixels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinesOrPixels.swift; sourceTree = "<group>"; };
+		97B83CE42860DA9800ECF109 /* CustomDecodingError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomDecodingError.swift; sourceTree = "<group>"; };
 		97C5D8FD2856E3BE00CBED2D /* GestureKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = GestureKit; sourceTree = "<group>"; };
 		97F77FA3285DC467007C9C2B /* DevicePickerSectionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSectionModel.swift; sourceTree = "<group>"; };
 		97F77FA7285DC828007C9C2B /* Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
@@ -259,6 +267,7 @@
 			isa = PBXGroup;
 			children = (
 				97F77FB5285F538E007C9C2B /* Codable */,
+				97B83CE42860DA9800ECF109 /* CustomDecodingError.swift */,
 				972DF6302859756700B83932 /* ProcessEnvironment.swift */,
 			);
 			path = Utilities;
@@ -380,6 +389,7 @@
 				972A5E31285D8B5B00CB6440 /* DeviceMatcher.swift */,
 				97F77FAE285F0A58007C9C2B /* ConfigurationRoot.swift */,
 				97F77FB0285F0CDC007C9C2B /* ConfigurationScheme.swift */,
+				97B83CDC2860B3FD00ECF109 /* ConfigurationScrollingSettings.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -396,6 +406,8 @@
 			isa = PBXGroup;
 			children = (
 				97F77FB6285F53A5007C9C2B /* ArrayOrSingleValue.swift */,
+				97B83CDE2860C56700ECF109 /* HexValue.swift */,
+				97B83CE22860CD8200ECF109 /* LinesOrPixels.swift */,
 			);
 			path = Codable;
 			sourceTree = "<group>";
@@ -737,12 +749,15 @@
 				B7ADF9852748B25A0005B02D /* ModifierActions.swift in Sources */,
 				B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */,
 				972A5E34285D8E4800CB6440 /* Defaults+Workaround.swift in Sources */,
+				97B83CE52860DA9800ECF109 /* CustomDecodingError.swift in Sources */,
 				B7ADF97F2748991D0005B02D /* ReverseScrolling.swift in Sources */,
 				97F77FB1285F0CDC007C9C2B /* ConfigurationScheme.swift in Sources */,
 				972A5E32285D8B5B00CB6440 /* DeviceMatcher.swift in Sources */,
+				97B83CDF2860C56700ECF109 /* HexValue.swift in Sources */,
 				B7842927278D9BBC00D207F0 /* CheckForUpdatesView.swift in Sources */,
 				972A5E2D285D882500CB6440 /* DeviceState.swift in Sources */,
 				972DF6312859756700B83932 /* ProcessEnvironment.swift in Sources */,
+				97B83CDD2860B3FD00ECF109 /* ConfigurationScrollingSettings.swift in Sources */,
 				97B83CDB28607E2600ECF109 /* ConfigurationState.swift in Sources */,
 				97F77FAF285F0A58007C9C2B /* ConfigurationRoot.swift in Sources */,
 				972A5E22285CA49800CB6440 /* DevicePicker.swift in Sources */,
@@ -776,6 +791,7 @@
 				972AFD472851E6B0009B0CBF /* AccessibilityPermission.swift in Sources */,
 				B7ADF9832748B12B0005B02D /* LinearScrolling.swift in Sources */,
 				B77A16122674C21600E99A5D /* Preferences.swift in Sources */,
+				97B83CE32860CD8200ECF109 /* LinesOrPixels.swift in Sources */,
 				972DF64C285A298600B83932 /* DetailView.swift in Sources */,
 				972A5E2A285D5D0100CB6440 /* DeviceButtonStyle.swift in Sources */,
 				97F77FAA285E178B007C9C2B /* DevicePickerSectionItem.swift in Sources */,

@@ -8,10 +8,12 @@
 /// provided, the scheme is regarded as active if any one of them is truthy.
 ///
 /// There can be multiple active schemes at the same time. Settings in
-/// subsequent schemes will be shallowly merged into the previous ones.
+/// subsequent schemes will be merged into the previous ones.
 struct ConfigurationScheme: Codable {
     /// Defines the conditions under which this scheme is active.
     var `if`: ArrayOrSingleValue<ConfigurationSchemeIf>?
+
+    var scrolling: ConfigurationScrollingSettings?
 }
 
 struct ConfigurationSchemeIf: Codable {
@@ -27,7 +29,11 @@ extension ConfigurationScheme {
         return `if`.value.contains(where: \.isTruthy)
     }
 
-    func merge(into _: inout ConfigurationScheme) {}
+    func merge(into scheme: inout Self) {
+        if let scrolling = scrolling {
+            scrolling.merge(into: &scheme.scrolling)
+        }
+    }
 }
 
 extension ConfigurationSchemeIf {

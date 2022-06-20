@@ -27,6 +27,8 @@ class ConfigurationState: ObservableObject {
             DispatchQueue.main.async { [self] in
                 guard shouldPerformSave else { return }
 
+                os_log("Auto saving the configuration", log: Self.log, type: .debug)
+
                 save()
                 shouldPerformSave = false
             }
@@ -74,6 +76,9 @@ extension ConfigurationState {
             )
             alert.runModal()
         }
+
+        // Prevent auto saving
+        shouldPerformSave = false
     }
 
     func save() {
