@@ -19,10 +19,15 @@ struct DevicePickerSheet: View {
                 .padding()
 
             if autoSelectActiveDevice {
-                Button("OK") {
-                    isPresented?.wrappedValue.toggle()
+                HStack {
+                    Spacer()
+
+                    Button("OK") {
+                        isPresented?.wrappedValue.toggle()
+                    }
+                    .padding([.bottom, .horizontal])
+                    .controlSize(.regular)
                 }
-                .padding(.bottom)
             }
         }
     }

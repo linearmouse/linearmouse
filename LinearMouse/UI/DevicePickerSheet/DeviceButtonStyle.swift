@@ -11,11 +11,11 @@ struct DeviceButtonStyle: ButtonStyle {
     }
 
     private var backgroundColor: Color {
-        backgroundColorPressed.opacity(0.3)
+        backgroundColorPressed.opacity(0.2)
     }
 
     private var backgroundColorPressed: Color {
-        (isSelected ? Color.accentColor : .gray).opacity(0.3)
+        (isSelected ? Color.accentColor : .gray).opacity(0.2)
     }
 
     func makeBody(configuration: Configuration) -> some View {

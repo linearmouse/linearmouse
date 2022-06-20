@@ -59,7 +59,7 @@ extension DeviceState {
             return
         }
 
-        let matchedDevice = deviceManager.devices.first { userSelectedDevice.strictMatch(with: $0) }
+        let matchedDevice = deviceManager.devices.first { userSelectedDevice.match(with: $0) }
 
         currentDevice = matchedDevice ?? lastActiveDevice
     }
