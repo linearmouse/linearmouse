@@ -79,18 +79,19 @@ Please read the [contributing guide](CONTRIBUTING.md) before making a pull reque
 Thank you to all the people who already contributed to LinearMouse!
 
 <a href="https://github.com/linearmouse/linearmouse/graphs/contributors">
-  <img src="https://opencollective.com/linearmouse/contributors.svg" />
+  <img src="https://opencollective.com/linearmouse/contributors.svg?button=0" />
 </a>
 
-## Star History
+## Backers
 
-[![Star History Chart](https://api.star-history.com/svg?repos=linearmouse/linearmouse&type=Date)](https://star-history.com/#linearmouse/linearmouse&Date)
+Financial contributors on [Open Collective](https://opencollective.com/linearmouse#section-top-financial-contributors) and [Ko-fi](https://ko-fi.com/lujjjh#topSupportersContainerDiv) help me pay for the Apple certificate and continue developing LinearMouse.
+
+<p>
+  <a href="https://opencollective.com/linearmouse">
+    <img src="https://opencollective.com/linearmouse/tiers/backers.svg" />
+  </a>
+</p>
 
 ## Credits
 
 * [Mac Mouse Fix](https://github.com/noah-nuebling/mac-mouse-fix)
-
-## Buy me a coffee
-
-* [Ko-fi](https://ko-fi.com/lujjjh)
-* [爱发电](https://afdian.net/@lujjjh)
