@@ -12,7 +12,7 @@ class ConfigurationState: ObservableObject {
     static let shared = ConfigurationState()
 
     let configurationPath = URL(
-        fileURLWithPath: ".config/linearmouse/config.json",
+        fileURLWithPath: ".config/linearmouse/linearmouse.json",
         relativeTo: FileManager.default.homeDirectoryForCurrentUser
     )
 

@@ -4,13 +4,11 @@ The LinearMouse configuration is stored in `~/.config/linearmouse/linearmouse.js
 
 If the configuration file does not exist, LinearMouse will create an empty configuration automatically.
 
-> **Note**
->
+> **Note**  
 > It's preferable to use the GUI to alter settings rather than manually updating configuration
 > unless you want to use advanced features.
 
-> **Note**
->
+> **Note**  
 > JSON5 is not supported yet. Writing comments in configuration will raise a parsing error.
 
 ## Get started

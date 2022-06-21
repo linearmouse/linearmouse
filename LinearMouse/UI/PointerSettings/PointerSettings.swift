@@ -3,7 +3,7 @@
 
 import SwiftUI
 
-struct CursorSettings: View {
+struct PointerSettings: View {
     @ObservedObject var defaults = AppDefaults.shared
 
     var sensitivityInDouble: Binding<Double> {
@@ -116,6 +116,6 @@ struct CursorSettings: View {
 
 struct CursorSettings_Previews: PreviewProvider {
     static var previews: some View {
-        CursorSettings()
+        PointerSettings()
     }
 }

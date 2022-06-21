@@ -3,6 +3,7 @@
 
 import Combine
 import Defaults
+import SwiftUI
 
 extension Defaults.Keys {
     static let autoSelectActiveDevice = Key<Bool>("autoSelectActiveDevice", default: true)

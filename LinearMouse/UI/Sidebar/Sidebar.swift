@@ -20,8 +20,8 @@ struct Sidebar: View {
             .tag(Tag.wheel)
 
             SidebarItem(imageName: "cursorarrow.motionlines",
-                        text: "Cursor") {
-                CursorSettings()
+                        text: "Pointer") {
+                PointerSettings()
             }
             .tag(Tag.cursor)
 

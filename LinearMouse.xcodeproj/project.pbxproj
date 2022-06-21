@@ -58,7 +58,7 @@
 		B75A06232671E9DA00BEAF77 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B75A06222671E9DA00BEAF77 /* Preview Assets.xcassets */; };
 		B75A06262671E9DA00BEAF77 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B75A06242671E9DA00BEAF77 /* Main.storyboard */; };
 		B76173442675AD8700CC9412 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = B76173462675AD8700CC9412 /* Localizable.strings */; };
-		B7618A1027621EDF00527C1A /* CursorSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7618A0F27621EDF00527C1A /* CursorSettings.swift */; };
+		B7618A1027621EDF00527C1A /* PointerSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7618A0F27621EDF00527C1A /* PointerSettings.swift */; };
 		B77A160E2674B3DD00E99A5D /* LinearMouse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160D2674B3DD00E99A5D /* LinearMouse.swift */; };
 		B77A16102674B85300E99A5D /* AppDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160F2674B85300E99A5D /* AppDefaults.swift */; };
 		B77A16122674C21600E99A5D /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A16112674C21600E99A5D /* Preferences.swift */; };
@@ -152,7 +152,7 @@
 		B75A06272671E9DA00BEAF77 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B75A06282671E9DA00BEAF77 /* LinearMouse.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LinearMouse.entitlements; sourceTree = "<group>"; };
 		B76173452675AD8700CC9412 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
-		B7618A0F27621EDF00527C1A /* CursorSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorSettings.swift; sourceTree = "<group>"; };
+		B7618A0F27621EDF00527C1A /* PointerSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointerSettings.swift; sourceTree = "<group>"; };
 		B77A160D2674B3DD00E99A5D /* LinearMouse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearMouse.swift; sourceTree = "<group>"; };
 		B77A160F2674B85300E99A5D /* AppDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDefaults.swift; sourceTree = "<group>"; };
 		B77A16112674C21600E99A5D /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
@@ -341,12 +341,12 @@
 			path = WheelSettings;
 			sourceTree = "<group>";
 		};
-		972DF657285AE10F00B83932 /* CursorSettings */ = {
+		972DF657285AE10F00B83932 /* PointerSettings */ = {
 			isa = PBXGroup;
 			children = (
-				B7618A0F27621EDF00527C1A /* CursorSettings.swift */,
+				B7618A0F27621EDF00527C1A /* PointerSettings.swift */,
 			);
-			path = CursorSettings;
+			path = PointerSettings;
 			sourceTree = "<group>";
 		};
 		972DF658285AE3B600B83932 /* ModifierKeysSettings */ = {
@@ -386,9 +386,9 @@
 		97F77FAD285F09FA007C9C2B /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				972A5E31285D8B5B00CB6440 /* DeviceMatcher.swift */,
 				97F77FAE285F0A58007C9C2B /* ConfigurationRoot.swift */,
 				97F77FB0285F0CDC007C9C2B /* ConfigurationScheme.swift */,
+				972A5E31285D8B5B00CB6440 /* DeviceMatcher.swift */,
 				97B83CDC2860B3FD00ECF109 /* ConfigurationScrollingSettings.swift */,
 			);
 			path = Model;
@@ -514,7 +514,7 @@
 				972DF64A285A295C00B83932 /* DetailView */,
 				972A5E1D285CA42500CB6440 /* DevicePickerSheet */,
 				972DF655285AE0AA00B83932 /* WheelSettings */,
-				972DF657285AE10F00B83932 /* CursorSettings */,
+				972DF657285AE10F00B83932 /* PointerSettings */,
 				972DF659285AEA9400B83932 /* ButtonsSettings */,
 				972DF658285AE3B600B83932 /* ModifierKeysSettings */,
 				972DF652285ADE8800B83932 /* GeneralSettings */,
@@ -739,7 +739,7 @@
 				B7ADF98127489CB00005B02D /* MouseDetector.swift in Sources */,
 				B77BA0F227480AA500E3BC5C /* EventTransformer.swift in Sources */,
 				972AFD492851E96D009B0CBF /* AccessibilityPermissionWindow.swift in Sources */,
-				B7618A1027621EDF00527C1A /* CursorSettings.swift in Sources */,
+				B7618A1027621EDF00527C1A /* PointerSettings.swift in Sources */,
 				B7ADF9882748B6390005B02D /* DefaultMouseDetector.swift in Sources */,
 				972A5E24285CA4AA00CB6440 /* DevicePickerModel.swift in Sources */,
 				B7B1D08D26B2FD6C00F48176 /* AppStorage.swift in Sources */,

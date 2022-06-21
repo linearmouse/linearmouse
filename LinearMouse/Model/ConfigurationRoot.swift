@@ -32,6 +32,17 @@ extension ConfigurationError: LocalizedError {
                     return String(format: NSLocalizedString("Type mismatch: expected %1$@ at %2$@", comment: ""),
                                   String(describing: type),
                                   String(describing: context.codingPath.map(\.stringValue).joined(separator: ".")))
+                case let .dataCorrupted(context):
+                    if let underlyingError = context.underlyingError {
+                        if let errorDescription = (underlyingError as NSError).userInfo[NSDebugDescriptionErrorKey] {
+                            return String(format: NSLocalizedString("Invalid JSON: %1$@", comment: ""),
+                                          String(describing: errorDescription))
+                        }
+                        return String(format: NSLocalizedString("Invalid JSON: %1$@", comment: ""),
+                                      String(describing: underlyingError))
+                    } else {
+                        return NSLocalizedString("Invalid JSON: Unknown error", comment: "")
+                    }
                 default:
                     break
                 }
