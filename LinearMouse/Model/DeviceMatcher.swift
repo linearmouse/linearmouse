@@ -29,6 +29,10 @@ extension DeviceMatcher {
             destination == nil || source == destination
         }
 
+        func matchValue<T>(_ destination: T?, _ source: T?) -> Bool where T: Equatable {
+            destination == nil || source == destination
+        }
+
         guard matchValue(vendorID?.value, device.vendorID),
               matchValue(productID?.value, device.productID),
               matchValue(serialNumber, device.serialNumber)
