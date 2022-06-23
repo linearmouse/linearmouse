@@ -22,7 +22,7 @@ struct AccessibilityPermissionView: View {
             .padding(.horizontal)
 
             Text(
-                "You need to grant Accessibility permission in System Preferences > Security & Pravicy > Accessibility."
+                "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility."
             )
             .padding(.horizontal)
 
