@@ -1,5 +1,5 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse 需要辅助功能权限";
-"You need to grant Accessibility permission in System Preferences > Security & Pravicy > Accessibility." = "您需要在系统偏好设置 > 安全性与隐私 > 辅助功能中授予辅助功能权限。";
+"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility.";
 "Get more help" = "获得更多帮助";
 "Open Accessibility" = "打开辅助功能";
 "Reset all permissions..." = "重置所有权限...";
