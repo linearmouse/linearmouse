@@ -1,12 +1,3 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility.";
-"Get more help" = "Get more help";
-"Open Accessibility" = "Open Accessibility";
-"Reset all permissions..." = "Reset all permissions...";
-"Are you sure?" = "Are you sure?";
-"This will reset all granted Accessibility permissions in the system." = "This will reset all granted Accessibility permissions in the system.";
-"Reset" = "Reset";
-"Cancel" = "Cancel";
 
 "Reverse scrolling:" = "Scorrimento inverso:";
 "Linear scrolling:" = "Scorrimento lineare:";
