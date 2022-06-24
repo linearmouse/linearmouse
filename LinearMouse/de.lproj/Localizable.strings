@@ -1,17 +1,6 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility.";
-"Get more help" = "Get more help";
-"Open Accessibility" = "Open Accessibility";
-"Reset all permissions..." = "Reset all permissions...";
-"Are you sure?" = "Are you sure?";
-"This will reset all granted Accessibility permissions in the system." = "This will reset all granted Accessibility permissions in the system.";
-"Reset" = "Reset";
-"Cancel" = "Cancel";
 
 "Reverse scrolling:" = "Invertiertes Scrollen:";
 "Linear scrolling:" = "Lineares Scrollen:";
-"vertically only" = "vertically only";
-"horizontally only" = "horizontally only";
 "Universal back and forward:" = "Universelles Vor und Zurück:";
 "on" = "An";
 "off" = "Aus";
@@ -26,10 +15,7 @@
 "Modifier Keys" = "Tastenkürzel";
 
 "Reverse scrolling" = "Scrollen invertieren";
-"(vertically)" = "(vertically)";
 "Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad." = "Invertiert die Scrollrichtung für die Maus, aber nicht für das Trackpad.";
-"(horizontally)" = "(horizontally)";
-"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
 "Enable linear scrolling" = "Lineares Scrollen aktivieren";
 "Disable mouse scrolling acceleration." = "Deaktiviert die Scrollbeschleunigung der Maus.";
 "Scroll" = "Scrolle";
