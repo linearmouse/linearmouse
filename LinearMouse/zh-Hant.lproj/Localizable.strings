@@ -1,17 +1,6 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility.";
-"Get more help" = "Get more help";
-"Open Accessibility" = "Open Accessibility";
-"Reset all permissions..." = "Reset all permissions...";
-"Are you sure?" = "Are you sure?";
-"This will reset all granted Accessibility permissions in the system." = "This will reset all granted Accessibility permissions in the system.";
-"Reset" = "Reset";
-"Cancel" = "Cancel";
 
 "Reverse scrolling:" = "反向捲動：";
 "Linear scrolling:" = "線性捲動：";
-"vertically only" = "vertically only";
-"horizontally only" = "horizontally only";
 "Universal back and forward:" = "全局後退、前進：";
 "on" = "開啟";
 "off" = "關閉";
@@ -26,10 +15,7 @@
 "Modifier Keys" = "修飾鍵";
 
 "Reverse scrolling" = "翻轉捲動";
-"(vertically)" = "(vertically)";
 "Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad." = "反轉滑鼠捲動方向，但不會反轉觸控板捲動方向。";
-"(horizontally)" = "(horizontally)";
-"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
 "Enable linear scrolling" = "啟用線性捲動";
 "Disable mouse scrolling acceleration." = "禁用滑鼠捲動加速度。";
 "Scroll" = "捲動";
