@@ -11,7 +11,7 @@
 /// subsequent schemes will be merged into the previous ones.
 struct ConfigurationScheme: Codable {
     /// Defines the conditions under which this scheme is active.
-    var `if`: ArrayOrSingleValue<ConfigurationSchemeIf>?
+    @SingleValueOrArray var `if`: [ConfigurationSchemeIf]?
 
     var scrolling: ConfigurationScrollingSettings?
 }
@@ -26,7 +26,27 @@ extension ConfigurationScheme {
             return true
         }
 
-        return `if`.value.contains(where: \.isTruthy)
+        return `if`.contains(where: \.isTruthy)
+    }
+
+    /// A scheme is device-specific if and only if a) it has only one `if` and
+    /// b) the `if` contains conditions that specifies both vendorID and productID.
+    var isDeviceSpecific: Bool {
+        guard let conditions = `if` else {
+            return false
+        }
+
+        guard conditions.count == 1,
+              let condition = conditions.first else {
+            return false
+        }
+
+        guard condition.device?.vendorID != nil,
+              condition.device?.productID != nil else {
+            return false
+        }
+
+        return true
     }
 
     func merge(into scheme: inout Self) {

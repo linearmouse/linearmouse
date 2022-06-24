@@ -18,27 +18,26 @@ class ConfigurationState: ObservableObject {
 
     private var shouldPerformSave = false
 
-    /// After being set, it will be saved to the disk automatically
-    /// in the next main loop.
-    @Published var configuration = ConfigurationRoot() {
-        didSet {
-            shouldPerformSave = true
-
-            DispatchQueue.main.async { [self] in
-                guard shouldPerformSave else { return }
-
-                os_log("Auto saving the configuration", log: Self.log, type: .debug)
-
-                save()
-                shouldPerformSave = false
-            }
-        }
-    }
+    @Published var configuration = ConfigurationRoot()
 
     @Published var activeScheme: ConfigurationScheme? {
         didSet {
-            os_log("Active scheme is switched to %{public}@", log: Self.log, type: .debug,
+            os_log("Active scheme is updated: %{public}@", log: Self.log, type: .debug,
                    String(describing: activeScheme))
+        }
+    }
+
+    private var activeDeviceSpecificSchemeIndex: Int? {
+        didSet {
+            os_log("Active device specific scheme index is updated: %{public}@", log: Self.log, type: .debug,
+                   String(describing: activeDeviceSpecificSchemeIndex))
+        }
+    }
+
+    @Published var activeDeviceSpecificScheme: SchemeState? {
+        didSet {
+            os_log("Active device-specific scheme is updated: %{public}@", log: Self.log, type: .debug,
+                   String(describing: activeDeviceSpecificScheme))
         }
     }
 
@@ -47,14 +46,18 @@ class ConfigurationState: ObservableObject {
     init() {
         load()
 
-        $configuration.sink { [weak self] configuration in
-            self?.updateActiveScheme(of: configuration)
+        $configuration.sink { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.updateActiveScheme()
+                self?.updateActiveDeviceSpecificScheme()
+            }
         }
         .store(in: &subscriptions)
 
         DeviceManager.shared.$lastActiveDevice.sink { [weak self] _ in
             DispatchQueue.main.async {
                 self?.updateActiveScheme()
+                self?.updateActiveDeviceSpecificScheme()
             }
         }
         .store(in: &subscriptions)
@@ -95,10 +98,12 @@ extension ConfigurationState {
     }
 
     func updateActiveScheme() {
-        updateActiveScheme(of: configuration)
+        activeScheme = configuration.activeScheme
     }
 
-    func updateActiveScheme(of configuration: ConfigurationRoot) {
-        activeScheme = configuration.activeScheme
+    func updateActiveDeviceSpecificScheme() {
+        activeDeviceSpecificSchemeIndex = configuration.getActiveDeviceSpecificSchemeIndex()
+
+        activeDeviceSpecificScheme = activeDeviceSpecificSchemeIndex.map { SchemeState(of: $0) }
     }
 }

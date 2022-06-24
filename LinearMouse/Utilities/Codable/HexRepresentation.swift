@@ -3,18 +3,16 @@
 
 import Foundation
 
-struct HexValue: Equatable {
-    var value: Int
-}
+@propertyWrapper
+struct HexRepresentation<Value: BinaryInteger & Codable>: Equatable {
+    var wrappedValue: Value?
 
-extension HexValue {
-    init?(_ value: Int?) {
-        guard let value = value else { return nil }
-        self.value = value
+    init(wrappedValue value: Value?) {
+        wrappedValue = value
     }
 }
 
-extension HexValue: Codable {
+extension HexRepresentation: Codable {
     enum ValueError: Error {
         case invalidValue
     }
@@ -26,28 +24,26 @@ extension HexValue: Codable {
             if hexValue.hasPrefix("0x") {
                 hexValue = String(hexValue.dropFirst(2))
             }
-            guard let parsedValue = Int(hexValue, radix: 16) else {
+            guard let parsedValue = Int64(hexValue, radix: 16) else {
                 throw CustomDecodingError(in: container, error: ValueError.invalidValue)
             }
-            value = parsedValue
+            wrappedValue = Value(parsedValue)
         } catch {
-            value = try container.decode(Int.self)
+            wrappedValue = try container.decode(Value.self)
         }
     }
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        try container.encode("0x" + String(value, radix: 16))
+        guard let wrappedValue = wrappedValue else {
+            try container.encodeNil()
+            return
+        }
+        try container.encode("0x" + String(wrappedValue, radix: 16))
     }
 }
 
-extension HexValue: CustomStringConvertible {
-    var description: String {
-        value.description
-    }
-}
-
-extension HexValue.ValueError: LocalizedError {
+extension HexRepresentation.ValueError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidValue:

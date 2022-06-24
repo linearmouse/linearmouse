@@ -54,8 +54,6 @@ extension ConfigurationError: LocalizedError {
 }
 
 extension ConfigurationRoot {
-    static var shared = ConfigurationRoot()
-
     static func load(from data: Data) throws -> Self {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
@@ -101,5 +99,28 @@ extension ConfigurationRoot {
         }
 
         return mergedScheme
+    }
+
+    mutating func getActiveDeviceSpecificSchemeIndex() -> Int? {
+        guard let activeDevice = DeviceManager.shared.lastActiveDevice else {
+            return nil
+        }
+
+        if let index = schemes.firstIndex(where: { $0.isDeviceSpecific && $0.isActive }) {
+            return index
+        }
+
+        var scheme = ConfigurationScheme()
+
+        let `if` = ConfigurationSchemeIf(device: DeviceMatcher(vendorID: activeDevice.vendorID,
+                                                               productID: activeDevice.productID,
+                                                               serialNumber: activeDevice.serialNumber,
+                                                               category: nil))
+
+        scheme.if = [`if`]
+
+        schemes.append(scheme)
+
+        return schemes.endIndex
     }
 }

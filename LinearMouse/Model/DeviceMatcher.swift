@@ -4,10 +4,10 @@
 import Defaults
 
 struct DeviceMatcher: Codable, Defaults.Serializable {
-    let vendorID: HexValue?
-    let productID: HexValue?
-    let serialNumber: String?
-    let category: ArrayOrSingleValue<Category>?
+    @HexRepresentation var vendorID: Int?
+    @HexRepresentation var productID: Int?
+    var serialNumber: String?
+    @SingleValueOrArray var category: [Category]?
 
     enum Category: String, Codable {
         case mouse, trackpad
@@ -16,10 +16,10 @@ struct DeviceMatcher: Codable, Defaults.Serializable {
 
 extension DeviceMatcher {
     init(of device: Device) {
-        let vendorID = HexValue(device.vendorID)
-        let productID = HexValue(device.productID)
+        let vendorID = device.vendorID
+        let productID = device.productID
         let serialNumber = device.serialNumber
-        let category = ArrayOrSingleValue(value: [Category(from: device.category)])
+        let category = [Category(from: device.category)]
 
         self.init(vendorID: vendorID, productID: productID, serialNumber: serialNumber, category: category)
     }
@@ -33,15 +33,15 @@ extension DeviceMatcher {
             destination == nil || source == destination
         }
 
-        guard matchValue(vendorID?.value, device.vendorID),
-              matchValue(productID?.value, device.productID),
+        guard matchValue(vendorID, device.vendorID),
+              matchValue(productID, device.productID),
               matchValue(serialNumber, device.serialNumber)
         else {
             return false
         }
 
         if let category = category {
-            guard category.value.contains(where: { $0.deviceCategory == device.category })
+            guard category.contains(where: { $0.deviceCategory == device.category })
             else {
                 return false
             }

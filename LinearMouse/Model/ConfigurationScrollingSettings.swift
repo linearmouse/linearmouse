@@ -4,8 +4,9 @@
 import Foundation
 
 struct ConfigurationScrollingSettings: Codable {
-    enum Reverse: String, Codable {
-        case none, vertical, horizontal, both
+    struct Reverse: Codable {
+        var vertical: Bool?
+        var horizontal: Bool?
     }
 
     var reverse: Reverse?
@@ -14,18 +15,17 @@ struct ConfigurationScrollingSettings: Codable {
 }
 
 extension ConfigurationScrollingSettings {
-    func merge(into settings: inout Self?) {
-        if settings == nil {
-            settings = self
-            return
+    func merge(into scrolling: inout Self?) {
+        if scrolling == nil {
+            scrolling = Self()
         }
 
         if let reverse = reverse {
-            settings?.reverse = reverse
+            scrolling?.reverse = reverse
         }
 
         if let distance = distance {
-            settings?.distance = distance
+            scrolling?.distance = distance
         }
     }
 }
