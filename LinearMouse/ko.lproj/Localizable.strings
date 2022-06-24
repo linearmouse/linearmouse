@@ -1,5 +1,5 @@
 "LinearMouse needs Accessibility permission" = "'LinearMouse'이(가) 손쉬운 사용 기능을 사용하여 이 컴퓨터를 제어하려고 합니다";
-"You need to grant Accessibility permission in System Preferences > Security & Pravicy > Accessibility." = "시스템 설정에 있는 보안 및 개인 정보 보호 환경설정에서 이 응용 프로그램에 접근 권한을 부여하십시오.";
+"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "시스템 설정에 있는 보안 및 개인 정보 보호 환경설정에서 이 응용 프로그램에 접근 권한을 부여하십시오.";
 "Get more help" = "더 많은 도움 얻기";
 "Open Accessibility" = "시스템 설정 열기";
 "Reset all permissions..." = "권한 초기화";
