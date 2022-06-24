@@ -1,0 +1,62 @@
+"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
+"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility.";
+"Get more help" = "Get more help";
+"Open Accessibility" = "Open Accessibility";
+"Reset all permissions..." = "Reset all permissions...";
+"Are you sure?" = "Are you sure?";
+"This will reset all granted Accessibility permissions in the system." = "This will reset all granted Accessibility permissions in the system.";
+"Reset" = "Reset";
+"Cancel" = "Cancel";
+
+"Reverse scrolling:" = "Scorrimento inverso:";
+"Linear scrolling:" = "Scorrimento lineare:";
+"vertically only" = "solo verticalmente";
+"horizontally only" = "solo orizzontalmente";
+"Universal back and forward:" = "Avanti e indietro universale:";
+"on" = "attivato";
+"off" = "disattivato";
+"line" = "riga";
+"lines" = "righe";
+"%@ Preferences..." = "Preferenze di %@...";
+"Quit %@" = "Chiudi %@";
+
+"%@ Preferences" = "Preferenze di %@";
+
+"General" = "Generale";
+"Modifier Keys" = "Tasti modificatori";
+
+"Reverse scrolling" = "Scorrimento inverso";
+"(vertically)" = "(verticalmente)";
+"Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad." = "Inverte la direzione di scorrimento per un mouse, ma non inverte la direzione di scorrimento per un trackpad.";
+"(horizontally)" = "(orizzontalmente)";
+"Some gestures, such as swiping back and forward, may stop working." = "Alcuni gesti, come scorrere avanti e indietro, potrebbero smettere di funzionare.";
+"Enable linear scrolling" = "Attivare lo scorrimento lineare";
+"Disable mouse scrolling acceleration." = "Disattivare l'accelerazione dello scorrimento del mouse.";
+"Scroll" = "Scorri";
+"Enable universal back and forward" = "Abilitare avanti e indietro universale";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Converti i pulsanti laterali avanti e indietro in gesti scorrevoli per consentire funzionalità di avanti e indietro universali.";
+"Show in menu bar" = "Mostra nella barra dei menu";
+"To show the preferences, launch %@ again." = "Per vedere le preferenze, apri %@ di nuovo.";
+"Version: %@" = "Versione: %@";
+"Check for Updates..." = "Controlla aggiornamenti...";
+"Automatically" = "Automaticamente";
+"Daily" = "Ogni giorno";
+"Weekly" = "Ogni settimana";
+"Monthly" = "Ogni mese";
+"Include beta" = "Includere beta";
+"Homepage" = "Homepage";
+"GitHub" = "GitHub";
+"Feedback" = "Feedback";
+"Contact" = "Contatto";
+
+"Cursor" = "Puntatore";
+"Acceleration" = "Accelerazione";
+"Sensitivity" = "Sensibilità";
+"Revert to system defaults" = "Ripristina impostazioni predefinite";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "Puoi anche premere ⌃⇧⌘Z per ripristinare le impostazioni predefinite.";
+"Disable cursor acceleration & sensitivity" = "Disabilitare accelerazione del puntatore e sensibilità";
+
+"No action" = "Nessuna azione";
+"Alter orientation" = "Cambiare orientamento";
+"Change speed" = "Cambia velocità";
+"to" = "a";

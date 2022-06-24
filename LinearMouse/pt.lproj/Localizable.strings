@@ -1,0 +1,62 @@
+"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
+"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility.";
+"Get more help" = "Get more help";
+"Open Accessibility" = "Open Accessibility";
+"Reset all permissions..." = "Reset all permissions...";
+"Are you sure?" = "Are you sure?";
+"This will reset all granted Accessibility permissions in the system." = "This will reset all granted Accessibility permissions in the system.";
+"Reset" = "Reset";
+"Cancel" = "Cancel";
+
+"Reverse scrolling:" = "Reverse scrolling:";
+"Linear scrolling:" = "Linear scrolling:";
+"vertically only" = "vertically only";
+"horizontally only" = "horizontally only";
+"Universal back and forward:" = "Universal back and forward:";
+"on" = "on";
+"off" = "off";
+"line" = "line";
+"lines" = "lines";
+"%@ Preferences..." = "%@ Preferences...";
+"Quit %@" = "Quit %@";
+
+"%@ Preferences" = "%@ Preferences";
+
+"General" = "General";
+"Modifier Keys" = "Modifier Keys";
+
+"Reverse scrolling" = "Reverse scrolling";
+"(vertically)" = "(vertically)";
+"Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad." = "Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad.";
+"(horizontally)" = "(horizontally)";
+"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
+"Enable linear scrolling" = "Enable linear scrolling";
+"Disable mouse scrolling acceleration." = "Disable mouse scrolling acceleration.";
+"Scroll" = "Scroll";
+"Enable universal back and forward" = "Enable universal back and forward";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
+"Show in menu bar" = "Show in menu bar";
+"To show the preferences, launch %@ again." = "To show the preferences, launch %@ again.";
+"Version: %@" = "Version: %@";
+"Check for Updates..." = "Check for Updates...";
+"Automatically" = "Automatically";
+"Daily" = "Daily";
+"Weekly" = "Weekly";
+"Monthly" = "Monthly";
+"Include beta" = "Include beta";
+"Homepage" = "Homepage";
+"GitHub" = "GitHub";
+"Feedback" = "Feedback";
+"Contact" = "Contact";
+
+"Cursor" = "Cursor";
+"Acceleration" = "Acceleration";
+"Sensitivity" = "Sensitivity";
+"Revert to system defaults" = "Revert to system defaults";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
+"Disable cursor acceleration & sensitivity" = "Disable cursor acceleration & sensitivity";
+
+"No action" = "No action";
+"Alter orientation" = "Alter orientation";
+"Change speed" = "Change speed";
+"to" = "to";
