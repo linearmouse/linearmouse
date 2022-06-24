@@ -1,5 +1,5 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse требуется разрешение на Универсальный доступ";
-"You need to grant Accessibility permission in System Preferences > Security & Pravicy > Accessibility." = "Вам необходимо предоставить разрешение на Универсальный доступ в Системных настройках > Защита и безопасность > Универсальный доступ.";
+"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility.";
 "Get more help" = "Получить дополнительную помощь";
 "Open Accessibility" = "Открыть Универсальный доступ";
 "Reset all permissions..." = "Сбросить все разрешения...";
