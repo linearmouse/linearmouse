@@ -10,8 +10,19 @@ struct WheelSettings: View {
         DetailView {
             VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading) {
-                    if let $scheme = Binding(configurationState.$activeDeviceSpecificScheme) {
-                        Toggle(isOn: $scheme.reverseScrollingVertically ?? .constant(false)) {
+                    if let index = configurationState.activeDeviceSpecificSchemeIndex {
+                        let scheme = $configurationState.configuration.schemes[index]
+
+                        Toggle(isOn: Binding<Bool>(
+                            get: {
+                                scheme.scrolling.wrappedValue?.reverse?.vertical ?? false
+                            },
+                            set: {
+                                var scrolling = Scheme.Scrolling()
+                                scrolling.reverse = Scheme.Scrolling.Reverse(vertical: $0)
+                                scrolling.merge(into: &scheme.scrolling.wrappedValue)
+                            }
+                        )) {
                             HStack(alignment: .firstTextBaseline, spacing: 2) {
                                 Text("Reverse scrolling")
                                 Text("(vertically)")

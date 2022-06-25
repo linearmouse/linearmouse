@@ -6,6 +6,6 @@ import XCTest
 
 class ConfigurationTests: XCTestCase {
     func testDump() throws {
-        print(try ConfigurationRoot(schemes: []).dump())
+        print(try Configuration(schemes: []).dump())
     }
 }

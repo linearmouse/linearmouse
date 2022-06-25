@@ -4,27 +4,24 @@
 import Defaults
 import Foundation
 
-struct ConfigurationRoot: Codable {
+struct Configuration: Codable {
     let jsonSchema = "https://app.linearmouse.org/schema/\(LinearMouse.appVersion)"
 
-    var schemes: [ConfigurationScheme] = []
+    var schemes: [Scheme] = []
 
     enum CodingKeys: String, CodingKey {
         case jsonSchema = "$schema"
         case schemes
     }
+
+    enum ConfigurationError: Error {
+        case parseError(Error)
+    }
 }
 
-enum ConfigurationError: Error {
-    case notImplemented
-    case parseError(Error)
-}
-
-extension ConfigurationError: LocalizedError {
+extension Configuration.ConfigurationError: LocalizedError {
     var errorDescription: String? {
         switch self {
-        case .notImplemented:
-            return NSLocalizedString("Not implemented", comment: "")
         case let .parseError(underlyingError):
             if let decodingError = underlyingError as? DecodingError {
                 switch decodingError {
@@ -43,6 +40,10 @@ extension ConfigurationError: LocalizedError {
                     } else {
                         return NSLocalizedString("Invalid JSON: Unknown error", comment: "")
                     }
+                case let .keyNotFound(codingKey, context):
+                    return String(format: NSLocalizedString("Missing key %1$@ at %2$@", comment: ""),
+                                  String(describing: codingKey.stringValue),
+                                  String(describing: context.codingPath.map(\.stringValue).joined(separator: ".")))
                 default:
                     break
                 }
@@ -53,30 +54,26 @@ extension ConfigurationError: LocalizedError {
     }
 }
 
-extension ConfigurationRoot {
-    static func load(from data: Data) throws -> Self {
+extension Configuration {
+    static func load(from data: Data) throws -> Configuration {
         let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
 
         do {
-            return try decoder.decode(ConfigurationRoot.self, from: data)
+            return try decoder.decode(Configuration.self, from: data)
         } catch {
             throw ConfigurationError.parseError(error)
         }
     }
 
-    static func load(from url: URL) throws -> Self {
-        guard url.isFileURL else {
-            throw ConfigurationError.notImplemented
-        }
-
-        return try load(from: try Data(contentsOf: url))
+    static func load(from url: URL) throws -> Configuration {
+        try load(from: try Data(contentsOf: url))
     }
 
     func dump() throws -> Data {
         let encoder = JSONEncoder()
+
         encoder.outputFormatting = .prettyPrinted
-        encoder.keyEncodingStrategy = .convertToSnakeCase
+
         return try encoder.encode(self)
     }
 
@@ -88,11 +85,11 @@ extension ConfigurationRoot {
         try dump().write(to: url, options: .atomic)
     }
 
-    var activeScheme: ConfigurationScheme? {
+    var activeScheme: Scheme? {
         // TODO: Backtrace the merge path
         // TODO: Optimize the algorithm
 
-        var mergedScheme = ConfigurationScheme()
+        var mergedScheme = Scheme()
 
         for scheme in schemes where scheme.isActive {
             scheme.merge(into: &mergedScheme)
@@ -101,26 +98,7 @@ extension ConfigurationRoot {
         return mergedScheme
     }
 
-    mutating func getActiveDeviceSpecificSchemeIndex() -> Int? {
-        guard let activeDevice = DeviceManager.shared.lastActiveDevice else {
-            return nil
-        }
-
-        if let index = schemes.firstIndex(where: { $0.isDeviceSpecific && $0.isActive }) {
-            return index
-        }
-
-        var scheme = ConfigurationScheme()
-
-        let `if` = ConfigurationSchemeIf(device: DeviceMatcher(vendorID: activeDevice.vendorID,
-                                                               productID: activeDevice.productID,
-                                                               serialNumber: activeDevice.serialNumber,
-                                                               category: nil))
-
-        scheme.if = [`if`]
-
-        schemes.append(scheme)
-
-        return schemes.endIndex
+    var activeDeviceSpecificSchemeIndex: Int? {
+        schemes.firstIndex(where: { $0.isDeviceSpecific && $0.isActive })
     }
 }

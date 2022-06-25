@@ -9,18 +9,14 @@
 ///
 /// There can be multiple active schemes at the same time. Settings in
 /// subsequent schemes will be merged into the previous ones.
-struct ConfigurationScheme: Codable {
+struct Scheme: Codable {
     /// Defines the conditions under which this scheme is active.
-    @SingleValueOrArray var `if`: [ConfigurationSchemeIf]?
+    @SingleValueOrArray var `if`: [If]?
 
-    var scrolling: ConfigurationScrollingSettings?
+    var scrolling: Scrolling?
 }
 
-struct ConfigurationSchemeIf: Codable {
-    var device: DeviceMatcher?
-}
-
-extension ConfigurationScheme {
+extension Scheme {
     var isActive: Bool {
         guard let `if` = `if` else {
             return true
@@ -53,18 +49,5 @@ extension ConfigurationScheme {
         if let scrolling = scrolling {
             scrolling.merge(into: &scheme.scrolling)
         }
-    }
-}
-
-extension ConfigurationSchemeIf {
-    var isTruthy: Bool {
-        if let device = device {
-            guard let activeDevice = DeviceManager.shared.lastActiveDevice else {
-                return false
-            }
-            guard device.match(with: activeDevice) else { return false }
-        }
-
-        return true
     }
 }

@@ -4,7 +4,7 @@
 import SwiftUI
 
 struct SecondaryButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
+    func makeBody(configuration: ButtonStyle.Configuration) -> some View {
         configuration.label
             .padding(.vertical, 3)
             .padding(.horizontal, 6)

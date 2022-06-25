@@ -18,7 +18,7 @@ struct DeviceButtonStyle: ButtonStyle {
         (isSelected ? Color.accentColor : .gray).opacity(0.2)
     }
 
-    func makeBody(configuration: Configuration) -> some View {
+    func makeBody(configuration: ButtonStyle.Configuration) -> some View {
         configuration.label
             .padding(.vertical, 3)
             .padding(.horizontal, 6)

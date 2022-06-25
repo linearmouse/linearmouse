@@ -35,10 +35,12 @@ extension HexRepresentation: Codable {
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
+
         guard let wrappedValue = wrappedValue else {
             try container.encodeNil()
             return
         }
+
         try container.encode("0x" + String(wrappedValue, radix: 16))
     }
 }
@@ -49,5 +51,23 @@ extension HexRepresentation.ValueError: LocalizedError {
         case .invalidValue:
             return NSLocalizedString("Invalid value", comment: "")
         }
+    }
+}
+
+extension KeyedDecodingContainer {
+    func decode<Value: BinaryInteger & Codable>(_ type: HexRepresentation<Value>.Type,
+                                                forKey key: Self.Key) throws -> HexRepresentation<Value> {
+        try decodeIfPresent(type, forKey: key) ?? HexRepresentation(wrappedValue: nil)
+    }
+}
+
+extension KeyedEncodingContainer {
+    mutating func encode<Value: BinaryInteger & Codable>(_ value: HexRepresentation<Value>,
+                                                         forKey key: Self.Key) throws {
+        guard value.wrappedValue != nil else {
+            return
+        }
+
+        try encodeIfPresent(value, forKey: key)
     }
 }

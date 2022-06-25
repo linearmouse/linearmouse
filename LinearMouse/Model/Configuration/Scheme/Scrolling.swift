@@ -3,18 +3,20 @@
 
 import Foundation
 
-struct ConfigurationScrollingSettings: Codable {
-    struct Reverse: Codable {
-        var vertical: Bool?
-        var horizontal: Bool?
+extension Scheme {
+    struct Scrolling: Codable {
+        struct Reverse: Codable {
+            var vertical: Bool?
+            var horizontal: Bool?
+        }
+
+        var reverse: Reverse?
+
+        var distance: LinesOrPixels?
     }
-
-    var reverse: Reverse?
-
-    var distance: LinesOrPixels?
 }
 
-extension ConfigurationScrollingSettings {
+extension Scheme.Scrolling {
     func merge(into scrolling: inout Self?) {
         if scrolling == nil {
             scrolling = Self()

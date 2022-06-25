@@ -14,22 +14,37 @@ extension SingleValueOrArray: Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         do {
-            wrappedValue = [try container.decode(Value.self)]
-        } catch {
             wrappedValue = try container.decode([Value].self)
+        } catch {
+            wrappedValue = [try container.decode(Value.self)]
         }
     }
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        guard let wrappedValue = wrappedValue else {
-            try container.encodeNil()
-            return
-        }
-        if wrappedValue.count == 1 {
-            try container.encode(wrappedValue[0])
+        if let value = wrappedValue, value.count == 1 {
+            try container.encode(value[0])
         } else {
             try container.encode(wrappedValue)
         }
+    }
+}
+
+extension KeyedDecodingContainer {
+    func decode<Value: Codable>(_ type: SingleValueOrArray<Value>.Type,
+                                forKey key: Self.Key) throws -> SingleValueOrArray<Value> {
+        try decodeIfPresent(type, forKey: key) ?? SingleValueOrArray(wrappedValue: nil)
+    }
+}
+
+extension KeyedEncodingContainer {
+    mutating func encode<Value: Codable>(_ value: SingleValueOrArray<Value>, forKey key: Self.Key) throws {
+        guard value.wrappedValue != nil else {
+            return
+        }
+
+        // Call `encodeIfPresent` instead of `encode` to avoid infinite recursive.
+        // Probably not the best practice?
+        try encodeIfPresent(value, forKey: key)
     }
 }

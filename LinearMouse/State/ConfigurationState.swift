@@ -16,25 +16,23 @@ class ConfigurationState: ObservableObject {
         relativeTo: FileManager.default.homeDirectoryForCurrentUser
     )
 
-    private var shouldPerformSave = false
+    @Published var configuration = Configuration()
 
-    @Published var configuration = ConfigurationRoot()
-
-    @Published var activeScheme: ConfigurationScheme? {
+    @Published var activeScheme: Scheme? {
         didSet {
             os_log("Active scheme is updated: %{public}@", log: Self.log, type: .debug,
                    String(describing: activeScheme))
         }
     }
 
-    private var activeDeviceSpecificSchemeIndex: Int? {
+    @Published var activeDeviceSpecificSchemeIndex: Int? {
         didSet {
             os_log("Active device specific scheme index is updated: %{public}@", log: Self.log, type: .debug,
                    String(describing: activeDeviceSpecificSchemeIndex))
         }
     }
 
-    @Published var activeDeviceSpecificScheme: SchemeState? {
+    @Published var activeDeviceSpecificScheme: Scheme? {
         didSet {
             os_log("Active device-specific scheme is updated: %{public}@", log: Self.log, type: .debug,
                    String(describing: activeDeviceSpecificScheme))
@@ -45,14 +43,7 @@ class ConfigurationState: ObservableObject {
 
     init() {
         load()
-
-        $configuration.sink { [weak self] _ in
-            DispatchQueue.main.async {
-                self?.updateActiveScheme()
-                self?.updateActiveDeviceSpecificScheme()
-            }
-        }
-        .store(in: &subscriptions)
+        save()
 
         DeviceManager.shared.$lastActiveDevice.sink { [weak self] _ in
             DispatchQueue.main.async {
@@ -67,7 +58,9 @@ class ConfigurationState: ObservableObject {
 extension ConfigurationState {
     func load() {
         do {
-            configuration = try ConfigurationRoot.load(from: configurationPath)
+            configuration = try Configuration.load(from: configurationPath)
+            updateActiveScheme()
+            updateActiveDeviceSpecificScheme()
         } catch CocoaError.fileReadNoSuchFile {
             os_log("No configuration file found, try creating a default one", log: Self.log, type: .debug)
             save()
@@ -79,9 +72,6 @@ extension ConfigurationState {
             )
             alert.runModal()
         }
-
-        // Prevent auto saving
-        shouldPerformSave = false
     }
 
     func save() {
@@ -102,8 +92,6 @@ extension ConfigurationState {
     }
 
     func updateActiveDeviceSpecificScheme() {
-        activeDeviceSpecificSchemeIndex = configuration.getActiveDeviceSpecificSchemeIndex()
-
-        activeDeviceSpecificScheme = activeDeviceSpecificSchemeIndex.map { SchemeState(of: $0) }
+        activeDeviceSpecificSchemeIndex = configuration.activeDeviceSpecificSchemeIndex
     }
 }
