@@ -10,6 +10,12 @@ struct SingleValueOrArray<Value> where Value: Codable {
     }
 }
 
+extension SingleValueOrArray: CustomStringConvertible {
+    var description: String {
+        wrappedValue?.description ?? "nil"
+    }
+}
+
 extension SingleValueOrArray: Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()

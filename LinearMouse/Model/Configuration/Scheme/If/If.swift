@@ -10,12 +10,12 @@ extension Scheme {
 }
 
 extension Scheme.If {
-    var isTruthy: Bool {
+    func isSatisfied(withDevice targetDevice: Device?) -> Bool {
         if let device = device {
-            guard let activeDevice = DeviceManager.shared.lastActiveDevice else {
+            guard let targetDevice = targetDevice else {
                 return false
             }
-            guard device.match(with: activeDevice) else { return false }
+            guard device.match(with: targetDevice) else { return false }
         }
 
         return true

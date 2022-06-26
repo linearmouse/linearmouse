@@ -4,12 +4,12 @@
 import SwiftUI
 
 struct DeviceIndicator: View {
-    @StateObject private var model = DeviceIndicatorModel()
+    @StateObject private var state = DeviceIndicatorState()
     @State private var showDevicePickerSheet = false
 
     var body: some View {
         Button(action: handleClick) {
-            Text(model.activeDeviceName ?? "Unknown")
+            Text(state.activeDeviceName ?? "Unknown")
                 .frame(maxWidth: 150)
                 .fixedSize()
                 .lineLimit(1)

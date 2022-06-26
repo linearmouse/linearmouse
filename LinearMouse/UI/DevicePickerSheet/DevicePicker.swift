@@ -4,12 +4,12 @@
 import SwiftUI
 
 struct DevicePicker: View {
-    @StateObject var model = DevicePickerModel()
+    @StateObject var state = DevicePickerState()
 
     var body: some View {
         List {
-            DevicePickerSection(title: "Mouse", devices: model.devices.filter(\.isMouse))
-            DevicePickerSection(title: "Trackpad", devices: model.devices.filter(\.isTrackpad))
+            DevicePickerSection(title: "Mouse", devices: state.devices.filter(\.isMouse))
+            DevicePickerSection(title: "Trackpad", devices: state.devices.filter(\.isTrackpad))
         }
         .frame(minWidth: 350)
     }

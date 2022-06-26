@@ -12,6 +12,12 @@ struct HexRepresentation<Value: BinaryInteger & Codable>: Equatable {
     }
 }
 
+extension HexRepresentation: CustomStringConvertible {
+    var description: String {
+        wrappedValue?.description ?? "nil"
+    }
+}
+
 extension HexRepresentation: Codable {
     enum ValueError: Error {
         case invalidValue

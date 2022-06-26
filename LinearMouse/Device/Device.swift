@@ -8,7 +8,8 @@ import PointerKit
 class Device {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Device")
 
-    private static let fallbackPointerAcceleration = 0.6875
+    static let fallbackPointerAcceleration = 0.6875
+    static let fallbackPointerSpeed = pointerSensitivity(fromPointerResolution: 400)
 
     private weak var manager: DeviceManager?
     let device: PointerDevice
@@ -27,7 +28,7 @@ class Device {
         }
         initialPointerResolution = pointerResolution
 
-        device.observeInput(using: inputCallback).tieToLifetime(of: self)
+        device.observeInput(using: inputValueCallback).tieToLifetime(of: self)
 
         os_log("Device initialized: %{public}@: HIDPointerResolution=%{public}f, HIDPointerAccelerationType=%{public}@",
                log: Self.log, type: .debug,
@@ -35,9 +36,15 @@ class Device {
                pointerResolution,
                device.pointerAccelerationType ?? "(unknown)")
     }
+}
 
+extension Device {
     var name: String {
         device.name
+    }
+
+    var productName: String? {
+        device.product
     }
 
     var vendorID: Int? {
@@ -60,7 +67,7 @@ class Device {
         [0x004C, 0x05AC].contains(vendorID) && [0x0269, 0x030D].contains(productID)
     }
 
-    lazy var category: Category = {
+    var category: Category {
         if let vendorID: Int = device.vendorID,
            let productID: Int = device.productID {
             if isAppleMagicMouse(vendorID: vendorID, productID: productID) {
@@ -71,14 +78,35 @@ class Device {
             return .trackpad
         }
         return .mouse
-    }()
+    }
 
     var pointerAcceleration: Double {
-        device.pointerAcceleration ?? Self.fallbackPointerAcceleration
+        get {
+            device.pointerAcceleration ?? Self.fallbackPointerAcceleration
+        }
+        set {
+            device.pointerAcceleration = newValue
+        }
+    }
+
+    private static let pointerSensitivityRange = 1.0 / 1200 ... 1.0 / 40
+
+    static func pointerSensitivity(fromPointerResolution pointerResolution: Double) -> Double {
+        (1 / pointerResolution).normalized(from: Self.pointerSensitivityRange)
+    }
+
+    static func pointerResolution(fromPointerSensitivity pointerSensitivity: Double) -> Double {
+        1 / (pointerSensitivity.normalized(to: Self.pointerSensitivityRange))
     }
 
     var pointerSensitivity: Double {
-        device.pointerResolution.map { 2000 - $0 } ?? 1600
+        get {
+            device.pointerResolution.map { Self.pointerSensitivity(fromPointerResolution: $0) } ?? Self
+                .fallbackPointerSpeed
+        }
+        set {
+            device.pointerResolution = Self.pointerResolution(fromPointerSensitivity: newValue)
+        }
     }
 
     var shouldApplyPointerSpeedSettings: Bool {
@@ -107,8 +135,8 @@ class Device {
                    String(describing: device),
                    acceleration,
                    sensitivity)
-            device.pointerAcceleration = acceleration
-            device.pointerResolution = 2000 - sensitivity
+            pointerAcceleration = acceleration
+            pointerSensitivity = sensitivity
         }
     }
 
@@ -128,12 +156,36 @@ class Device {
                initialPointerResolution)
 
         device.pointerResolution = initialPointerResolution
-        device.pointerAcceleration = systemPointerAcceleration
+        pointerAcceleration = systemPointerAcceleration
     }
 
-    private func inputCallback(device: PointerDevice, value _: IOHIDValue) {
+    private func inputValueCallback(device: PointerDevice, value: IOHIDValue) {
         guard let manager = manager else {
             return
+        }
+
+        let element = IOHIDValueGetElement(value)
+
+        let usagePage = IOHIDElementGetUsagePage(element)
+        let usage = IOHIDElementGetUsage(element)
+
+        guard usagePage == kHIDPage_GenericDesktop || usagePage == kHIDPage_Digitizer || usagePage == kHIDPage_Button
+        else {
+            return
+        }
+
+        switch Int(usagePage) {
+        case kHIDPage_GenericDesktop:
+            switch Int(usage) {
+            case kHIDUsage_GD_X, kHIDUsage_GD_Y, kHIDUsage_GD_Z, kHIDUsage_GD_Wheel:
+                guard IOHIDValueGetIntegerValue(value) != 0 else {
+                    return
+                }
+            default:
+                break
+            }
+        default:
+            break
         }
 
         if let lastActiveDevice = manager.lastActiveDevice {
@@ -144,9 +196,15 @@ class Device {
 
         manager.lastActiveDevice = self
 
-        os_log("Last active device changed: %{public}@, Category=%{public}@",
+        os_log("""
+               Last active device changed: %{public}@, category=%{public}@ \
+               (Reason: Received input value: usagePage=0x%{public}02X, usage=0x%{public}02X)
+               """,
                log: Self.log, type: .debug,
-               String(describing: device), String(describing: category))
+               String(describing: device),
+               String(describing: category),
+               usagePage,
+               usage)
     }
 }
 

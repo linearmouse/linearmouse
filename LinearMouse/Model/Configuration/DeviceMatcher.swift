@@ -6,6 +6,7 @@ import Defaults
 struct DeviceMatcher: Codable, Defaults.Serializable {
     @HexRepresentation var vendorID: Int?
     @HexRepresentation var productID: Int?
+    var productName: String?
     var serialNumber: String?
     @SingleValueOrArray var category: [Category]?
 
@@ -16,12 +17,11 @@ struct DeviceMatcher: Codable, Defaults.Serializable {
 
 extension DeviceMatcher {
     init(of device: Device) {
-        let vendorID = device.vendorID
-        let productID = device.productID
-        let serialNumber = device.serialNumber
-        let category = [Category(from: device.category)]
-
-        self.init(vendorID: vendorID, productID: productID, serialNumber: serialNumber, category: category)
+        self.init(vendorID: device.vendorID,
+                  productID: device.productID,
+                  productName: device.productName,
+                  serialNumber: device.serialNumber,
+                  category: [Category(from: device.category)])
     }
 
     func match(with device: Device) -> Bool {
@@ -35,6 +35,7 @@ extension DeviceMatcher {
 
         guard matchValue(vendorID, device.vendorID),
               matchValue(productID, device.productID),
+              matchValue(productName, device.productName),
               matchValue(serialNumber, device.serialNumber)
         else {
             return false

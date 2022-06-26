@@ -6,7 +6,7 @@ import Defaults
 import SwiftUI
 
 extension Defaults.Keys {
-    static let autoSelectActiveDevice = Key<Bool>("autoSelectActiveDevice", default: true)
+    static let autoSwitchToActiveDevice = Key<Bool>("autoSwitchToActiveDevice", default: true)
 
     static let selectedDevice = Key<DeviceMatcher?>("selectedDevice", default: nil)
 }
@@ -18,7 +18,7 @@ class DeviceState: ObservableObject {
 
     @Published var currentDevice: Device? {
         didSet {
-            guard !Defaults[.autoSelectActiveDevice] else {
+            guard !Defaults[.autoSwitchToActiveDevice] else {
                 return
             }
 
@@ -27,12 +27,12 @@ class DeviceState: ObservableObject {
     }
 
     init() {
-        Defaults.observe(keys: .autoSelectActiveDevice, .selectedDevice) { [weak self] in
+        Defaults.observe(keys: .autoSwitchToActiveDevice, .selectedDevice) { [weak self] in
             self?.updateCurrentDevice()
         }
         .tieToLifetime(of: self)
 
-        Defaults.observe(.autoSelectActiveDevice) { change in
+        Defaults.observe(.autoSwitchToActiveDevice) { change in
             if change.newValue {
                 Defaults[.selectedDevice] = nil
             }
@@ -50,7 +50,7 @@ extension DeviceState {
     private var deviceManager: DeviceManager { DeviceManager.shared }
 
     private func updateCurrentDevice(lastActiveDevice: Device?) {
-        guard !Defaults[.autoSelectActiveDevice] else {
+        guard !Defaults[.autoSwitchToActiveDevice] else {
             currentDevice = lastActiveDevice
             return
         }

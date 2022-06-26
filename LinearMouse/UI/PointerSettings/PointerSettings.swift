@@ -4,43 +4,13 @@
 import SwiftUI
 
 struct PointerSettings: View {
-    @ObservedObject var defaults = AppDefaults.shared
-
-    var sensitivityInDouble: Binding<Double> {
-        let low = 1.0 / 1200
-        let high = 1.0 / 40
-
-        return Binding<Double>(get: {
-            (1 / (2000 - defaults.cursorSensitivity) - low) / (high - low)
-        }, set: {
-            let value = 1 / (low + (high - low) * $0)
-            defaults.cursorSensitivity = 2000 - value
-        })
-    }
-
-    let accelerationFormatter: NumberFormatter = {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = NumberFormatter.Style.decimal
-        formatter.roundingMode = NumberFormatter.RoundingMode.halfUp
-        formatter.maximumFractionDigits = 4
-        formatter.thousandSeparator = ""
-        return formatter
-    }()
-
-    let sensitivityFormatter: NumberFormatter = {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = NumberFormatter.Style.decimal
-        formatter.roundingMode = NumberFormatter.RoundingMode.halfUp
-        formatter.maximumFractionDigits = 2
-        formatter.thousandSeparator = ""
-        return formatter
-    }()
+    @StateObject var state = PointerSettingsState()
 
     var body: some View {
         DetailView {
             VStack(alignment: .leading, spacing: 20) {
                 Form {
-                    Slider(value: $defaults.cursorAcceleration,
+                    Slider(value: $state.pointerAcceleration,
                            in: 0.0 ... 20.0) {
                         Text("Acceleration")
                     }
@@ -50,16 +20,16 @@ struct PointerSettings: View {
                             .foregroundColor(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                         TextField("",
-                                  value: $defaults.cursorAcceleration,
-                                  formatter: accelerationFormatter)
+                                  value: $state.pointerAcceleration,
+                                  formatter: state.pointerAccelerationFormatter)
                             .textFieldStyle(.roundedBorder)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 80)
                     }
 
-                    Slider(value: sensitivityInDouble,
+                    Slider(value: $state.pointerSpeed,
                            in: 0 ... 1) {
-                        Text("Sensitivity")
+                        Text("Speed")
                     }.padding(.top)
                     HStack {
                         Text("(0–1)")
@@ -67,19 +37,19 @@ struct PointerSettings: View {
                             .foregroundColor(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                         TextField("",
-                                  value: sensitivityInDouble,
-                                  formatter: sensitivityFormatter)
+                                  value: $state.pointerSpeed,
+                                  formatter: state.pointerSpeedFormatter)
                             .textFieldStyle(.roundedBorder)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 80)
                     }
                 }
-                .disabled(defaults.linearMovementOn)
+                .disabled(state.pointerDisableAcceleration)
 
                 Spacer()
 
-                Toggle(isOn: $defaults.linearMovementOn) {
-                    Text("Disable cursor acceleration & sensitivity")
+                Toggle(isOn: $state.pointerDisableAcceleration) {
+                    Text("Disable cursor acceleration")
                 }
 
                 Spacer()
@@ -95,12 +65,12 @@ struct PointerSettings: View {
                             revertSpeed()
                         }
                         .keyboardShortcut("z", modifiers: [.control, .command, .shift])
-                        .disabled(defaults.linearMovementOn)
+                        .disabled(state.pointerDisableAcceleration)
                     } else {
                         Button("Revert to system defaults") {
                             revertSpeed()
                         }
-                        .disabled(defaults.linearMovementOn)
+                        .disabled(state.pointerDisableAcceleration)
                     }
                 }
             }
@@ -109,8 +79,8 @@ struct PointerSettings: View {
 
     private func revertSpeed() {
         DeviceManager.shared.restorePointerSpeedToInitialValue()
-        defaults.cursorAcceleration = DeviceManager.shared.pointerAcceleration
-        defaults.cursorSensitivity = DeviceManager.shared.pointerSensitivity
+        state.pointerAcceleration = DeviceManager.shared.pointerAcceleration
+        state.pointerSpeed = DeviceManager.shared.pointerSensitivity
     }
 }
 

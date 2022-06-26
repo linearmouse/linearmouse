@@ -4,11 +4,11 @@
 import SwiftUI
 
 struct ButtonsSettings: View {
-    @ObservedObject var defaults = AppDefaults.shared
+    @StateObject var state = ButtonsSettingsState()
 
     var body: some View {
         DetailView {
-            Toggle(isOn: $defaults.universalBackForwardOn) {
+            Toggle(isOn: $state.universalBackForward) {
                 VStack(alignment: .leading) {
                     Text("Enable universal back and forward")
                     Text("""

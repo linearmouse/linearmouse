@@ -5,7 +5,7 @@ import Combine
 import PointerKit
 import SwiftUI
 
-class DeviceIndicatorModel: ObservableObject {
+class DeviceIndicatorState: ObservableObject {
     @Published var activeDeviceName: String?
 
     private var subscriptions = Set<AnyCancellable>()
@@ -17,6 +17,6 @@ class DeviceIndicatorModel: ObservableObject {
     }
 }
 
-extension DeviceIndicatorModel {
+extension DeviceIndicatorState {
     private var deviceState: DeviceState { DeviceState.shared }
 }

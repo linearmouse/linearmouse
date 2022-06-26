@@ -8,13 +8,13 @@ struct DevicePickerSection: View {
     var devices: [DeviceModel]
     @Environment(\.isPresented) var isPresented
 
-    @StateObject var model = DevicePickerSectionModel()
+    @StateObject var state = DevicePickerSectionState()
 
     var body: some View {
         Section(header: Text(title)) {
             ForEach(devices) { deviceModel in
                 DevicePickerSectionItem(deviceModel: deviceModel) {
-                    model.setDevice(deviceModel)
+                    state.setDevice(deviceModel)
                     isPresented?.wrappedValue = false
                 }
             }
@@ -25,6 +25,6 @@ struct DevicePickerSection: View {
 struct DevicePickerSection_Previews: PreviewProvider {
     static var previews: some View {
         DevicePickerSection(title: "Mouse",
-                            devices: DevicePickerModel().devices)
+                            devices: DevicePickerState().devices)
     }
 }

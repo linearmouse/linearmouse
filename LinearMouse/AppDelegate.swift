@@ -82,7 +82,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func update(_ defaults: AppDefaults) {
         DeviceManager.shared.updatePointerSpeed(
             acceleration: defaults.cursorAcceleration,
-            sensitivity: defaults.cursorSensitivity,
+            sensitivity: Device.pointerSensitivity(fromPointerResolution: 2000 - defaults.cursorSensitivity),
             disableAcceleration: defaults.linearMovementOn
         )
     }

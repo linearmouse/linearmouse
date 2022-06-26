@@ -85,20 +85,26 @@ extension Configuration {
         try dump().write(to: url, options: .atomic)
     }
 
-    var activeScheme: Scheme? {
+    func matchedScheme(withDevice device: Device?) -> Scheme {
         // TODO: Backtrace the merge path
         // TODO: Optimize the algorithm
 
         var mergedScheme = Scheme()
 
-        for scheme in schemes where scheme.isActive {
+        if let device = device {
+            mergedScheme.if = [
+                Scheme.If(device: DeviceMatcher(of: device))
+            ]
+        }
+
+        for scheme in schemes where scheme.isActive(withDevice: device) {
             scheme.merge(into: &mergedScheme)
         }
 
         return mergedScheme
     }
 
-    var activeDeviceSpecificSchemeIndex: Int? {
-        schemes.firstIndex(where: { $0.isDeviceSpecific && $0.isActive })
+    var activeScheme: Scheme {
+        matchedScheme(withDevice: DeviceManager.shared.lastActiveDevice)
     }
 }

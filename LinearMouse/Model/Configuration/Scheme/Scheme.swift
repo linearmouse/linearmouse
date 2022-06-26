@@ -14,15 +14,19 @@ struct Scheme: Codable {
     @SingleValueOrArray var `if`: [If]?
 
     var scrolling: Scrolling?
+
+    var pointer: Pointer?
+
+    var buttons: Buttons?
 }
 
 extension Scheme {
-    var isActive: Bool {
+    func isActive(withDevice device: Device?) -> Bool {
         guard let `if` = `if` else {
             return true
         }
 
-        return `if`.contains(where: \.isTruthy)
+        return `if`.contains { $0.isSatisfied(withDevice: device) }
     }
 
     /// A scheme is device-specific if and only if a) it has only one `if` and
@@ -45,9 +49,21 @@ extension Scheme {
         return true
     }
 
+    var firstMatchedDevice: Device? {
+        DeviceManager.shared.devices.first { isActive(withDevice: $0) }
+    }
+
     func merge(into scheme: inout Self) {
         if let scrolling = scrolling {
             scrolling.merge(into: &scheme.scrolling)
+        }
+
+        if let pointer = pointer {
+            pointer.merge(into: &scheme.pointer)
+        }
+
+        if let buttons = buttons {
+            buttons.merge(into: &scheme.buttons)
         }
     }
 }

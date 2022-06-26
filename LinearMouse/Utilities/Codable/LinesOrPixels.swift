@@ -14,6 +14,17 @@ struct LinesOrPixels {
     var unit: Unit = .line
 }
 
+extension LinesOrPixels: CustomStringConvertible {
+    var description: String {
+        switch unit {
+        case .line:
+            return String(value)
+        case .pixel:
+            return "\(value)px"
+        }
+    }
+}
+
 extension LinesOrPixels: Codable {
     enum ValueError: Error {
         case invalidValue
@@ -65,7 +76,13 @@ extension LinesOrPixels: Codable {
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        try container.encode("0x" + String(value, radix: 16))
+
+        switch unit {
+        case .line:
+            try container.encode(value)
+        case .pixel:
+            try container.encode("\(value)px")
+        }
     }
 }
 
