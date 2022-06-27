@@ -29,7 +29,7 @@ extension PointerSettingsState {
     var pointerSpeed: Double {
         get {
             scheme.pointer?.speed.map(\.asTruncatedDouble)
-                ?? scheme.firstMatchedDevice?.pointerSensitivity
+                ?? scheme.firstMatchedDevice?.pointerSpeed
                 ?? Device.fallbackPointerSpeed
         }
         set {
@@ -86,7 +86,7 @@ extension PointerSettingsState {
         Scheme(
             pointer: Scheme.Pointer(
                 acceleration: Decimal(device?.pointerAcceleration ?? Device.fallbackPointerAcceleration),
-                speed: Decimal(device?.pointerSensitivity ?? Device.fallbackPointerSpeed),
+                speed: Decimal(device?.pointerSpeed ?? Device.fallbackPointerSpeed),
                 disableAcceleration: false
             )
         )

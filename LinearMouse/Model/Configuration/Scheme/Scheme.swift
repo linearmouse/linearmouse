@@ -2,7 +2,7 @@
 // Copyright (c) 2021-2022 Jiahao Lu
 
 /// A scheme is a set of settings to be applied to LinearMouse, for example,
-/// pointer sensitivity.
+/// pointer speed.
 ///
 /// A scheme will be active only if its `if` is truthy. If multiple `if`s are
 /// provided, the scheme is regarded as active if any one of them is truthy.

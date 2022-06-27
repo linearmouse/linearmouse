@@ -16,10 +16,6 @@ class DeviceManager: ObservableObject {
     private var pointerDeviceToDevice = [PointerDevice: Device]()
     @Published var devices: [Device] = []
 
-    private var lastPointerAcceleration: Double?
-    private var lastPointerSensitivity: Double?
-    private var lastDisablePointerAcceleration: Bool?
-
     @Published var lastActiveDevice: Device?
 
     init() {
@@ -115,7 +111,7 @@ class DeviceManager: ObservableObject {
         }
 
         if let pointerSpeed = scheme.pointer?.speed {
-            device.pointerSensitivity = pointerSpeed.asTruncatedDouble
+            device.pointerSpeed = pointerSpeed.asTruncatedDouble
         }
     }
 

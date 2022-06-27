@@ -9,7 +9,7 @@ class Device {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Device")
 
     static let fallbackPointerAcceleration = 0.6875
-    static let fallbackPointerSpeed = pointerSensitivity(fromPointerResolution: 400)
+    static let fallbackPointerSpeed = pointerSpeed(fromPointerResolution: 400)
 
     private weak var manager: DeviceManager?
     let device: PointerDevice
@@ -92,26 +92,26 @@ extension Device {
         }
     }
 
-    private static let pointerSensitivityRange = 1.0 / 1200 ... 1.0 / 40
+    private static let pointerSpeedRange = 1.0 / 1200 ... 1.0 / 40
 
-    static func pointerSensitivity(fromPointerResolution pointerResolution: Double) -> Double {
-        (1 / pointerResolution).normalized(from: Self.pointerSensitivityRange)
+    static func pointerSpeed(fromPointerResolution pointerResolution: Double) -> Double {
+        (1 / pointerResolution).normalized(from: Self.pointerSpeedRange)
     }
 
-    static func pointerResolution(fromPointerSensitivity pointerSensitivity: Double) -> Double {
-        1 / (pointerSensitivity.normalized(to: Self.pointerSensitivityRange))
+    static func pointerResolution(fromPointerSpeed pointerSpeed: Double) -> Double {
+        1 / (pointerSpeed.normalized(to: Self.pointerSpeedRange))
     }
 
-    var pointerSensitivity: Double {
+    var pointerSpeed: Double {
         get {
-            device.pointerResolution.map { Self.pointerSensitivity(fromPointerResolution: $0) } ?? Self
+            device.pointerResolution.map { Self.pointerSpeed(fromPointerResolution: $0) } ?? Self
                 .fallbackPointerSpeed
         }
         set {
             os_log("Update pointer speed for device: %{public}@: %{public}f",
                    log: Self.log, type: .debug,
                    String(describing: self), newValue)
-            device.pointerResolution = Self.pointerResolution(fromPointerSensitivity: newValue)
+            device.pointerResolution = Self.pointerResolution(fromPointerSpeed: newValue)
         }
     }
 
@@ -120,7 +120,7 @@ extension Device {
             .getSystemProperty(forKey: device.pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey) as IOFixed?)
             .map { Double($0) / 65536 } ?? Self.fallbackPointerAcceleration
 
-        os_log("Revert speed for device: %{public}@, acceleration = %{public}f, sensitivity = %{public}f",
+        os_log("Revert speed for device: %{public}@, acceleration = %{public}f, resolution = %{public}f",
                log: Self.log, type: .debug,
                String(describing: device),
                systemPointerAcceleration,
