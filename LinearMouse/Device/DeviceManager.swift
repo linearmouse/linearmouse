@@ -1,6 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2022 Jiahao Lu
 
+import Combine
 import Foundation
 import os.log
 import PointerKit
@@ -28,21 +29,32 @@ class DeviceManager: ObservableObject {
         for property in [kIOHIDMouseAccelerationType, kIOHIDTrackpadAccelerationType, kIOHIDPointerResolutionKey] {
             manager.observePropertyChanged(property: property) { [self] _ in
                 os_log("Property %@ changed", log: Self.log, type: .debug, property)
-                renewPointerSpeed()
+                updatePointerSpeed()
             }.tieToLifetime(of: self)
         }
 
-        resume()
+        DispatchQueue.main.async { [weak self] in
+            self?.resume()
+        }
     }
+
+    private var subscriptions = Set<AnyCancellable>()
 
     func pause() {
         restorePointerSpeedToInitialValue()
         manager.stopObservation()
+        subscriptions.removeAll()
     }
 
     func resume() {
         manager.startObservation()
-        renewPointerSpeed()
+
+        ConfigurationState.shared.$configuration.sink { _ in
+            DispatchQueue.main.async { [weak self] in
+                self?.updatePointerSpeed()
+            }
+        }
+        .store(in: &subscriptions)
     }
 
     private func deviceAdded(_: PointerDeviceManager, pointerDevice: PointerDevice) {
@@ -62,7 +74,7 @@ class DeviceManager: ObservableObject {
                log: Self.log, type: .debug,
                String(describing: device))
 
-        renewPointerSpeed(forDevice: device)
+        updatePointerSpeed(for: device)
     }
 
     private func deviceRemoved(_: PointerDeviceManager, pointerDevice: PointerDevice) {
@@ -82,40 +94,28 @@ class DeviceManager: ObservableObject {
                String(describing: device))
     }
 
-    func updatePointerSpeed(acceleration: Double, sensitivity: Double, disableAcceleration: Bool) {
-        lastPointerAcceleration = acceleration
-        lastPointerSensitivity = sensitivity
-        lastDisablePointerAcceleration = disableAcceleration
+    func updatePointerSpeed() {
         for device in devices {
-            device.updatePointerSpeed(
-                acceleration: acceleration,
-                sensitivity: sensitivity,
-                disableAcceleration: disableAcceleration
-            )
+            updatePointerSpeed(for: device)
         }
     }
 
-    func renewPointerSpeed() {
-        if let acceleration = lastPointerAcceleration,
-           let sensitivity = lastPointerSensitivity,
-           let disableAcceleration = lastDisablePointerAcceleration {
-            updatePointerSpeed(
-                acceleration: acceleration,
-                sensitivity: sensitivity,
-                disableAcceleration: disableAcceleration
-            )
-        }
-    }
+    func updatePointerSpeed(for device: Device) {
+        let scheme = ConfigurationState.shared.configuration.matchedScheme(withDevice: device)
 
-    func renewPointerSpeed(forDevice device: Device) {
-        if let acceleration = lastPointerAcceleration,
-           let sensitivity = lastPointerSensitivity,
-           let disableAcceleration = lastDisablePointerAcceleration {
-            device.updatePointerSpeed(
-                acceleration: acceleration,
-                sensitivity: sensitivity,
-                disableAcceleration: disableAcceleration
-            )
+        if let pointerDisableAcceleration = scheme.pointer?.disableAcceleration {
+            if pointerDisableAcceleration {
+                device.pointerAcceleration = -1
+                return
+            }
+        }
+
+        if let pointerAcceleration = scheme.pointer?.acceleration {
+            device.pointerAcceleration = pointerAcceleration.asTruncatedDouble
+        }
+
+        if let pointerSpeed = scheme.pointer?.speed {
+            device.pointerSensitivity = pointerSpeed.asTruncatedDouble
         }
     }
 
@@ -123,18 +123,6 @@ class DeviceManager: ObservableObject {
         for device in devices {
             device.restorePointerSpeedToInitialValue()
         }
-    }
-
-    private var firstAvailableDevice: Device? {
-        devices.first { $0.shouldApplyPointerSpeedSettings }
-    }
-
-    var pointerAcceleration: Double {
-        firstAvailableDevice?.pointerAcceleration ?? 0.6875
-    }
-
-    var pointerSensitivity: Double {
-        firstAvailableDevice?.pointerSensitivity ?? 1600
     }
 
     func getSystemProperty<T>(forKey key: String) -> T? {

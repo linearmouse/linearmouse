@@ -77,4 +77,19 @@ extension PointerSettingsState {
             .merge(into: &scheme)
         }
     }
+
+    func revertPointerSpeed() {
+        let device = scheme.firstMatchedDevice
+
+        device?.restorePointerSpeedToInitialValue()
+
+        Scheme(
+            pointer: Scheme.Pointer(
+                acceleration: Decimal(device?.pointerAcceleration ?? Device.fallbackPointerAcceleration),
+                speed: Decimal(device?.pointerSensitivity ?? Device.fallbackPointerSpeed),
+                disableAcceleration: false
+            )
+        )
+        .merge(into: &scheme)
+    }
 }

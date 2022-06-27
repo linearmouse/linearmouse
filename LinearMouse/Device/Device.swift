@@ -85,6 +85,9 @@ extension Device {
             device.pointerAcceleration ?? Self.fallbackPointerAcceleration
         }
         set {
+            os_log("Update pointer acceleration for device: %{public}@: %{public}f",
+                   log: Self.log, type: .debug,
+                   String(describing: self), newValue)
             device.pointerAcceleration = newValue
         }
     }
@@ -105,46 +108,14 @@ extension Device {
                 .fallbackPointerSpeed
         }
         set {
+            os_log("Update pointer speed for device: %{public}@: %{public}f",
+                   log: Self.log, type: .debug,
+                   String(describing: self), newValue)
             device.pointerResolution = Self.pointerResolution(fromPointerSensitivity: newValue)
         }
     }
 
-    var shouldApplyPointerSpeedSettings: Bool {
-        guard category == .mouse else {
-            os_log("Device ignored for pointer speed settings: %@: Category is %@",
-                   log: Self.log, type: .debug,
-                   String(describing: self), String(describing: category))
-            return false
-        }
-        return true
-    }
-
-    func updatePointerSpeed(acceleration: Double, sensitivity: Double, disableAcceleration: Bool) {
-        guard shouldApplyPointerSpeedSettings else {
-            return
-        }
-
-        if disableAcceleration {
-            os_log("Disable acceleration and sensitivity for device: %{public}@",
-                   log: Self.log, type: .debug,
-                   String(describing: device))
-            device.pointerAcceleration = -1
-        } else {
-            os_log("Update speed for device: %{public}@, acceleration = %{public}f, sensitivity = %{public}f",
-                   log: Self.log, type: .debug,
-                   String(describing: device),
-                   acceleration,
-                   sensitivity)
-            pointerAcceleration = acceleration
-            pointerSensitivity = sensitivity
-        }
-    }
-
     func restorePointerSpeedToInitialValue() {
-        guard shouldApplyPointerSpeedSettings else {
-            return
-        }
-
         let systemPointerAcceleration = (DeviceManager.shared
             .getSystemProperty(forKey: device.pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey) as IOFixed?)
             .map { Double($0) / 65536 } ?? Self.fallbackPointerAcceleration

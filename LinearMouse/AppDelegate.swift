@@ -38,16 +38,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         eventTap.enable()
         self.eventTap = eventTap
 
-        // subscribe to the user settings
-        let defaults = AppDefaults.shared
-        defaults.objectWillChange.sink { _ in
-            DispatchQueue.main.async {
-                self.update(defaults)
-            }
-        }
-        .store(in: &subscriptions)
-        update(defaults)
-
         NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.sessionDidResignActiveNotification,
             object: nil,
@@ -76,14 +66,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     DeviceManager.shared.resume()
                 }
             }
-        )
-    }
-
-    func update(_ defaults: AppDefaults) {
-        DeviceManager.shared.updatePointerSpeed(
-            acceleration: defaults.cursorAcceleration,
-            sensitivity: Device.pointerSensitivity(fromPointerResolution: 2000 - defaults.cursorSensitivity),
-            disableAcceleration: defaults.linearMovementOn
         )
     }
 

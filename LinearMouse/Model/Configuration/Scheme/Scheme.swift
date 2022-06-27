@@ -49,6 +49,10 @@ extension Scheme {
         return true
     }
 
+    var matchedDevices: [Device] {
+        DeviceManager.shared.devices.filter { isActive(withDevice: $0) }
+    }
+
     var firstMatchedDevice: Device? {
         DeviceManager.shared.devices.first { isActive(withDevice: $0) }
     }

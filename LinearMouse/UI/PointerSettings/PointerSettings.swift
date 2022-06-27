@@ -62,13 +62,13 @@ struct PointerSettings: View {
                             .fixedSize(horizontal: false, vertical: true)
 
                         Button("Revert to system defaults") {
-                            revertSpeed()
+                            revertPointerSpeed()
                         }
                         .keyboardShortcut("z", modifiers: [.control, .command, .shift])
                         .disabled(state.pointerDisableAcceleration)
                     } else {
                         Button("Revert to system defaults") {
-                            revertSpeed()
+                            revertPointerSpeed()
                         }
                         .disabled(state.pointerDisableAcceleration)
                     }
@@ -77,10 +77,8 @@ struct PointerSettings: View {
         }
     }
 
-    private func revertSpeed() {
-        DeviceManager.shared.restorePointerSpeedToInitialValue()
-        state.pointerAcceleration = DeviceManager.shared.pointerAcceleration
-        state.pointerSpeed = DeviceManager.shared.pointerSensitivity
+    private func revertPointerSpeed() {
+        state.revertPointerSpeed()
     }
 }
 
