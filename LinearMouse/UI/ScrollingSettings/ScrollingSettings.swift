@@ -3,8 +3,8 @@
 
 import SwiftUI
 
-struct WheelSettings: View {
-    @StateObject var state = WheelSettingsState()
+struct ScrollingSettings: View {
+    @StateObject var state = ScrollingSettingsState()
 
     var body: some View {
         DetailView {

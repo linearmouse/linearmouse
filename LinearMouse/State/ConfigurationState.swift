@@ -19,6 +19,8 @@ class ConfigurationState: ObservableObject {
 
     @Published var configuration = Configuration() {
         didSet {
+            updateActiveScheme()
+
             guard shouldAutoSaveConfiguration else {
                 return
             }
@@ -33,15 +35,20 @@ class ConfigurationState: ObservableObject {
 
     @Published var activeScheme: Scheme? {
         didSet {
+            eventTransformers = buildEventTransformers()
+
             guard let activeScheme = activeScheme else {
                 os_log("Active scheme is updated: nil", log: Self.log, type: .debug,
                        String(describing: activeScheme))
                 return
             }
+
             os_log("Active scheme is updated: %{public}@", log: Self.log, type: .debug,
                    String(describing: activeScheme))
         }
     }
+
+    @Published var eventTransformers: [EventTransformer] = []
 
     @Published var currentDeviceSchemeIndex: Int? {
         didSet {
@@ -132,5 +139,38 @@ extension ConfigurationState {
 
             return $0.if?.contains { $0.isSatisfied(withDevice: device) } == true
         }
+    }
+
+    func buildEventTransformers() -> [EventTransformer] {
+        var transformers: [EventTransformer] = []
+
+        guard let scheme = activeScheme else {
+            return transformers
+        }
+
+        if let reverse = scheme.scrolling?.reverse {
+            let vertical = reverse.vertical ?? false
+            let horizontal = reverse.horizontal ?? false
+
+            if vertical || horizontal {
+                transformers.append(ReverseScrolling(vertically: vertical, horizontally: horizontal))
+            }
+        }
+
+        if let distance = scheme.scrolling?.distance {
+            if distance.unit == .line {
+                transformers.append(LinearScrolling(scrollLines: distance.value))
+            }
+        }
+
+        if let modifiers = scheme.scrolling?.modifiers {
+            transformers.append(ModifierActions(modifiers: modifiers))
+        }
+
+        if scheme.buttons?.universalBackForward == true {
+            transformers.append(UniversalBackForward())
+        }
+
+        return transformers
     }
 }

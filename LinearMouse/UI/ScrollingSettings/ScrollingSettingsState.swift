@@ -3,9 +3,9 @@
 
 import Combine
 
-class WheelSettingsState: CurrentConfigurationState {}
+class ScrollingSettingsState: CurrentConfigurationState {}
 
-extension WheelSettingsState {
+extension ScrollingSettingsState {
     var reverseScrollingVertical: Bool {
         get {
             scheme.scrolling?.reverse?.vertical ?? false

@@ -14,8 +14,8 @@ struct Sidebar: View {
     var body: some View {
         List(selection: $selection) {
             SidebarItem(imageName: "arrow.up.and.down",
-                        text: "Wheel") {
-                WheelSettings()
+                        text: "Scrolling") {
+                ScrollingSettings()
             }
             .tag(Tag.wheel)
 
