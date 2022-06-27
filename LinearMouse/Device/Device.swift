@@ -115,19 +115,31 @@ extension Device {
         }
     }
 
-    func restorePointerSpeedToInitialValue() {
+    func restorePointerAcceleration() {
         let systemPointerAcceleration = (DeviceManager.shared
             .getSystemProperty(forKey: device.pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey) as IOFixed?)
             .map { Double($0) / 65536 } ?? Self.fallbackPointerAcceleration
 
-        os_log("Revert speed for device: %{public}@, acceleration = %{public}f, resolution = %{public}f",
+        os_log("Restore pointer acceleration for device: %{public}@: %{public}f",
                log: Self.log, type: .debug,
                String(describing: device),
-               systemPointerAcceleration,
-               initialPointerResolution)
+               systemPointerAcceleration)
+
+        pointerAcceleration = systemPointerAcceleration
+    }
+
+    func restorePointerSpeed() {
+        os_log("Restore pointer speed for device: %{public}@: %{public}f",
+               log: Self.log, type: .debug,
+               String(describing: device),
+               Self.pointerSpeed(fromPointerResolution: initialPointerResolution))
 
         device.pointerResolution = initialPointerResolution
-        pointerAcceleration = systemPointerAcceleration
+    }
+
+    func restorePointerAccelerationAndPointerSpeed() {
+        restorePointerAcceleration()
+        restorePointerSpeed()
     }
 
     private func inputValueCallback(device: PointerDevice, value: IOHIDValue) {

@@ -81,7 +81,7 @@ extension PointerSettingsState {
     func revertPointerSpeed() {
         let device = scheme.firstMatchedDevice
 
-        device?.restorePointerSpeedToInitialValue()
+        device?.restorePointerAccelerationAndPointerSpeed()
 
         Scheme(
             pointer: Scheme.Pointer(

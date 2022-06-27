@@ -108,16 +108,20 @@ class DeviceManager: ObservableObject {
 
         if let pointerAcceleration = scheme.pointer?.acceleration {
             device.pointerAcceleration = pointerAcceleration.asTruncatedDouble
+        } else {
+            device.restorePointerAcceleration()
         }
 
         if let pointerSpeed = scheme.pointer?.speed {
             device.pointerSpeed = pointerSpeed.asTruncatedDouble
+        } else {
+            device.restorePointerSpeed()
         }
     }
 
     func restorePointerSpeedToInitialValue() {
         for device in devices {
-            device.restorePointerSpeedToInitialValue()
+            device.restorePointerAccelerationAndPointerSpeed()
         }
     }
 
