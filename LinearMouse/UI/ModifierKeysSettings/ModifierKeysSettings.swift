@@ -4,25 +4,19 @@
 import SwiftUI
 
 struct ModifierKeysSettings: View {
-    @ObservedObject var defaults = AppDefaults.shared
+    @StateObject var state = ModifierKeysSettingsState()
 
     var body: some View {
         DetailView {
             Form {
-                ModifierKeyActionPicker(label: "⌘ (Command)", action: $defaults.modifiersCommandAction)
+                ModifierKeyActionPicker(label: "⌘ (Command)", action: $state.commandAction)
 
-                ModifierKeyActionPicker(label: "⇧ (Shift)", action: $defaults.modifiersShiftAction)
+                ModifierKeyActionPicker(label: "⇧ (Shift)", action: $state.shiftAction)
 
-                ModifierKeyActionPicker(label: "⌥ (Option)", action: $defaults.modifiersAlternateAction)
+                ModifierKeyActionPicker(label: "⌥ (Option)", action: $state.optionAction)
 
-                ModifierKeyActionPicker(label: "⌃ (Control)", action: $defaults.modifiersControlAction)
+                ModifierKeyActionPicker(label: "⌃ (Control)", action: $state.controlAction)
             }
         }
-    }
-}
-
-struct ModifierKeysSettings_Previews: PreviewProvider {
-    static var previews: some View {
-        ModifierKeysSettings()
     }
 }

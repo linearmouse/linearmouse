@@ -1,23 +1,25 @@
 // MIT License
 // Copyright (c) 2021-2022 Jiahao Lu
 
+import Foundation
+
 extension Scheme {
     struct Acceleration: ClampRange {
-        typealias Value = Double
+        typealias Value = Decimal
 
         static var range: ClosedRange<Value> = 0 ... 20
     }
 
     struct Speed: ClampRange {
-        typealias Value = Double
+        typealias Value = Decimal
 
         static var range: ClosedRange<Value> = 0 ... 1
     }
 
     struct Pointer: Codable {
-        @Clamp<Acceleration> var acceleration: Double?
+        @Clamp<Acceleration> var acceleration: Decimal?
 
-        @Clamp<Speed> var speed: Double?
+        @Clamp<Speed> var speed: Decimal?
 
         var disableAcceleration: Bool?
     }

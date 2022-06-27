@@ -1,6 +1,8 @@
 // MIT License
 // Copyright (c) 2021-2022 Jiahao Lu
 
+import Foundation
+
 extension Scheme.Scrolling {
     struct Modifiers: Codable {
         var command: Action?
@@ -13,7 +15,7 @@ extension Scheme.Scrolling {
 extension Scheme.Scrolling.Modifiers {
     enum Action: Codable {
         case alterOrientation
-        case changeSpeed(Double)
+        case changeSpeed(Decimal)
     }
 }
 

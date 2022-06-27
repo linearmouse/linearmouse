@@ -8,7 +8,7 @@ class PointerSettingsState: CurrentConfigurationState {}
 extension PointerSettingsState {
     var pointerAcceleration: Double {
         get {
-            scheme.pointer?.acceleration
+            scheme.pointer?.acceleration.map(\.asTruncatedDouble)
                 ?? scheme.firstMatchedDevice?.pointerAcceleration
                 ?? Device.fallbackPointerAcceleration
         }
@@ -19,7 +19,7 @@ extension PointerSettingsState {
 
             Scheme(
                 pointer: Scheme.Pointer(
-                    acceleration: newValue
+                    acceleration: Decimal(newValue).rounded(4)
                 )
             )
             .merge(into: &scheme)
@@ -28,7 +28,7 @@ extension PointerSettingsState {
 
     var pointerSpeed: Double {
         get {
-            scheme.pointer?.speed
+            scheme.pointer?.speed.map(\.asTruncatedDouble)
                 ?? scheme.firstMatchedDevice?.pointerSensitivity
                 ?? Device.fallbackPointerSpeed
         }
@@ -39,7 +39,7 @@ extension PointerSettingsState {
 
             Scheme(
                 pointer: Scheme.Pointer(
-                    speed: newValue
+                    speed: Decimal(newValue).rounded(2)
                 )
             )
             .merge(into: &scheme)
