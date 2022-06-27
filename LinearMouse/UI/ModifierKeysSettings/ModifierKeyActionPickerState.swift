@@ -21,6 +21,8 @@ extension ModifierKeyActionPicker {
                 }
 
                 switch action {
+                case .none:
+                    return .noAction
                 case .alterOrientation:
                     return .alterOrientation
                 case .changeSpeed:
@@ -31,11 +33,11 @@ extension ModifierKeyActionPicker {
             set: { action in
                 switch action {
                 case .noAction:
-                    self.action = nil
+                    self.action = Scheme.Scrolling.Modifiers.Action.none
                 case .alterOrientation:
                     self.action = .alterOrientation
                 case .changeSpeed:
-                    self.action = .changeSpeed(1)
+                    self.action = .changeSpeed(scale: 1)
                 }
             }
         )
@@ -53,13 +55,13 @@ extension ModifierKeyActionPicker {
 
             set: { value in
                 if value < 0 {
-                    action = .changeSpeed(Decimal(value).rounded(0))
+                    action = .changeSpeed(scale: Decimal(value).rounded(0))
                 } else if 0 ..< 0.1 ~= value {
-                    action = .changeSpeed(Decimal(value * 20).rounded(0) / 20)
+                    action = .changeSpeed(scale: Decimal(value * 20).rounded(0) / 20)
                 } else if 0.1 ..< 1 ~= value {
-                    action = .changeSpeed(Decimal(value).rounded(1))
+                    action = .changeSpeed(scale: Decimal(value).rounded(1))
                 } else {
-                    action = .changeSpeed(Decimal(value * 2).rounded(0) / 2)
+                    action = .changeSpeed(scale: Decimal(value * 2).rounded(0) / 2)
                 }
             }
         )
