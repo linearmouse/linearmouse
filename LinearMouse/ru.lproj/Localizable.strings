@@ -23,9 +23,9 @@
 "Some gestures, such as swiping back and forward, may stop working." = "Некоторые жесты, такие как смахивание «назад» и «вперед», могут перестать работать.";
 "Enable linear scrolling" = "Включить линейную прокрутку";
 "Disable mouse scrolling acceleration." = "Отключает ускорение прокрутки мыши.";
-"Scroll" = "Scroll";
-"line" = "line";
-"lines" = "lines";
+"Scroll" = "Прокрутка";
+"line" = "строка";
+"lines" = "строки";
 
 "Acceleration" = "Ускорение";
 "Speed" = "Speed";
