@@ -8,35 +8,41 @@
 "Reset" = "Reset";
 "Cancel" = "Cancel";
 
-"Reverse scrolling:" = "Inverter a rolagem:";
-"Linear scrolling:" = "Rolagem linear:";
-"vertically only" = "apenas verticalmente";
-"horizontally only" = "apenas horizontalmente";
-"Universal back and forward:" = "Retorno e avanço universal:";
-"on" = "ligado";
-"off" = "desligado";
-"line" = "linha";
-"lines" = "linhas";
 "%@ Preferences..." = "Preferências...";
 "Quit %@" = "Encerrar %@";
 
-"%@ Preferences" = "Preferências do %@";
-
-"General" = "Geral";
+"Scrolling" = "Scrolling";
+"Pointer" = "Pointer";
+"Buttons" = "Buttons";
 "Modifier Keys" = "Teclas Modificadoras";
+"General" = "Geral";
 
 "Reverse scrolling" = "Inverter a rolagem";
 "(vertically)" = "(verticalmente)";
-"Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad." = "Inverte a direção de rolagem do mouse, mas não inverterá a direção de rolagem para o trackpad.";
 "(horizontally)" = "(horizontalmente)";
 "Some gestures, such as swiping back and forward, may stop working." = "Alguns gestos, como deslizar para a frente e para trás, podem parar de funcionar.";
 "Enable linear scrolling" = "Habilitar rolagem linear";
 "Disable mouse scrolling acceleration." = "Desativa a aceleração de rolagem do mouse.";
-"Scroll" = "Rolar";
+
+"Acceleration" = "Aceleração";
+"Speed" = "Speed";
+"Revert to system defaults" = "Restaurar Padrões";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "Você também pode pressionar ⌃⇧⌘Z para restaurar os padrões.";
+"Disable pointer acceleration" = "Disable pointer acceleration";
+
 "Enable universal back and forward" = "Habilitar retorno e avanço universal";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Converte os botões laterais de retorno e avanço para gestos do trackpad para habilitar a funcionalidade de retorno e avanço universal.";
+
+"No action" = "Nenhuma ação";
+"Alter orientation" = "Mudar orientação";
+"Change speed" = "Alterar velocidade";
+"to" = "para";
+
+"Settings" = "Settings";
 "Show in menu bar" = "Mostrar na barra de menus";
 "To show the preferences, launch %@ again." = "Para mostrar as preferências, execute o %@ novamente.";
+
+"Update" = "Update";
 "Version: %@" = "Versão: %@";
 "Check for Updates..." = "Buscar Atualizações...";
 "Automatically" = "Automaticamente";
@@ -44,19 +50,9 @@
 "Weekly" = "Semanalmente";
 "Monthly" = "Mensalmente";
 "Include beta" = "Incluir versão beta";
+
+"Links" = "Links";
 "Homepage" = "Página inicial";
 "GitHub" = "GitHub";
 "Feedback" = "Feedback";
 "Contact" = "Contato";
-
-"Cursor" = "Cursor";
-"Acceleration" = "Aceleração";
-"Sensitivity" = "Sensibilidade";
-"Revert to system defaults" = "Restaurar Padrões";
-"You may also press ⌃⇧⌘Z to revert to system defaults." = "Você também pode pressionar ⌃⇧⌘Z para restaurar os padrões.";
-"Disable cursor acceleration & sensitivity" = "Desativar aceleração e sensibilidade do cursor";
-
-"No action" = "Nenhuma ação";
-"Alter orientation" = "Mudar orientação";
-"Change speed" = "Alterar velocidade";
-"to" = "para";
