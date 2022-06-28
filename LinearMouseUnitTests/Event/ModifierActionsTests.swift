@@ -7,10 +7,11 @@ import XCTest
 class ModifierActionsTests: XCTestCase {
     func testModifierActions() throws {
         var event = CGEvent(scrollWheelEvent2Source: nil, units: .line, wheelCount: 2, wheel1: 1, wheel2: 2, wheel3: 0)!
-        let transformer = ModifierActions(commandAction: .init(type: .noAction, speedFactor: 0),
-                                          shiftAction: .init(type: .alterOrientation, speedFactor: 0),
-                                          alternateAction: .init(type: .changeSpeed, speedFactor: 2),
-                                          controlAction: .init(type: .changeSpeed, speedFactor: 3))
+        let modifiers = Scheme.Scrolling.Modifiers(command: Scheme.Scrolling.Modifiers.Action.none,
+                                                   shift: .alterOrientation,
+                                                   option: .changeSpeed(scale: 2),
+                                                   control: .changeSpeed(scale: 3))
+        let transformer = ModifierActions(modifiers: modifiers)
         event.flags.insert(.maskCommand)
         event.flags.insert(.maskShift)
         event.flags.insert(.maskAlternate)

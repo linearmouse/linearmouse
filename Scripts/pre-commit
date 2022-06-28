@@ -1,3 +1,10 @@
 #!/bin/bash -e
 
-make lint-fix
+FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g' | { grep '.swift$' || :; })
+
+[ -z "$FILES" ] && exit 0
+
+echo $FILES | xargs swiftformat
+echo $FILES | xargs swiftlint --fix
+
+echo $FILES | xargs git add

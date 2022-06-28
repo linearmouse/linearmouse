@@ -23,10 +23,6 @@ lint:
 	swiftformat --lint .
 	swiftlint .
 
-lint-fix:
-	swiftformat .
-	swiftlint --fix .
-
 test:
 	xcodebuild test -project LinearMouse.xcodeproj -scheme LinearMouse
 

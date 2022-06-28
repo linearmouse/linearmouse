@@ -5,9 +5,8 @@ import Foundation
 import PointerKitC
 
 public class PointerDevice {
-    private let client: IOHIDServiceClient
-    private let device: IOHIDDevice?
-    private let queue: DispatchQueue
+    internal let client: IOHIDServiceClient
+    internal let device: IOHIDDevice?
 
     public typealias InputValueClosure = (PointerDevice, IOHIDValue) -> Void
 
@@ -25,10 +24,9 @@ public class PointerDevice {
         this.inputValueCallback(value)
     }
 
-    init(_ client: IOHIDServiceClient, _ queue: DispatchQueue) {
+    init(_ client: IOHIDServiceClient) {
         self.client = client
         device = client.device
-        self.queue = queue
 
         if let device = device {
             IOHIDDeviceOpen(device, IOOptionBits(kIOHIDOptionsTypeNone))
@@ -92,6 +90,10 @@ public extension PointerDevice {
         }
 
         return String(format: "0x%04X", productID)
+    }
+
+    var serialNumber: String? {
+        client.getProperty(kIOHIDSerialNumberKey)
     }
 }
 
@@ -160,10 +162,8 @@ public extension PointerDevice {
 
 extension PointerDevice {
     private func inputValueCallback(_ value: IOHIDValue) {
-        queue.async { [self] in
-            for (_, callback) in observations.inputValue {
-                callback(self, value)
-            }
+        for (_, callback) in observations.inputValue {
+            callback(self, value)
         }
     }
 

@@ -4,17 +4,12 @@
 import Foundation
 
 class ModifierActions: EventTransformer {
-    private let commandAction: ModifierKeyAction
-    private let shiftAction: ModifierKeyAction
-    private let alternateAction: ModifierKeyAction
-    private let controlAction: ModifierKeyAction
+    typealias Modifiers = Scheme.Scrolling.Modifiers
 
-    init(commandAction: ModifierKeyAction, shiftAction: ModifierKeyAction,
-         alternateAction: ModifierKeyAction, controlAction: ModifierKeyAction) {
-        self.commandAction = commandAction
-        self.shiftAction = shiftAction
-        self.alternateAction = alternateAction
-        self.controlAction = controlAction
+    private let modifiers: Modifiers
+
+    init(modifiers: Scheme.Scrolling.Modifiers) {
+        self.modifiers = modifiers
     }
 
     func transform(_ event: CGEvent) -> CGEvent? {
@@ -22,11 +17,11 @@ class ModifierActions: EventTransformer {
             return event
         }
 
-        let actions: [(CGEventFlags.Element, ModifierKeyAction)] = [
-            (.maskCommand, commandAction),
-            (.maskShift, shiftAction),
-            (.maskAlternate, alternateAction),
-            (.maskControl, controlAction)
+        let actions: [(CGEventFlags.Element, Modifiers.Action?)] = [
+            (.maskCommand, modifiers.command),
+            (.maskShift, modifiers.shift),
+            (.maskAlternate, modifiers.option),
+            (.maskControl, modifiers.control)
         ]
         for case let (flag, action) in actions {
             if event.flags.contains(flag) {
@@ -38,16 +33,20 @@ class ModifierActions: EventTransformer {
         return event
     }
 
-    private func handleModifierKeyAction(for event: CGEvent, action: ModifierKeyAction) -> Bool {
+    private func handleModifierKeyAction(for event: CGEvent, action: Modifiers.Action?) -> Bool {
+        guard let action = action else {
+            return false
+        }
+
         let view = ScrollWheelEventView(event)
 
-        switch action.type {
-        case .noAction:
+        switch action {
+        case .none:
             return false
         case .alterOrientation:
             view.swapXY()
-        case .changeSpeed:
-            view.scale(factor: action.speedFactor)
+        case let .changeSpeed(scale: scale):
+            view.scale(factor: scale.asTruncatedDouble)
         }
 
         return true
