@@ -23,9 +23,9 @@
 "Some gestures, such as swiping back and forward, may stop working." = "某些手势可能无法正常工作，如滑动后退和前进。";
 "Enable linear scrolling" = "启用线性滚动";
 "Disable mouse scrolling acceleration." = "禁用鼠标滚动加速度。";
-"Scroll" = "Scroll";
-"line" = "line";
-"lines" = "lines";
+"Scroll" = "滚动";
+"line" = "行";
+"lines" = "行";
 
 "Acceleration" = "加速度";
 "Speed" = "速度";
