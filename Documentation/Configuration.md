@@ -77,7 +77,7 @@ Vendor ID and product ID can be provided to match a specific device.
 
 You may find these values in About This Mac → System Report... → Bluetooth / USB.
 
-For example, to configure pointer sensitivity of my Logitech mouse and Microsoft mouse respectively,
+For example, to configure pointer speed of my Logitech mouse and Microsoft mouse respectively,
 I would create two schemes and specify the vendor ID and product ID:
 
 ```json
@@ -92,7 +92,7 @@ I would create two schemes and specify the vendor ID and product ID:
       },
       "pointer": {
         "acceleration": 0,
-        "sensitivity": 0.36
+        "speed": 0.36
       }
     },
     {
@@ -104,14 +104,14 @@ I would create two schemes and specify the vendor ID and product ID:
       },
       "pointer": {
         "acceleration": 0,
-        "sensitivity": 0.4
+        "speed": 0.4
       }
     }
   ]
 }
 ```
 
-Then, the pointer sensitivity of my Logitech mouse and Microsoft mouse will be set to 0.36 and 0.4
+Then, the pointer speed of my Logitech mouse and Microsoft mouse will be set to 0.36 and 0.4
 respectively.
 
 ## Schemes merging and multiple `if`s
@@ -154,7 +154,7 @@ For example, the configuration above can alternatively be written as:
         }
       },
       "pointer": {
-        "sensitivity": 0.36
+        "speed": 0.36
       }
     },
     {
@@ -165,7 +165,7 @@ For example, the configuration above can alternatively be written as:
         }
       },
       "pointer": {
-        "sensitivity": 0.4
+        "speed": 0.4
       }
     }
   ]
@@ -194,7 +194,7 @@ Or, with fewer lines but more difficult to maintain:
       ],
       "pointer": {
         "acceleration": 0,
-        "sensitivity": 0.36
+        "speed": 0.36
       }
     },
     {
@@ -205,7 +205,7 @@ Or, with fewer lines but more difficult to maintain:
         }
       },
       "pointer": {
-        "sensitivity": 0.4
+        "speed": 0.4
       }
     }
   ]
