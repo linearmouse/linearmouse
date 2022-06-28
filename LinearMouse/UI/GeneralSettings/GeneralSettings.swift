@@ -40,12 +40,22 @@ struct GeneralSettings: View {
                         HyperLink(URL(string: "https://github.com/linearmouse/linearmouse")!) {
                             Text("GitHub")
                         }
+                        HyperLink(URL(string: "https://opencollective.com/linearmouse")!) {
+                            Text("Open Collective")
+                        }
                         HyperLink(URL(string: "https://github.com/linearmouse/linearmouse/issues")!) {
                             Text("Feedback")
                         }
                         HyperLink(URL(string: "mailto:feedback@linearmouse.org")!) {
                             Text("Contact")
                         }
+                        HyperLink(URL(string: "https://ko-fi.com/lujjjh")!) {
+                            Image("Kofi")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(height: 30)
+                        }
+                        .padding(.vertical, 5)
                     }
                 }
             }
