@@ -23,6 +23,9 @@
 "Some gestures, such as swiping back and forward, may stop working." = "Alcuni gesti, come scorrere avanti e indietro, potrebbero smettere di funzionare.";
 "Enable linear scrolling" = "Attivare lo scorrimento lineare";
 "Disable mouse scrolling acceleration." = "Disattivare l'accelerazione dello scorrimento del mouse.";
+"Scroll" = "Scorri";
+"line" = "riga";
+"lines" = "righe";
 
 "Acceleration" = "Accelerazione";
 "Speed" = "Speed";
@@ -57,3 +60,10 @@
 "GitHub" = "GitHub";
 "Feedback" = "Feedback";
 "Contact" = "Contatto";
+
+"Auto switch to the active device" = "Auto switch to the active device";
+"OK" = "OK";
+
+"Mouse" = "Mouse";
+"Trackpad" = "Trackpad";
+"(active)" = "(active)";
