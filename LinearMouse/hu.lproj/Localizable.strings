@@ -56,10 +56,3 @@
 "GitHub" = "GitHub";
 "Feedback" = "Feedback";
 "Contact" = "Contact";
-
-"Cursor" = "Cursor";
-"Acceleration" = "Acceleration";
-"Speed" = "Speed";
-"Revert to system defaults" = "Revert to system defaults";
-"You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
-"Disable cursor acceleration & sensitivity" = "Disable cursor acceleration & sensitivity";
