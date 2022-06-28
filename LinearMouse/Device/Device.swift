@@ -28,7 +28,10 @@ class Device {
         }
         initialPointerResolution = pointerResolution
 
-        device.observeInput(using: inputValueCallback).tieToLifetime(of: self)
+        // TODO: More elegant way?
+        device.observeInput(using: { [weak self] in
+            self?.inputValueCallback($0, $1)
+        }).tieToLifetime(of: self)
 
         os_log("Device initialized: %{public}@: HIDPointerResolution=%{public}f, HIDPointerAccelerationType=%{public}@",
                log: Self.log, type: .debug,
@@ -142,7 +145,7 @@ extension Device {
         restorePointerSpeed()
     }
 
-    private func inputValueCallback(device: PointerDevice, value: IOHIDValue) {
+    private func inputValueCallback(_ device: PointerDevice, _ value: IOHIDValue) {
         guard let manager = manager else {
             return
         }

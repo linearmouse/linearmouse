@@ -35,6 +35,8 @@ class ConfigurationState: ObservableObject {
 
     @Published var activeScheme: Scheme? {
         didSet {
+            // TODO: Refactor: `EventTransformer`s shouldn't be built here.
+            // FIXME: The first event after device switching may be handled by the last built `EventTransformer`s.
             eventTransformers = buildEventTransformers()
 
             guard let activeScheme = activeScheme else {

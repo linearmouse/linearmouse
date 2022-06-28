@@ -6,7 +6,6 @@ import PointerKitC
 
 public final class PointerDeviceManager {
     private var eventSystemClient: IOHIDEventSystemClient?
-    private let queue: DispatchQueue
 
     public typealias DeviceAddedClosure = (PointerDeviceManager, PointerDevice) -> Void
     public typealias DeviceRemovedClosure = (PointerDeviceManager, PointerDevice) -> Void
@@ -24,9 +23,7 @@ public final class PointerDeviceManager {
         Array(serviceClientToPointerDevice.values)
     }
 
-    public init(queue: DispatchQueue = DispatchQueue.main) {
-        self.queue = queue
-    }
+    public init() {}
 }
 
 // MARK: Observation API
@@ -92,38 +89,36 @@ extension PointerDeviceManager {
      Registered `DeviceAddedClosure`s will be notified immediately with all the current devices.
      */
     public func startObservation() {
-        queue.async { [self] in
-            guard eventSystemClient == nil else { return }
+        guard eventSystemClient == nil else { return }
 
-            guard let eventSystemClient = IOHIDEventSystemClientCreate(kCFAllocatorDefault) else {
-                return
+        guard let eventSystemClient = IOHIDEventSystemClientCreate(kCFAllocatorDefault) else {
+            return
+        }
+
+        self.eventSystemClient = eventSystemClient
+
+        IOHIDEventSystemClientSetMatchingMultiple(eventSystemClient,
+                                                  ObservationMatches.mouseOrPointer)
+        IOHIDEventSystemClientRegisterDeviceMatchingBlock(eventSystemClient,
+                                                          serviceMatchingCallback,
+                                                          nil,
+                                                          nil)
+        IOHIDEventSystemClientScheduleWithDispatchQueue(eventSystemClient, DispatchQueue.main)
+
+        if let clients = IOHIDEventSystemClientCopyServices(eventSystemClient) as? [IOHIDServiceClient] {
+            for client in clients {
+                addDevice(forClient: client)
             }
+        }
 
-            self.eventSystemClient = eventSystemClient
-
-            IOHIDEventSystemClientSetMatchingMultiple(eventSystemClient,
-                                                      ObservationMatches.mouseOrPointer)
-            IOHIDEventSystemClientRegisterDeviceMatchingBlock(eventSystemClient,
-                                                              serviceMatchingCallback,
-                                                              nil,
-                                                              nil)
-            IOHIDEventSystemClientScheduleWithDispatchQueue(eventSystemClient, queue)
-
-            if let clients = IOHIDEventSystemClientCopyServices(eventSystemClient) as? [IOHIDServiceClient] {
-                for client in clients {
-                    addDevice(forClient: client)
-                }
-            }
-
-            for property in observations.propertyChanged.values.map(\.property) {
-                IOHIDEventSystemClientRegisterPropertyChangedCallback(
-                    eventSystemClient,
-                    property as CFString,
-                    Self.propertyChangedCallback,
-                    Unmanaged.passUnretained(self).toOpaque(),
-                    nil
-                )
-            }
+        for property in observations.propertyChanged.values.map(\.property) {
+            IOHIDEventSystemClientRegisterPropertyChangedCallback(
+                eventSystemClient,
+                property as CFString,
+                Self.propertyChangedCallback,
+                Unmanaged.passUnretained(self).toOpaque(),
+                nil
+            )
         }
     }
 
@@ -133,18 +128,16 @@ extension PointerDeviceManager {
      Registered `DeviceRemovedClosure`s will be notified immediately with all the current devices.
      */
     public func stopObservation() {
-        queue.async { [self] in
-            guard let eventSystemClient = eventSystemClient else { return }
+        guard let eventSystemClient = eventSystemClient else { return }
 
-            IOHIDEventSystemClientUnregisterDeviceMatchingBlock(eventSystemClient)
-            IOHIDEventSystemClientUnscheduleFromDispatchQueue(eventSystemClient, queue)
+        IOHIDEventSystemClientUnregisterDeviceMatchingBlock(eventSystemClient)
+        IOHIDEventSystemClientUnscheduleFromDispatchQueue(eventSystemClient, DispatchQueue.main)
 
-            for device in devices {
-                removeDevice(device)
-            }
-
-            self.eventSystemClient = nil
+        for device in devices {
+            removeDevice(device)
         }
+
+        self.eventSystemClient = nil
     }
 
     private func serviceMatchingCallback(_: UnsafeMutableRawPointer?,
@@ -152,9 +145,7 @@ extension PointerDeviceManager {
                                          _ client: IOHIDServiceClient?) {
         guard let client = client else { return }
 
-        queue.async { [self] in
-            addDevice(forClient: client)
-        }
+        addDevice(forClient: client)
     }
 
     private func clientRemovalCallback(_: UnsafeMutableRawPointer?,
@@ -162,23 +153,19 @@ extension PointerDeviceManager {
                                        _ client: IOHIDServiceClient?) {
         guard let client = client else { return }
 
-        queue.async { [self] in
-            removeDevice(forClient: client)
-        }
+        removeDevice(forClient: client)
     }
 
     private func propertyChangedCallback(_ property: String, _: AnyObject?) {
-        queue.async { [self] in
-            for (_, (observingProperty, callback)) in observations.propertyChanged where property == observingProperty {
-                callback(self)
-            }
+        for (_, (observingProperty, callback)) in observations.propertyChanged where property == observingProperty {
+            callback(self)
         }
     }
 
     private func addDevice(forClient client: IOHIDServiceClient) {
         guard serviceClientToPointerDevice[client] == nil else { return }
 
-        let device = PointerDevice(client, queue)
+        let device = PointerDevice(client)
 
         serviceClientToPointerDevice[client] = device
 

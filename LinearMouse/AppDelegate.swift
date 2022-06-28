@@ -41,30 +41,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.sessionDidResignActiveNotification,
             object: nil,
-            queue: nil,
+            queue: .main,
             using: { _ in
-                DispatchQueue.main.async {
-                    os_log("Session inactive", log: Self.log, type: .debug)
-                    if let eventTap = self.eventTap {
-                        eventTap.disable()
-                    }
-                    DeviceManager.shared.pause()
+                os_log("Session inactive", log: Self.log, type: .debug)
+                if let eventTap = self.eventTap {
+                    eventTap.disable()
                 }
+                DeviceManager.shared.pause()
             }
         )
 
         NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.sessionDidBecomeActiveNotification,
             object: nil,
-            queue: nil,
+            queue: .main,
             using: { _ in
-                DispatchQueue.main.async {
-                    os_log("Session active", log: Self.log, type: .debug)
-                    if let eventTap = self.eventTap {
-                        eventTap.enable()
-                    }
-                    DeviceManager.shared.resume()
+                os_log("Session active", log: Self.log, type: .debug)
+                if let eventTap = self.eventTap {
+                    eventTap.enable()
                 }
+                DeviceManager.shared.resume()
             }
         )
     }

@@ -19,8 +19,13 @@ class DeviceManager: ObservableObject {
     @Published var lastActiveDevice: Device?
 
     init() {
-        manager.observeDeviceAdded(using: deviceAdded).tieToLifetime(of: self)
-        manager.observeDeviceRemoved(using: deviceRemoved).tieToLifetime(of: self)
+        manager.observeDeviceAdded(using: { [weak self] in
+            self?.deviceAdded($0, $1)
+        }).tieToLifetime(of: self)
+
+        manager.observeDeviceRemoved(using: { [weak self] in
+            self?.deviceRemoved($0, $1)
+        }).tieToLifetime(of: self)
 
         for property in [kIOHIDMouseAccelerationType, kIOHIDTrackpadAccelerationType, kIOHIDPointerResolutionKey] {
             manager.observePropertyChanged(property: property) { [self] _ in
@@ -53,7 +58,7 @@ class DeviceManager: ObservableObject {
         .store(in: &subscriptions)
     }
 
-    private func deviceAdded(_: PointerDeviceManager, pointerDevice: PointerDevice) {
+    private func deviceAdded(_: PointerDeviceManager, _ pointerDevice: PointerDevice) {
         guard let device = Device(self, pointerDevice) else {
             os_log("Unsupported device: %{public}@",
                    log: Self.log, type: .debug,
@@ -73,7 +78,7 @@ class DeviceManager: ObservableObject {
         updatePointerSpeed(for: device)
     }
 
-    private func deviceRemoved(_: PointerDeviceManager, pointerDevice: PointerDevice) {
+    private func deviceRemoved(_: PointerDeviceManager, _ pointerDevice: PointerDevice) {
         guard let device = pointerDeviceToDevice[pointerDevice] else { return }
 
         objectWillChange.send()
