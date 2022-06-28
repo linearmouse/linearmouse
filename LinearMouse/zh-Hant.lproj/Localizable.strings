@@ -22,7 +22,7 @@
 "(horizontally)" = "(horizontally)";
 "Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
 "Enable linear scrolling" = "啟用線性捲動";
-"Disable mouse scrolling acceleration." = "禁用滑鼠捲動加速度。";
+"Disable scrolling acceleration." = "Disable scrolling acceleration.";
 "Scroll" = "Scroll";
 "line" = "line";
 "lines" = "lines";
