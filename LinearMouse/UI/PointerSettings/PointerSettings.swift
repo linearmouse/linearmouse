@@ -49,7 +49,7 @@ struct PointerSettings: View {
                 Spacer()
 
                 Toggle(isOn: $state.pointerDisableAcceleration) {
-                    Text("Disable cursor acceleration")
+                    Text("Disable pointer acceleration")
                 }
 
                 Spacer()
