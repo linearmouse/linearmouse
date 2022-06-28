@@ -23,6 +23,9 @@
 "Some gestures, such as swiping back and forward, may stop working." = "Alguns gestos, como deslizar para a frente e para trás, podem parar de funcionar.";
 "Enable linear scrolling" = "Habilitar rolagem linear";
 "Disable mouse scrolling acceleration." = "Desativa a aceleração de rolagem do mouse.";
+"Scroll" = "Scroll";
+"line" = "line";
+"lines" = "lines";
 
 "Acceleration" = "Aceleração";
 "Speed" = "Speed";
