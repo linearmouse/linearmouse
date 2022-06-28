@@ -8,35 +8,41 @@
 "Reset" = "Reset";
 "Cancel" = "Cancel";
 
-"Reverse scrolling:" = "Invertiertes Scrollen:";
-"Linear scrolling:" = "Lineares Scrollen:";
-"vertically only" = "vertically only";
-"horizontally only" = "horizontally only";
-"Universal back and forward:" = "Universelles Vor und Zurück:";
-"on" = "An";
-"off" = "Aus";
-"line" = "Zeile";
-"lines" = "Zeilen";
 "%@ Preferences..." = "%@ Einstellungen...";
 "Quit %@" = "%@ beenden";
 
-"%@ Preferences" = "%@ Einstellungen";
-
-"General" = "Allgemein";
+"Scrolling" = "Scrolling";
+"Pointer" = "Pointer";
+"Buttons" = "Buttons";
 "Modifier Keys" = "Tastenkürzel";
+"General" = "Allgemein";
 
 "Reverse scrolling" = "Scrollen invertieren";
 "(vertically)" = "(vertically)";
-"Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad." = "Invertiert die Scrollrichtung für die Maus, aber nicht für das Trackpad.";
 "(horizontally)" = "(horizontally)";
 "Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
 "Enable linear scrolling" = "Lineares Scrollen aktivieren";
 "Disable mouse scrolling acceleration." = "Deaktiviert die Scrollbeschleunigung der Maus.";
-"Scroll" = "Scrolle";
+
+"Acceleration" = "Beschleunigung";
+"Speed" = "Speed";
+"Revert to system defaults" = "Auf Systemstandards zurücksetzen";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "Durch Drücken des Kürzels ⌃⇧⌘Z kann ebenfalls zu den Systemstandards zurückgekehrt werden.";
+"Disable pointer acceleration" = "Disable pointer acceleration";
+
 "Enable universal back and forward" = "Universelles Vor und Zurück aktivieren";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Konvertiert die Vor- und Zurück-Seitentasten in die jeweiligen Wischgesten, um eine universelle Vor- und Zurück-Funktion zu ermöglichen.";
+
+"No action" = "Keine Funktion";
+"Alter orientation" = "Scrollorientierung ändern";
+"Change speed" = "Scrollgeschwindigkeit ändern";
+"to" = "zu";
+
+"Settings" = "Settings";
 "Show in menu bar" = "In der Menüleiste anzeigen";
 "To show the preferences, launch %@ again." = "Um die Einstellungen anzuzeigen, öffne %@ erneut.";
+
+"Update" = "Update";
 "Version: %@" = "Version: %@";
 "Check for Updates..." = "Nach Updates suchen...";
 "Automatically" = "Automatisch";
@@ -44,19 +50,9 @@
 "Weekly" = "Wöchentlich";
 "Monthly" = "Monatlich";
 "Include beta" = "An Beta-Versionen teilnehmen";
+
+"Links" = "Links";
 "Homepage" = "Homepage";
 "GitHub" = "GitHub";
 "Feedback" = "Feedback";
 "Contact" = "Kontakt";
-
-"Cursor" = "Mauszeiger";
-"Acceleration" = "Beschleunigung";
-"Sensitivity" = "Empfindlichkeit";
-"Revert to system defaults" = "Auf Systemstandards zurücksetzen";
-"You may also press ⌃⇧⌘Z to revert to system defaults." = "Durch Drücken des Kürzels ⌃⇧⌘Z kann ebenfalls zu den Systemstandards zurückgekehrt werden.";
-"Disable cursor acceleration & sensitivity" = "Zeigerbeschleunigung & Empfindlichkeit deaktivieren";
-
-"No action" = "Keine Funktion";
-"Alter orientation" = "Scrollorientierung ändern";
-"Change speed" = "Scrollgeschwindigkeit ändern";
-"to" = "zu";
