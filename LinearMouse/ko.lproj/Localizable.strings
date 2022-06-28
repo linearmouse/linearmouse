@@ -23,9 +23,9 @@
 "Some gestures, such as swiping back and forward, may stop working." = "'앞뒤로 스와이프' 등 일부 제스처의 작동을 멈출 수 있습니다.";
 "Enable linear scrolling" = "리니어 스크롤 사용";
 "Disable mouse scrolling acceleration." = "마우스 스크롤 가속을 비활성화합니다.";
-"Scroll" = "Scroll";
-"line" = "line";
-"lines" = "lines";
+"Scroll" = "스크롤";
+"line" = "줄";
+"lines" = "줄";
 
 "Acceleration" = "가속도";
 "Speed" = "Speed";
