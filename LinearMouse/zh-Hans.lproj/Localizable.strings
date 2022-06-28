@@ -61,9 +61,9 @@
 "Feedback" = "反馈";
 "Contact" = "联系";
 
-"Auto switch to the active device" = "Auto switch to the active device";
-"OK" = "OK";
+"Auto switch to the active device" = "自动切换到活跃设备";
+"OK" = "好";
 
-"Mouse" = "Mouse";
-"Trackpad" = "Trackpad";
-"(active)" = "(active)";
+"Mouse" = "鼠标";
+"Trackpad" = "触控板";
+"(active)" = "(活跃)";
