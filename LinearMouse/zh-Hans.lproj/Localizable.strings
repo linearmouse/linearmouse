@@ -11,9 +11,9 @@
 "%@ Preferences..." = "%@ 偏好设置...";
 "Quit %@" = "退出 %@";
 
-"Scrolling" = "Scrolling";
-"Pointer" = "Pointer";
-"Buttons" = "Buttons";
+"Scrolling" = "滚动";
+"Pointer" = "指针";
+"Buttons" = "按钮";
 "Modifier Keys" = "修饰键";
 "General" = "通用";
 
@@ -23,12 +23,15 @@
 "Some gestures, such as swiping back and forward, may stop working." = "某些手势可能无法正常工作，如滑动后退和前进。";
 "Enable linear scrolling" = "启用线性滚动";
 "Disable mouse scrolling acceleration." = "禁用鼠标滚动加速度。";
+"Scroll" = "Scroll";
+"line" = "line";
+"lines" = "lines";
 
 "Acceleration" = "加速度";
-"Speed" = "Speed";
+"Speed" = "速度";
 "Revert to system defaults" = "回退到系统默认值";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "你也可以按下 ⌃⇧⌘Z 来回退到系统默认值。";
-"Disable pointer acceleration" = "Disable pointer acceleration";
+"Disable pointer acceleration" = "禁用指针加速度";
 
 "Enable universal back and forward" = "启用全局后退、前进";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "将后退、前进侧键转换为滑动手势，以全局启用后退、前进支持。";
@@ -38,11 +41,11 @@
 "Change speed" = "变更速度";
 "to" = "到";
 
-"Settings" = "Settings";
+"Settings" = "设置";
 "Show in menu bar" = "在菜单栏中显示";
 "To show the preferences, launch %@ again." = "要显示偏好设置，再次运行 %@。";
 
-"Update" = "Update";
+"Update" = "更新";
 "Version: %@" = "版本：%@";
 "Check for Updates..." = "检查更新...";
 "Automatically" = "自动";
@@ -51,7 +54,7 @@
 "Monthly" = "每月";
 "Include beta" = "包括测试版";
 
-"Links" = "Links";
+"Links" = "链接";
 "Homepage" = "主页";
 "Open Collective" = "Open Collective";
 "GitHub" = "GitHub";
