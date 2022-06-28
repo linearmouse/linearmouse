@@ -5,31 +5,45 @@ import Introspect
 import SwiftUI
 
 struct Sidebar: View {
-    @State var selection: Tag? = .general
+    @State var selection: Tag? = .wheel
 
     enum Tag {
-        case general, cursor, modifierKeys
+        case wheel, cursor, buttons, modifierKeys, general
     }
 
     var body: some View {
         List(selection: $selection) {
-            SidebarItem(imageName: "gearshape.fill",
-                        text: "General") {
-                GeneralView()
+            SidebarItem(imageName: "arrow.up.and.down",
+                        text: "Scrolling") {
+                ScrollingSettings()
             }
-            .tag(Tag.general)
+            .tag(Tag.wheel)
 
             SidebarItem(imageName: "cursorarrow.motionlines",
-                        text: "Cursor") {
-                CursorView()
+                        text: "Pointer") {
+                PointerSettings()
             }
             .tag(Tag.cursor)
 
+            SidebarItem(imageName: "computermouse.fill",
+                        text: "Buttons") {
+                ButtonsSettings()
+            }
+            .tag(Tag.buttons)
+
             SidebarItem(imageName: "command",
                         text: "Modifier Keys") {
-                ModifierKeysView()
+                ModifierKeysSettings()
             }
             .tag(Tag.modifierKeys)
+
+            Spacer()
+
+            SidebarItem(imageName: "gearshape.fill",
+                        text: "General") {
+                GeneralSettings()
+            }
+            .tag(Tag.general)
         }
         .padding(.top)
         .listStyle(SidebarListStyle())

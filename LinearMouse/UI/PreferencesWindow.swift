@@ -17,13 +17,12 @@ class PreferencesWindow: NSWindow {
 
         isReleasedWhenClosed = false
 
-        title = String(format: NSLocalizedString("%@ Preferences", comment: ""), LinearMouse.appName)
+        title = LinearMouse.appName
 
+        titleVisibility = .hidden
         titlebarAppearsTransparent = true
 
-        level = .floating
-
-        contentView = NSHostingView(rootView: PreferencesView())
+        contentView = NSHostingView(rootView: Preferences())
 
         center()
     }

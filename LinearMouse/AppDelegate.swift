@@ -11,76 +11,62 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private let autoUpdateManager = AutoUpdateManager.shared
     private let statusItem = StatusItem.shared
-    private var defaultsSubscription: AnyCancellable!
+    private var subscriptions = Set<AnyCancellable>()
     private var eventTap: EventTap?
 
     func applicationDidFinishLaunching(_: Notification) {
-        guard Environment.isRunningApp else { return }
+        guard ProcessEnvironment.isRunningApp else { return }
 
         if !AccessibilityPermission.enabled {
             AccessibilityPermissionWindow.shared.bringToFront()
         }
 
-        AccessibilityPermission.pollingUntilEnabled {
-            // register the start entry if the user grants the permission
-            AutoStartManager.enable()
-
-            // scrolling functionalities
-            let eventTap = EventTap()
-            eventTap.enable()
-            self.eventTap = eventTap
-
-            // subscribe to the user settings
-            let defaults = AppDefaults.shared
-            self.defaultsSubscription = defaults.objectWillChange.sink { _ in
-                DispatchQueue.main.async {
-                    self.update(defaults)
-                }
-            }
-            self.update(defaults)
-
-            NSWorkspace.shared.notificationCenter.addObserver(
-                forName: NSWorkspace.sessionDidResignActiveNotification,
-                object: nil,
-                queue: nil,
-                using: { _ in
-                    DispatchQueue.main.async {
-                        os_log("Session inactive", log: Self.log, type: .debug)
-                        if let eventTap = self.eventTap {
-                            eventTap.disable()
-                        }
-                        DeviceManager.shared.pause()
-                    }
-                }
-            )
-
-            NSWorkspace.shared.notificationCenter.addObserver(
-                forName: NSWorkspace.sessionDidBecomeActiveNotification,
-                object: nil,
-                queue: nil,
-                using: { _ in
-                    DispatchQueue.main.async {
-                        os_log("Session active", log: Self.log, type: .debug)
-                        if let eventTap = self.eventTap {
-                            eventTap.enable()
-                        }
-                        DeviceManager.shared.resume()
-                    }
-                }
-            )
-        }
+        AccessibilityPermission.pollingUntilEnabled(completion: setup)
     }
 
-    func update(_ defaults: AppDefaults) {
-        DeviceManager.shared.updatePointerSpeed(
-            acceleration: defaults.cursorAcceleration,
-            sensitivity: defaults.cursorSensitivity,
-            disableAcceleration: defaults.linearMovementOn
+    func setup() {
+        ConfigurationState.shared.$activeScheme.sink { _ in
+            // TODO: Apply settings
+        }
+        .store(in: &subscriptions)
+
+        // register the start entry if the user grants the permission
+        AutoStartManager.enable()
+
+        // scrolling functionalities
+        let eventTap = EventTap()
+        eventTap.enable()
+        self.eventTap = eventTap
+
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.sessionDidResignActiveNotification,
+            object: nil,
+            queue: .main,
+            using: { _ in
+                os_log("Session inactive", log: Self.log, type: .debug)
+                if let eventTap = self.eventTap {
+                    eventTap.disable()
+                }
+                DeviceManager.shared.pause()
+            }
+        )
+
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.sessionDidBecomeActiveNotification,
+            object: nil,
+            queue: .main,
+            using: { _ in
+                os_log("Session active", log: Self.log, type: .debug)
+                if let eventTap = self.eventTap {
+                    eventTap.enable()
+                }
+                DeviceManager.shared.resume()
+            }
         )
     }
 
     func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        guard Environment.isRunningApp else { return true }
+        guard ProcessEnvironment.isRunningApp else { return true }
 
         if flag {
             return true
@@ -92,7 +78,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_: Notification) {
-        guard Environment.isRunningApp else { return }
+        guard ProcessEnvironment.isRunningApp else { return }
 
         DeviceManager.shared.pause()
     }

@@ -57,13 +57,15 @@ struct CheckForUpdatesView: View {
     @ObservedObject var defaults = AppDefaults.shared
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
+        VStack(alignment: .leading, spacing: 10) {
             Text("Version: \(LinearMouse.appVersion)")
                 .foregroundColor(.secondary)
+
             HStack {
                 Button("Check for Updates...", action: updaterViewModel.checkForUpdates)
                     .disabled(!updaterViewModel.canCheckForUpdates)
             }
+
             HStack {
                 Toggle(isOn: $updaterViewModel.automaticallyChecksForUpdates) {
                     Text("Automatically")
@@ -76,10 +78,16 @@ struct CheckForUpdatesView: View {
                 .frame(width: 120)
                 .disabled(!updaterViewModel.automaticallyChecksForUpdates)
             }
+
             Toggle(isOn: $defaults.betaChannelOn) {
                 Text("Include beta")
             }
         }
-        .controlSize(.small)
+    }
+}
+
+struct CheckForUpdateView_Previews: PreviewProvider {
+    static var previews: some View {
+        CheckForUpdatesView()
     }
 }

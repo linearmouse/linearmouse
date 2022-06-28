@@ -6,61 +6,61 @@ import SwiftUI
 class AppDefaults: ObservableObject {
     public static let shared = AppDefaults()
 
-    @AppStorageCompat(wrappedValue: true, "reverseScrollingOn") var reverseScrollingVerticallyOn: Bool {
+    @AppStorageCompat("reverseScrollingOn") var reverseScrollingVerticallyOn = true {
         willSet {
             objectWillChange.send()
         }
     }
 
-    @AppStorageCompat(wrappedValue: false, "reverseScrollingHorizontallyOn") var reverseScrollingHorizontallyOn: Bool {
+    @AppStorageCompat("reverseScrollingHorizontallyOn") var reverseScrollingHorizontallyOn = false {
         willSet {
             objectWillChange.send()
         }
     }
 
-    @AppStorageCompat(wrappedValue: false, "linearScrollingOn") var linearScrollingOn: Bool {
+    @AppStorageCompat("linearScrollingOn") var linearScrollingOn = false {
         willSet {
             objectWillChange.send()
         }
     }
 
-    @AppStorageCompat(wrappedValue: 3, "scrollLines") var scrollLines: Int {
+    @AppStorageCompat("scrollLines") var scrollLines = 3 {
         willSet {
             objectWillChange.send()
         }
     }
 
-    @AppStorageCompat(wrappedValue: true, "universalBackForwardOn") var universalBackForwardOn: Bool {
+    @AppStorageCompat("universalBackForwardOn") var universalBackForwardOn = true {
         willSet {
             objectWillChange.send()
         }
     }
 
-    @AppStorageCompat(wrappedValue: true, "showInMenuBar") var showInMenuBar: Bool {
+    @AppStorageCompat("showInMenuBar") var showInMenuBar = true {
         willSet {
             objectWillChange.send()
         }
     }
 
-    @AppStorageCompat(wrappedValue: false, "betaChannelOn") var betaChannelOn: Bool {
+    @AppStorageCompat("betaChannelOn") var betaChannelOn = false {
         willSet {
             objectWillChange.send()
         }
     }
 
-    @AppStorageCompat(wrappedValue: false, "linearMovementOn") var linearMovementOn: Bool {
+    @AppStorageCompat("linearMovementOn") var linearMovementOn = false {
         willSet {
             objectWillChange.send()
         }
     }
 
-    @AppStorageCompat(wrappedValue: 0.6875, "cursor.acceleration") var cursorAcceleration: Double {
+    @AppStorageCompat("cursor.acceleration") var cursorAcceleration = 0.6875 {
         willSet {
             objectWillChange.send()
         }
     }
 
-    @AppStorageCompat(wrappedValue: 1600, "cursor.sensitivity") var cursorSensitivity: Double {
+    @AppStorageCompat("cursor.sensitivity") var cursorSensitivity = 1600.0 {
         willSet {
             objectWillChange.send()
         }
@@ -92,5 +92,89 @@ class AppDefaults: ObservableObject {
         willSet {
             objectWillChange.send()
         }
+    }
+
+    @AppStorageCompat("hasMigrated") var hasMigrated = false
+
+    // AppDefaults -> Configuration migration.
+    var configuration: Configuration {
+        var scheme = Scheme(
+            if: [
+                .init(device: .init(category: [.mouse]))
+            ],
+
+            scrolling: .init(
+                reverse: .init(
+                    vertical: reverseScrollingVerticallyOn,
+                    horizontal: reverseScrollingHorizontallyOn
+                )
+            ),
+
+            pointer: .init(
+                acceleration: cursorAcceleration == 0.6875 ? nil : Decimal(cursorAcceleration),
+                speed: cursorSensitivity == 1600 ? nil :
+                    Decimal(Device.pointerSpeed(fromPointerResolution: 2000 - cursorSensitivity)),
+                disableAcceleration: linearMovementOn
+            ),
+
+            buttons: .init(
+                universalBackForward: universalBackForwardOn
+            )
+        )
+
+        if linearScrollingOn {
+            Scheme(
+                scrolling: Scheme.Scrolling(
+                    distance: LinesOrPixels(value: scrollLines, unit: .line)
+                )
+            )
+            .merge(into: &scheme)
+        }
+
+        if modifiersCommandAction.type != .noAction {
+            Scheme(
+                scrolling: Scheme.Scrolling(
+                    modifiers: Scheme.Scrolling.Modifiers(
+                        command: modifiersCommandAction.schemeAction
+                    )
+                )
+            )
+            .merge(into: &scheme)
+        }
+
+        if modifiersShiftAction.type != .noAction {
+            Scheme(
+                scrolling: Scheme.Scrolling(
+                    modifiers: Scheme.Scrolling.Modifiers(
+                        command: modifiersShiftAction.schemeAction
+                    )
+                )
+            )
+            .merge(into: &scheme)
+        }
+
+        if modifiersAlternateAction.type != .noAction {
+            Scheme(
+                scrolling: Scheme.Scrolling(
+                    modifiers: Scheme.Scrolling.Modifiers(
+                        command: modifiersAlternateAction.schemeAction
+                    )
+                )
+            )
+            .merge(into: &scheme)
+        }
+
+        if modifiersControlAction.type != .noAction {
+            Scheme(
+                scrolling: Scheme.Scrolling(
+                    modifiers: Scheme.Scrolling.Modifiers(
+                        command: modifiersControlAction.schemeAction
+                    )
+                )
+            )
+            .merge(into: &scheme)
+        }
+
+        return Configuration(schemes: [scheme])
     }
 }

@@ -4,7 +4,7 @@
 import Introspect
 import SwiftUI
 
-struct PreferencesView: View {
+struct Preferences: View {
     @ObservedObject var defaults = AppDefaults.shared
 
     var body: some View {
@@ -16,6 +16,6 @@ struct PreferencesView: View {
 
 struct PreferencesView_Previews: PreviewProvider {
     static var previews: some View {
-        PreferencesView()
+        Preferences()
     }
 }
