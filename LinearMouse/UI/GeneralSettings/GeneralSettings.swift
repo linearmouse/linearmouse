@@ -51,9 +51,6 @@ struct GeneralSettings: View {
                         }
                         HyperLink(URL(string: "https://ko-fi.com/lujjjh")!) {
                             Image("Kofi")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(height: 30)
                         }
                         .padding(.vertical, 5)
                     }

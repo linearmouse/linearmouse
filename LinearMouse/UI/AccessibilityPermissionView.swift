@@ -13,8 +13,6 @@ struct AccessibilityPermissionView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 15) {
                 Image("AccessibilityIcon")
-                    .resizable()
-                    .frame(width: 40, height: 40)
 
                 Text("LinearMouse needs Accessibility permission")
                     .font(.headline)
