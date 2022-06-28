@@ -8,35 +8,41 @@
 "Reset" = "Reset";
 "Cancel" = "Cancel";
 
-"Reverse scrolling:" = "Reverse scrolling:";
-"Linear scrolling:" = "Linear scrolling:";
-"vertically only" = "vertically only";
-"horizontally only" = "horizontally only";
-"Universal back and forward:" = "Universal back and forward:";
-"on" = "on";
-"off" = "off";
-"line" = "line";
-"lines" = "lines";
 "%@ Preferences..." = "%@ Preferences...";
 "Quit %@" = "Quit %@";
 
-"%@ Preferences" = "%@ Preferences";
-
-"General" = "General";
+"Scrolling" = "Scrolling";
+"Pointer" = "Pointer";
+"Buttons" = "Buttons";
 "Modifier Keys" = "Modifier Keys";
+"General" = "General";
 
 "Reverse scrolling" = "Reverse scrolling";
 "(vertically)" = "(vertically)";
-"Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad." = "Reverse the scroll direction for a mouse but won't reverse the scroll direction for a Trackpad.";
 "(horizontally)" = "(horizontally)";
 "Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
 "Enable linear scrolling" = "Enable linear scrolling";
 "Disable mouse scrolling acceleration." = "Disable mouse scrolling acceleration.";
-"Scroll" = "Scroll";
+
+"Acceleration" = "Acceleration";
+"Speed" = "Speed";
+"Revert to system defaults" = "Revert to system defaults";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
+"Disable pointer acceleration" = "Disable pointer acceleration";
+
 "Enable universal back and forward" = "Enable universal back and forward";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
+
+"No action" = "No action";
+"Alter orientation" = "Alter orientation";
+"Change speed" = "Change speed";
+"to" = "to";
+
+"Settings" = "Settings";
 "Show in menu bar" = "Show in menu bar";
 "To show the preferences, launch %@ again." = "To show the preferences, launch %@ again.";
+
+"Update" = "Update";
 "Version: %@" = "Version: %@";
 "Check for Updates..." = "Check for Updates...";
 "Automatically" = "Automatically";
@@ -44,6 +50,8 @@
 "Weekly" = "Weekly";
 "Monthly" = "Monthly";
 "Include beta" = "Include beta";
+
+"Links" = "Links";
 "Homepage" = "Homepage";
 "GitHub" = "GitHub";
 "Feedback" = "Feedback";
@@ -55,8 +63,3 @@
 "Revert to system defaults" = "Revert to system defaults";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
 "Disable cursor acceleration & sensitivity" = "Disable cursor acceleration & sensitivity";
-
-"No action" = "No action";
-"Alter orientation" = "Alter orientation";
-"Change speed" = "Change speed";
-"to" = "to";
