@@ -67,8 +67,6 @@ class ConfigurationState: ObservableObject {
     private var subscriptions = Set<AnyCancellable>()
 
     init() {
-        load()
-
         DeviceManager.shared.$lastActiveDevice.sink { [weak self] _ in
             DispatchQueue.main.async {
                 self?.updateActiveScheme()

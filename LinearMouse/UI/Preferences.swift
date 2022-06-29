@@ -10,6 +10,8 @@ struct Preferences: View {
     var body: some View {
         NavigationView {
             Sidebar()
+
+            ScrollingSettings()
         }
     }
 }
