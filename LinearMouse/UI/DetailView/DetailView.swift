@@ -13,12 +13,22 @@ struct DetailView<T>: View where T: View {
                 Header()
             }
 
-            ScrollView {
-                content()
-                    .padding(.horizontal, 40)
-                    .padding(.vertical, 30)
+            if #available(macOS 11.0, *) {
+                ScrollView {
+                    content()
+                        .padding(.horizontal, 40)
+                        .padding(.vertical, 30)
+                }
+                .frame(minWidth: 500, alignment: .topLeading)
+            } else {
+                // HACK: maxWidth: .inifinity will cause crashes on Catalina?
+                ScrollView {
+                    content()
+                        .padding(.horizontal, 40)
+                        .padding(.vertical, 30)
+                }
+                .frame(minWidth: 500, maxWidth: 10000, alignment: .topLeading)
             }
-            .frame(minWidth: 500, maxWidth: .infinity, alignment: .topLeading)
         }
         .edgesIgnoringSafeArea(.top)
     }

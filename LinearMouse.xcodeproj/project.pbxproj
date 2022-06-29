@@ -31,6 +31,8 @@
 		972DF651285A35B100B83932 /* DeviceIndicatorState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF650285A35B100B83932 /* DeviceIndicatorState.swift */; };
 		972DF654285ADE9600B83932 /* GeneralSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF653285ADE9600B83932 /* GeneralSettings.swift */; };
 		972DF65B285AEABA00B83932 /* ButtonsSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF65A285AEABA00B83932 /* ButtonsSettings.swift */; };
+		977638F6286BE9AB00A698B6 /* StateObjectPolyfill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977638F5286BE9AB00A698B6 /* StateObjectPolyfill.swift */; };
+		977638F9286BE9EE00A698B6 /* PublishedObject in Frameworks */ = {isa = PBXBuildFile; productRef = 977638F8286BE9EE00A698B6 /* PublishedObject */; };
 		97A46B17285444BF00C07C9B /* NSWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A46B16285444BF00C07C9B /* NSWindow.swift */; };
 		97A7A39C28587E8C00EE4833 /* PointerKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97A7A39B28587E8C00EE4833 /* PointerKit */; };
 		97B83CDB28607E2600ECF109 /* ConfigurationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97B83CDA28607E2600ECF109 /* ConfigurationState.swift */; };
@@ -136,6 +138,7 @@
 		972DF650285A35B100B83932 /* DeviceIndicatorState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIndicatorState.swift; sourceTree = "<group>"; };
 		972DF653285ADE9600B83932 /* GeneralSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettings.swift; sourceTree = "<group>"; };
 		972DF65A285AEABA00B83932 /* ButtonsSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonsSettings.swift; sourceTree = "<group>"; };
+		977638F5286BE9AB00A698B6 /* StateObjectPolyfill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateObjectPolyfill.swift; sourceTree = "<group>"; };
 		97A46B16285444BF00C07C9B /* NSWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSWindow.swift; sourceTree = "<group>"; };
 		97A7A3982857266700EE4833 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		97A7A39928572FB600EE4833 /* PointerKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PointerKit; sourceTree = "<group>"; };
@@ -245,6 +248,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				977638F9286BE9EE00A698B6 /* PublishedObject in Frameworks */,
 				B70A58F6284F987900E5C86E /* LaunchAtLogin in Frameworks */,
 				972DF63D28599BA400B83932 /* Introspect in Frameworks */,
 				B784292D278DB06600D207F0 /* Sparkle in Frameworks */,
@@ -545,6 +549,7 @@
 				B7B1D08C26B2FD6C00F48176 /* AppStorage.swift */,
 				B7842924278D985600D207F0 /* AutoUpdateManager.swift */,
 				972A5E33285D8E4800CB6440 /* Defaults+Workaround.swift */,
+				977638F5286BE9AB00A698B6 /* StateObjectPolyfill.swift */,
 			);
 			path = LinearMouse;
 			sourceTree = "<group>";
@@ -669,6 +674,7 @@
 				97A7A39B28587E8C00EE4833 /* PointerKit */,
 				972DF63C28599BA400B83932 /* Introspect */,
 				972A5E2F285D891100CB6440 /* Defaults */,
+				977638F8286BE9EE00A698B6 /* PublishedObject */,
 			);
 			productName = LinearMouse;
 			productReference = B75A06182671E9D800BEAF77 /* LinearMouse.app */;
@@ -757,6 +763,7 @@
 				B70A58F4284F987900E5C86E /* XCRemoteSwiftPackageReference "LaunchAtLogin" */,
 				972DF63B28599BA400B83932 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */,
 				972A5E2E285D891100CB6440 /* XCRemoteSwiftPackageReference "Defaults" */,
+				977638F7286BE9EE00A698B6 /* XCRemoteSwiftPackageReference "PublishedObject" */,
 			);
 			productRefGroup = B75A06192671E9D800BEAF77 /* Products */;
 			projectDirPath = "";
@@ -846,6 +853,7 @@
 				972DF6312859756700B83932 /* ProcessEnvironment.swift in Sources */,
 				97C5DBC028689F7E006FA6B4 /* Buttons.swift in Sources */,
 				97B83CDD2860B3FD00ECF109 /* Scrolling.swift in Sources */,
+				977638F6286BE9AB00A698B6 /* StateObjectPolyfill.swift in Sources */,
 				97B83CDB28607E2600ECF109 /* ConfigurationState.swift in Sources */,
 				97F77FAF285F0A58007C9C2B /* Configuration.swift in Sources */,
 				972A5E22285CA49800CB6440 /* DevicePicker.swift in Sources */,
@@ -1227,6 +1235,14 @@
 				minimumVersion = 0.1.4;
 			};
 		};
+		977638F7286BE9EE00A698B6 /* XCRemoteSwiftPackageReference "PublishedObject" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Amzd/PublishedObject";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.2.0;
+			};
+		};
 		B70A58F4284F987900E5C86E /* XCRemoteSwiftPackageReference "LaunchAtLogin" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/LaunchAtLogin";
@@ -1287,6 +1303,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 972DF63B28599BA400B83932 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */;
 			productName = Introspect;
+		};
+		977638F8286BE9EE00A698B6 /* PublishedObject */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 977638F7286BE9EE00A698B6 /* XCRemoteSwiftPackageReference "PublishedObject" */;
+			productName = PublishedObject;
 		};
 		97A7A39B28587E8C00EE4833 /* PointerKit */ = {
 			isa = XCSwiftPackageProductDependency;

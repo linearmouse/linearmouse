@@ -36,6 +36,15 @@
       }
     },
     {
+      "identity" : "publishedobject",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Amzd/PublishedObject",
+      "state" : {
+        "revision" : "e61bfde22832ba8dfe9f8be2561838a1512e38af",
+        "version" : "0.2.0"
+      }
+    },
+    {
       "identity" : "sparkle",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/lujjjh/Sparkle",
