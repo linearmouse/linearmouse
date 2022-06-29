@@ -17,6 +17,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_: Notification) {
         guard ProcessEnvironment.isRunningApp else { return }
 
+        ConfigurationState.shared.load()
+
         if !AccessibilityPermission.enabled {
             AccessibilityPermissionWindow.shared.bringToFront()
         }

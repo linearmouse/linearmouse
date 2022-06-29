@@ -47,7 +47,6 @@ struct Sidebar: View {
         }
         .padding(.top)
         .listStyle(SidebarListStyle())
-        .buttonStyle(PlainButtonStyle())
         .frame(minWidth: 200, maxWidth: .infinity)
         .preventSidebarCollapse()
     }
