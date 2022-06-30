@@ -4,7 +4,7 @@
 "Open Accessibility" = "打开辅助功能";
 "Reset all permissions..." = "重置所有权限...";
 "Are you sure?" = "你确定吗？";
-"This will reset all granted Accessibility permissions in the system." = "这将重置系统中所有授予的辅助功能权限。";
+"By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them." = "操作后，将完全重置辅助功能权限，所有权限——包括授予其他应用的权限——都将被移除。\n\n只有在权限完全损坏的时候，你才需要重置它们。";
 "Reset" = "重置";
 "Cancel" = "取消";
 

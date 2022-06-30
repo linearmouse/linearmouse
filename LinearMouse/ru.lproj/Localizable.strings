@@ -4,7 +4,7 @@
 "Open Accessibility" = "Открыть Универсальный доступ";
 "Reset all permissions..." = "Сбросить все разрешения...";
 "Are you sure?" = "Вы уверены?";
-"This will reset all granted Accessibility permissions in the system." = "Это приведет к сбросу всех предоставленных разрешений на Универсальный доступ в системе.";
+"By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them." = "By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them.";
 "Reset" = "Сбросить";
 "Cancel" = "Отмена";
 

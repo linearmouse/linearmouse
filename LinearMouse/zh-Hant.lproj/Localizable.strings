@@ -4,7 +4,7 @@
 "Open Accessibility" = "Open Accessibility";
 "Reset all permissions..." = "Reset all permissions...";
 "Are you sure?" = "Are you sure?";
-"This will reset all granted Accessibility permissions in the system." = "This will reset all granted Accessibility permissions in the system.";
+"By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them." = "By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them.";
 "Reset" = "Reset";
 "Cancel" = "Cancel";
 
