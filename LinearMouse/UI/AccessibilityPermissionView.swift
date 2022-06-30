@@ -57,13 +57,16 @@ struct AccessibilityPermissionView: View {
 
         alert.messageText = NSLocalizedString("Are you sure?", comment: "")
         alert.informativeText = NSLocalizedString(
-            "This will reset all granted Accessibility permissions in the system.",
+            "By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them.",
             comment: ""
         )
         alert.alertStyle = .warning
 
         let reset = alert.addButton(withTitle: NSLocalizedString("Reset", comment: ""))
         reset.keyEquivalent = ""
+        if #available(macOS 11.0, *) {
+            reset.hasDestructiveAction = true
+        }
 
         let cancel = alert.addButton(withTitle: NSLocalizedString("Cancel", comment: ""))
         cancel.keyEquivalent = "\r"
