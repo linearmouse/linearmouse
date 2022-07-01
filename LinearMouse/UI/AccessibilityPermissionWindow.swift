@@ -48,6 +48,12 @@ extension AccessibilityPermissionWindow: NSWindowDelegate {
             exit(0)
         }
 
-        PreferencesWindow.shared.bringToFront()
+        let url = URL(fileURLWithPath: Bundle.main.resourcePath!)
+        let path = url.deletingLastPathComponent().deletingLastPathComponent().absoluteString
+        let task = Process()
+        task.launchPath = "/usr/bin/open"
+        task.arguments = [path, "--args", "--show"]
+        task.launch()
+        exit(0)
     }
 }

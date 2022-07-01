@@ -19,18 +19,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         ConfigurationState.shared.load()
 
-        if !AccessibilityPermission.enabled {
+        guard AccessibilityPermission.enabled else {
             AccessibilityPermissionWindow.shared.bringToFront()
+            return
         }
 
-        AccessibilityPermission.pollingUntilEnabled(completion: setup)
+        setup()
+
+        if CommandLine.arguments.contains("--show") {
+            PreferencesWindow.shared.bringToFront()
+        }
     }
 
     func setup() {
-        ConfigurationState.shared.$activeScheme.sink { _ in
-            // TODO: Apply settings
-        }
-        .store(in: &subscriptions)
+        DeviceManager.shared.resume()
 
         // register the start entry if the user grants the permission
         AutoStartManager.enable()

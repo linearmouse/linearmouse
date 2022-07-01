@@ -33,10 +33,6 @@ class DeviceManager: ObservableObject {
                 updatePointerSpeed()
             }.tieToLifetime(of: self)
         }
-
-        DispatchQueue.main.async { [weak self] in
-            self?.resume()
-        }
     }
 
     private var subscriptions = Set<AnyCancellable>()
