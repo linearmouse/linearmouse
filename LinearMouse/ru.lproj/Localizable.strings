@@ -24,8 +24,8 @@
 "Enable linear scrolling" = "Включить линейную прокрутку";
 "Disable scrolling acceleration." = "Disable scrolling acceleration.";
 "Scroll" = "Прокрутка";
-"line" = "строка";
-"lines" = "строки";
+"By lines" = "By lines";
+"By pixels" = "By pixels";
 
 "Acceleration" = "Ускорение";
 "Speed" = "Speed";
