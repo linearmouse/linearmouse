@@ -24,8 +24,8 @@
 "Enable linear scrolling" = "启用线性滚动";
 "Disable scrolling acceleration." = "禁用滚动加速度。";
 "Scroll" = "滚动";
-"line" = "行";
-"lines" = "行";
+"By lines" = "By lines";
+"By pixels" = "By pixels";
 
 "Acceleration" = "加速度";
 "Speed" = "速度";
