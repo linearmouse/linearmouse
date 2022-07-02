@@ -12,7 +12,7 @@ extension Scheme {
 
         var reverse: Reverse?
 
-        var distance: LinesOrPixels?
+        var distance: Distance?
 
         var modifiers: Modifiers?
     }

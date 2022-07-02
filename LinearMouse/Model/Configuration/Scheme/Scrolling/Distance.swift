@@ -3,15 +3,19 @@
 
 import Foundation
 
-/// Accepts lines (e.g. 3) or pixels (e.g. "12px").
-enum LinesOrPixels {
-    case line(Int)
-    case pixel(Decimal)
+extension Scheme.Scrolling {
+    enum Distance {
+        case auto
+        case line(Int)
+        case pixel(Decimal)
+    }
 }
 
-extension LinesOrPixels: CustomStringConvertible {
+extension Scheme.Scrolling.Distance: CustomStringConvertible {
     var description: String {
         switch self {
+        case .auto:
+            return "auto"
         case let .line(value):
             return String(value)
         case let .pixel(value):
@@ -20,7 +24,7 @@ extension LinesOrPixels: CustomStringConvertible {
     }
 }
 
-extension LinesOrPixels: Codable {
+extension Scheme.Scrolling.Distance: Codable {
     enum ValueError: Error {
         case invalidValue
         case unknownUnit
@@ -33,6 +37,12 @@ extension LinesOrPixels: Codable {
             self = .line(value)
         } catch {
             let stringValue = try container.decode(String.self)
+
+            if stringValue == "auto" {
+                self = .auto
+                return
+            }
+
             let regex = try NSRegularExpression(pattern: #"^([\d.]+)(px|)$"#, options: [])
 
             let matches = regex.matches(
@@ -79,6 +89,8 @@ extension LinesOrPixels: Codable {
         var container = encoder.singleValueContainer()
 
         switch self {
+        case .auto:
+            try container.encode("auto")
         case let .line(value):
             try container.encode(value)
         case let .pixel(value):
@@ -87,12 +99,12 @@ extension LinesOrPixels: Codable {
     }
 }
 
-extension LinesOrPixels.ValueError: LocalizedError {
+extension Scheme.Scrolling.Distance.ValueError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidValue:
             return NSLocalizedString(
-                "LinesOrPixels must be a number or a string representing value and unit",
+                "Distance must be \"auto\" or a number or a string representing value and unit",
                 comment: ""
             )
         case .unknownUnit:
