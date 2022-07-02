@@ -146,12 +146,8 @@ extension ConfigurationState {
         }
     }
 
-    func getSchemeIndex(forDevice device: Device?) -> Int? {
-        guard let device = device else {
-            return nil
-        }
-
-        return configuration.schemes.firstIndex {
+    func getSchemeIndex(forDevice device: Device) -> Int? {
+        configuration.schemes.firstIndex {
             guard $0.isDeviceSpecific else { return false }
 
             return $0.if?.contains { $0.isSatisfied(withDevice: device) } == true

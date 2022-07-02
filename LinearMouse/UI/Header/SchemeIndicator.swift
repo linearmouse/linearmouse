@@ -3,7 +3,7 @@
 
 import SwiftUI
 
-struct Header: View {
+struct SchemeIndicator: View {
     var body: some View {
         HStack {
             DeviceIndicator()
@@ -16,6 +16,6 @@ struct Header: View {
 
 struct Header_Previews: PreviewProvider {
     static var previews: some View {
-        Header()
+        SchemeIndicator()
     }
 }

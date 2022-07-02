@@ -4,24 +4,32 @@
 import SwiftUI
 
 struct DetailView<T>: View where T: View {
-    var showHeader = true
+    var schemeSpecific = true
     var content: () -> T
+
+    @StateObject var schemeState = SchemeState()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            if showHeader {
-                Header()
+            if schemeSpecific {
+                SchemeIndicator()
             }
 
-            ScrollView {
-                content()
-                    .padding(.horizontal, 40)
-                    .padding(.vertical, 30)
-                    .frame(
-                        minWidth: 500,
-                        maxWidth: 10000 /* TODO: Replace with .infinity after Catalina is deprecated */,
-                        alignment: .topLeading
-                    )
+            if schemeSpecific, !schemeState.isSchemeValid {
+                Text("No device selected.")
+                    .frame(maxWidth: .infinity,
+                           maxHeight: .infinity)
+            } else {
+                ScrollView {
+                    content()
+                        .padding(.horizontal, 40)
+                        .padding(.vertical, 30)
+                        .frame(
+                            minWidth: 500,
+                            maxWidth: 10000 /* TODO: Replace with .infinity after Catalina is deprecated */,
+                            alignment: .topLeading
+                        )
+                }
             }
         }
         .edgesIgnoringSafeArea(.top)

@@ -27,6 +27,10 @@ class DeviceManager: ObservableObject {
             self?.deviceRemoved($0, $1)
         }).tieToLifetime(of: self)
 
+        manager.observeEventReceived(using: { [weak self] in
+            self?.eventReceived($0, $1, $2)
+        }).tieToLifetime(of: self)
+
         for property in [kIOHIDMouseAccelerationType, kIOHIDTrackpadAccelerationType, kIOHIDPointerResolutionKey] {
             manager.observePropertyChanged(property: property) { [self] _ in
                 os_log("Property %@ changed", log: Self.log, type: .debug, property)
@@ -55,12 +59,7 @@ class DeviceManager: ObservableObject {
     }
 
     private func deviceAdded(_: PointerDeviceManager, _ pointerDevice: PointerDevice) {
-        guard let device = Device(self, pointerDevice) else {
-            os_log("Unsupported device: %{public}@",
-                   log: Self.log, type: .debug,
-                   String(describing: pointerDevice))
-            return
-        }
+        let device = Device(self, pointerDevice)
 
         objectWillChange.send()
 
@@ -89,6 +88,25 @@ class DeviceManager: ObservableObject {
         os_log("Device removed: %{public}@",
                log: Self.log, type: .debug,
                String(describing: device))
+    }
+
+    /// Observes events from `DeviceManager`.
+    ///
+    /// It seems that extenal Trackpads do not trigger to `IOHIDDevice`'s inputValueCallback.
+    /// That's why we need to observe events from `DeviceManager` too.
+    private func eventReceived(_: PointerDeviceManager, _ pointerDevice: PointerDevice, _: IOHIDEvent) {
+        guard let device = pointerDeviceToDevice[pointerDevice] else { return }
+
+        if lastActiveDevice != device {
+            lastActiveDevice = device
+            os_log("""
+                   Last active device changed: %{public}@, category=%{public}@ \
+                   (Reason: Received event from DeviceManager)
+                   """,
+                   log: Self.log, type: .debug,
+                   String(describing: device),
+                   String(describing: device.category))
+        }
     }
 
     func updatePointerSpeed() {

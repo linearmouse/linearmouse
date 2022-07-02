@@ -35,7 +35,7 @@
 
 CF_IMPLICIT_BRIDGING_ENABLED
 
-typedef struct __IOHIDEvent * IOHIDEventRef;
+typedef CFTypeRef IOHIDEventRef;
 typedef struct CF_BRIDGED_TYPE(id) __IOHIDServiceClient * IOHIDServiceClientRef;
 typedef struct CF_BRIDGED_TYPE(id) __IOHIDEventSystemClient * IOHIDEventSystemClientRef;
 typedef void (^IOHIDServiceClientBlock)(void *, void *, IOHIDServiceClientRef);
@@ -106,6 +106,9 @@ uint64_t IOHIDEventGetTimeStamp(IOHIDEventRef);
 IOHIDFloat IOHIDEventGetFloatValue(IOHIDEventRef, IOHIDEventField);
 IOHIDEventSenderID IOHIDEventGetSenderID(IOHIDEventRef);
 IOHIDEventScrollMomentumBits IOHIDEventGetScrollMomentum(IOHIDEventRef);
+
+typedef void (^IOHIDEventSystemClientEventBlock)(void* target, void* refcon, IOHIDServiceClientRef sender, IOHIDEventRef event);
+void IOHIDEventSystemClientRegisterEventBlock(IOHIDEventSystemClientRef client, IOHIDEventSystemClientEventBlock callback, void* target, void* refcon);
 
 CF_IMPLICIT_BRIDGING_DISABLED
 

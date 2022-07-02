@@ -7,7 +7,7 @@ struct GeneralSettings: View {
     @ObservedObject var defaults = AppDefaults.shared
 
     var body: some View {
-        DetailView(showHeader: false) {
+        DetailView(schemeSpecific: false) {
             VStack(alignment: .leading, spacing: 20) {
                 Section(header: Text("Settings").font(.headline)) {
                     Toggle(isOn: $defaults.showInMenuBar) {
