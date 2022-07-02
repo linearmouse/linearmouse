@@ -1,0 +1,10 @@
+{
+  "name": "linearmouse",
+  "private": true,
+  "scripts": {
+    "generate:json-schema": "ts-json-schema-generator --path 'Documentation/Configuration.d.ts' --type Configuration > Documentation/Configuration.json"
+  },
+  "devDependencies": {
+    "ts-json-schema-generator": "^1.0.0"
+  }
+}

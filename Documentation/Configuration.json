@@ -1,0 +1,274 @@
+{
+  "$ref": "#/definitions/Configuration",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Configuration": {
+      "additionalProperties": false,
+      "properties": {
+        "$schema": {
+          "type": "string"
+        },
+        "schemes": {
+          "items": {
+            "$ref": "#/definitions/Scheme"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "HexString": {
+      "pattern": "^0x[0-9a-fA-F]+$",
+      "type": "string"
+    },
+    "Int": {
+      "type": "number"
+    },
+    "IntString": {
+      "pattern": "^\\d+$",
+      "type": "string"
+    },
+    "Scheme": {
+      "additionalProperties": false,
+      "properties": {
+        "buttons": {
+          "$ref": "#/definitions/Scheme.Buttons"
+        },
+        "if": {
+          "$ref": "#/definitions/SingleValueOrArray%3CScheme.If%3E"
+        },
+        "pointer": {
+          "$ref": "#/definitions/Scheme.Pointer"
+        },
+        "scrolling": {
+          "$ref": "#/definitions/Scheme.Scrolling"
+        }
+      },
+      "type": "object"
+    },
+    "Scheme.Buttons": {
+      "additionalProperties": false,
+      "properties": {
+        "universalBackForward": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "Scheme.If": {
+      "additionalProperties": false,
+      "properties": {
+        "device": {
+          "$ref": "#/definitions/Scheme.If.Device"
+        }
+      },
+      "type": "object"
+    },
+    "Scheme.If.Category": {
+      "enum": [
+        "mouse",
+        "trackpad"
+      ],
+      "type": "string"
+    },
+    "Scheme.If.Device": {
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "$ref": "#/definitions/SingleValueOrArray%3CScheme.If.Category%3E"
+        },
+        "productID": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/HexString"
+            },
+            {
+              "$ref": "#/definitions/Int"
+            }
+          ]
+        },
+        "productName": {
+          "type": "string"
+        },
+        "serialNumber": {
+          "type": "string"
+        },
+        "vendorID": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/HexString"
+            },
+            {
+              "$ref": "#/definitions/Int"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "Scheme.Pointer": {
+      "additionalProperties": false,
+      "properties": {
+        "acceleration": {
+          "maximum": 20,
+          "minimum": 0,
+          "type": "number"
+        },
+        "disableAcceleration": {
+          "type": "boolean"
+        },
+        "speed": {
+          "maximum": 1,
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "Scheme.Scrolling": {
+      "additionalProperties": false,
+      "properties": {
+        "distance": {
+          "$ref": "#/definitions/Scheme.Scrolling.Distance"
+        },
+        "modifiers": {
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers"
+        },
+        "reverse": {
+          "$ref": "#/definitions/Scheme.Scrolling.Reverse"
+        }
+      },
+      "type": "object"
+    },
+    "Scheme.Scrolling.Distance": {
+      "anyOf": [
+        {
+          "const": "auto",
+          "type": "string"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Scrolling.Distance.Line"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Scrolling.Distance.Pixel"
+        }
+      ]
+    },
+    "Scheme.Scrolling.Distance.Line": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Int"
+        },
+        {
+          "$ref": "#/definitions/IntString"
+        }
+      ]
+    },
+    "Scheme.Scrolling.Distance.Pixel": {
+      "pattern": "^\\d[1-9]*(\\.\\d+)?px",
+      "type": "string"
+    },
+    "Scheme.Scrolling.Modifiers": {
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.Action"
+        },
+        "control": {
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.Action"
+        },
+        "option": {
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.Action"
+        },
+        "shift": {
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.Action"
+        }
+      },
+      "type": "object"
+    },
+    "Scheme.Scrolling.Modifiers.Action": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "none",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "alterOrientation",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "scale": {
+              "type": "number"
+            },
+            "type": {
+              "const": "changeSpeed",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "scale"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Scheme.Scrolling.Reverse": {
+      "additionalProperties": false,
+      "properties": {
+        "horizontal": {
+          "type": "boolean"
+        },
+        "vertical": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "SingleValueOrArray<Scheme.If.Category>": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Scheme.If.Category"
+        },
+        {
+          "items": {
+            "$ref": "#/definitions/Scheme.If.Category"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    "SingleValueOrArray<Scheme.If>": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Scheme.If"
+        },
+        {
+          "items": {
+            "$ref": "#/definitions/Scheme.If"
+          },
+          "type": "array"
+        }
+      ]
+    }
+  }
+}
