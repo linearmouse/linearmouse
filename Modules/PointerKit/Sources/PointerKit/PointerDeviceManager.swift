@@ -10,11 +10,13 @@ public final class PointerDeviceManager {
     public typealias DeviceAddedClosure = (PointerDeviceManager, PointerDevice) -> Void
     public typealias DeviceRemovedClosure = (PointerDeviceManager, PointerDevice) -> Void
     public typealias PropertyChangedClosure = (PointerDeviceManager) -> Void
+    public typealias EventReceivedClosure = (PointerDeviceManager, PointerDevice, IOHIDEvent) -> Void
 
     private var observations = (
         deviceAdded: [UUID: DeviceAddedClosure](),
         deviceRemoved: [UUID: DeviceRemovedClosure](),
-        propertyChanged: [UUID: (property: String, closure: PropertyChangedClosure)]()
+        propertyChanged: [UUID: (property: String, closure: PropertyChangedClosure)](),
+        eventReceived: [UUID: EventReceivedClosure]()
     )
 
     private var serviceClientToPointerDevice = [IOHIDServiceClient: PointerDevice]()
@@ -51,6 +53,14 @@ public extension PointerDeviceManager {
 
         return ObservationToken { [weak self] in
             self?.observations.propertyChanged.removeValue(forKey: id)
+        }
+    }
+
+    func observeEventReceived(using closure: @escaping EventReceivedClosure) -> ObservationToken {
+        let id = observations.eventReceived.insert(closure)
+
+        return ObservationToken { [weak self] in
+            self?.observations.eventReceived.removeValue(forKey: id)
         }
     }
 }
@@ -103,6 +113,10 @@ extension PointerDeviceManager {
                                                           serviceMatchingCallback,
                                                           nil,
                                                           nil)
+        IOHIDEventSystemClientRegisterEventBlock(eventSystemClient,
+                                                 eventReceivedCallback,
+                                                 nil,
+                                                 nil)
         IOHIDEventSystemClientScheduleWithDispatchQueue(eventSystemClient, DispatchQueue.main)
 
         if let clients = IOHIDEventSystemClientCopyServices(eventSystemClient) as? [IOHIDServiceClient] {
@@ -154,6 +168,20 @@ extension PointerDeviceManager {
         guard let client = client else { return }
 
         removeDevice(forClient: client)
+    }
+
+    private func eventReceivedCallback(_: UnsafeMutableRawPointer?,
+                                       _: UnsafeMutableRawPointer?,
+                                       _ client: IOHIDServiceClient?,
+                                       event: IOHIDEvent?) {
+        guard let client = client else { return }
+        guard let event = event else { return }
+
+        guard let device = serviceClientToPointerDevice[client] else { return }
+
+        for (_, callback) in observations.eventReceived {
+            callback(self, device, event)
+        }
     }
 
     private func propertyChangedCallback(_ property: String, _: AnyObject?) {

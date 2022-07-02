@@ -27,14 +27,28 @@ extension SchemeState {
         DeviceState.shared.currentDevice
     }
 
+    var isSchemeValid: Bool {
+        guard device != nil else {
+            return false
+        }
+
+        return true
+    }
+
     var scheme: Scheme {
         get {
-            configurationState.getSchemeIndex(forDevice: device)
+            guard let device = device else {
+                return Scheme()
+            }
+
+            return configurationState.getSchemeIndex(forDevice: device)
                 .map { configurationState.configuration.schemes[$0] }
                 ?? configurationState.configuration.matchedScheme(withDevice: device)
         }
 
         set {
+            guard let device = device else { return }
+
             guard let index = configurationState.getSchemeIndex(forDevice: device) else {
                 configurationState.configuration.schemes.append(newValue)
                 return

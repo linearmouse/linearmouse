@@ -9,24 +9,19 @@ class Device {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Device")
 
     static let fallbackPointerAcceleration = 0.6875
-    static let fallbackPointerSpeed = pointerSpeed(fromPointerResolution: 400)
+    static let fallbackPointerResolution = 400.0
+    static let fallbackPointerSpeed = pointerSpeed(fromPointerResolution: fallbackPointerResolution)
 
     private weak var manager: DeviceManager?
     let device: PointerDevice
 
     private let initialPointerResolution: Double
 
-    init?(_ manager: DeviceManager, _ device: PointerDevice) {
+    init(_ manager: DeviceManager, _ device: PointerDevice) {
         self.manager = manager
         self.device = device
 
-        guard let pointerResolution = device.pointerResolution else {
-            os_log("HIDPointerResolution not found: %{public}@",
-                   log: Self.log, type: .debug,
-                   String(describing: device))
-            return nil
-        }
-        initialPointerResolution = pointerResolution
+        initialPointerResolution = device.pointerResolution ?? Self.fallbackPointerResolution
 
         // TODO: More elegant way?
         device.observeInput(using: { [weak self] in
@@ -36,7 +31,7 @@ class Device {
         os_log("Device initialized: %{public}@: HIDPointerResolution=%{public}f, HIDPointerAccelerationType=%{public}@",
                log: Self.log, type: .debug,
                String(describing: device),
-               pointerResolution,
+               initialPointerResolution,
                device.pointerAccelerationType ?? "(unknown)")
     }
 }
