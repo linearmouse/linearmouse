@@ -35,6 +35,8 @@ class LinearScrolling: EventTransformer {
             view.continuous = true
             view.deltaXPt = Double(deltaXSignum) * value.asTruncatedDouble
             view.deltaYPt = Double(deltaYSignum) * value.asTruncatedDouble
+            view.deltaXFixedPt = Double(deltaXSignum) * value.asTruncatedDouble
+            view.deltaYFixedPt = Double(deltaYSignum) * value.asTruncatedDouble
         }
 
         os_log("continuous=%{public}@, oldValue=%{public}@, newValue=%{public}@", log: Self.log, type: .debug,
