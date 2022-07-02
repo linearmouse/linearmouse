@@ -11,31 +11,14 @@ extension CGMouseButton {
 }
 
 class UniversalBackForward: EventTransformer {
-    /**
-     Applications whose `CFBundleIdentifier` are contained in the set
-     will be ignored by `UniversalBackForward` transformer.
-
-     Keep it in alphabetical order if you want to change it.
-
-     See: <https://github.com/linearmouse/linearmouse/issues/57>
-     */
-    private static let ignoreSet: Set = [
-        "com.microsoft.VSCode",
-        "com.microsoft.rdc.macos",
-        "com.parallels.desktop.console",
-        "com.valvesoftware.dota2",
-        "com.vmware.fusion",
-        "org.virtualbox.app.VirtualBox",
-        "tv.parsec.www"
-    ]
-
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "UniversalBackForward")
 
-    private func targetInIgnoreSet(_ view: MouseEventView) -> Bool {
+    private func shouldHandleEvent(_ view: MouseEventView) -> Bool {
         guard let bundleIdentifier = view.targetBundleIdentifier else {
             return false
         }
-        return Self.ignoreSet.contains(bundleIdentifier)
+
+        return bundleIdentifier.hasPrefix("com.apple.")
     }
 
     // swiftlint:disable cyclomatic_complexity
@@ -50,9 +33,9 @@ class UniversalBackForward: EventTransformer {
 
         // Skip applications in ignore set.
         let targetBundleIdentifierString = view.targetBundleIdentifier ?? "(nil)"
-        guard !targetInIgnoreSet(view) else {
+        guard shouldHandleEvent(view) else {
             if event.type == .otherMouseDown {
-                os_log("Hit ignore set: %{public}@", log: Self.log, type: .debug, targetBundleIdentifierString)
+                os_log("Ignore: %{public}@", log: Self.log, type: .debug, targetBundleIdentifierString)
             }
             return event
         }
