@@ -125,7 +125,7 @@ class AppDefaults: ObservableObject {
         if linearScrollingOn {
             Scheme(
                 scrolling: Scheme.Scrolling(
-                    distance: LinesOrPixels(value: scrollLines, unit: .line)
+                    distance: .line(scrollLines)
                 )
             )
             .merge(into: &scheme)

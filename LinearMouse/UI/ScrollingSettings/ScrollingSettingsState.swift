@@ -2,8 +2,9 @@
 // Copyright (c) 2021-2022 Jiahao Lu
 
 import Combine
+import Foundation
 
-class ScrollingSettingsState: CurrentConfigurationState {}
+class ScrollingSettingsState: SchemeState {}
 
 extension ScrollingSettingsState {
     var reverseScrollingVertical: Bool {
@@ -50,24 +51,77 @@ extension ScrollingSettingsState {
 
             Scheme(
                 scrolling: Scheme.Scrolling(
-                    distance: LinesOrPixels(value: 3)
+                    distance: .line(3)
                 )
             )
             .merge(into: &scheme)
         }
     }
 
-    var linearScrollingLines: Int {
+    var linearScrollingDistance: LinesOrPixels {
         get {
-            scheme.scrolling?.distance?.value ?? 3
+            scheme.scrolling?.distance ?? .line(3)
         }
         set {
             Scheme(
                 scrolling: Scheme.Scrolling(
-                    distance: LinesOrPixels(value: newValue)
+                    distance: newValue
                 )
             )
             .merge(into: &scheme)
+        }
+    }
+
+    enum LinearScrollingUnit: String, CaseIterable, Identifiable {
+        var id: Self { self }
+
+        case line = "By lines"
+        case pixel = "By pixels"
+    }
+
+    var linearScrollingUnit: LinearScrollingUnit {
+        get {
+            switch linearScrollingDistance {
+            case .line: return .line
+            case .pixel: return .pixel
+            }
+        }
+
+        set {
+            switch newValue {
+            case .line:
+                linearScrollingDistance = .line(3)
+            case .pixel:
+                linearScrollingDistance = .pixel(36)
+            }
+        }
+    }
+
+    var linearScrollingLines: Int {
+        get {
+            guard case let .line(value) = linearScrollingDistance else {
+                return 3
+            }
+
+            return value
+        }
+
+        set {
+            linearScrollingDistance = .line(newValue)
+        }
+    }
+
+    var linearScrollingPixels: Double {
+        get {
+            guard case let .pixel(value) = linearScrollingDistance else {
+                return 36
+            }
+
+            return value.asTruncatedDouble
+        }
+
+        set {
+            linearScrollingDistance = .pixel(Decimal(newValue).rounded(1))
         }
     }
 }

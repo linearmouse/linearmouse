@@ -175,9 +175,7 @@ extension ConfigurationState {
         }
 
         if let distance = scheme.scrolling?.distance {
-            if distance.unit == .line {
-                transformers.append(LinearScrolling(scrollLines: distance.value))
-            }
+            transformers.append(LinearScrolling(distance: distance))
         }
 
         if let modifiers = scheme.scrolling?.modifiers {

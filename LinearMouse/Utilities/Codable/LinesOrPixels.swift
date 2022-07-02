@@ -4,22 +4,17 @@
 import Foundation
 
 /// Accepts lines (e.g. 3) or pixels (e.g. "12px").
-struct LinesOrPixels {
-    var value: Int
-
-    enum Unit {
-        case line, pixel
-    }
-
-    var unit: Unit = .line
+enum LinesOrPixels {
+    case line(Int)
+    case pixel(Decimal)
 }
 
 extension LinesOrPixels: CustomStringConvertible {
     var description: String {
-        switch unit {
-        case .line:
+        switch self {
+        case let .line(value):
             return String(value)
-        case .pixel:
+        case let .pixel(value):
             return "\(value)px"
         }
     }
@@ -34,10 +29,11 @@ extension LinesOrPixels: Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         do {
-            value = try container.decode(Int.self)
+            let value = try container.decode(Int.self)
+            self = .line(value)
         } catch {
             let stringValue = try container.decode(String.self)
-            let regex = try NSRegularExpression(pattern: #"^(\d+)(px|)$"#, options: [])
+            let regex = try NSRegularExpression(pattern: #"^([\d.]+)(px|)$"#, options: [])
 
             let matches = regex.matches(
                 in: stringValue,
@@ -58,16 +54,21 @@ extension LinesOrPixels: Codable {
             let valueString = String(stringValue[valueRange])
             let unitString = String(stringValue[unitRange])
 
-            guard let value = Int(valueString, radix: 10) else {
-                throw ValueError.invalidValue
-            }
-            self.value = value
-
             switch unitString {
             case "":
-                unit = .line
+                guard let value = Int(valueString, radix: 10) else {
+                    throw ValueError.invalidValue
+                }
+
+                self = .line(value)
+
             case "px":
-                unit = .pixel
+                guard let value = Decimal(string: valueString) else {
+                    throw ValueError.invalidValue
+                }
+
+                self = .pixel(value)
+
             default:
                 throw ValueError.unknownUnit
             }
@@ -77,10 +78,10 @@ extension LinesOrPixels: Codable {
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
 
-        switch unit {
-        case .line:
+        switch self {
+        case let .line(value):
             try container.encode(value)
-        case .pixel:
+        case let .pixel(value):
             try container.encode("\(value)px")
         }
     }

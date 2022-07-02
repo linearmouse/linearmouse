@@ -42,7 +42,7 @@
 		97B83CE52860DA9800ECF109 /* CustomDecodingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97B83CE42860DA9800ECF109 /* CustomDecodingError.swift */; };
 		97B9D4992865EC0900137E60 /* If.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97B9D4982865EC0900137E60 /* If.swift */; };
 		97C5D8FF2856E3CB00CBED2D /* GestureKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C5D8FE2856E3CB00CBED2D /* GestureKit */; };
-		97C5DBB42867EA48006FA6B4 /* CurrentConfigurationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBB32867EA48006FA6B4 /* CurrentConfigurationState.swift */; };
+		97C5DBB42867EA48006FA6B4 /* SchemeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBB32867EA48006FA6B4 /* SchemeState.swift */; };
 		97C5DBB62867ECD6006FA6B4 /* DeviceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBB52867ECD6006FA6B4 /* DeviceModel.swift */; };
 		97C5DBB82868158C006FA6B4 /* PointerSettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBB72868158C006FA6B4 /* PointerSettingsState.swift */; };
 		97C5DBBA28682809006FA6B4 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBB928682809006FA6B4 /* Extensions.swift */; };
@@ -149,7 +149,7 @@
 		97B83CE42860DA9800ECF109 /* CustomDecodingError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomDecodingError.swift; sourceTree = "<group>"; };
 		97B9D4982865EC0900137E60 /* If.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = If.swift; sourceTree = "<group>"; };
 		97C5D8FD2856E3BE00CBED2D /* GestureKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = GestureKit; sourceTree = "<group>"; };
-		97C5DBB32867EA48006FA6B4 /* CurrentConfigurationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentConfigurationState.swift; sourceTree = "<group>"; };
+		97C5DBB32867EA48006FA6B4 /* SchemeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemeState.swift; sourceTree = "<group>"; };
 		97C5DBB52867ECD6006FA6B4 /* DeviceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceModel.swift; sourceTree = "<group>"; };
 		97C5DBB72868158C006FA6B4 /* PointerSettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointerSettingsState.swift; sourceTree = "<group>"; };
 		97C5DBB928682809006FA6B4 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
@@ -290,7 +290,7 @@
 			isa = PBXGroup;
 			children = (
 				97B83CDA28607E2600ECF109 /* ConfigurationState.swift */,
-				97C5DBB32867EA48006FA6B4 /* CurrentConfigurationState.swift */,
+				97C5DBB32867EA48006FA6B4 /* SchemeState.swift */,
 				972A5E2C285D882500CB6440 /* DeviceState.swift */,
 			);
 			path = State;
@@ -868,7 +868,7 @@
 				97F77FB7285F53A5007C9C2B /* SingleValueOrArray.swift in Sources */,
 				972A5E28285D4EB500CB6440 /* DevicePickerSection.swift in Sources */,
 				972A5E1F285CA43D00CB6440 /* DevicePickerSheet.swift in Sources */,
-				97C5DBB42867EA48006FA6B4 /* CurrentConfigurationState.swift in Sources */,
+				97C5DBB42867EA48006FA6B4 /* SchemeState.swift in Sources */,
 				97C5DBB62867ECD6006FA6B4 /* DeviceModel.swift in Sources */,
 				B716F16026BC10B80052F551 /* UniversalBackForward.swift in Sources */,
 				B77A16172674D88E00E99A5D /* PreferencesWindow.swift in Sources */,

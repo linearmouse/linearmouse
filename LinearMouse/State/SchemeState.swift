@@ -4,7 +4,7 @@
 import Combine
 import Foundation
 
-class CurrentConfigurationState: ObservableObject {
+class SchemeState: ObservableObject {
     private let configurationState = ConfigurationState.shared
 
     private var subscriptions = Set<AnyCancellable>()
@@ -22,7 +22,7 @@ class CurrentConfigurationState: ObservableObject {
     }
 }
 
-extension CurrentConfigurationState {
+extension SchemeState {
     private var device: Device? {
         DeviceState.shared.currentDevice
     }
@@ -33,6 +33,7 @@ extension CurrentConfigurationState {
                 .map { configurationState.configuration.schemes[$0] }
                 ?? configurationState.configuration.matchedScheme(withDevice: device)
         }
+
         set {
             guard let index = configurationState.getSchemeIndex(forDevice: device) else {
                 configurationState.configuration.schemes.append(newValue)

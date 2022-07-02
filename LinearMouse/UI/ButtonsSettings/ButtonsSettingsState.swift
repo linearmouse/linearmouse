@@ -3,7 +3,7 @@
 
 import Foundation
 
-class ButtonsSettingsState: CurrentConfigurationState {}
+class ButtonsSettingsState: SchemeState {}
 
 extension ButtonsSettingsState {
     var universalBackForward: Bool {
