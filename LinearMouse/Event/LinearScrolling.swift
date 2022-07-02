@@ -7,9 +7,9 @@ import os.log
 class LinearScrolling: EventTransformer {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "LinearScrolling")
 
-    private let distance: LinesOrPixels
+    private let distance: Scheme.Scrolling.Distance
 
-    init(distance: LinesOrPixels) {
+    init(distance: Scheme.Scrolling.Distance) {
         self.distance = distance
     }
 
@@ -26,6 +26,9 @@ class LinearScrolling: EventTransformer {
         let (deltaXSignum, deltaYSignum) = (view.deltaXSignum, view.deltaYSignum)
 
         switch distance {
+        case .auto:
+            return event
+
         case let .line(value):
             view.continuous = false
             view.deltaX = deltaXSignum * Int64(value)
@@ -43,6 +46,7 @@ class LinearScrolling: EventTransformer {
                String(describing: continuous),
                String(describing: oldValue),
                String(describing: view.matrixValue))
+
         return event
     }
 }

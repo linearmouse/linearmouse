@@ -41,11 +41,15 @@ extension ScrollingSettingsState {
 
     var linearScrollingEnabled: Bool {
         get {
-            scheme.scrolling?.distance != nil
+            if case .auto = scheme.scrolling?.distance ?? .auto {
+                return false
+            }
+
+            return true
         }
         set {
             guard newValue else {
-                scheme.scrolling?.distance = nil
+                scheme.scrolling?.distance = .auto
                 return
             }
 
@@ -58,7 +62,7 @@ extension ScrollingSettingsState {
         }
     }
 
-    var linearScrollingDistance: LinesOrPixels {
+    var linearScrollingDistance: Scheme.Scrolling.Distance {
         get {
             scheme.scrolling?.distance ?? .line(3)
         }
@@ -82,7 +86,7 @@ extension ScrollingSettingsState {
     var linearScrollingUnit: LinearScrollingUnit {
         get {
             switch linearScrollingDistance {
-            case .line: return .line
+            case .auto, .line: return .line
             case .pixel: return .pixel
             }
         }
