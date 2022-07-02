@@ -3,7 +3,7 @@
 
 import Foundation
 
-class PointerSettingsState: CurrentConfigurationState {}
+class PointerSettingsState: SchemeState {}
 
 extension PointerSettingsState {
     var pointerAcceleration: Double {

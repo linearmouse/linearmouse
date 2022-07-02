@@ -7,10 +7,10 @@ import os.log
 class LinearScrolling: EventTransformer {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "LinearScrolling")
 
-    private let scrollLines: Int
+    private let distance: LinesOrPixels
 
-    init(scrollLines: Int) {
-        self.scrollLines = scrollLines
+    init(distance: LinesOrPixels) {
+        self.distance = distance
     }
 
     func transform(_ event: CGEvent) -> CGEvent? {
@@ -24,9 +24,19 @@ class LinearScrolling: EventTransformer {
         }
         let (continuous, oldValue) = (view.continuous, view.matrixValue)
         let (deltaXSignum, deltaYSignum) = (view.deltaXSignum, view.deltaYSignum)
-        view.continuous = false
-        view.deltaX = deltaXSignum * Int64(scrollLines)
-        view.deltaY = deltaYSignum * Int64(scrollLines)
+
+        switch distance {
+        case let .line(value):
+            view.continuous = false
+            view.deltaX = deltaXSignum * Int64(value)
+            view.deltaY = deltaYSignum * Int64(value)
+
+        case let .pixel(value):
+            view.continuous = true
+            view.deltaXPt = Double(deltaXSignum) * value.asTruncatedDouble
+            view.deltaYPt = Double(deltaYSignum) * value.asTruncatedDouble
+        }
+
         os_log("continuous=%{public}@, oldValue=%{public}@, newValue=%{public}@", log: Self.log, type: .debug,
                String(describing: continuous),
                String(describing: oldValue),
