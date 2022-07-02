@@ -24,8 +24,8 @@
 "Enable linear scrolling" = "리니어 스크롤 사용";
 "Disable scrolling acceleration." = "Disable scrolling acceleration.";
 "Scroll" = "스크롤";
-"line" = "줄";
-"lines" = "줄";
+"By lines" = "By lines";
+"By pixels" = "By pixels";
 
 "Acceleration" = "가속도";
 "Speed" = "Speed";
