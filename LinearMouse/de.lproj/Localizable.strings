@@ -24,8 +24,8 @@
 "Enable linear scrolling" = "Lineares Scrollen aktivieren";
 "Disable scrolling acceleration." = "Disable scrolling acceleration.";
 "Scroll" = "Scrolle";
-"line" = "Zeile";
-"lines" = "Zeilen";
+"By lines" = "By lines";
+"By pixels" = "By pixels";
 
 "Acceleration" = "Beschleunigung";
 "Speed" = "Speed";
