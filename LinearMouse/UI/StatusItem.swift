@@ -14,7 +14,7 @@ class StatusItem {
 
         let openPreferenceItem = NSMenuItem(
             title: String(format: NSLocalizedString("%@ Preferences...", comment: ""), LinearMouse.appName),
-            action: #selector(openPreferencesAction),
+            action: #selector(openPreferences),
             keyEquivalent: ","
         )
 
@@ -25,18 +25,14 @@ class StatusItem {
         configurationItem.submenu = configurationMenu
 
         let quitItem = NSMenuItem(title: String(format: NSLocalizedString("Quit %@", comment: ""), LinearMouse.appName),
-                                  action: #selector(quitAction),
+                                  action: #selector(quit),
                                   keyEquivalent: "q")
 
         menu.items = [
             openPreferenceItem,
-
-            NSMenuItem.separator(),
-
+            .separator(),
             configurationItem,
-
-            NSMenuItem.separator(),
-
+            .separator(),
             quitItem
         ]
 
@@ -48,12 +44,17 @@ class StatusItem {
     private lazy var configurationMenu: NSMenu = {
         let configurationMenu = NSMenu()
 
+        let reloadItem = NSMenuItem(title: NSLocalizedString("Reload", comment: ""),
+                                    action: #selector(reloadConfiguration), keyEquivalent: "r")
+
         let revealInFinderItem = NSMenuItem(title: NSLocalizedString("Reveal in Finder", comment: ""),
                                             action: #selector(revealConfigurationInFinder),
                                             keyEquivalent: "r")
         revealInFinderItem.keyEquivalentModifierMask = [.option, .command]
 
         configurationMenu.items = [
+            reloadItem,
+            .separator(),
             revealInFinderItem
         ]
 
@@ -97,16 +98,19 @@ class StatusItem {
         AccessibilityPermissionWindow.shared.bringToFront()
     }
 
-    @objc private func openPreferencesAction() {
+    @objc private func openPreferences() {
         PreferencesWindow.shared.bringToFront()
     }
 
+    @objc private func reloadConfiguration() {
+        ConfigurationState.shared.load()
+    }
+
     @objc private func revealConfigurationInFinder() {
-        print(ConfigurationState.shared.configurationPath)
         NSWorkspace.shared.activateFileViewerSelecting([ConfigurationState.shared.configurationPath.absoluteURL])
     }
 
-    @objc func quitAction() {
+    @objc func quit() {
         // remove the start entry if the user quits LinearMouse manually
         AutoStartManager.disable()
 
