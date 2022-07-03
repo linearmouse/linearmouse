@@ -9,6 +9,8 @@
 "Cancel" = "Cancel";
 
 "%@ Preferences..." = "%@ Preferences...";
+"Config" = "Config";
+"Reveal in Finder" = "Reveal in Finder";
 "Quit %@" = "Quit %@";
 
 "Scrolling" = "Scrolling";
