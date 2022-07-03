@@ -10,6 +10,7 @@
 
 "%@ Preferences..." = "%@ 偏好设置...";
 "Config" = "配置";
+"Reload" = "重新加载";
 "Reveal in Finder" = "在 Finder 中显示";
 "Quit %@" = "退出 %@";
 
