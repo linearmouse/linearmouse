@@ -9,6 +9,8 @@
 "Cancel" = "Отмена";
 
 "%@ Preferences..." = "Настройки %@...";
+"Config" = "Конфигурация";
+"Reload" = "Обновить";
 "Reveal in Finder" = "Показать в Finder";
 "Quit %@" = "Завершить %@";
 
@@ -25,6 +27,8 @@
 "Enable linear scrolling" = "Включить линейную прокрутку";
 "Disable scrolling acceleration." = "Отключает ускорение прокрутки.";
 "Scroll" = "Прокрутка";
+"By lines" = "По строкам";
+"By pixels" = "По пикселям";
 
 "Acceleration" = "Ускорение";
 "Speed" = "Скорость";
