@@ -235,6 +235,11 @@ declare namespace Scheme {
   };
 
   type Buttons = {
+    /**
+     * @title Universal back and forward
+     * @description If the value is true, the back and forward side buttons will be enabled in Safari and some other apps that do not handle these side buttons correctly.
+     * @default false
+     */
     universalBackForward?: boolean;
   };
 }

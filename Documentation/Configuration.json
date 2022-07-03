@@ -72,6 +72,8 @@
       "additionalProperties": false,
       "properties": {
         "universalBackForward": {
+          "description": "If the value is true, the back and forward side buttons will be enabled in Safari and some other apps that do not handle these side buttons correctly.",
+          "title": "Universal back and forward",
           "type": "boolean"
         }
       },
@@ -116,6 +118,9 @@
             }
           ],
           "description": "The product ID of the devices.",
+          "examples": [
+            "0xA123"
+          ],
           "title": "Product ID"
         },
         "productName": {
@@ -138,6 +143,9 @@
             }
           ],
           "description": "The vendor ID of the devices.",
+          "examples": [
+            "0xA123"
+          ],
           "title": "Vendor ID"
         }
       },
