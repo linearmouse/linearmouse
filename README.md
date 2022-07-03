@@ -40,7 +40,7 @@ improve the experience and functionality of third-party mice.
 
 ### Installation
 
-#### Homebrew
+#### via Homebrew
 
 ```sh
 $ brew install --cask linearmouse
@@ -48,9 +48,7 @@ $ brew install --cask linearmouse
 
 #### Manually
 
-1. Download [LinearMouse](https://github.com/linearmouse/linearmouse/releases/latest/download/LinearMouse.dmg).
-2. Open LinearMouse.dmg, drag & drop LinearMouse to Applications.
-3. Open Applications. **Right click** LinearMouse and choose Open (to make [Gatekeeper](https://support.apple.com/en-us/HT202491) happy).
+[Download](https://github.com/linearmouse/linearmouse/releases/latest/download/LinearMouse.dmg)
 
 ### Accessibility permission
 
