@@ -8,7 +8,14 @@
 "Cancel" = "취소";
 
 "%@ Preferences..." = "환경 설정";
+"Config" = "설정";
+"Reload" = "새로고침";
+"Reveal in Finder" = "Finder에서 보기";
 "Quit %@" = "%@ 종료";
+
+"Scrolling" = "스크롤";
+"Pointer" = "포인터";
+"Buttons" = "버튼";
 "Modifier Keys" = "보조 키";
 "General" = "일반";
 
@@ -32,6 +39,8 @@
 "to" = "으로";
 "Show in menu bar" = "메뉴 막대에 표시";
 "To show the preferences, launch %@ again." = "설정을 적용하려면 %@을(를) 재시작하십시오.";
+
+"Update" = "업데이트";
 "Version: %@" = "버전: %@";
 "Check for Updates..." = "업데이트 확인...";
 "Automatically" = "자동으로";
@@ -39,7 +48,12 @@
 "Weekly" = "매주";
 "Monthly" = "매월";
 "Include beta" = "베타 포함";
+
+"Links" = "링크";
 "Homepage" = "홈페이지";
 "GitHub" = "GitHub";
 "Feedback" = "의견";
 "Contact" = "문의";
+
+"Mouse" = "마우스";
+"Trackpad" = "트랙패드";
