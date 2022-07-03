@@ -9,9 +9,23 @@
           "type": "string"
         },
         "schemes": {
+          "description": "A scheme is a collection of settings that are activated in specified circumstances.",
+          "examples": [
+            {
+              "if": {
+                "device": {
+                  "category": "mouse"
+                }
+              },
+              "scrolling": {
+                "reverse": "vertical"
+              }
+            }
+          ],
           "items": {
             "$ref": "#/definitions/Scheme"
           },
+          "title": "Schemes",
           "type": "array"
         }
       },
@@ -32,16 +46,24 @@
       "additionalProperties": false,
       "properties": {
         "buttons": {
-          "$ref": "#/definitions/Scheme.Buttons"
+          "$ref": "#/definitions/Scheme.Buttons",
+          "description": "Customize the buttons behavior.",
+          "title": "Buttons settings"
         },
         "if": {
-          "$ref": "#/definitions/SingleValueOrArray%3CScheme.If%3E"
+          "$ref": "#/definitions/SingleValueOrArray%3CScheme.If%3E",
+          "description": "This value can be a single condition or an array. A scheme is activated if at least one of the conditions is met.",
+          "title": "Scheme activation conditions"
         },
         "pointer": {
-          "$ref": "#/definitions/Scheme.Pointer"
+          "$ref": "#/definitions/Scheme.Pointer",
+          "description": "Customize the pointer acceleration and speed.",
+          "title": "Pointer settings"
         },
         "scrolling": {
-          "$ref": "#/definitions/Scheme.Scrolling"
+          "$ref": "#/definitions/Scheme.Scrolling",
+          "description": "Customize the scrolling behavior.",
+          "title": "Scrolling settings"
         }
       },
       "type": "object"
@@ -59,23 +81,30 @@
       "additionalProperties": false,
       "properties": {
         "device": {
-          "$ref": "#/definitions/Scheme.If.Device"
+          "$ref": "#/definitions/Scheme.If.Device",
+          "description": "Match one or more devices.",
+          "title": "Device"
         }
       },
       "type": "object"
     },
     "Scheme.If.Category": {
-      "enum": [
-        "mouse",
-        "trackpad"
-      ],
-      "type": "string"
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Scheme.If.Mouse"
+        },
+        {
+          "$ref": "#/definitions/Scheme.If.Trackpad"
+        }
+      ]
     },
     "Scheme.If.Device": {
       "additionalProperties": false,
       "properties": {
         "category": {
-          "$ref": "#/definitions/SingleValueOrArray%3CScheme.If.Category%3E"
+          "$ref": "#/definitions/SingleValueOrArray%3CScheme.If.Category%3E",
+          "description": "The category of the devices.",
+          "title": "Category"
         },
         "productID": {
           "anyOf": [
@@ -85,12 +114,18 @@
             {
               "$ref": "#/definitions/Int"
             }
-          ]
+          ],
+          "description": "The product ID of the devices.",
+          "title": "Product ID"
         },
         "productName": {
+          "description": "The product name of the devices.",
+          "title": "Product name",
           "type": "string"
         },
         "serialNumber": {
+          "description": "The serial number of the devices.",
+          "title": "Serial number",
           "type": "string"
         },
         "vendorID": {
@@ -101,24 +136,45 @@
             {
               "$ref": "#/definitions/Int"
             }
-          ]
+          ],
+          "description": "The vendor ID of the devices.",
+          "title": "Vendor ID"
         }
       },
       "type": "object"
+    },
+    "Scheme.If.Mouse": {
+      "const": "mouse",
+      "description": "Match mouse devices.",
+      "title": "Mouse",
+      "type": "string"
+    },
+    "Scheme.If.Trackpad": {
+      "const": "trackpad",
+      "description": "Match trackpad devices.",
+      "title": "Trackpad",
+      "type": "string"
     },
     "Scheme.Pointer": {
       "additionalProperties": false,
       "properties": {
         "acceleration": {
+          "description": "If the value is not specified, system default value will be used.",
           "maximum": 20,
           "minimum": 0,
+          "title": "Pointer acceleration",
           "type": "number"
         },
         "disableAcceleration": {
+          "default": false,
+          "description": "If the value is true, the pointer acceleration will be disabled and acceleration and speed will not take effect.",
+          "title": "Disable pointer acceleration",
           "type": "boolean"
         },
         "speed": {
+          "description": "If the value is not specified, device default value will be used.",
           "maximum": 1,
+          "title": "Pointer speed",
           "type": "number"
         }
       },
@@ -128,22 +184,30 @@
       "additionalProperties": false,
       "properties": {
         "distance": {
-          "$ref": "#/definitions/Scheme.Scrolling.Distance"
+          "$ref": "#/definitions/Scheme.Scrolling.Distance",
+          "description": "The distance after rolling the wheel.",
+          "title": "Scrolling distance"
         },
         "modifiers": {
-          "$ref": "#/definitions/Scheme.Scrolling.Modifiers"
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers",
+          "title": "Modifier keys settings"
         },
         "reverse": {
-          "$ref": "#/definitions/Scheme.Scrolling.Reverse"
+          "$ref": "#/definitions/Scheme.Scrolling.Reverse",
+          "title": "Reverse scrolling"
         }
       },
       "type": "object"
     },
+    "Scheme.Scrolling.Auto": {
+      "const": "auto",
+      "description": "The scrolling distance will not be modified.",
+      "type": "string"
+    },
     "Scheme.Scrolling.Distance": {
       "anyOf": [
         {
-          "const": "auto",
-          "type": "string"
+          "$ref": "#/definitions/Scheme.Scrolling.Auto"
         },
         {
           "$ref": "#/definitions/Scheme.Scrolling.Distance.Line"
@@ -161,9 +225,11 @@
         {
           "$ref": "#/definitions/IntString"
         }
-      ]
+      ],
+      "description": "The scrolling distance in lines."
     },
     "Scheme.Scrolling.Distance.Pixel": {
+      "description": "The scrolling distance in pixels.",
       "pattern": "^\\d[1-9]*(\\.\\d+)?px",
       "type": "string"
     },
@@ -171,16 +237,20 @@
       "additionalProperties": false,
       "properties": {
         "command": {
-          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.Action"
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.Action",
+          "description": "The action when command key is pressed."
         },
         "control": {
-          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.Action"
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.Action",
+          "description": "The action when control key is pressed."
         },
         "option": {
-          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.Action"
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.Action",
+          "description": "The action when option key is pressed."
         },
         "shift": {
-          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.Action"
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.Action",
+          "description": "The action when shift key is pressed."
         }
       },
       "type": "object"
@@ -188,57 +258,74 @@
     "Scheme.Scrolling.Modifiers.Action": {
       "anyOf": [
         {
-          "additionalProperties": false,
-          "properties": {
-            "type": {
-              "const": "none",
-              "type": "string"
-            }
-          },
-          "required": [
-            "type"
-          ],
-          "type": "object"
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.None"
         },
         {
-          "additionalProperties": false,
-          "properties": {
-            "type": {
-              "const": "alterOrientation",
-              "type": "string"
-            }
-          },
-          "required": [
-            "type"
-          ],
-          "type": "object"
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.AlterOrientation"
         },
         {
-          "additionalProperties": false,
-          "properties": {
-            "scale": {
-              "type": "number"
-            },
-            "type": {
-              "const": "changeSpeed",
-              "type": "string"
-            }
-          },
-          "required": [
-            "type",
-            "scale"
-          ],
-          "type": "object"
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.ChangeSpeed"
         }
       ]
+    },
+    "Scheme.Scrolling.Modifiers.AlterOrientation": {
+      "additionalProperties": false,
+      "description": "Alter the scrolling orientation from vertical to horizontal or vice versa.",
+      "properties": {
+        "type": {
+          "const": "alterOrientation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "Scheme.Scrolling.Modifiers.ChangeSpeed": {
+      "additionalProperties": false,
+      "description": "Scale the scrolling speed.",
+      "properties": {
+        "scale": {
+          "description": "The factor to scale the scrolling speed.",
+          "type": "number"
+        },
+        "type": {
+          "const": "changeSpeed",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "scale"
+      ],
+      "type": "object"
+    },
+    "Scheme.Scrolling.Modifiers.None": {
+      "additionalProperties": false,
+      "description": "No actions.",
+      "properties": {
+        "type": {
+          "const": "none",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
     },
     "Scheme.Scrolling.Reverse": {
       "additionalProperties": false,
       "properties": {
         "horizontal": {
+          "default": false,
+          "title": "Reverse horizontally",
           "type": "boolean"
         },
         "vertical": {
+          "default": false,
+          "title": "Reverse vertically",
           "type": "boolean"
         }
       },
