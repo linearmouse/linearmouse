@@ -1,39 +1,15 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility.";
-"Get more help" = "Get more help";
-"Open Accessibility" = "Open Accessibility";
-"Reset all permissions..." = "Reset all permissions...";
-"Are you sure?" = "Are you sure?";
-"By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them." = "By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them.";
-"Reset" = "Reset";
-"Cancel" = "Cancel";
 
 "%@ Preferences..." = "%@ 偏好設定...";
-"Config" = "Config";
-"Reveal in Finder" = "Reveal in Finder";
 "Quit %@" = "退出 %@";
-
-"Scrolling" = "Scrolling";
-"Pointer" = "Pointer";
-"Buttons" = "Buttons";
 "Modifier Keys" = "修飾鍵";
 "General" = "通用";
 
 "Reverse scrolling" = "翻轉捲動";
-"(vertically)" = "(vertically)";
-"(horizontally)" = "(horizontally)";
-"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
 "Enable linear scrolling" = "啟用線性捲動";
-"Disable scrolling acceleration." = "Disable scrolling acceleration.";
-"Scroll" = "Scroll";
-"By lines" = "By lines";
-"By pixels" = "By pixels";
 
 "Acceleration" = "加速度";
-"Speed" = "Speed";
 "Revert to system defaults" = "回退到系統預設值";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "你也可以按下 ⌃⇧⌘Z 來回退到系統預設值。";
-"Disable pointer acceleration" = "Disable pointer acceleration";
 
 "Enable universal back and forward" = "啟用全局後退、前進";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "將後退、前進側鍵轉換為滑動手勢，以全局啟用後退、前進支持。";
@@ -42,12 +18,8 @@
 "Alter orientation" = "改變方向";
 "Change speed" = "變更速度";
 "to" = "到";
-
-"Settings" = "Settings";
 "Show in menu bar" = "在選單列中顯示";
 "To show the preferences, launch %@ again." = "要顯示偏好設定，再次運行 %@。";
-
-"Update" = "Update";
 "Version: %@" = "版本：%@";
 "Check for Updates..." = "檢查更新...";
 "Automatically" = "自動";
@@ -55,17 +27,7 @@
 "Weekly" = "每週";
 "Monthly" = "每月";
 "Include beta" = "包含測試版";
-
-"Links" = "Links";
 "Homepage" = "主頁";
-"Open Collective" = "Open Collective";
 "GitHub" = "GitHub";
 "Feedback" = "反饋";
 "Contact" = "聯絡";
-
-"Auto switch to the active device" = "Auto switch to the active device";
-"OK" = "OK";
-
-"Mouse" = "Mouse";
-"Trackpad" = "Trackpad";
-"(active)" = "(active)";
