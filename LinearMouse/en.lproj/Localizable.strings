@@ -10,6 +10,7 @@
 
 "%@ Preferences..." = "%@ Preferences...";
 "Config" = "Config";
+"Reload" = "Reload";
 "Reveal in Finder" = "Reveal in Finder";
 "Quit %@" = "Quit %@";
 
