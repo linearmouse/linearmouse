@@ -1,9 +1,10 @@
 "LinearMouse needs Accessibility permission" = "'LinearMouse'이(가) 손쉬운 사용 기능을 사용하여 이 컴퓨터를 제어하려고 합니다";
 "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "시스템 설정에 있는 보안 및 개인 정보 보호 환경설정에서 이 응용 프로그램에 접근 권한을 부여하십시오.";
-"Get more help" = "더 많은 도움 얻기";
+"Get more help" = "더 많은 도움 받기";
 "Open Accessibility" = "시스템 설정 열기";
-"Reset all permissions..." = "권한 초기화";
+"Reset all permissions..." = "모든 권한 초기화...";
 "Are you sure?" = "정말 진행하실 건가요?";
+"By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them." = "다른 앱을 포함해 손쉬운 사용 권한이 완전히 초기화됩니다.\n\n권한 설정이 완전히 파손되지 않는 한 재설정 할 필요가 없습니다.";
 "Reset" = "초기화";
 "Cancel" = "취소";
 
@@ -20,23 +21,30 @@
 "General" = "일반";
 
 "Reverse scrolling" = "역방향 스크롤";
-"(vertically)" = "(수직으로)";
-"(horizontally)" = "(수평으로)";
+"(vertically)" = "(수직)";
+"(horizontally)" = "(수평)";
 "Some gestures, such as swiping back and forward, may stop working." = "'앞뒤로 스와이프' 등 일부 제스처의 작동을 멈출 수 있습니다.";
 "Enable linear scrolling" = "리니어 스크롤 사용";
+"Disable scrolling acceleration." = "스크롤 가속 비활성화";
 "Scroll" = "스크롤";
+"By lines" = "줄";
+"By pixels" = "픽셀";
 
 "Acceleration" = "가속도";
+"Speed" = "민감도";
 "Revert to system defaults" = "기본 설정으로 돌아가기";
-"You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z를 눌러 시스템 기본 설정으로 되돌릴 수도 있습니다.";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z를 눌러서도 시스템 기본 설정으로 되돌릴 수 있습니다.";
+"Disable pointer acceleration" = "포인터 가속 비활성화";
 
 "Enable universal back and forward" = "유니버셜 백/포워드 사용";
-"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "뒤로 및 앞으로 가기 측면 버튼을 스와이프 제스처로 변환하여 유니버셜 백/포워드 기능을 활성화합니다.";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "뒤로 및 앞으로 가기 측면 버튼을 스와이프 제스처로 변환합니다.";
 
 "No action" = "동작 없음";
 "Alter orientation" = "방향 변경";
-"Change speed" = "속도 변경";
+"Change speed" = "민감도 변경";
 "to" = "으로";
+
+"Settings" = "설정";
 "Show in menu bar" = "메뉴 막대에 표시";
 "To show the preferences, launch %@ again." = "설정을 적용하려면 %@을(를) 재시작하십시오.";
 
@@ -51,9 +59,14 @@
 
 "Links" = "링크";
 "Homepage" = "홈페이지";
+"Open Collective" = "Open Collective";
 "GitHub" = "GitHub";
 "Feedback" = "의견";
 "Contact" = "문의";
 
+"Auto switch to the active device" = "활성화된 디바이스로 자동 전환";
+"OK" = "확인";
+
 "Mouse" = "마우스";
 "Trackpad" = "트랙패드";
+"(active)" = "(활성)";
