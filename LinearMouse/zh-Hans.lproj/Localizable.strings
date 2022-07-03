@@ -9,6 +9,8 @@
 "Cancel" = "取消";
 
 "%@ Preferences..." = "%@ 偏好设置...";
+"Config" = "配置";
+"Reveal in Finder" = "在 Finder 中显示";
 "Quit %@" = "退出 %@";
 
 "Scrolling" = "滚动";
