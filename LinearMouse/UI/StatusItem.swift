@@ -11,21 +11,55 @@ class StatusItem {
 
     private lazy var menu: NSMenu = {
         let menu = NSMenu()
+
+        let openPreferenceItem = NSMenuItem(
+            title: String(format: NSLocalizedString("%@ Preferences...", comment: ""), LinearMouse.appName),
+            action: #selector(openPreferencesAction),
+            keyEquivalent: ","
+        )
+
+        let configurationItem = NSMenuItem(title: NSLocalizedString("Config", comment: ""),
+                                           action: nil,
+                                           keyEquivalent: "")
+
+        configurationItem.submenu = configurationMenu
+
+        let quitItem = NSMenuItem(title: String(format: NSLocalizedString("Quit %@", comment: ""), LinearMouse.appName),
+                                  action: #selector(quitAction),
+                                  keyEquivalent: "q")
+
         menu.items = [
-            .init(
-                title: String(format: NSLocalizedString("%@ Preferences...", comment: ""), LinearMouse.appName),
-                action: #selector(openPreferencesAction),
-                keyEquivalent: ","
-            ),
-            .separator(),
-            .init(
-                title: String(format: NSLocalizedString("Quit %@", comment: ""), LinearMouse.appName),
-                action: #selector(quitAction),
-                keyEquivalent: "q"
-            )
+            openPreferenceItem,
+
+            NSMenuItem.separator(),
+
+            configurationItem,
+
+            NSMenuItem.separator(),
+
+            quitItem
         ]
+
         menu.items.forEach { $0.target = self }
+
         return menu
+    }()
+
+    private lazy var configurationMenu: NSMenu = {
+        let configurationMenu = NSMenu()
+
+        let revealInFinderItem = NSMenuItem(title: NSLocalizedString("Reveal in Finder", comment: ""),
+                                            action: #selector(revealConfigurationInFinder),
+                                            keyEquivalent: "r")
+        revealInFinderItem.keyEquivalentModifierMask = [.option, .command]
+
+        configurationMenu.items = [
+            revealInFinderItem
+        ]
+
+        configurationMenu.items.forEach { $0.target = self }
+
+        return configurationMenu
     }()
 
     var defaultsSubscription: AnyCancellable!
@@ -65,6 +99,11 @@ class StatusItem {
 
     @objc private func openPreferencesAction() {
         PreferencesWindow.shared.bringToFront()
+    }
+
+    @objc private func revealConfigurationInFinder() {
+        print(ConfigurationState.shared.configurationPath)
+        NSWorkspace.shared.activateFileViewerSelecting([ConfigurationState.shared.configurationPath.absoluteURL])
     }
 
     @objc func quitAction() {
