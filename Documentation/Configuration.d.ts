@@ -60,12 +60,14 @@ declare namespace Scheme {
       /**
        * @title Vendor ID
        * @description The vendor ID of the devices.
+       * @examples ["0xA123"]
        */
       vendorID?: HexString | Int;
 
       /**
        * @title Product ID
        * @description The product ID of the devices.
+       * @examples ["0xA123"]
        */
       productID?: HexString | Int;
 
