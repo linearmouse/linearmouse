@@ -4,11 +4,19 @@
 "Open Accessibility" = "Открыть Универсальный доступ";
 "Reset all permissions..." = "Сбросить все разрешения...";
 "Are you sure?" = "Вы уверены?";
+"By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them." = "При этом разрешения Универсального доступа будут полностью сброшены, а все разрешения, в том числе предоставленные другим приложениям, будут удалены.\n\nЕсли разрешения не нарушены полностью, не нужно их сбрасывать.";
 "Reset" = "Сбросить";
 "Cancel" = "Отмена";
 
 "%@ Preferences..." = "Настройки %@...";
+"Config" = "Конфигурация";
+"Reload" = "Обновить";
+"Reveal in Finder" = "Показать в Finder";
 "Quit %@" = "Завершить %@";
+
+"Scrolling" = "Прокрутка";
+"Pointer" = "Указатель";
+"Buttons" = "Кнопки";
 "Modifier Keys" = "Клавиши-модификаторы";
 "General" = "Основные";
 
@@ -17,11 +25,16 @@
 "(horizontally)" = "(по горизонтали)";
 "Some gestures, such as swiping back and forward, may stop working." = "Некоторые жесты, такие как смахивание «назад» и «вперед», могут перестать работать.";
 "Enable linear scrolling" = "Включить линейную прокрутку";
+"Disable scrolling acceleration." = "Отключает ускорение прокрутки.";
 "Scroll" = "Прокрутка";
+"By lines" = "По строкам";
+"By pixels" = "По пикселям";
 
 "Acceleration" = "Ускорение";
+"Speed" = "Скорость";
 "Revert to system defaults" = "Вернуться к системным настройкам по умолчанию";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Вы также можете нажать ⌃⇧⌘Z, чтобы вернуться к системным настройкам по умолчанию.";
+"Disable pointer acceleration" = "Отключить ускорение указателя";
 
 "Enable universal back and forward" = "Включить универсальные «назад» и «вперед»";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Преобразует боковые кнопки «назад» и «вперед» в жесты смахивания, чтобы сделать их работоспособными во всех приложениях.";
@@ -30,8 +43,12 @@
 "Alter orientation" = "Изменить направление";
 "Change speed" = "Изменить скорость";
 "to" = "на";
+
+"Settings" = "Настройки";
 "Show in menu bar" = "Показывать в строке меню";
 "To show the preferences, launch %@ again." = "Чтобы настройки отображались, перезапустите %@.";
+
+"Update" = "Обновление";
 "Version: %@" = "Версия: %@";
 "Check for Updates..." = "Проверить наличие обновлений...";
 "Automatically" = "Автоматически";
@@ -39,7 +56,17 @@
 "Weekly" = "Еженедельно";
 "Monthly" = "Ежемесячно";
 "Include beta" = "Включая бета-версии";
+
+"Links" = "Ссылки";
 "Homepage" = "Домашняя страница";
+"Open Collective" = "Open Collective";
 "GitHub" = "GitHub";
 "Feedback" = "Обратная связь";
 "Contact" = "Связаться";
+
+"Auto switch to the active device" = "Автопереключение на активное устройство";
+"OK" = "ОК";
+
+"Mouse" = "Мышь";
+"Trackpad" = "Трекпад";
+"(active)" = "(активно)";
