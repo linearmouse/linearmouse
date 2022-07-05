@@ -1,6 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2022 Jiahao Lu
 
+import AppKit
 import Defaults
 import Foundation
 
@@ -85,19 +86,26 @@ extension Configuration {
         try dump().write(to: url, options: .atomic)
     }
 
-    func matchedScheme(withDevice device: Device?) -> Scheme {
+    func matchedScheme(withDevice device: Device? = nil,
+                       withApp app: String? = nil) -> Scheme {
         // TODO: Backtrace the merge path
         // TODO: Optimize the algorithm
 
         var mergedScheme = Scheme()
 
+        var `if` = Scheme.If()
+
         if let device = device {
-            mergedScheme.if = [
-                Scheme.If(device: DeviceMatcher(of: device))
-            ]
+            `if`.device = DeviceMatcher(of: device)
         }
 
-        for scheme in schemes where scheme.isActive(withDevice: device) {
+        if let app = app {
+            `if`.app = app
+        }
+
+        mergedScheme.if = [`if`]
+
+        for scheme in schemes where scheme.isActive(withDevice: device, withApp: app) {
             scheme.merge(into: &mergedScheme)
         }
 
@@ -105,6 +113,7 @@ extension Configuration {
     }
 
     var activeScheme: Scheme {
-        matchedScheme(withDevice: DeviceManager.shared.lastActiveDevice)
+        matchedScheme(withDevice: DeviceManager.shared.lastActiveDevice,
+                      withApp: NSWorkspace.shared.frontmostApplication?.bundleIdentifier)
     }
 }
