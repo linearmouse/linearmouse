@@ -50,13 +50,13 @@ declare namespace Scheme {
   type If = {
     /**
      * @title Device
-     * @description Match one or more devices.
+     * @description Match one or more devices. If not provided, the scheme is activated on all devices.
      */
     device?: If.Device;
 
     /**
      * @title App
-     * @description Match app by providing a bundle ID. For example, `com.apple.Safari`.
+     * @description Match app by providing a bundle ID. For example, `com.apple.Safari`. If not provided, the scheme is activated on all apps.
      */
     app?: string;
   };
