@@ -114,6 +114,48 @@ I would create two schemes and specify the vendor ID and product ID:
 Then, the pointer speed of my Logitech mouse and Microsoft mouse will be set to 0.36 and 0.4
 respectively.
 
+## App matching
+
+App bundle ID can be provided to match a specific app.
+
+For example, to modify the pointer acceleration in Safari for my Logitech mouse:
+
+```json
+{
+  "schemes": [
+    {
+      "if": {
+        "device": {
+          "vendorID": "0x046d",
+          "productID": "0xc52b"
+        },
+        "app": "com.apple.Safari"
+      },
+      "pointer": {
+        "acceleration": 0.5
+      }
+    }
+  ]
+}
+```
+
+Or, to disable reverse scrolling in Safari for all devices:
+
+```json
+{
+  "schemes": [
+    {
+      "if": {
+        "app": "com.apple.Safari"
+      },
+      "scroll": {
+        "reverse": false
+      }
+    }
+  ]
+}
+```
+
 ## Schemes merging and multiple `if`s
 
 If multiple schemes are activated at the same time, they will be merged in the order of their
