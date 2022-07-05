@@ -1,6 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2022 Jiahao Lu
 
+import AppKit
 import Defaults
 import Foundation
 
@@ -112,6 +113,7 @@ extension Configuration {
     }
 
     var activeScheme: Scheme {
-        matchedScheme(withDevice: DeviceManager.shared.lastActiveDevice)
+        matchedScheme(withDevice: DeviceManager.shared.lastActiveDevice,
+                      withApp: NSWorkspace.shared.frontmostApplication?.bundleIdentifier)
     }
 }

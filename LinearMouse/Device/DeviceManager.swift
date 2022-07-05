@@ -1,6 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2022 Jiahao Lu
 
+import AppKit
 import Combine
 import Foundation
 import os.log
@@ -39,15 +40,41 @@ class DeviceManager: ObservableObject {
         }
     }
 
+    deinit {
+        pause()
+    }
+
+    private enum State {
+        case paused, running
+    }
+
+    private var state: State = .paused
+
     private var subscriptions = Set<AnyCancellable>()
 
+    private var activateApplicationObserver: Any?
+
     func pause() {
+        guard state == .running else {
+            return
+        }
+        state = .paused
+
         restorePointerSpeedToInitialValue()
         manager.stopObservation()
         subscriptions.removeAll()
+
+        if let activateApplicationObserver = activateApplicationObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(activateApplicationObserver)
+        }
     }
 
     func resume() {
+        guard state == .paused else {
+            return
+        }
+        state = .running
+
         manager.startObservation()
 
         ConfigurationState.shared.$configuration.sink { _ in
@@ -56,6 +83,17 @@ class DeviceManager: ObservableObject {
             }
         }
         .store(in: &subscriptions)
+
+        activateApplicationObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification,
+            object: nil,
+            queue: .main,
+            using: { [weak self] _ in
+                os_log("Frontmost app changed: %@", log: Self.log, type: .debug,
+                       NSWorkspace.shared.frontmostApplication?.bundleIdentifier ?? "(nil)")
+                self?.updatePointerSpeed()
+            }
+        )
     }
 
     private func deviceAdded(_: PointerDeviceManager, _ pointerDevice: PointerDevice) {
@@ -116,7 +154,9 @@ class DeviceManager: ObservableObject {
     }
 
     func updatePointerSpeed(for device: Device) {
-        let scheme = ConfigurationState.shared.configuration.matchedScheme(withDevice: device)
+        let scheme = ConfigurationState.shared.configuration.matchedScheme(withDevice: device,
+                                                                           withApp: NSWorkspace.shared
+                                                                               .frontmostApplication?.bundleIdentifier)
 
         if let pointerDisableAcceleration = scheme.pointer?.disableAcceleration {
             if pointerDisableAcceleration {
