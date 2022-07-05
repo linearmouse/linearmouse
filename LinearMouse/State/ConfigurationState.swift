@@ -40,10 +40,6 @@ class ConfigurationState: ObservableObject {
 
     @Published var activeScheme: Scheme? {
         didSet {
-            // TODO: Refactor: `EventTransformer`s shouldn't be built here.
-            // FIXME: The first event after device switching may be handled by the last built `EventTransformer`s.
-            eventTransformers = buildEventTransformers()
-
             guard let activeScheme = activeScheme else {
                 os_log("Active scheme is updated: nil", log: Self.log, type: .debug,
                        String(describing: activeScheme))
@@ -54,8 +50,6 @@ class ConfigurationState: ObservableObject {
                    String(describing: activeScheme))
         }
     }
-
-    @Published var eventTransformers: [EventTransformer] = []
 
     @Published var currentDeviceSchemeIndex: Int? {
         didSet {
@@ -152,36 +146,5 @@ extension ConfigurationState {
 
             return $0.if?.contains { $0.isSatisfied(withDevice: device) } == true
         }
-    }
-
-    func buildEventTransformers() -> [EventTransformer] {
-        var transformers: [EventTransformer] = []
-
-        guard let scheme = activeScheme else {
-            return transformers
-        }
-
-        if let reverse = scheme.scrolling?.reverse {
-            let vertical = reverse.vertical ?? false
-            let horizontal = reverse.horizontal ?? false
-
-            if vertical || horizontal {
-                transformers.append(ReverseScrolling(vertically: vertical, horizontally: horizontal))
-            }
-        }
-
-        if let distance = scheme.scrolling?.distance {
-            transformers.append(LinearScrolling(distance: distance))
-        }
-
-        if let modifiers = scheme.scrolling?.modifiers {
-            transformers.append(ModifierActions(modifiers: modifiers))
-        }
-
-        if scheme.buttons?.universalBackForward == true {
-            transformers.append(UniversalBackForward())
-        }
-
-        return transformers
     }
 }

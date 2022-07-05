@@ -53,6 +53,12 @@ declare namespace Scheme {
      * @description Match one or more devices.
      */
     device?: If.Device;
+
+    /**
+     * @title App
+     * @description Match app by providing a bundle ID. For example, `com.apple.Safari`.
+     */
+    app?: string;
   };
 
   namespace If {

@@ -1,6 +1,8 @@
 // MIT License
 // Copyright (c) 2021-2022 Jiahao Lu
 
+import Foundation
+
 /// A scheme is a set of settings to be applied to LinearMouse, for example,
 /// pointer speed.
 ///
@@ -21,12 +23,13 @@ struct Scheme: Codable {
 }
 
 extension Scheme {
-    func isActive(withDevice device: Device?) -> Bool {
+    func isActive(withDevice device: Device? = nil,
+                  withApp app: String? = nil) -> Bool {
         guard let `if` = `if` else {
             return true
         }
 
-        return `if`.contains { $0.isSatisfied(withDevice: device) }
+        return `if`.contains { $0.isSatisfied(withDevice: device, withApp: app) }
     }
 
     /// A scheme is device-specific if and only if a) it has only one `if` and
@@ -68,6 +71,16 @@ extension Scheme {
 
         if let buttons = buttons {
             buttons.merge(into: &scheme.buttons)
+        }
+    }
+}
+
+extension Scheme: CustomStringConvertible {
+    var description: String {
+        do {
+            return String(data: try JSONEncoder().encode(self), encoding: .utf8) ?? "<Scheme>"
+        } catch {
+            return "<Scheme>"
         }
     }
 }

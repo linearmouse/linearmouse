@@ -72,6 +72,7 @@
       "additionalProperties": false,
       "properties": {
         "universalBackForward": {
+          "default": false,
           "description": "If the value is true, the back and forward side buttons will be enabled in Safari and some other apps that do not handle these side buttons correctly.",
           "title": "Universal back and forward",
           "type": "boolean"
@@ -82,6 +83,11 @@
     "Scheme.If": {
       "additionalProperties": false,
       "properties": {
+        "app": {
+          "description": "Match app by providing a bundle ID. For example, `com.apple.Safari`.",
+          "title": "App",
+          "type": "string"
+        },
         "device": {
           "$ref": "#/definitions/Scheme.If.Device",
           "description": "Match one or more devices.",
