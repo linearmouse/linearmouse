@@ -18,6 +18,10 @@ class LinearScrolling: EventTransformer {
             return event
         }
 
+        if case .auto = distance {
+            return event
+        }
+
         let view = ScrollWheelEventView(event)
         guard view.momentumPhase == .none else {
             return nil
