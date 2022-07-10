@@ -1,31 +1,31 @@
-"LinearMouse needs Accessibility permission" = "'LinearMouse'이(가) 손쉬운 사용 기능을 사용하여 이 컴퓨터를 제어하려고 합니다";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "시스템 설정에 있는 보안 및 개인 정보 보호 환경설정에서 이 응용 프로그램에 접근 권한을 부여하십시오.";
-"Get more help" = "더 많은 도움 받기";
+"LinearMouse needs Accessibility permission" = "LinearMouse이(가) 손쉬운 사용 기능을 사용하여 이 컴퓨터를 제어하려고 합니다";
+"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "시스템 설정에 있는 개인 정보 보호 환경설정에서 이 응용 프로그램에 접근 권한을 부여하십시오.";
+"Get more help" = "도움 받기";
 "Open Accessibility" = "시스템 설정 열기";
 "Reset all permissions..." = "모든 권한 초기화...";
-"Are you sure?" = "정말 진행하실 건가요?";
-"By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them." = "다른 앱을 포함해 손쉬운 사용 권한이 완전히 초기화됩니다.\n\n권한 설정이 완전히 파손되지 않는 한 재설정 할 필요가 없습니다.";
+"Are you sure?" = "확실하신가요?";
+"By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them." = "다른 앱을 포함한 모든 손쉬운 사용 권한이 초기화됩니다.\n\n권한 설정이 완전히 파손되지 않는 한, 초기화 할 필요가 없습니다.";
 "Reset" = "초기화";
 "Cancel" = "취소";
 
-"%@ Preferences..." = "환경 설정";
+"%@ Preferences..." = "환경설정...";
 "Config" = "설정";
-"Reload" = "새로고침";
-"Reveal in Finder" = "Finder에서 보기";
+"Reload" = "새로 고침";
+"Reveal in Finder" = "Finder에서 열기";
 "Quit %@" = "%@ 종료";
 
 "Scrolling" = "스크롤";
 "Pointer" = "포인터";
 "Buttons" = "버튼";
-"Modifier Keys" = "보조 키";
+"Modifier Keys" = "단축키";
 "General" = "일반";
 
 "Reverse scrolling" = "역방향 스크롤";
-"(vertically)" = "(수직)";
-"(horizontally)" = "(수평)";
-"Some gestures, such as swiping back and forward, may stop working." = "'앞뒤로 스와이프' 등 일부 제스처의 작동을 멈출 수 있습니다.";
+"(vertically)" = "(수직 방향)";
+"(horizontally)" = "(수평 방향)";
+"Some gestures, such as swiping back and forward, may stop working." = "'앞뒤로 스와이프' 등 일부 제스처가 오작동할 수 있습니다.";
 "Enable linear scrolling" = "리니어 스크롤 사용";
-"Disable scrolling acceleration." = "스크롤 가속 비활성화";
+"Disable scrolling acceleration." = "마우스 스크롤 가속을 끕니다.";
 "Scroll" = "스크롤";
 "By lines" = "줄";
 "By pixels" = "픽셀";
@@ -33,11 +33,11 @@
 "Acceleration" = "가속도";
 "Speed" = "민감도";
 "Revert to system defaults" = "기본 설정으로 돌아가기";
-"You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z를 눌러서도 시스템 기본 설정으로 되돌릴 수 있습니다.";
-"Disable pointer acceleration" = "포인터 가속 비활성화";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z를 눌러 시스템 기본 설정으로 되돌리기";
+"Disable pointer acceleration" = "포인터 가속 끄기";
 
-"Enable universal back and forward" = "유니버셜 백/포워드 사용";
-"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "뒤로 및 앞으로 가기 측면 버튼을 스와이프 제스처로 변환합니다.";
+"Enable universal back and forward" = "유니버설 백/포워드 사용";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "뒤로 및 앞으로 가기 측면 버튼을 스와이프 제스처로 변환하여 앱 별 호환성을 높입니다.";
 
 "No action" = "동작 없음";
 "Alter orientation" = "방향 변경";
@@ -54,15 +54,15 @@
 "Automatically" = "자동으로";
 "Daily" = "매일";
 "Weekly" = "매주";
-"Monthly" = "매월";
+"Monthly" = "매달";
 "Include beta" = "베타 버전 포함";
 
 "Links" = "링크";
 "Homepage" = "홈페이지";
-"Open Collective" = "Open Collective";
-"GitHub" = "GitHub";
-"Feedback" = "의견";
-"Contact" = "문의";
+"Open Collective" = "후원하기(Open Collective)";
+"GitHub" = "깃허브";
+"Feedback" = "의견 보내기";
+"Contact" = "연락처";
 
 "Auto switch to the active device" = "활성화된 디바이스로 자동 전환";
 "OK" = "확인";
