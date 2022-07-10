@@ -55,7 +55,7 @@
 "Daily" = "매일";
 "Weekly" = "매주";
 "Monthly" = "매월";
-"Include beta" = "베타 포함";
+"Include beta" = "베타 버전 포함";
 
 "Links" = "링크";
 "Homepage" = "홈페이지";
@@ -69,4 +69,4 @@
 
 "Mouse" = "마우스";
 "Trackpad" = "트랙패드";
-"(active)" = "(활성)";
+"(active)" = "(활성화됨)";
