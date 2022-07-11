@@ -1,6 +1,10 @@
+"LinearMouse needs Accessibility permission" = "LinearMouse wymaga uprawnień Dostępności";
+"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "Należy przyznać uprawnienia Dostępności poprzez Apple > Preferencje systemowe > Bezpieczeństwo i prywatność > Dostępność.";
 "Get more help" = "Uzyskaj więcej pomocy";
+"Open Accessibility" = "Otwórz Dostępność";
 "Reset all permissions..." = "Wyzeruj wszystkie uprawnienia...";
 "Are you sure?" = "Czy na pewno?";
+"By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them." = "Jeśli to zrobisz, wszystkie uprawnienia Dostępności zostaną całkowicie wyzerowane, a wszystkie uprawnienia—również te przydzielone innym aplikacjom—zostaną usunięte.\n\nNie musisz zerować uprawnień jeśli wszystko jest z nimi w porządku.";
 "Reset" = "Wyzeruj";
 "Cancel" = "Anuluj";
 
@@ -13,19 +17,36 @@
 "Scrolling" = "Przewijanie";
 "Pointer" = "Wskaźnik";
 "Buttons" = "Przyciski";
+"Modifier Keys" = "Klawisze modyfikujące";
 "General" = "Ogólne";
 
 "Reverse scrolling" = "Odwróć przewijanie";
 "(vertically)" = "(pionowo)";
 "(horizontally)" = "(poziomo)";
+"Some gestures, such as swiping back and forward, may stop working." = "Niektóre gesty, takie jak przesuwanie w przód i w tył mogą przestać działać.";
+"Enable linear scrolling" = "Włącz gładkie przewijanie";
+"Disable scrolling acceleration." = "Wyłącz przyspieszenie przewijania.";
 "Scroll" = "Przewiń";
+"By lines" = "Użyj wierszy";
+"By pixels" = "Użyj pikseli";
 
 "Acceleration" = "Przyspieszenie";
 "Speed" = "Szybkość";
 "Revert to system defaults" = "Przywróć ustawienia systemowe";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "Możesz także nacisnąć na ⌃⇧⌘Z, aby przywrócić ustawienia systemowe.";
 "Disable pointer acceleration" = "Wyłącz przyspieszenie wskaźnika";
 
+"Enable universal back and forward" = "Włącz uniwersalne przejścia w przód i w tył";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Zamienia działanie przycisków bocznych myszy na gesty przesuwania, tak aby umożliwić uniwersalne przechodzenie w przód i w tył.";
+
+"No action" = "Brak akcji";
+"Alter orientation" = "Zmień orientację";
+"Change speed" = "Zmień szybkość";
+"to" = "na";
+
 "Settings" = "Ustawienia";
+"Show in menu bar" = "Pokaż na pasku menu";
+"To show the preferences, launch %@ again." = "Aby wyświetlić preferencje, ponownie uruchom %@.";
 
 "Update" = "Aktualizacja";
 "Version: %@" = "Wersja: %@";
@@ -42,6 +63,8 @@
 "GitHub" = "GitHub";
 "Feedback" = "Prześlij opinię";
 "Contact" = "Kontakt";
+
+"Auto switch to the active device" = "Automatycznie przełącz na aktywne urządzenie";
 "OK" = "OK";
 
 "Mouse" = "Mysz";
