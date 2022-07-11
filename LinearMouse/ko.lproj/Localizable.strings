@@ -24,7 +24,7 @@
 "(vertically)" = "(수직 방향)";
 "(horizontally)" = "(수평 방향)";
 "Some gestures, such as swiping back and forward, may stop working." = "'앞뒤로 스와이프' 등 일부 제스처가 오작동할 수 있습니다.";
-"Enable linear scrolling" = "리니어 스크롤 사용";
+"Enable linear scrolling" = "리니어 스크롤";
 "Disable scrolling acceleration." = "마우스 스크롤 가속을 끕니다.";
 "Scroll" = "스크롤";
 "By lines" = "줄";
@@ -32,12 +32,12 @@
 
 "Acceleration" = "가속도";
 "Speed" = "민감도";
-"Revert to system defaults" = "기본 설정으로 돌아가기";
-"You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z를 눌러 시스템 기본 설정으로 되돌리기";
+"Revert to system defaults" = "초기 설정 복원";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z를 눌러 초기 설정으로 되돌릴 수도 있습니다.";
 "Disable pointer acceleration" = "포인터 가속 끄기";
 
-"Enable universal back and forward" = "유니버설 백/포워드 사용";
-"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "뒤로 및 앞으로 가기 측면 버튼을 스와이프 제스처로 변환하여 앱 별 호환성을 높입니다.";
+"Enable universal back and forward" = "유니버설 백/포워드";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "뒤로 및 앞으로 가기 측면 버튼을 스와이프 제스처로 변환하여 앱 호환성을 높입니다.";
 
 "No action" = "동작 없음";
 "Alter orientation" = "방향 변경";

@@ -1,71 +1,49 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility.";
-"Get more help" = "Get more help";
-"Open Accessibility" = "Open Accessibility";
-"Reset all permissions..." = "Reset all permissions...";
-"Are you sure?" = "Are you sure?";
-"By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them." = "By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them.";
-"Reset" = "Reset";
-"Cancel" = "Cancel";
+"Get more help" = "Uzyskaj więcej pomocy";
+"Reset all permissions..." = "Wyzeruj wszystkie uprawnienia...";
+"Are you sure?" = "Czy na pewno?";
+"Reset" = "Wyzeruj";
+"Cancel" = "Anuluj";
 
-"%@ Preferences..." = "%@ Preferences...";
-"Config" = "Config";
-"Reveal in Finder" = "Reveal in Finder";
-"Quit %@" = "Quit %@";
+"%@ Preferences..." = "Preferencje %@...";
+"Config" = "Konfiguracja";
+"Reload" = "Odśwież";
+"Reveal in Finder" = "Pokaż w Finderze";
+"Quit %@" = "Zamknij %@";
 
-"Scrolling" = "Scrolling";
-"Pointer" = "Pointer";
-"Buttons" = "Buttons";
-"Modifier Keys" = "Modifier Keys";
-"General" = "General";
+"Scrolling" = "Przewijanie";
+"Pointer" = "Wskaźnik";
+"Buttons" = "Przyciski";
+"General" = "Ogólne";
 
-"Reverse scrolling" = "Reverse scrolling";
-"(vertically)" = "(vertically)";
-"(horizontally)" = "(horizontally)";
-"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
-"Enable linear scrolling" = "Enable linear scrolling";
-"Disable scrolling acceleration." = "Disable scrolling acceleration.";
-"Scroll" = "Scroll";
-"By lines" = "By lines";
-"By pixels" = "By pixels";
+"Reverse scrolling" = "Odwróć przewijanie";
+"(vertically)" = "(pionowo)";
+"(horizontally)" = "(poziomo)";
+"Scroll" = "Przewiń";
 
-"Acceleration" = "Acceleration";
-"Speed" = "Speed";
-"Revert to system defaults" = "Revert to system defaults";
-"You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
-"Disable pointer acceleration" = "Disable pointer acceleration";
+"Acceleration" = "Przyspieszenie";
+"Speed" = "Szybkość";
+"Revert to system defaults" = "Przywróć ustawienia systemowe";
+"Disable pointer acceleration" = "Wyłącz przyspieszenie wskaźnika";
 
-"Enable universal back and forward" = "Enable universal back and forward";
-"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
+"Settings" = "Ustawienia";
 
-"No action" = "No action";
-"Alter orientation" = "Alter orientation";
-"Change speed" = "Change speed";
-"to" = "to";
+"Update" = "Aktualizacja";
+"Version: %@" = "Wersja: %@";
+"Check for Updates..." = "Sprawdź aktualizacje...";
+"Automatically" = "Automatycznie";
+"Daily" = "Codziennie";
+"Weekly" = "Co tydzień";
+"Monthly" = "Co miesiąc";
+"Include beta" = "Wersje beta";
 
-"Settings" = "Settings";
-"Show in menu bar" = "Show in menu bar";
-"To show the preferences, launch %@ again." = "To show the preferences, launch %@ again.";
-
-"Update" = "Update";
-"Version: %@" = "Version: %@";
-"Check for Updates..." = "Check for Updates...";
-"Automatically" = "Automatically";
-"Daily" = "Daily";
-"Weekly" = "Weekly";
-"Monthly" = "Monthly";
-"Include beta" = "Include beta";
-
-"Links" = "Links";
-"Homepage" = "Homepage";
+"Links" = "Odnośniki";
+"Homepage" = "Strona WWW";
 "Open Collective" = "Open Collective";
 "GitHub" = "GitHub";
-"Feedback" = "Feedback";
-"Contact" = "Contact";
-
-"Auto switch to the active device" = "Auto switch to the active device";
+"Feedback" = "Prześlij opinię";
+"Contact" = "Kontakt";
 "OK" = "OK";
 
-"Mouse" = "Mouse";
-"Trackpad" = "Trackpad";
-"(active)" = "(active)";
+"Mouse" = "Mysz";
+"Trackpad" = "Gładzik";
+"(active)" = "(aktywne)";
