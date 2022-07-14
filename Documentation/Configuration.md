@@ -17,7 +17,7 @@ Here is a simple example of LinearMouse configuration.
 
 ```json
 {
-  "$schema": "https://app.linearmouse.org/schema/0.7.0",
+  "$schema": "https://app.linearmouse.org/schema/0.7.1",
   "schemes": [
     {
       "if": {
@@ -26,7 +26,9 @@ Here is a simple example of LinearMouse configuration.
         }
       },
       "scrolling": {
-        "reverse": "vertical"
+        "reverse": {
+          "vertical": true
+        }
       }
     }
   ]
@@ -61,12 +63,14 @@ LinearMouse to activate this scheme only when the active device is a mouse:
 ```
 
 And the `scrolling` field in this scheme defines the scrolling behaviors, with
-`"reverse": "vertical"` reversing the vertical scrolling direction:
+`"reverse": { "vertical": true }` reversing the vertical scrolling direction:
 
 ```json
 {
   "scrolling": {
-    "reverse": "vertical"
+    "reverse": {
+      "vertical": true
+    }
   }
 }
 ```
@@ -148,8 +152,11 @@ Or, to disable reverse scrolling in Safari for all devices:
       "if": {
         "app": "com.apple.Safari"
       },
-      "scroll": {
-        "reverse": false
+      "scrolling": {
+        "reverse": {
+          "vertical": false,
+          "horizontal": false
+        }
       }
     }
   ]
