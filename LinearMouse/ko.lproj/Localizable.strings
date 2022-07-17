@@ -2,11 +2,6 @@
 "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "시스템 설정에 있는 개인 정보 보호 환경설정에서 이 응용 프로그램에 접근 권한을 부여하십시오.";
 "Get more help" = "도움 받기";
 "Open Accessibility" = "시스템 설정 열기";
-"Reset all permissions..." = "모든 권한 초기화...";
-"Are you sure?" = "확실하신가요?";
-"By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them." = "다른 앱을 포함한 모든 손쉬운 사용 권한이 초기화됩니다.\n\n권한 설정이 완전히 파손되지 않는 한, 초기화 할 필요가 없습니다.";
-"Reset" = "초기화";
-"Cancel" = "취소";
 
 "%@ Preferences..." = "환경설정...";
 "Config" = "설정";
