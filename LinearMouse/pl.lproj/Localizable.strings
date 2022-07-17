@@ -2,11 +2,6 @@
 "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "Należy przyznać uprawnienia Dostępności poprzez Apple > Preferencje systemowe > Bezpieczeństwo i prywatność > Dostępność.";
 "Get more help" = "Uzyskaj więcej pomocy";
 "Open Accessibility" = "Otwórz Dostępność";
-"Reset all permissions..." = "Wyzeruj wszystkie uprawnienia...";
-"Are you sure?" = "Czy na pewno?";
-"By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them." = "Jeśli to zrobisz, wszystkie uprawnienia Dostępności zostaną całkowicie wyzerowane, a wszystkie uprawnienia—również te przydzielone innym aplikacjom—zostaną usunięte.\n\nNie musisz zerować uprawnień jeśli wszystko jest z nimi w porządku.";
-"Reset" = "Wyzeruj";
-"Cancel" = "Anuluj";
 
 "%@ Preferences..." = "Preferencje %@...";
 "Config" = "Konfiguracja";
