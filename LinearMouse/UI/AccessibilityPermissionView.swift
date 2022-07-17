@@ -7,8 +7,6 @@ import SwiftUI
 struct AccessibilityPermissionView: View {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "AccessibilityPermissionView")
 
-    @State var resetAllPermissionConfirmationShown = false
-
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 15) {
@@ -35,12 +33,6 @@ struct AccessibilityPermissionView: View {
                 Button("Open Accessibility") {
                     openAccessibility()
                 }
-
-                Spacer()
-
-                Button("Reset all permissions...") {
-                    resetAllPermissions()
-                }
             }
         }
         .padding()
@@ -48,38 +40,11 @@ struct AccessibilityPermissionView: View {
     }
 
     func openAccessibility() {
+        do {
+            try AccessibilityPermission.reset()
+        } catch {}
         AccessibilityPermission.prompt()
         AccessibilityPermissionWindow.shared.moveAside()
-    }
-
-    func resetAllPermissions() {
-        let alert = NSAlert()
-
-        alert.messageText = NSLocalizedString("Are you sure?", comment: "")
-        alert.informativeText = NSLocalizedString(
-            "By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them.",
-            comment: ""
-        )
-        alert.alertStyle = .warning
-
-        let reset = alert.addButton(withTitle: NSLocalizedString("Reset", comment: ""))
-        reset.keyEquivalent = ""
-        if #available(macOS 11.0, *) {
-            reset.hasDestructiveAction = true
-        }
-
-        let cancel = alert.addButton(withTitle: NSLocalizedString("Cancel", comment: ""))
-        cancel.keyEquivalent = "\r"
-
-        guard alert.runModal() == .alertFirstButtonReturn else {
-            return
-        }
-
-        guard (try? AccessibilityPermission.reset()) != nil else {
-            return
-        }
-
-        openAccessibility()
     }
 }
 

@@ -32,10 +32,10 @@ class AccessibilityPermission {
     }
 
     static func reset() throws {
-        let command = "do shell script \"tccutil reset Accessibility\" with administrator privileges"
+        let command = "tccutil reset Accessibility com.lujjjh.LinearMouse"
 
         guard let script = NSAppleScript(source: command) else {
-            os_log("Failed to reset Accessibility permissions", log: Self.log, type: .error)
+            os_log("Failed to reset Accessibility permission", log: Self.log, type: .error)
             return
         }
 
