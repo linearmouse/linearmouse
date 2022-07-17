@@ -1,15 +1,35 @@
+"LinearMouse needs Accessibility permission" = "LinearMouse 需要輔助功能權限";
+"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "你需要在系統偏好設置 > 安全性與隱私 > 輔助功能中授予輔助功能權限。";
+"Get more help" = "獲取更多幫助";
+"Open Accessibility" = "打開輔助功能";
 
 "%@ Preferences..." = "%@ 偏好設定...";
+"Config" = "設定";
+"Reload" = "重新載入";
+"Reveal in Finder" = "在 Finder 中揭示";
 "Quit %@" = "退出 %@";
+
+"Scrolling" = "捲動";
+"Pointer" = "指標";
+"Buttons" = "按鍵";
 "Modifier Keys" = "修飾鍵";
 "General" = "通用";
 
 "Reverse scrolling" = "翻轉捲動";
+"(vertically)" = "(垂直)";
+"(horizontally)" = "(水平)";
+"Some gestures, such as swiping back and forward, may stop working." = "某些手勢可能無法正常工作，如滑動後退和前進。";
 "Enable linear scrolling" = "啟用線性捲動";
+"Disable scrolling acceleration." = "禁用捲動加速度。";
+"Scroll" = "捲動";
+"By lines" = "按行";
+"By pixels" = "按像素";
 
 "Acceleration" = "加速度";
+"Speed" = "速度";
 "Revert to system defaults" = "回退到系統預設值";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "你也可以按下 ⌃⇧⌘Z 來回退到系統預設值。";
+"Disable pointer acceleration" = "禁用指標加速度";
 
 "Enable universal back and forward" = "啟用全局後退、前進";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "將後退、前進側鍵轉換為滑動手勢，以全局啟用後退、前進支持。";
@@ -18,8 +38,12 @@
 "Alter orientation" = "改變方向";
 "Change speed" = "變更速度";
 "to" = "到";
+
+"Settings" = "設置";
 "Show in menu bar" = "在選單列中顯示";
 "To show the preferences, launch %@ again." = "要顯示偏好設定，再次運行 %@。";
+
+"Update" = "更新";
 "Version: %@" = "版本：%@";
 "Check for Updates..." = "檢查更新...";
 "Automatically" = "自動";
@@ -27,7 +51,17 @@
 "Weekly" = "每週";
 "Monthly" = "每月";
 "Include beta" = "包含測試版";
+
+"Links" = "連結";
 "Homepage" = "主頁";
+"Open Collective" = "Open Collective";
 "GitHub" = "GitHub";
 "Feedback" = "反饋";
 "Contact" = "聯絡";
+
+"Auto switch to the active device" = "自動切換到活躍設備";
+"OK" = "確認";
+
+"Mouse" = "滑鼠";
+"Trackpad" = "觸控板";
+"(active)" = "(活躍)";
