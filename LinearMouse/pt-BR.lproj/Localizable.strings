@@ -1,6 +1,17 @@
+"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
+"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility.";
+"Get more help" = "Get more help";
+"Open Accessibility" = "Open Accessibility";
 
 "%@ Preferences..." = "Preferências...";
+"Config" = "Config";
+"Reload" = "Reload";
+"Reveal in Finder" = "Reveal in Finder";
 "Quit %@" = "Encerrar %@";
+
+"Scrolling" = "Scrolling";
+"Pointer" = "Pointer";
+"Buttons" = "Buttons";
 "Modifier Keys" = "Teclas Modificadoras";
 "General" = "Geral";
 
@@ -9,11 +20,16 @@
 "(horizontally)" = "(horizontalmente)";
 "Some gestures, such as swiping back and forward, may stop working." = "Alguns gestos, como deslizar para a frente e para trás, podem parar de funcionar.";
 "Enable linear scrolling" = "Habilitar rolagem linear";
+"Disable scrolling acceleration." = "Disable scrolling acceleration.";
 "Scroll" = "Rolar";
+"By lines" = "By lines";
+"By pixels" = "By pixels";
 
 "Acceleration" = "Aceleração";
+"Speed" = "Speed";
 "Revert to system defaults" = "Restaurar Padrões";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Você também pode pressionar ⌃⇧⌘Z para restaurar os padrões.";
+"Disable pointer acceleration" = "Disable pointer acceleration";
 
 "Enable universal back and forward" = "Habilitar retorno e avanço universal";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Converte os botões laterais de retorno e avanço para gestos do trackpad para habilitar a funcionalidade de retorno e avanço universal.";
@@ -22,8 +38,12 @@
 "Alter orientation" = "Mudar orientação";
 "Change speed" = "Alterar velocidade";
 "to" = "para";
+
+"Settings" = "Settings";
 "Show in menu bar" = "Mostrar na barra de menus";
 "To show the preferences, launch %@ again." = "Para mostrar as preferências, execute o %@ novamente.";
+
+"Update" = "Update";
 "Version: %@" = "Versão: %@";
 "Check for Updates..." = "Buscar Atualizações...";
 "Automatically" = "Automaticamente";
@@ -31,7 +51,17 @@
 "Weekly" = "Semanalmente";
 "Monthly" = "Mensalmente";
 "Include beta" = "Incluir versão beta";
+
+"Links" = "Links";
 "Homepage" = "Página inicial";
+"Open Collective" = "Open Collective";
 "GitHub" = "GitHub";
 "Feedback" = "Feedback";
 "Contact" = "Contato";
+
+"Auto switch to the active device" = "Auto switch to the active device";
+"OK" = "OK";
+
+"Mouse" = "Mouse";
+"Trackpad" = "Trackpad";
+"(active)" = "(active)";
