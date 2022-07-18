@@ -1,16 +1,35 @@
+"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
+"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility.";
+"Get more help" = "Get more help";
+"Open Accessibility" = "Open Accessibility";
 
 "%@ Preferences..." = "%@ Einstellungen...";
+"Config" = "Config";
+"Reload" = "Reload";
+"Reveal in Finder" = "Reveal in Finder";
 "Quit %@" = "%@ beenden";
+
+"Scrolling" = "Scrolling";
+"Pointer" = "Pointer";
+"Buttons" = "Buttons";
 "Modifier Keys" = "Tastenkürzel";
 "General" = "Allgemein";
 
 "Reverse scrolling" = "Scrollen invertieren";
+"(vertically)" = "(vertically)";
+"(horizontally)" = "(horizontally)";
+"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
 "Enable linear scrolling" = "Lineares Scrollen aktivieren";
+"Disable scrolling acceleration." = "Disable scrolling acceleration.";
 "Scroll" = "Scrolle";
+"By lines" = "By lines";
+"By pixels" = "By pixels";
 
 "Acceleration" = "Beschleunigung";
+"Speed" = "Speed";
 "Revert to system defaults" = "Auf Systemstandards zurücksetzen";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Durch Drücken des Kürzels ⌃⇧⌘Z kann ebenfalls zu den Systemstandards zurückgekehrt werden.";
+"Disable pointer acceleration" = "Disable pointer acceleration";
 
 "Enable universal back and forward" = "Universelles Vor und Zurück aktivieren";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Konvertiert die Vor- und Zurück-Seitentasten in die jeweiligen Wischgesten, um eine universelle Vor- und Zurück-Funktion zu ermöglichen.";
@@ -19,8 +38,12 @@
 "Alter orientation" = "Scrollorientierung ändern";
 "Change speed" = "Scrollgeschwindigkeit ändern";
 "to" = "zu";
+
+"Settings" = "Settings";
 "Show in menu bar" = "In der Menüleiste anzeigen";
 "To show the preferences, launch %@ again." = "Um die Einstellungen anzuzeigen, öffne %@ erneut.";
+
+"Update" = "Update";
 "Version: %@" = "Version: %@";
 "Check for Updates..." = "Nach Updates suchen...";
 "Automatically" = "Automatisch";
@@ -28,7 +51,17 @@
 "Weekly" = "Wöchentlich";
 "Monthly" = "Monatlich";
 "Include beta" = "An Beta-Versionen teilnehmen";
+
+"Links" = "Links";
 "Homepage" = "Homepage";
+"Open Collective" = "Open Collective";
 "GitHub" = "GitHub";
 "Feedback" = "Feedback";
 "Contact" = "Kontakt";
+
+"Auto switch to the active device" = "Auto switch to the active device";
+"OK" = "OK";
+
+"Mouse" = "Mouse";
+"Trackpad" = "Trackpad";
+"(active)" = "(active)";
