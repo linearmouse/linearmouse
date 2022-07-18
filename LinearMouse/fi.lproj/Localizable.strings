@@ -2,14 +2,10 @@
 "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility.";
 "Get more help" = "Get more help";
 "Open Accessibility" = "Open Accessibility";
-"Reset all permissions..." = "Reset all permissions...";
-"Are you sure?" = "Are you sure?";
-"By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them." = "By doing this, the Accessibility permissions will be completely reset and all permissions—including those granted to other apps—will be removed.\n\nUnless the permissions are totally broken, you do not have to reset them.";
-"Reset" = "Reset";
-"Cancel" = "Cancel";
 
 "%@ Preferences..." = "%@ Preferences...";
 "Config" = "Config";
+"Reload" = "Reload";
 "Reveal in Finder" = "Reveal in Finder";
 "Quit %@" = "Quit %@";
 
