@@ -2,12 +2,14 @@
 // Copyright (c) 2021-2022 Jiahao Lu
 
 extension Scheme.Buttons {
-    // TODO: TBD.
-    struct Binding: Codable {
+    struct Mapping: Codable {
         var button: Int
-        var shift: Bool?
-        var control: Bool?
-        var option: Bool?
+
         var command: Bool?
+        var shift: Bool?
+        var option: Bool?
+        var control: Bool?
+
+        var action: Action?
     }
 }
