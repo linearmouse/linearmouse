@@ -267,7 +267,7 @@ Button mappings is a list that allows you to assign actions to buttons. For exam
 Launchpad when the back button is clicked, or to open Mission Control when <kbd>command</kbd> +
 the forward button is clicked.
 
-### Open Launchpad when the back button is clicked
+### Bsaic example
 
 ```json
 {
@@ -295,6 +295,8 @@ the forward button is clicked.
 }
 ```
 
+In this example, the back button is bound to open Launchpad.
+
 '"button": 3' denotes the fourth button, which is typically the back button.
 
 The following table lists all the buttons:
@@ -308,10 +310,12 @@ The following table lists all the buttons:
 | 4      | The fifth button, typically the forward button.                  |
 | 5-31   | Other buttons.                                                   |
 
-`{ "action": { "run": "open -a Launchpad" }}` assigns a shell command `open -a LaunchPad` to
+`{ "action": { "run": "open -a Launchpad" } }` assigns a shell command `open -a LaunchPad` to
 the button. When the button is clicked, the shell command will be executed.
 
-## Open Mission Control when <kbd>command</kbd> + the forward button is clicked
+### Example with modifier keys
+
+In this example, <kbd>command</kbd> + the forward button is bound to open Mission Control.
 
 ```json
 {
@@ -340,4 +344,47 @@ the button. When the button is clicked, the shell command will be executed.
 }
 ```
 
-In this example, `"command": true` denotes that <kbd>command</kbd> should be pressed.
+`"command": true` denotes that <kbd>command</kbd> should be pressed.
+
+You can specify `shift`, `option` and `control` as well.
+
+### Switch spaces (desktops) with the back and forward button
+
+```json
+{
+  "schemes": [
+    {
+      "if": [
+        {
+          "device": {
+            "category": "mouse"
+          }
+        }
+      ],
+      "buttons": {
+        "mappings": [
+          {
+            "button": 3,
+            "action": {
+              "run": "osascript -e 'tell application \"System Events\" to key code 123 using control down'"
+            }
+          },
+          {
+            "button": 4,
+            "action": {
+              "run": "osascript -e 'tell application \"System Events\" to key code 124 using control down'"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+In this example, AppleScript is used to simulate <kbd>control+←</kbd> and <kbd>control+→</kbd>.
+
+> **Note:**  
+> You will have to grant an additional permission to allow LinearMouse to simulate keys.
+
+This is not the best way to switch spaces. More action types will be added in future versions.
