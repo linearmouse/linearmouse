@@ -108,7 +108,9 @@ class DeviceManager: ObservableObject {
                log: Self.log, type: .debug,
                String(describing: device))
 
-        updatePointerSpeed(for: device)
+        DispatchQueue.main.async { [weak self] in
+            self?.updatePointerSpeed(for: device)
+        }
     }
 
     private func deviceRemoved(_: PointerDeviceManager, _ pointerDevice: PointerDevice) {
