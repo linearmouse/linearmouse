@@ -242,10 +242,76 @@ declare namespace Scheme {
 
   type Buttons = {
     /**
+     * @title Button mappings
+     * @description Assign actions to buttons.
+     */
+    mappings?: Buttons.Mapping[];
+
+    /**
      * @title Universal back and forward
      * @description If the value is true, the back and forward side buttons will be enabled in Safari and some other apps that do not handle these side buttons correctly.
      * @default false
      */
     universalBackForward?: boolean;
   };
+
+  namespace Buttons {
+    type Mapping = {
+      /**
+       * @title Button number
+       * @description 0 - left; 1 - right; 2 - center, ... See https://developer.apple.com/documentation/coregraphics/cgmousebutton
+       */
+      button: number;
+
+      /**
+       * @description Indicates if the command modifier key should be pressed.
+       */
+      command?: boolean;
+
+      /**
+       * @description Indicates if the shift modifier key should be pressed.
+       */
+      shift?: boolean;
+
+      /**
+       * @description Indicates if the option modifier key should be pressed.
+       */
+      option?: boolean;
+
+      /**
+       * @description Indicates if the control modifier key should be pressed.
+       */
+      control?: boolean;
+
+      /**
+       * @title Action
+       */
+      action?: Mapping.Action;
+    };
+
+    namespace Mapping {
+      type Action = Auto | None | Run;
+
+      /**
+       * @description Do not modify the button behavior.
+       */
+      type Auto = "auto";
+
+      /**
+       * @description Prevent the button events.
+       */
+      type None = "none";
+
+      /**
+       * @description Run a specific command.
+       */
+      type Run = {
+        /**
+         * @title Command
+         * @description The command to be executed. For example, `"open -a 'Mission Control'"`.
+         */
+        run: string;
+      };
+    }
+  }
 }

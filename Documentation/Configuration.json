@@ -71,6 +71,14 @@
     "Scheme.Buttons": {
       "additionalProperties": false,
       "properties": {
+        "mappings": {
+          "description": "Assign actions to buttons.",
+          "items": {
+            "$ref": "#/definitions/Scheme.Buttons.Mapping"
+          },
+          "title": "Button mappings",
+          "type": "array"
+        },
         "universalBackForward": {
           "default": false,
           "description": "If the value is true, the back and forward side buttons will be enabled in Safari and some other apps that do not handle these side buttons correctly.",
@@ -80,17 +88,89 @@
       },
       "type": "object"
     },
+    "Scheme.Buttons.Mapping": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Action",
+          "title": "Action"
+        },
+        "button": {
+          "description": "0 - left; 1 - right; 2 - center, ... See https://developer.apple.com/documentation/coregraphics/cgmousebutton",
+          "title": "Button number",
+          "type": "number"
+        },
+        "command": {
+          "description": "Indicates if the command modifier key should be pressed.",
+          "type": "boolean"
+        },
+        "control": {
+          "description": "Indicates if the control modifier key should be pressed.",
+          "type": "boolean"
+        },
+        "option": {
+          "description": "Indicates if the option modifier key should be pressed.",
+          "type": "boolean"
+        },
+        "shift": {
+          "description": "Indicates if the shift modifier key should be pressed.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "button"
+      ],
+      "type": "object"
+    },
+    "Scheme.Buttons.Mapping.Action": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Auto"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.None"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Run"
+        }
+      ]
+    },
+    "Scheme.Buttons.Mapping.Auto": {
+      "const": "auto",
+      "description": "Do not modify the button behavior.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.None": {
+      "const": "none",
+      "description": "Prevent the button events.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.Run": {
+      "additionalProperties": false,
+      "description": "Run a specific command.",
+      "properties": {
+        "run": {
+          "description": "The command to be executed. For example, `\"open -a 'Mission Control'\"`.",
+          "title": "Command",
+          "type": "string"
+        }
+      },
+      "required": [
+        "run"
+      ],
+      "type": "object"
+    },
     "Scheme.If": {
       "additionalProperties": false,
       "properties": {
         "app": {
-          "description": "Match app by providing a bundle ID. For example, `com.apple.Safari`.",
+          "description": "Match app by providing a bundle ID. For example, `com.apple.Safari`. If not provided, the scheme is activated on all apps.",
           "title": "App",
           "type": "string"
         },
         "device": {
           "$ref": "#/definitions/Scheme.If.Device",
-          "description": "Match one or more devices.",
+          "description": "Match one or more devices. If not provided, the scheme is activated on all devices.",
           "title": "Device"
         }
       },
