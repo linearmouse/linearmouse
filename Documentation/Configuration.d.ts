@@ -259,9 +259,9 @@ declare namespace Scheme {
     type Mapping = {
       /**
        * @title Button number
-       * @description 0 - left; 1 - right; 2 - center, ... See https://developer.apple.com/documentation/coregraphics/cgmousebutton
+       * @description The button number. See https://developer.apple.com/documentation/coregraphics/cgmousebutton
        */
-      button: number;
+      button: Mapping.Button;
 
       /**
        * @description Indicates if the command modifier key should be pressed.
@@ -312,6 +312,33 @@ declare namespace Scheme {
          */
         run: string;
       };
+
+      type Button = Primary | Secondary | Auxiliary | Back | Forward | number;
+
+      /**
+       * @description Primary button, usually the left button.
+       */
+      type Primary = 0;
+
+      /**
+       * @description Secondary button, usually the right button.
+       */
+      type Secondary = 1;
+
+      /**
+       * @description Auxiliary button, usually the wheel button or the middle button.
+       */
+      type Auxiliary = 2;
+
+      /**
+       * @description Forth button, typically the back button.
+       */
+      type Back = 3;
+
+      /**
+       * @description Fifth button, typically the forward button.
+       */
+      type Forward = 4;
     }
   }
 }

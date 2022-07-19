@@ -96,9 +96,9 @@
           "title": "Action"
         },
         "button": {
-          "description": "0 - left; 1 - right; 2 - center, ... See https://developer.apple.com/documentation/coregraphics/cgmousebutton",
-          "title": "Button number",
-          "type": "number"
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Button",
+          "description": "The button number. See https://developer.apple.com/documentation/coregraphics/cgmousebutton",
+          "title": "Button number"
         },
         "command": {
           "description": "Indicates if the command modifier key should be pressed.",
@@ -140,10 +140,52 @@
       "description": "Do not modify the button behavior.",
       "type": "string"
     },
+    "Scheme.Buttons.Mapping.Auxiliary": {
+      "const": 2,
+      "description": "Auxiliary button, usually the wheel button or the middle button.",
+      "type": "number"
+    },
+    "Scheme.Buttons.Mapping.Back": {
+      "const": 3,
+      "description": "Forth button, typically the back button.",
+      "type": "number"
+    },
+    "Scheme.Buttons.Mapping.Button": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Primary"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Secondary"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Auxiliary"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Back"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Forward"
+        },
+        {
+          "type": "number"
+        }
+      ]
+    },
+    "Scheme.Buttons.Mapping.Forward": {
+      "const": 4,
+      "description": "Fifth button, typically the forward button.",
+      "type": "number"
+    },
     "Scheme.Buttons.Mapping.None": {
       "const": "none",
       "description": "Prevent the button events.",
       "type": "string"
+    },
+    "Scheme.Buttons.Mapping.Primary": {
+      "const": 0,
+      "description": "Primary button, usually the left button.",
+      "type": "number"
     },
     "Scheme.Buttons.Mapping.Run": {
       "additionalProperties": false,
@@ -159,6 +201,11 @@
         "run"
       ],
       "type": "object"
+    },
+    "Scheme.Buttons.Mapping.Secondary": {
+      "const": 1,
+      "description": "Secondary button, usually the right button.",
+      "type": "number"
     },
     "Scheme.If": {
       "additionalProperties": false,

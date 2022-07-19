@@ -260,3 +260,84 @@ Or, with fewer lines but more difficult to maintain:
   ]
 }
 ```
+
+## Button mappings
+
+Button mappings is a list that allows you to assign actions to buttons. For example, to open
+Launchpad when the back button is clicked, or to open Mission Control when <kbd>command</kbd> +
+the forward button is clicked.
+
+### Open Launchpad when the back button is clicked
+
+```json
+{
+  "schemes": [
+    {
+      "if": [
+        {
+          "device": {
+            "category": "mouse"
+          }
+        }
+      ],
+      "buttons": {
+        "mappings": [
+          {
+            "button": 3,
+            "action": {
+              "run": "open -a Launchpad"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+'"button": 3' denotes the fourth button, which is typically the back button.
+
+The following table lists all the buttons:
+
+| Button | Description                                                      |
+| ------ | ---------------------------------------------------------------- |
+| 0      | Primary button, usually the left button.                         |
+| 1      | Secondary button, usually the right button.                      |
+| 2      | Auxiliary button, usually the wheel button or the middle button. |
+| 3      | The fourth button, typically the back button.                    |
+| 4      | The fifth button, typically the forward button.                  |
+| 5-31   | Other buttons.                                                   |
+
+`{ "action": { "run": "open -a Launchpad" }}` assigns a shell command `open -a LaunchPad` to
+the button. When the button is clicked, the shell command will be executed.
+
+## Open Mission Control when <kbd>command</kbd> + the forward button is clicked
+
+```json
+{
+  "schemes": [
+    {
+      "if": [
+        {
+          "device": {
+            "category": "mouse"
+          }
+        }
+      ],
+      "buttons": {
+        "mappings": [
+          {
+            "button": 4,
+            "command": true,
+            "action": {
+              "run": "open -a 'Mission Control'"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+In this example, `"command": true` denotes that <kbd>command</kbd> should be pressed.
