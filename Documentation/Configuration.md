@@ -264,8 +264,8 @@ Or, with fewer lines but more difficult to maintain:
 ## Button mappings
 
 Button mappings is a list that allows you to assign actions to buttons. For example, to open
-Launchpad when the back button is clicked, or to open Mission Control when <kbd>command</kbd> +
-the forward button is clicked.
+Launchpad when <kbd>back</kbd> is clicked, or to open Mission Control when <kbd>command+forward</kbd>
+is clicked.
 
 ### Bsaic example
 
@@ -295,9 +295,9 @@ the forward button is clicked.
 }
 ```
 
-In this example, the back button is bound to open Launchpad.
+In this example, <kbd>back</kbd> is bound to open Launchpad.
 
-'"button": 3' denotes the fourth button, which is typically the back button.
+`"button": 3` denotes the fourth button, which is typically the back button.
 
 The following table lists all the buttons:
 
@@ -315,7 +315,7 @@ the button. When the button is clicked, the shell command will be executed.
 
 ### Example with modifier keys
 
-In this example, <kbd>command</kbd> + the forward button is bound to open Mission Control.
+In this example, <kbd>command + forward</kbd> is bound to open Mission Control.
 
 ```json
 {
@@ -382,9 +382,9 @@ You can specify `shift`, `option` and `control` as well.
 }
 ```
 
-In this example, AppleScript is used to simulate <kbd>control+←</kbd> and <kbd>control+→</kbd>.
+In this example, AppleScript is used to simulate <kbd>control + ←</kbd> and <kbd>control + →</kbd>.
 
-> **Note:**  
+> **Note**  
 > You will have to grant an additional permission to allow LinearMouse to simulate keys.
 
 This is not the best way to switch spaces. More action types will be added in future versions.
