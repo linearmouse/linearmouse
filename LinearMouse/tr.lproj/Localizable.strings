@@ -1,11 +1,11 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility.";
-"Get more help" = "Get more help";
-"Open Accessibility" = "Open Accessibility";
+"LinearMouse needs Accessibility permission" = "LinearMouse erişim iznine ihtiyaç duyuyor";
+"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "Sistem Ayarları > Güvenlik & Gizlilik > Erişilebilirlik üzerinden erişim izni vermeniz gerekiyor.";
+"Get more help" = "Daha fazla yardım";
+"Open Accessibility" = "Erişilebilirliği Aç";
 
-"%@ Preferences..." = "%@ Preferences...";
-"Config" = "Config";
-"Reload" = "Reload";
+"%@ Preferences..." = "%@ Tercihleri...";
+"Config" = "Ayarlar";
+"Reload" = "Yenile";
 "Reveal in Finder" = "Reveal in Finder";
 "Quit %@" = "Quit %@";
 
