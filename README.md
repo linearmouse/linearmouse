@@ -13,7 +13,9 @@
   <a href="https://crowdin.com/project/linearmouse"><img src="https://badges.crowdin.net/linearmouse/localized.svg" alt="Crowdin" /></a>
 </p>
 
+<p align="center">
 🖱 The mouse and trackpad utility for Mac.
+</p>
 
 ## Get started
 
