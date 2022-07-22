@@ -1,67 +1,67 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility.";
-"Get more help" = "Get more help";
-"Open Accessibility" = "Open Accessibility";
+"LinearMouse needs Accessibility permission" = "LinearMouse erişim iznine ihtiyaç duyuyor";
+"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "Sistem Ayarları > Güvenlik & Gizlilik > Erişilebilirlik üzerinden erişim izni vermeniz gerekiyor.";
+"Get more help" = "Daha fazla yardım";
+"Open Accessibility" = "Erişilebilirliği Aç";
 
-"%@ Preferences..." = "%@ Preferences...";
-"Config" = "Config";
-"Reload" = "Reload";
-"Reveal in Finder" = "Reveal in Finder";
-"Quit %@" = "Quit %@";
+"%@ Preferences..." = "%@ Tercihleri...";
+"Config" = "Ayarlar";
+"Reload" = "Yenile";
+"Reveal in Finder" = "Finder'da göster";
+"Quit %@" = "%@ 'dan çık";
 
-"Scrolling" = "Scrolling";
-"Pointer" = "Pointer";
-"Buttons" = "Buttons";
-"Modifier Keys" = "Modifier Keys";
-"General" = "General";
+"Scrolling" = "Kaydırma";
+"Pointer" = "İşaretçi";
+"Buttons" = "Tuşlar";
+"Modifier Keys" = "Değiştirici tuşlar";
+"General" = "Genel";
 
-"Reverse scrolling" = "Reverse scrolling";
-"(vertically)" = "(vertically)";
-"(horizontally)" = "(horizontally)";
-"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
-"Enable linear scrolling" = "Enable linear scrolling";
-"Disable scrolling acceleration." = "Disable scrolling acceleration.";
-"Scroll" = "Scroll";
-"By lines" = "By lines";
-"By pixels" = "By pixels";
+"Reverse scrolling" = "Ters kaydırma";
+"(vertically)" = "(dikey)";
+"(horizontally)" = "(yatay)";
+"Some gestures, such as swiping back and forward, may stop working." = "İleri ve geri kaydırma gibi bazı hareketler çalışmayabilir.";
+"Enable linear scrolling" = "Doğrusal kaydırmayı etkinleştir";
+"Disable scrolling acceleration." = "Kaydırma ivmesini devre dışı bırak.";
+"Scroll" = "Kaydır";
+"By lines" = "Satıra göre";
+"By pixels" = "Piksele göre";
 
-"Acceleration" = "Acceleration";
-"Speed" = "Speed";
-"Revert to system defaults" = "Revert to system defaults";
-"You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
-"Disable pointer acceleration" = "Disable pointer acceleration";
+"Acceleration" = "İvme";
+"Speed" = "Hız";
+"Revert to system defaults" = "Fabrika ayarlarına dön";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z'a basarak da fabrika ayarlarına dönebilirsiniz.";
+"Disable pointer acceleration" = "İşaretçi ivmesini devre dışı bırak";
 
-"Enable universal back and forward" = "Enable universal back and forward";
-"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
+"Enable universal back and forward" = "Evrensel ileri ve geriyi etkinleştir";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Evrensel ileri ve geri işlevine izin vermek için ileri ve geri yan düğmelerini kaydırma hareketlerine dönüştürün.";
 
-"No action" = "No action";
-"Alter orientation" = "Alter orientation";
-"Change speed" = "Change speed";
-"to" = "to";
+"No action" = "Eylem yok";
+"Alter orientation" = "Yönlendirmeyi değiştir";
+"Change speed" = "Hızı değiştir";
+"to" = "şuna";
 
-"Settings" = "Settings";
-"Show in menu bar" = "Show in menu bar";
-"To show the preferences, launch %@ again." = "To show the preferences, launch %@ again.";
+"Settings" = "Ayarlar";
+"Show in menu bar" = "Menüde göster";
+"To show the preferences, launch %@ again." = "Tercihleri görmek için %@'i yeniden başlatın.";
 
-"Update" = "Update";
-"Version: %@" = "Version: %@";
-"Check for Updates..." = "Check for Updates...";
-"Automatically" = "Automatically";
-"Daily" = "Daily";
-"Weekly" = "Weekly";
-"Monthly" = "Monthly";
-"Include beta" = "Include beta";
+"Update" = "Güncellemeler";
+"Version: %@" = "Sürüm: %@";
+"Check for Updates..." = "Güncellemeleri kontrol et...";
+"Automatically" = "Otomatik olarak";
+"Daily" = "Günlük";
+"Weekly" = "Haftalık";
+"Monthly" = "Aylık";
+"Include beta" = "Beta sürümlerini dahil et";
 
-"Links" = "Links";
-"Homepage" = "Homepage";
-"Open Collective" = "Open Collective";
+"Links" = "Bağlantılar";
+"Homepage" = "Anasayfa";
+"Open Collective" = "Topluluğu aç";
 "GitHub" = "GitHub";
-"Feedback" = "Feedback";
-"Contact" = "Contact";
+"Feedback" = "Geri bildirim";
+"Contact" = "İletişim";
 
-"Auto switch to the active device" = "Auto switch to the active device";
-"OK" = "OK";
+"Auto switch to the active device" = "Otomatik olarak aktif cihaza değiştir";
+"OK" = "Tamam";
 
-"Mouse" = "Mouse";
-"Trackpad" = "Trackpad";
-"(active)" = "(active)";
+"Mouse" = "Fare";
+"Trackpad" = "Dokunmatik yüzey";
+"(active)" = "(aktif)";
