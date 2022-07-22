@@ -2,22 +2,34 @@
 // Copyright (c) 2021-2022 Jiahao Lu
 
 import Foundation
+import os.log
 
 class EventTap {
+    private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "EventTap")
+
     var eventTap: CFMachPort?
     var runLoopSource: CFRunLoopSource?
 
     private let mouseDetector = DefaultMouseDetector()
 
-    private let eventTapCallback: CGEventTapCallBack = { _, _, event, refcon in
+    private let eventTapCallback: CGEventTapCallBack = { _, type, event, refcon in
         // TODO: Weak self reference?
         guard let unwrappedRefcon = refcon else {
             return Unmanaged.passUnretained(event)
         }
+
         let this = Unmanaged<EventTap>.fromOpaque(unwrappedRefcon).takeUnretainedValue()
+
+        // FIXME: Avoid timeout?
+        if type == .tapDisabledByUserInput || type == .tapDisabledByTimeout {
+            os_log("EventTap disabled (%{public}@), re-enable it", log: log, type: .error, String(describing: type))
+            this.enable()
+        }
+
         if let event = transformEvent(event) {
             return Unmanaged.passUnretained(event)
         }
+
         return nil
     }
 
