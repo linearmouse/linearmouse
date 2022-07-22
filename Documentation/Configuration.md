@@ -17,7 +17,7 @@ Here is a simple example of LinearMouse configuration.
 
 ```json
 {
-  "$schema": "https://app.linearmouse.org/schema/0.7.1",
+  "$schema": "https://app.linearmouse.org/schema/0.7.2",
   "schemes": [
     {
       "if": {
