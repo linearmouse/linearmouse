@@ -80,18 +80,30 @@ enum CGSError: Error {
 }
 
 func postSymbolicHotKey(_ hotkey: SymbolicHotKey) throws {
+    let hotkey = CGSSymbolicHotKey(hotkey.rawValue)
+
     var keyEquivalent: unichar = 0
     var virtualKeyCode: unichar = 0
     var modifiers = CGSModifierFlags(0)
 
     let error = CGSGetSymbolicHotKeyValue(
-        CGSSymbolicHotKey(hotkey.rawValue),
+        hotkey,
         &keyEquivalent,
         &virtualKeyCode,
         &modifiers
     )
     guard error == .success else {
         throw CGSError.CoreGraphicsError(error)
+    }
+
+    let hotkeyEnabled = CGSIsSymbolicHotKeyEnabled(hotkey)
+    if !hotkeyEnabled {
+        CGSSetSymbolicHotKeyEnabled(hotkey, true)
+    }
+    defer {
+        if !hotkeyEnabled {
+            CGSSetSymbolicHotKeyEnabled(hotkey, false)
+        }
     }
 
     let down = CGEvent(keyboardEventSource: nil, virtualKey: virtualKeyCode, keyDown: true)!
