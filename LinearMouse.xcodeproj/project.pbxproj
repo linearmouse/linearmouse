@@ -118,6 +118,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		971F87DB288DA11600748F24 /* CGSKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = CGSKit; sourceTree = "<group>"; };
 		972A5E1E285CA43D00CB6440 /* DevicePickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSheet.swift; sourceTree = "<group>"; };
 		972A5E21285CA49800CB6440 /* DevicePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePicker.swift; sourceTree = "<group>"; };
 		972A5E23285CA4AA00CB6440 /* DevicePickerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerState.swift; sourceTree = "<group>"; };
@@ -452,6 +453,7 @@
 		97C5D8F12856D9FE00CBED2D /* Modules */ = {
 			isa = PBXGroup;
 			children = (
+				971F87DB288DA11600748F24 /* CGSKit */,
 				97C5D8FD2856E3BE00CBED2D /* GestureKit */,
 				97A7A39928572FB600EE4833 /* PointerKit */,
 				97A7A3982857266700EE4833 /* README.md */,
