@@ -137,9 +137,26 @@
           "$ref": "#/definitions/Scheme.Buttons.Mapping.SpaceRight"
         },
         {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MissionControl"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.AppExpose"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Launchpad"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.ShowDesktop"
+        },
+        {
           "$ref": "#/definitions/Scheme.Buttons.Mapping.Run"
         }
       ]
+    },
+    "Scheme.Buttons.Mapping.AppExpose": {
+      "const": "appExpose",
+      "description": "App Exposé.",
+      "type": "string"
     },
     "Scheme.Buttons.Mapping.Auto": {
       "const": "auto",
@@ -183,6 +200,16 @@
       "description": "Fifth button, typically the forward button.",
       "type": "number"
     },
+    "Scheme.Buttons.Mapping.Launchpad": {
+      "const": "launchpad",
+      "description": "Launchpad.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.MissionControl": {
+      "const": "missionControl",
+      "description": "Mission Control.",
+      "type": "string"
+    },
     "Scheme.Buttons.Mapping.None": {
       "const": "none",
       "description": "Prevent the button events.",
@@ -212,6 +239,11 @@
       "const": 1,
       "description": "Secondary button, usually the right button.",
       "type": "number"
+    },
+    "Scheme.Buttons.Mapping.ShowDesktop": {
+      "const": "showDesktop",
+      "description": "Show desktop.",
+      "type": "string"
     },
     "Scheme.Buttons.Mapping.SpaceLeft": {
       "const": "spaceLeft",

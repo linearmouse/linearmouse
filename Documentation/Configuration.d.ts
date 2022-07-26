@@ -290,7 +290,16 @@ declare namespace Scheme {
     };
 
     namespace Mapping {
-      type Action = Auto | None | SpaceLeft | SpaceRight | Run;
+      type Action =
+        | Auto
+        | None
+        | SpaceLeft
+        | SpaceRight
+        | MissionControl
+        | AppExpose
+        | Launchpad
+        | ShowDesktop
+        | Run;
 
       /**
        * @description Do not modify the button behavior.
@@ -311,6 +320,26 @@ declare namespace Scheme {
        * @description Mission Control: Move right a space.
        */
       type SpaceRight = "spaceRight";
+
+      /**
+       * @description Mission Control.
+       */
+      type MissionControl = "missionControl";
+
+      /**
+       * @description App Exposé.
+       */
+      type AppExpose = "appExpose";
+
+      /**
+       * @description Launchpad.
+       */
+      type Launchpad = "launchpad";
+
+      /**
+       * @description Show desktop.
+       */
+      type ShowDesktop = "showDesktop";
 
       /**
        * @description Run a specific command.

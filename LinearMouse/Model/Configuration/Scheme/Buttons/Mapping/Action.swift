@@ -5,15 +5,25 @@ import Foundation
 
 extension Scheme.Buttons.Mapping {
     enum Action {
-        case auto
-        case none
-        case spaceLeft
-        case spaceRight
+        case simpleAction(SimpleAction)
         case run(String)
     }
 }
 
 extension Scheme.Buttons.Mapping.Action: Codable {
+    enum SimpleAction: String, Codable, CaseIterable {
+        case auto
+        case none
+
+        case spaceLeft
+        case spaceRight
+
+        case missionControl
+        case appExpose
+        case launchpad
+        case showDesktop
+    }
+
     enum ValueError: Error {
         case invalidValue
     }
@@ -23,51 +33,26 @@ extension Scheme.Buttons.Mapping.Action: Codable {
     }
 
     init(from decoder: Decoder) throws {
-        do {
-            let container = try decoder.singleValueContainer()
-
-            switch try container.decode(String.self) {
-            case "auto":
-                self = .auto
-
-            case "none":
-                self = .none
-
-            case "spaceLeft":
-                self = .spaceLeft
-
-            case "spaceRight":
-                self = .spaceRight
-
-            default:
-                throw CustomDecodingError(in: container, error: ValueError.invalidValue)
-            }
-        } catch {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-
-            let command = try container.decode(String.self, forKey: .run)
-
-            self = .run(command)
+        if let container = try? decoder.singleValueContainer(),
+           let simpleAction = try? container.decode(SimpleAction.self) {
+            self = .simpleAction(simpleAction)
+            return
         }
+
+        if let container = try? decoder.container(keyedBy: CodingKeys.self),
+           let command = try? container.decode(String.self, forKey: .run) {
+            self = .run(command)
+            return
+        }
+
+        throw CustomDecodingError(codingPath: decoder.codingPath, error: ValueError.invalidValue)
     }
 
     func encode(to encoder: Encoder) throws {
         switch self {
-        case .auto:
+        case let .simpleAction(simpleAction):
             var container = encoder.singleValueContainer()
-            try container.encode("auto")
-
-        case .none:
-            var container = encoder.singleValueContainer()
-            try container.encode("none")
-
-        case .spaceLeft:
-            var container = encoder.singleValueContainer()
-            try container.encode("spaceLeft")
-
-        case .spaceRight:
-            var container = encoder.singleValueContainer()
-            try container.encode("spaceRight")
+            try container.encode(simpleAction)
 
         case let .run(command):
             var container = encoder.container(keyedBy: CodingKeys.self)
@@ -80,7 +65,10 @@ extension Scheme.Buttons.Mapping.Action.ValueError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidValue:
-            return NSLocalizedString(#"Action must be "auto", "none" or { "run": "<command>" }"#, comment: "")
+            let simpleActions = Scheme.Buttons.Mapping.Action.SimpleAction.allCases
+                .map { "\"\($0)\"" }
+                .joined(separator: ", ")
+            return NSLocalizedString("Action must be \(simpleActions) or { \"run\": \"<command>\" }", comment: "")
         }
     }
 }
