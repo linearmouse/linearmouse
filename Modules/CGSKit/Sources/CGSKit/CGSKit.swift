@@ -2,8 +2,9 @@
 // Copyright (c) 2021-2022 Jiahao Lu
 
 import CGSKitC
+import CoreFoundation
 
-enum SymbolicHotKey: UInt32 {
+public enum SymbolicHotKey: UInt32 {
     // full keyboard access hotkeys
     case toggleFullKeyboardAccess = 12,
          focusMenubar = 7,
@@ -75,11 +76,11 @@ enum SymbolicHotKey: UInt32 {
          increaseDisplayBrightness = 54
 }
 
-enum CGSError: Error {
+public enum CGSError: Error {
     case CoreGraphicsError(CGError)
 }
 
-func postSymbolicHotKey(_ hotkey: SymbolicHotKey) throws {
+public func postSymbolicHotKey(_ hotkey: SymbolicHotKey) throws {
     let hotkey = CGSSymbolicHotKey(hotkey.rawValue)
 
     var keyEquivalent: unichar = 0
@@ -102,15 +103,59 @@ func postSymbolicHotKey(_ hotkey: SymbolicHotKey) throws {
     }
     defer {
         if !hotkeyEnabled {
+            waitUntilCGEventsBeingHandled()
             CGSSetSymbolicHotKeyEnabled(hotkey, false)
         }
     }
 
-    let down = CGEvent(keyboardEventSource: nil, virtualKey: virtualKeyCode, keyDown: true)!
-    down.flags = CGEventFlags(rawValue: UInt64(modifiers.rawValue))
-    let up = CGEvent(keyboardEventSource: nil, virtualKey: virtualKeyCode, keyDown: false)!
-    up.flags = CGEventFlags(rawValue: UInt64(modifiers.rawValue))
+    let keyDown = CGEvent(keyboardEventSource: nil, virtualKey: virtualKeyCode, keyDown: true)!
+    keyDown.flags = CGEventFlags(rawValue: UInt64(modifiers.rawValue))
+    let keyUp = CGEvent(keyboardEventSource: nil, virtualKey: virtualKeyCode, keyDown: false)!
+    keyUp.flags = CGEventFlags(rawValue: UInt64(modifiers.rawValue))
 
-    down.post(tap: .cgSessionEventTap)
-    up.post(tap: .cgSessionEventTap)
+    keyDown.post(tap: .cgSessionEventTap)
+    keyUp.post(tap: .cgSessionEventTap)
+}
+
+private func waitUntilCGEventsBeingHandled() {
+    enum Consts {
+        static let magic: Int64 = 10086
+    }
+
+    var seenMark = false
+
+    let callback: CGEventTapCallBack = { _, _, event, refcon in
+        if event.getIntegerValueField(.eventSourceUserData) == Consts.magic {
+            refcon?.storeBytes(of: true, as: Bool.self)
+        }
+
+        return Unmanaged.passUnretained(event)
+    }
+
+    let eventTap = CGEvent.tapCreate(tap: .cgSessionEventTap,
+                                     place: .tailAppendEventTap,
+                                     options: .listenOnly,
+                                     eventsOfInterest: 1 << CGEventType.null.rawValue,
+                                     callback: callback,
+                                     userInfo: &seenMark)!
+
+    let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
+
+    CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
+
+    let mark = CGEvent(source: nil)!
+    mark.setIntegerValueField(.eventSourceUserData, value: Consts.magic)
+    mark.post(tap: .cgSessionEventTap)
+    CGEvent.tapEnable(tap: eventTap, enable: true)
+
+    for _ in 0 ..< 10 {
+        CFRunLoopRunInMode(.defaultMode, 0.01, true)
+        if seenMark {
+            break
+        }
+    }
+
+    CGEvent.tapEnable(tap: eventTap, enable: false)
+
+    CFRunLoopRemoveSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
 }
