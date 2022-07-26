@@ -384,3 +384,40 @@ You can specify `shift`, `option` and `control` as well.
 
 > **Note**  
 > You will have to grant an additional permission to allow LinearMouse to simulate keys.
+
+### Action sheet
+
+#### Simple actions
+
+A simple action is an action without any parameters.
+
+```json
+{
+  "action": "<action>"
+}
+```
+
+`<action>` could be one of:
+
+| Action           | Description                          |
+| ---------------- | ------------------------------------ |
+| `auto`           | Do not modify the button behavior.   |
+| `none`           | Prevent the button events.           |
+| `spaceLeft`      | Mission Control: Move left a space.  |
+| `spaceRight`     | Mission Control: Move right a space. |
+| `missionControl` | Mission Control.                     |
+| `appExpose`      | App Exposé.                          |
+| `launchpad`      | Launchpad.                           |
+| `showDesktop`    | Show desktop.                        |
+
+#### Run shell commands
+
+```json
+{
+  "action": {
+    "run": "<command>"
+  }
+}
+```
+
+The `<command>` will be executed with bash.
