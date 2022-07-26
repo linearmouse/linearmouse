@@ -169,6 +169,7 @@
 		97C5DBC92868B1B4006FA6B4 /* ModifierKeysSettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierKeysSettingsState.swift; sourceTree = "<group>"; };
 		97C5DBCB2868B4A5006FA6B4 /* ModifierKeyActionPickerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierKeyActionPickerState.swift; sourceTree = "<group>"; };
 		97C97726288FC19A009094BA /* DockKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DockKit; sourceTree = "<group>"; };
+		97C9772928900298009094BA /* zh-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-HK"; path = "zh-HK.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		97EFAABC28675D00008E6E67 /* ScrollingSettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingSettingsState.swift; sourceTree = "<group>"; };
 		97F77FA3285DC467007C9C2B /* DevicePickerSectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSectionState.swift; sourceTree = "<group>"; };
 		97F77FA7285DC828007C9C2B /* Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
@@ -777,6 +778,7 @@
 				fi,
 				fr,
 				nl,
+				"zh-HK",
 			);
 			mainGroup = B75A060F2671E9D800BEAF77;
 			packageReferences = (
@@ -991,6 +993,7 @@
 				B7BE469527B3768B00168BB9 /* fi */,
 				B7BE469627B3768B00168BB9 /* fr */,
 				B7BE469727B3768B00168BB9 /* nl */,
+				97C9772928900298009094BA /* zh-HK */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
