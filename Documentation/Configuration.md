@@ -348,7 +348,7 @@ In this example, <kbd>command + forward</kbd> is bound to open Mission Control.
 
 You can specify `shift`, `option` and `control` as well.
 
-### Switch spaces (desktops) with the back and forward button
+### Switch spaces (desktops) with the <kbd>command + back</kbd> and <kbd>command + forward</kbd>
 
 `spaceLeft` and `spaceRight` can be used to move left and right a space.
 
@@ -367,10 +367,12 @@ You can specify `shift`, `option` and `control` as well.
         "mappings": [
           {
             "button": 3,
+            "command": true,
             "action": "spaceLeft"
           },
           {
             "button": 4,
+            "command": true,
             "action": "spaceRight"
           }
         ]
