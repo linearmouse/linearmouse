@@ -264,8 +264,8 @@ Or, with fewer lines but more difficult to maintain:
 ## Button mappings
 
 Button mappings is a list that allows you to assign actions to buttons. For example, to open
-Launchpad when <kbd>back</kbd> is clicked, or to open Mission Control when <kbd>command+forward</kbd>
-is clicked.
+Launchpad when the wheel button is clicked, or to switch spaces when <kbd>command + back</kbd>
+or <kbd>command + forward</kbd> is clicked.
 
 ### Bsaic example
 
@@ -283,7 +283,7 @@ is clicked.
       "buttons": {
         "mappings": [
           {
-            "button": 3,
+            "button": 2,
             "action": {
               "run": "open -a Launchpad"
             }
@@ -295,9 +295,9 @@ is clicked.
 }
 ```
 
-In this example, <kbd>back</kbd> is bound to open Launchpad.
+In this example, the wheel button is bound to open Launchpad.
 
-`"button": 3` denotes the fourth button, which is typically the back button.
+`"button": 2` denotes the auxiliary button, which is usually the wheel button.
 
 The following table lists all the buttons:
 
