@@ -1,3 +1,3 @@
 # CGSKit
 
-A description of this package.
+Private APIs in CoreGraphics.

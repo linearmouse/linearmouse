@@ -3,6 +3,7 @@
 
 import AppKit
 import CGSKit
+import DockKit
 import Foundation
 import os.log
 
@@ -48,7 +49,7 @@ extension ButtonActions: EventTransformer {
             return nil
         }
 
-        if case .auto = action {
+        if case .simpleAction(.auto) = action {
             return nil
         }
 
@@ -84,14 +85,26 @@ extension ButtonActions: EventTransformer {
 
     func exec(action: Scheme.Buttons.Mapping.Action) throws {
         switch action {
-        case .none, .auto:
+        case .simpleAction(.none), .simpleAction(.auto):
             return
 
-        case .spaceLeft:
+        case .simpleAction(.spaceLeft):
             try postSymbolicHotKey(.spaceLeft)
 
-        case .spaceRight:
+        case .simpleAction(.spaceRight):
             try postSymbolicHotKey(.spaceRight)
+
+        case .simpleAction(.missionControl):
+            missionControl()
+
+        case .simpleAction(.appExpose):
+            appExpose()
+
+        case .simpleAction(.launchpad):
+            launchpad()
+
+        case .simpleAction(.showDesktop):
+            showDesktop()
 
         case let .run(command):
             let task = Process()
