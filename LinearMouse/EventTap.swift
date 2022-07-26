@@ -51,7 +51,7 @@ class EventTap {
             userInfo: Unmanaged.passUnretained(self).toOpaque()
         )
         runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
-        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, CFRunLoopMode.commonModes)
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
     }
 
     func enable() {

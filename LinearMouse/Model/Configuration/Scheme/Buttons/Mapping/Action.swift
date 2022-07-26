@@ -7,6 +7,8 @@ extension Scheme.Buttons.Mapping {
     enum Action {
         case auto
         case none
+        case spaceLeft
+        case spaceRight
         case run(String)
     }
 }
@@ -31,6 +33,12 @@ extension Scheme.Buttons.Mapping.Action: Codable {
             case "none":
                 self = .none
 
+            case "spaceLeft":
+                self = .spaceLeft
+
+            case "spaceRight":
+                self = .spaceRight
+
             default:
                 throw CustomDecodingError(in: container, error: ValueError.invalidValue)
             }
@@ -52,6 +60,14 @@ extension Scheme.Buttons.Mapping.Action: Codable {
         case .none:
             var container = encoder.singleValueContainer()
             try container.encode("none")
+
+        case .spaceLeft:
+            var container = encoder.singleValueContainer()
+            try container.encode("spaceLeft")
+
+        case .spaceRight:
+            var container = encoder.singleValueContainer()
+            try container.encode("spaceRight")
 
         case let .run(command):
             var container = encoder.container(keyedBy: CodingKeys.self)

@@ -56,6 +56,7 @@
 		97C5DBC82868A2C7006FA6B4 /* Modifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBC72868A2C7006FA6B4 /* Modifiers.swift */; };
 		97C5DBCA2868B1B4006FA6B4 /* ModifierKeysSettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBC92868B1B4006FA6B4 /* ModifierKeysSettingsState.swift */; };
 		97C5DBCC2868B4A5006FA6B4 /* ModifierKeyActionPickerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBCB2868B4A5006FA6B4 /* ModifierKeyActionPickerState.swift */; };
+		97C97725288EE67E009094BA /* CGSKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C97724288EE67E009094BA /* CGSKit */; };
 		97EFAABD28675D00008E6E67 /* ScrollingSettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97EFAABC28675D00008E6E67 /* ScrollingSettingsState.swift */; };
 		97F77FA4285DC467007C9C2B /* DevicePickerSectionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA3285DC467007C9C2B /* DevicePickerSectionState.swift */; };
 		97F77FA8285DC828007C9C2B /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA7285DC828007C9C2B /* Environment.swift */; };
@@ -264,6 +265,7 @@
 				B71392F426731645004C0173 /* LoginServiceKit in Frameworks */,
 				B73AC55127C29C7C00F7D3E8 /* Version in Frameworks */,
 				B7F6C5F827A4F6A800E5400B /* LRUCache in Frameworks */,
+				97C97725288EE67E009094BA /* CGSKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -691,6 +693,7 @@
 				972DF63C28599BA400B83932 /* Introspect */,
 				972A5E2F285D891100CB6440 /* Defaults */,
 				977638F8286BE9EE00A698B6 /* PublishedObject */,
+				97C97724288EE67E009094BA /* CGSKit */,
 			);
 			productName = LinearMouse;
 			productReference = B75A06182671E9D800BEAF77 /* LinearMouse.app */;
@@ -1334,6 +1337,10 @@
 		97C5D8FE2856E3CB00CBED2D /* GestureKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = GestureKit;
+		};
+		97C97724288EE67E009094BA /* CGSKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CGSKit;
 		};
 		B70A58F5284F987900E5C86E /* LaunchAtLogin */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -350,6 +350,8 @@ You can specify `shift`, `option` and `control` as well.
 
 ### Switch spaces (desktops) with the back and forward button
 
+`spaceLeft` and `spaceRight` can be used to move left and right a space.
+
 ```json
 {
   "schemes": [
@@ -365,15 +367,11 @@ You can specify `shift`, `option` and `control` as well.
         "mappings": [
           {
             "button": 3,
-            "action": {
-              "run": "osascript -e 'tell application \"System Events\" to key code 123 using control down'"
-            }
+            "action": "spaceLeft"
           },
           {
             "button": 4,
-            "action": {
-              "run": "osascript -e 'tell application \"System Events\" to key code 124 using control down'"
-            }
+            "action": "spaceRight"
           }
         ]
       }
@@ -382,9 +380,5 @@ You can specify `shift`, `option` and `control` as well.
 }
 ```
 
-In this example, AppleScript is used to simulate <kbd>control + ←</kbd> and <kbd>control + →</kbd>.
-
 > **Note**  
 > You will have to grant an additional permission to allow LinearMouse to simulate keys.
-
-This is not the best way to switch spaces. More action types will be added in future versions.
