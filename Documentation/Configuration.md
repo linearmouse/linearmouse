@@ -264,8 +264,8 @@ Or, with fewer lines but more difficult to maintain:
 ## Button mappings
 
 Button mappings is a list that allows you to assign actions to buttons. For example, to open
-Launchpad when <kbd>back</kbd> is clicked, or to open Mission Control when <kbd>command+forward</kbd>
-is clicked.
+Launchpad when the wheel button is clicked, or to switch spaces when <kbd>command + back</kbd>
+or <kbd>command + forward</kbd> is clicked.
 
 ### Bsaic example
 
@@ -283,7 +283,7 @@ is clicked.
       "buttons": {
         "mappings": [
           {
-            "button": 3,
+            "button": 2,
             "action": {
               "run": "open -a Launchpad"
             }
@@ -295,9 +295,9 @@ is clicked.
 }
 ```
 
-In this example, <kbd>back</kbd> is bound to open Launchpad.
+In this example, the wheel button is bound to open Launchpad.
 
-`"button": 3` denotes the fourth button, which is typically the back button.
+`"button": 2` denotes the auxiliary button, which is usually the wheel button.
 
 The following table lists all the buttons:
 
@@ -348,7 +348,9 @@ In this example, <kbd>command + forward</kbd> is bound to open Mission Control.
 
 You can specify `shift`, `option` and `control` as well.
 
-### Switch spaces (desktops) with the back and forward button
+### Switch spaces (desktops) with the <kbd>command + back</kbd> and <kbd>command + forward</kbd>
+
+`spaceLeft` and `spaceRight` can be used to move left and right a space.
 
 ```json
 {
@@ -365,15 +367,13 @@ You can specify `shift`, `option` and `control` as well.
         "mappings": [
           {
             "button": 3,
-            "action": {
-              "run": "osascript -e 'tell application \"System Events\" to key code 123 using control down'"
-            }
+            "command": true,
+            "action": "spaceLeft"
           },
           {
             "button": 4,
-            "action": {
-              "run": "osascript -e 'tell application \"System Events\" to key code 124 using control down'"
-            }
+            "command": true,
+            "action": "spaceRight"
           }
         ]
       }
@@ -382,9 +382,5 @@ You can specify `shift`, `option` and `control` as well.
 }
 ```
 
-In this example, AppleScript is used to simulate <kbd>control + ←</kbd> and <kbd>control + →</kbd>.
-
 > **Note**  
 > You will have to grant an additional permission to allow LinearMouse to simulate keys.
-
-This is not the best way to switch spaces. More action types will be added in future versions.

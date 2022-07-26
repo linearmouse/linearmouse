@@ -1,5 +1,8 @@
 #!/bin/bash -e
 
+npm run generate:json-schema
+git add Documentation/Configuration.json
+
 FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g' | { grep '.swift$' || :; })
 
 [ -z "$FILES" ] && exit 0

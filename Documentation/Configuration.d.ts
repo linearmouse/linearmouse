@@ -290,7 +290,7 @@ declare namespace Scheme {
     };
 
     namespace Mapping {
-      type Action = Auto | None | Run;
+      type Action = Auto | None | SpaceLeft | SpaceRight | Run;
 
       /**
        * @description Do not modify the button behavior.
@@ -301,6 +301,16 @@ declare namespace Scheme {
        * @description Prevent the button events.
        */
       type None = "none";
+
+      /**
+       * @description Mission Control: Move left a space.
+       */
+      type SpaceLeft = "spaceLeft";
+
+      /**
+       * @description Mission Control: Move right a space.
+       */
+      type SpaceRight = "spaceRight";
 
       /**
        * @description Run a specific command.

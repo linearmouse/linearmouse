@@ -56,6 +56,7 @@
 		97C5DBC82868A2C7006FA6B4 /* Modifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBC72868A2C7006FA6B4 /* Modifiers.swift */; };
 		97C5DBCA2868B1B4006FA6B4 /* ModifierKeysSettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBC92868B1B4006FA6B4 /* ModifierKeysSettingsState.swift */; };
 		97C5DBCC2868B4A5006FA6B4 /* ModifierKeyActionPickerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBCB2868B4A5006FA6B4 /* ModifierKeyActionPickerState.swift */; };
+		97C97725288EE67E009094BA /* CGSKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C97724288EE67E009094BA /* CGSKit */; };
 		97EFAABD28675D00008E6E67 /* ScrollingSettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97EFAABC28675D00008E6E67 /* ScrollingSettingsState.swift */; };
 		97F77FA4285DC467007C9C2B /* DevicePickerSectionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA3285DC467007C9C2B /* DevicePickerSectionState.swift */; };
 		97F77FA8285DC828007C9C2B /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA7285DC828007C9C2B /* Environment.swift */; };
@@ -118,6 +119,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		971F87DB288DA11600748F24 /* CGSKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = CGSKit; sourceTree = "<group>"; };
 		972A5E1E285CA43D00CB6440 /* DevicePickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSheet.swift; sourceTree = "<group>"; };
 		972A5E21285CA49800CB6440 /* DevicePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePicker.swift; sourceTree = "<group>"; };
 		972A5E23285CA4AA00CB6440 /* DevicePickerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerState.swift; sourceTree = "<group>"; };
@@ -263,6 +265,7 @@
 				B71392F426731645004C0173 /* LoginServiceKit in Frameworks */,
 				B73AC55127C29C7C00F7D3E8 /* Version in Frameworks */,
 				B7F6C5F827A4F6A800E5400B /* LRUCache in Frameworks */,
+				97C97725288EE67E009094BA /* CGSKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -452,6 +455,7 @@
 		97C5D8F12856D9FE00CBED2D /* Modules */ = {
 			isa = PBXGroup;
 			children = (
+				971F87DB288DA11600748F24 /* CGSKit */,
 				97C5D8FD2856E3BE00CBED2D /* GestureKit */,
 				97A7A39928572FB600EE4833 /* PointerKit */,
 				97A7A3982857266700EE4833 /* README.md */,
@@ -689,6 +693,7 @@
 				972DF63C28599BA400B83932 /* Introspect */,
 				972A5E2F285D891100CB6440 /* Defaults */,
 				977638F8286BE9EE00A698B6 /* PublishedObject */,
+				97C97724288EE67E009094BA /* CGSKit */,
 			);
 			productName = LinearMouse;
 			productReference = B75A06182671E9D800BEAF77 /* LinearMouse.app */;
@@ -1332,6 +1337,10 @@
 		97C5D8FE2856E3CB00CBED2D /* GestureKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = GestureKit;
+		};
+		97C97724288EE67E009094BA /* CGSKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CGSKit;
 		};
 		B70A58F5284F987900E5C86E /* LaunchAtLogin */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -1,6 +1,8 @@
 // MIT License
 // Copyright (c) 2021-2022 Jiahao Lu
 
+import AppKit
+import CGSKit
 import Foundation
 import os.log
 
@@ -65,24 +67,37 @@ extension ButtonActions: EventTransformer {
         os_log("Find mapping: %{public}@", log: Self.log, type: .debug, String(describing: action))
 
         if mouseUpEventTypes.contains(event.type) {
-            exec(action: action)
+            DispatchQueue.main.async { [self] in
+                do {
+                    try exec(action: action)
+                } catch {
+                    let alert = NSAlert()
+                    alert.alertStyle = .warning
+                    alert.messageText = String(describing: error)
+                    alert.runModal()
+                }
+            }
         }
 
         return nil
     }
 
-    func exec(action: Scheme.Buttons.Mapping.Action) {
+    func exec(action: Scheme.Buttons.Mapping.Action) throws {
         switch action {
         case .none, .auto:
             return
 
+        case .spaceLeft:
+            try postSymbolicHotKey(.spaceLeft)
+
+        case .spaceRight:
+            try postSymbolicHotKey(.spaceRight)
+
         case let .run(command):
-            DispatchQueue.main.async {
-                let task = Process()
-                task.launchPath = "/bin/bash"
-                task.arguments = ["-c", command]
-                task.launch()
-            }
+            let task = Process()
+            task.launchPath = "/bin/bash"
+            task.arguments = ["-c", command]
+            task.launch()
         }
     }
 }

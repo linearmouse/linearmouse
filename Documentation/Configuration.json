@@ -131,6 +131,12 @@
           "$ref": "#/definitions/Scheme.Buttons.Mapping.None"
         },
         {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.SpaceLeft"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.SpaceRight"
+        },
+        {
           "$ref": "#/definitions/Scheme.Buttons.Mapping.Run"
         }
       ]
@@ -206,6 +212,16 @@
       "const": 1,
       "description": "Secondary button, usually the right button.",
       "type": "number"
+    },
+    "Scheme.Buttons.Mapping.SpaceLeft": {
+      "const": "spaceLeft",
+      "description": "Mission Control: Move left a space.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.SpaceRight": {
+      "const": "spaceRight",
+      "description": "Mission Control: Move right a space.",
+      "type": "string"
     },
     "Scheme.If": {
       "additionalProperties": false,
