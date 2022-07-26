@@ -1,5 +1,5 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse 需要輔助使用權限";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "你需要在系統偏好設定 > 安全性與隱私權 > 輔助使用中授予輔助使用權限。";
+"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "你需要在系統偏好設定 > 保安與私隱 > 輔助使用中授予輔助使用權限。";
 "Get more help" = "獲取更多幫助";
 "Open Accessibility" = "打開輔助使用";
 
@@ -11,7 +11,7 @@
 
 "Scrolling" = "捲動";
 "Pointer" = "指標";
-"Buttons" = "按鍵";
+"Buttons" = "按鈕";
 "Modifier Keys" = "變更鍵";
 "General" = "通用";
 
@@ -23,12 +23,12 @@
 "Disable scrolling acceleration." = "禁用捲動加速度。";
 "Scroll" = "捲動";
 "By lines" = "按行";
-"By pixels" = "按畫素";
+"By pixels" = "按像素";
 
 "Acceleration" = "加速度";
 "Speed" = "速度";
-"Revert to system defaults" = "回退到系統預設值";
-"You may also press ⌃⇧⌘Z to revert to system defaults." = "你也可以按下 ⌃⇧⌘Z 來回退到系統預設值。";
+"Revert to system defaults" = "恢復到系統預設值";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "你也可以按下 ⌃⇧⌘Z 來恢復到系統預設值。";
 "Disable pointer acceleration" = "禁用指標加速度";
 
 "Enable universal back and forward" = "啟用全局後退、前進";
@@ -47,7 +47,7 @@
 "Version: %@" = "版本：%@";
 "Check for Updates..." = "檢查更新...";
 "Automatically" = "自動";
-"Daily" = "每天";
+"Daily" = "每日";
 "Weekly" = "每週";
 "Monthly" = "每月";
 "Include beta" = "包含測試版";
@@ -56,12 +56,12 @@
 "Homepage" = "首頁";
 "Open Collective" = "Open Collective";
 "GitHub" = "GitHub";
-"Feedback" = "反饋";
+"Feedback" = "意見反饋";
 "Contact" = "聯絡";
 
 "Auto switch to the active device" = "自動切換到活躍設備";
 "OK" = "確認";
 
 "Mouse" = "滑鼠";
-"Trackpad" = "觸控式軌跡板";
+"Trackpad" = "觸控板";
 "(active)" = "(活躍)";
