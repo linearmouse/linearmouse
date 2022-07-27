@@ -290,16 +290,29 @@ declare namespace Scheme {
     };
 
     namespace Mapping {
-      type Action =
+      type Action = SimpleAction | Run;
+
+      type SimpleAction =
         | Auto
         | None
-        | SpaceLeft
-        | SpaceRight
+        | MissionControlSpaceLeft
+        | MissionControlSpaceRight
         | MissionControl
         | AppExpose
         | Launchpad
         | ShowDesktop
-        | Run;
+        | DisplayBrightnessUp
+        | DisplayBrightnessDown
+        | MediaVolumeUp
+        | MediaVolumeDown
+        | MediaMute
+        | MediaPlayPause
+        | MediaNext
+        | MediaPrevious
+        | MediaFastForward
+        | MediaRewind
+        | KeyboardBrightnessUp
+        | KeyboardBrightnessDown;
 
       /**
        * @description Do not modify the button behavior.
@@ -312,19 +325,19 @@ declare namespace Scheme {
       type None = "none";
 
       /**
+       * @description Mission Control.
+       */
+      type MissionControl = "missionControl";
+
+      /**
        * @description Mission Control: Move left a space.
        */
-      type SpaceLeft = "spaceLeft";
+      type MissionControlSpaceLeft = "missionControl.spaceLeft";
 
       /**
        * @description Mission Control: Move right a space.
        */
-      type SpaceRight = "spaceRight";
-
-      /**
-       * @description Mission Control.
-       */
-      type MissionControl = "missionControl";
+      type MissionControlSpaceRight = "missionControl.spaceRight";
 
       /**
        * @description App Exposé.
@@ -340,6 +353,66 @@ declare namespace Scheme {
        * @description Show desktop.
        */
       type ShowDesktop = "showDesktop";
+
+      /**
+       * @description Display: Brightness up.
+       */
+      type DisplayBrightnessUp = "display.brightnessUp";
+
+      /**
+       * @description Display: Brightness down.
+       */
+      type DisplayBrightnessDown = "display.brightnessDown";
+
+      /**
+       * @description Media: Volume up.
+       */
+      type MediaVolumeUp = "media.volumeUp";
+
+      /**
+       * @description Media: Volume down.
+       */
+      type MediaVolumeDown = "media.volumeDown";
+
+      /**
+       * @description Media: Toggle mute.
+       */
+      type MediaMute = "media.mute";
+
+      /**
+       * @description Media: Play / pause.
+       */
+      type MediaPlayPause = "media.playPause";
+
+      /**
+       * @description Media: Next.
+       */
+      type MediaNext = "media.next";
+
+      /**
+       * @description Media: Previous.
+       */
+      type MediaPrevious = "media.previous";
+
+      /**
+       * @description Media: Fast forward.
+       */
+      type MediaFastForward = "media.fastForward";
+
+      /**
+       * @description Media: Rewind.
+       */
+      type MediaRewind = "media.rewind";
+
+      /**
+       * @description Keyboard: Brightness up.
+       */
+      type KeyboardBrightnessUp = "keyboard.brightnessUp";
+
+      /**
+       * @description Keyboard: Brightness down.
+       */
+      type KeyboardBrightnessDown = "keyboard.brightnessDown";
 
       /**
        * @description Run a specific command.

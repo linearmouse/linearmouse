@@ -15,29 +15,31 @@ extension Scheme.Buttons.Mapping.Action: Codable {
         case auto
         case none
 
-        case spaceLeft
-        case spaceRight
+        case spaceLeftDeprecated = "spaceLeft"
+        case spaceRightDeprecated = "spaceRight"
 
         case missionControl
+        case missionControlSpaceLeft = "missionControl.spaceLeft"
+        case missionControlSpaceRight = "missionControl.spaceRight"
+
         case appExpose
         case launchpad
         case showDesktop
 
-        case volumeUp
-        case volumeDown
-        case mute
+        case displayBrightnessUp = "display.brightnessUp"
+        case displayBrightnessDown = "display.brightnessDown"
 
-        case brightnessUp
-        case brightnessDown
+        case mediaVolumeUp = "media.volumeUp"
+        case mediaVolumeDown = "media.volumeDown"
+        case mediaMute = "media.mute"
+        case mediaPlayPause = "media.playPause"
+        case mediaNext = "media.next"
+        case mediaPrevious = "media.previous"
+        case mediaFastForward = "media.fastForward"
+        case mediaRewind = "media.rewind"
 
-        case play
-        case next
-        case previous
-        case fastForward
-        case rewind
-
-        case keyboardBrightnessUp
-        case keyboardBrightnessDown
+        case keyboardBrightnessUp = "keyboard.brightnessUp"
+        case keyboardBrightnessDown = "keyboard.brightnessDown"
     }
 
     enum ValueError: Error {

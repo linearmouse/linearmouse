@@ -88,10 +88,12 @@ extension ButtonActions: EventTransformer {
         case .simpleAction(.none), .simpleAction(.auto):
             return
 
-        case .simpleAction(.spaceLeft):
+        case .simpleAction(.missionControlSpaceLeft),
+             .simpleAction(.spaceLeftDeprecated):
             try postSymbolicHotKey(.spaceLeft)
 
-        case .simpleAction(.spaceRight):
+        case .simpleAction(.missionControlSpaceRight),
+             .simpleAction(.spaceRightDeprecated):
             try postSymbolicHotKey(.spaceRight)
 
         case .simpleAction(.missionControl):
@@ -106,34 +108,34 @@ extension ButtonActions: EventTransformer {
         case .simpleAction(.showDesktop):
             showDesktop()
 
-        case .simpleAction(.volumeUp):
-            postSystemDefinedKey(.soundUp)
-
-        case .simpleAction(.volumeDown):
-            postSystemDefinedKey(.soundDown)
-
-        case .simpleAction(.mute):
-            postSystemDefinedKey(.mute)
-
-        case .simpleAction(.brightnessUp):
+        case .simpleAction(.displayBrightnessUp):
             postSystemDefinedKey(.brightnessUp)
 
-        case .simpleAction(.brightnessDown):
+        case .simpleAction(.displayBrightnessDown):
             postSystemDefinedKey(.brightnessDown)
 
-        case .simpleAction(.play):
+        case .simpleAction(.mediaVolumeUp):
+            postSystemDefinedKey(.soundUp)
+
+        case .simpleAction(.mediaVolumeDown):
+            postSystemDefinedKey(.soundDown)
+
+        case .simpleAction(.mediaMute):
+            postSystemDefinedKey(.mute)
+
+        case .simpleAction(.mediaPlayPause):
             postSystemDefinedKey(.play)
 
-        case .simpleAction(.next):
+        case .simpleAction(.mediaNext):
             postSystemDefinedKey(.next)
 
-        case .simpleAction(.previous):
+        case .simpleAction(.mediaPrevious):
             postSystemDefinedKey(.previous)
 
-        case .simpleAction(.fastForward):
+        case .simpleAction(.mediaFastForward):
             postSystemDefinedKey(.fast)
 
-        case .simpleAction(.rewind):
+        case .simpleAction(.mediaRewind):
             postSystemDefinedKey(.rewind)
 
         case .simpleAction(.keyboardBrightnessUp):
