@@ -2,9 +2,9 @@
 // Copyright (c) 2021-2022 Jiahao Lu
 
 import AppKit
-import CGSKit
 import DockKit
 import Foundation
+import KeyKit
 import os.log
 
 class ButtonActions {
@@ -105,6 +105,42 @@ extension ButtonActions: EventTransformer {
 
         case .simpleAction(.showDesktop):
             showDesktop()
+
+        case .simpleAction(.volumeUp):
+            postSystemDefinedKey(.soundUp)
+
+        case .simpleAction(.volumeDown):
+            postSystemDefinedKey(.soundDown)
+
+        case .simpleAction(.mute):
+            postSystemDefinedKey(.mute)
+
+        case .simpleAction(.brightnessUp):
+            postSystemDefinedKey(.brightnessUp)
+
+        case .simpleAction(.brightnessDown):
+            postSystemDefinedKey(.brightnessDown)
+
+        case .simpleAction(.play):
+            postSystemDefinedKey(.play)
+
+        case .simpleAction(.next):
+            postSystemDefinedKey(.next)
+
+        case .simpleAction(.previous):
+            postSystemDefinedKey(.previous)
+
+        case .simpleAction(.fastForward):
+            postSystemDefinedKey(.fast)
+
+        case .simpleAction(.rewind):
+            postSystemDefinedKey(.rewind)
+
+        case .simpleAction(.keyboardBrightnessUp):
+            postSystemDefinedKey(.illuminationUp)
+
+        case .simpleAction(.keyboardBrightnessDown):
+            postSystemDefinedKey(.illuminationDown)
 
         case let .run(command):
             let task = Process()

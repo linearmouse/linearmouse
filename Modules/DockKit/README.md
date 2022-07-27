@@ -1,3 +1,3 @@
 # DockKit
 
-Private APIs for Dock in ApplicationServices.
+Private APIs for Dock.

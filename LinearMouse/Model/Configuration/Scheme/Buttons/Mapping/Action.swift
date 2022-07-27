@@ -22,6 +22,22 @@ extension Scheme.Buttons.Mapping.Action: Codable {
         case appExpose
         case launchpad
         case showDesktop
+
+        case volumeUp
+        case volumeDown
+        case mute
+
+        case brightnessUp
+        case brightnessDown
+
+        case play
+        case next
+        case previous
+        case fastForward
+        case rewind
+
+        case keyboardBrightnessUp
+        case keyboardBrightnessDown
     }
 
     enum ValueError: Error {
