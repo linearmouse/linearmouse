@@ -284,9 +284,7 @@ or <kbd>command + forward</kbd> is clicked.
         "mappings": [
           {
             "button": 2,
-            "action": {
-              "run": "open -a Launchpad"
-            }
+            "action": "launchpad"
           }
         ]
       }
@@ -333,9 +331,7 @@ In this example, <kbd>command + forward</kbd> is bound to open Mission Control.
           {
             "button": 4,
             "command": true,
-            "action": {
-              "run": "open -a 'Mission Control'"
-            }
+            "action": "missionControl"
           }
         ]
       }
