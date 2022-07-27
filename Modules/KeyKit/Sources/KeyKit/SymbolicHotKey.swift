@@ -1,8 +1,8 @@
 // MIT License
 // Copyright (c) 2021-2022 Jiahao Lu
 
-import CGSKitC
 import CoreFoundation
+import KeyKitC
 
 public enum SymbolicHotKey: UInt32 {
     // full keyboard access hotkeys

@@ -2,9 +2,9 @@
 // Copyright (c) 2021-2022 Jiahao Lu
 
 import AppKit
-import CGSKit
 import DockKit
 import Foundation
+import KeyKit
 import os.log
 
 class ButtonActions {
@@ -88,10 +88,12 @@ extension ButtonActions: EventTransformer {
         case .simpleAction(.none), .simpleAction(.auto):
             return
 
-        case .simpleAction(.spaceLeft):
+        case .simpleAction(.missionControlSpaceLeft),
+             .simpleAction(.spaceLeftDeprecated):
             try postSymbolicHotKey(.spaceLeft)
 
-        case .simpleAction(.spaceRight):
+        case .simpleAction(.missionControlSpaceRight),
+             .simpleAction(.spaceRightDeprecated):
             try postSymbolicHotKey(.spaceRight)
 
         case .simpleAction(.missionControl):
@@ -105,6 +107,42 @@ extension ButtonActions: EventTransformer {
 
         case .simpleAction(.showDesktop):
             showDesktop()
+
+        case .simpleAction(.displayBrightnessUp):
+            postSystemDefinedKey(.brightnessUp)
+
+        case .simpleAction(.displayBrightnessDown):
+            postSystemDefinedKey(.brightnessDown)
+
+        case .simpleAction(.mediaVolumeUp):
+            postSystemDefinedKey(.soundUp)
+
+        case .simpleAction(.mediaVolumeDown):
+            postSystemDefinedKey(.soundDown)
+
+        case .simpleAction(.mediaMute):
+            postSystemDefinedKey(.mute)
+
+        case .simpleAction(.mediaPlayPause):
+            postSystemDefinedKey(.play)
+
+        case .simpleAction(.mediaNext):
+            postSystemDefinedKey(.next)
+
+        case .simpleAction(.mediaPrevious):
+            postSystemDefinedKey(.previous)
+
+        case .simpleAction(.mediaFastForward):
+            postSystemDefinedKey(.fast)
+
+        case .simpleAction(.mediaRewind):
+            postSystemDefinedKey(.rewind)
+
+        case .simpleAction(.keyboardBrightnessUp):
+            postSystemDefinedKey(.illuminationUp)
+
+        case .simpleAction(.keyboardBrightnessDown):
+            postSystemDefinedKey(.illuminationDown)
 
         case let .run(command):
             let task = Process()

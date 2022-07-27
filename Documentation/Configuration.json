@@ -125,28 +125,7 @@
     "Scheme.Buttons.Mapping.Action": {
       "anyOf": [
         {
-          "$ref": "#/definitions/Scheme.Buttons.Mapping.Auto"
-        },
-        {
-          "$ref": "#/definitions/Scheme.Buttons.Mapping.None"
-        },
-        {
-          "$ref": "#/definitions/Scheme.Buttons.Mapping.SpaceLeft"
-        },
-        {
-          "$ref": "#/definitions/Scheme.Buttons.Mapping.SpaceRight"
-        },
-        {
-          "$ref": "#/definitions/Scheme.Buttons.Mapping.MissionControl"
-        },
-        {
-          "$ref": "#/definitions/Scheme.Buttons.Mapping.AppExpose"
-        },
-        {
-          "$ref": "#/definitions/Scheme.Buttons.Mapping.Launchpad"
-        },
-        {
-          "$ref": "#/definitions/Scheme.Buttons.Mapping.ShowDesktop"
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.SimpleAction"
         },
         {
           "$ref": "#/definitions/Scheme.Buttons.Mapping.Run"
@@ -195,19 +174,89 @@
         }
       ]
     },
+    "Scheme.Buttons.Mapping.DisplayBrightnessDown": {
+      "const": "display.brightnessDown",
+      "description": "Display: Brightness down.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.DisplayBrightnessUp": {
+      "const": "display.brightnessUp",
+      "description": "Display: Brightness up.",
+      "type": "string"
+    },
     "Scheme.Buttons.Mapping.Forward": {
       "const": 4,
       "description": "Fifth button, typically the forward button.",
       "type": "number"
+    },
+    "Scheme.Buttons.Mapping.KeyboardBrightnessDown": {
+      "const": "keyboard.brightnessDown",
+      "description": "Keyboard: Brightness down.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.KeyboardBrightnessUp": {
+      "const": "keyboard.brightnessUp",
+      "description": "Keyboard: Brightness up.",
+      "type": "string"
     },
     "Scheme.Buttons.Mapping.Launchpad": {
       "const": "launchpad",
       "description": "Launchpad.",
       "type": "string"
     },
+    "Scheme.Buttons.Mapping.MediaFastForward": {
+      "const": "media.fastForward",
+      "description": "Media: Fast forward.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.MediaMute": {
+      "const": "media.mute",
+      "description": "Media: Toggle mute.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.MediaNext": {
+      "const": "media.next",
+      "description": "Media: Next.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.MediaPlayPause": {
+      "const": "media.playPause",
+      "description": "Media: Play / pause.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.MediaPrevious": {
+      "const": "media.previous",
+      "description": "Media: Previous.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.MediaRewind": {
+      "const": "media.rewind",
+      "description": "Media: Rewind.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.MediaVolumeDown": {
+      "const": "media.volumeDown",
+      "description": "Media: Volume down.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.MediaVolumeUp": {
+      "const": "media.volumeUp",
+      "description": "Media: Volume up.",
+      "type": "string"
+    },
     "Scheme.Buttons.Mapping.MissionControl": {
       "const": "missionControl",
       "description": "Mission Control.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.MissionControlSpaceLeft": {
+      "const": "missionControl.spaceLeft",
+      "description": "Mission Control: Move left a space.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.MissionControlSpaceRight": {
+      "const": "missionControl.spaceRight",
+      "description": "Mission Control: Move right a space.",
       "type": "string"
     },
     "Scheme.Buttons.Mapping.None": {
@@ -245,15 +294,69 @@
       "description": "Show desktop.",
       "type": "string"
     },
-    "Scheme.Buttons.Mapping.SpaceLeft": {
-      "const": "spaceLeft",
-      "description": "Mission Control: Move left a space.",
-      "type": "string"
-    },
-    "Scheme.Buttons.Mapping.SpaceRight": {
-      "const": "spaceRight",
-      "description": "Mission Control: Move right a space.",
-      "type": "string"
+    "Scheme.Buttons.Mapping.SimpleAction": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Auto"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.None"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MissionControlSpaceLeft"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MissionControlSpaceRight"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MissionControl"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.AppExpose"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Launchpad"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.ShowDesktop"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.DisplayBrightnessUp"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.DisplayBrightnessDown"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MediaVolumeUp"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MediaVolumeDown"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MediaMute"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MediaPlayPause"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MediaNext"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MediaPrevious"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MediaFastForward"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MediaRewind"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.KeyboardBrightnessUp"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.KeyboardBrightnessDown"
+        }
+      ]
     },
     "Scheme.If": {
       "additionalProperties": false,

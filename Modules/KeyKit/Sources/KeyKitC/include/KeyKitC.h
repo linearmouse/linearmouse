@@ -9,6 +9,7 @@
 #define CGSKITC_H
 
 #import <Foundation/Foundation.h>
+#import <IOKit/hidsystem/ev_keymap.h>
 
 #import "../CGSInternal/CGSInternal.h"
 

@@ -368,12 +368,12 @@ You can specify `shift`, `option` and `control` as well.
           {
             "button": 3,
             "command": true,
-            "action": "spaceLeft"
+            "action": "missionControl.spaceLeft"
           },
           {
             "button": 4,
             "command": true,
-            "action": "spaceRight"
+            "action": "missionControl.spaceRight"
           }
         ]
       }
@@ -399,16 +399,28 @@ A simple action is an action without any parameters.
 
 `<action>` could be one of:
 
-| Action           | Description                          |
-| ---------------- | ------------------------------------ |
-| `auto`           | Do not modify the button behavior.   |
-| `none`           | Prevent the button events.           |
-| `spaceLeft`      | Mission Control: Move left a space.  |
-| `spaceRight`     | Mission Control: Move right a space. |
-| `missionControl` | Mission Control.                     |
-| `appExpose`      | App Exposé.                          |
-| `launchpad`      | Launchpad.                           |
-| `showDesktop`    | Show desktop.                        |
+| Action                      | Description                          |
+| --------------------------- | ------------------------------------ |
+| `auto`                      | Do not modify the button behavior.   |
+| `none`                      | Prevent the button events.           |
+| `missionControl`            | Mission Control.                     |
+| `missionControl.spaceLeft`  | Mission Control: Move left a space.  |
+| `missionControl.spaceRight` | Mission Control: Move right a space. |
+| `appExpose`                 | App Exposé.                          |
+| `launchpad`                 | Launchpad.                           |
+| `showDesktop`               | Show desktop.                        |
+| `display.brightnessUp`      | Display: Brightness up.              |
+| `display.brightnessDown`    | Display: Brightness down.            |
+| `media.volumeUp`            | Media: Volume up.                    |
+| `media.volumeDown`          | Media: Volume down.                  |
+| `media.mute`                | Media: Toggle mute.                  |
+| `media.playPause`           | Media: Play / pause.                 |
+| `media.next`                | Media: Next.                         |
+| `media.previous`            | Media: Previous.                     |
+| `media.fastForward`         | Media: Fast forward.                 |
+| `media.rewind`              | Media: Rewind.                       |
+| `keyboard.brightnessUp`     | Keyboard: Brightness up.             |
+| `keyboard.brightnessDown`   | Keyboard: Brightness down.           |
 
 #### Run shell commands
 
