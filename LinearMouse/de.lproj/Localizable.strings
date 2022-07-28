@@ -1,7 +1,7 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility.";
-"Get more help" = "Get more help";
-"Open Accessibility" = "Open Accessibility";
+"LinearMouse needs Accessibility permission" = "LinearMouse benötigt Zugriff auf Bedienungshilfen";
+"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "Erlaube den Zugriff auf die Bedienungshilfen über die Systemeinstellungen > Sicherheit & Datenschutz > Bedienungshilfen.";
+"Get more help" = "Weitere Hilfe erhalten";
+"Open Accessibility" = "Öffne Bedienungshilfen";
 
 "%@ Preferences..." = "%@ Einstellungen...";
 "Config" = "Konfigurationsdatei";
@@ -22,14 +22,14 @@
 "Enable linear scrolling" = "Lineares Scrollen aktivieren";
 "Disable scrolling acceleration." = "Deaktiviert die Scrollbeschleunigung.";
 "Scroll" = "Scrolle";
-"By lines" = "By lines";
-"By pixels" = "By pixels";
+"By lines" = "Nach Zeilen";
+"By pixels" = "Nach Pixel";
 
 "Acceleration" = "Beschleunigung";
-"Speed" = "Speed";
+"Speed" = "Geschwindigkeit";
 "Revert to system defaults" = "Auf Systemstandards zurücksetzen";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Durch Drücken des Kürzels ⌃⇧⌘Z kann ebenfalls zu den Systemstandards zurückgekehrt werden.";
-"Disable pointer acceleration" = "Disable pointer acceleration";
+"Disable pointer acceleration" = "Zeigerbeschleunigung deaktivieren";
 
 "Enable universal back and forward" = "Universelles Vor und Zurück aktivieren";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Konvertiert die Vor- und Zurück-Seitentasten in die jeweiligen Wischgesten, um eine universelle Vor- und Zurück-Funktion zu ermöglichen.";
@@ -39,7 +39,7 @@
 "Change speed" = "Scrollgeschwindigkeit ändern";
 "to" = "zu";
 
-"Settings" = "Settings";
+"Settings" = "Einstellungen";
 "Show in menu bar" = "In der Menüleiste anzeigen";
 "To show the preferences, launch %@ again." = "Um die Einstellungen anzuzeigen, öffne %@ erneut.";
 
@@ -59,9 +59,9 @@
 "Feedback" = "Feedback";
 "Contact" = "Kontakt";
 
-"Auto switch to the active device" = "Auto switch to the active device";
+"Auto switch to the active device" = "Automatisch zum aktiven Gerät wechseln";
 "OK" = "OK";
 
-"Mouse" = "Mouse";
+"Mouse" = "Maus";
 "Trackpad" = "Trackpad";
-"(active)" = "(active)";
+"(active)" = "(aktiv)";
