@@ -20,10 +20,15 @@ class EventTap {
 
         let this = Unmanaged<EventTap>.fromOpaque(unwrappedRefcon).takeUnretainedValue()
 
+        if type == .tapDisabledByUserInput {
+            return Unmanaged.passUnretained(event)
+        }
+
         // FIXME: Avoid timeout?
-        if type == .tapDisabledByUserInput || type == .tapDisabledByTimeout {
-            os_log("EventTap disabled (%{public}@), re-enable it", log: log, type: .error, String(describing: type))
+        if type == .tapDisabledByTimeout {
+            os_log("EventTap disabled by timeout, re-enable it", log: log, type: .error, String(describing: type))
             this.enable()
+            return Unmanaged.passUnretained(event)
         }
 
         if let event = transformEvent(event) {
