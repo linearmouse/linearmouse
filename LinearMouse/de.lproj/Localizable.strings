@@ -4,23 +4,23 @@
 "Open Accessibility" = "Open Accessibility";
 
 "%@ Preferences..." = "%@ Einstellungen...";
-"Config" = "Config";
-"Reload" = "Reload";
-"Reveal in Finder" = "Reveal in Finder";
+"Config" = "Konfigurationsdatei";
+"Reload" = "Neu laden";
+"Reveal in Finder" = "Im Finder anzeigen";
 "Quit %@" = "%@ beenden";
 
-"Scrolling" = "Scrolling";
-"Pointer" = "Pointer";
-"Buttons" = "Buttons";
+"Scrolling" = "Scrollen";
+"Pointer" = "Zeiger";
+"Buttons" = "Tasten";
 "Modifier Keys" = "Tastenkürzel";
 "General" = "Allgemein";
 
 "Reverse scrolling" = "Scrollen invertieren";
-"(vertically)" = "(vertically)";
-"(horizontally)" = "(horizontally)";
-"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
+"(vertically)" = "(Vertikal)";
+"(horizontally)" = "(Horizontal)";
+"Some gestures, such as swiping back and forward, may stop working." = "Manche Gesten, beispielsweise Vor- und Zurück-Wischen, könnten nicht korrekt funktionieren.";
 "Enable linear scrolling" = "Lineares Scrollen aktivieren";
-"Disable scrolling acceleration." = "Disable scrolling acceleration.";
+"Disable scrolling acceleration." = "Deaktiviert die Scrollbeschleunigung.";
 "Scroll" = "Scrolle";
 "By lines" = "By lines";
 "By pixels" = "By pixels";
