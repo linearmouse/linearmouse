@@ -19,6 +19,8 @@ class DeviceManager: ObservableObject {
 
     @Published var lastActiveDevice: Device?
 
+    @Published var lastActiveDeviceIncludingMovements: Device?
+
     init() {
         manager.observeDeviceAdded(using: { [weak self] in
             self?.deviceAdded($0, $1)
@@ -120,6 +122,10 @@ class DeviceManager: ObservableObject {
             lastActiveDevice = nil
         }
 
+        if lastActiveDeviceIncludingMovements == device {
+            lastActiveDeviceIncludingMovements = nil
+        }
+
         pointerDeviceToDevice.removeValue(forKey: pointerDevice)
         devices.removeAll { $0 == device }
 
@@ -144,6 +150,10 @@ class DeviceManager: ObservableObject {
                    log: Self.log, type: .debug,
                    String(describing: device),
                    String(describing: device.category))
+        }
+
+        if lastActiveDeviceIncludingMovements != device {
+            lastActiveDeviceIncludingMovements = device
         }
     }
 
