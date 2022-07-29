@@ -16,7 +16,9 @@ class DeviceModel: ObservableObject {
     init(device: Device) {
         self.device = device
 
-        DeviceManager.shared.$lastActiveDevice
+        DeviceManager.shared.$lastActiveDeviceIncludingMovements
+            .throttle(for: 0.5, scheduler: RunLoop.main, latest: true)
+            .removeDuplicates()
             .map { $0 == device }
             .sink { [weak self] value in
                 withAnimation {

@@ -145,6 +145,10 @@ extension Device {
             return
         }
 
+        guard manager.lastActiveDevice != self || manager.lastActiveDeviceIncludingMovements != self else {
+            return
+        }
+
         let element = IOHIDValueGetElement(value)
 
         let usagePage = IOHIDElementGetUsagePage(element)
@@ -155,27 +159,25 @@ extension Device {
             return
         }
 
-        switch Int(usagePage) {
-        case kHIDPage_GenericDesktop:
-            switch Int(usage) {
-            case kHIDUsage_GD_X, kHIDUsage_GD_Y, kHIDUsage_GD_Z, kHIDUsage_GD_Wheel:
+        if usagePage == kHIDPage_GenericDesktop {
+            if usage == kHIDUsage_GD_X || usage == kHIDUsage_GD_Y || usage == kHIDUsage_GD_Z {
                 guard IOHIDValueGetIntegerValue(value) != 0 else {
                     return
                 }
-            default:
-                break
-            }
-        default:
-            break
-        }
-
-        if let lastActiveDevice = manager.lastActiveDevice {
-            if lastActiveDevice == self {
-                return
             }
         }
 
-        manager.lastActiveDevice = self
+        if usagePage == kHIDPage_GenericDesktop || usagePage == kHIDPage_Digitizer {
+            if manager.lastActiveDeviceIncludingMovements != self {
+                manager.lastActiveDeviceIncludingMovements = self
+            }
+
+            return
+        }
+
+        if manager.lastActiveDevice != self {
+            manager.lastActiveDevice = self
+        }
 
         os_log("""
                Last active device changed: %{public}@, category=%{public}@ \

@@ -39,10 +39,13 @@ class DeviceState: ObservableObject {
         }
         .tieToLifetime(of: self)
 
-        deviceManager.$lastActiveDevice.sink { [weak self] lastActiveDevice in
-            self?.updateCurrentDevice(lastActiveDevice: lastActiveDevice)
-        }
-        .store(in: &subscriptions)
+        deviceManager.$lastActiveDeviceIncludingMovements
+            .throttle(for: 0.5, scheduler: RunLoop.main, latest: true)
+            .removeDuplicates()
+            .sink { [weak self] lastActiveDevice in
+                self?.updateCurrentDevice(lastActiveDevice: lastActiveDevice)
+            }
+            .store(in: &subscriptions)
     }
 }
 
