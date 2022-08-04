@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		971338AF289B64C1005A74D2 /* HelpButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971338AE289B64C1005A74D2 /* HelpButton.swift */; };
 		972A5E1F285CA43D00CB6440 /* DevicePickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E1E285CA43D00CB6440 /* DevicePickerSheet.swift */; };
 		972A5E22285CA49800CB6440 /* DevicePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E21285CA49800CB6440 /* DevicePicker.swift */; };
 		972A5E24285CA4AA00CB6440 /* DevicePickerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E23285CA4AA00CB6440 /* DevicePickerState.swift */; };
@@ -120,6 +121,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		971338AE289B64C1005A74D2 /* HelpButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpButton.swift; sourceTree = "<group>"; };
 		972A5E1E285CA43D00CB6440 /* DevicePickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSheet.swift; sourceTree = "<group>"; };
 		972A5E21285CA49800CB6440 /* DevicePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePicker.swift; sourceTree = "<group>"; };
 		972A5E23285CA4AA00CB6440 /* DevicePickerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerState.swift; sourceTree = "<group>"; };
@@ -283,6 +285,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		971338AD289B649D005A74D2 /* HelpButton */ = {
+			isa = PBXGroup;
+			children = (
+				971338AE289B64C1005A74D2 /* HelpButton.swift */,
+			);
+			path = HelpButton;
+			sourceTree = "<group>";
+		};
 		972A5E1D285CA42500CB6440 /* DevicePickerSheet */ = {
 			isa = PBXGroup;
 			children = (
@@ -620,6 +630,7 @@
 			children = (
 				972DF63E28599F4500B83932 /* Extensions */,
 				972DF64D285A2D6D00B83932 /* ButtonStyle */,
+				971338AD289B649D005A74D2 /* HelpButton */,
 				972DF6362859979F00B83932 /* Sidebar */,
 				972DF644285A266C00B83932 /* Header */,
 				972DF64A285A295C00B83932 /* DetailView */,
@@ -864,6 +875,7 @@
 				97C5DBCA2868B1B4006FA6B4 /* ModifierKeysSettingsState.swift in Sources */,
 				972DF6422859C1AC00B83932 /* SidebarItem.swift in Sources */,
 				97C5DBCC2868B4A5006FA6B4 /* ModifierKeyActionPickerState.swift in Sources */,
+				971338AF289B64C1005A74D2 /* HelpButton.swift in Sources */,
 				B7ADF98D2748E5010005B02D /* ScrollWheelEventView.swift in Sources */,
 				B7ADF9852748B25A0005B02D /* ModifierActions.swift in Sources */,
 				97C5DBB82868158C006FA6B4 /* PointerSettingsState.swift in Sources */,

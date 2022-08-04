@@ -48,8 +48,15 @@ struct PointerSettings: View {
 
                 Spacer()
 
-                Toggle(isOn: $state.pointerDisableAcceleration) {
-                    Text("Disable pointer acceleration")
+                HStack(spacing: 15) {
+                    Toggle(isOn: $state.pointerDisableAcceleration) {
+                        Text("Disable pointer acceleration")
+                    }
+
+                    HelpButton {
+                        NSWorkspace.shared
+                            .open(URL(string: "https://go.linearmouse.org/disable-pointer-acceleration-and-speed")!)
+                    }
                 }
 
                 Spacer()
