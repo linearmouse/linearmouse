@@ -4,6 +4,7 @@
 "Open Accessibility" = "Erişilebilirliği Aç";
 
 "%@ Preferences..." = "%@ Tercihleri...";
+"Start at login" = "Start at login";
 "Config" = "Ayarlar";
 "Reload" = "Yenile";
 "Reveal in Finder" = "Finder'da göster";
