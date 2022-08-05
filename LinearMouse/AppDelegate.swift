@@ -17,8 +17,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_: Notification) {
         guard ProcessEnvironment.isRunningApp else { return }
 
-        ConfigurationState.shared.load()
-
         guard AccessibilityPermission.enabled else {
             AccessibilityPermissionWindow.shared.bringToFront()
             return
@@ -29,44 +27,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if CommandLine.arguments.contains("--show") {
             PreferencesWindow.shared.bringToFront()
         }
-    }
-
-    func setup() {
-        DeviceManager.shared.resume()
-
-        // register the start entry if the user grants the permission
-        AutoStartManager.enable()
-
-        // scrolling functionalities
-        let eventTap = EventTap()
-        eventTap.enable()
-        self.eventTap = eventTap
-
-        NSWorkspace.shared.notificationCenter.addObserver(
-            forName: NSWorkspace.sessionDidResignActiveNotification,
-            object: nil,
-            queue: .main,
-            using: { _ in
-                os_log("Session inactive", log: Self.log, type: .debug)
-                if let eventTap = self.eventTap {
-                    eventTap.disable()
-                }
-                DeviceManager.shared.pause()
-            }
-        )
-
-        NSWorkspace.shared.notificationCenter.addObserver(
-            forName: NSWorkspace.sessionDidBecomeActiveNotification,
-            object: nil,
-            queue: .main,
-            using: { _ in
-                os_log("Session active", log: Self.log, type: .debug)
-                if let eventTap = self.eventTap {
-                    eventTap.enable()
-                }
-                DeviceManager.shared.resume()
-            }
-        )
     }
 
     func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -84,6 +44,50 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_: Notification) {
         guard ProcessEnvironment.isRunningApp else { return }
 
-        DeviceManager.shared.pause()
+        stop()
+    }
+}
+
+extension AppDelegate {
+    func setup() {
+        setupConfiguration()
+        setupNotifications()
+        start()
+    }
+
+    func setupConfiguration() {
+        ConfigurationState.shared.load()
+    }
+
+    func setupNotifications() {
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.sessionDidResignActiveNotification,
+            object: nil,
+            queue: .main,
+            using: { [weak self] _ in
+                os_log("Session inactive", log: Self.log, type: .debug)
+                self?.stop()
+            }
+        )
+
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.sessionDidBecomeActiveNotification,
+            object: nil,
+            queue: .main,
+            using: { [weak self] _ in
+                os_log("Session active", log: Self.log, type: .debug)
+                self?.start()
+            }
+        )
+    }
+
+    func start() {
+        DeviceManager.shared.start()
+        EventTap.shared.start()
+    }
+
+    func stop() {
+        DeviceManager.shared.stop()
+        EventTap.shared.stop()
     }
 }

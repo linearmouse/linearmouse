@@ -69,7 +69,6 @@
 		97F77FB4285F45AF007C9C2B /* ConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FB3285F45AF007C9C2B /* ConfigurationTests.swift */; };
 		97F77FB7285F53A5007C9C2B /* SingleValueOrArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FB6285F53A5007C9C2B /* SingleValueOrArray.swift */; };
 		B70A58F6284F987900E5C86E /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = B70A58F5284F987900E5C86E /* LaunchAtLogin */; };
-		B71392F426731645004C0173 /* LoginServiceKit in Frameworks */ = {isa = PBXBuildFile; productRef = B71392F326731645004C0173 /* LoginServiceKit */; };
 		B716F16026BC10B80052F551 /* UniversalBackForward.swift in Sources */ = {isa = PBXBuildFile; fileRef = B716F15F26BC10B80052F551 /* UniversalBackForward.swift */; };
 		B73AC55127C29C7C00F7D3E8 /* Version in Frameworks */ = {isa = PBXBuildFile; productRef = B73AC55027C29C7C00F7D3E8 /* Version */; };
 		B754147E274E3AB0003CDAD0 /* LinearScrollingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B754147D274E3AB0003CDAD0 /* LinearScrollingTests.swift */; };
@@ -106,7 +105,6 @@
 		B7B6D83E26B2745300B0D247 /* ModifierKeyActionPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7B6D83D26B2745300B0D247 /* ModifierKeyActionPicker.swift */; };
 		B7BD51812672FEB5001FE742 /* EventTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BD51802672FEB5001FE742 /* EventTap.swift */; };
 		B7BD5183267300DC001FE742 /* AutoStartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BD5182267300DC001FE742 /* AutoStartManager.swift */; };
-		B7DD796426730A800067F1AD /* LoginServiceKit in Frameworks */ = {isa = PBXBuildFile; productRef = B7DD796326730A800067F1AD /* LoginServiceKit */; };
 		B7F6C5F827A4F6A800E5400B /* LRUCache in Frameworks */ = {isa = PBXBuildFile; productRef = B7F6C5F727A4F6A800E5400B /* LRUCache */; };
 /* End PBXBuildFile section */
 
@@ -265,11 +263,9 @@
 				97C97728288FC49F009094BA /* DockKit in Frameworks */,
 				972DF63D28599BA400B83932 /* Introspect in Frameworks */,
 				B784292D278DB06600D207F0 /* Sparkle in Frameworks */,
-				B7DD796426730A800067F1AD /* LoginServiceKit in Frameworks */,
 				972A5E30285D891100CB6440 /* Defaults in Frameworks */,
 				97A7A39C28587E8C00EE4833 /* PointerKit in Frameworks */,
 				97C5D8FF2856E3CB00CBED2D /* GestureKit in Frameworks */,
-				B71392F426731645004C0173 /* LoginServiceKit in Frameworks */,
 				B73AC55127C29C7C00F7D3E8 /* Version in Frameworks */,
 				B7F6C5F827A4F6A800E5400B /* LRUCache in Frameworks */,
 			);
@@ -698,8 +694,6 @@
 			);
 			name = LinearMouse;
 			packageProductDependencies = (
-				B7DD796326730A800067F1AD /* LoginServiceKit */,
-				B71392F326731645004C0173 /* LoginServiceKit */,
 				B784292C278DB06600D207F0 /* Sparkle */,
 				B7F6C5F727A4F6A800E5400B /* LRUCache */,
 				B73AC55027C29C7C00F7D3E8 /* Version */,
@@ -793,7 +787,6 @@
 			);
 			mainGroup = B75A060F2671E9D800BEAF77;
 			packageReferences = (
-				B71392F226731645004C0173 /* XCRemoteSwiftPackageReference "LoginServiceKit" */,
 				B784292B278DB06600D207F0 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				B7F6C5F627A4F6A800E5400B /* XCRemoteSwiftPackageReference "LRUCache" */,
 				B73AC54F27C29C7C00F7D3E8 /* XCRemoteSwiftPackageReference "Version" */,
@@ -1288,16 +1281,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/LaunchAtLogin";
 			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
-		B71392F226731645004C0173 /* XCRemoteSwiftPackageReference "LoginServiceKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Clipy/LoginServiceKit";
-			requirement = {
-				kind = revision;
-				revision = 04a1379908432bc4e304b38c831d573b1943b3fa;
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.0.0;
 			};
 		};
 		B73AC54F27C29C7C00F7D3E8 /* XCRemoteSwiftPackageReference "Version" */ = {
@@ -1314,14 +1299,6 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 2.0.0;
-			};
-		};
-		B7DD796226730A800067F1AD /* XCRemoteSwiftPackageReference "LoginServiceKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Clipy/LoginServiceKit";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.2.1;
 			};
 		};
 		B7F6C5F627A4F6A800E5400B /* XCRemoteSwiftPackageReference "LRUCache" */ = {
@@ -1371,11 +1348,6 @@
 			package = B70A58F4284F987900E5C86E /* XCRemoteSwiftPackageReference "LaunchAtLogin" */;
 			productName = LaunchAtLogin;
 		};
-		B71392F326731645004C0173 /* LoginServiceKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B71392F226731645004C0173 /* XCRemoteSwiftPackageReference "LoginServiceKit" */;
-			productName = LoginServiceKit;
-		};
 		B73AC55027C29C7C00F7D3E8 /* Version */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B73AC54F27C29C7C00F7D3E8 /* XCRemoteSwiftPackageReference "Version" */;
@@ -1385,11 +1357,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B784292B278DB06600D207F0 /* XCRemoteSwiftPackageReference "Sparkle" */;
 			productName = Sparkle;
-		};
-		B7DD796326730A800067F1AD /* LoginServiceKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B7DD796226730A800067F1AD /* XCRemoteSwiftPackageReference "LoginServiceKit" */;
-			productName = LoginServiceKit;
 		};
 		B7F6C5F727A4F6A800E5400B /* LRUCache */ = {
 			isa = XCSwiftPackageProductDependency;
