@@ -4,6 +4,7 @@
 "Open Accessibility" = "Öffne Bedienungshilfen";
 
 "%@ Preferences..." = "%@ Einstellungen...";
+"Start at login" = "Start at login";
 "Config" = "Konfigurationsdatei";
 "Reload" = "Neu laden";
 "Reveal in Finder" = "Im Finder anzeigen";
