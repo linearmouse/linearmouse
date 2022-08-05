@@ -45,6 +45,7 @@ class StatusItem {
             openPreferenceItem,
             .separator(),
             configurationItem,
+            .separator(),
             startAtLoginItem,
             .separator(),
             quitItem
