@@ -43,24 +43,24 @@ class DeviceManager: ObservableObject {
     }
 
     deinit {
-        pause()
+        stop()
     }
 
     private enum State {
-        case paused, running
+        case stopped, running
     }
 
-    private var state: State = .paused
+    private var state: State = .stopped
 
     private var subscriptions = Set<AnyCancellable>()
 
     private var activateApplicationObserver: Any?
 
-    func pause() {
+    func stop() {
         guard state == .running else {
             return
         }
-        state = .paused
+        state = .stopped
 
         restorePointerSpeedToInitialValue()
         manager.stopObservation()
@@ -71,8 +71,8 @@ class DeviceManager: ObservableObject {
         }
     }
 
-    func resume() {
-        guard state == .paused else {
+    func start() {
+        guard state == .stopped else {
             return
         }
         state = .running

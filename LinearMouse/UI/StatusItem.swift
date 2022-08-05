@@ -2,12 +2,15 @@
 // Copyright (c) 2021-2022 Jiahao Lu
 
 import Combine
+import LaunchAtLogin
 import SwiftUI
 
 class StatusItem {
     static let shared = StatusItem()
 
     private lazy var statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+
+    private var subscriptions = Set<AnyCancellable>()
 
     private lazy var menu: NSMenu = {
         let menu = NSMenu()
@@ -24,6 +27,16 @@ class StatusItem {
 
         configurationItem.submenu = configurationMenu
 
+        let startAtLoginItem = NSMenuItem(
+            title: String(format: NSLocalizedString("Start at login", comment: "")),
+            action: #selector(toggleStartAtLogin),
+            keyEquivalent: ""
+        )
+        LaunchAtLogin.publisher.sink { value in
+            startAtLoginItem.state = value ? .on : .off
+        }
+        .store(in: &subscriptions)
+
         let quitItem = NSMenuItem(title: String(format: NSLocalizedString("Quit %@", comment: ""), LinearMouse.appName),
                                   action: #selector(quit),
                                   keyEquivalent: "q")
@@ -32,6 +45,7 @@ class StatusItem {
             openPreferenceItem,
             .separator(),
             configurationItem,
+            startAtLoginItem,
             .separator(),
             quitItem
         ]
@@ -63,8 +77,6 @@ class StatusItem {
         return configurationMenu
     }()
 
-    var defaultsSubscription: AnyCancellable!
-
     init() {
         if let button = statusItem.button {
             button.image = NSImage(named: "MenuIcon")
@@ -72,22 +84,13 @@ class StatusItem {
             button.target = self
         }
 
-        AccessibilityPermission.pollingUntilEnabled {
-            self.initMenu()
+        AccessibilityPermission.pollingUntilEnabled { [weak self] in
+            self?.setup()
         }
     }
 
-    private func initMenu() {
+    private func setup() {
         statusItem.menu = menu
-
-        // Subscribe to the user settings and show / hide the menu icon.
-        let defaults = AppDefaults.shared
-        defaultsSubscription = defaults.objectWillChange.sink { _ in
-            DispatchQueue.main.async {
-                self.update(defaults)
-            }
-        }
-        update(defaults)
     }
 
     @objc private func statusItemAction(sender _: NSStatusBarButton) {
@@ -110,14 +113,11 @@ class StatusItem {
         NSWorkspace.shared.activateFileViewerSelecting([ConfigurationState.shared.configurationPath.absoluteURL])
     }
 
-    @objc func quit() {
-        // remove the start entry if the user quits LinearMouse manually
-        AutoStartManager.disable()
-
-        NSApp.terminate(nil)
+    @objc private func toggleStartAtLogin() {
+        LaunchAtLogin.isEnabled.toggle()
     }
 
-    func update(_ defaults: AppDefaults) {
-        statusItem.isVisible = defaults.showInMenuBar
+    @objc private func quit() {
+        NSApp.terminate(nil)
     }
 }

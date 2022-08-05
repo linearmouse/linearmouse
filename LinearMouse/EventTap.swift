@@ -7,6 +7,8 @@ import os.log
 class EventTap {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "EventTap")
 
+    static let shared = EventTap()
+
     var eventTap: CFMachPort?
     var runLoopSource: CFRunLoopSource?
 
@@ -27,7 +29,7 @@ class EventTap {
         // FIXME: Avoid timeout?
         if type == .tapDisabledByTimeout {
             os_log("EventTap disabled by timeout, re-enable it", log: log, type: .error, String(describing: type))
-            this.enable()
+            this.start()
             return Unmanaged.passUnretained(event)
         }
 
@@ -59,13 +61,13 @@ class EventTap {
         CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
     }
 
-    func enable() {
+    func start() {
         if let eventTap = eventTap {
             CGEvent.tapEnable(tap: eventTap, enable: true)
         }
     }
 
-    func disable() {
+    func stop() {
         if let eventTap = eventTap {
             CGEvent.tapEnable(tap: eventTap, enable: false)
         }

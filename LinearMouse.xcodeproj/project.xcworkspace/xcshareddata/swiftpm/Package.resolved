@@ -14,16 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sindresorhus/LaunchAtLogin",
       "state" : {
-        "branch" : "main",
-        "revision" : "e8171b3e38a2816f579f58f3dac1522aa39efe41"
-      }
-    },
-    {
-      "identity" : "loginservicekit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Clipy/LoginServiceKit",
-      "state" : {
-        "revision" : "04a1379908432bc4e304b38c831d573b1943b3fa"
+        "revision" : "e8171b3e38a2816f579f58f3dac1522aa39efe41",
+        "version" : "4.2.0"
       }
     },
     {
