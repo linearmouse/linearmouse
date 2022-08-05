@@ -4,6 +4,7 @@
 "Open Accessibility" = "打开辅助功能";
 
 "%@ Preferences..." = "%@ 偏好设置...";
+"Start at login" = "登录时启动";
 "Config" = "配置";
 "Reload" = "重新加载";
 "Reveal in Finder" = "在 Finder 中显示";

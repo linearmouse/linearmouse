@@ -4,6 +4,7 @@
 "Open Accessibility" = "시스템 설정 열기";
 
 "%@ Preferences..." = "환경설정...";
+"Start at login" = "Start at login";
 "Config" = "설정";
 "Reload" = "새로 고침";
 "Reveal in Finder" = "Finder에서 열기";
