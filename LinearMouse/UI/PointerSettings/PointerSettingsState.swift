@@ -33,13 +33,13 @@ extension PointerSettingsState {
                 ?? Device.fallbackPointerSpeed
         }
         set {
-            guard abs(pointerSpeed - newValue) >= 0.01 else {
+            guard abs(pointerSpeed - newValue) >= 0.0001 else {
                 return
             }
 
             Scheme(
                 pointer: Scheme.Pointer(
-                    speed: Decimal(newValue).rounded(2)
+                    speed: Decimal(newValue).rounded(4)
                 )
             )
             .merge(into: &scheme)
@@ -59,7 +59,7 @@ extension PointerSettingsState {
         let formatter = NumberFormatter()
         formatter.numberStyle = NumberFormatter.Style.decimal
         formatter.roundingMode = NumberFormatter.RoundingMode.halfUp
-        formatter.maximumFractionDigits = 2
+        formatter.maximumFractionDigits = 4
         formatter.thousandSeparator = ""
         return formatter
     }
