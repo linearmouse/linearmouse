@@ -1,4 +1,4 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse이(가) 손쉬운 사용 기능을 사용하여 이 컴퓨터를 제어하려고 합니다";
+"LinearMouse needs Accessibility permission" = "LinearMouse이(가) 손쉬운 사용 권한이 필요합니다";
 "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "시스템 설정에 있는 개인 정보 보호 환경설정에서 이 응용 프로그램에 접근 권한을 부여하십시오.";
 "Get more help" = "도움 받기";
 "Open Accessibility" = "시스템 설정 열기";
@@ -13,7 +13,7 @@
 "Scrolling" = "스크롤";
 "Pointer" = "포인터";
 "Buttons" = "버튼";
-"Modifier Keys" = "단축키";
+"Modifier Keys" = "보조 키";
 "General" = "일반";
 
 "Reverse scrolling" = "역방향 스크롤";
