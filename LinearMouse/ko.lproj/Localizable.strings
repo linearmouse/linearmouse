@@ -1,35 +1,35 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse이(가) 손쉬운 사용 기능을 사용하여 이 컴퓨터를 제어하려고 합니다";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "시스템 설정에 있는 개인 정보 보호 환경설정에서 이 응용 프로그램에 접근 권한을 부여하십시오.";
+"LinearMouse needs Accessibility permission" = "LinearMouse이(가) 손쉬운 사용 권한이 필요합니다";
+"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "시스템 설정 > 개인정보 보호 및 보안 > 손쉬운 사용에서 이 응용 프로그램에 접근 권한을 부여하십시오.";
 "Get more help" = "도움 받기";
-"Open Accessibility" = "시스템 설정 열기";
+"Open Accessibility" = "손쉬운 사용 열기";
 
 "%@ Preferences..." = "환경설정...";
-"Start at login" = "Start at login";
+"Start at login" = "로그인할 때 실행";
 "Config" = "설정";
-"Reload" = "새로 고침";
+"Reload" = "새로고침";
 "Reveal in Finder" = "Finder에서 열기";
 "Quit %@" = "%@ 종료";
 
 "Scrolling" = "스크롤";
 "Pointer" = "포인터";
 "Buttons" = "버튼";
-"Modifier Keys" = "단축키";
+"Modifier Keys" = "보조 키";
 "General" = "일반";
 
 "Reverse scrolling" = "역방향 스크롤";
 "(vertically)" = "(수직 방향)";
 "(horizontally)" = "(수평 방향)";
-"Some gestures, such as swiping back and forward, may stop working." = "'앞뒤로 스와이프' 등 일부 제스처가 오작동할 수 있습니다.";
+"Some gestures, such as swiping back and forward, may stop working." = "앞뒤로 스와이프와 같은 일부 제스처의 작동을 멈출 수 있습니다.";
 "Enable linear scrolling" = "리니어 스크롤";
-"Disable scrolling acceleration." = "마우스 스크롤 가속을 끕니다.";
+"Disable scrolling acceleration." = "스크롤 가속을 끕니다.";
 "Scroll" = "스크롤";
 "By lines" = "줄";
 "By pixels" = "픽셀";
 
 "Acceleration" = "가속도";
 "Speed" = "민감도";
-"Revert to system defaults" = "초기 설정 복원";
-"You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z를 눌러 초기 설정으로 되돌릴 수도 있습니다.";
+"Revert to system defaults" = "시스템 기본값으로 되돌리기";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z를 눌러서도 시스템 기본값으로 되돌릴 수 있습니다.";
 "Disable pointer acceleration" = "포인터 가속 끄기";
 
 "Enable universal back and forward" = "유니버설 백/포워드";
@@ -41,7 +41,7 @@
 "to" = "으로";
 
 "Settings" = "설정";
-"Show in menu bar" = "메뉴 막대에 표시";
+"Show in menu bar" = "메뉴 막대에서 보기";
 "To show the preferences, launch %@ again." = "설정을 적용하려면 %@을(를) 재시작하십시오.";
 
 "Update" = "업데이트";
@@ -56,7 +56,7 @@
 "Links" = "링크";
 "Homepage" = "홈페이지";
 "Open Collective" = "후원하기(Open Collective)";
-"GitHub" = "깃허브";
+"GitHub" = "GitHub";
 "Feedback" = "의견 보내기";
 "Contact" = "연락처";
 
