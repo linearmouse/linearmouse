@@ -26,8 +26,8 @@
 "By lines" = "줄";
 "By pixels" = "픽셀";
 
-"Acceleration" = "가속도";
-"Speed" = "민감도";
+"Acceleration" = "가속";
+"Speed" = "속도";
 "Revert to system defaults" = "시스템 기본값으로 되돌리기";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z를 눌러서도 시스템 기본값으로 되돌릴 수 있습니다.";
 "Disable pointer acceleration" = "포인터 가속 끄기";
@@ -37,7 +37,7 @@
 
 "No action" = "동작 없음";
 "Alter orientation" = "방향 변경";
-"Change speed" = "민감도 변경";
+"Change speed" = "속도 변경";
 "to" = "으로";
 
 "Settings" = "설정";
