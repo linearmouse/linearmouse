@@ -4,7 +4,7 @@
 "Open Accessibility" = "Открыть Универсальный доступ";
 
 "%@ Preferences..." = "Настройки %@...";
-"Start at login" = "Start at login";
+"Start at login" = "Запуск при входе";
 "Config" = "Конфигурация";
 "Reload" = "Обновить";
 "Reveal in Finder" = "Показать в Finder";
