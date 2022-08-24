@@ -27,7 +27,7 @@ extension ButtonActions: EventTransformer {
     }
 
     func action(of event: CGEvent) -> Scheme.Buttons.Mapping.Action? {
-        guard let mapping = mappings.last(where: { event.match(with: $0) }),
+        guard let mapping = mappings.last(where: { $0.match(with: event) }),
               let action = mapping.action else {
             return nil
         }
@@ -138,31 +138,5 @@ extension ButtonActions: EventTransformer {
             task.arguments = ["-c", command]
             task.launch()
         }
-    }
-}
-
-extension CGEventFlags {
-    func match(with mapping: Scheme.Buttons.Mapping) -> Bool {
-        guard mapping.command ?? false == contains(.maskCommand),
-              mapping.shift ?? false == contains(.maskShift),
-              mapping.option ?? false == contains(.maskAlternate),
-              mapping.control ?? false == contains(.maskControl) else {
-            return false
-        }
-
-        return true
-    }
-}
-
-extension CGEvent {
-    func match(with mapping: Scheme.Buttons.Mapping) -> Bool {
-        let button = getIntegerValueField(.mouseEventButtonNumber)
-
-        guard mapping.button == button,
-              flags.match(with: mapping) else {
-            return false
-        }
-
-        return true
     }
 }
