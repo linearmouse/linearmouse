@@ -13,3 +13,26 @@ extension Scheme.Buttons {
         var action: Action?
     }
 }
+
+extension Scheme.Buttons.Mapping {
+    var modifierFlags: CGEventFlags {
+        CGEventFlags([
+            (command, CGEventFlags.maskCommand),
+            (shift, CGEventFlags.maskShift),
+            (option, CGEventFlags.maskAlternate),
+            (control, CGEventFlags.maskControl)
+        ]
+        .filter { $0.0 == true }
+        .map(\.1))
+    }
+
+    func match(with event: CGEvent) -> Bool {
+        let view = MouseEventView(event)
+
+        guard let mouseButton = view.mouseButton, mouseButton.rawValue == button else {
+            return false
+        }
+
+        return view.modifierFlags == modifierFlags
+    }
+}

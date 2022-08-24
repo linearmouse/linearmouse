@@ -21,6 +21,29 @@ class MouseEventView {
         return CGMouseButton(rawValue: mouseButtonNumber)!
     }
 
+    var modifierFlags: CGEventFlags {
+        event.flags.intersection([.maskCommand, .maskShift, .maskAlternate, .maskControl])
+    }
+
+    var modifiers: [String] {
+        [
+            (CGEventFlags.maskCommand, "command"),
+            (CGEventFlags.maskShift, "shift"),
+            (CGEventFlags.maskAlternate, "option"),
+            (CGEventFlags.maskControl, "control")
+        ]
+        .filter { modifierFlags.contains($0.0) }
+        .map(\.1)
+    }
+
+    var mouseButtonDescription: String {
+        guard let mouseButton = mouseButton else {
+            return "(null)"
+        }
+
+        return (modifiers + ["<button \(mouseButton.rawValue)>"]).joined(separator: "+")
+    }
+
     var targetBundleIdentifier: String? {
         let pid = pid_t(event.getIntegerValueField(.eventTargetUnixProcessID))
         guard let bundleIdentifier = Self.bundleIdentifierCache.value(forKey: pid)

@@ -21,7 +21,7 @@ func transformEvent(_ event: CGEvent) -> CGEvent? {
     let mergedScheme = ConfigurationState.shared.configuration.matchedScheme(withDevice: device,
                                                                              withApp: app)
 
-    os_log("Using scheme: %@ (device: %@, app: %@)", log: log, type: .debug,
+    os_log("Using scheme: %{public}@ (device: %{public}@, app: %{public}@)", log: log, type: .debug,
            String(describing: mergedScheme),
            String(describing: device),
            app ?? "(nil)")
