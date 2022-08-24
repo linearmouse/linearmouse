@@ -27,25 +27,8 @@ extension ButtonActions: EventTransformer {
     }
 
     func action(of event: CGEvent) -> Scheme.Buttons.Mapping.Action? {
-        let button = event.getIntegerValueField(.mouseEventButtonNumber)
-
-        func match(with mapping: Scheme.Buttons.Mapping) -> Bool {
-            guard mapping.button == button,
-                  mapping.command ?? false == event.flags.contains(.maskCommand),
-                  mapping.shift ?? false == event.flags.contains(.maskShift),
-                  mapping.option ?? false == event.flags.contains(.maskAlternate),
-                  mapping.control ?? false == event.flags.contains(.maskControl)
-            else {
-                return false
-            }
-
-            return true
-        }
-
-        guard let mapping = mappings.last(where: match),
+        guard let mapping = mappings.last(where: { event.match(with: $0) }),
               let action = mapping.action else {
-            os_log("No button mapping found for button %{public}d", log: Self.log, type: .debug, button)
-
             return nil
         }
 
@@ -61,11 +44,16 @@ extension ButtonActions: EventTransformer {
             return event
         }
 
+        let view = MouseEventView(event)
+
         guard let action = action(of: event) else {
+            os_log("No button mapping found: button=%{public}@", log: Self.log, type: .debug,
+                   view.mouseButtonDescription)
             return event
         }
 
-        os_log("Find mapping: %{public}@", log: Self.log, type: .debug, String(describing: action))
+        os_log("Found mapping: button=%{public}@, mapping=%{public}@", log: Self.log, type: .debug,
+               view.mouseButtonDescription, String(describing: action))
 
         if mouseUpEventTypes.contains(event.type) {
             DispatchQueue.main.async { [self] in
@@ -150,5 +138,31 @@ extension ButtonActions: EventTransformer {
             task.arguments = ["-c", command]
             task.launch()
         }
+    }
+}
+
+extension CGEventFlags {
+    func match(with mapping: Scheme.Buttons.Mapping) -> Bool {
+        guard mapping.command ?? false == contains(.maskCommand),
+              mapping.shift ?? false == contains(.maskShift),
+              mapping.option ?? false == contains(.maskAlternate),
+              mapping.control ?? false == contains(.maskControl) else {
+            return false
+        }
+
+        return true
+    }
+}
+
+extension CGEvent {
+    func match(with mapping: Scheme.Buttons.Mapping) -> Bool {
+        let button = getIntegerValueField(.mouseEventButtonNumber)
+
+        guard mapping.button == button,
+              flags.match(with: mapping) else {
+            return false
+        }
+
+        return true
     }
 }
