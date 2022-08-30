@@ -26,7 +26,7 @@ struct DetailView<T>: View where T: View {
                         .padding(.vertical, 30)
                         .frame(
                             minWidth: 500,
-                            maxWidth: 10000 /* TODO: Replace with .infinity after Catalina is deprecated */,
+                            maxWidth: 850,
                             alignment: .topLeading
                         )
                 }

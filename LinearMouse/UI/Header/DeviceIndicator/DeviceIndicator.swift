@@ -14,6 +14,7 @@ struct DeviceIndicator: View {
                 .fixedSize()
                 .lineLimit(1)
         }
+        .controlSize(.small)
         .buttonStyle(SecondaryButtonStyle())
         .sheet(isPresented: $showDevicePickerSheet) {
             DevicePickerSheet()
