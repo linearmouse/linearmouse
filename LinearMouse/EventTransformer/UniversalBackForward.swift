@@ -13,12 +13,16 @@ extension CGMouseButton {
 class UniversalBackForward: EventTransformer {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "UniversalBackForward")
 
+    private static let includeSet: Set<String> = [
+        "org.mozilla.firefox"
+    ]
+
     private func shouldHandleEvent(_ view: MouseEventView) -> Bool {
         guard let bundleIdentifier = view.targetBundleIdentifier else {
             return false
         }
 
-        return bundleIdentifier.hasPrefix("com.apple.")
+        return Self.includeSet.contains(bundleIdentifier) || bundleIdentifier.hasPrefix("com.apple.")
     }
 
     // swiftlint:disable cyclomatic_complexity
@@ -31,7 +35,6 @@ class UniversalBackForward: EventTransformer {
             return event
         }
 
-        // Skip applications in ignore set.
         let targetBundleIdentifierString = view.targetBundleIdentifier ?? "(nil)"
         guard shouldHandleEvent(view) else {
             if event.type == .otherMouseDown {
