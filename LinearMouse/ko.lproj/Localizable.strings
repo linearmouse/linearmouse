@@ -1,12 +1,12 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse이(가) 손쉬운 사용 권한이 필요합니다";
 "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "시스템 설정 > 개인정보 보호 및 보안 > 손쉬운 사용에서 이 응용 프로그램에 접근 권한을 부여하십시오.";
-"Get more help" = "도움 얻기";
+"Get more help" = "도움이 필요하신가요?";
 "Open Accessibility" = "손쉬운 사용 열기";
 
-"%@ Preferences..." = "환경설정...";
-"Start at login" = "로그인할 때 실행";
+"%@ Preferences..." = "설정...";
+"Start at login" = "로그인 시 시작";
 "Config" = "설정";
-"Reload" = "새로고침";
+"Reload" = "재설정";
 "Reveal in Finder" = "Finder에서 열기";
 "Quit %@" = "%@ 종료";
 
@@ -19,9 +19,9 @@
 "Reverse scrolling" = "역방향 스크롤";
 "(vertically)" = "(수직 방향)";
 "(horizontally)" = "(수평 방향)";
-"Some gestures, such as swiping back and forward, may stop working." = "앞뒤로 스와이프와 같은 일부 제스처의 작동을 멈출 수 있습니다.";
+"Some gestures, such as swiping back and forward, may stop working." = "앞뒤로 스와이프와 같은 일부 제스처가 작동하지 않을 수 있습니다.";
 "Enable linear scrolling" = "리니어 스크롤";
-"Disable scrolling acceleration." = "스크롤 가속을 끕니다.";
+"Disable scrolling acceleration." = "스크롤 가속을 비활성화합니다.";
 "Scroll" = "스크롤";
 "By lines" = "줄";
 "By pixels" = "픽셀";
@@ -30,7 +30,7 @@
 "Speed" = "속도";
 "Revert to system defaults" = "시스템 기본값으로 되돌리기";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z를 눌러서도 시스템 기본값으로 되돌릴 수 있습니다.";
-"Disable pointer acceleration" = "포인터 가속 끄기";
+"Disable pointer acceleration" = "포인터 가속 비활성화";
 
 "Enable universal back and forward" = "유니버설 백/포워드";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "뒤로 및 앞으로 가기 측면 버튼을 스와이프 제스처로 변환하여 앱 호환성을 높입니다.";
@@ -42,7 +42,7 @@
 
 "Settings" = "설정";
 "Show in menu bar" = "메뉴 막대에서 보기";
-"To show the preferences, launch %@ again." = "설정을 적용하려면 %@를 재시작하십시오.";
+"To show the preferences, launch %@ again." = "설정을 표시하려면 %@을(를) 재시작하십시오.";
 
 "Update" = "업데이트";
 "Version: %@" = "버전: %@";
@@ -55,7 +55,7 @@
 
 "Links" = "링크";
 "Homepage" = "홈페이지";
-"Open Collective" = "후원하기(Open Collective)";
+"Open Collective" = "Open Collective";
 "GitHub" = "GitHub";
 "Feedback" = "의견 보내기";
 "Contact" = "연락처";
