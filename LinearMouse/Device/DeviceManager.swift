@@ -164,9 +164,17 @@ class DeviceManager: ObservableObject {
     }
 
     func updatePointerSpeed(for device: Device) {
+        var frontmostApp = NSWorkspace.shared.frontmostApplication
+        if frontmostApp != nil {
+            var parentPid = OPParentIDForProcessID(frontmostApp!.processIdentifier);
+            // stop at launchd(1) or kernel_task(0)
+            while parentPid > 1 {
+                frontmostApp = NSRunningApplication.init(processIdentifier: parentPid)
+                parentPid = OPParentIDForProcessID(frontmostApp!.processIdentifier)
+            }
+        }
         let scheme = ConfigurationState.shared.configuration.matchedScheme(withDevice: device,
-                                                                           withApp: NSWorkspace.shared
-                                                                               .frontmostApplication?.bundleIdentifier)
+                                                                           withApp: frontmostApp?.bundleIdentifier)
 
         if let pointerDisableAcceleration = scheme.pointer?.disableAcceleration {
             if pointerDisableAcceleration {
