@@ -13,8 +13,8 @@ extension ScrollingSettingsState {
         }
         set {
             Scheme(
-                scrolling: Scheme.Scrolling(
-                    reverse: Scheme.Scrolling.Reverse(
+                scrolling: .init(
+                    reverse: .init(
                         vertical: newValue
                     )
                 )
@@ -29,8 +29,8 @@ extension ScrollingSettingsState {
         }
         set {
             Scheme(
-                scrolling: Scheme.Scrolling(
-                    reverse: Scheme.Scrolling.Reverse(
+                scrolling: .init(
+                    reverse: .init(
                         horizontal: newValue
                     )
                 )
@@ -54,7 +54,7 @@ extension ScrollingSettingsState {
             }
 
             Scheme(
-                scrolling: Scheme.Scrolling(
+                scrolling: .init(
                     distance: .line(3)
                 )
             )
@@ -68,7 +68,7 @@ extension ScrollingSettingsState {
         }
         set {
             Scheme(
-                scrolling: Scheme.Scrolling(
+                scrolling: .init(
                     distance: newValue
                 )
             )

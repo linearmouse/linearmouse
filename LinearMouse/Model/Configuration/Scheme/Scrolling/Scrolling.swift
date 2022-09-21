@@ -5,16 +5,36 @@ import Foundation
 
 extension Scheme {
     struct Scrolling: Codable {
-        struct Reverse: Codable {
-            var vertical: Bool?
-            var horizontal: Bool?
-        }
-
-        var reverse: Reverse?
+        var reverse: Bidirectional<Bool>?
 
         var distance: Distance?
 
         var modifiers: Modifiers?
+    }
+}
+
+extension Scheme.Scrolling {
+    struct Bidirectional<T: Codable>: Codable {
+        var vertical: T?
+        var horizontal: T?
+
+        func merge(into: inout Self) {
+            if let vertical = vertical {
+                into.vertical = vertical
+            }
+
+            if let horizontal = horizontal {
+                into.horizontal = horizontal
+            }
+        }
+
+        func merge(into: inout Self?) {
+            if into == nil {
+                into = Self()
+            }
+
+            merge(into: &into!)
+        }
     }
 }
 
@@ -39,25 +59,5 @@ extension Scheme.Scrolling {
         }
 
         merge(into: &scrolling!)
-    }
-}
-
-extension Scheme.Scrolling.Reverse {
-    func merge(into reverse: inout Self) {
-        if let vertical = vertical {
-            reverse.vertical = vertical
-        }
-
-        if let horizontal = horizontal {
-            reverse.horizontal = horizontal
-        }
-    }
-
-    func merge(into reverse: inout Self?) {
-        if reverse == nil {
-            reverse = Self()
-        }
-
-        merge(into: &reverse!)
     }
 }
