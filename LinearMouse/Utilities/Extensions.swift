@@ -64,4 +64,24 @@ extension pid_t {
 
         return bundleIdentifier
     }
+
+    var parent: pid_t? {
+        let pid = getProcessInfo(self).ppid
+
+        guard pid > 0 else {
+            return nil
+        }
+
+        return pid
+    }
+
+    var group: pid_t? {
+        let pid = getProcessInfo(self).pgid
+
+        guard pid > 0 else {
+            return nil
+        }
+
+        return pid
+    }
 }
