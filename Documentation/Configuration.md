@@ -174,7 +174,9 @@ For example, to match the Minecraft (a Java process) launched by PolyMC:
 {
   "schemes": [
     {
-      "parentApp": "org.polymc.PolyMC"
+      "if": {
+        "parentApp": "org.polymc.PolyMC"
+      }
     }
   ]
 }
@@ -186,7 +188,9 @@ Or, to match the whole process group:
 {
   "schemes": [
     {
-      "groupApp": "org.polymc.PolyMC"
+      "if": {
+        "groupApp": "org.polymc.PolyMC"
+      }
     }
   ]
 }
@@ -296,7 +300,7 @@ Button mappings is a list that allows you to assign actions to buttons. For exam
 Launchpad when the wheel button is clicked, or to switch spaces when <kbd>command + back</kbd>
 or <kbd>command + forward</kbd> is clicked.
 
-### Bsaic example
+### Basic example
 
 ```json
 {
