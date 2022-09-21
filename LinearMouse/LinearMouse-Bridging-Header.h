@@ -8,6 +8,8 @@
 #include <CoreGraphics/CoreGraphics.h>
 #include <IOKit/hidsystem/IOHIDEventSystemClient.h>
 
+#include "Utilities/Process.h"
+
 CF_IMPLICIT_BRIDGING_ENABLED
 
 enum {

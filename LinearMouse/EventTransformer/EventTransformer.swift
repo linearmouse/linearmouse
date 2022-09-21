@@ -16,15 +16,14 @@ func transformEvent(_ event: CGEvent) -> CGEvent? {
     let view = MouseEventView(event)
 
     let device = DeviceManager.shared.lastActiveDevice
-    let app = view.targetBundleIdentifier
 
     let mergedScheme = ConfigurationState.shared.configuration.matchedScheme(withDevice: device,
-                                                                             withApp: app)
+                                                                             withPid: view.targetPid)
 
     os_log("Using scheme: %{public}@ (device: %{public}@, app: %{public}@)", log: log, type: .debug,
            String(describing: mergedScheme),
            String(describing: device),
-           app ?? "(nil)")
+           view.targetPid?.bundleIdentifier ?? "(nil)")
 
     // TODO: Cache transformers
     let transformers = buildEventTransformers(for: mergedScheme)

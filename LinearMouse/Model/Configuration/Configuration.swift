@@ -87,7 +87,7 @@ extension Configuration {
     }
 
     func matchedScheme(withDevice device: Device? = nil,
-                       withApp app: String? = nil) -> Scheme {
+                       withPid pid: pid_t? = nil) -> Scheme {
         // TODO: Backtrace the merge path
         // TODO: Optimize the algorithm
 
@@ -99,13 +99,9 @@ extension Configuration {
             `if`.device = DeviceMatcher(of: device)
         }
 
-        if let app = app {
-            `if`.app = app
-        }
-
         mergedScheme.if = [`if`]
 
-        for scheme in schemes where scheme.isActive(withDevice: device, withApp: app) {
+        for scheme in schemes where scheme.isActive(withDevice: device, withPid: pid) {
             scheme.merge(into: &mergedScheme)
         }
 
@@ -114,6 +110,6 @@ extension Configuration {
 
     var activeScheme: Scheme {
         matchedScheme(withDevice: DeviceManager.shared.lastActiveDevice,
-                      withApp: NSWorkspace.shared.frontmostApplication?.bundleIdentifier)
+                      withPid: NSWorkspace.shared.frontmostApplication?.processIdentifier)
     }
 }

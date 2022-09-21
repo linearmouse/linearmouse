@@ -56,9 +56,21 @@ declare namespace Scheme {
 
     /**
      * @title App
-     * @description Match app by providing a bundle ID. For example, `com.apple.Safari`. If not provided, the scheme is activated on all apps.
+     * @description Match apps by providing the bundle ID. For example, `com.apple.Safari`.
      */
     app?: string;
+
+    /**
+     * @title Parent app
+     * @description Match apps by providing the bundle ID of the parent process. For example, `org.polymc.PolyMC`.
+     */
+    parentApp?: string;
+
+    /**
+     * @title Group app
+     * @description Match apps by providing the bundle ID of the process group. For example, `org.polymc.PolyMC`.
+     */
+    groupApp?: string;
   };
 
   namespace If {

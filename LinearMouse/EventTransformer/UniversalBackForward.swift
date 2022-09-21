@@ -18,7 +18,7 @@ class UniversalBackForward: EventTransformer {
     ]
 
     private func shouldHandleEvent(_ view: MouseEventView) -> Bool {
-        guard let bundleIdentifier = view.targetBundleIdentifier else {
+        guard let bundleIdentifier = view.targetPid?.bundleIdentifier else {
             return false
         }
 
@@ -35,7 +35,7 @@ class UniversalBackForward: EventTransformer {
             return event
         }
 
-        let targetBundleIdentifierString = view.targetBundleIdentifier ?? "(nil)"
+        let targetBundleIdentifierString = view.targetPid?.bundleIdentifier ?? "(nil)"
         guard shouldHandleEvent(view) else {
             if event.type == .otherMouseDown {
                 os_log("Ignore: %{public}@", log: Self.log, type: .debug, targetBundleIdentifierString)

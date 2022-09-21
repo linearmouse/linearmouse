@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		36EBC3223E2CEE09F84076D8 /* Process.m in Sources */ = {isa = PBXBuildFile; fileRef = 36EBC80F80AD57E8226267BF /* Process.m */; };
 		971338AF289B64C1005A74D2 /* HelpButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971338AE289B64C1005A74D2 /* HelpButton.swift */; };
 		972A5E1F285CA43D00CB6440 /* DevicePickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E1E285CA43D00CB6440 /* DevicePickerSheet.swift */; };
 		972A5E22285CA49800CB6440 /* DevicePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E21285CA49800CB6440 /* DevicePicker.swift */; };
@@ -118,6 +119,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		36EBC1359D50EDBC252FB81F /* Process.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Process.h; sourceTree = "<group>"; };
+		36EBC80F80AD57E8226267BF /* Process.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Process.m; sourceTree = "<group>"; };
 		971338AE289B64C1005A74D2 /* HelpButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpButton.swift; sourceTree = "<group>"; };
 		972A5E1E285CA43D00CB6440 /* DevicePickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSheet.swift; sourceTree = "<group>"; };
 		972A5E21285CA49800CB6440 /* DevicePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePicker.swift; sourceTree = "<group>"; };
@@ -316,8 +319,10 @@
 			children = (
 				97F77FB5285F538E007C9C2B /* Codable */,
 				97B83CE42860DA9800ECF109 /* CustomDecodingError.swift */,
-				972DF6302859756700B83932 /* ProcessEnvironment.swift */,
 				97C5DBB928682809006FA6B4 /* Extensions.swift */,
+				36EBC1359D50EDBC252FB81F /* Process.h */,
+				36EBC80F80AD57E8226267BF /* Process.m */,
+				972DF6302859756700B83932 /* ProcessEnvironment.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -928,6 +933,7 @@
 				972DF64C285A298600B83932 /* DetailView.swift in Sources */,
 				972A5E2A285D5D0100CB6440 /* DeviceButtonStyle.swift in Sources */,
 				97F77FAA285E178B007C9C2B /* DevicePickerSectionItem.swift in Sources */,
+				36EBC3223E2CEE09F84076D8 /* Process.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -164,9 +164,9 @@ class DeviceManager: ObservableObject {
     }
 
     func updatePointerSpeed(for device: Device) {
+        let frontmostApp = NSWorkspace.shared.frontmostApplication
         let scheme = ConfigurationState.shared.configuration.matchedScheme(withDevice: device,
-                                                                           withApp: NSWorkspace.shared
-                                                                               .frontmostApplication?.bundleIdentifier)
+                                                                           withPid: frontmostApp?.processIdentifier)
 
         if let pointerDisableAcceleration = scheme.pointer?.disableAcceleration {
             if pointerDisableAcceleration {
