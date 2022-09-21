@@ -1,7 +1,9 @@
 // MIT License
 // Copyright (c) 2021-2022 Jiahao Lu
 
+import AppKit
 import Foundation
+import LRUCache
 
 extension Comparable {
     func clamped(to range: ClosedRange<Self>) -> Self {
@@ -45,5 +47,21 @@ extension Decimal {
         var mutableSelf = self
         NSDecimalRound(&roundedValue, &mutableSelf, scale, .plain)
         return roundedValue
+    }
+}
+
+extension pid_t {
+    private static var bundleIdentifierCache = LRUCache<Self, String>(countLimit: 16)
+
+    var bundleIdentifier: String? {
+        guard let bundleIdentifier = Self.bundleIdentifierCache.value(forKey: self)
+            ?? NSRunningApplication(processIdentifier: self)?.bundleIdentifier
+        else {
+            return nil
+        }
+
+        Self.bundleIdentifierCache.setValue(bundleIdentifier, forKey: self)
+
+        return bundleIdentifier
     }
 }

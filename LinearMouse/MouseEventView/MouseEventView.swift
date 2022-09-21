@@ -6,8 +6,6 @@ import Foundation
 import LRUCache
 
 class MouseEventView {
-    private static var bundleIdentifierCache = LRUCache<pid_t, String>(countLimit: 5)
-
     let event: CGEvent
 
     init(_ event: CGEvent) {
@@ -45,13 +43,6 @@ class MouseEventView {
     }
 
     var targetBundleIdentifier: String? {
-        let pid = pid_t(event.getIntegerValueField(.eventTargetUnixProcessID))
-        guard let bundleIdentifier = Self.bundleIdentifierCache.value(forKey: pid)
-            ?? NSRunningApplication(processIdentifier: pid)?.bundleIdentifier
-        else {
-            return nil
-        }
-        Self.bundleIdentifierCache.setValue(bundleIdentifier, forKey: pid)
-        return bundleIdentifier
+        pid_t(event.getIntegerValueField(.eventTargetUnixProcessID)).bundleIdentifier
     }
 }
