@@ -24,12 +24,12 @@ struct Scheme: Codable {
 
 extension Scheme {
     func isActive(withDevice device: Device? = nil,
-                  withApp app: String? = nil) -> Bool {
+                  withPid pid: pid_t? = nil) -> Bool {
         guard let `if` = `if` else {
             return true
         }
 
-        return `if`.contains { $0.isSatisfied(withDevice: device, withApp: app) }
+        return `if`.contains { $0.isSatisfied(withDevice: device, withPid: pid) }
     }
 
     /// A scheme is device-specific if and only if a) it has only one `if` and

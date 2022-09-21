@@ -163,6 +163,35 @@ Or, to disable reverse scrolling in Safari for all devices:
 }
 ```
 
+By default, LinearMouse checks the app bundle ID of the frontmost process. However, in some
+circumstances, a program might not be placed in a specific application bundle. In that case, you
+may specify the app bundle ID of the parent process or the process group of the frontmost process
+by specify `parentApp` and `groupApp`.
+
+For example, to match the Minecraft (a Java process) launched by PolyMC:
+
+```json
+{
+  "schemes": [
+    {
+      "parentApp": "org.polymc.PolyMC"
+    }
+  ]
+}
+```
+
+Or, to match the whole process group:
+
+```json
+{
+  "schemes": [
+    {
+      "groupApp": "org.polymc.PolyMC"
+    }
+  ]
+}
+```
+
 ## Schemes merging and multiple `if`s
 
 If multiple schemes are activated at the same time, they will be merged in the order of their
