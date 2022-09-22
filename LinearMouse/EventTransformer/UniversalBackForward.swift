@@ -17,7 +17,30 @@ class UniversalBackForward: EventTransformer {
         "org.mozilla.firefox"
     ]
 
+    private let interestedButtons: Set<CGMouseButton>
+
+    init(universalBackForward: Scheme.Buttons.UniversalBackForward) {
+        switch universalBackForward {
+        case .none:
+            interestedButtons = []
+        case .both:
+            interestedButtons = [.back, .forward]
+        case .backOnly:
+            interestedButtons = [.back]
+        case .forwardOnly:
+            interestedButtons = [.forward]
+        }
+    }
+
     private func shouldHandleEvent(_ view: MouseEventView) -> Bool {
+        guard let mouseButton = view.mouseButton else {
+            return false
+        }
+
+        guard interestedButtons.contains(mouseButton) else {
+            return false
+        }
+
         guard let bundleIdentifier = view.targetPid?.bundleIdentifier else {
             return false
         }
@@ -28,18 +51,9 @@ class UniversalBackForward: EventTransformer {
     // swiftlint:disable cyclomatic_complexity
     func transform(_ event: CGEvent) -> CGEvent? {
         let view = MouseEventView(event)
-        guard let mouseButton = view.mouseButton else {
-            return event
-        }
-        guard [.back, .forward].contains(mouseButton) else {
-            return event
-        }
 
         let targetBundleIdentifierString = view.targetPid?.bundleIdentifier ?? "(nil)"
         guard shouldHandleEvent(view) else {
-            if event.type == .otherMouseDown {
-                os_log("Ignore: %{public}@", log: Self.log, type: .debug, targetBundleIdentifierString)
-            }
             return event
         }
 
@@ -55,12 +69,12 @@ class UniversalBackForward: EventTransformer {
         }
 
         os_log("Convert to swipe: %{public}@", log: Self.log, type: .debug, targetBundleIdentifierString)
-        switch mouseButton {
-        case .back:
+        switch view.mouseButton {
+        case CGMouseButton.back:
             if let event = GestureEvent(navigationSwipeSource: nil, direction: .swipeLeft) {
                 event.post(tap: .cghidEventTap)
             }
-        case .forward:
+        case CGMouseButton.forward:
             if let event = GestureEvent(navigationSwipeSource: nil, direction: .swipeRight) {
                 event.post(tap: .cghidEventTap)
             }

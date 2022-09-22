@@ -61,8 +61,9 @@ func buildEventTransformers(for scheme: Scheme) -> [EventTransformer] {
         transformers.append(ButtonActions(mappings: mappings))
     }
 
-    if scheme.buttons?.universalBackForward == true {
-        transformers.append(UniversalBackForward())
+    if let universalBackForward = scheme.buttons?.universalBackForward,
+       universalBackForward != .none {
+        transformers.append(UniversalBackForward(universalBackForward: universalBackForward))
     }
 
     return transformers

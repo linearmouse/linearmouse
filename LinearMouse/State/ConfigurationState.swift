@@ -91,17 +91,6 @@ extension ConfigurationState {
         } catch CocoaError.fileReadNoSuchFile {
             os_log("No configuration file found, try creating a default one",
                    log: Self.log, type: .debug)
-
-            if !Defaults[.hasCheckedMigration], UserDefaults.standard.bool(forKey: "SUHasLaunchedBefore") {
-                configuration = AppDefaults.shared.configuration
-
-                os_log("Migrate from previous version: %@",
-                       log: Self.log, type: .debug,
-                       String(describing: configuration))
-
-                Defaults[.hasCheckedMigration] = true
-            }
-
             save()
         } catch {
             let alert = NSAlert()
