@@ -54,11 +54,11 @@ extension Scheme.Scrolling.Distance: Codable {
             }
 
             guard let valueRange = Range(match.range(at: 1), in: stringValue) else {
-                throw ValueError.invalidValue
+                throw CustomDecodingError(in: container, error: ValueError.invalidValue)
             }
 
             guard let unitRange = Range(match.range(at: 2), in: stringValue) else {
-                throw ValueError.invalidValue
+                throw CustomDecodingError(in: container, error: ValueError.invalidValue)
             }
 
             let valueString = String(stringValue[valueRange])
@@ -67,20 +67,20 @@ extension Scheme.Scrolling.Distance: Codable {
             switch unitString {
             case "":
                 guard let value = Int(valueString, radix: 10) else {
-                    throw ValueError.invalidValue
+                    throw CustomDecodingError(in: container, error: ValueError.invalidValue)
                 }
 
                 self = .line(value)
 
             case "px":
                 guard let value = Decimal(string: valueString) else {
-                    throw ValueError.invalidValue
+                    throw CustomDecodingError(in: container, error: ValueError.invalidValue)
                 }
 
                 self = .pixel(value)
 
             default:
-                throw ValueError.unknownUnit
+                throw CustomDecodingError(in: container, error: ValueError.unknownUnit)
             }
         }
     }

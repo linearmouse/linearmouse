@@ -8,12 +8,18 @@ class ButtonsSettingsState: SchemeState {}
 extension ButtonsSettingsState {
     var universalBackForward: Bool {
         get {
-            scheme.buttons?.universalBackForward ?? false
+            guard let universalBackForward = scheme.buttons?.universalBackForward else {
+                return false
+            }
+
+            return universalBackForward != .none
         }
         set {
+            let universalBackForward: Scheme.Buttons.UniversalBackForward = newValue ? .both : .none
+
             Scheme(
                 buttons: Scheme.Buttons(
-                    universalBackForward: newValue
+                    universalBackForward: universalBackForward
                 )
             )
             .merge(into: &scheme)
