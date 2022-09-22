@@ -41,21 +41,18 @@ extension ScrollingSettingsState {
 
     var linearScrollingEnabled: Bool {
         get {
-            if case .auto = scheme.scrolling?.distance ?? .auto {
+            if case .auto = scheme.scrolling?.distance?.vertical ?? .auto {
                 return false
             }
 
             return true
         }
         set {
-            guard newValue else {
-                scheme.scrolling?.distance = .auto
-                return
-            }
-
             Scheme(
                 scrolling: .init(
-                    distance: .line(3)
+                    distance: .init(
+                        vertical: newValue ? .line(3) : .auto
+                    )
                 )
             )
             .merge(into: &scheme)
@@ -64,12 +61,14 @@ extension ScrollingSettingsState {
 
     var linearScrollingDistance: Scheme.Scrolling.Distance {
         get {
-            scheme.scrolling?.distance ?? .line(3)
+            scheme.scrolling?.distance?.vertical ?? .line(3)
         }
         set {
             Scheme(
                 scrolling: .init(
-                    distance: newValue
+                    distance: .init(
+                        vertical: newValue
+                    )
                 )
             )
             .merge(into: &scheme)

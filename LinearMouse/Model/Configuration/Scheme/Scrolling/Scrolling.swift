@@ -7,7 +7,7 @@ extension Scheme {
     struct Scrolling: Codable {
         var reverse: Bidirectional<Bool>?
 
-        var distance: Distance?
+        var distance: Bidirectional<Distance>?
 
         var modifiers: Modifiers?
     }
