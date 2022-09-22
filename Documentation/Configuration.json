@@ -80,10 +80,10 @@
           "type": "array"
         },
         "universalBackForward": {
+          "$ref": "#/definitions/Scheme.Buttons.UniversalBackForward",
           "default": false,
-          "description": "If the value is true, the back and forward side buttons will be enabled in Safari and some other apps that do not handle these side buttons correctly.",
-          "title": "Universal back and forward",
-          "type": "boolean"
+          "description": "If the value is true, the back and forward side buttons will be enabled in Safari and some other apps that do not handle these side buttons correctly. If the value is \"backOnly\" or \"forwardOnly\", only universal back or universal forward will be enabled.",
+          "title": "Universal back and forward"
         }
       },
       "type": "object"
@@ -357,6 +357,29 @@
           "$ref": "#/definitions/Scheme.Buttons.Mapping.KeyboardBrightnessDown"
         }
       ]
+    },
+    "Scheme.Buttons.UniversalBackForward": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.UniversalBackForward.BackOnly"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.UniversalBackForward.ForwardOnly"
+        }
+      ]
+    },
+    "Scheme.Buttons.UniversalBackForward.BackOnly": {
+      "const": "backOnly",
+      "description": "Enable universal back only.",
+      "type": "string"
+    },
+    "Scheme.Buttons.UniversalBackForward.ForwardOnly": {
+      "const": "forwardOnly",
+      "description": "Enable universal forward only.",
+      "type": "string"
     },
     "Scheme.If": {
       "additionalProperties": false,

@@ -261,10 +261,10 @@ declare namespace Scheme {
 
     /**
      * @title Universal back and forward
-     * @description If the value is true, the back and forward side buttons will be enabled in Safari and some other apps that do not handle these side buttons correctly.
+     * @description If the value is true, the back and forward side buttons will be enabled in Safari and some other apps that do not handle these side buttons correctly. If the value is "backOnly" or "forwardOnly", only universal back or universal forward will be enabled.
      * @default false
      */
-    universalBackForward?: boolean;
+    universalBackForward?: Buttons.UniversalBackForward;
   };
 
   namespace Buttons {
@@ -463,6 +463,23 @@ declare namespace Scheme {
        * @description Fifth button, typically the forward button.
        */
       type Forward = 4;
+    }
+
+    type UniversalBackForward =
+      | boolean
+      | UniversalBackForward.BackOnly
+      | UniversalBackForward.ForwardOnly;
+
+    namespace UniversalBackForward {
+      /**
+       * @description Enable universal back only.
+       */
+      type BackOnly = "backOnly";
+
+      /**
+       * @description Enable universal forward only.
+       */
+      type ForwardOnly = "forwardOnly";
     }
   }
 }
