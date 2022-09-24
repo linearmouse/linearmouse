@@ -12,23 +12,23 @@
 
 "Scrolling" = "スクロール";
 "Pointer" = "ポインター";
-"Buttons" = "Buttons";
-"Modifier Keys" = "Modifier Keys";
-"General" = "General";
+"Buttons" = "ボタン";
+"Modifier Keys" = "修飾キー";
+"General" = "一般";
 
-"Reverse scrolling" = "Reverse scrolling";
-"(vertically)" = "(vertically)";
-"(horizontally)" = "(horizontally)";
-"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
-"Enable linear scrolling" = "Enable linear scrolling";
-"Disable scrolling acceleration." = "Disable scrolling acceleration.";
-"Scroll" = "Scroll";
-"By lines" = "By lines";
-"By pixels" = "By pixels";
+"Reverse scrolling" = "逆スクロール";
+"(vertically)" = "(縦方向)";
+"(horizontally)" = "(横方向)";
+"Some gestures, such as swiping back and forward, may stop working." = "前後スワイプ等、一部のジェスチャーが動作しなくなる可能性があります。";
+"Enable linear scrolling" = "線形スクロール";
+"Disable scrolling acceleration." = "スクロールアクセラレーションを無効にする。";
+"Scroll" = "スクロール";
+"By lines" = "行数";
+"By pixels" = "ピクセル数";
 
-"Acceleration" = "Acceleration";
-"Speed" = "Speed";
-"Revert to system defaults" = "Revert to system defaults";
+"Acceleration" = "アクセラレーション";
+"Speed" = "速度";
+"Revert to system defaults" = "システムデフォルトに戻す";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
 "Disable pointer acceleration" = "Disable pointer acceleration";
 
