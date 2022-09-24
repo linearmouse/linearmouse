@@ -1,17 +1,17 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility.";
-"Get more help" = "Get more help";
-"Open Accessibility" = "Open Accessibility";
+"LinearMouse needs Accessibility permission" = "LinearMouseにはアクセシビリティの許可が必要です";
+"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "システム環境設定 > セキュリティ & プライバシー > アクセシビリティでアクセシビリティの許可が必要です。";
+"Get more help" = "ヘルプ";
+"Open Accessibility" = "アクセシビリティの設定を開く";
 
-"%@ Preferences..." = "%@ Preferences...";
-"Start at login" = "Start at login";
-"Config" = "Config";
-"Reload" = "Reload";
-"Reveal in Finder" = "Reveal in Finder";
-"Quit %@" = "Quit %@";
+"%@ Preferences..." = "%@環境設定...";
+"Start at login" = "ログイン時の自動起動";
+"Config" = "設定";
+"Reload" = "再ロード";
+"Reveal in Finder" = "Finder で表示";
+"Quit %@" = "%@を終了";
 
-"Scrolling" = "Scrolling";
-"Pointer" = "Pointer";
+"Scrolling" = "スクロール";
+"Pointer" = "ポインター";
 "Buttons" = "Buttons";
 "Modifier Keys" = "Modifier Keys";
 "General" = "General";
