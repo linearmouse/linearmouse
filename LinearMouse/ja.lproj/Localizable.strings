@@ -48,13 +48,13 @@
 "Version: %@" = "Version: %@";
 "Check for Updates..." = "Check for Updates...";
 "Automatically" = "Automatically";
-"Daily" = "Daily";
-"Weekly" = "Weekly";
-"Monthly" = "Monthly";
-"Include beta" = "Include beta";
+"Daily" = "毎日";
+"Weekly" = "毎週";
+"Monthly" = "毎月";
+"Include beta" = "ベータ版を含める";
 
-"Links" = "Links";
-"Homepage" = "Homepage";
+"Links" = "リンク";
+"Homepage" = "ホームページ";
 "Open Collective" = "Open Collective";
 "GitHub" = "GitHub";
 "Feedback" = "Feedback";
@@ -63,6 +63,6 @@
 "Auto switch to the active device" = "Auto switch to the active device";
 "OK" = "OK";
 
-"Mouse" = "Mouse";
-"Trackpad" = "Trackpad";
-"(active)" = "(active)";
+"Mouse" = "マウス";
+"Trackpad" = "トラックパッド";
+"(active)" = "(有効)";
