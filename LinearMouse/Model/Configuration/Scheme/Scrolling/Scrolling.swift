@@ -20,7 +20,7 @@ extension Scheme.Scrolling {
         }
 
         if let distance = distance {
-            scrolling.distance = distance
+            distance.merge(into: &scrolling.distance)
         }
 
         if let modifiers = modifiers {
