@@ -18,7 +18,7 @@ class LinearScrollingTests: XCTestCase {
         event = transformer.transform(event)!
         let view = ScrollWheelEventView(event)
         XCTAssertFalse(view.continuous)
-        XCTAssertEqual(view.deltaX, 3)
+        XCTAssertEqual(view.deltaX, 0)
         XCTAssertEqual(view.deltaY, 3)
     }
 
@@ -35,9 +35,9 @@ class LinearScrollingTests: XCTestCase {
         event = transformer.transform(event)!
         let view = ScrollWheelEventView(event)
         XCTAssertTrue(view.continuous)
-        XCTAssertEqual(view.deltaXPt, 36)
+        XCTAssertEqual(view.deltaXPt, 0)
         XCTAssertEqual(view.deltaYPt, 36)
-        XCTAssertEqual(view.deltaXFixedPt, 36)
+        XCTAssertEqual(view.deltaXFixedPt, 0)
         XCTAssertEqual(view.deltaYFixedPt, 36)
     }
 }
