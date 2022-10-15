@@ -4,8 +4,8 @@
 import Foundation
 import os.log
 
-class LinearScrolling: EventTransformer {
-    private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "LinearScrolling")
+class LinearScrollingHorizontal: EventTransformer {
+    private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "LinearScrollingHorizontal")
 
     private let distance: Scheme.Scrolling.Distance
 
@@ -23,11 +23,17 @@ class LinearScrolling: EventTransformer {
         }
 
         let view = ScrollWheelEventView(event)
+
+        guard view.deltaXSignum != 0 else {
+            return event
+        }
+
         guard view.momentumPhase == .none else {
             return nil
         }
+
         let (continuous, oldValue) = (view.continuous, view.matrixValue)
-        let (deltaXSignum, deltaYSignum) = (view.deltaXSignum, view.deltaYSignum)
+        let deltaXSignum = view.deltaXSignum
 
         switch distance {
         case .auto:
@@ -36,14 +42,14 @@ class LinearScrolling: EventTransformer {
         case let .line(value):
             view.continuous = false
             view.deltaX = deltaXSignum * Int64(value)
-            view.deltaY = deltaYSignum * Int64(value)
+            view.deltaY = 0
 
         case let .pixel(value):
             view.continuous = true
             view.deltaXPt = Double(deltaXSignum) * value.asTruncatedDouble
-            view.deltaYPt = Double(deltaYSignum) * value.asTruncatedDouble
             view.deltaXFixedPt = Double(deltaXSignum) * value.asTruncatedDouble
-            view.deltaYFixedPt = Double(deltaYSignum) * value.asTruncatedDouble
+            view.deltaYPt = 0
+            view.deltaYFixedPt = 0
         }
 
         os_log("continuous=%{public}@, oldValue=%{public}@, newValue=%{public}@", log: Self.log, type: .debug,

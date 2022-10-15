@@ -142,26 +142,21 @@ declare namespace Scheme {
   };
 
   namespace Scrolling {
-    type Reverse = {
-      /**
-       * @title Reverse vertically
-       * @default false
-       */
-      vertical?: boolean;
+    type Bidirectional<T> =
+      | T
+      | {
+          vertical: T;
+          horizontal: T;
+        };
 
-      /**
-       * @title Reverse horizontally
-       * @default false
-       */
-      horizontal?: boolean;
-    };
+    type Reverse = Bidirectional<boolean | undefined>;
 
     /**
      * @description The scrolling distance will not be modified.
      */
     type Auto = "auto";
 
-    type Distance = Auto | Distance.Line | Distance.Pixel;
+    type Distance = Bidirectional<Auto | Distance.Line | Distance.Pixel>;
 
     namespace Distance {
       /**

@@ -5,14 +5,9 @@ import Foundation
 
 extension Scheme {
     struct Scrolling: Codable {
-        struct Reverse: Codable {
-            var vertical: Bool?
-            var horizontal: Bool?
-        }
+        var reverse: Bidirectional<Bool>?
 
-        var reverse: Reverse?
-
-        var distance: Distance?
+        var distance: Bidirectional<Distance>?
 
         var modifiers: Modifiers?
     }
@@ -25,7 +20,7 @@ extension Scheme.Scrolling {
         }
 
         if let distance = distance {
-            scrolling.distance = distance
+            distance.merge(into: &scrolling.distance)
         }
 
         if let modifiers = modifiers {
@@ -42,22 +37,65 @@ extension Scheme.Scrolling {
     }
 }
 
-extension Scheme.Scrolling.Reverse {
-    func merge(into reverse: inout Self) {
-        if let vertical = vertical {
-            reverse.vertical = vertical
+extension Scheme.Scrolling {
+    struct Bidirectional<T: Codable & Equatable> {
+        var value: Value
+
+        struct Value: Codable {
+            var vertical: T?
+            var horizontal: T?
         }
 
-        if let horizontal = horizontal {
-            reverse.horizontal = horizontal
+        init(vertical: T? = nil, horizontal: T? = nil) {
+            value = .init(vertical: vertical, horizontal: horizontal)
+        }
+
+        func merge(into: inout Self) {
+            if let vertical = value.vertical {
+                into.value.vertical = vertical
+            }
+
+            if let horizontal = value.horizontal {
+                into.value.horizontal = horizontal
+            }
+        }
+
+        func merge(into: inout Self?) {
+            if into == nil {
+                into = Self()
+            }
+
+            merge(into: &into!)
+        }
+    }
+}
+
+extension Scheme.Scrolling.Bidirectional {
+    var vertical: T? { value.vertical }
+
+    var horizontal: T? { value.horizontal }
+}
+
+extension Scheme.Scrolling.Bidirectional: Codable {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+
+        do {
+            value = try container.decode(Value.self)
+        } catch {
+            let v = try container.decode(T?.self)
+            value = .init(vertical: v, horizontal: v)
         }
     }
 
-    func merge(into reverse: inout Self?) {
-        if reverse == nil {
-            reverse = Self()
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+
+        if value.vertical == value.horizontal {
+            try container.encode(value.vertical)
+            return
         }
 
-        merge(into: &reverse!)
+        try container.encode(value)
     }
 }

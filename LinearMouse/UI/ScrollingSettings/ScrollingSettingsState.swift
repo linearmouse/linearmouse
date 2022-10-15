@@ -13,8 +13,8 @@ extension ScrollingSettingsState {
         }
         set {
             Scheme(
-                scrolling: Scheme.Scrolling(
-                    reverse: Scheme.Scrolling.Reverse(
+                scrolling: .init(
+                    reverse: .init(
                         vertical: newValue
                     )
                 )
@@ -29,8 +29,8 @@ extension ScrollingSettingsState {
         }
         set {
             Scheme(
-                scrolling: Scheme.Scrolling(
-                    reverse: Scheme.Scrolling.Reverse(
+                scrolling: .init(
+                    reverse: .init(
                         horizontal: newValue
                     )
                 )
@@ -39,37 +39,36 @@ extension ScrollingSettingsState {
         }
     }
 
-    var linearScrollingEnabled: Bool {
+    var linearScrollingVertical: Bool {
         get {
-            if case .auto = scheme.scrolling?.distance ?? .auto {
+            if case .auto = scheme.scrolling?.distance?.vertical ?? .auto {
                 return false
             }
 
             return true
         }
         set {
-            guard newValue else {
-                scheme.scrolling?.distance = .auto
-                return
-            }
-
             Scheme(
-                scrolling: Scheme.Scrolling(
-                    distance: .line(3)
+                scrolling: .init(
+                    distance: .init(
+                        vertical: newValue ? .line(3) : .auto
+                    )
                 )
             )
             .merge(into: &scheme)
         }
     }
 
-    var linearScrollingDistance: Scheme.Scrolling.Distance {
+    var linearScrollingVerticalDistance: Scheme.Scrolling.Distance {
         get {
-            scheme.scrolling?.distance ?? .line(3)
+            scheme.scrolling?.distance?.vertical ?? .line(3)
         }
         set {
             Scheme(
-                scrolling: Scheme.Scrolling(
-                    distance: newValue
+                scrolling: .init(
+                    distance: .init(
+                        vertical: newValue
+                    )
                 )
             )
             .merge(into: &scheme)
@@ -83,9 +82,9 @@ extension ScrollingSettingsState {
         case pixel = "By pixels"
     }
 
-    var linearScrollingUnit: LinearScrollingUnit {
+    var linearScrollingVerticalUnit: LinearScrollingUnit {
         get {
-            switch linearScrollingDistance {
+            switch linearScrollingVerticalDistance {
             case .auto, .line: return .line
             case .pixel: return .pixel
             }
@@ -94,16 +93,16 @@ extension ScrollingSettingsState {
         set {
             switch newValue {
             case .line:
-                linearScrollingDistance = .line(3)
+                linearScrollingVerticalDistance = .line(3)
             case .pixel:
-                linearScrollingDistance = .pixel(36)
+                linearScrollingVerticalDistance = .pixel(36)
             }
         }
     }
 
-    var linearScrollingLines: Int {
+    var linearScrollingVerticalLines: Int {
         get {
-            guard case let .line(value) = linearScrollingDistance else {
+            guard case let .line(value) = linearScrollingVerticalDistance else {
                 return 3
             }
 
@@ -111,13 +110,13 @@ extension ScrollingSettingsState {
         }
 
         set {
-            linearScrollingDistance = .line(newValue)
+            linearScrollingVerticalDistance = .line(newValue)
         }
     }
 
-    var linearScrollingPixels: Double {
+    var linearScrollingVerticalPixels: Double {
         get {
-            guard case let .pixel(value) = linearScrollingDistance else {
+            guard case let .pixel(value) = linearScrollingVerticalDistance else {
                 return 36
             }
 
@@ -125,7 +124,89 @@ extension ScrollingSettingsState {
         }
 
         set {
-            linearScrollingDistance = .pixel(Decimal(newValue).rounded(1))
+            linearScrollingVerticalDistance = .pixel(Decimal(newValue).rounded(1))
+        }
+    }
+
+    var linearScrollingHorizontal: Bool {
+        get {
+            if case .auto = scheme.scrolling?.distance?.horizontal ?? .auto {
+                return false
+            }
+
+            return true
+        }
+        set {
+            Scheme(
+                scrolling: .init(
+                    distance: .init(
+                        horizontal: newValue ? .line(3) : .auto
+                    )
+                )
+            )
+            .merge(into: &scheme)
+        }
+    }
+
+    var linearScrollingHorizontalDistance: Scheme.Scrolling.Distance {
+        get {
+            scheme.scrolling?.distance?.horizontal ?? .line(3)
+        }
+        set {
+            Scheme(
+                scrolling: .init(
+                    distance: .init(
+                        horizontal: newValue
+                    )
+                )
+            )
+            .merge(into: &scheme)
+        }
+    }
+
+    var linearScrollingHorizontalUnit: LinearScrollingUnit {
+        get {
+            switch linearScrollingHorizontalDistance {
+            case .auto, .line: return .line
+            case .pixel: return .pixel
+            }
+        }
+
+        set {
+            switch newValue {
+            case .line:
+                linearScrollingHorizontalDistance = .line(3)
+            case .pixel:
+                linearScrollingHorizontalDistance = .pixel(36)
+            }
+        }
+    }
+
+    var linearScrollingHorizontalLines: Int {
+        get {
+            guard case let .line(value) = linearScrollingHorizontalDistance else {
+                return 3
+            }
+
+            return value
+        }
+
+        set {
+            linearScrollingHorizontalDistance = .line(newValue)
+        }
+    }
+
+    var linearScrollingHorizontalPixels: Double {
+        get {
+            guard case let .pixel(value) = linearScrollingHorizontalDistance else {
+                return 36
+            }
+
+            return value.asTruncatedDouble
+        }
+
+        set {
+            linearScrollingHorizontalDistance = .pixel(Decimal(newValue).rounded(1))
         }
     }
 }
