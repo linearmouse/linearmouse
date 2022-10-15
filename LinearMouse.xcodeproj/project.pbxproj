@@ -60,6 +60,7 @@
 		97C5DBCC2868B4A5006FA6B4 /* ModifierKeyActionPickerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBCB2868B4A5006FA6B4 /* ModifierKeyActionPickerState.swift */; };
 		97C97728288FC49F009094BA /* DockKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C97727288FC49F009094BA /* DockKit */; };
 		97C9772D28910E4F009094BA /* KeyKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C9772C28910E4F009094BA /* KeyKit */; };
+		97E16F4F28F9A22A00E7D09B /* LinearScrollingHorizontal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E16F4E28F9A22A00E7D09B /* LinearScrollingHorizontal.swift */; };
 		97EFAABD28675D00008E6E67 /* ScrollingSettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97EFAABC28675D00008E6E67 /* ScrollingSettingsState.swift */; };
 		97F77FA4285DC467007C9C2B /* DevicePickerSectionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA3285DC467007C9C2B /* DevicePickerSectionState.swift */; };
 		97F77FA8285DC828007C9C2B /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA7285DC828007C9C2B /* Environment.swift */; };
@@ -93,7 +94,7 @@
 		B784292D278DB06600D207F0 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = B784292C278DB06600D207F0 /* Sparkle */; };
 		B7ADF97F2748991D0005B02D /* ReverseScrolling.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF97E2748991D0005B02D /* ReverseScrolling.swift */; };
 		B7ADF98127489CB00005B02D /* MouseDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF98027489CB00005B02D /* MouseDetector.swift */; };
-		B7ADF9832748B12B0005B02D /* LinearScrolling.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF9822748B12B0005B02D /* LinearScrolling.swift */; };
+		B7ADF9832748B12B0005B02D /* LinearScrollingVertical.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF9822748B12B0005B02D /* LinearScrollingVertical.swift */; };
 		B7ADF9852748B25A0005B02D /* ModifierActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF9842748B25A0005B02D /* ModifierActions.swift */; };
 		B7ADF9882748B6390005B02D /* DefaultMouseDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF9872748B6390005B02D /* DefaultMouseDetector.swift */; };
 		B7ADF98D2748E5010005B02D /* ScrollWheelEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7ADF98C2748E5010005B02D /* ScrollWheelEventView.swift */; };
@@ -172,6 +173,7 @@
 		97C97726288FC19A009094BA /* DockKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DockKit; sourceTree = "<group>"; };
 		97C9772928900298009094BA /* zh-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-HK"; path = "zh-HK.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		97C9772B28910054009094BA /* KeyKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = KeyKit; sourceTree = "<group>"; };
+		97E16F4E28F9A22A00E7D09B /* LinearScrollingHorizontal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearScrollingHorizontal.swift; sourceTree = "<group>"; };
 		97EFAABC28675D00008E6E67 /* ScrollingSettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingSettingsState.swift; sourceTree = "<group>"; };
 		97F77FA3285DC467007C9C2B /* DevicePickerSectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSectionState.swift; sourceTree = "<group>"; };
 		97F77FA7285DC828007C9C2B /* Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
@@ -208,7 +210,7 @@
 		B794BFE126BC0B2F003B11EF /* LinearMouse-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "LinearMouse-Bridging-Header.h"; sourceTree = "<group>"; };
 		B7ADF97E2748991D0005B02D /* ReverseScrolling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReverseScrolling.swift; sourceTree = "<group>"; };
 		B7ADF98027489CB00005B02D /* MouseDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseDetector.swift; sourceTree = "<group>"; };
-		B7ADF9822748B12B0005B02D /* LinearScrolling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearScrolling.swift; sourceTree = "<group>"; };
+		B7ADF9822748B12B0005B02D /* LinearScrollingVertical.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearScrollingVertical.swift; sourceTree = "<group>"; };
 		B7ADF9842748B25A0005B02D /* ModifierActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierActions.swift; sourceTree = "<group>"; };
 		B7ADF9872748B6390005B02D /* DefaultMouseDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultMouseDetector.swift; sourceTree = "<group>"; };
 		B7ADF98C2748E5010005B02D /* ScrollWheelEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollWheelEventView.swift; sourceTree = "<group>"; };
@@ -597,7 +599,8 @@
 			children = (
 				B77BA0F127480AA500E3BC5C /* EventTransformer.swift */,
 				B7ADF97E2748991D0005B02D /* ReverseScrolling.swift */,
-				B7ADF9822748B12B0005B02D /* LinearScrolling.swift */,
+				B7ADF9822748B12B0005B02D /* LinearScrollingVertical.swift */,
+				97E16F4E28F9A22A00E7D09B /* LinearScrollingHorizontal.swift */,
 				B7ADF9842748B25A0005B02D /* ModifierActions.swift */,
 				B716F15F26BC10B80052F551 /* UniversalBackForward.swift */,
 				97B913FD28869F0500DC920A /* ButtonActions.swift */,
@@ -873,6 +876,7 @@
 				971338AF289B64C1005A74D2 /* HelpButton.swift in Sources */,
 				B7ADF98D2748E5010005B02D /* ScrollWheelEventView.swift in Sources */,
 				B7ADF9852748B25A0005B02D /* ModifierActions.swift in Sources */,
+				97E16F4F28F9A22A00E7D09B /* LinearScrollingHorizontal.swift in Sources */,
 				97C5DBB82868158C006FA6B4 /* PointerSettingsState.swift in Sources */,
 				B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */,
 				972A5E34285D8E4800CB6440 /* Defaults+Workaround.swift in Sources */,
@@ -927,7 +931,7 @@
 				972DF654285ADE9600B83932 /* GeneralSettings.swift in Sources */,
 				97F77FA4285DC467007C9C2B /* DevicePickerSectionState.swift in Sources */,
 				972AFD472851E6B0009B0CBF /* AccessibilityPermission.swift in Sources */,
-				B7ADF9832748B12B0005B02D /* LinearScrolling.swift in Sources */,
+				B7ADF9832748B12B0005B02D /* LinearScrollingVertical.swift in Sources */,
 				97EFAABD28675D00008E6E67 /* ScrollingSettingsState.swift in Sources */,
 				B77A16122674C21600E99A5D /* Preferences.swift in Sources */,
 				972DF64C285A298600B83932 /* DetailView.swift in Sources */,

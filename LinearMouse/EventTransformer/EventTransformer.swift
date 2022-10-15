@@ -49,8 +49,12 @@ func buildEventTransformers(for scheme: Scheme) -> [EventTransformer] {
         }
     }
 
+    if let distance = scheme.scrolling?.distance?.horizontal {
+        transformers.append(LinearScrollingHorizontal(distance: distance))
+    }
+
     if let distance = scheme.scrolling?.distance?.vertical {
-        transformers.append(LinearScrolling(distance: distance))
+        transformers.append(LinearScrollingVertical(distance: distance))
     }
 
     if let modifiers = scheme.scrolling?.modifiers {
