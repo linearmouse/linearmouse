@@ -518,7 +518,23 @@
           "title": "Modifier keys settings"
         },
         "reverse": {
-          "$ref": "#/definitions/Scheme.Scrolling.Reverse",
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "horizontal": {
+                  "type": "boolean"
+                },
+                "vertical": {
+                  "type": "boolean"
+                }
+              },
+              "type": "object"
+            }
+          ],
           "title": "Reverse scrolling"
         }
       },
@@ -529,7 +545,7 @@
       "description": "The scrolling distance will not be modified.",
       "type": "string"
     },
-    "Scheme.Scrolling.Distance": {
+    "Scheme.Scrolling.Bidirectional<(Scheme.Scrolling.Auto|Scheme.Scrolling.Distance.Line|Scheme.Scrolling.Distance.Pixel)>": {
       "anyOf": [
         {
           "$ref": "#/definitions/Scheme.Scrolling.Auto"
@@ -539,8 +555,47 @@
         },
         {
           "$ref": "#/definitions/Scheme.Scrolling.Distance.Pixel"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "horizontal": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/Scheme.Scrolling.Auto"
+                },
+                {
+                  "$ref": "#/definitions/Scheme.Scrolling.Distance.Line"
+                },
+                {
+                  "$ref": "#/definitions/Scheme.Scrolling.Distance.Pixel"
+                }
+              ]
+            },
+            "vertical": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/Scheme.Scrolling.Auto"
+                },
+                {
+                  "$ref": "#/definitions/Scheme.Scrolling.Distance.Line"
+                },
+                {
+                  "$ref": "#/definitions/Scheme.Scrolling.Distance.Pixel"
+                }
+              ]
+            }
+          },
+          "required": [
+            "vertical",
+            "horizontal"
+          ],
+          "type": "object"
         }
       ]
+    },
+    "Scheme.Scrolling.Distance": {
+      "$ref": "#/definitions/Scheme.Scrolling.Bidirectional%3C(Scheme.Scrolling.Auto%7CScheme.Scrolling.Distance.Line%7CScheme.Scrolling.Distance.Pixel)%3E"
     },
     "Scheme.Scrolling.Distance.Line": {
       "anyOf": [
@@ -638,22 +693,6 @@
       "required": [
         "type"
       ],
-      "type": "object"
-    },
-    "Scheme.Scrolling.Reverse": {
-      "additionalProperties": false,
-      "properties": {
-        "horizontal": {
-          "default": false,
-          "title": "Reverse horizontally",
-          "type": "boolean"
-        },
-        "vertical": {
-          "default": false,
-          "title": "Reverse vertically",
-          "type": "boolean"
-        }
-      },
       "type": "object"
     },
     "SingleValueOrArray<Scheme.If.Category>": {
