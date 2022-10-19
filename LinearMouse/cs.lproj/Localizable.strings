@@ -1,68 +1,68 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse vyžaduje oprávnění k usnadnění přístupu";
+"LinearMouse needs Accessibility permission" = "LinearMouse vyžaduje oprávnění k použití funkce Zpřístupnění";
 "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "Aplikace ke správnému fungování používá funkce Zpřístupnění vašeho operačního systému. Funkci aktivujete povolením této aplikace v Předvolbách systému > Zabezpečení a soukromí > Zpřístupnění.";
 "Get more help" = "Více informací";
 "Open Accessibility" = "Přejít na obrazovku Zpřístupnění";
 
-"%@ Preferences..." = "%@ Preferences...";
-"Start at login" = "Start at login";
-"Config" = "Config";
-"Reload" = "Reload";
-"Reveal in Finder" = "Reveal in Finder";
-"Quit %@" = "Quit %@";
+"%@ Preferences..." = "Předvolby %@...";
+"Start at login" = "Spustit při startu systému";
+"Config" = "Konfigurační soubory";
+"Reload" = "Načíst znovu";
+"Reveal in Finder" = "Zobrazit ve Finderu";
+"Quit %@" = "Ukončit %@";
 
-"Scrolling" = "Scrolling";
-"Pointer" = "Pointer";
-"Buttons" = "Buttons";
-"Modifier Keys" = "Modifier Keys";
-"General" = "General";
+"Scrolling" = "Posouvání";
+"Pointer" = "Kurzor";
+"Buttons" = "Tlačítka";
+"Modifier Keys" = "Modifikační klávesy";
+"General" = "Obecné";
 
-"Reverse scrolling" = "Reverse scrolling";
-"(vertically)" = "(vertically)";
-"(horizontally)" = "(horizontally)";
-"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
-"Enable linear scrolling" = "Enable linear scrolling";
-"Disable scrolling acceleration." = "Disable scrolling acceleration.";
-"Scroll" = "Scroll";
-"By lines" = "By lines";
-"By pixels" = "By pixels";
+"Reverse scrolling" = "Obrácené posouvání";
+"(vertically)" = "(vertikální)";
+"(horizontally)" = "(horizontální)";
+"Some gestures, such as swiping back and forward, may stop working." = "Po aktivaci této volby mohou některá gesta, např. zpět a dopředu, přestat fungovat";
+"Enable linear scrolling" = "Aktivovat lineární posouvání";
+"Disable scrolling acceleration." = "Tato volba deaktivuje akceleraci při posuvu obsahu";
+"Scroll" = "Posouvat";
+"By lines" = "Po řádcích";
+"By pixels" = "Po bodech";
 
-"Acceleration" = "Acceleration";
-"Speed" = "Speed";
-"Revert to system defaults" = "Revert to system defaults";
-"You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
-"Disable pointer acceleration" = "Disable pointer acceleration";
+"Acceleration" = "Zrychlení";
+"Speed" = "Rychlost";
+"Revert to system defaults" = "Obnovit výchozí nastavení systému";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "Pro obnovení výchozího nastavení systému můžete také použít klávesovou zkratku ⌃⇧⌘Z";
+"Disable pointer acceleration" = "Deaktivovat zrychlení kurzoru";
 
-"Enable universal back and forward" = "Enable universal back and forward";
-"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
+"Enable universal back and forward" = "Aktivovat univerzální přecházení zpět a dopředu";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Převádí stisk bočních tlačítek myši pro pohyb zpět a dopředu na gesta přejetí prstem (swipe) a tím umožňuje využití tlačítek pro navigaci";
 
-"No action" = "No action";
-"Alter orientation" = "Alter orientation";
-"Change speed" = "Change speed";
-"to" = "to";
+"No action" = "Nenastaveno";
+"Alter orientation" = "Změna oriantace";
+"Change speed" = "Změna rychlosti";
+"to" = "na";
 
-"Settings" = "Settings";
-"Show in menu bar" = "Show in menu bar";
-"To show the preferences, launch %@ again." = "To show the preferences, launch %@ again.";
+"Settings" = "Nastavení";
+"Show in menu bar" = "Zobrazovat v řádku nabídek";
+"To show the preferences, launch %@ again." = "Pro zobrazení ikony aplikace a přístup k Předvolbám spusťte aplikaci %@ ručně znovu";
 
-"Update" = "Update";
-"Version: %@" = "Version: %@";
-"Check for Updates..." = "Check for Updates...";
-"Automatically" = "Automatically";
-"Daily" = "Daily";
-"Weekly" = "Weekly";
-"Monthly" = "Monthly";
-"Include beta" = "Include beta";
+"Update" = "Aktualizace aplikace";
+"Version: %@" = "Verze %@";
+"Check for Updates..." = "Zkontrolovat aktualizace...";
+"Automatically" = "Automaticky";
+"Daily" = "Denně";
+"Weekly" = "Týdně";
+"Monthly" = "Měsíčně";
+"Include beta" = "Instalovat beta verze";
 
-"Links" = "Links";
-"Homepage" = "Homepage";
+"Links" = "Odkazy";
+"Homepage" = "Stránky aplikace";
 "Open Collective" = "Open Collective";
 "GitHub" = "GitHub";
-"Feedback" = "Feedback";
-"Contact" = "Contact";
+"Feedback" = "Zpětná vazba";
+"Contact" = "Kontakt";
 
-"Auto switch to the active device" = "Auto switch to the active device";
+"Auto switch to the active device" = "Automaticky přepínat na aktivní zařízení";
 "OK" = "OK";
 
-"Mouse" = "Mouse";
+"Mouse" = "Myš";
 "Trackpad" = "Trackpad";
-"(active)" = "(active)";
+"(active)" = "(aktivní)";
