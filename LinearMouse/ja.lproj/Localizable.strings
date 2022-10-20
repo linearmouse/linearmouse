@@ -30,24 +30,24 @@
 "Speed" = "速度";
 "Revert to system defaults" = "システムデフォルトに戻す";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
-"Disable pointer acceleration" = "Disable pointer acceleration";
+"Disable pointer acceleration" = "ポインター加速を無効にする。";
 
-"Enable universal back and forward" = "Enable universal back and forward";
+"Enable universal back and forward" = "システム全般の戻る・進むボタンを有効にする";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
 
-"No action" = "No action";
-"Alter orientation" = "Alter orientation";
-"Change speed" = "Change speed";
+"No action" = "何もしない";
+"Alter orientation" = "方向を変更する";
+"Change speed" = "速度変更";
 "to" = "to";
 
 "Settings" = "設定";
-"Show in menu bar" = "Show in menu bar";
-"To show the preferences, launch %@ again." = "To show the preferences, launch %@ again.";
+"Show in menu bar" = "メニューバーに表示";
+"To show the preferences, launch %@ again." = "設定を表示するには、 %@ を再度起動してください。";
 
-"Update" = "Update";
-"Version: %@" = "Version: %@";
-"Check for Updates..." = "Check for Updates...";
-"Automatically" = "Automatically";
+"Update" = "アップデート";
+"Version: %@" = "バージョン %@";
+"Check for Updates..." = "アップデートを確認";
+"Automatically" = "自動";
 "Daily" = "毎日";
 "Weekly" = "毎週";
 "Monthly" = "毎月";
@@ -57,11 +57,11 @@
 "Homepage" = "ホームページ";
 "Open Collective" = "Open Collective";
 "GitHub" = "GitHub";
-"Feedback" = "Feedback";
-"Contact" = "Contact";
+"Feedback" = "ご意見";
+"Contact" = "お問い合わせ";
 
-"Auto switch to the active device" = "Auto switch to the active device";
-"OK" = "OK";
+"Auto switch to the active device" = "自動的に使用中の装置に切り替え";
+"OK" = "了解";
 
 "Mouse" = "マウス";
 "Trackpad" = "トラックパッド";
