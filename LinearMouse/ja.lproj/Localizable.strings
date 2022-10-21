@@ -29,16 +29,16 @@
 "Acceleration" = "アクセラレーション";
 "Speed" = "速度";
 "Revert to system defaults" = "システムデフォルトに戻す";
-"You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "<unk> ⌘Z を押してデフォルトに戻れます。";
 "Disable pointer acceleration" = "ポインター加速を無効にする。";
 
 "Enable universal back and forward" = "システム全般の戻る・進むボタンを有効にする";
-"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "戻る・進むボタンをスワイプジェスチャーに変換し、システム全般における戻る・進む機能を行えるようにします。";
 
 "No action" = "何もしない";
 "Alter orientation" = "方向を変更する";
 "Change speed" = "速度変更";
-"to" = "to";
+"to" = "　";
 
 "Settings" = "設定";
 "Show in menu bar" = "メニューバーに表示";
@@ -55,7 +55,7 @@
 
 "Links" = "リンク";
 "Homepage" = "ホームページ";
-"Open Collective" = "Open Collective";
+"Open Collective" = "Open Collectiveに移動";
 "GitHub" = "GitHub";
 "Feedback" = "ご意見";
 "Contact" = "お問い合わせ";
