@@ -82,7 +82,7 @@
 		B76173442675AD8700CC9412 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = B76173462675AD8700CC9412 /* Localizable.strings */; };
 		B7618A1027621EDF00527C1A /* PointerSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7618A0F27621EDF00527C1A /* PointerSettings.swift */; };
 		B77A160E2674B3DD00E99A5D /* LinearMouse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160D2674B3DD00E99A5D /* LinearMouse.swift */; };
-		B77A16102674B85300E99A5D /* AppDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160F2674B85300E99A5D /* AppDefaults.swift */; };
+		B77A16102674B85300E99A5D /* DefaultsKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A160F2674B85300E99A5D /* DefaultsKeys.swift */; };
 		B77A16122674C21600E99A5D /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A16112674C21600E99A5D /* Preferences.swift */; };
 		B77A16172674D88E00E99A5D /* PreferencesWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A16162674D88E00E99A5D /* PreferencesWindow.swift */; };
 		B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = B77A161A2674EF0E00E99A5D /* HyperLink.swift */; };
@@ -198,7 +198,7 @@
 		B76173452675AD8700CC9412 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		B7618A0F27621EDF00527C1A /* PointerSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointerSettings.swift; sourceTree = "<group>"; };
 		B77A160D2674B3DD00E99A5D /* LinearMouse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearMouse.swift; sourceTree = "<group>"; };
-		B77A160F2674B85300E99A5D /* AppDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDefaults.swift; sourceTree = "<group>"; };
+		B77A160F2674B85300E99A5D /* DefaultsKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultsKeys.swift; sourceTree = "<group>"; };
 		B77A16112674C21600E99A5D /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		B77A16162674D88E00E99A5D /* PreferencesWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesWindow.swift; sourceTree = "<group>"; };
 		B77A161A2674EF0E00E99A5D /* HyperLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HyperLink.swift; sourceTree = "<group>"; };
@@ -575,12 +575,12 @@
 				972AFD462851E6B0009B0CBF /* AccessibilityPermission.swift */,
 				B7BD51802672FEB5001FE742 /* EventTap.swift */,
 				B77A160D2674B3DD00E99A5D /* LinearMouse.swift */,
-				B77A160F2674B85300E99A5D /* AppDefaults.swift */,
 				B76173462675AD8700CC9412 /* Localizable.strings */,
 				B7B6D83B26B2726B00B0D247 /* ModifierKeys.swift */,
 				B7B1D08C26B2FD6C00F48176 /* AppStorage.swift */,
 				B7842924278D985600D207F0 /* AutoUpdateManager.swift */,
 				972A5E33285D8E4800CB6440 /* Defaults+Workaround.swift */,
+				B77A160F2674B85300E99A5D /* DefaultsKeys.swift */,
 				977638F5286BE9AB00A698B6 /* StateObjectPolyfill.swift */,
 			);
 			path = LinearMouse;
@@ -860,7 +860,7 @@
 				972DF65B285AEABA00B83932 /* ButtonsSettings.swift in Sources */,
 				973EB9FE287EE7D90069A8EF /* Action.swift in Sources */,
 				B77D7C1727BA597E00825F54 /* Device.swift in Sources */,
-				B77A16102674B85300E99A5D /* AppDefaults.swift in Sources */,
+				B77A16102674B85300E99A5D /* DefaultsKeys.swift in Sources */,
 				B7ADF98127489CB00005B02D /* MouseDetector.swift in Sources */,
 				B77BA0F227480AA500E3BC5C /* EventTransformer.swift in Sources */,
 				972AFD492851E96D009B0CBF /* AccessibilityPermissionWindow.swift in Sources */,

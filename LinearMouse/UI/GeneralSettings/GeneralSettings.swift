@@ -1,16 +1,17 @@
 // MIT License
 // Copyright (c) 2021-2022 Jiahao Lu
 
+import Defaults
 import SwiftUI
 
 struct GeneralSettings: View {
-    @ObservedObject var defaults = AppDefaults.shared
+    @Default(.showInMenuBar) var showInMenuBar
 
     var body: some View {
         DetailView(schemeSpecific: false) {
             VStack(alignment: .leading, spacing: 20) {
                 Section(header: Text("Settings").font(.headline)) {
-                    Toggle(isOn: $defaults.showInMenuBar) {
+                    Toggle(isOn: $showInMenuBar) {
                         VStack(alignment: .leading) {
                             Text("Show in menu bar")
                             Text("""

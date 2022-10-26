@@ -1,6 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2022 Jiahao Lu
 
+import Defaults
 import Foundation
 import Sparkle
 import Version
@@ -25,7 +26,7 @@ class AutoUpdateManager: NSObject {
 
 extension AutoUpdateManager: SPUUpdaterDelegate {
     func allowedChannels(for _: SPUUpdater) -> Set<String> {
-        AppDefaults.shared.betaChannelOn ? ["beta"] : []
+        Defaults[.betaChannelOn] ? ["beta"] : []
     }
 
     func versionComparator(for _: SPUUpdater) -> SUVersionComparison? {

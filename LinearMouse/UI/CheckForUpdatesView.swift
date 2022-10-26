@@ -2,6 +2,7 @@
 // Copyright (c) 2021-2022 Jiahao Lu
 
 import Combine
+import Defaults
 import Sparkle
 import SwiftUI
 
@@ -54,7 +55,7 @@ final class UpdaterViewModel: ObservableObject {
 
 struct CheckForUpdatesView: View {
     @ObservedObject var updaterViewModel = UpdaterViewModel.shared
-    @ObservedObject var defaults = AppDefaults.shared
+    @Default(.betaChannelOn) var betaChannelOn
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -79,7 +80,7 @@ struct CheckForUpdatesView: View {
                 .disabled(!updaterViewModel.automaticallyChecksForUpdates)
             }
 
-            Toggle(isOn: $defaults.betaChannelOn) {
+            Toggle(isOn: $betaChannelOn) {
                 Text("Include beta")
             }
         }
