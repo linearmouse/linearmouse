@@ -2,6 +2,7 @@
 // Copyright (c) 2021-2022 Jiahao Lu
 
 import Combine
+import Defaults
 import LaunchAtLogin
 import SwiftUI
 
@@ -92,6 +93,12 @@ class StatusItem {
 
     private func setup() {
         statusItem.menu = menu
+
+        Defaults.observe(.showInMenuBar) { [weak self] change in
+            guard let self = self else { return }
+
+            self.statusItem.isVisible = change.newValue
+        }.tieToLifetime(of: self)
     }
 
     @objc private func statusItemAction(sender _: NSStatusBarButton) {

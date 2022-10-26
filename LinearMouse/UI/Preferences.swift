@@ -5,8 +5,6 @@ import Introspect
 import SwiftUI
 
 struct Preferences: View {
-    @ObservedObject var defaults = AppDefaults.shared
-
     var body: some View {
         NavigationView {
             Sidebar()
