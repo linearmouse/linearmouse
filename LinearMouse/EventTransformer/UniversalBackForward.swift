@@ -13,7 +13,9 @@ extension CGMouseButton {
 class UniversalBackForward: EventTransformer {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "UniversalBackForward")
 
-    private static let includeSet: Set<String> = [
+    private static let includes = [
+        "com.apple.*",
+        "com.binarynights.ForkLift*",
         "org.mozilla.firefox"
     ]
 
@@ -45,7 +47,13 @@ class UniversalBackForward: EventTransformer {
             return false
         }
 
-        return Self.includeSet.contains(bundleIdentifier) || bundleIdentifier.hasPrefix("com.apple.")
+        return Self.includes.contains {
+            if $0.hasSuffix("*") {
+                return bundleIdentifier.hasPrefix($0.dropLast())
+            } else {
+                return bundleIdentifier == $0
+            }
+        }
     }
 
     // swiftlint:disable cyclomatic_complexity
