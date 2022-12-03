@@ -8,36 +8,40 @@ protocol EventTransformer {
     func transform(_ event: CGEvent) -> CGEvent?
 }
 
-func transformEvent(_ event: CGEvent) -> CGEvent? {
-    let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "EventTransformer")
+extension [EventTransformer]: EventTransformer {
+    func transform(_ event: CGEvent) -> CGEvent? {
+        var transformedEvent: CGEvent? = event
 
-    var transformed: CGEvent? = event
-
-    let view = MouseEventView(event)
-
-    let device = DeviceManager.shared.lastActiveDevice
-
-    let mergedScheme = ConfigurationState.shared.configuration.matchedScheme(withDevice: device,
-                                                                             withPid: view.targetPid)
-
-    os_log("Using scheme: %{public}@ (device: %{public}@, app: %{public}@)", log: log, type: .debug,
-           String(describing: mergedScheme),
-           String(describing: device),
-           view.targetPid?.bundleIdentifier ?? "(nil)")
-
-    // TODO: Cache transformers
-    let transformers = buildEventTransformers(for: mergedScheme)
-
-    for transformer in transformers {
-        if let transformedEvent = transformed {
-            transformed = transformer.transform(transformedEvent)
+        for eventTransformer in self {
+            transformedEvent = transformedEvent.flatMap { eventTransformer.transform($0) }
         }
-    }
 
-    return transformed
+        return transformedEvent
+    }
 }
 
-func buildEventTransformers(for scheme: Scheme) -> [EventTransformer] {
+func transformEvent(_ event: CGEvent) -> CGEvent? {
+    let view = MouseEventView(event)
+
+    let eventTransformer = buildEventTransformer(forDevice: DeviceManager.shared.lastActiveDevice,
+                                                 forPid: view.targetPid)
+
+    return eventTransformer.transform(event)
+}
+
+func buildEventTransformer(forDevice device: Device?, forPid pid: pid_t? = nil) -> [EventTransformer] {
+    // TODO: Cache
+
+    let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "EventTransformer")
+
+    let scheme = ConfigurationState.shared.configuration.matchedScheme(withDevice: device,
+                                                                       withPid: pid)
+
+    os_log("Using scheme: %{public}@ (device: %{public}@, app: %{public}@)", log: log, type: .debug,
+           String(describing: scheme),
+           String(describing: device),
+           pid?.bundleIdentifier ?? "(nil)")
+
     var transformers: [EventTransformer] = []
 
     if let reverse = scheme.scrolling?.reverse {

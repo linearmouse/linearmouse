@@ -42,12 +42,12 @@ class AccessibilityPermission {
         var error: NSDictionary?
         script.executeAndReturnError(&error)
 
-        if let error = error {
-            throw AccessibilityPermissionError.resetError(error)
+        if error != nil {
+            throw AccessibilityPermissionError.resetError
         }
     }
 }
 
 enum AccessibilityPermissionError: Error {
-    case resetError(NSDictionary)
+    case resetError
 }
