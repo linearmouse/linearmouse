@@ -47,8 +47,6 @@ extension ButtonActions: EventTransformer {
         let view = MouseEventView(event)
 
         guard let action = action(of: event) else {
-            os_log("No button mapping found: button=%{public}@", log: Self.log, type: .debug,
-                   view.mouseButtonDescription)
             return event
         }
 

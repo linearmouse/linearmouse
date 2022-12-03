@@ -8,10 +8,6 @@ import Foundation
 import os.log
 import SwiftUI
 
-extension Defaults.Keys {
-    static let hasCheckedMigration = Key<Bool>("hasCheckedMigration", default: false)
-}
-
 class ConfigurationState: ObservableObject {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "AppDelegate")
 

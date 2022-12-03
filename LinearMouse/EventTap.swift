@@ -12,8 +12,6 @@ class EventTap {
     var eventTap: CFMachPort?
     var runLoopSource: CFRunLoopSource?
 
-    private let mouseDetector = DefaultMouseDetector()
-
     private let eventTapCallback: CGEventTapCallBack = { _, type, event, refcon in
         // TODO: Weak self reference?
         guard let unwrappedRefcon = refcon else {
