@@ -18,8 +18,12 @@ class ConfigurationState: ObservableObject {
         relativeTo: FileManager.default.homeDirectoryForCurrentUser
     )
 
+    var version: Int = 0
+
     @Published var configuration = Configuration() {
         didSet {
+            version += 1
+
             updateActiveScheme()
 
             guard shouldAutoSaveConfiguration else {

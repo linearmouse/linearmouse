@@ -2,6 +2,7 @@
 // Copyright (c) 2021-2022 Jiahao Lu
 
 import Foundation
+import LRUCache
 import os.log
 
 protocol EventTransformer {
@@ -10,27 +11,46 @@ protocol EventTransformer {
 
 extension [EventTransformer]: EventTransformer {
     func transform(_ event: CGEvent) -> CGEvent? {
-        var transformedEvent: CGEvent? = event
+        var event: CGEvent? = event
 
         for eventTransformer in self {
-            transformedEvent = transformedEvent.flatMap { eventTransformer.transform($0) }
+            event = event.flatMap { eventTransformer.transform($0) }
         }
 
-        return transformedEvent
+        return event
     }
 }
 
-func transformEvent(_ event: CGEvent) -> CGEvent? {
-    let view = MouseEventView(event)
+var eventTransformerCache = LRUCache<EventTransformerCacheKey, EventTransformer>(countLimit: 1)
 
-    let eventTransformer = buildEventTransformer(forDevice: DeviceManager.shared.lastActiveDevice,
-                                                 forPid: view.targetPid)
+class EventTransformerCacheKey: Equatable, Hashable {
+    let version: Int
+    let device: WeakRef<Device>?
+    let pid: pid_t?
 
-    return eventTransformer.transform(event)
+    init(version: Int, device: Device?, pid: pid_t?) {
+        self.version = version
+        self.device = device.map { WeakRef($0) }
+        self.pid = pid
+    }
+
+    static func == (lhs: EventTransformerCacheKey, rhs: EventTransformerCacheKey) -> Bool {
+        lhs.version == rhs.version && lhs.device == rhs.device && lhs.pid == rhs.pid
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(version)
+        hasher.combine(device)
+        hasher.combine(pid)
+    }
 }
 
-func buildEventTransformer(forDevice device: Device?, forPid pid: pid_t? = nil) -> [EventTransformer] {
-    // TODO: Cache
+func getEventTransformer(forDevice device: Device?, forPid pid: pid_t? = nil) -> EventTransformer {
+    let cacheKey = EventTransformerCacheKey(version: ConfigurationState.shared.version, device: device, pid: pid)
+
+    if let eventTransformer = eventTransformerCache.value(forKey: cacheKey) {
+        return eventTransformer
+    }
 
     let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "EventTransformer")
 
@@ -73,6 +93,8 @@ func buildEventTransformer(forDevice device: Device?, forPid pid: pid_t? = nil) 
        universalBackForward != .none {
         transformers.append(UniversalBackForward(universalBackForward: universalBackForward))
     }
+
+    eventTransformerCache.setValue(transformers, forKey: cacheKey)
 
     return transformers
 }
