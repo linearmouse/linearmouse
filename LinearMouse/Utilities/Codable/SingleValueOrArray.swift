@@ -1,6 +1,9 @@
 // MIT License
 // Copyright (c) 2021-2022 Jiahao Lu
 
+// SwiftFormat will eat the empty lines between the file header and @propertyWrapper.
+// These comments should be removed when SwiftFormat fixes this bug.
+
 @propertyWrapper
 struct SingleValueOrArray<Value> where Value: Codable {
     var wrappedValue: [Value]?
