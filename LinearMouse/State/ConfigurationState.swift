@@ -8,10 +8,6 @@ import Foundation
 import os.log
 import SwiftUI
 
-extension Defaults.Keys {
-    static let hasCheckedMigration = Key<Bool>("hasCheckedMigration", default: false)
-}
-
 class ConfigurationState: ObservableObject {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "AppDelegate")
 
@@ -22,8 +18,12 @@ class ConfigurationState: ObservableObject {
         relativeTo: FileManager.default.homeDirectoryForCurrentUser
     )
 
+    var version: Int = 0
+
     @Published var configuration = Configuration() {
         didSet {
+            version += 1
+
             updateActiveScheme()
 
             guard shouldAutoSaveConfiguration else {

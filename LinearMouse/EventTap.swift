@@ -12,8 +12,6 @@ class EventTap {
     var eventTap: CFMachPort?
     var runLoopSource: CFRunLoopSource?
 
-    private let mouseDetector = DefaultMouseDetector()
-
     private let eventTapCallback: CGEventTapCallBack = { _, type, event, refcon in
         // TODO: Weak self reference?
         guard let unwrappedRefcon = refcon else {
@@ -33,7 +31,10 @@ class EventTap {
             return Unmanaged.passUnretained(event)
         }
 
-        if let event = transformEvent(event) {
+        let eventTransformer = getEventTransformer(forDevice: DeviceManager.shared.lastActiveDevice,
+                                                   forPid: MouseEventView(event).targetPid)
+
+        if let event = eventTransformer.transform(event) {
             return Unmanaged.passUnretained(event)
         }
 
