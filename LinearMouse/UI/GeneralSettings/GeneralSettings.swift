@@ -28,7 +28,6 @@ struct GeneralSettings: View {
 
                 Section(header: Text("Update").font(.headline)) {
                     CheckForUpdatesView()
-                        .controlSize(.small)
                 }
 
                 Spacer()
