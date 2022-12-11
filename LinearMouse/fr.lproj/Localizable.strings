@@ -26,7 +26,7 @@
 "By lines" = "By lines";
 "By pixels" = "By pixels";
 
-"Acceleration" = "Acceleration";
+"Acceleration" = "Accélération";
 "Speed" = "Speed";
 "Revert to system defaults" = "Revert to system defaults";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
@@ -63,6 +63,6 @@
 "Auto switch to the active device" = "Auto switch to the active device";
 "OK" = "OK";
 
-"Mouse" = "Mouse";
+"Mouse" = "Souris";
 "Trackpad" = "Trackpad";
 "(active)" = "(active)";
