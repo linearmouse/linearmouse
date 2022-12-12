@@ -60,9 +60,9 @@
 "Feedback" = "Feedback";
 "Contact" = "Contact";
 
-"Auto switch to the active device" = "Auto switch to the active device";
-"OK" = "OK";
+"Auto switch to the active device" = "Basculer automatiquement vers le périphérique actif";
+"OK" = "Ok";
 
 "Mouse" = "Souris";
 "Trackpad" = "Trackpad";
-"(active)" = "(active)";
+"(active)" = "(actif)";
