@@ -4,8 +4,8 @@
 "Open Accessibility" = "Open Accessibility";
 
 "%@ Preferences..." = "%@ Preferences...";
-"Start at login" = "Start at login";
-"Config" = "Config";
+"Start at login" = "Lancer au démarrage";
+"Config" = "Configuration";
 "Reload" = "Reload";
 "Reveal in Finder" = "Reveal in Finder";
 "Quit %@" = "Quit %@";
@@ -14,7 +14,7 @@
 "Pointer" = "Pointer";
 "Buttons" = "Buttons";
 "Modifier Keys" = "Modifier Keys";
-"General" = "General";
+"General" = "Général";
 
 "Reverse scrolling" = "Reverse scrolling";
 "(vertically)" = "(vertically)";
