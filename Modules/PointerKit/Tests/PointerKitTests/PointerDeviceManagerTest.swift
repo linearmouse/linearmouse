@@ -12,7 +12,7 @@ class PointerDeviceManagerTest: XCTestCase {
     }
 
     func testStartStop() throws {
-        var tokenRef = WeakRef<PointerDeviceManager.ObservationToken>()
+        var tokenRef = WeakRef<ObservationToken>()
 
         do {
             let manager = PointerDeviceManager()
@@ -60,9 +60,9 @@ class PointerDeviceManagerTest: XCTestCase {
         DispatchQueue.main.async {
             for device in manager.devices {
                 print("Device:", device.name)
-                print("Pointer resolution:", device.pointerResolution ?? "(null)")
-                print("Pointer acceleration type:", device.pointerAccelerationType ?? "(null)")
-                print("Pointer acceleration:", device.pointerAcceleration ?? "(null)")
+                print("Pointer resolution:", device.pointerResolution ?? "(nil)")
+                print("Pointer acceleration type:", device.pointerAccelerationType ?? "(nil)")
+                print("Pointer acceleration:", device.pointerAcceleration ?? "(nil)")
                 print("==========================")
             }
         }

@@ -23,7 +23,7 @@ extension [EventTransformer]: EventTransformer {
 
 var eventTransformerCache = LRUCache<EventTransformerCacheKey, EventTransformer>(countLimit: 1)
 
-class EventTransformerCacheKey: Equatable, Hashable {
+class EventTransformerCacheKey {
     let version: Int
     let device: WeakRef<Device>?
     let pid: pid_t?
@@ -33,7 +33,9 @@ class EventTransformerCacheKey: Equatable, Hashable {
         self.device = device.map { WeakRef($0) }
         self.pid = pid
     }
+}
 
+extension EventTransformerCacheKey: Equatable, Hashable {
     static func == (lhs: EventTransformerCacheKey, rhs: EventTransformerCacheKey) -> Bool {
         lhs.version == rhs.version && lhs.device == rhs.device && lhs.pid == rhs.pid
     }
@@ -45,56 +47,64 @@ class EventTransformerCacheKey: Equatable, Hashable {
     }
 }
 
+extension EventTransformerCacheKey: CustomStringConvertible {
+    var description: String {
+        "EventTransformerCacheKey(version: \(version), device: \(String(describing: device)), pid: \(String(describing: pid)))"
+    }
+}
+
 func getEventTransformer(forDevice device: Device?, forPid pid: pid_t? = nil) -> EventTransformer {
+    let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "EventTransformer")
+
     let cacheKey = EventTransformerCacheKey(version: ConfigurationState.shared.version, device: device, pid: pid)
 
     if let eventTransformer = eventTransformerCache.value(forKey: cacheKey) {
         return eventTransformer
     }
 
-    let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "EventTransformer")
+    let scheme = ConfigurationState.shared.configuration.matchScheme(withDevice: device,
+                                                                     withPid: pid)
 
-    let scheme = ConfigurationState.shared.configuration.matchedScheme(withDevice: device,
-                                                                       withPid: pid)
+    // TODO: Patch EventTransformer instead of rebuilding it
 
-    os_log("Using scheme: %{public}@ (device: %{public}@, app: %{public}@)", log: log, type: .debug,
+    os_log("Initialize EventTransformer with scheme: %{public}@ (cacheKey=%{public}@)",
+           log: log, type: .debug,
            String(describing: scheme),
-           String(describing: device),
-           pid?.bundleIdentifier ?? "(nil)")
+           String(describing: cacheKey))
 
-    var transformers: [EventTransformer] = []
+    var eventTransformer: [EventTransformer] = []
 
     if let reverse = scheme.scrolling?.reverse {
         let vertical = reverse.vertical ?? false
         let horizontal = reverse.horizontal ?? false
 
         if vertical || horizontal {
-            transformers.append(ReverseScrolling(vertically: vertical, horizontally: horizontal))
+            eventTransformer.append(ReverseScrolling(vertically: vertical, horizontally: horizontal))
         }
     }
 
     if let distance = scheme.scrolling?.distance?.horizontal {
-        transformers.append(LinearScrollingHorizontal(distance: distance))
+        eventTransformer.append(LinearScrollingHorizontal(distance: distance))
     }
 
     if let distance = scheme.scrolling?.distance?.vertical {
-        transformers.append(LinearScrollingVertical(distance: distance))
+        eventTransformer.append(LinearScrollingVertical(distance: distance))
     }
 
     if let modifiers = scheme.scrolling?.modifiers {
-        transformers.append(ModifierActions(modifiers: modifiers))
+        eventTransformer.append(ModifierActions(modifiers: modifiers))
     }
 
     if let mappings = scheme.buttons?.mappings {
-        transformers.append(ButtonActions(mappings: mappings))
+        eventTransformer.append(ButtonActions(mappings: mappings))
     }
 
     if let universalBackForward = scheme.buttons?.universalBackForward,
        universalBackForward != .none {
-        transformers.append(UniversalBackForward(universalBackForward: universalBackForward))
+        eventTransformer.append(UniversalBackForward(universalBackForward: universalBackForward))
     }
 
-    eventTransformerCache.setValue(transformers, forKey: cacheKey)
+    eventTransformerCache.setValue(eventTransformer, forKey: cacheKey)
 
-    return transformers
+    return eventTransformer
 }

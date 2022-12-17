@@ -86,8 +86,8 @@ extension Configuration {
         try dump().write(to: url, options: .atomic)
     }
 
-    func matchedScheme(withDevice device: Device? = nil,
-                       withPid pid: pid_t? = nil) -> Scheme {
+    func matchScheme(withDevice device: Device? = nil,
+                     withPid pid: pid_t? = nil) -> Scheme {
         // TODO: Backtrace the merge path
         // TODO: Optimize the algorithm
 
@@ -109,7 +109,7 @@ extension Configuration {
     }
 
     var activeScheme: Scheme {
-        matchedScheme(withDevice: DeviceManager.shared.lastActiveDevice,
-                      withPid: NSWorkspace.shared.frontmostApplication?.processIdentifier)
+        matchScheme(withDevice: DeviceManager.shared.lastActiveDevice,
+                    withPid: NSWorkspace.shared.frontmostApplication?.processIdentifier)
     }
 }
