@@ -22,3 +22,9 @@ extension WeakRef: Hashable where T: Hashable {
         hasher.combine(value)
     }
 }
+
+extension WeakRef: CustomStringConvertible where T: CustomStringConvertible {
+    var description: String {
+        value?.description ?? "(nil)"
+    }
+}

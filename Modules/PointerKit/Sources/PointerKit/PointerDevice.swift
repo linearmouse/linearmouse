@@ -78,7 +78,7 @@ public extension PointerDevice {
 
     var vendorIDString: String {
         guard let vendorID = vendorID else {
-            return "(null)"
+            return "(nil)"
         }
 
         return String(format: "0x%04X", vendorID)
@@ -86,7 +86,7 @@ public extension PointerDevice {
 
     var productIDString: String {
         guard let productID = productID else {
-            return "(null)"
+            return "(nil)"
         }
 
         return String(format: "0x%04X", productID)

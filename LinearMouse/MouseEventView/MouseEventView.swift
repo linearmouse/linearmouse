@@ -36,7 +36,7 @@ class MouseEventView {
 
     var mouseButtonDescription: String {
         guard let mouseButton = mouseButton else {
-            return "(null)"
+            return "(nil)"
         }
 
         return (modifiers + ["<button \(mouseButton.rawValue)>"]).joined(separator: "+")

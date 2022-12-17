@@ -43,7 +43,7 @@ extension SchemeState {
 
             return configurationState.getSchemeIndex(forDevice: device)
                 .map { configurationState.configuration.schemes[$0] }
-                ?? configurationState.configuration.matchedScheme(withDevice: device)
+                ?? configurationState.configuration.matchScheme(withDevice: device)
         }
 
         set {

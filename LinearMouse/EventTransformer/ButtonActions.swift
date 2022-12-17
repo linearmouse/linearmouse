@@ -12,8 +12,14 @@ class ButtonActions {
 
     let mappings: [Scheme.Buttons.Mapping]
 
+    var timer: Timer?
+
     init(mappings: [Scheme.Buttons.Mapping]) {
         self.mappings = mappings
+    }
+
+    deinit {
+        timer?.invalidate()
     }
 }
 
@@ -26,7 +32,59 @@ extension ButtonActions: EventTransformer {
         [.leftMouseUp, .rightMouseUp, .otherMouseUp]
     }
 
-    func action(of event: CGEvent) -> Scheme.Buttons.Mapping.Action? {
+    func transform(_ event: CGEvent) -> CGEvent? {
+        guard mouseDownEventTypes.contains(event.type) || mouseUpEventTypes.contains(event.type) else {
+            return event
+        }
+
+        timer?.invalidate()
+
+        guard let action = getAction(of: event) else {
+            return event
+        }
+
+        guard mouseDownEventTypes.contains(event.type) else {
+            return nil
+        }
+
+        DispatchQueue.main.async { [self] in
+            executeIgnoreErrors(action: action)
+
+            // FIXME: `NSEvent.keyRepeatDelay` and `NSEvent.keyRepeatInterval` are not kept up to date
+
+            guard NSEvent.keyRepeatDelay > 0, NSEvent.keyRepeatInterval > 0 else {
+                return
+            }
+
+            timer = Timer.scheduledTimer(
+                withTimeInterval: NSEvent.keyRepeatDelay,
+                repeats: false,
+                block: { [weak self] _ in
+                    guard let self = self else {
+                        return
+                    }
+
+                    self.executeIgnoreErrors(action: action)
+
+                    self.timer = Timer.scheduledTimer(
+                        withTimeInterval: NSEvent.keyRepeatInterval,
+                        repeats: true,
+                        block: { [weak self] _ in
+                            guard let self = self else {
+                                return
+                            }
+
+                            self.executeIgnoreErrors(action: action)
+                        }
+                    )
+                }
+            )
+        }
+
+        return nil
+    }
+
+    private func getAction(of event: CGEvent) -> Scheme.Buttons.Mapping.Action? {
         guard let mapping = mappings.last(where: { $0.match(with: event) }),
               let action = mapping.action else {
             return nil
@@ -39,37 +97,20 @@ extension ButtonActions: EventTransformer {
         return action
     }
 
-    func transform(_ event: CGEvent) -> CGEvent? {
-        guard mouseDownEventTypes.contains(event.type) || mouseUpEventTypes.contains(event.type) else {
-            return event
+    private func executeIgnoreErrors(action: Scheme.Buttons.Mapping.Action) {
+        do {
+            os_log("Execute action: %{public}@", log: Self.log, type: .debug,
+                   String(describing: action))
+
+            try execute(action: action)
+        } catch {
+            os_log("Failed to execute: %{public}@: %{public}@", log: Self.log, type: .error,
+                   String(describing: action),
+                   String(describing: error))
         }
-
-        let view = MouseEventView(event)
-
-        guard let action = action(of: event) else {
-            return event
-        }
-
-        os_log("Found mapping: button=%{public}@, mapping=%{public}@", log: Self.log, type: .debug,
-               view.mouseButtonDescription, String(describing: action))
-
-        if mouseUpEventTypes.contains(event.type) {
-            DispatchQueue.main.async { [self] in
-                do {
-                    try exec(action: action)
-                } catch {
-                    let alert = NSAlert()
-                    alert.alertStyle = .warning
-                    alert.messageText = String(describing: error)
-                    alert.runModal()
-                }
-            }
-        }
-
-        return nil
     }
 
-    func exec(action: Scheme.Buttons.Mapping.Action) throws {
+    private func execute(action: Scheme.Buttons.Mapping.Action) throws {
         switch action {
         case .simpleAction(.none), .simpleAction(.auto):
             return
