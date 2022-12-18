@@ -173,16 +173,16 @@ extension ButtonActions: EventTransformer {
             postSystemDefinedKey(.illuminationDown)
 
         case .simpleAction(.scrollUp):
-            postScrollEvent(.line, x: 0, y: 3)
+            postScrollEvent(.line, dx: 0, dy: 3)
 
         case .simpleAction(.scrollDown):
-            postScrollEvent(.line, x: 0, y: -3)
+            postScrollEvent(.line, dx: 0, dy: -3)
 
         case .simpleAction(.scrollLeft):
-            postScrollEvent(.line, x: 3, y: 0)
+            postScrollEvent(.line, dx: 3, dy: 0)
 
         case .simpleAction(.scrollRight):
-            postScrollEvent(.line, x: -3, y: 0)
+            postScrollEvent(.line, dx: -3, dy: 0)
 
         case let .run(command):
             let task = Process()
@@ -192,9 +192,9 @@ extension ButtonActions: EventTransformer {
         }
     }
 
-    private func postScrollEvent(_ unit: CGScrollEventUnit, x: Int32, y: Int32) {
+    private func postScrollEvent(_ unit: CGScrollEventUnit, dx: Int32, dy: Int32) {
         if let event = CGEvent(scrollWheelEvent2Source: nil, units: unit, wheelCount: 2,
-                               wheel1: y, wheel2: x, wheel3: 0) {
+                               wheel1: dy, wheel2: dx, wheel3: 0) {
             event.flags = []
             event.post(tap: .cgSessionEventTap)
         }
