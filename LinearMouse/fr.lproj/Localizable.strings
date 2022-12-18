@@ -4,8 +4,8 @@
 "Open Accessibility" = "Open Accessibility";
 
 "%@ Preferences..." = "%@ Preferences...";
-"Start at login" = "Start at login";
-"Config" = "Config";
+"Start at login" = "Lancer au démarrage";
+"Config" = "Configuration";
 "Reload" = "Reload";
 "Reveal in Finder" = "Reveal in Finder";
 "Quit %@" = "Quit %@";
@@ -14,7 +14,7 @@
 "Pointer" = "Pointer";
 "Buttons" = "Buttons";
 "Modifier Keys" = "Modifier Keys";
-"General" = "General";
+"General" = "Général";
 
 "Reverse scrolling" = "Reverse scrolling";
 "(vertically)" = "(vertically)";
@@ -26,7 +26,7 @@
 "By lines" = "By lines";
 "By pixels" = "By pixels";
 
-"Acceleration" = "Acceleration";
+"Acceleration" = "Accélération";
 "Speed" = "Speed";
 "Revert to system defaults" = "Revert to system defaults";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
@@ -60,9 +60,9 @@
 "Feedback" = "Feedback";
 "Contact" = "Contact";
 
-"Auto switch to the active device" = "Auto switch to the active device";
-"OK" = "OK";
+"Auto switch to the active device" = "Basculer automatiquement vers le périphérique actif";
+"OK" = "Ok";
 
-"Mouse" = "Mouse";
+"Mouse" = "Souris";
 "Trackpad" = "Trackpad";
-"(active)" = "(active)";
+"(active)" = "(actif)";
