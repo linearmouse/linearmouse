@@ -40,6 +40,11 @@ extension Scheme.Buttons.Mapping.Action: Codable {
 
         case keyboardBrightnessUp = "keyboard.brightnessUp"
         case keyboardBrightnessDown = "keyboard.brightnessDown"
+
+        case scrollUp = "scroll.up"
+        case scrollDown = "scroll.down"
+        case scrollLeft = "scroll.left"
+        case scrollRight = "scroll.right"
     }
 
     enum ValueError: Error {

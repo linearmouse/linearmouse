@@ -39,7 +39,7 @@ extension ButtonActions: EventTransformer {
 
         timer?.invalidate()
 
-        guard let action = getAction(of: event) else {
+        guard let action = matchAction(of: event) else {
             return event
         }
 
@@ -84,7 +84,7 @@ extension ButtonActions: EventTransformer {
         return nil
     }
 
-    private func getAction(of event: CGEvent) -> Scheme.Buttons.Mapping.Action? {
+    private func matchAction(of event: CGEvent) -> Scheme.Buttons.Mapping.Action? {
         guard let mapping = mappings.last(where: { $0.match(with: event) }),
               let action = mapping.action else {
             return nil
@@ -110,6 +110,7 @@ extension ButtonActions: EventTransformer {
         }
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     private func execute(action: Scheme.Buttons.Mapping.Action) throws {
         switch action {
         case .simpleAction(.none), .simpleAction(.auto):
@@ -171,11 +172,31 @@ extension ButtonActions: EventTransformer {
         case .simpleAction(.keyboardBrightnessDown):
             postSystemDefinedKey(.illuminationDown)
 
+        case .simpleAction(.scrollUp):
+            postScrollEvent(.line, x: 0, y: 3)
+
+        case .simpleAction(.scrollDown):
+            postScrollEvent(.line, x: 0, y: -3)
+
+        case .simpleAction(.scrollLeft):
+            postScrollEvent(.line, x: 3, y: 0)
+
+        case .simpleAction(.scrollRight):
+            postScrollEvent(.line, x: -3, y: 0)
+
         case let .run(command):
             let task = Process()
             task.launchPath = "/bin/bash"
             task.arguments = ["-c", command]
             task.launch()
+        }
+    }
+
+    private func postScrollEvent(_ unit: CGScrollEventUnit, x: Int32, y: Int32) {
+        if let event = CGEvent(scrollWheelEvent2Source: nil, units: unit, wheelCount: 2,
+                               wheel1: y, wheel2: x, wheel3: 0) {
+            event.flags = []
+            event.post(tap: .cgSessionEventTap)
         }
     }
 }
