@@ -31,8 +31,7 @@ class EventTap {
             return Unmanaged.passUnretained(event)
         }
 
-        let eventTransformer = getEventTransformer(forDevice: DeviceManager.shared.lastActiveDevice,
-                                                   forPid: MouseEventView(event).targetPid)
+        let eventTransformer = EventTransformerManager.shared.get(withPid: MouseEventView(event).targetPid)
 
         if let event = eventTransformer.transform(event) {
             return Unmanaged.passUnretained(event)
