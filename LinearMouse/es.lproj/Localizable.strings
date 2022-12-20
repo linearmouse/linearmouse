@@ -1,68 +1,68 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility.";
-"Get more help" = "Get more help";
-"Open Accessibility" = "Open Accessibility";
+"LinearMouse needs Accessibility permission" = "LinearMouse necesita permiso de Accesibilidad";
+"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "Necesita conceder permiso de Accesibilidad en Preferencias del sistema > Seguridad y privacidad > Accesibilidad.";
+"Get more help" = "Ayuda";
+"Open Accessibility" = "Abrir Accesibilidad";
 
-"%@ Preferences..." = "%@ Preferences...";
-"Start at login" = "Start at login";
-"Config" = "Config";
-"Reload" = "Reload";
-"Reveal in Finder" = "Reveal in Finder";
-"Quit %@" = "Quit %@";
+"%@ Preferences..." = "%@ Preferencias...";
+"Start at login" = "Abrir al iniciar sesión";
+"Config" = "Configuración";
+"Reload" = "Volver a cargar";
+"Reveal in Finder" = "Mostrar en el Finder";
+"Quit %@" = "Salir de %@";
 
-"Scrolling" = "Scrolling";
-"Pointer" = "Pointer";
-"Buttons" = "Buttons";
-"Modifier Keys" = "Modifier Keys";
+"Scrolling" = "Desplazamiento";
+"Pointer" = "Cursor";
+"Buttons" = "Botones";
+"Modifier Keys" = "Teclas modificadoras";
 "General" = "General";
 
-"Reverse scrolling" = "Reverse scrolling";
-"(vertically)" = "(vertically)";
-"(horizontally)" = "(horizontally)";
-"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
-"Enable linear scrolling" = "Enable linear scrolling";
-"Disable scrolling acceleration." = "Disable scrolling acceleration.";
-"Scroll" = "Scroll";
-"By lines" = "By lines";
-"By pixels" = "By pixels";
+"Reverse scrolling" = "Invertir desplazamiento";
+"(vertically)" = "(vertical)";
+"(horizontally)" = "(horizontal)";
+"Some gestures, such as swiping back and forward, may stop working." = "Algunos gestos, como el deslizamiento hacia atrás y hacia delante, pueden dejar de funcionar.";
+"Enable linear scrolling" = "Habilitar desplazamiento lineal";
+"Disable scrolling acceleration." = "Desactivar aceleración de desplazamiento.";
+"Scroll" = "Desplazar";
+"By lines" = "Por líneas";
+"By pixels" = "Por píxeles";
 
-"Acceleration" = "Acceleration";
-"Speed" = "Speed";
-"Revert to system defaults" = "Revert to system defaults";
-"You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
-"Disable pointer acceleration" = "Disable pointer acceleration";
+"Acceleration" = "Aceleración";
+"Speed" = "Velocidad";
+"Revert to system defaults" = "Restablecer valores por defecto";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "También puedes pulsar ⌃⇧⌘Z para restablecer valores por defecto.";
+"Disable pointer acceleration" = "Deshabilitar aceleración del cursor";
 
-"Enable universal back and forward" = "Enable universal back and forward";
-"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
+"Enable universal back and forward" = "Habilitar retroceso y avance universal";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convierte los botones laterales atrás y adelante en gestos de deslizamiento para permitir una funcionalidad universal hacia atrás y hacia delante.";
 
-"No action" = "No action";
-"Alter orientation" = "Alter orientation";
-"Change speed" = "Change speed";
-"to" = "to";
+"No action" = "No hacer nada";
+"Alter orientation" = "Cambiar orientación";
+"Change speed" = "Cambiar velocidad";
+"to" = "a";
 
-"Settings" = "Settings";
-"Show in menu bar" = "Show in menu bar";
-"To show the preferences, launch %@ again." = "To show the preferences, launch %@ again.";
+"Settings" = "Ajustes";
+"Show in menu bar" = "Mostrar en la barra de menú";
+"To show the preferences, launch %@ again." = "Para mostrar las preferencias, vuelve a lanzar %@.";
 
-"Update" = "Update";
-"Version: %@" = "Version: %@";
-"Check for Updates..." = "Check for Updates...";
-"Automatically" = "Automatically";
-"Daily" = "Daily";
-"Weekly" = "Weekly";
-"Monthly" = "Monthly";
-"Include beta" = "Include beta";
+"Update" = "Actualizar";
+"Version: %@" = "Versión: %@";
+"Check for Updates..." = "Buscar actualizaciones...";
+"Automatically" = "Automáticamente";
+"Daily" = "Cada día";
+"Weekly" = "Cada semana";
+"Monthly" = "Cada mes";
+"Include beta" = "Incluir beta";
 
-"Links" = "Links";
-"Homepage" = "Homepage";
-"Open Collective" = "Open Collective";
+"Links" = "Enlaces";
+"Homepage" = "Página web";
+"Open Collective" = "Abrir Collective";
 "GitHub" = "GitHub";
 "Feedback" = "Feedback";
-"Contact" = "Contact";
+"Contact" = "Contacto";
 
-"Auto switch to the active device" = "Auto switch to the active device";
-"OK" = "OK";
+"Auto switch to the active device" = "Cambiar automáticamente al dispositivo activo";
+"OK" = "Aceptar";
 
-"Mouse" = "Mouse";
+"Mouse" = "Ratón";
 "Trackpad" = "Trackpad";
-"(active)" = "(active)";
+"(active)" = "(activo)";
