@@ -172,16 +172,16 @@ extension ButtonActions: EventTransformer {
         case .simpleAction(.keyboardBrightnessDown):
             postSystemDefinedKey(.illuminationDown)
 
-        case .simpleAction(.scrollUp):
+        case .simpleAction(.mouseWheelScrollUp):
             postScrollEvent(.line, dx: 0, dy: 3)
 
-        case .simpleAction(.scrollDown):
+        case .simpleAction(.mouseWheelScrollDown):
             postScrollEvent(.line, dx: 0, dy: -3)
 
-        case .simpleAction(.scrollLeft):
+        case .simpleAction(.mouseWheelScrollLeft):
             postScrollEvent(.line, dx: 3, dy: 0)
 
-        case .simpleAction(.scrollRight):
+        case .simpleAction(.mouseWheelScrollRight):
             postScrollEvent(.line, dx: -3, dy: 0)
 
         case let .run(command):
