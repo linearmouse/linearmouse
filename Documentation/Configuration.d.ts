@@ -297,7 +297,13 @@ declare namespace Scheme {
     };
 
     namespace Mapping {
-      type Action = SimpleAction | Run;
+      type Action =
+        | SimpleAction
+        | Run
+        | MouseWheelScrollUpWithDistance
+        | MouseWheelScrollDownWithDistance
+        | MouseWheelScrollLeftWithDistance
+        | MouseWheelScrollRightWithDistance;
 
       type SimpleAction =
         | Auto
@@ -319,7 +325,11 @@ declare namespace Scheme {
         | MediaFastForward
         | MediaRewind
         | KeyboardBrightnessUp
-        | KeyboardBrightnessDown;
+        | KeyboardBrightnessDown
+        | MouseWheelScrollUp
+        | MouseWheelScrollDown
+        | MouseWheelScrollLeft
+        | MouseWheelScrollRight;
 
       /**
        * @description Do not modify the button behavior.
@@ -422,6 +432,26 @@ declare namespace Scheme {
       type KeyboardBrightnessDown = "keyboard.brightnessDown";
 
       /**
+       * @description Mouse: Wheel: Scroll up.
+       */
+      type MouseWheelScrollUp = "mouse.wheel.scrollUp";
+
+      /**
+       * @description Mouse: Wheel: Scroll down.
+       */
+      type MouseWheelScrollDown = "mouse.wheel.scrollDown";
+
+      /**
+       * @description Mouse: Wheel: Scroll left.
+       */
+      type MouseWheelScrollLeft = "mouse.wheel.scrollLeft";
+
+      /**
+       * @description Mouse: Wheel: Scroll right.
+       */
+      type MouseWheelScrollRight = "mouse.wheel.scrollRight";
+
+      /**
        * @description Run a specific command.
        */
       type Run = {
@@ -431,6 +461,38 @@ declare namespace Scheme {
          */
         run: string;
       };
+
+      /**
+       * @description Mouse: Wheel: Scroll up a certain distance.
+       */
+      type MouseWheelScrollUpWithDistance = Record<
+        MouseWheelScrollUp,
+        Scheme.Scrolling.Distance
+      >;
+
+      /**
+       * @description Mouse: Wheel: Scroll down a certain distance.
+       */
+      type MouseWheelScrollDownWithDistance = Record<
+        MouseWheelScrollDown,
+        Scheme.Scrolling.Distance
+      >;
+
+      /**
+       * @description Mouse: Wheel: Scroll left a certain distance.
+       */
+      type MouseWheelScrollLeftWithDistance = Record<
+        MouseWheelScrollLeft,
+        Scheme.Scrolling.Distance
+      >;
+
+      /**
+       * @description Mouse: Wheel: Scroll right a certain distance.
+       */
+      type MouseWheelScrollRightWithDistance = Record<
+        MouseWheelScrollRight,
+        Scheme.Scrolling.Distance
+      >;
 
       type Button = Primary | Secondary | Auxiliary | Back | Forward | number;
 
