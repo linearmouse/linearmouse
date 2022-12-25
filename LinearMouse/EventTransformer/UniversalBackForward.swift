@@ -80,11 +80,11 @@ class UniversalBackForward: EventTransformer {
         switch view.mouseButton {
         case CGMouseButton.back:
             if let event = GestureEvent(navigationSwipeSource: nil, direction: .swipeLeft) {
-                event.post(tap: .cghidEventTap)
+                event.post(tap: .cgSessionEventTap)
             }
         case CGMouseButton.forward:
             if let event = GestureEvent(navigationSwipeSource: nil, direction: .swipeRight) {
-                event.post(tap: .cghidEventTap)
+                event.post(tap: .cgSessionEventTap)
             }
         default:
             break

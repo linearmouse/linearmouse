@@ -79,8 +79,8 @@ class DeviceManager: ObservableObject {
 
         manager.startObservation()
 
-        ConfigurationState.shared.$configuration.sink { _ in
-            DispatchQueue.main.async { [weak self] in
+        ConfigurationState.shared.$configuration.sink { [weak self] _ in
+            DispatchQueue.main.async {
                 self?.updatePointerSpeed()
             }
         }

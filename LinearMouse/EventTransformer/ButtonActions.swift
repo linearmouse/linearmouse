@@ -39,7 +39,7 @@ extension ButtonActions: EventTransformer {
 
         timer?.invalidate()
 
-        guard let action = getAction(of: event) else {
+        guard let action = matchAction(of: event) else {
             return event
         }
 
@@ -84,7 +84,7 @@ extension ButtonActions: EventTransformer {
         return nil
     }
 
-    private func getAction(of event: CGEvent) -> Scheme.Buttons.Mapping.Action? {
+    private func matchAction(of event: CGEvent) -> Scheme.Buttons.Mapping.Action? {
         guard let mapping = mappings.last(where: { $0.match(with: event) }),
               let action = mapping.action else {
             return nil
@@ -110,6 +110,7 @@ extension ButtonActions: EventTransformer {
         }
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     private func execute(action: Scheme.Buttons.Mapping.Action) throws {
         switch action {
         case .simpleAction(.none), .simpleAction(.auto):
@@ -171,11 +172,109 @@ extension ButtonActions: EventTransformer {
         case .simpleAction(.keyboardBrightnessDown):
             postSystemDefinedKey(.illuminationDown)
 
+        case .simpleAction(.mouseWheelScrollUp):
+            postScrollEvent(horizontal: 0, vertical: 3)
+
+        case .simpleAction(.mouseWheelScrollDown):
+            postScrollEvent(horizontal: 0, vertical: -3)
+
+        case .simpleAction(.mouseWheelScrollLeft):
+            postScrollEvent(horizontal: 3, vertical: 0)
+
+        case .simpleAction(.mouseWheelScrollRight):
+            postScrollEvent(horizontal: -3, vertical: 0)
+
         case let .run(command):
             let task = Process()
             task.launchPath = "/bin/bash"
             task.arguments = ["-c", command]
             task.launch()
+
+        case let .mouseWheelScrollUp(distance):
+            postScrollEvent(direction: .up, distance: distance)
+
+        case let .mouseWheelScrollDown(distance):
+            postScrollEvent(direction: .down, distance: distance)
+
+        case let .mouseWheelScrollLeft(distance):
+            postScrollEvent(direction: .left, distance: distance)
+
+        case let .mouseWheelScrollRight(distance):
+            postScrollEvent(direction: .right, distance: distance)
+        }
+    }
+
+    private func postScrollEvent(horizontal: Int32, vertical: Int32) {
+        guard let event = CGEvent(scrollWheelEvent2Source: nil, units: .line, wheelCount: 2,
+                                  wheel1: vertical, wheel2: horizontal, wheel3: 0) else {
+            return
+        }
+
+        event.flags = []
+        event.post(tap: .cgSessionEventTap)
+    }
+
+    private func postContinuousScrollEvent(horizontal: Double, vertical: Double) {
+        guard let event = CGEvent(scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 2,
+                                  wheel1: 0, wheel2: 0, wheel3: 0) else {
+            return
+        }
+
+        event.setDoubleValueField(.scrollWheelEventPointDeltaAxis1, value: vertical)
+        event.setDoubleValueField(.scrollWheelEventFixedPtDeltaAxis1, value: vertical)
+        event.setDoubleValueField(.scrollWheelEventPointDeltaAxis2, value: horizontal)
+        event.setDoubleValueField(.scrollWheelEventFixedPtDeltaAxis2, value: horizontal)
+
+        event.flags = []
+        event.post(tap: .cgSessionEventTap)
+    }
+
+    private enum ScrollEventDirection {
+        case up, down, left, right
+    }
+
+    private func postScrollEvent(direction: ScrollEventDirection,
+                                 distance: Scheme.Scrolling.Distance) {
+        switch distance {
+        case .auto:
+            switch direction {
+            case .up:
+                postScrollEvent(horizontal: 0, vertical: 3)
+            case .down:
+                postScrollEvent(horizontal: 0, vertical: -3)
+            case .left:
+                postScrollEvent(horizontal: 3, vertical: 0)
+            case .right:
+                postScrollEvent(horizontal: -3, vertical: 0)
+            }
+
+        case let .line(value):
+            let value = Int32(value)
+
+            switch direction {
+            case .up:
+                postScrollEvent(horizontal: 0, vertical: value)
+            case .down:
+                postScrollEvent(horizontal: 0, vertical: -value)
+            case .left:
+                postScrollEvent(horizontal: value, vertical: 0)
+            case .right:
+                postScrollEvent(horizontal: -value, vertical: 0)
+            }
+
+        case let .pixel(value):
+            let value = value.asTruncatedDouble
+
+            switch direction {
+            case .up:
+                postContinuousScrollEvent(horizontal: 0, vertical: value)
+            case .down:
+                postContinuousScrollEvent(horizontal: 0, vertical: -value)
+            case .left:
+                postContinuousScrollEvent(horizontal: value, vertical: 0)
+            case .right:
+                postContinuousScrollEvent(horizontal: -value, vertical: 0)
+            }
         }
     }
 }

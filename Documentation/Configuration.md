@@ -450,6 +450,10 @@ A simple action is an action without any parameters.
 | `media.rewind`              | Media: Rewind.                       |
 | `keyboard.brightnessUp`     | Keyboard: Brightness up.             |
 | `keyboard.brightnessDown`   | Keyboard: Brightness down.           |
+| `mouse.wheel.scrollUp`      | Mouse: Wheel: Scroll up.             |
+| `mouse.wheel.scrollDown`    | Mouse: Wheel: Scroll down.           |
+| `mouse.wheel.scrollLeft`    | Mouse: Wheel: Scroll left.           |
+| `mouse.wheel.scrollRight`   | Mouse: Wheel: Scroll right.          |
 
 #### Run shell commands
 
@@ -462,3 +466,25 @@ A simple action is an action without any parameters.
 ```
 
 The `<command>` will be executed with bash.
+
+#### Scroll a certain distance
+
+##### Scroll up 2 lines
+
+```json
+{
+  "action": {
+    "mouse.wheel.scrollUp": 2
+  }
+}
+```
+
+##### Scroll left 32 pixels
+
+```json
+{
+  "action": {
+    "mouse.wheel.scrollLeft": "32px"
+  }
+}
+```

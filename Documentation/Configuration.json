@@ -129,6 +129,18 @@
         },
         {
           "$ref": "#/definitions/Scheme.Buttons.Mapping.Run"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MouseWheelScrollUpWithDistance"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MouseWheelScrollDownWithDistance"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MouseWheelScrollLeftWithDistance"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MouseWheelScrollRightWithDistance"
         }
       ]
     },
@@ -259,6 +271,78 @@
       "description": "Mission Control: Move right a space.",
       "type": "string"
     },
+    "Scheme.Buttons.Mapping.MouseWheelScrollDown": {
+      "const": "mouse.wheel.scrollDown",
+      "description": "Mouse: Wheel: Scroll down.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.MouseWheelScrollDownWithDistance": {
+      "additionalProperties": false,
+      "properties": {
+        "mouse.wheel.scrollDown": {
+          "$ref": "#/definitions/Scheme.Scrolling.Distance",
+          "description": "Mouse: Wheel: Scroll down a certain distance."
+        }
+      },
+      "required": [
+        "mouse.wheel.scrollDown"
+      ],
+      "type": "object"
+    },
+    "Scheme.Buttons.Mapping.MouseWheelScrollLeft": {
+      "const": "mouse.wheel.scrollLeft",
+      "description": "Mouse: Wheel: Scroll left.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.MouseWheelScrollLeftWithDistance": {
+      "additionalProperties": false,
+      "properties": {
+        "mouse.wheel.scrollLeft": {
+          "$ref": "#/definitions/Scheme.Scrolling.Distance",
+          "description": "Mouse: Wheel: Scroll left a certain distance."
+        }
+      },
+      "required": [
+        "mouse.wheel.scrollLeft"
+      ],
+      "type": "object"
+    },
+    "Scheme.Buttons.Mapping.MouseWheelScrollRight": {
+      "const": "mouse.wheel.scrollRight",
+      "description": "Mouse: Wheel: Scroll right.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.MouseWheelScrollRightWithDistance": {
+      "additionalProperties": false,
+      "properties": {
+        "mouse.wheel.scrollRight": {
+          "$ref": "#/definitions/Scheme.Scrolling.Distance",
+          "description": "Mouse: Wheel: Scroll right a certain distance."
+        }
+      },
+      "required": [
+        "mouse.wheel.scrollRight"
+      ],
+      "type": "object"
+    },
+    "Scheme.Buttons.Mapping.MouseWheelScrollUp": {
+      "const": "mouse.wheel.scrollUp",
+      "description": "Mouse: Wheel: Scroll up.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.MouseWheelScrollUpWithDistance": {
+      "additionalProperties": false,
+      "properties": {
+        "mouse.wheel.scrollUp": {
+          "$ref": "#/definitions/Scheme.Scrolling.Distance",
+          "description": "Mouse: Wheel: Scroll up a certain distance."
+        }
+      },
+      "required": [
+        "mouse.wheel.scrollUp"
+      ],
+      "type": "object"
+    },
     "Scheme.Buttons.Mapping.None": {
       "const": "none",
       "description": "Prevent the button events.",
@@ -271,11 +355,9 @@
     },
     "Scheme.Buttons.Mapping.Run": {
       "additionalProperties": false,
-      "description": "Run a specific command.",
       "properties": {
         "run": {
-          "description": "The command to be executed. For example, `\"open -a 'Mission Control'\"`.",
-          "title": "Command",
+          "description": "Run a specific command. For example, `\"open -a 'Mission Control'\"`.",
           "type": "string"
         }
       },
@@ -355,6 +437,18 @@
         },
         {
           "$ref": "#/definitions/Scheme.Buttons.Mapping.KeyboardBrightnessDown"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MouseWheelScrollUp"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MouseWheelScrollDown"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MouseWheelScrollLeft"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MouseWheelScrollRight"
         }
       ]
     },
