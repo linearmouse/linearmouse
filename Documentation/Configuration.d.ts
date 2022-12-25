@@ -451,48 +451,40 @@ declare namespace Scheme {
        */
       type MouseWheelScrollRight = "mouse.wheel.scrollRight";
 
-      /**
-       * @description Run a specific command.
-       */
       type Run = {
         /**
-         * @title Command
-         * @description The command to be executed. For example, `"open -a 'Mission Control'"`.
+         * @description Run a specific command. For example, `"open -a 'Mission Control'"`.
          */
         run: string;
       };
 
-      /**
-       * @description Mouse: Wheel: Scroll up a certain distance.
-       */
-      type MouseWheelScrollUpWithDistance = Record<
-        MouseWheelScrollUp,
-        Scheme.Scrolling.Distance
-      >;
+      type MouseWheelScrollUpWithDistance = {
+        /**
+         * @description Mouse: Wheel: Scroll up a certain distance.
+         */
+        "mouse.wheel.scrollUp": Scheme.Scrolling.Distance;
+      };
 
-      /**
-       * @description Mouse: Wheel: Scroll down a certain distance.
-       */
-      type MouseWheelScrollDownWithDistance = Record<
-        MouseWheelScrollDown,
-        Scheme.Scrolling.Distance
-      >;
+      type MouseWheelScrollDownWithDistance = {
+        /**
+         * @description Mouse: Wheel: Scroll down a certain distance.
+         */
+        "mouse.wheel.scrollDown": Scheme.Scrolling.Distance;
+      };
 
-      /**
-       * @description Mouse: Wheel: Scroll left a certain distance.
-       */
-      type MouseWheelScrollLeftWithDistance = Record<
-        MouseWheelScrollLeft,
-        Scheme.Scrolling.Distance
-      >;
+      type MouseWheelScrollLeftWithDistance = {
+        /**
+         * @description Mouse: Wheel: Scroll left a certain distance.
+         */
+        "mouse.wheel.scrollLeft": Scheme.Scrolling.Distance;
+      };
 
-      /**
-       * @description Mouse: Wheel: Scroll right a certain distance.
-       */
-      type MouseWheelScrollRightWithDistance = Record<
-        MouseWheelScrollRight,
-        Scheme.Scrolling.Distance
-      >;
+      type MouseWheelScrollRightWithDistance = {
+        /**
+         * @description Mouse: Wheel: Scroll right a certain distance.
+         */
+        "mouse.wheel.scrollRight": Scheme.Scrolling.Distance;
+      };
 
       type Button = Primary | Secondary | Auxiliary | Back | Forward | number;
 

@@ -278,10 +278,10 @@
     },
     "Scheme.Buttons.Mapping.MouseWheelScrollDownWithDistance": {
       "additionalProperties": false,
-      "description": "Mouse: Wheel: Scroll down a certain distance.",
       "properties": {
         "mouse.wheel.scrollDown": {
-          "$ref": "#/definitions/Scheme.Scrolling.Distance"
+          "$ref": "#/definitions/Scheme.Scrolling.Distance",
+          "description": "Mouse: Wheel: Scroll down a certain distance."
         }
       },
       "required": [
@@ -296,10 +296,10 @@
     },
     "Scheme.Buttons.Mapping.MouseWheelScrollLeftWithDistance": {
       "additionalProperties": false,
-      "description": "Mouse: Wheel: Scroll left a certain distance.",
       "properties": {
         "mouse.wheel.scrollLeft": {
-          "$ref": "#/definitions/Scheme.Scrolling.Distance"
+          "$ref": "#/definitions/Scheme.Scrolling.Distance",
+          "description": "Mouse: Wheel: Scroll left a certain distance."
         }
       },
       "required": [
@@ -314,10 +314,10 @@
     },
     "Scheme.Buttons.Mapping.MouseWheelScrollRightWithDistance": {
       "additionalProperties": false,
-      "description": "Mouse: Wheel: Scroll right a certain distance.",
       "properties": {
         "mouse.wheel.scrollRight": {
-          "$ref": "#/definitions/Scheme.Scrolling.Distance"
+          "$ref": "#/definitions/Scheme.Scrolling.Distance",
+          "description": "Mouse: Wheel: Scroll right a certain distance."
         }
       },
       "required": [
@@ -332,10 +332,10 @@
     },
     "Scheme.Buttons.Mapping.MouseWheelScrollUpWithDistance": {
       "additionalProperties": false,
-      "description": "Mouse: Wheel: Scroll up a certain distance.",
       "properties": {
         "mouse.wheel.scrollUp": {
-          "$ref": "#/definitions/Scheme.Scrolling.Distance"
+          "$ref": "#/definitions/Scheme.Scrolling.Distance",
+          "description": "Mouse: Wheel: Scroll up a certain distance."
         }
       },
       "required": [
@@ -355,11 +355,9 @@
     },
     "Scheme.Buttons.Mapping.Run": {
       "additionalProperties": false,
-      "description": "Run a specific command.",
       "properties": {
         "run": {
-          "description": "The command to be executed. For example, `\"open -a 'Mission Control'\"`.",
-          "title": "Command",
+          "description": "Run a specific command. For example, `\"open -a 'Mission Control'\"`.",
           "type": "string"
         }
       },
