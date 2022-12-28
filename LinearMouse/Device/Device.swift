@@ -136,8 +136,8 @@ extension Device {
     }
 
     func restorePointerAccelerationAndPointerSpeed() {
-        restorePointerAcceleration()
         restorePointerSpeed()
+        restorePointerAcceleration()
     }
 
     private func inputValueCallback(_ device: PointerDevice, _ value: IOHIDValue) {
