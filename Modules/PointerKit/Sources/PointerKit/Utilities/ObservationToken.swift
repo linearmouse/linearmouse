@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2022 Jiahao Lu
+// Copyright (c) 2021-2023 Jiahao Lu
 
 public final class ObservationToken {
     private let cancellationClosure: () -> Void

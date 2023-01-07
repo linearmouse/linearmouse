@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2022 Jiahao Lu
+// Copyright (c) 2021-2023 Jiahao Lu
 
 extension Comparable {
     func clamp(_ x: Self, _ y: Self) -> Self {
