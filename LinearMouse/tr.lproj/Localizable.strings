@@ -1,9 +1,9 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse erişim iznine ihtiyaç duyuyor";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "Sistem Ayarları > Güvenlik & Gizlilik > Erişilebilirlik üzerinden erişim izni vermeniz gerekiyor.";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
 "Get more help" = "Daha fazla yardım";
 "Open Accessibility" = "Erişilebilirliği Aç";
 
-"%@ Preferences..." = "%@ Tercihleri...";
+"%@ Settings..." = "%@ Settings...";
 "Start at login" = "Start at login";
 "Config" = "Ayarlar";
 "Reload" = "Yenile";
@@ -42,7 +42,7 @@
 
 "Settings" = "Ayarlar";
 "Show in menu bar" = "Menüde göster";
-"To show the preferences, launch %@ again." = "Tercihleri görmek için %@'i yeniden başlatın.";
+"To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
 
 "Update" = "Güncellemeler";
 "Version: %@" = "Sürüm: %@";
