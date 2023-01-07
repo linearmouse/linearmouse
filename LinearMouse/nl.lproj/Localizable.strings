@@ -1,9 +1,9 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility.";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
 "Get more help" = "Get more help";
 "Open Accessibility" = "Open Accessibility";
 
-"%@ Preferences..." = "%@ Preferences...";
+"%@ Settings..." = "%@ Settings...";
 "Start at login" = "Start at login";
 "Config" = "Config";
 "Reload" = "Reload";
@@ -42,7 +42,7 @@
 
 "Settings" = "Settings";
 "Show in menu bar" = "Show in menu bar";
-"To show the preferences, launch %@ again." = "To show the preferences, launch %@ again.";
+"To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
 
 "Update" = "Update";
 "Version: %@" = "Version: %@";
