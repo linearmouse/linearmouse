@@ -1,9 +1,9 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse 需要輔助使用權限";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "你需要在系統偏好設定 > 安全性與隱私權 > 輔助使用中授予輔助使用權限。";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "你需要在系統設定 > 安全性與隱私權 > 輔助使用中授予輔助使用權限。";
 "Get more help" = "獲取更多幫助";
 "Open Accessibility" = "打開輔助使用";
 
-"%@ Preferences..." = "%@ 偏好設定...";
+"%@ Settings..." = "%@ 設定...";
 "Start at login" = "登入時啟動";
 "Config" = "設定";
 "Reload" = "重新載入";
@@ -42,7 +42,7 @@
 
 "Settings" = "設定";
 "Show in menu bar" = "在選單列中顯示";
-"To show the preferences, launch %@ again." = "要顯示偏好設定，再次運行 %@。";
+"To show the settings, launch %@ again." = "要顯示設定，再次運行 %@。";
 
 "Update" = "更新";
 "Version: %@" = "版本：%@";

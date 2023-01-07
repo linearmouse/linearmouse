@@ -1,9 +1,9 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse vyžaduje oprávnění k použití funkce Zpřístupnění";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "Aplikace ke správnému fungování používá funkce Zpřístupnění vašeho operačního systému. Funkci aktivujete povolením této aplikace v Předvolbách systému > Zabezpečení a soukromí > Zpřístupnění.";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
 "Get more help" = "Více informací";
 "Open Accessibility" = "Přejít na obrazovku Zpřístupnění";
 
-"%@ Preferences..." = "Předvolby %@...";
+"%@ Settings..." = "%@ Settings...";
 "Start at login" = "Spustit při startu systému";
 "Config" = "Konfigurační soubory";
 "Reload" = "Načíst znovu";
@@ -42,7 +42,7 @@
 
 "Settings" = "Nastavení";
 "Show in menu bar" = "Zobrazovat v řádku nabídek";
-"To show the preferences, launch %@ again." = "Pro zobrazení ikony aplikace a přístup k Předvolbám spusťte aplikaci %@ ručně znovu";
+"To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
 
 "Update" = "Aktualizace aplikace";
 "Version: %@" = "Verze %@";

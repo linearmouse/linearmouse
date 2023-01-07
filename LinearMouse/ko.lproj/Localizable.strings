@@ -1,9 +1,9 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse이(가) 손쉬운 사용 권한이 필요합니다";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "시스템 설정 > 개인정보 보호 및 보안 > 손쉬운 사용에서 이 응용 프로그램에 접근 권한을 부여하십시오.";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
 "Get more help" = "도움이 필요하신가요?";
 "Open Accessibility" = "손쉬운 사용 열기";
 
-"%@ Preferences..." = "설정...";
+"%@ Settings..." = "%@ Settings...";
 "Start at login" = "로그인 시 시작";
 "Config" = "설정";
 "Reload" = "재설정";
@@ -42,7 +42,7 @@
 
 "Settings" = "설정";
 "Show in menu bar" = "메뉴 막대에서 보기";
-"To show the preferences, launch %@ again." = "설정을 표시하려면 %@을(를) 재시작하십시오.";
+"To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
 
 "Update" = "업데이트";
 "Version: %@" = "버전: %@";

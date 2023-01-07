@@ -1,9 +1,9 @@
 "LinearMouse needs Accessibility permission" = "LinearMouseにはアクセシビリティの許可が必要です";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "システム環境設定 > セキュリティ & プライバシー > アクセシビリティでアクセシビリティの許可が必要です。";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
 "Get more help" = "ヘルプ";
 "Open Accessibility" = "アクセシビリティの設定を開く";
 
-"%@ Preferences..." = "%@環境設定...";
+"%@ Settings..." = "%@ Settings...";
 "Start at login" = "ログイン時の自動起動";
 "Config" = "設定";
 "Reload" = "再ロード";
@@ -42,7 +42,7 @@
 
 "Settings" = "設定";
 "Show in menu bar" = "メニューバーに表示";
-"To show the preferences, launch %@ again." = "設定を表示するには、 %@ を再度起動してください。";
+"To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
 
 "Update" = "アップデート";
 "Version: %@" = "バージョン %@";

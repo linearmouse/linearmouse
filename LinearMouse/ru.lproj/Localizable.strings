@@ -1,9 +1,9 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse требуется разрешение на Универсальный доступ";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "Вам необходимо предоставить разрешение на Универсальный доступ в Системных настройках > Защита и безопасность > Универсальный доступ.";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
 "Get more help" = "Получить дополнительную помощь";
 "Open Accessibility" = "Открыть Универсальный доступ";
 
-"%@ Preferences..." = "Настройки %@...";
+"%@ Settings..." = "%@ Settings...";
 "Start at login" = "Запуск при входе";
 "Config" = "Конфигурация";
 "Reload" = "Обновить";
@@ -42,7 +42,7 @@
 
 "Settings" = "Настройки";
 "Show in menu bar" = "Показывать в строке меню";
-"To show the preferences, launch %@ again." = "Чтобы настройки отображались, перезапустите %@.";
+"To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
 
 "Update" = "Обновление";
 "Version: %@" = "Версия: %@";
