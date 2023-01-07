@@ -1,9 +1,9 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse wymaga uprawnień Dostępności";
-"You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility." = "Należy przyznać uprawnienia Dostępności poprzez Apple > Preferencje systemowe > Bezpieczeństwo i prywatność > Dostępność.";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
 "Get more help" = "Uzyskaj więcej pomocy";
 "Open Accessibility" = "Otwórz Dostępność";
 
-"%@ Preferences..." = "Preferencje %@...";
+"%@ Settings..." = "%@ Settings...";
 "Start at login" = "Start at login";
 "Config" = "Konfiguracja";
 "Reload" = "Odśwież";
@@ -42,7 +42,7 @@
 
 "Settings" = "Ustawienia";
 "Show in menu bar" = "Pokaż na pasku menu";
-"To show the preferences, launch %@ again." = "Aby wyświetlić preferencje, ponownie uruchom %@.";
+"To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
 
 "Update" = "Aktualizacja";
 "Version: %@" = "Wersja: %@";
