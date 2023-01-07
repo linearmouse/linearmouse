@@ -1,10 +1,10 @@
 // MIT License
-// Copyright (c) 2021-2022 Jiahao Lu
+// Copyright (c) 2021-2023 Jiahao Lu
 
 import Introspect
 import SwiftUI
 
-struct Preferences: View {
+struct Settings: View {
     var body: some View {
         NavigationView {
             Sidebar()
@@ -14,8 +14,8 @@ struct Preferences: View {
     }
 }
 
-struct PreferencesView_Previews: PreviewProvider {
+struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
-        Preferences()
+        Settings()
     }
 }

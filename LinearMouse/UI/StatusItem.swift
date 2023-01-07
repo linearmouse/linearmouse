@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2022 Jiahao Lu
+// Copyright (c) 2021-2023 Jiahao Lu
 
 import Combine
 import Defaults
@@ -17,8 +17,8 @@ class StatusItem {
         let menu = NSMenu()
 
         let openPreferenceItem = NSMenuItem(
-            title: String(format: NSLocalizedString("%@ Preferences...", comment: ""), LinearMouse.appName),
-            action: #selector(openPreferences),
+            title: String(format: NSLocalizedString("%@ Settings...", comment: ""), LinearMouse.appName),
+            action: #selector(openSettings),
             keyEquivalent: ","
         )
 
@@ -109,8 +109,8 @@ class StatusItem {
         AccessibilityPermissionWindow.shared.bringToFront()
     }
 
-    @objc private func openPreferences() {
-        PreferencesWindow.shared.bringToFront()
+    @objc private func openSettings() {
+        SettingsWindow.shared.bringToFront()
     }
 
     @objc private func reloadConfiguration() {

@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2022 Jiahao Lu
+// Copyright (c) 2021-2023 Jiahao Lu
 
 import Defaults
 import SwiftUI
@@ -15,7 +15,7 @@ struct GeneralSettings: View {
                         VStack(alignment: .leading) {
                             Text("Show in menu bar")
                             Text("""
-                            To show the preferences, launch \
+                            To show the settings, launch \
                             \(LinearMouse.appName) again.
                             """)
                             .controlSize(.small)
