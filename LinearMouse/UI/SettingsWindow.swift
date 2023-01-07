@@ -1,11 +1,11 @@
 // MIT License
-// Copyright (c) 2021-2022 Jiahao Lu
+// Copyright (c) 2021-2023 Jiahao Lu
 
 import Foundation
 import SwiftUI
 
-class PreferencesWindow: NSWindow {
-    static var shared = PreferencesWindow()
+class SettingsWindow: NSWindow {
+    static var shared = SettingsWindow()
 
     init() {
         super.init(
@@ -22,7 +22,7 @@ class PreferencesWindow: NSWindow {
         titleVisibility = .hidden
         titlebarAppearsTransparent = true
 
-        contentView = NSHostingView(rootView: Preferences())
+        contentView = NSHostingView(rootView: Settings())
 
         center()
     }

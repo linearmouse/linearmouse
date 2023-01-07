@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2022 Jiahao Lu
+// Copyright (c) 2021-2023 Jiahao Lu
 
 import os.log
 import SwiftUI
@@ -18,7 +18,7 @@ struct AccessibilityPermissionView: View {
             .padding(.horizontal)
 
             Text(
-                "You need to grant Accessibility permission in System Preferences > Security & Privacy > Accessibility."
+                "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility."
             )
             .padding(.horizontal)
 

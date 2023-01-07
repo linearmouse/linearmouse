@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2022 Jiahao Lu
+// Copyright (c) 2021-2023 Jiahao Lu
 
 import Combine
 import os.log
@@ -25,7 +25,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setup()
 
         if CommandLine.arguments.contains("--show") {
-            PreferencesWindow.shared.bringToFront()
+            SettingsWindow.shared.bringToFront()
         }
     }
 
@@ -36,7 +36,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return true
         }
 
-        PreferencesWindow.shared.bringToFront()
+        SettingsWindow.shared.bringToFront()
 
         return false
     }
