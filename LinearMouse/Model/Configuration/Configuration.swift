@@ -6,7 +6,7 @@ import Defaults
 import Foundation
 
 struct Configuration: Codable {
-    let jsonSchema = "https://app.linearmouse.org/schema/\(LinearMouse.appVersion)"
+    let jsonSchema = "https://schema.linearmouse.app/\(LinearMouse.appVersion)"
 
     var schemes: [Scheme] = []
 
