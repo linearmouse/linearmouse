@@ -112,6 +112,10 @@
           "description": "Indicates if the option modifier key should be pressed.",
           "type": "boolean"
         },
+        "repeat": {
+          "description": "Indicates if key repeat is enabled. If the value is true, the action will be repeatedly executed when the button is hold according to the key repeat settings in System Settings.",
+          "type": "boolean"
+        },
         "shift": {
           "description": "Indicates if the shift modifier key should be pressed.",
           "type": "boolean"

@@ -11,6 +11,8 @@ extension Scheme.Buttons {
         var control: Bool?
 
         var action: Action?
+
+        var `repeat`: Bool?
     }
 }
 

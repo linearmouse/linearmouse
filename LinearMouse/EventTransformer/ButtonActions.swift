@@ -39,7 +39,15 @@ extension ButtonActions: EventTransformer {
 
         timer?.invalidate()
 
-        guard let action = matchAction(of: event) else {
+        guard let mapping = findMapping(of: event) else {
+            return event
+        }
+
+        guard let action = mapping.action else {
+            return event
+        }
+
+        if case .simpleAction(.auto) = action {
             return event
         }
 
@@ -51,13 +59,16 @@ extension ButtonActions: EventTransformer {
             executeIgnoreErrors(action: action)
 
             // FIXME: `NSEvent.keyRepeatDelay` and `NSEvent.keyRepeatInterval` are not kept up to date
+            // TODO: Support override `repeatDelay` and `repeatInterval`
+            let repeatDelay = mapping.repeat == true ? NSEvent.keyRepeatDelay : 0
+            let repeatInterval = mapping.repeat == true ? NSEvent.keyRepeatInterval : 0
 
-            guard NSEvent.keyRepeatDelay > 0, NSEvent.keyRepeatInterval > 0 else {
+            guard repeatDelay > 0, repeatInterval > 0 else {
                 return
             }
 
             timer = Timer.scheduledTimer(
-                withTimeInterval: NSEvent.keyRepeatDelay,
+                withTimeInterval: repeatDelay,
                 repeats: false,
                 block: { [weak self] _ in
                     guard let self = self else {
@@ -67,7 +78,7 @@ extension ButtonActions: EventTransformer {
                     self.executeIgnoreErrors(action: action)
 
                     self.timer = Timer.scheduledTimer(
-                        withTimeInterval: NSEvent.keyRepeatInterval,
+                        withTimeInterval: repeatInterval,
                         repeats: true,
                         block: { [weak self] _ in
                             guard let self = self else {
@@ -84,17 +95,8 @@ extension ButtonActions: EventTransformer {
         return nil
     }
 
-    private func matchAction(of event: CGEvent) -> Scheme.Buttons.Mapping.Action? {
-        guard let mapping = mappings.last(where: { $0.match(with: event) }),
-              let action = mapping.action else {
-            return nil
-        }
-
-        if case .simpleAction(.auto) = action {
-            return nil
-        }
-
-        return action
+    private func findMapping(of event: CGEvent) -> Scheme.Buttons.Mapping? {
+        mappings.last { $0.match(with: event) }
     }
 
     private func executeIgnoreErrors(action: Scheme.Buttons.Mapping.Action) {

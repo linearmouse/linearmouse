@@ -294,6 +294,11 @@ declare namespace Scheme {
        * @title Action
        */
       action?: Mapping.Action;
+
+      /**
+       * @description Indicates if key repeat is enabled. If the value is true, the action will be repeatedly executed when the button is hold according to the key repeat settings in System Settings.
+       */
+      repeat?: boolean;
     };
 
     namespace Mapping {
