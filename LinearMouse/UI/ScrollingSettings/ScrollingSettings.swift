@@ -68,7 +68,7 @@ struct ScrollingSettings: View {
                         case .line:
                             Stepper(
                                 value: $state.linearScrollingVerticalLines,
-                                in: 1 ... 10,
+                                in: 0 ... 10,
                                 step: 1
                             ) {
                                 Text(String(state.linearScrollingVerticalLines))
@@ -77,7 +77,7 @@ struct ScrollingSettings: View {
                         case .pixel:
                             Slider(
                                 value: $state.linearScrollingVerticalPixels,
-                                in: 1 ... 128
+                                in: 0 ... 128
                             )
 
                             Text(String(state.linearScrollingVerticalPixels))
@@ -118,7 +118,7 @@ struct ScrollingSettings: View {
                         case .line:
                             Stepper(
                                 value: $state.linearScrollingHorizontalLines,
-                                in: 1 ... 10,
+                                in: 0 ... 10,
                                 step: 1
                             ) {
                                 Text(String(state.linearScrollingHorizontalLines))
@@ -127,7 +127,7 @@ struct ScrollingSettings: View {
                         case .pixel:
                             Slider(
                                 value: $state.linearScrollingHorizontalPixels,
-                                in: 1 ... 128
+                                in: 0 ... 128
                             )
 
                             Text(String(state.linearScrollingHorizontalPixels))
