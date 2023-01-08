@@ -51,45 +51,52 @@ extension ButtonActions: EventTransformer {
             return event
         }
 
-        guard mouseDownEventTypes.contains(event.type) else {
-            return nil
-        }
+        // FIXME: `NSEvent.keyRepeatDelay` and `NSEvent.keyRepeatInterval` are not kept up to date
+        // TODO: Support override `repeatDelay` and `repeatInterval`
+        let keyRepeatDelay = mapping.repeat == true ? NSEvent.keyRepeatDelay : 0
+        let keyRepeatInterval = mapping.repeat == true ? NSEvent.keyRepeatInterval : 0
+        let keyRepeatEnabled = keyRepeatDelay > 0 && keyRepeatInterval > 0
 
-        DispatchQueue.main.async { [self] in
-            executeIgnoreErrors(action: action)
-
-            // FIXME: `NSEvent.keyRepeatDelay` and `NSEvent.keyRepeatInterval` are not kept up to date
-            // TODO: Support override `repeatDelay` and `repeatInterval`
-            let repeatDelay = mapping.repeat == true ? NSEvent.keyRepeatDelay : 0
-            let repeatInterval = mapping.repeat == true ? NSEvent.keyRepeatInterval : 0
-
-            guard repeatDelay > 0, repeatInterval > 0 else {
-                return
+        if keyRepeatEnabled {
+            guard mouseDownEventTypes.contains(event.type) else {
+                return nil
             }
 
-            timer = Timer.scheduledTimer(
-                withTimeInterval: repeatDelay,
-                repeats: false,
-                block: { [weak self] _ in
-                    guard let self = self else {
-                        return
-                    }
+            DispatchQueue.main.async { [self] in
+                executeIgnoreErrors(action: action)
 
-                    self.executeIgnoreErrors(action: action)
-
-                    self.timer = Timer.scheduledTimer(
-                        withTimeInterval: repeatInterval,
-                        repeats: true,
-                        block: { [weak self] _ in
-                            guard let self = self else {
-                                return
-                            }
-
-                            self.executeIgnoreErrors(action: action)
+                timer = Timer.scheduledTimer(
+                    withTimeInterval: keyRepeatDelay,
+                    repeats: false,
+                    block: { [weak self] _ in
+                        guard let self = self else {
+                            return
                         }
-                    )
-                }
-            )
+
+                        self.executeIgnoreErrors(action: action)
+
+                        self.timer = Timer.scheduledTimer(
+                            withTimeInterval: keyRepeatInterval,
+                            repeats: true,
+                            block: { [weak self] _ in
+                                guard let self = self else {
+                                    return
+                                }
+
+                                self.executeIgnoreErrors(action: action)
+                            }
+                        )
+                    }
+                )
+            }
+        } else {
+            guard mouseUpEventTypes.contains(event.type) else {
+                return nil
+            }
+
+            DispatchQueue.main.async { [self] in
+                executeIgnoreErrors(action: action)
+            }
         }
 
         return nil
