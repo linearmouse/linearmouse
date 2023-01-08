@@ -34,7 +34,7 @@ struct GeneralSettings: View {
 
                 Section(header: Text("Links").font(.headline)) {
                     VStack(alignment: .leading, spacing: 5) {
-                        HyperLink(URL(string: "https://linearmouse.org")!) {
+                        HyperLink(URL(string: "https://linearmouse.app")!) {
                             Text("Homepage")
                         }
                         HyperLink(URL(string: "https://github.com/linearmouse/linearmouse")!) {
@@ -46,7 +46,7 @@ struct GeneralSettings: View {
                         HyperLink(URL(string: "https://github.com/linearmouse/linearmouse/issues")!) {
                             Text("Feedback")
                         }
-                        HyperLink(URL(string: "mailto:feedback@linearmouse.org")!) {
+                        HyperLink(URL(string: "mailto:feedback@linearmouse.app")!) {
                             Text("Contact")
                         }
                         HyperLink(URL(string: "https://ko-fi.com/lujjjh")!) {

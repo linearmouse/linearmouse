@@ -55,7 +55,7 @@ struct PointerSettings: View {
 
                     HelpButton {
                         NSWorkspace.shared
-                            .open(URL(string: "https://go.linearmouse.org/disable-pointer-acceleration-and-speed")!)
+                            .open(URL(string: "https://go.linearmouse.app/disable-pointer-acceleration-and-speed")!)
                     }
                 }
 
