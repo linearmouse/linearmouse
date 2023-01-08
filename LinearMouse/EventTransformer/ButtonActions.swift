@@ -39,25 +39,40 @@ extension ButtonActions: EventTransformer {
 
         timer?.invalidate()
 
-        guard let action = matchAction(of: event) else {
+        guard let mapping = findMapping(of: event) else {
             return event
         }
 
-        guard mouseDownEventTypes.contains(event.type) else {
+        guard let action = mapping.action else {
+            return event
+        }
+
+        if case .simpleAction(.auto) = action {
+            return event
+        }
+
+        // FIXME: `NSEvent.keyRepeatDelay` and `NSEvent.keyRepeatInterval` are not kept up to date
+        // TODO: Support override `repeatDelay` and `repeatInterval`
+        let keyRepeatDelay = mapping.repeat == true ? NSEvent.keyRepeatDelay : 0
+        let keyRepeatInterval = mapping.repeat == true ? NSEvent.keyRepeatInterval : 0
+        let keyRepeatEnabled = keyRepeatDelay > 0 && keyRepeatInterval > 0
+
+        // Actions are executed when button is down if key repeat is enabled; otherwise, actions are
+        // executed when button is up.
+        let eventsOfInterest = keyRepeatEnabled ? mouseDownEventTypes : mouseUpEventTypes
+        guard eventsOfInterest.contains(event.type) else {
             return nil
         }
 
         DispatchQueue.main.async { [self] in
             executeIgnoreErrors(action: action)
 
-            // FIXME: `NSEvent.keyRepeatDelay` and `NSEvent.keyRepeatInterval` are not kept up to date
-
-            guard NSEvent.keyRepeatDelay > 0, NSEvent.keyRepeatInterval > 0 else {
+            guard keyRepeatEnabled else {
                 return
             }
 
             timer = Timer.scheduledTimer(
-                withTimeInterval: NSEvent.keyRepeatDelay,
+                withTimeInterval: keyRepeatDelay,
                 repeats: false,
                 block: { [weak self] _ in
                     guard let self = self else {
@@ -67,7 +82,7 @@ extension ButtonActions: EventTransformer {
                     self.executeIgnoreErrors(action: action)
 
                     self.timer = Timer.scheduledTimer(
-                        withTimeInterval: NSEvent.keyRepeatInterval,
+                        withTimeInterval: keyRepeatInterval,
                         repeats: true,
                         block: { [weak self] _ in
                             guard let self = self else {
@@ -84,17 +99,8 @@ extension ButtonActions: EventTransformer {
         return nil
     }
 
-    private func matchAction(of event: CGEvent) -> Scheme.Buttons.Mapping.Action? {
-        guard let mapping = mappings.last(where: { $0.match(with: event) }),
-              let action = mapping.action else {
-            return nil
-        }
-
-        if case .simpleAction(.auto) = action {
-            return nil
-        }
-
-        return action
+    private func findMapping(of event: CGEvent) -> Scheme.Buttons.Mapping? {
+        mappings.last { $0.match(with: event) }
     }
 
     private func executeIgnoreErrors(action: Scheme.Buttons.Mapping.Action) {
