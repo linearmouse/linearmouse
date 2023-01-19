@@ -8,25 +8,25 @@ struct Sidebar: View {
 
     var body: some View {
         List(selection: $settingsState.navigation) {
-            SidebarItem(imageName: "arrow.up.and.down",
+            SidebarItem(imageName: "Scrolling",
                         text: "Scrolling")
                 .tag(SettingsState.Navigation.scrolling)
 
-            SidebarItem(imageName: "cursorarrow.motionlines",
+            SidebarItem(imageName: "Pointer",
                         text: "Pointer")
                 .tag(SettingsState.Navigation.pointer)
 
-            SidebarItem(imageName: "computermouse.fill",
+            SidebarItem(imageName: "Buttons",
                         text: "Buttons")
                 .tag(SettingsState.Navigation.buttons)
 
-            SidebarItem(imageName: "command",
+            SidebarItem(imageName: "Modifier Keys",
                         text: "Modifier Keys")
                 .tag(SettingsState.Navigation.modifierKeys)
 
             Spacer()
 
-            SidebarItem(imageName: "gearshape.fill",
+            SidebarItem(imageName: "General",
                         text: "General")
                 .tag(SettingsState.Navigation.general)
         }

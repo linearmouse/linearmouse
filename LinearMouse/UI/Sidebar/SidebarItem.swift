@@ -8,8 +8,18 @@ struct SidebarItem: View {
     var text: LocalizedStringKey
 
     var body: some View {
-        if let imageName = imageName, #available(macOS 11.0, *) {
-            Label(text, systemImage: imageName)
+        if let imageName = imageName {
+            if #available(macOS 11.0, *) {
+                Label(text, image: imageName)
+            } else {
+                HStack {
+                    Image(imageName)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 14, height: 14)
+                    Text(text)
+                }
+            }
         } else {
             Text(text)
         }
