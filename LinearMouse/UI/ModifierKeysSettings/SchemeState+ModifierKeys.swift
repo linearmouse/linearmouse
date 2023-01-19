@@ -3,9 +3,7 @@
 
 import Foundation
 
-class ModifierKeysSettingsState: SchemeState {}
-
-extension ModifierKeysSettingsState {
+extension SchemeState {
     var commandAction: Scheme.Scrolling.Modifiers.Action? {
         get {
             scheme.scrolling?.modifiers?.command

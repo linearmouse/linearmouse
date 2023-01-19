@@ -5,7 +5,7 @@ import Foundation
 import SwiftUI
 
 class AccessibilityPermissionWindow: NSWindow {
-    static var shared = AccessibilityPermissionWindow()
+    static let shared = AccessibilityPermissionWindow()
 
     init() {
         super.init(

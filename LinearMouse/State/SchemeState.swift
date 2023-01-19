@@ -5,20 +5,26 @@ import Combine
 import Foundation
 
 class SchemeState: ObservableObject {
+    static let shared = SchemeState()
+
     private let configurationState = ConfigurationState.shared
 
     private var subscriptions = Set<AnyCancellable>()
 
     init() {
-        configurationState.$configuration.sink { [weak self] _ in
-            self?.objectWillChange.send()
-        }
-        .store(in: &subscriptions)
+        configurationState.$configuration
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &subscriptions)
 
-        configurationState.$currentDeviceSchemeIndex.sink { [weak self] _ in
-            self?.objectWillChange.send()
-        }
-        .store(in: &subscriptions)
+        configurationState.$currentDeviceSchemeIndex
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &subscriptions)
     }
 }
 

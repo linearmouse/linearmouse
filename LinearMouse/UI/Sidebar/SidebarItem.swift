@@ -3,26 +3,25 @@
 
 import SwiftUI
 
-struct SidebarItem<Destination>: View where Destination: View {
+struct SidebarItem: View {
     var imageName: String?
     var text: LocalizedStringKey
-    var destination: () -> Destination
 
     var body: some View {
-        NavigationLink(destination: destination) {
-            if let imageName = imageName, #available(macOS 11.0, *) {
-                Label(text, systemImage: imageName)
+        if let imageName = imageName {
+            if #available(macOS 11.0, *) {
+                Label(text, image: imageName)
             } else {
-                Text(text)
+                HStack {
+                    Image(imageName)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 14, height: 14)
+                    Text(text)
+                }
             }
-        }
-    }
-}
-
-struct SidebarItem_Previews: PreviewProvider {
-    static var previews: some View {
-        SidebarItem(imageName: "gear", text: "General") {
-            Text("Destination")
+        } else {
+            Text(text)
         }
     }
 }

@@ -8,7 +8,7 @@ struct DevicePickerSection: View {
     var devices: [DeviceModel]
     @Environment(\.isPresented) var isPresented
 
-    @StateObject var state = DevicePickerSectionState()
+    @ObservedObject var state = DevicePickerSectionState.shared
 
     var body: some View {
         Section(header: Text(title)) {
@@ -19,12 +19,5 @@ struct DevicePickerSection: View {
                 }
             }
         }
-    }
-}
-
-struct DevicePickerSection_Previews: PreviewProvider {
-    static var previews: some View {
-        DevicePickerSection(title: "Mouse",
-                            devices: DevicePickerState().devices)
     }
 }

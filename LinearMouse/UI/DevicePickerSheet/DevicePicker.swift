@@ -4,7 +4,7 @@
 import SwiftUI
 
 struct DevicePicker: View {
-    @StateObject var state = DevicePickerState()
+    @ObservedObject var state = DevicePickerState.shared
 
     var body: some View {
         List {
@@ -12,11 +12,5 @@ struct DevicePicker: View {
             DevicePickerSection(title: "Trackpad", devices: state.devices.filter(\.isTrackpad))
         }
         .frame(minWidth: 350)
-    }
-}
-
-struct DevicePicker_Previews: PreviewProvider {
-    static var previews: some View {
-        DevicePicker()
     }
 }

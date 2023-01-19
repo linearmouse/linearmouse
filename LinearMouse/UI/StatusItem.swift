@@ -33,10 +33,12 @@ class StatusItem {
             action: #selector(toggleStartAtLogin),
             keyEquivalent: ""
         )
-        LaunchAtLogin.publisher.sink { value in
-            startAtLoginItem.state = value ? .on : .off
-        }
-        .store(in: &subscriptions)
+        LaunchAtLogin.publisher
+            .receive(on: RunLoop.main)
+            .sink { value in
+                startAtLoginItem.state = value ? .on : .off
+            }
+            .store(in: &subscriptions)
 
         let quitItem = NSMenuItem(title: String(format: NSLocalizedString("Quit %@", comment: ""), LinearMouse.appName),
                                   action: #selector(quit),

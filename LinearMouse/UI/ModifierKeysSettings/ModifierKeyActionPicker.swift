@@ -26,7 +26,6 @@ struct ModifierKeyActionPicker: View {
                 }
                 .frame(width: 60, alignment: .trailing)
             }
-            .padding(.bottom, 20)
         }
     }
 }

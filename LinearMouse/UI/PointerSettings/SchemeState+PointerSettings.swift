@@ -3,9 +3,7 @@
 
 import Foundation
 
-class PointerSettingsState: SchemeState {}
-
-extension PointerSettingsState {
+extension SchemeState {
     var pointerAcceleration: Double {
         get {
             scheme.pointer?.acceleration.map(\.asTruncatedDouble)

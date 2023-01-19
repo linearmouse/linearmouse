@@ -5,7 +5,7 @@ import Foundation
 import SwiftUI
 
 class SettingsWindow: NSWindow {
-    static var shared = SettingsWindow()
+    static let shared = SettingsWindow()
 
     init() {
         super.init(
