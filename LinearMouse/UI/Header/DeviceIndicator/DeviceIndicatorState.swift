@@ -6,14 +6,19 @@ import PointerKit
 import SwiftUI
 
 class DeviceIndicatorState: ObservableObject {
+    static let shared = DeviceIndicatorState()
+
     @Published var activeDeviceName: String?
 
     private var subscriptions = Set<AnyCancellable>()
 
     init() {
-        deviceState.$currentDevice.sink { [weak self] device in
-            self?.activeDeviceName = device?.name
-        }.store(in: &subscriptions)
+        deviceState.$currentDevice
+            .receive(on: RunLoop.main)
+            .sink { [weak self] device in
+                self?.activeDeviceName = device?.name
+            }
+            .store(in: &subscriptions)
     }
 }
 

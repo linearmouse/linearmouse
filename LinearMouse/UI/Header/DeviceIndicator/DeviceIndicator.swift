@@ -4,7 +4,7 @@
 import SwiftUI
 
 struct DeviceIndicator: View {
-    @StateObject private var state = DeviceIndicatorState()
+    @ObservedObject private var state = DeviceIndicatorState.shared
     @State private var showDevicePickerSheet = false
 
     var body: some View {
@@ -24,11 +24,5 @@ struct DeviceIndicator: View {
 
     private func handleClick() {
         showDevicePickerSheet.toggle()
-    }
-}
-
-struct DeviceIndicator_Previews: PreviewProvider {
-    static var previews: some View {
-        DeviceIndicator()
     }
 }

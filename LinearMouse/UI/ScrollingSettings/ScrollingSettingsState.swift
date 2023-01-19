@@ -3,210 +3,64 @@
 
 import Combine
 import Foundation
+import SwiftUI
 
-class ScrollingSettingsState: SchemeState {}
+extension ScrollingSettings {
+    class State: SchemeStateWrapper {
+        static let shared = State()
 
-extension ScrollingSettingsState {
-    var reverseScrollingVertical: Bool {
-        get {
-            scheme.scrolling?.reverse?.vertical ?? false
+        enum Orientation {
+            case vertical, horizontal
         }
-        set {
-            Scheme(
-                scrolling: .init(
-                    reverse: .init(
-                        vertical: newValue
-                    )
-                )
-            )
-            .merge(into: &scheme)
-        }
-    }
 
-    var reverseScrollingHorizontal: Bool {
-        get {
-            scheme.scrolling?.reverse?.horizontal ?? false
-        }
-        set {
-            Scheme(
-                scrolling: .init(
-                    reverse: .init(
-                        horizontal: newValue
-                    )
-                )
-            )
-            .merge(into: &scheme)
-        }
-    }
-
-    var linearScrollingVertical: Bool {
-        get {
-            if case .auto = scheme.scrolling?.distance?.vertical ?? .auto {
-                return false
-            }
-
-            return true
-        }
-        set {
-            Scheme(
-                scrolling: .init(
-                    distance: .init(
-                        vertical: newValue ? .line(3) : .auto
-                    )
-                )
-            )
-            .merge(into: &scheme)
-        }
-    }
-
-    var linearScrollingVerticalDistance: Scheme.Scrolling.Distance {
-        get {
-            scheme.scrolling?.distance?.vertical ?? .line(3)
-        }
-        set {
-            Scheme(
-                scrolling: .init(
-                    distance: .init(
-                        vertical: newValue
-                    )
-                )
-            )
-            .merge(into: &scheme)
-        }
-    }
-
-    enum LinearScrollingUnit: String, CaseIterable, Identifiable {
-        var id: Self { self }
-
-        case line = "By lines"
-        case pixel = "By pixels"
-    }
-
-    var linearScrollingVerticalUnit: LinearScrollingUnit {
-        get {
-            switch linearScrollingVerticalDistance {
-            case .auto, .line: return .line
-            case .pixel: return .pixel
+        @Published var orientation: Orientation = .vertical {
+            willSet {
+                objectWillChange.send()
             }
         }
 
-        set {
-            switch newValue {
-            case .line:
-                linearScrollingVerticalDistance = .line(3)
-            case .pixel:
-                linearScrollingVerticalDistance = .pixel(36)
-            }
-        }
+        private var subscriptions = Set<AnyCancellable>()
+    }
+}
+
+extension ScrollingSettings.State {
+    private func v<T>(_ vertical: T, _ horizontal: T) -> T {
+        orientation == .vertical ? vertical : horizontal
     }
 
-    var linearScrollingVerticalLines: Int {
-        get {
-            guard case let .line(value) = linearScrollingVerticalDistance else {
-                return 3
-            }
-
-            return value
-        }
-
-        set {
-            linearScrollingVerticalDistance = .line(newValue)
-        }
+    var reverseScrollingBinding: Binding<Bool> {
+        v($schemeState.reverseScrollingVertical, $schemeState.reverseScrollingHorizontal)
     }
 
-    var linearScrollingVerticalPixels: Double {
-        get {
-            guard case let .pixel(value) = linearScrollingVerticalDistance else {
-                return 36
-            }
-
-            return value.asTruncatedDouble
-        }
-
-        set {
-            linearScrollingVerticalDistance = .pixel(Decimal(newValue).rounded(1))
-        }
+    var linearScrollingBinding: Binding<Bool> {
+        v($schemeState.linearScrollingVertical, $schemeState.linearScrollingHorizontal)
     }
 
-    var linearScrollingHorizontal: Bool {
-        get {
-            if case .auto = scheme.scrolling?.distance?.horizontal ?? .auto {
-                return false
-            }
-
-            return true
-        }
-        set {
-            Scheme(
-                scrolling: .init(
-                    distance: .init(
-                        horizontal: newValue ? .line(3) : .auto
-                    )
-                )
-            )
-            .merge(into: &scheme)
-        }
+    var linearScrolling: Bool {
+        linearScrollingBinding.wrappedValue
     }
 
-    var linearScrollingHorizontalDistance: Scheme.Scrolling.Distance {
-        get {
-            scheme.scrolling?.distance?.horizontal ?? .line(3)
-        }
-        set {
-            Scheme(
-                scrolling: .init(
-                    distance: .init(
-                        horizontal: newValue
-                    )
-                )
-            )
-            .merge(into: &scheme)
-        }
+    var linearScrollingUnitBinding: Binding<SchemeState.LinearScrollingUnit> {
+        v($schemeState.linearScrollingVerticalUnit, $schemeState.linearScrollingHorizontalUnit)
     }
 
-    var linearScrollingHorizontalUnit: LinearScrollingUnit {
-        get {
-            switch linearScrollingHorizontalDistance {
-            case .auto, .line: return .line
-            case .pixel: return .pixel
-            }
-        }
-
-        set {
-            switch newValue {
-            case .line:
-                linearScrollingHorizontalDistance = .line(3)
-            case .pixel:
-                linearScrollingHorizontalDistance = .pixel(36)
-            }
-        }
+    var linearScrollingUnit: SchemeState.LinearScrollingUnit {
+        linearScrollingUnitBinding.wrappedValue
     }
 
-    var linearScrollingHorizontalLines: Int {
-        get {
-            guard case let .line(value) = linearScrollingHorizontalDistance else {
-                return 3
-            }
-
-            return value
-        }
-
-        set {
-            linearScrollingHorizontalDistance = .line(newValue)
-        }
+    var linearScrollingLinesBinding: Binding<Int> {
+        v($schemeState.linearScrollingVerticalLines, $schemeState.linearScrollingHorizontalLines)
     }
 
-    var linearScrollingHorizontalPixels: Double {
-        get {
-            guard case let .pixel(value) = linearScrollingHorizontalDistance else {
-                return 36
-            }
+    var linearScrollingLines: Int {
+        linearScrollingLinesBinding.wrappedValue
+    }
 
-            return value.asTruncatedDouble
-        }
+    var linearScrollingPixelsBinding: Binding<Double> {
+        v($schemeState.linearScrollingVerticalPixels, $schemeState.linearScrollingHorizontalPixels)
+    }
 
-        set {
-            linearScrollingHorizontalDistance = .pixel(Decimal(newValue).rounded(1))
-        }
+    var linearScrollingPixels: Double {
+        linearScrollingPixelsBinding.wrappedValue
     }
 }

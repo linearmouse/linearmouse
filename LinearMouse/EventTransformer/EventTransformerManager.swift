@@ -14,19 +14,19 @@ class EventTransformerManager {
     private var subscriptions = Set<AnyCancellable>()
 
     init() {
-        ConfigurationState.shared.$configuration.sink { [weak self] _ in
-            DispatchQueue.main.async {
+        ConfigurationState.shared.$configuration
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
                 self?.lastEventTransformer = nil
             }
-        }
-        .store(in: &subscriptions)
+            .store(in: &subscriptions)
 
-        DeviceManager.shared.$lastActiveDevice.sink { [weak self] _ in
-            DispatchQueue.main.async {
+        DeviceManager.shared.$lastActiveDevice
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
                 self?.lastEventTransformer = nil
             }
-        }
-        .store(in: &subscriptions)
+            .store(in: &subscriptions)
     }
 
     func get(withPid pid: pid_t?) -> EventTransformer {

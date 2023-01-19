@@ -5,6 +5,8 @@ import Combine
 import Defaults
 
 class DevicePickerSectionState: ObservableObject {
+    static let shared = DevicePickerSectionState()
+
     let deviceState = DeviceState.shared
 
     func setDevice(_ deviceModel: DeviceModel) {

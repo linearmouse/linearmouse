@@ -3,9 +3,7 @@
 
 import Foundation
 
-class ButtonsSettingsState: SchemeState {}
-
-extension ButtonsSettingsState {
+extension SchemeState {
     var universalBackForward: Bool {
         get {
             guard let universalBackForward = scheme.buttons?.universalBackForward else {

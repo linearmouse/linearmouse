@@ -1,59 +1,36 @@
 // MIT License
 // Copyright (c) 2021-2023 Jiahao Lu
 
-import Introspect
 import SwiftUI
 
 struct Sidebar: View {
-    @State var selection: Tag? = .wheel
-
-    enum Tag {
-        case wheel, cursor, buttons, modifierKeys, general
-    }
+    @ObservedObject var settingsState = SettingsState.shared
 
     var body: some View {
-        List(selection: $selection) {
+        List(selection: $settingsState.navigation) {
             SidebarItem(imageName: "arrow.up.and.down",
-                        text: "Scrolling") {
-                ScrollingSettings()
-            }
-            .tag(Tag.wheel)
+                        text: "Scrolling")
+                .tag(SettingsState.Navigation.scrolling)
 
             SidebarItem(imageName: "cursorarrow.motionlines",
-                        text: "Pointer") {
-                PointerSettings()
-            }
-            .tag(Tag.cursor)
+                        text: "Pointer")
+                .tag(SettingsState.Navigation.pointer)
 
             SidebarItem(imageName: "computermouse.fill",
-                        text: "Buttons") {
-                ButtonsSettings()
-            }
-            .tag(Tag.buttons)
+                        text: "Buttons")
+                .tag(SettingsState.Navigation.buttons)
 
             SidebarItem(imageName: "command",
-                        text: "Modifier Keys") {
-                ModifierKeysSettings()
-            }
-            .tag(Tag.modifierKeys)
+                        text: "Modifier Keys")
+                .tag(SettingsState.Navigation.modifierKeys)
 
             Spacer()
 
             SidebarItem(imageName: "gearshape.fill",
-                        text: "General") {
-                GeneralSettings()
-            }
-            .tag(Tag.general)
+                        text: "General")
+                .tag(SettingsState.Navigation.general)
         }
-        .padding(.top)
         .listStyle(SidebarListStyle())
-        .frame(minWidth: 200, maxWidth: .infinity)
-        .preventSidebarCollapse()
-    }
-}
-
-struct Sidebar_Previews: PreviewProvider {
-    static var previews: some View {
-        Sidebar()
+        .frame(width: 220)
     }
 }

@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		36EBC3223E2CEE09F84076D8 /* Process.m in Sources */ = {isa = PBXBuildFile; fileRef = 36EBC80F80AD57E8226267BF /* Process.m */; };
+		9704BA992976E84C00C8B06D /* SettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9704BA982976E84C00C8B06D /* SettingsState.swift */; };
+		9704BA9B29796D2000C8B06D /* ScrollingSettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9704BA9A29796D2000C8B06D /* ScrollingSettingsState.swift */; };
+		9704BA9D2979795E00C8B06D /* SchemeStateWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9704BA9C2979795E00C8B06D /* SchemeStateWrapper.swift */; };
 		971338AF289B64C1005A74D2 /* HelpButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971338AE289B64C1005A74D2 /* HelpButton.swift */; };
 		972A5E1F285CA43D00CB6440 /* DevicePickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E1E285CA43D00CB6440 /* DevicePickerSheet.swift */; };
 		972A5E22285CA49800CB6440 /* DevicePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E21285CA49800CB6440 /* DevicePicker.swift */; };
@@ -23,8 +26,6 @@
 		972AFD492851E96D009B0CBF /* AccessibilityPermissionWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972AFD482851E96D009B0CBF /* AccessibilityPermissionWindow.swift */; };
 		972DF6312859756700B83932 /* ProcessEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF6302859756700B83932 /* ProcessEnvironment.swift */; };
 		972DF63A285997CD00B83932 /* Sidebar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF639285997CD00B83932 /* Sidebar.swift */; };
-		972DF63D28599BA400B83932 /* Introspect in Frameworks */ = {isa = PBXBuildFile; productRef = 972DF63C28599BA400B83932 /* Introspect */; };
-		972DF64028599F5D00B83932 /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF63F28599F5D00B83932 /* View.swift */; };
 		972DF6422859C1AC00B83932 /* SidebarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF6412859C1AC00B83932 /* SidebarItem.swift */; };
 		972DF646285A269500B83932 /* SchemeIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF645285A269500B83932 /* SchemeIndicator.swift */; };
 		972DF649285A26F700B83932 /* DeviceIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF648285A26F700B83932 /* DeviceIndicator.swift */; };
@@ -34,7 +35,6 @@
 		972DF654285ADE9600B83932 /* GeneralSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF653285ADE9600B83932 /* GeneralSettings.swift */; };
 		972DF65B285AEABA00B83932 /* ButtonsSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF65A285AEABA00B83932 /* ButtonsSettings.swift */; };
 		973EB9FE287EE7D90069A8EF /* Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 973EB9FD287EE7D90069A8EF /* Action.swift */; };
-		977638F6286BE9AB00A698B6 /* StateObjectPolyfill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977638F5286BE9AB00A698B6 /* StateObjectPolyfill.swift */; };
 		977638F9286BE9EE00A698B6 /* PublishedObject in Frameworks */ = {isa = PBXBuildFile; productRef = 977638F8286BE9EE00A698B6 /* PublishedObject */; };
 		97A13AD2287094FB002F6193 /* Distance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A13AD1287094FB002F6193 /* Distance.swift */; };
 		97A2F60A29508AD800F31122 /* EventTransformerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A2F60929508AD800F31122 /* EventTransformerManager.swift */; };
@@ -49,21 +49,21 @@
 		97C5D8FF2856E3CB00CBED2D /* GestureKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C5D8FE2856E3CB00CBED2D /* GestureKit */; };
 		97C5DBB42867EA48006FA6B4 /* SchemeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBB32867EA48006FA6B4 /* SchemeState.swift */; };
 		97C5DBB62867ECD6006FA6B4 /* DeviceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBB52867ECD6006FA6B4 /* DeviceModel.swift */; };
-		97C5DBB82868158C006FA6B4 /* PointerSettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBB72868158C006FA6B4 /* PointerSettingsState.swift */; };
+		97C5DBB82868158C006FA6B4 /* SchemeState+PointerSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBB72868158C006FA6B4 /* SchemeState+PointerSettings.swift */; };
 		97C5DBBA28682809006FA6B4 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBB928682809006FA6B4 /* Extensions.swift */; };
 		97C5DBBC28686EFC006FA6B4 /* Pointer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBBB28686EFC006FA6B4 /* Pointer.swift */; };
 		97C5DBBE286875C2006FA6B4 /* Clamp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBBD286875C2006FA6B4 /* Clamp.swift */; };
 		97C5DBC028689F7E006FA6B4 /* Buttons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBBF28689F7E006FA6B4 /* Buttons.swift */; };
 		97C5DBC328689FF9006FA6B4 /* Mapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBC228689FF9006FA6B4 /* Mapping.swift */; };
-		97C5DBC52868A1ED006FA6B4 /* ButtonsSettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBC42868A1ED006FA6B4 /* ButtonsSettingsState.swift */; };
+		97C5DBC52868A1ED006FA6B4 /* SchemeState+ButtonsSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBC42868A1ED006FA6B4 /* SchemeState+ButtonsSettings.swift */; };
 		97C5DBC82868A2C7006FA6B4 /* Modifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBC72868A2C7006FA6B4 /* Modifiers.swift */; };
-		97C5DBCA2868B1B4006FA6B4 /* ModifierKeysSettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBC92868B1B4006FA6B4 /* ModifierKeysSettingsState.swift */; };
+		97C5DBCA2868B1B4006FA6B4 /* SchemeState+ModifierKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBC92868B1B4006FA6B4 /* SchemeState+ModifierKeys.swift */; };
 		97C5DBCC2868B4A5006FA6B4 /* ModifierKeyActionPickerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBCB2868B4A5006FA6B4 /* ModifierKeyActionPickerState.swift */; };
 		97C97728288FC49F009094BA /* DockKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C97727288FC49F009094BA /* DockKit */; };
 		97C9772D28910E4F009094BA /* KeyKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C9772C28910E4F009094BA /* KeyKit */; };
 		97D3470C293CDEA000E7DFE1 /* WeakRef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97D3470B293CDEA000E7DFE1 /* WeakRef.swift */; };
 		97E16F4F28F9A22A00E7D09B /* LinearScrollingHorizontal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E16F4E28F9A22A00E7D09B /* LinearScrollingHorizontal.swift */; };
-		97EFAABD28675D00008E6E67 /* ScrollingSettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97EFAABC28675D00008E6E67 /* ScrollingSettingsState.swift */; };
+		97EFAABD28675D00008E6E67 /* SchemeState+ScrollingSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97EFAABC28675D00008E6E67 /* SchemeState+ScrollingSettings.swift */; };
 		97F77FA4285DC467007C9C2B /* DevicePickerSectionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA3285DC467007C9C2B /* DevicePickerSectionState.swift */; };
 		97F77FA8285DC828007C9C2B /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA7285DC828007C9C2B /* Environment.swift */; };
 		97F77FAA285E178B007C9C2B /* DevicePickerSectionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA9285E178B007C9C2B /* DevicePickerSectionItem.swift */; };
@@ -121,6 +121,9 @@
 /* Begin PBXFileReference section */
 		36EBC1359D50EDBC252FB81F /* Process.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Process.h; sourceTree = "<group>"; };
 		36EBC80F80AD57E8226267BF /* Process.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Process.m; sourceTree = "<group>"; };
+		9704BA982976E84C00C8B06D /* SettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsState.swift; sourceTree = "<group>"; };
+		9704BA9A29796D2000C8B06D /* ScrollingSettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingSettingsState.swift; sourceTree = "<group>"; };
+		9704BA9C2979795E00C8B06D /* SchemeStateWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemeStateWrapper.swift; sourceTree = "<group>"; };
 		971338AE289B64C1005A74D2 /* HelpButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpButton.swift; sourceTree = "<group>"; };
 		972A5E1E285CA43D00CB6440 /* DevicePickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSheet.swift; sourceTree = "<group>"; };
 		972A5E21285CA49800CB6440 /* DevicePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePicker.swift; sourceTree = "<group>"; };
@@ -135,7 +138,6 @@
 		972AFD482851E96D009B0CBF /* AccessibilityPermissionWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermissionWindow.swift; sourceTree = "<group>"; };
 		972DF6302859756700B83932 /* ProcessEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessEnvironment.swift; sourceTree = "<group>"; };
 		972DF639285997CD00B83932 /* Sidebar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sidebar.swift; sourceTree = "<group>"; };
-		972DF63F28599F5D00B83932 /* View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
 		972DF6412859C1AC00B83932 /* SidebarItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarItem.swift; sourceTree = "<group>"; };
 		972DF645285A269500B83932 /* SchemeIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemeIndicator.swift; sourceTree = "<group>"; };
 		972DF648285A26F700B83932 /* DeviceIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIndicator.swift; sourceTree = "<group>"; };
@@ -145,7 +147,6 @@
 		972DF653285ADE9600B83932 /* GeneralSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettings.swift; sourceTree = "<group>"; };
 		972DF65A285AEABA00B83932 /* ButtonsSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonsSettings.swift; sourceTree = "<group>"; };
 		973EB9FD287EE7D90069A8EF /* Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Action.swift; sourceTree = "<group>"; };
-		977638F5286BE9AB00A698B6 /* StateObjectPolyfill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateObjectPolyfill.swift; sourceTree = "<group>"; };
 		97A13AD1287094FB002F6193 /* Distance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Distance.swift; sourceTree = "<group>"; };
 		97A2F60929508AD800F31122 /* EventTransformerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTransformerManager.swift; sourceTree = "<group>"; };
 		97A46B16285444BF00C07C9B /* NSWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSWindow.swift; sourceTree = "<group>"; };
@@ -160,22 +161,22 @@
 		97C5D8FD2856E3BE00CBED2D /* GestureKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = GestureKit; sourceTree = "<group>"; };
 		97C5DBB32867EA48006FA6B4 /* SchemeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemeState.swift; sourceTree = "<group>"; };
 		97C5DBB52867ECD6006FA6B4 /* DeviceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceModel.swift; sourceTree = "<group>"; };
-		97C5DBB72868158C006FA6B4 /* PointerSettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointerSettingsState.swift; sourceTree = "<group>"; };
+		97C5DBB72868158C006FA6B4 /* SchemeState+PointerSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SchemeState+PointerSettings.swift"; sourceTree = "<group>"; };
 		97C5DBB928682809006FA6B4 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		97C5DBBB28686EFC006FA6B4 /* Pointer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pointer.swift; sourceTree = "<group>"; };
 		97C5DBBD286875C2006FA6B4 /* Clamp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clamp.swift; sourceTree = "<group>"; };
 		97C5DBBF28689F7E006FA6B4 /* Buttons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Buttons.swift; sourceTree = "<group>"; };
 		97C5DBC228689FF9006FA6B4 /* Mapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mapping.swift; sourceTree = "<group>"; };
-		97C5DBC42868A1ED006FA6B4 /* ButtonsSettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonsSettingsState.swift; sourceTree = "<group>"; };
+		97C5DBC42868A1ED006FA6B4 /* SchemeState+ButtonsSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SchemeState+ButtonsSettings.swift"; sourceTree = "<group>"; };
 		97C5DBC72868A2C7006FA6B4 /* Modifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Modifiers.swift; sourceTree = "<group>"; };
-		97C5DBC92868B1B4006FA6B4 /* ModifierKeysSettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierKeysSettingsState.swift; sourceTree = "<group>"; };
+		97C5DBC92868B1B4006FA6B4 /* SchemeState+ModifierKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SchemeState+ModifierKeys.swift"; sourceTree = "<group>"; };
 		97C5DBCB2868B4A5006FA6B4 /* ModifierKeyActionPickerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierKeyActionPickerState.swift; sourceTree = "<group>"; };
 		97C97726288FC19A009094BA /* DockKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DockKit; sourceTree = "<group>"; };
 		97C9772928900298009094BA /* zh-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-HK"; path = "zh-HK.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		97C9772B28910054009094BA /* KeyKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = KeyKit; sourceTree = "<group>"; };
 		97D3470B293CDEA000E7DFE1 /* WeakRef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeakRef.swift; sourceTree = "<group>"; };
 		97E16F4E28F9A22A00E7D09B /* LinearScrollingHorizontal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearScrollingHorizontal.swift; sourceTree = "<group>"; };
-		97EFAABC28675D00008E6E67 /* ScrollingSettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingSettingsState.swift; sourceTree = "<group>"; };
+		97EFAABC28675D00008E6E67 /* SchemeState+ScrollingSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SchemeState+ScrollingSettings.swift"; sourceTree = "<group>"; };
 		97F77FA3285DC467007C9C2B /* DevicePickerSectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSectionState.swift; sourceTree = "<group>"; };
 		97F77FA7285DC828007C9C2B /* Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
 		97F77FA9285E178B007C9C2B /* DevicePickerSectionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSectionItem.swift; sourceTree = "<group>"; };
@@ -262,7 +263,6 @@
 				977638F9286BE9EE00A698B6 /* PublishedObject in Frameworks */,
 				B70A58F6284F987900E5C86E /* LaunchAtLogin in Frameworks */,
 				97C97728288FC49F009094BA /* DockKit in Frameworks */,
-				972DF63D28599BA400B83932 /* Introspect in Frameworks */,
 				B784292D278DB06600D207F0 /* Sparkle in Frameworks */,
 				972A5E30285D891100CB6440 /* Defaults in Frameworks */,
 				97A7A39C28587E8C00EE4833 /* PointerKit in Frameworks */,
@@ -307,6 +307,7 @@
 		972A5E2B285D881700CB6440 /* State */ = {
 			isa = PBXGroup;
 			children = (
+				9704BA982976E84C00C8B06D /* SettingsState.swift */,
 				97B83CDA28607E2600ECF109 /* ConfigurationState.swift */,
 				97C5DBB32867EA48006FA6B4 /* SchemeState.swift */,
 				972A5E2C285D882500CB6440 /* DeviceState.swift */,
@@ -340,7 +341,6 @@
 		972DF63E28599F4500B83932 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				972DF63F28599F5D00B83932 /* View.swift */,
 				97F77FA7285DC828007C9C2B /* Environment.swift */,
 				97A46B16285444BF00C07C9B /* NSWindow.swift */,
 			);
@@ -393,7 +393,8 @@
 			isa = PBXGroup;
 			children = (
 				B7B1D08E26B3EC4F00F48176 /* ScrollingSettings.swift */,
-				97EFAABC28675D00008E6E67 /* ScrollingSettingsState.swift */,
+				97EFAABC28675D00008E6E67 /* SchemeState+ScrollingSettings.swift */,
+				9704BA9A29796D2000C8B06D /* ScrollingSettingsState.swift */,
 			);
 			path = ScrollingSettings;
 			sourceTree = "<group>";
@@ -402,7 +403,7 @@
 			isa = PBXGroup;
 			children = (
 				B7618A0F27621EDF00527C1A /* PointerSettings.swift */,
-				97C5DBB72868158C006FA6B4 /* PointerSettingsState.swift */,
+				97C5DBB72868158C006FA6B4 /* SchemeState+PointerSettings.swift */,
 			);
 			path = PointerSettings;
 			sourceTree = "<group>";
@@ -411,7 +412,7 @@
 			isa = PBXGroup;
 			children = (
 				B7B1D09026B3ECC500F48176 /* ModifierKeysSettings.swift */,
-				97C5DBC92868B1B4006FA6B4 /* ModifierKeysSettingsState.swift */,
+				97C5DBC92868B1B4006FA6B4 /* SchemeState+ModifierKeys.swift */,
 				B7B6D83D26B2745300B0D247 /* ModifierKeyActionPicker.swift */,
 				97C5DBCB2868B4A5006FA6B4 /* ModifierKeyActionPickerState.swift */,
 			);
@@ -422,7 +423,7 @@
 			isa = PBXGroup;
 			children = (
 				972DF65A285AEABA00B83932 /* ButtonsSettings.swift */,
-				97C5DBC42868A1ED006FA6B4 /* ButtonsSettingsState.swift */,
+				97C5DBC42868A1ED006FA6B4 /* SchemeState+ButtonsSettings.swift */,
 			);
 			path = ButtonsSettings;
 			sourceTree = "<group>";
@@ -578,7 +579,6 @@
 				B7842924278D985600D207F0 /* AutoUpdateManager.swift */,
 				972A5E33285D8E4800CB6440 /* Defaults+Workaround.swift */,
 				B77A160F2674B85300E99A5D /* DefaultsKeys.swift */,
-				977638F5286BE9AB00A698B6 /* StateObjectPolyfill.swift */,
 			);
 			path = LinearMouse;
 			sourceTree = "<group>";
@@ -625,6 +625,7 @@
 				972DF644285A266C00B83932 /* Header */,
 				972DF64A285A295C00B83932 /* DetailView */,
 				972A5E1D285CA42500CB6440 /* DevicePickerSheet */,
+				9704BA9C2979795E00C8B06D /* SchemeStateWrapper.swift */,
 				972DF655285AE0AA00B83932 /* ScrollingSettings */,
 				972DF657285AE10F00B83932 /* PointerSettings */,
 				972DF659285AEA9400B83932 /* ButtonsSettings */,
@@ -694,7 +695,6 @@
 				B70A58F5284F987900E5C86E /* LaunchAtLogin */,
 				97C5D8FE2856E3CB00CBED2D /* GestureKit */,
 				97A7A39B28587E8C00EE4833 /* PointerKit */,
-				972DF63C28599BA400B83932 /* Introspect */,
 				972A5E2F285D891100CB6440 /* Defaults */,
 				977638F8286BE9EE00A698B6 /* PublishedObject */,
 				97C97727288FC49F009094BA /* DockKit */,
@@ -785,7 +785,6 @@
 				B7F6C5F627A4F6A800E5400B /* XCRemoteSwiftPackageReference "LRUCache" */,
 				B73AC54F27C29C7C00F7D3E8 /* XCRemoteSwiftPackageReference "Version" */,
 				B70A58F4284F987900E5C86E /* XCRemoteSwiftPackageReference "LaunchAtLogin" */,
-				972DF63B28599BA400B83932 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */,
 				972A5E2E285D891100CB6440 /* XCRemoteSwiftPackageReference "Defaults" */,
 				977638F7286BE9EE00A698B6 /* XCRemoteSwiftPackageReference "PublishedObject" */,
 			);
@@ -846,6 +845,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9704BA992976E84C00C8B06D /* SettingsState.swift in Sources */,
 				972DF65B285AEABA00B83932 /* ButtonsSettings.swift in Sources */,
 				973EB9FE287EE7D90069A8EF /* Action.swift in Sources */,
 				B77D7C1727BA597E00825F54 /* Device.swift in Sources */,
@@ -855,15 +855,16 @@
 				B7618A1027621EDF00527C1A /* PointerSettings.swift in Sources */,
 				97C5DBC82868A2C7006FA6B4 /* Modifiers.swift in Sources */,
 				972A5E24285CA4AA00CB6440 /* DevicePickerState.swift in Sources */,
+				9704BA9D2979795E00C8B06D /* SchemeStateWrapper.swift in Sources */,
 				972DF651285A35B100B83932 /* DeviceIndicatorState.swift in Sources */,
-				97C5DBCA2868B1B4006FA6B4 /* ModifierKeysSettingsState.swift in Sources */,
+				97C5DBCA2868B1B4006FA6B4 /* SchemeState+ModifierKeys.swift in Sources */,
 				972DF6422859C1AC00B83932 /* SidebarItem.swift in Sources */,
 				97C5DBCC2868B4A5006FA6B4 /* ModifierKeyActionPickerState.swift in Sources */,
 				971338AF289B64C1005A74D2 /* HelpButton.swift in Sources */,
 				B7ADF98D2748E5010005B02D /* ScrollWheelEventView.swift in Sources */,
 				B7ADF9852748B25A0005B02D /* ModifierActions.swift in Sources */,
 				97E16F4F28F9A22A00E7D09B /* LinearScrollingHorizontal.swift in Sources */,
-				97C5DBB82868158C006FA6B4 /* PointerSettingsState.swift in Sources */,
+				97C5DBB82868158C006FA6B4 /* SchemeState+PointerSettings.swift in Sources */,
 				B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */,
 				972A5E34285D8E4800CB6440 /* Defaults+Workaround.swift in Sources */,
 				97B83CE52860DA9800ECF109 /* CustomDecodingError.swift in Sources */,
@@ -879,7 +880,6 @@
 				97C5DBC028689F7E006FA6B4 /* Buttons.swift in Sources */,
 				97A13AD2287094FB002F6193 /* Distance.swift in Sources */,
 				97B83CDD2860B3FD00ECF109 /* Scrolling.swift in Sources */,
-				977638F6286BE9AB00A698B6 /* StateObjectPolyfill.swift in Sources */,
 				97B83CDB28607E2600ECF109 /* ConfigurationState.swift in Sources */,
 				97F77FAF285F0A58007C9C2B /* Configuration.swift in Sources */,
 				972A5E22285CA49800CB6440 /* DevicePicker.swift in Sources */,
@@ -913,14 +913,14 @@
 				97C5DBBE286875C2006FA6B4 /* Clamp.swift in Sources */,
 				97D3470C293CDEA000E7DFE1 /* WeakRef.swift in Sources */,
 				97C5DBBC28686EFC006FA6B4 /* Pointer.swift in Sources */,
-				97C5DBC52868A1ED006FA6B4 /* ButtonsSettingsState.swift in Sources */,
+				97C5DBC52868A1ED006FA6B4 /* SchemeState+ButtonsSettings.swift in Sources */,
 				972DF649285A26F700B83932 /* DeviceIndicator.swift in Sources */,
-				972DF64028599F5D00B83932 /* View.swift in Sources */,
 				972DF654285ADE9600B83932 /* GeneralSettings.swift in Sources */,
+				9704BA9B29796D2000C8B06D /* ScrollingSettingsState.swift in Sources */,
 				97F77FA4285DC467007C9C2B /* DevicePickerSectionState.swift in Sources */,
 				972AFD472851E6B0009B0CBF /* AccessibilityPermission.swift in Sources */,
 				B7ADF9832748B12B0005B02D /* LinearScrollingVertical.swift in Sources */,
-				97EFAABD28675D00008E6E67 /* ScrollingSettingsState.swift in Sources */,
+				97EFAABD28675D00008E6E67 /* SchemeState+ScrollingSettings.swift in Sources */,
 				B77A16122674C21600E99A5D /* Settings.swift in Sources */,
 				972DF64C285A298600B83932 /* DetailView.swift in Sources */,
 				972A5E2A285D5D0100CB6440 /* DeviceButtonStyle.swift in Sources */,
@@ -1255,14 +1255,6 @@
 				kind = branch;
 			};
 		};
-		972DF63B28599BA400B83932 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/siteline/SwiftUI-Introspect.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.1.4;
-			};
-		};
 		977638F7286BE9EE00A698B6 /* XCRemoteSwiftPackageReference "PublishedObject" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Amzd/PublishedObject";
@@ -1310,11 +1302,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 972A5E2E285D891100CB6440 /* XCRemoteSwiftPackageReference "Defaults" */;
 			productName = Defaults;
-		};
-		972DF63C28599BA400B83932 /* Introspect */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 972DF63B28599BA400B83932 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */;
-			productName = Introspect;
 		};
 		977638F8286BE9EE00A698B6 /* PublishedObject */ = {
 			isa = XCSwiftPackageProductDependency;

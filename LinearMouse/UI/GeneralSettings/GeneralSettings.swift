@@ -59,9 +59,3 @@ struct GeneralSettings: View {
         }
     }
 }
-
-struct GeneralSettings_Previews: PreviewProvider {
-    static var previews: some View {
-        GeneralSettings()
-    }
-}

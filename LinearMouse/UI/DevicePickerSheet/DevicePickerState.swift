@@ -5,6 +5,8 @@ import Combine
 import SwiftUI
 
 class DevicePickerState: ObservableObject {
+    static let shared = DevicePickerState()
+
     var subscriptions = Set<AnyCancellable>()
 
     @Published var devices: [DeviceModel] = []
@@ -14,6 +16,7 @@ class DevicePickerState: ObservableObject {
             $0
                 .map { DeviceModel(device: $0) }
         }
+        .receive(on: RunLoop.main)
         .sink { [weak self] value in
             withAnimation {
                 self?.devices = value
