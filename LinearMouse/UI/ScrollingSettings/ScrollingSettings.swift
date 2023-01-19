@@ -22,11 +22,11 @@ struct ScrollingSettings: View {
                     Spacer()
                 }
 
-                Toggle(isOn: state.reverseScrollingBinding) {
+                Toggle(isOn: $state.reverseScrolling) {
                     Text("Reverse scrolling")
                 }
 
-                Toggle(isOn: state.linearScrollingBinding) {
+                Toggle(isOn: $state.linearScrolling) {
                     VStack(alignment: .leading) {
                         HStack(alignment: .firstTextBaseline, spacing: 2) {
                             Text("Enable linear scrolling")
@@ -40,7 +40,7 @@ struct ScrollingSettings: View {
                 }
                 if state.linearScrolling {
                     HStack {
-                        Picker("", selection: state.linearScrollingUnitBinding) {
+                        Picker("", selection: $state.linearScrollingUnit) {
                             ForEach(SchemeState.LinearScrollingUnit.allCases) { unit in
                                 Text(NSLocalizedString(unit.rawValue, comment: ""))
                             }
@@ -51,7 +51,7 @@ struct ScrollingSettings: View {
                         switch state.linearScrollingUnit {
                         case .line:
                             Stepper(
-                                value: state.linearScrollingLinesBinding,
+                                value: $state.linearScrollingLines,
                                 in: 0 ... 10,
                                 step: 1
                             ) {
@@ -60,7 +60,7 @@ struct ScrollingSettings: View {
 
                         case .pixel:
                             Slider(
-                                value: state.linearScrollingPixelsBinding,
+                                value: $state.linearScrollingPixels,
                                 in: 0 ... 128
                             )
 

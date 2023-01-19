@@ -15,15 +15,15 @@ struct PointerSettings: View {
                         Text("Acceleration")
                     }
                     HStack {
-                        Text("(0–20)")
-                            .controlSize(.small)
-                            .foregroundColor(.secondary)
                         TextField("",
                                   value: $schemeState.pointerAcceleration,
                                   formatter: schemeState.pointerAccelerationFormatter)
                             .textFieldStyle(.roundedBorder)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 80)
+                        Text("(0–20)")
+                            .controlSize(.small)
+                            .foregroundColor(.secondary)
                     }
 
                     Spacer()
@@ -34,16 +34,16 @@ struct PointerSettings: View {
                         Text("Speed")
                     }
                     HStack {
-                        Text("(0–1)")
-                            .controlSize(.small)
-                            .foregroundColor(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
                         TextField("",
                                   value: $schemeState.pointerSpeed,
                                   formatter: schemeState.pointerSpeedFormatter)
                             .textFieldStyle(.roundedBorder)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 80)
+                        Text("(0–1)")
+                            .controlSize(.small)
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 .disabled(schemeState.pointerDisableAcceleration)
