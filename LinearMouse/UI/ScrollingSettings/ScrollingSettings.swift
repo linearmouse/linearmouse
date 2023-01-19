@@ -23,7 +23,14 @@ struct ScrollingSettings: View {
                 }
 
                 Toggle(isOn: $state.reverseScrolling) {
-                    Text("Reverse scrolling")
+                    VStack(alignment: .leading) {
+                        Text("Reverse scrolling")
+                        if state.orientation == .horizontal {
+                            Text("Some gestures, such as swiping back and forward, may stop working.")
+                                .controlSize(.small)
+                                .foregroundColor(.secondary)
+                        }
+                    }
                 }
 
                 Toggle(isOn: $state.linearScrolling) {
