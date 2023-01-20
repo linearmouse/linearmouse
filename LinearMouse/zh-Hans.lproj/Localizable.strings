@@ -16,9 +16,9 @@
 "Modifier Keys" = "修饰键";
 "General" = "通用";
 
+"Vertical" = "Vertical";
+"Horizontal" = "Horizontal";
 "Reverse scrolling" = "反向滚动";
-"(vertically)" = "(垂直)";
-"(horizontally)" = "(水平)";
 "Some gestures, such as swiping back and forward, may stop working." = "某些手势可能无法正常工作，如滑动后退和前进。";
 "Enable linear scrolling" = "启用线性滚动";
 "Disable scrolling acceleration." = "禁用滚动加速度。";

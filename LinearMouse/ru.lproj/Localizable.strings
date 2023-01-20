@@ -16,9 +16,9 @@
 "Modifier Keys" = "Клавиши-модификаторы";
 "General" = "Основные";
 
+"Vertical" = "Vertical";
+"Horizontal" = "Horizontal";
 "Reverse scrolling" = "Обратная прокрутка";
-"(vertically)" = "(по вертикали)";
-"(horizontally)" = "(по горизонтали)";
 "Some gestures, such as swiping back and forward, may stop working." = "Некоторые жесты, такие как смахивание «назад» и «вперед», могут перестать работать.";
 "Enable linear scrolling" = "Включить линейную прокрутку";
 "Disable scrolling acceleration." = "Отключает ускорение прокрутки.";

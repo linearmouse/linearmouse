@@ -16,9 +16,9 @@
 "Modifier Keys" = "Teclas modificadoras";
 "General" = "General";
 
+"Vertical" = "Vertical";
+"Horizontal" = "Horizontal";
 "Reverse scrolling" = "Invertir desplazamiento";
-"(vertically)" = "(vertical)";
-"(horizontally)" = "(horizontal)";
 "Some gestures, such as swiping back and forward, may stop working." = "Algunos gestos, como el deslizamiento hacia atrás y hacia delante, pueden dejar de funcionar.";
 "Enable linear scrolling" = "Habilitar desplazamiento lineal";
 "Disable scrolling acceleration." = "Desactivar aceleración de desplazamiento.";

@@ -16,9 +16,9 @@
 "Modifier Keys" = "Modifier Keys";
 "General" = "General";
 
+"Vertical" = "Vertical";
+"Horizontal" = "Horizontal";
 "Reverse scrolling" = "Reverse scrolling";
-"(vertically)" = "(vertically)";
-"(horizontally)" = "(horizontally)";
 "Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
 "Enable linear scrolling" = "Enable linear scrolling";
 "Disable scrolling acceleration." = "Disable scrolling acceleration.";

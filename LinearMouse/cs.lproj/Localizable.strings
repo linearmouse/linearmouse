@@ -16,9 +16,9 @@
 "Modifier Keys" = "Modifikační klávesy";
 "General" = "Obecné";
 
+"Vertical" = "Vertical";
+"Horizontal" = "Horizontal";
 "Reverse scrolling" = "Obrácené posouvání";
-"(vertically)" = "(vertikální)";
-"(horizontally)" = "(horizontální)";
 "Some gestures, such as swiping back and forward, may stop working." = "Po aktivaci této volby mohou některá gesta, např. zpět a dopředu, přestat fungovat";
 "Enable linear scrolling" = "Aktivovat lineární posouvání";
 "Disable scrolling acceleration." = "Tato volba deaktivuje akceleraci při posuvu obsahu";
