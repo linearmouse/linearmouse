@@ -3,7 +3,8 @@
 
 extension Scheme.Buttons {
     struct Mapping: Codable {
-        var button: Int
+        var button: Int?
+        var scroll: ScrollDirection?
 
         var command: Bool?
         var shift: Bool?
@@ -17,6 +18,10 @@ extension Scheme.Buttons {
 }
 
 extension Scheme.Buttons.Mapping {
+    enum ScrollDirection: String, Codable {
+        case up, down, left, right
+    }
+
     var modifierFlags: CGEventFlags {
         CGEventFlags([
             (command, CGEventFlags.maskCommand),
@@ -31,8 +36,38 @@ extension Scheme.Buttons.Mapping {
     func match(with event: CGEvent) -> Bool {
         let view = MouseEventView(event)
 
-        guard let mouseButton = view.mouseButton, mouseButton.rawValue == button else {
-            return false
+        if let button = button {
+            guard let mouseButton = view.mouseButton,
+                  mouseButton.rawValue == button else {
+                return false
+            }
+        }
+
+        if let scroll = scroll {
+            guard event.type == .scrollWheel else {
+                return false
+            }
+
+            let view = ScrollWheelEventView(event)
+
+            switch scroll {
+            case .up:
+                guard view.deltaY > 0 else {
+                    return false
+                }
+            case .down:
+                guard view.deltaY < 0 else {
+                    return false
+                }
+            case .left:
+                guard view.deltaX > 0 else {
+                    return false
+                }
+            case .right:
+                guard view.deltaX < 0 else {
+                    return false
+                }
+            }
         }
 
         return view.modifierFlags == modifierFlags

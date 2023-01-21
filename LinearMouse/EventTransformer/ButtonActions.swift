@@ -12,14 +12,14 @@ class ButtonActions {
 
     let mappings: [Scheme.Buttons.Mapping]
 
-    var timer: Timer?
+    var repeatTimer: Timer?
 
     init(mappings: [Scheme.Buttons.Mapping]) {
         self.mappings = mappings
     }
 
     deinit {
-        timer?.invalidate()
+        repeatTimer?.invalidate()
     }
 }
 
@@ -33,11 +33,12 @@ extension ButtonActions: EventTransformer {
     }
 
     func transform(_ event: CGEvent) -> CGEvent? {
-        guard mouseDownEventTypes.contains(event.type) || mouseUpEventTypes.contains(event.type) else {
+        guard mouseDownEventTypes.contains(event.type) || mouseUpEventTypes.contains(event.type) || event
+            .type == .scrollWheel else {
             return event
         }
 
-        timer?.invalidate()
+        repeatTimer?.invalidate()
 
         guard let mapping = findMapping(of: event) else {
             return event
@@ -51,19 +52,40 @@ extension ButtonActions: EventTransformer {
             return event
         }
 
-        // FIXME: `NSEvent.keyRepeatDelay` and `NSEvent.keyRepeatInterval` are not kept up to date
-        // TODO: Support override `repeatDelay` and `repeatInterval`
-        let keyRepeatDelay = mapping.repeat == true ? NSEvent.keyRepeatDelay : 0
-        let keyRepeatInterval = mapping.repeat == true ? NSEvent.keyRepeatInterval : 0
-        let keyRepeatEnabled = keyRepeatDelay > 0 && keyRepeatInterval > 0
+        var eventsOfInterest: [CGEventType] = []
+        if event.type == .scrollWheel {
+            queueActions(action: action)
+        } else {
+            // FIXME: `NSEvent.keyRepeatDelay` and `NSEvent.keyRepeatInterval` are not kept up to date
+            // TODO: Support override `repeatDelay` and `repeatInterval`
+            let keyRepeatDelay = mapping.repeat == true ? NSEvent.keyRepeatDelay : 0
+            let keyRepeatInterval = mapping.repeat == true ? NSEvent.keyRepeatInterval : 0
+            let keyRepeatEnabled = keyRepeatDelay > 0 && keyRepeatInterval > 0
 
-        // Actions are executed when button is down if key repeat is enabled; otherwise, actions are
-        // executed when button is up.
-        let eventsOfInterest = keyRepeatEnabled ? mouseDownEventTypes : mouseUpEventTypes
-        guard eventsOfInterest.contains(event.type) else {
-            return nil
+            // Actions are executed when button is down if key repeat is enabled; otherwise, actions are
+            // executed when button is up.
+            eventsOfInterest = keyRepeatEnabled ? mouseDownEventTypes : mouseUpEventTypes
+
+            guard eventsOfInterest.contains(event.type) else {
+                return nil
+            }
+
+            queueActions(action: action,
+                         keyRepeatDelay: keyRepeatDelay,
+                         keyRepeatInterval: keyRepeatInterval)
         }
 
+        return nil
+    }
+
+    private func findMapping(of event: CGEvent) -> Scheme.Buttons.Mapping? {
+        mappings.last { $0.match(with: event) }
+    }
+
+    private func queueActions(action: Scheme.Buttons.Mapping.Action,
+                              keyRepeatEnabled: Bool = false,
+                              keyRepeatDelay: TimeInterval = 0,
+                              keyRepeatInterval: TimeInterval = 0) {
         DispatchQueue.main.async { [self] in
             executeIgnoreErrors(action: action)
 
@@ -71,7 +93,7 @@ extension ButtonActions: EventTransformer {
                 return
             }
 
-            timer = Timer.scheduledTimer(
+            repeatTimer = Timer.scheduledTimer(
                 withTimeInterval: keyRepeatDelay,
                 repeats: false,
                 block: { [weak self] _ in
@@ -81,7 +103,7 @@ extension ButtonActions: EventTransformer {
 
                     self.executeIgnoreErrors(action: action)
 
-                    self.timer = Timer.scheduledTimer(
+                    self.repeatTimer = Timer.scheduledTimer(
                         withTimeInterval: keyRepeatInterval,
                         repeats: true,
                         block: { [weak self] _ in
@@ -95,12 +117,6 @@ extension ButtonActions: EventTransformer {
                 }
             )
         }
-
-        return nil
-    }
-
-    private func findMapping(of event: CGEvent) -> Scheme.Buttons.Mapping? {
-        mappings.last { $0.match(with: event) }
     }
 
     private func executeIgnoreErrors(action: Scheme.Buttons.Mapping.Action) {
