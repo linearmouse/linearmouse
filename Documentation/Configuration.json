@@ -89,42 +89,80 @@
       "type": "object"
     },
     "Scheme.Buttons.Mapping": {
-      "additionalProperties": false,
-      "properties": {
-        "action": {
-          "$ref": "#/definitions/Scheme.Buttons.Mapping.Action",
-          "title": "Action"
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "action": {
+              "$ref": "#/definitions/Scheme.Buttons.Mapping.Action",
+              "title": "Action"
+            },
+            "button": {
+              "$ref": "#/definitions/Scheme.Buttons.Mapping.Button",
+              "description": "The button number. See https://developer.apple.com/documentation/coregraphics/cgmousebutton",
+              "title": "Button number"
+            },
+            "command": {
+              "description": "Indicates if the command modifier key should be pressed.",
+              "type": "boolean"
+            },
+            "control": {
+              "description": "Indicates if the control modifier key should be pressed.",
+              "type": "boolean"
+            },
+            "option": {
+              "description": "Indicates if the option modifier key should be pressed.",
+              "type": "boolean"
+            },
+            "repeat": {
+              "description": "Indicates if key repeat is enabled. If the value is true, the action will be repeatedly executed when the button is hold according to the key repeat settings in System Settings.",
+              "type": "boolean"
+            },
+            "shift": {
+              "description": "Indicates if the shift modifier key should be pressed.",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "button"
+          ],
+          "type": "object"
         },
-        "button": {
-          "$ref": "#/definitions/Scheme.Buttons.Mapping.Button",
-          "description": "The button number. See https://developer.apple.com/documentation/coregraphics/cgmousebutton",
-          "title": "Button number"
-        },
-        "command": {
-          "description": "Indicates if the command modifier key should be pressed.",
-          "type": "boolean"
-        },
-        "control": {
-          "description": "Indicates if the control modifier key should be pressed.",
-          "type": "boolean"
-        },
-        "option": {
-          "description": "Indicates if the option modifier key should be pressed.",
-          "type": "boolean"
-        },
-        "repeat": {
-          "description": "Indicates if key repeat is enabled. If the value is true, the action will be repeatedly executed when the button is hold according to the key repeat settings in System Settings.",
-          "type": "boolean"
-        },
-        "shift": {
-          "description": "Indicates if the shift modifier key should be pressed.",
-          "type": "boolean"
+        {
+          "additionalProperties": false,
+          "properties": {
+            "action": {
+              "$ref": "#/definitions/Scheme.Buttons.Mapping.Action",
+              "title": "Action"
+            },
+            "command": {
+              "description": "Indicates if the command modifier key should be pressed.",
+              "type": "boolean"
+            },
+            "control": {
+              "description": "Indicates if the control modifier key should be pressed.",
+              "type": "boolean"
+            },
+            "option": {
+              "description": "Indicates if the option modifier key should be pressed.",
+              "type": "boolean"
+            },
+            "scroll": {
+              "$ref": "#/definitions/Scheme.Buttons.Mapping.ScrollDirection",
+              "description": "Map scroll events to specific actions.",
+              "title": "Scroll direction"
+            },
+            "shift": {
+              "description": "Indicates if the shift modifier key should be pressed.",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "scroll"
+          ],
+          "type": "object"
         }
-      },
-      "required": [
-        "button"
-      ],
-      "type": "object"
+      ]
     },
     "Scheme.Buttons.Mapping.Action": {
       "anyOf": [
@@ -369,6 +407,16 @@
         "run"
       ],
       "type": "object"
+    },
+    "Scheme.Buttons.Mapping.ScrollDirection": {
+      "description": "Scroll direction.",
+      "enum": [
+        "up",
+        "down",
+        "left",
+        "right"
+      ],
+      "type": "string"
     },
     "Scheme.Buttons.Mapping.Secondary": {
       "const": 1,

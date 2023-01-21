@@ -4,6 +4,8 @@
 extension Scheme.Buttons {
     struct Mapping: Codable {
         var button: Int?
+        var `repeat`: Bool?
+
         var scroll: ScrollDirection?
 
         var command: Bool?
@@ -12,8 +14,6 @@ extension Scheme.Buttons {
         var control: Bool?
 
         var action: Action?
-
-        var `repeat`: Bool?
     }
 }
 

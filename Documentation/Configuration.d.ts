@@ -263,13 +263,27 @@ declare namespace Scheme {
   };
 
   namespace Buttons {
-    type Mapping = {
-      /**
-       * @title Button number
-       * @description The button number. See https://developer.apple.com/documentation/coregraphics/cgmousebutton
-       */
-      button: Mapping.Button;
+    type Mapping = (
+      | {
+          /**
+           * @title Button number
+           * @description The button number. See https://developer.apple.com/documentation/coregraphics/cgmousebutton
+           */
+          button: Mapping.Button;
 
+          /**
+           * @description Indicates if key repeat is enabled. If the value is true, the action will be repeatedly executed when the button is hold according to the key repeat settings in System Settings.
+           */
+          repeat?: boolean;
+        }
+      | {
+          /**
+           * @title Scroll direction
+           * @description Map scroll events to specific actions.
+           */
+          scroll: Mapping.ScrollDirection;
+        }
+    ) & {
       /**
        * @description Indicates if the command modifier key should be pressed.
        */
@@ -294,11 +308,6 @@ declare namespace Scheme {
        * @title Action
        */
       action?: Mapping.Action;
-
-      /**
-       * @description Indicates if key repeat is enabled. If the value is true, the action will be repeatedly executed when the button is hold according to the key repeat settings in System Settings.
-       */
-      repeat?: boolean;
     };
 
     namespace Mapping {
@@ -517,6 +526,11 @@ declare namespace Scheme {
        * @description Fifth button, typically the forward button.
        */
       type Forward = 4;
+
+      /**
+       * @description Scroll direction.
+       */
+      type ScrollDirection = "up" | "down" | "left" | "right";
     }
 
     type UniversalBackForward =
