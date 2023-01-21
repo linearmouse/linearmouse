@@ -71,6 +71,7 @@ extension ButtonActions: EventTransformer {
             }
 
             queueActions(action: action,
+                         keyRepeatEnabled: keyRepeatEnabled,
                          keyRepeatDelay: keyRepeatDelay,
                          keyRepeatInterval: keyRepeatInterval)
         }

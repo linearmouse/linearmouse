@@ -296,9 +296,9 @@ Or, with fewer lines but more difficult to maintain:
 
 ## Button mappings
 
-Button mappings is a list that allows you to assign actions to buttons. For example, to open
-Launchpad when the wheel button is clicked, or to switch spaces when <kbd>command + back</kbd>
-or <kbd>command + forward</kbd> is clicked.
+Button mappings is a list that allows you to assign actions to buttons or scroll wheels.
+For example, to open Launchpad when the wheel button is clicked, or to switch spaces when
+<kbd>command + back</kbd> or <kbd>command + forward</kbd> is clicked.
 
 ### Basic example
 
@@ -344,7 +344,7 @@ The following table lists all the buttons:
 `{ "action": { "run": "open -a Launchpad" } }` assigns a shell command `open -a LaunchPad` to
 the button. When the button is clicked, the shell command will be executed.
 
-### Example with modifier keys
+### Modifier keys
 
 In this example, <kbd>command + forward</kbd> is bound to open Mission Control.
 
@@ -379,7 +379,7 @@ You can specify `shift`, `option` and `control` as well.
 
 ### Switch spaces (desktops) with the <kbd>command + back</kbd> and <kbd>command + forward</kbd>
 
-`spaceLeft` and `spaceRight` can be used to move left and right a space.
+`missionControl.spaceLeft` and `missionControl.spaceRight` can be used to move left and right a space.
 
 ```json
 {
@@ -413,6 +413,86 @@ You can specify `shift`, `option` and `control` as well.
 
 > **Note**  
 > You will have to grant an additional permission to allow LinearMouse to simulate keys.
+
+### Key repeat
+
+With `repeat: true`, actions will be repeated until the button is up.
+
+In this example, <kbd>option + back</kbd> and <kbd>option + forward</kbd> is bound to volume down
+and volume up.
+
+If you hold <kbd>option + back</kbd>, the volume will continue to decrease.
+
+> **Note**  
+> If you disabled key repeat in System Settings, `repeat: true` will not work.
+> If you change key repeat rate or delay until repeat in System Settings, you have to restart
+> LinearMouse to take effect.
+
+```json
+{
+  "schemes": [
+    {
+      "if": [
+        {
+          "device": {
+            "category": "mouse"
+          }
+        }
+      ],
+      "buttons": {
+        "mappings": [
+          {
+            "button": 4,
+            "repeat": true,
+            "option": true,
+            "action": "media.volumeUp"
+          },
+          {
+            "button": 3,
+            "repeat": true,
+            "option": true,
+            "action": "media.volumeDown"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+### Volume up and down with <kbd>option + scrollUp</kbd> and <kbd>option + scrollDown</kbd>
+
+`scroll` can be specified instead of `button` to map scroll events to specific actions.
+
+```json
+{
+  "schemes": [
+    {
+      "if": [
+        {
+          "device": {
+            "category": "mouse"
+          }
+        }
+      ],
+      "buttons": {
+        "mappings": [
+          {
+            "scroll": "up",
+            "option": true,
+            "action": "media.volumeUp"
+          },
+          {
+            "scroll": "down",
+            "option": true,
+            "action": "media.volumeDown"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
 
 ### Action sheet
 
