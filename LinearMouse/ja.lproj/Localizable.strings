@@ -55,10 +55,9 @@
 
 "Links" = "リンク";
 "Homepage" = "ホームページ";
-"Open Collective" = "Open Collectiveに移動";
-"GitHub" = "GitHub";
-"Feedback" = "ご意見";
-"Contact" = "お問い合わせ";
+"Bug report" = "Bug report";
+"Feature request" = "Feature request";
+"Donate" = "Donate";
 
 "Auto switch to the active device" = "自動的に使用中の装置に切り替え";
 "OK" = "了解";

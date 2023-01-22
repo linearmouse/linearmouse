@@ -55,10 +55,9 @@
 
 "Links" = "Odnośniki";
 "Homepage" = "Strona WWW";
-"Open Collective" = "Open Collective";
-"GitHub" = "GitHub";
-"Feedback" = "Prześlij opinię";
-"Contact" = "Kontakt";
+"Bug report" = "Bug report";
+"Feature request" = "Feature request";
+"Donate" = "Donate";
 
 "Auto switch to the active device" = "Automatycznie przełącz na aktywne urządzenie";
 "OK" = "OK";
