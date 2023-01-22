@@ -55,10 +55,9 @@
 
 "Links" = "連結";
 "Homepage" = "首頁";
-"Open Collective" = "Open Collective";
-"GitHub" = "GitHub";
-"Feedback" = "意見反饋";
-"Contact" = "聯絡";
+"Bug report" = "Bug report";
+"Feature request" = "Feature request";
+"Donate" = "Donate";
 
 "Auto switch to the active device" = "自動切換到活躍設備";
 "OK" = "確認";
