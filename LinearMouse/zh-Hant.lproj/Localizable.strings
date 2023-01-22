@@ -55,9 +55,9 @@
 
 "Links" = "連結";
 "Homepage" = "首頁";
-"Bug report" = "Bug report";
-"Feature request" = "Feature request";
-"Donate" = "Donate";
+"Bug report" = "Bug 回報";
+"Feature request" = "功能建議";
+"Donate" = "捐贈";
 
 "Auto switch to the active device" = "自動切換到活躍設備";
 "OK" = "確認";
