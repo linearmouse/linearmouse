@@ -33,29 +33,73 @@ struct GeneralSettings: View {
                 Spacer()
 
                 Section(header: Text("Links").font(.headline)) {
-                    VStack(alignment: .leading, spacing: 5) {
-                        HyperLink(URL(string: "https://linearmouse.app")!) {
-                            Text("Homepage")
+                    VStack(alignment: .leading, spacing: 10) {
+                        HyperLink(URLs.homepage) {
+                            HStack(alignment: .firstTextBaseline, spacing: 5) {
+                                Text("🏡")
+                                Text("Homepage")
+                            }
                         }
-                        HyperLink(URL(string: "https://github.com/linearmouse/linearmouse")!) {
-                            Text("GitHub")
+                        HyperLink(URLs.bugReport) {
+                            HStack(alignment: .firstTextBaseline, spacing: 5) {
+                                Text("🐛")
+                                Text("Bug report")
+                            }
                         }
-                        HyperLink(URL(string: "https://opencollective.com/linearmouse")!) {
-                            Text("Open Collective")
+                        HyperLink(URLs.featureRequest) {
+                            HStack(alignment: .firstTextBaseline, spacing: 5) {
+                                Text("✍🏻")
+                                Text("Feature request")
+                            }
                         }
-                        HyperLink(URL(string: "https://github.com/linearmouse/linearmouse/issues")!) {
-                            Text("Feedback")
+                        HyperLink(URLs.donate) {
+                            HStack(alignment: .firstTextBaseline, spacing: 5) {
+                                Text("❤️")
+                                Text("Donate")
+                            }
                         }
-                        HyperLink(URL(string: "mailto:feedback@linearmouse.app")!) {
-                            Text("Contact")
-                        }
-                        HyperLink(URL(string: "https://ko-fi.com/lujjjh")!) {
-                            Image("Kofi")
-                        }
-                        .padding(.vertical, 5)
                     }
                 }
             }
+        }
+    }
+}
+
+extension GeneralSettings {
+    enum URLs {
+        static func withEnvironmentParametersAppended(for url: URL) -> URL {
+            var osVersion = Foundation.ProcessInfo.processInfo.operatingSystemVersionString
+            if osVersion.hasPrefix("Version ") {
+                osVersion = String(osVersion.dropFirst("Version ".count))
+            }
+            osVersion = "macOS \(osVersion)"
+            let linearMouseVersion = "v\(LinearMouse.appVersion)"
+
+            var components = URLComponents(url: url, resolvingAgainstBaseURL: false)!
+            var queryItems = components.queryItems ?? []
+            queryItems.append(contentsOf: [
+                .init(name: "os", value: osVersion),
+                .init(name: "linearmouse", value: linearMouseVersion)
+            ])
+            components.queryItems = queryItems
+
+            return components.url!
+        }
+
+        static var homepage: URL {
+            URL(string: "https://linearmouse.app")!
+        }
+
+        static var bugReport: URL {
+            withEnvironmentParametersAppended(for: URL(string: "https://go.linearmouse.app/bug-report")!)
+        }
+
+        static var featureRequest: URL {
+            withEnvironmentParametersAppended(for: URL(string: "https://go.linearmouse.app/feature-request")!)
+        }
+
+        static var donate: URL {
+            URL(string: "https://go.linearmouse.app/donate")!
         }
     }
 }
