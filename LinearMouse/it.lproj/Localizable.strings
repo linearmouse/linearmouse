@@ -55,10 +55,9 @@
 
 "Links" = "Links";
 "Homepage" = "Homepage";
-"Open Collective" = "Open Collective";
-"GitHub" = "GitHub";
-"Feedback" = "Feedback";
-"Contact" = "Contatto";
+"Bug report" = "Bug report";
+"Feature request" = "Feature request";
+"Donate" = "Donate";
 
 "Auto switch to the active device" = "Auto switch to the active device";
 "OK" = "OK";
