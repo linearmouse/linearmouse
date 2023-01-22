@@ -55,9 +55,9 @@
 
 "Links" = "链接";
 "Homepage" = "主页";
-"Bug report" = "Bug report";
-"Feature request" = "Feature request";
-"Donate" = "Donate";
+"Bug report" = "Bug 反馈";
+"Feature request" = "功能建议";
+"Donate" = "捐赠";
 
 "Auto switch to the active device" = "自动切换到活跃设备";
 "OK" = "好";
