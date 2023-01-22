@@ -55,10 +55,9 @@
 
 "Links" = "Odkazy";
 "Homepage" = "Stránky aplikace";
-"Open Collective" = "Open Collective";
-"GitHub" = "GitHub";
-"Feedback" = "Zpětná vazba";
-"Contact" = "Kontakt";
+"Bug report" = "Bug report";
+"Feature request" = "Feature request";
+"Donate" = "Donate";
 
 "Auto switch to the active device" = "Automaticky přepínat na aktivní zařízení";
 "OK" = "OK";
