@@ -20,14 +20,15 @@
 "Horizontal" = "Horizontal";
 "Reverse scrolling" = "Scorrimento inverso";
 "Some gestures, such as swiping back and forward, may stop working." = "Alcuni gesti, come scorrere avanti e indietro, potrebbero smettere di funzionare.";
-"Enable linear scrolling" = "Attivare lo scorrimento lineare";
-"Disable scrolling acceleration." = "Disable scrolling acceleration.";
-"Scroll" = "Scorri";
-"By lines" = "By lines";
-"By pixels" = "By pixels";
+"Mode" = "Mode";
+"Accelerated" = "Accelerated";
+"Speed" = "Speed";
+"Linear" = "Linear";
+"Unit" = "Unit";
+"Lines" = "Lines";
+"Pixels" = "Pixels";
 
 "Acceleration" = "Accelerazione";
-"Speed" = "Speed";
 "Revert to system defaults" = "Ripristina impostazioni predefinite";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Puoi anche premere ⌃⇧⌘Z per ripristinare le impostazioni predefinite.";
 "Disable pointer acceleration" = "Disable pointer acceleration";

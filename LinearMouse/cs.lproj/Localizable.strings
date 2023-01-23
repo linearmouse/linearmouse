@@ -20,14 +20,15 @@
 "Horizontal" = "Horizontal";
 "Reverse scrolling" = "Obrácené posouvání";
 "Some gestures, such as swiping back and forward, may stop working." = "Po aktivaci této volby mohou některá gesta, např. zpět a dopředu, přestat fungovat";
-"Enable linear scrolling" = "Aktivovat lineární posouvání";
-"Disable scrolling acceleration." = "Tato volba deaktivuje akceleraci při posuvu obsahu";
-"Scroll" = "Posouvat";
-"By lines" = "Po řádcích";
-"By pixels" = "Po bodech";
+"Mode" = "Mode";
+"Accelerated" = "Accelerated";
+"Speed" = "Rychlost";
+"Linear" = "Linear";
+"Unit" = "Unit";
+"Lines" = "Lines";
+"Pixels" = "Pixels";
 
 "Acceleration" = "Zrychlení";
-"Speed" = "Rychlost";
 "Revert to system defaults" = "Obnovit výchozí nastavení systému";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Pro obnovení výchozího nastavení systému můžete také použít klávesovou zkratku ⌃⇧⌘Z";
 "Disable pointer acceleration" = "Deaktivovat zrychlení kurzoru";

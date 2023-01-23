@@ -20,14 +20,15 @@
 "Horizontal" = "Horizontal";
 "Reverse scrolling" = "Ters kaydırma";
 "Some gestures, such as swiping back and forward, may stop working." = "İleri ve geri kaydırma gibi bazı hareketler çalışmayabilir.";
-"Enable linear scrolling" = "Doğrusal kaydırmayı etkinleştir";
-"Disable scrolling acceleration." = "Kaydırma ivmesini devre dışı bırak.";
-"Scroll" = "Kaydır";
-"By lines" = "Satıra göre";
-"By pixels" = "Piksele göre";
+"Mode" = "Mode";
+"Accelerated" = "Accelerated";
+"Speed" = "Hız";
+"Linear" = "Linear";
+"Unit" = "Unit";
+"Lines" = "Lines";
+"Pixels" = "Pixels";
 
 "Acceleration" = "İvme";
-"Speed" = "Hız";
 "Revert to system defaults" = "Fabrika ayarlarına dön";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z'a basarak da fabrika ayarlarına dönebilirsiniz.";
 "Disable pointer acceleration" = "İşaretçi ivmesini devre dışı bırak";

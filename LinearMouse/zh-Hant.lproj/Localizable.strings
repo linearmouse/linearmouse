@@ -20,14 +20,15 @@
 "Horizontal" = "橫向";
 "Reverse scrolling" = "反向捲動";
 "Some gestures, such as swiping back and forward, may stop working." = "某些手勢可能無法正常工作，如滑動後退和前進。";
-"Enable linear scrolling" = "啟用線性捲動";
-"Disable scrolling acceleration." = "禁用捲動加速度。";
-"Scroll" = "捲動";
-"By lines" = "按行";
-"By pixels" = "按畫素";
+"Mode" = "模式";
+"Accelerated" = "帶加速度";
+"Speed" = "速度";
+"Linear" = "線性";
+"Unit" = "單位";
+"Lines" = "行";
+"Pixels" = "畫素";
 
 "Acceleration" = "加速度";
-"Speed" = "速度";
 "Revert to system defaults" = "回退到系統預設值";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "你也可以按下 ⌃⇧⌘Z 來回退到系統預設值。";
 "Disable pointer acceleration" = "禁用指標加速度";
