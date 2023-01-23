@@ -20,14 +20,14 @@
 "Horizontal" = "Horizontal";
 "Reverse scrolling" = "Обратная прокрутка";
 "Some gestures, such as swiping back and forward, may stop working." = "Некоторые жесты, такие как смахивание «назад» и «вперед», могут перестать работать.";
-"Enable linear scrolling" = "Включить линейную прокрутку";
-"Disable scrolling acceleration." = "Отключает ускорение прокрутки.";
-"Scroll" = "Прокрутка";
-"By lines" = "По строкам";
-"By pixels" = "По пикселям";
+"Mode" = "Mode";
+"Accelerated" = "Accelerated";
+"Linear" = "Linear";
+"Unit" = "Unit";
+"Lines" = "Lines";
+"Pixels" = "Pixels";
 
 "Acceleration" = "Ускорение";
-"Speed" = "Скорость";
 "Revert to system defaults" = "Вернуться к системным настройкам по умолчанию";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Вы также можете нажать ⌃⇧⌘Z, чтобы вернуться к системным настройкам по умолчанию.";
 "Disable pointer acceleration" = "Отключить ускорение указателя";
