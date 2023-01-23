@@ -20,14 +20,14 @@
 "Horizontal" = "Horizontal";
 "Reverse scrolling" = "Reverse scrolling";
 "Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
-"Enable linear scrolling" = "Enable linear scrolling";
-"Disable scrolling acceleration." = "Disable scrolling acceleration.";
-"Scroll" = "Scroll";
-"By lines" = "By lines";
-"By pixels" = "By pixels";
+"Mode" = "Mode";
+"Accelerated" = "Accelerated";
+"Linear" = "Linear";
+"Unit" = "Unit";
+"Lines" = "Lines";
+"Pixels" = "Pixels";
 
 "Acceleration" = "Acceleration";
-"Speed" = "Speed";
 "Revert to system defaults" = "Revert to system defaults";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
 "Disable pointer acceleration" = "Disable pointer acceleration";
