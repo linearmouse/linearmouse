@@ -33,49 +33,49 @@ struct ScrollingSettings: View {
                     }
                 }
 
-                Spacer()
-
-                Picker("Mode", selection: $state.scrollingMode) {
-                    Text("Accelerated").tag(SchemeState.ScrollingMode.accelerated)
-                    Text("Linear").tag(SchemeState.ScrollingMode.linear)
-                }
-                .fixedSize()
-
-                if state.scrollingMode == .accelerated {
-                    Slider(value: $state.scrollingSpeed,
-                           in: 0.0 ... 10.0) {
-                        Text("Speed")
+                Form {
+                    Picker("Mode", selection: $state.scrollingMode) {
+                        Text("Accelerated").tag(SchemeState.ScrollingMode.accelerated)
+                        Text("Linear").tag(SchemeState.ScrollingMode.linear)
                     }
-                }
+                    .fixedSize()
 
-                if state.scrollingMode == .linear {
-                    HStack {
-                        Picker("Unit", selection: $state.linearScrollingUnit) {
-                            Text("Lines").tag(SchemeState.LinearScrollingUnit.line)
-                            Text("Pixels").tag(SchemeState.LinearScrollingUnit.pixel)
+                    if state.scrollingMode == .accelerated {
+                        Slider(value: $state.scrollingSpeed,
+                               in: 0.0 ... 10.0) {
+                            Text("Speed")
                         }
-                        .fixedSize()
-                        .padding(.trailing)
+                    }
 
-                        switch state.linearScrollingUnit {
-                        case .line:
-                            Slider(
-                                value: $state.linearScrollingLinesInDouble,
-                                in: 0 ... 10,
-                                step: 1
-                            )
+                    if state.scrollingMode == .linear {
+                        HStack {
+                            Picker("Unit", selection: $state.linearScrollingUnit) {
+                                Text("Lines").tag(SchemeState.LinearScrollingUnit.line)
+                                Text("Pixels").tag(SchemeState.LinearScrollingUnit.pixel)
+                            }
+                            .fixedSize()
+                            .padding(.trailing)
 
-                            Text(String(state.linearScrollingLines))
-                                .frame(width: 80)
+                            switch state.linearScrollingUnit {
+                            case .line:
+                                Slider(
+                                    value: $state.linearScrollingLinesInDouble,
+                                    in: 0 ... 10,
+                                    step: 1
+                                )
 
-                        case .pixel:
-                            Slider(
-                                value: $state.linearScrollingPixels,
-                                in: 0 ... 128
-                            )
+                                Text(String(state.linearScrollingLines))
+                                    .frame(width: 80)
 
-                            Text(String(state.linearScrollingPixels))
-                                .frame(width: 80)
+                            case .pixel:
+                                Slider(
+                                    value: $state.linearScrollingPixels,
+                                    in: 0 ... 128
+                                )
+
+                                Text(String(state.linearScrollingPixels))
+                                    .frame(width: 80)
+                            }
                         }
                     }
                 }
