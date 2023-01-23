@@ -37,19 +37,83 @@ extension SchemeState {
         }
     }
 
-    var linearScrollingVertical: Bool {
+    enum ScrollingMode {
+        case accelerated, linear
+    }
+
+    var scrollingModeVertical: ScrollingMode {
         get {
             if case .auto = scheme.scrolling?.distance?.vertical ?? .auto {
-                return false
+                return .accelerated
             }
 
-            return true
+            return .linear
         }
         set {
             Scheme(
                 scrolling: .init(
                     distance: .init(
-                        vertical: newValue ? .line(3) : .auto
+                        vertical: newValue == .linear ? .line(3) : .auto
+                    ),
+                    scale: .init(
+                        vertical: 1
+                    )
+                )
+            )
+            .merge(into: &scheme)
+        }
+    }
+
+    var scrollingModeHorizontal: ScrollingMode {
+        get {
+            if case .auto = scheme.scrolling?.distance?.horizontal ?? .auto {
+                return .accelerated
+            }
+
+            return .linear
+        }
+        set {
+            Scheme(
+                scrolling: .init(
+                    distance: .init(
+                        horizontal: newValue == .linear ? .line(3) : .auto
+                    ),
+                    scale: .init(
+                        horizontal: 1
+                    )
+                )
+            )
+            .merge(into: &scheme)
+        }
+    }
+
+    var scrollingScaleVertical: Double {
+        get {
+            scheme.scrolling?.scale?.vertical?.asTruncatedDouble ?? 1
+        }
+
+        set {
+            Scheme(
+                scrolling: .init(
+                    scale: .init(
+                        vertical: Decimal(newValue).rounded(2)
+                    )
+                )
+            )
+            .merge(into: &scheme)
+        }
+    }
+
+    var scrollingScaleHorizontal: Double {
+        get {
+            scheme.scrolling?.scale?.horizontal?.asTruncatedDouble ?? 1
+        }
+
+        set {
+            Scheme(
+                scrolling: .init(
+                    scale: .init(
+                        horizontal: Decimal(newValue).rounded(2)
                     )
                 )
             )
@@ -73,11 +137,24 @@ extension SchemeState {
         }
     }
 
-    enum LinearScrollingUnit: String, CaseIterable, Identifiable {
-        var id: Self { self }
+    var linearScrollingHorizontalDistance: Scheme.Scrolling.Distance {
+        get {
+            scheme.scrolling?.distance?.horizontal ?? .line(3)
+        }
+        set {
+            Scheme(
+                scrolling: .init(
+                    distance: .init(
+                        horizontal: newValue
+                    )
+                )
+            )
+            .merge(into: &scheme)
+        }
+    }
 
-        case line = "By lines"
-        case pixel = "By pixels"
+    enum LinearScrollingUnit {
+        case line, pixel
     }
 
     var linearScrollingVerticalUnit: LinearScrollingUnit {
@@ -112,56 +189,6 @@ extension SchemeState {
         }
     }
 
-    var linearScrollingVerticalPixels: Double {
-        get {
-            guard case let .pixel(value) = linearScrollingVerticalDistance else {
-                return 36
-            }
-
-            return value.asTruncatedDouble
-        }
-
-        set {
-            linearScrollingVerticalDistance = .pixel(Decimal(newValue).rounded(1))
-        }
-    }
-
-    var linearScrollingHorizontal: Bool {
-        get {
-            if case .auto = scheme.scrolling?.distance?.horizontal ?? .auto {
-                return false
-            }
-
-            return true
-        }
-        set {
-            Scheme(
-                scrolling: .init(
-                    distance: .init(
-                        horizontal: newValue ? .line(3) : .auto
-                    )
-                )
-            )
-            .merge(into: &scheme)
-        }
-    }
-
-    var linearScrollingHorizontalDistance: Scheme.Scrolling.Distance {
-        get {
-            scheme.scrolling?.distance?.horizontal ?? .line(3)
-        }
-        set {
-            Scheme(
-                scrolling: .init(
-                    distance: .init(
-                        horizontal: newValue
-                    )
-                )
-            )
-            .merge(into: &scheme)
-        }
-    }
-
     var linearScrollingHorizontalUnit: LinearScrollingUnit {
         get {
             switch linearScrollingHorizontalDistance {
@@ -191,6 +218,20 @@ extension SchemeState {
 
         set {
             linearScrollingHorizontalDistance = .line(newValue)
+        }
+    }
+
+    var linearScrollingVerticalPixels: Double {
+        get {
+            guard case let .pixel(value) = linearScrollingVerticalDistance else {
+                return 36
+            }
+
+            return value.asTruncatedDouble
+        }
+
+        set {
+            linearScrollingVerticalDistance = .pixel(Decimal(newValue).rounded(1))
         }
     }
 

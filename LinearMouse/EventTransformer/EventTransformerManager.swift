@@ -15,14 +15,12 @@ class EventTransformerManager {
 
     init() {
         ConfigurationState.shared.$configuration
-            .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.lastEventTransformer = nil
             }
             .store(in: &subscriptions)
 
         DeviceManager.shared.$lastActiveDevice
-            .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.lastEventTransformer = nil
             }
@@ -68,6 +66,10 @@ class EventTransformerManager {
 
         if let distance = scheme.scrolling?.distance?.vertical {
             eventTransformer.append(LinearScrollingVertical(distance: distance))
+        }
+
+        if let scale = scheme.scrolling?.scale, scale.vertical ?? 1 != 1 || scale.horizontal ?? 1 != 1 {
+            eventTransformer.append(ScrollingScale(scale: scale))
         }
 
         if let modifiers = scheme.scrolling?.modifiers {

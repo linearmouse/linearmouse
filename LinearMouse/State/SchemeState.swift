@@ -13,14 +13,12 @@ class SchemeState: ObservableObject {
 
     init() {
         configurationState.$configuration
-            .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
             .store(in: &subscriptions)
 
         configurationState.$currentDeviceSchemeIndex
-            .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }

@@ -9,23 +9,18 @@ extension Scheme {
 
         var distance: Bidirectional<Distance>?
 
+        var scale: Bidirectional<Decimal>?
+
         var modifiers: Modifiers?
     }
 }
 
 extension Scheme.Scrolling {
     func merge(into scrolling: inout Self) {
-        if let reverse = reverse {
-            reverse.merge(into: &scrolling.reverse)
-        }
-
-        if let distance = distance {
-            distance.merge(into: &scrolling.distance)
-        }
-
-        if let modifiers = modifiers {
-            modifiers.merge(into: &scrolling.modifiers)
-        }
+        reverse?.merge(into: &scrolling.reverse)
+        distance?.merge(into: &scrolling.distance)
+        scale?.merge(into: &scrolling.scale)
+        modifiers?.merge(into: &scrolling.modifiers)
     }
 
     func merge(into scrolling: inout Self?) {
