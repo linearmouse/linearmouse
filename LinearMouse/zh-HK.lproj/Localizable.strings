@@ -20,12 +20,12 @@
 "Horizontal" = "橫向";
 "Reverse scrolling" = "反向捲動";
 "Some gestures, such as swiping back and forward, may stop working." = "某些手勢可能無法正常工作，如滑動後退和前進。";
-"Mode" = "Mode";
-"Accelerated" = "Accelerated";
-"Linear" = "Linear";
-"Unit" = "Unit";
-"Lines" = "Lines";
-"Pixels" = "Pixels";
+"Mode" = "模式";
+"Accelerated" = "帶加速度";
+"Linear" = "線性";
+"Unit" = "單位";
+"Lines" = "行";
+"Pixels" = "像素";
 
 "Acceleration" = "加速度";
 "Revert to system defaults" = "恢復到系統預設值";
