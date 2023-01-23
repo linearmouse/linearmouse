@@ -20,14 +20,14 @@
 "Horizontal" = "Horizontal";
 "Reverse scrolling" = "逆スクロール";
 "Some gestures, such as swiping back and forward, may stop working." = "前後スワイプ等、一部のジェスチャーが動作しなくなる可能性があります。";
-"Enable linear scrolling" = "線形スクロール";
-"Disable scrolling acceleration." = "スクロールアクセラレーションを無効にする。";
-"Scroll" = "スクロール";
-"By lines" = "行数";
-"By pixels" = "ピクセル数";
+"Mode" = "Mode";
+"Accelerated" = "Accelerated";
+"Linear" = "Linear";
+"Unit" = "Unit";
+"Lines" = "Lines";
+"Pixels" = "Pixels";
 
 "Acceleration" = "アクセラレーション";
-"Speed" = "速度";
 "Revert to system defaults" = "システムデフォルトに戻す";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "<unk> ⌘Z を押してデフォルトに戻れます。";
 "Disable pointer acceleration" = "ポインター加速を無効にする。";
