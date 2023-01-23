@@ -22,6 +22,7 @@
 "Some gestures, such as swiping back and forward, may stop working." = "Niektóre gesty, takie jak przesuwanie w przód i w tył mogą przestać działać.";
 "Mode" = "Mode";
 "Accelerated" = "Accelerated";
+"Speed" = "Speed";
 "Linear" = "Linear";
 "Unit" = "Unit";
 "Lines" = "Lines";
