@@ -30,72 +30,93 @@ extension ScrollingSettings {
 }
 
 extension ScrollingSettings.State {
-    private func getValue<T>(_ vertical: T, _ horizontal: T) -> T {
-        orientation == .vertical ? vertical : horizontal
-    }
-
-    private func setValue<T>(_ vertical: inout T, _ horizontal: inout T, value: T) {
-        if orientation == .vertical {
-            vertical = value
-        } else {
-            horizontal = value
-        }
-    }
-
     var reverseScrolling: Bool {
         get {
-            getValue(schemeState.reverseScrollingVertical, schemeState.reverseScrollingHorizontal)
+            orientation == .vertical ? schemeState.reverseScrollingVertical : schemeState.reverseScrollingHorizontal
         }
         set {
-            setValue(&schemeState.reverseScrollingVertical, &schemeState.reverseScrollingHorizontal, value: newValue)
+            if orientation == .vertical {
+                schemeState.reverseScrollingVertical = newValue
+            } else {
+                schemeState.reverseScrollingHorizontal = newValue
+            }
         }
     }
 
-    var linearScrolling: Bool {
+    var scrollingMode: SchemeState.ScrollingMode {
         get {
-            getValue(schemeState.linearScrollingVertical, schemeState.linearScrollingHorizontal)
+            orientation == .vertical ? schemeState.scrollingModeVertical : schemeState.scrollingModeHorizontal
         }
         set {
-            setValue(&schemeState.linearScrollingVertical, &schemeState.linearScrollingHorizontal, value: newValue)
+            if orientation == .vertical {
+                schemeState.scrollingModeVertical = newValue
+            } else {
+                schemeState.scrollingModeHorizontal = newValue
+            }
+        }
+    }
+
+    var scrollingSpeed: Double {
+        get {
+            orientation == .vertical ? schemeState.scrollingScaleVertical : schemeState.scrollingScaleHorizontal
+        }
+        set {
+            if orientation == .vertical {
+                schemeState.scrollingScaleVertical = newValue
+            } else {
+                schemeState.scrollingScaleHorizontal = newValue
+            }
         }
     }
 
     var linearScrollingUnit: SchemeState.LinearScrollingUnit {
         get {
-            getValue(schemeState.linearScrollingVerticalUnit, schemeState.linearScrollingHorizontalUnit)
+            orientation == .vertical ? schemeState.linearScrollingVerticalUnit : schemeState
+                .linearScrollingHorizontalUnit
         }
         set {
-            setValue(
-                &schemeState.linearScrollingVerticalUnit,
-                &schemeState.linearScrollingHorizontalUnit,
-                value: newValue
-            )
+            if orientation == .vertical {
+                schemeState.linearScrollingVerticalUnit = newValue
+            } else {
+                schemeState.linearScrollingHorizontalUnit = newValue
+            }
         }
     }
 
     var linearScrollingLines: Int {
         get {
-            getValue(schemeState.linearScrollingVerticalLines, schemeState.linearScrollingHorizontalLines)
+            orientation == .vertical ? schemeState.linearScrollingVerticalLines : schemeState
+                .linearScrollingHorizontalLines
         }
         set {
-            setValue(
-                &schemeState.linearScrollingVerticalLines,
-                &schemeState.linearScrollingHorizontalLines,
-                value: newValue
-            )
+            if orientation == .vertical {
+                schemeState.linearScrollingVerticalLines = newValue
+            } else {
+                schemeState.linearScrollingHorizontalLines = newValue
+            }
+        }
+    }
+
+    var linearScrollingLinesInDouble: Double {
+        get {
+            Double(linearScrollingLines)
+        }
+        set {
+            linearScrollingLines = Int(newValue)
         }
     }
 
     var linearScrollingPixels: Double {
         get {
-            getValue(schemeState.linearScrollingVerticalPixels, schemeState.linearScrollingHorizontalPixels)
+            orientation == .vertical ? schemeState.linearScrollingVerticalPixels : schemeState
+                .linearScrollingHorizontalPixels
         }
         set {
-            setValue(
-                &schemeState.linearScrollingVerticalPixels,
-                &schemeState.linearScrollingHorizontalPixels,
-                value: newValue
-            )
+            if orientation == .vertical {
+                schemeState.linearScrollingVerticalPixels = newValue
+            } else {
+                schemeState.linearScrollingHorizontalPixels = newValue
+            }
         }
     }
 }

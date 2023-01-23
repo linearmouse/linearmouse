@@ -40,7 +40,6 @@ class DeviceState: ObservableObject {
         .tieToLifetime(of: self)
 
         deviceManager.$lastActiveDeviceIncludingMovements
-            .receive(on: RunLoop.main)
             .throttle(for: 0.5, scheduler: RunLoop.main, latest: true)
             .removeDuplicates()
             .sink { [weak self] lastActiveDevice in

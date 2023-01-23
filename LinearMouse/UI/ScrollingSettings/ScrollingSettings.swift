@@ -33,37 +33,40 @@ struct ScrollingSettings: View {
                     }
                 }
 
-                Toggle(isOn: $state.linearScrolling) {
-                    VStack(alignment: .leading) {
-                        HStack(alignment: .firstTextBaseline, spacing: 2) {
-                            Text("Enable linear scrolling")
-                        }
-                        Text("""
-                        Disable scrolling acceleration.
-                        """)
-                        .controlSize(.small)
-                        .foregroundColor(.secondary)
+                Spacer()
+
+                Picker("Mode", selection: $state.scrollingMode) {
+                    Text("Accelerated").tag(SchemeState.ScrollingMode.accelerated)
+                    Text("Linear").tag(SchemeState.ScrollingMode.linear)
+                }
+                .fixedSize()
+
+                if state.scrollingMode == .accelerated {
+                    Slider(value: $state.scrollingSpeed,
+                           in: 0.0 ... 10.0) {
+                        Text("Speed")
                     }
                 }
-                if state.linearScrolling {
+
+                if state.scrollingMode == .linear {
                     HStack {
-                        Picker("", selection: $state.linearScrollingUnit) {
-                            ForEach(SchemeState.LinearScrollingUnit.allCases) { unit in
-                                Text(NSLocalizedString(unit.rawValue, comment: ""))
-                            }
+                        Picker("Unit", selection: $state.linearScrollingUnit) {
+                            Text("Lines").tag(SchemeState.LinearScrollingUnit.line)
+                            Text("Pixels").tag(SchemeState.LinearScrollingUnit.pixel)
                         }
                         .fixedSize()
                         .padding(.trailing)
 
                         switch state.linearScrollingUnit {
                         case .line:
-                            Stepper(
-                                value: $state.linearScrollingLines,
+                            Slider(
+                                value: $state.linearScrollingLinesInDouble,
                                 in: 0 ... 10,
                                 step: 1
-                            ) {
-                                Text(String(state.linearScrollingLines))
-                            }
+                            )
+
+                            Text(String(state.linearScrollingLines))
+                                .frame(width: 80)
 
                         case .pixel:
                             Slider(
@@ -75,9 +78,6 @@ struct ScrollingSettings: View {
                                 .frame(width: 80)
                         }
                     }
-                    .controlSize(.small)
-                    .padding(.top, -20)
-                    .frame(minHeight: 20)
                 }
             }
         }

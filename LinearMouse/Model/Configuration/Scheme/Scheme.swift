@@ -61,17 +61,9 @@ extension Scheme {
     }
 
     func merge(into scheme: inout Self) {
-        if let scrolling = scrolling {
-            scrolling.merge(into: &scheme.scrolling)
-        }
-
-        if let pointer = pointer {
-            pointer.merge(into: &scheme.pointer)
-        }
-
-        if let buttons = buttons {
-            buttons.merge(into: &scheme.buttons)
-        }
+        scrolling?.merge(into: &scheme.scrolling)
+        pointer?.merge(into: &scheme.pointer)
+        buttons?.merge(into: &scheme.buttons)
     }
 }
 

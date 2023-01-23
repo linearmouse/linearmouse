@@ -48,7 +48,6 @@ class StatusItem {
             openPreferenceItem,
             .separator(),
             configurationItem,
-            .separator(),
             startAtLoginItem,
             .separator(),
             quitItem
@@ -72,7 +71,6 @@ class StatusItem {
 
         configurationMenu.items = [
             reloadItem,
-            .separator(),
             revealInFinderItem
         ]
 
