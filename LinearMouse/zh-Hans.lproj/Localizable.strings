@@ -22,6 +22,7 @@
 "Some gestures, such as swiping back and forward, may stop working." = "某些手势可能无法正常工作，如滑动后退和前进。";
 "Mode" = "模式";
 "Accelerated" = "带加速度";
+"Speed" = "速度";
 "Linear" = "线性";
 "Unit" = "单位";
 "Lines" = "行";
