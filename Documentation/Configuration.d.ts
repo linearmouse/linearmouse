@@ -130,10 +130,15 @@ declare namespace Scheme {
     reverse?: Scrolling.Reverse;
 
     /**
-     * @title Scrolling distance
+     * @title Scroll distance
      * @description The distance after rolling the wheel.
      */
     distance?: Scrolling.Distance;
+
+    /**
+     * @description The scaling factor applied to the scroll distance.
+     */
+    scale?: Scrolling.Scale;
 
     /**
      * @title Modifier keys settings
@@ -170,6 +175,8 @@ declare namespace Scheme {
        */
       type Pixel = string;
     }
+
+    type Scale = Bidirectional<number>;
 
     type Modifiers = {
       /**

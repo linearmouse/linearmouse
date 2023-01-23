@@ -657,7 +657,7 @@
         "distance": {
           "$ref": "#/definitions/Scheme.Scrolling.Distance",
           "description": "The distance after rolling the wheel.",
-          "title": "Scrolling distance"
+          "title": "Scroll distance"
         },
         "modifiers": {
           "$ref": "#/definitions/Scheme.Scrolling.Modifiers",
@@ -682,6 +682,10 @@
             }
           ],
           "title": "Reverse scrolling"
+        },
+        "scale": {
+          "$ref": "#/definitions/Scheme.Scrolling.Scale",
+          "description": "The scaling factor applied to the scroll distance."
         }
       },
       "type": "object"
@@ -730,6 +734,29 @@
                   "$ref": "#/definitions/Scheme.Scrolling.Distance.Pixel"
                 }
               ]
+            }
+          },
+          "required": [
+            "vertical",
+            "horizontal"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Scheme.Scrolling.Bidirectional<number>": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "horizontal": {
+              "type": "number"
+            },
+            "vertical": {
+              "type": "number"
             }
           },
           "required": [
@@ -840,6 +867,9 @@
         "type"
       ],
       "type": "object"
+    },
+    "Scheme.Scrolling.Scale": {
+      "$ref": "#/definitions/Scheme.Scrolling.Bidirectional%3Cnumber%3E"
     },
     "SingleValueOrArray<Scheme.If.Category>": {
       "anyOf": [
