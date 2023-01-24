@@ -22,16 +22,17 @@
 "Some gestures, such as swiping back and forward, may stop working." = "前後スワイプ等、一部のジェスチャーが動作しなくなる可能性があります。";
 "Mode" = "Mode";
 "Accelerated" = "Accelerated";
+"By Lines" = "By Lines";
+"By Pixels" = "By Pixels";
 "Speed" = "速度";
-"Linear" = "Linear";
-"Unit" = "Unit";
-"Lines" = "Lines";
-"Pixels" = "Pixels";
+"Slower" = "Slower";
+"Faster" = "Faster";
+"Distance" = "Distance";
 
+"Disable pointer acceleration" = "ポインター加速を無効にする。";
 "Acceleration" = "アクセラレーション";
 "Revert to system defaults" = "システムデフォルトに戻す";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "<unk> ⌘Z を押してデフォルトに戻れます。";
-"Disable pointer acceleration" = "ポインター加速を無効にする。";
 
 "Enable universal back and forward" = "システム全般の戻る・進むボタンを有効にする";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "戻る・進むボタンをスワイプジェスチャーに変換し、システム全般における戻る・進む機能を行えるようにします。";
@@ -45,16 +46,16 @@
 "Show in menu bar" = "メニューバーに表示";
 "To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
 
-"Update" = "アップデート";
 "Version: %@" = "バージョン %@";
-"Check for Updates..." = "アップデートを確認";
-"Automatically" = "自動";
+"Check for updates automatically" = "Check for updates automatically";
+"Update check interval" = "Update check interval";
 "Daily" = "毎日";
 "Weekly" = "毎週";
 "Monthly" = "毎月";
-"Include beta" = "ベータ版を含める";
+"Receive beta updates" = "Receive beta updates";
+"Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
+"Check for Updates..." = "アップデートを確認";
 
-"Links" = "リンク";
 "Homepage" = "ホームページ";
 "Bug report" = "Bug report";
 "Feature request" = "Feature request";
