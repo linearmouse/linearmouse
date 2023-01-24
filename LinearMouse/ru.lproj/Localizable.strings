@@ -22,16 +22,17 @@
 "Some gestures, such as swiping back and forward, may stop working." = "Некоторые жесты, такие как смахивание «назад» и «вперед», могут перестать работать.";
 "Mode" = "Mode";
 "Accelerated" = "Accelerated";
+"By Lines" = "By Lines";
+"By Pixels" = "By Pixels";
 "Speed" = "Скорость";
-"Linear" = "Linear";
-"Unit" = "Unit";
-"Lines" = "Lines";
-"Pixels" = "Pixels";
+"Slower" = "Slower";
+"Faster" = "Faster";
+"Distance" = "Distance";
 
+"Disable pointer acceleration" = "Отключить ускорение указателя";
 "Acceleration" = "Ускорение";
 "Revert to system defaults" = "Вернуться к системным настройкам по умолчанию";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Вы также можете нажать ⌃⇧⌘Z, чтобы вернуться к системным настройкам по умолчанию.";
-"Disable pointer acceleration" = "Отключить ускорение указателя";
 
 "Enable universal back and forward" = "Включить универсальные «назад» и «вперед»";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Преобразует боковые кнопки «назад» и «вперед» в жесты смахивания, чтобы сделать их работоспособными во всех приложениях.";
@@ -45,16 +46,16 @@
 "Show in menu bar" = "Показывать в строке меню";
 "To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
 
-"Update" = "Обновление";
 "Version: %@" = "Версия: %@";
-"Check for Updates..." = "Проверить наличие обновлений...";
-"Automatically" = "Автоматически";
+"Check for updates automatically" = "Check for updates automatically";
+"Update check interval" = "Update check interval";
 "Daily" = "Ежедневно";
 "Weekly" = "Еженедельно";
 "Monthly" = "Ежемесячно";
-"Include beta" = "Включая бета-версии";
+"Receive beta updates" = "Receive beta updates";
+"Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
+"Check for Updates..." = "Проверить наличие обновлений...";
 
-"Links" = "Ссылки";
 "Homepage" = "Домашняя страница";
 "Bug report" = "Bug report";
 "Feature request" = "Feature request";
