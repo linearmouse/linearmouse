@@ -22,16 +22,17 @@
 "Some gestures, such as swiping back and forward, may stop working." = "Manche Gesten, beispielsweise Vor- und Zurück-Wischen, könnten nicht korrekt funktionieren.";
 "Mode" = "Modus";
 "Accelerated" = "Beschleunigt";
+"By Lines" = "By Lines";
+"By Pixels" = "By Pixels";
 "Speed" = "Geschwindigkeit";
-"Linear" = "Linear";
-"Unit" = "Einheit";
-"Lines" = "Zeilen";
-"Pixels" = "Pixel";
+"Slower" = "Slower";
+"Faster" = "Faster";
+"Distance" = "Distance";
 
+"Disable pointer acceleration" = "Zeigerbeschleunigung deaktivieren";
 "Acceleration" = "Beschleunigung";
 "Revert to system defaults" = "Auf Systemstandards zurücksetzen";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Durch Drücken des Kürzels ⌃⇧⌘Z kann ebenfalls zu den Systemstandards zurückgekehrt werden.";
-"Disable pointer acceleration" = "Zeigerbeschleunigung deaktivieren";
 
 "Enable universal back and forward" = "Universelles Vor und Zurück aktivieren";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Konvertiert die Vor- und Zurück-Seitentasten in die jeweiligen Wischgesten, um eine universelle Vor- und Zurück-Funktion zu ermöglichen.";
@@ -45,16 +46,16 @@
 "Show in menu bar" = "In der Menüleiste anzeigen";
 "To show the settings, launch %@ again." = "Um die Einstellungen anzuzeigen, öffne %@ erneut.";
 
-"Update" = "Update";
 "Version: %@" = "Version: %@";
-"Check for Updates..." = "Nach Updates suchen...";
-"Automatically" = "Automatisch";
+"Check for updates automatically" = "Check for updates automatically";
+"Update check interval" = "Update check interval";
 "Daily" = "Täglich";
 "Weekly" = "Wöchentlich";
 "Monthly" = "Monatlich";
-"Include beta" = "An Beta-Versionen teilnehmen";
+"Receive beta updates" = "Receive beta updates";
+"Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
+"Check for Updates..." = "Nach Updates suchen...";
 
-"Links" = "Links";
 "Homepage" = "Homepage";
 "Bug report" = "Fehler melden";
 "Feature request" = "Verbesserungen vorschlagen";
