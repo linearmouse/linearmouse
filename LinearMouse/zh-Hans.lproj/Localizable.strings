@@ -22,16 +22,17 @@
 "Some gestures, such as swiping back and forward, may stop working." = "某些手势可能无法正常工作，如滑动后退和前进。";
 "Mode" = "模式";
 "Accelerated" = "带加速度";
+"By Lines" = "按行";
+"By Pixels" = "按像素";
 "Speed" = "速度";
-"Linear" = "线性";
-"Unit" = "单位";
-"Lines" = "行";
-"Pixels" = "像素";
+"Slower" = "慢";
+"Faster" = "快";
+"Distance" = "距离";
 
+"Disable pointer acceleration" = "禁用指针加速度";
 "Acceleration" = "加速度";
 "Revert to system defaults" = "回退到系统默认值";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "你也可以按下 ⌃⇧⌘Z 来回退到系统默认值。";
-"Disable pointer acceleration" = "禁用指针加速度";
 
 "Enable universal back and forward" = "启用全局后退、前进";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "将后退、前进侧键转换为滑动手势，以全局启用后退、前进支持。";
@@ -45,16 +46,16 @@
 "Show in menu bar" = "在菜单栏中显示";
 "To show the settings, launch %@ again." = "要显示设置，再次运行 %@。";
 
-"Update" = "更新";
 "Version: %@" = "版本：%@";
-"Check for Updates..." = "检查更新...";
-"Automatically" = "自动";
+"Check for updates automatically" = "自动检查更新";
+"Update check interval" = "更新检查频率";
 "Daily" = "每天";
 "Weekly" = "每周";
 "Monthly" = "每月";
-"Include beta" = "包括测试版";
+"Receive beta updates" = "接收测试版本（beta）更新";
+"Thank you for participating in the beta test." = "感谢你参加 beta 测试。";
+"Check for Updates..." = "检查更新...";
 
-"Links" = "链接";
 "Homepage" = "主页";
 "Bug report" = "Bug 反馈";
 "Feature request" = "功能建议";

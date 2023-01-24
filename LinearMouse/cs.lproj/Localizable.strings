@@ -22,16 +22,17 @@
 "Some gestures, such as swiping back and forward, may stop working." = "Po aktivaci této volby mohou některá gesta, např. zpět a dopředu, přestat fungovat";
 "Mode" = "Mode";
 "Accelerated" = "Accelerated";
+"By Lines" = "By Lines";
+"By Pixels" = "By Pixels";
 "Speed" = "Rychlost";
-"Linear" = "Linear";
-"Unit" = "Unit";
-"Lines" = "Lines";
-"Pixels" = "Pixels";
+"Slower" = "Slower";
+"Faster" = "Faster";
+"Distance" = "Distance";
 
+"Disable pointer acceleration" = "Deaktivovat zrychlení kurzoru";
 "Acceleration" = "Zrychlení";
 "Revert to system defaults" = "Obnovit výchozí nastavení systému";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Pro obnovení výchozího nastavení systému můžete také použít klávesovou zkratku ⌃⇧⌘Z";
-"Disable pointer acceleration" = "Deaktivovat zrychlení kurzoru";
 
 "Enable universal back and forward" = "Aktivovat univerzální přecházení zpět a dopředu";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Převádí stisk bočních tlačítek myši pro pohyb zpět a dopředu na gesta přejetí prstem (swipe) a tím umožňuje využití tlačítek pro navigaci";
@@ -45,16 +46,16 @@
 "Show in menu bar" = "Zobrazovat v řádku nabídek";
 "To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
 
-"Update" = "Aktualizace aplikace";
 "Version: %@" = "Verze %@";
-"Check for Updates..." = "Zkontrolovat aktualizace...";
-"Automatically" = "Automaticky";
+"Check for updates automatically" = "Check for updates automatically";
+"Update check interval" = "Update check interval";
 "Daily" = "Denně";
 "Weekly" = "Týdně";
 "Monthly" = "Měsíčně";
-"Include beta" = "Instalovat beta verze";
+"Receive beta updates" = "Receive beta updates";
+"Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
+"Check for Updates..." = "Zkontrolovat aktualizace...";
 
-"Links" = "Odkazy";
 "Homepage" = "Stránky aplikace";
 "Bug report" = "Bug report";
 "Feature request" = "Feature request";
