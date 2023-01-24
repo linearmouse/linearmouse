@@ -22,16 +22,17 @@
 "Some gestures, such as swiping back and forward, may stop working." = "Algunos gestos, como el deslizamiento hacia atrás y hacia delante, pueden dejar de funcionar.";
 "Mode" = "Mode";
 "Accelerated" = "Accelerated";
+"By Lines" = "By Lines";
+"By Pixels" = "By Pixels";
 "Speed" = "Velocidad";
-"Linear" = "Linear";
-"Unit" = "Unit";
-"Lines" = "Lines";
-"Pixels" = "Pixels";
+"Slower" = "Slower";
+"Faster" = "Faster";
+"Distance" = "Distance";
 
+"Disable pointer acceleration" = "Deshabilitar aceleración del cursor";
 "Acceleration" = "Aceleración";
 "Revert to system defaults" = "Restablecer valores por defecto";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "También puedes pulsar ⌃⇧⌘Z para restablecer valores por defecto.";
-"Disable pointer acceleration" = "Deshabilitar aceleración del cursor";
 
 "Enable universal back and forward" = "Habilitar retroceso y avance universal";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convierte los botones laterales atrás y adelante en gestos de deslizamiento para permitir una funcionalidad universal hacia atrás y hacia delante.";
@@ -45,16 +46,16 @@
 "Show in menu bar" = "Mostrar en la barra de menú";
 "To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
 
-"Update" = "Actualizar";
 "Version: %@" = "Versión: %@";
-"Check for Updates..." = "Buscar actualizaciones...";
-"Automatically" = "Automáticamente";
+"Check for updates automatically" = "Check for updates automatically";
+"Update check interval" = "Update check interval";
 "Daily" = "Cada día";
 "Weekly" = "Cada semana";
 "Monthly" = "Cada mes";
-"Include beta" = "Incluir beta";
+"Receive beta updates" = "Receive beta updates";
+"Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
+"Check for Updates..." = "Buscar actualizaciones...";
 
-"Links" = "Enlaces";
 "Homepage" = "Página web";
 "Bug report" = "Bug report";
 "Feature request" = "Feature request";
