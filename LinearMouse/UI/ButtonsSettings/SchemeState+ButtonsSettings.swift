@@ -6,18 +6,12 @@ import Foundation
 extension SchemeState {
     var universalBackForward: Bool {
         get {
-            guard let universalBackForward = scheme.buttons?.universalBackForward else {
-                return false
-            }
-
-            return universalBackForward != .none
+            scheme.buttons?.universalBackForward ?? .none != .none
         }
         set {
-            let universalBackForward: Scheme.Buttons.UniversalBackForward = newValue ? .both : .none
-
             Scheme(
                 buttons: Scheme.Buttons(
-                    universalBackForward: universalBackForward
+                    universalBackForward: .some(newValue ? .both : .none)
                 )
             )
             .merge(into: &scheme)

@@ -8,7 +8,7 @@ struct ScrollingSettings: View {
 
     var body: some View {
         DetailView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading) {
                 HStack {
                     Spacer()
 
@@ -21,64 +21,69 @@ struct ScrollingSettings: View {
 
                     Spacer()
                 }
-
-                Toggle(isOn: $state.reverseScrolling) {
-                    VStack(alignment: .leading) {
-                        Text("Reverse scrolling")
-                        if state.orientation == .horizontal {
-                            Text("Some gestures, such as swiping back and forward, may stop working.")
-                                .controlSize(.small)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
+                .padding(.top, 20)
 
                 Form {
-                    Picker("Mode", selection: $state.scrollingMode) {
-                        Text("Accelerated").tag(SchemeState.ScrollingMode.accelerated)
-                        Text("Linear").tag(SchemeState.ScrollingMode.linear)
-                    }
-                    .fixedSize()
-
-                    if state.scrollingMode == .accelerated {
-                        Slider(value: $state.scrollingSpeed,
-                               in: 0.0 ... 10.0) {
-                            Text("Speed")
-                        }
-                    }
-
-                    if state.scrollingMode == .linear {
-                        HStack {
-                            Picker("Unit", selection: $state.linearScrollingUnit) {
-                                Text("Lines").tag(SchemeState.LinearScrollingUnit.line)
-                                Text("Pixels").tag(SchemeState.LinearScrollingUnit.pixel)
-                            }
-                            .fixedSize()
-                            .padding(.trailing)
-
-                            switch state.linearScrollingUnit {
-                            case .line:
-                                Slider(
-                                    value: $state.linearScrollingLinesInDouble,
-                                    in: 0 ... 10,
-                                    step: 1
-                                )
-
-                                Text(String(state.linearScrollingLines))
-                                    .frame(width: 80)
-
-                            case .pixel:
-                                Slider(
-                                    value: $state.linearScrollingPixels,
-                                    in: 0 ... 128
-                                )
-
-                                Text(String(state.linearScrollingPixels))
-                                    .frame(width: 80)
+                    Section {
+                        Toggle(isOn: $state.reverseScrolling) {
+                            withDescription {
+                                Text("Reverse scrolling")
+                                if state.orientation == .horizontal {
+                                    Text("Some gestures, such as swiping back and forward, may stop working.")
+                                }
                             }
                         }
                     }
+                    .modifier(SectionViewModifier())
+
+                    Section {
+                        Picker("Mode", selection: $state.scrollingMode) {
+                            Text("Accelerated").tag(SchemeState.ScrollingMode.accelerated)
+                            Text("By Lines").tag(SchemeState.ScrollingMode.byLines)
+                            Text("By Pixels").tag(SchemeState.ScrollingMode.byPixels)
+                        }
+                        .modifier(PickerViewModifier())
+
+                        switch state.scrollingMode {
+                        case .accelerated:
+                            Slider(value: $state.scrollingSpeed,
+                                   in: 0.0 ... 10.0) {
+                                Text("Speed")
+                            } minimumValueLabel: {
+                                Text("Slower")
+                            } maximumValueLabel: {
+                                Text("Faster")
+                            }
+
+                        case .byLines:
+                            Slider(
+                                value: $state.linearScrollingLinesInDouble,
+                                in: 0 ... 10,
+                                step: 1
+                            ) {
+                                Text("Distance")
+                            } minimumValueLabel: {
+                                Text("0")
+                            } maximumValueLabel: {
+                                Text("10")
+                            }
+
+                        case .byPixels:
+                            Slider(
+                                value: $state.linearScrollingPixels,
+                                in: 0 ... 128
+                            ) {
+                                Text("Distance")
+                            } minimumValueLabel: {
+                                Text("0px")
+                            } maximumValueLabel: {
+                                Text("128px")
+                            }
+                        }
+                    }
+                    .modifier(SectionViewModifier())
                 }
+                .modifier(FormViewModifier())
             }
         }
     }

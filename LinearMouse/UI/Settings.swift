@@ -8,7 +8,7 @@ struct Settings: View {
     @ObservedObject var state = SettingsState.shared
 
     var body: some View {
-        HStack {
+        HStack(spacing: 0) {
             if #available(macOS 11, *) {
                 Sidebar()
             } else {
@@ -32,6 +32,6 @@ struct Settings: View {
                 }
             }
         }
-        .frame(width: 850, height: 600)
+        .frame(minWidth: 600, minHeight: 600)
     }
 }

@@ -9,12 +9,6 @@ struct SchemeIndicator: View {
             DeviceIndicator()
         }
         .padding(.horizontal, 10)
-        .frame(maxWidth: .infinity, minHeight: 35, maxHeight: 35, alignment: .leading)
-    }
-}
-
-struct Header_Previews: PreviewProvider {
-    static var previews: some View {
-        SchemeIndicator()
+        .frame(height: 35, alignment: .leading)
     }
 }

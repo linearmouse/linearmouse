@@ -2,65 +2,66 @@
 // Copyright (c) 2021-2023 Jiahao Lu
 
 import Defaults
+import LaunchAtLogin
 import SwiftUI
 
 struct GeneralSettings: View {
     @Default(.showInMenuBar) var showInMenuBar
 
     var body: some View {
-        DetailView(schemeSpecific: false) {
-            VStack(alignment: .leading, spacing: 20) {
-                Section(header: Text("Settings").font(.headline)) {
-                    Toggle(isOn: $showInMenuBar) {
-                        VStack(alignment: .leading) {
+        DetailView {
+            Form {
+                Section {
+                    Toggle(isOn: $showInMenuBar.animation()) {
+                        withDescription {
                             Text("Show in menu bar")
-                            Text("""
-                            To show the settings, launch \
-                            \(LinearMouse.appName) again.
-                            """)
-                            .controlSize(.small)
-                            .foregroundColor(.secondary)
+                            if !showInMenuBar {
+                                Text("To show the settings, launch \(LinearMouse.appName) again.")
+                            }
                         }
                     }
+
+                    LaunchAtLogin.Toggle {
+                        Text("Start at login")
+                    }
                 }
+                .modifier(SectionViewModifier())
 
-                Spacer()
-
-                Section(header: Text("Update").font(.headline)) {
+                Section {
                     CheckForUpdatesView()
                 }
+                .modifier(SectionViewModifier())
 
-                Spacer()
-
-                Section(header: Text("Links").font(.headline)) {
-                    VStack(alignment: .leading, spacing: 10) {
-                        HyperLink(URLs.homepage) {
-                            HStack(alignment: .firstTextBaseline, spacing: 5) {
-                                Text("🏡")
-                                Text("Homepage")
-                            }
+                Section {
+                    HyperLink(URLs.homepage) {
+                        HStack(alignment: .firstTextBaseline, spacing: 5) {
+                            Text("🏡")
+                            Text("Homepage")
                         }
-                        HyperLink(URLs.bugReport) {
-                            HStack(alignment: .firstTextBaseline, spacing: 5) {
-                                Text("🐛")
-                                Text("Bug report")
-                            }
+                    }
+                    HyperLink(URLs.bugReport) {
+                        HStack(alignment: .firstTextBaseline, spacing: 5) {
+                            Text("🐛")
+                            Text("Bug report")
                         }
-                        HyperLink(URLs.featureRequest) {
-                            HStack(alignment: .firstTextBaseline, spacing: 5) {
-                                Text("✍🏻")
-                                Text("Feature request")
-                            }
+                    }
+                    HyperLink(URLs.featureRequest) {
+                        HStack(alignment: .firstTextBaseline, spacing: 5) {
+                            Text("✍🏻")
+                            Text("Feature request")
                         }
-                        HyperLink(URLs.donate) {
-                            HStack(alignment: .firstTextBaseline, spacing: 5) {
-                                Text("❤️")
-                                Text("Donate")
-                            }
+                    }
+                    HyperLink(URLs.donate) {
+                        HStack(alignment: .firstTextBaseline, spacing: 5) {
+                            Text("❤️")
+                            Text("Donate")
                         }
                     }
                 }
+                .modifier(SectionViewModifier())
+                .frame(minHeight: 22)
             }
+            .modifier(FormViewModifier())
         }
     }
 }

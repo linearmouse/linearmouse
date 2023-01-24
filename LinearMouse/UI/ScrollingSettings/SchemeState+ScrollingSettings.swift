@@ -38,22 +38,36 @@ extension SchemeState {
     }
 
     enum ScrollingMode {
-        case accelerated, linear
+        case accelerated, byLines, byPixels
     }
 
     var scrollingModeVertical: ScrollingMode {
         get {
-            if case .auto = scheme.scrolling?.distance?.vertical ?? .auto {
+            switch scheme.scrolling?.distance?.vertical ?? .auto {
+            case .auto:
                 return .accelerated
+            case .line:
+                return .byLines
+            case .pixel:
+                return .byPixels
             }
-
-            return .linear
         }
         set {
+            var distance: Scheme.Scrolling.Distance
+
+            switch newValue {
+            case .accelerated:
+                distance = .auto
+            case .byLines:
+                distance = .line(3)
+            case .byPixels:
+                distance = .pixel(36)
+            }
+
             Scheme(
                 scrolling: .init(
                     distance: .init(
-                        vertical: newValue == .linear ? .line(3) : .auto
+                        vertical: distance
                     ),
                     scale: .init(
                         vertical: 1
@@ -66,17 +80,31 @@ extension SchemeState {
 
     var scrollingModeHorizontal: ScrollingMode {
         get {
-            if case .auto = scheme.scrolling?.distance?.horizontal ?? .auto {
+            switch scheme.scrolling?.distance?.horizontal ?? .auto {
+            case .auto:
                 return .accelerated
+            case .line:
+                return .byLines
+            case .pixel:
+                return .byPixels
             }
-
-            return .linear
         }
         set {
+            var distance: Scheme.Scrolling.Distance
+
+            switch newValue {
+            case .accelerated:
+                distance = .auto
+            case .byLines:
+                distance = .line(3)
+            case .byPixels:
+                distance = .pixel(36)
+            }
+
             Scheme(
                 scrolling: .init(
                     distance: .init(
-                        horizontal: newValue == .linear ? .line(3) : .auto
+                        horizontal: distance
                     ),
                     scale: .init(
                         horizontal: 1

@@ -30,11 +30,3 @@ struct HyperLink<Content>: View where Content: View {
         })
     }
 }
-
-struct HyperLink_Previews: PreviewProvider {
-    static var previews: some View {
-        HyperLink(URL(string: "https://linearmouse.lujjjh.com/")!) {
-            Text("LinearMouse")
-        }
-    }
-}

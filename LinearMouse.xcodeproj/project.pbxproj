@@ -34,6 +34,7 @@
 		972DF654285ADE9600B83932 /* GeneralSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF653285ADE9600B83932 /* GeneralSettings.swift */; };
 		972DF65B285AEABA00B83932 /* ButtonsSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF65A285AEABA00B83932 /* ButtonsSettings.swift */; };
 		97353386297ED84600C1B5D0 /* ScrollingScale.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97353385297ED84600C1B5D0 /* ScrollingScale.swift */; };
+		9735338F297F8EE200C1B5D0 /* FormViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9735338E297F8EE200C1B5D0 /* FormViewModifier.swift */; };
 		973EB9FE287EE7D90069A8EF /* Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 973EB9FD287EE7D90069A8EF /* Action.swift */; };
 		977638F9286BE9EE00A698B6 /* PublishedObject in Frameworks */ = {isa = PBXBuildFile; productRef = 977638F8286BE9EE00A698B6 /* PublishedObject */; };
 		97A13AD2287094FB002F6193 /* Distance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A13AD1287094FB002F6193 /* Distance.swift */; };
@@ -146,6 +147,7 @@
 		972DF653285ADE9600B83932 /* GeneralSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettings.swift; sourceTree = "<group>"; };
 		972DF65A285AEABA00B83932 /* ButtonsSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonsSettings.swift; sourceTree = "<group>"; };
 		97353385297ED84600C1B5D0 /* ScrollingScale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingScale.swift; sourceTree = "<group>"; };
+		9735338E297F8EE200C1B5D0 /* FormViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormViewModifier.swift; sourceTree = "<group>"; };
 		973EB9FD287EE7D90069A8EF /* Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Action.swift; sourceTree = "<group>"; };
 		97A13AD1287094FB002F6193 /* Distance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Distance.swift; sourceTree = "<group>"; };
 		97A2F60929508AD800F31122 /* EventTransformerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTransformerManager.swift; sourceTree = "<group>"; };
@@ -428,6 +430,14 @@
 			path = ButtonsSettings;
 			sourceTree = "<group>";
 		};
+		9735338D297F8ED200C1B5D0 /* ViewModifiers */ = {
+			isa = PBXGroup;
+			children = (
+				9735338E297F8EE200C1B5D0 /* FormViewModifier.swift */,
+			);
+			path = ViewModifiers;
+			sourceTree = "<group>";
+		};
 		973EB9FC287EE7C80069A8EF /* Mapping */ = {
 			isa = PBXGroup;
 			children = (
@@ -620,6 +630,7 @@
 			isa = PBXGroup;
 			children = (
 				972DF63E28599F4500B83932 /* Extensions */,
+				9735338D297F8ED200C1B5D0 /* ViewModifiers */,
 				972DF64D285A2D6D00B83932 /* ButtonStyle */,
 				971338AD289B649D005A74D2 /* HelpButton */,
 				972DF6362859979F00B83932 /* Sidebar */,
@@ -872,6 +883,7 @@
 				97F77FB1285F0CDC007C9C2B /* Scheme.swift in Sources */,
 				97A2F60A29508AD800F31122 /* EventTransformerManager.swift in Sources */,
 				972A5E32285D8B5B00CB6440 /* DeviceMatcher.swift in Sources */,
+				9735338F297F8EE200C1B5D0 /* FormViewModifier.swift in Sources */,
 				97B83CDF2860C56700ECF109 /* HexRepresentation.swift in Sources */,
 				B7842927278D9BBC00D207F0 /* CheckForUpdatesView.swift in Sources */,
 				972A5E2D285D882500CB6440 /* DeviceState.swift in Sources */,
