@@ -22,11 +22,11 @@
 "Some gestures, such as swiping back and forward, may stop working." = "Manche Gesten, beispielsweise Vor- und Zurück-Wischen, könnten nicht korrekt funktionieren.";
 "Mode" = "Modus";
 "Accelerated" = "Beschleunigt";
-"By Lines" = "By Lines";
-"By Pixels" = "By Pixels";
+"By Lines" = "Nach Zeilen";
+"By Pixels" = "Nach Pixel";
 "Speed" = "Geschwindigkeit";
-"Slower" = "Slower";
-"Faster" = "Faster";
+"Slower" = "Langsamer";
+"Faster" = "Schneller";
 "Distance" = "Distance";
 
 "Disable pointer acceleration" = "Zeigerbeschleunigung deaktivieren";
