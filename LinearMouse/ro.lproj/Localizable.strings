@@ -1,69 +1,69 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
-"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
-"Get more help" = "Get more help";
-"Open Accessibility" = "Open Accessibility";
+"LinearMouse needs Accessibility permission" = "LinearMouse are nevoie de permisiune de accesibilitate";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "Trebuie să acordați permisiunea de accesibilitate în Setările de sistem > Securitate & Confidențialitate > Accesibilitate.";
+"Get more help" = "Obțineți mai mult ajutor";
+"Open Accessibility" = "Deschide Accesibilitate";
 
-"%@ Settings..." = "%@ Settings...";
-"Start at login" = "Start at login";
-"Config" = "Config";
-"Reload" = "Reload";
-"Reveal in Finder" = "Reveal in Finder";
-"Quit %@" = "Quit %@";
+"%@ Settings..." = "%@ Setări...";
+"Start at login" = "Pornește la autentificare";
+"Config" = "Configurare";
+"Reload" = "Reîncărcare";
+"Reveal in Finder" = "Arată în Finder";
+"Quit %@" = "Părăsește %@";
 
-"Scrolling" = "Scrolling";
-"Pointer" = "Pointer";
-"Buttons" = "Buttons";
-"Modifier Keys" = "Modifier Keys";
+"Scrolling" = "Derulare";
+"Pointer" = "Indicator";
+"Buttons" = "Butoane";
+"Modifier Keys" = "Modificator de taste";
 "General" = "General";
 
 "Vertical" = "Vertical";
-"Horizontal" = "Horizontal";
-"Reverse scrolling" = "Reverse scrolling";
-"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
-"Mode" = "Mode";
-"Accelerated" = "Accelerated";
-"By Lines" = "By Lines";
-"By Pixels" = "By Pixels";
-"Speed" = "Speed";
-"Slower" = "Slower";
-"Faster" = "Faster";
-"Distance" = "Distance";
+"Horizontal" = "Orizontal";
+"Reverse scrolling" = "Derulare inversă";
+"Some gestures, such as swiping back and forward, may stop working." = "Unele gesturi, cum ar fi glisarea înapoi și înainte, pot înceta să funcționeze.";
+"Mode" = "Mod";
+"Accelerated" = "Accelerat";
+"By Lines" = "După linii";
+"By Pixels" = "De pixeli";
+"Speed" = "Viteză";
+"Slower" = "Mai încet";
+"Faster" = "Mai rapid";
+"Distance" = "Distanță";
 
-"Disable pointer acceleration" = "Disable pointer acceleration";
-"Acceleration" = "Acceleration";
-"Revert to system defaults" = "Revert to system defaults";
-"You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
+"Disable pointer acceleration" = "Dezactivează accelerația cursorului";
+"Acceleration" = "Accelerare";
+"Revert to system defaults" = "Revenire la valorile implicite ale sistemului";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "Puteți, de asemenea, să apăsați ⌃⇧⌘Z pentru a reveni la valorile implicite ale sistemului.";
 
-"Enable universal back and forward" = "Enable universal back and forward";
-"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
+"Enable universal back and forward" = "Activați funcția universală înapoi și înainte";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convertește butoanele din spate și din față lateral la gesturi de glisare pentru a permite funcționalitatea universală înapoi și înainte.";
 
-"No action" = "No action";
-"Alter orientation" = "Alter orientation";
-"Change speed" = "Change speed";
-"to" = "to";
+"No action" = "Nicio acțiune";
+"Alter orientation" = "Modifică orientarea";
+"Change speed" = "Schimbă viteza";
+"to" = "către";
 
-"Settings" = "Settings";
-"Show in menu bar" = "Show in menu bar";
-"To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
+"Settings" = "Setări";
+"Show in menu bar" = "Arată in bara de meniu";
+"To show the settings, launch %@ again." = "Pentru a afișa setările, lansați %@ din nou.";
 
-"Version: %@" = "Version: %@";
-"Check for updates automatically" = "Check for updates automatically";
-"Update check interval" = "Update check interval";
-"Daily" = "Daily";
-"Weekly" = "Weekly";
-"Monthly" = "Monthly";
-"Receive beta updates" = "Receive beta updates";
-"Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
-"Check for Updates..." = "Check for Updates...";
+"Version: %@" = "Versiune: %@";
+"Check for updates automatically" = "Verificați automat dacă există actualizări";
+"Update check interval" = "Interval de verificare a actualizărilor";
+"Daily" = "Zilnic";
+"Weekly" = "Săptămânal";
+"Monthly" = "Lunar";
+"Receive beta updates" = "Primește versiuni beta";
+"Thank you for participating in the beta test." = "Vă mulțumim că ați participat la testul beta.";
+"Check for Updates..." = "Verificați dacă există actualizări...";
 
-"Homepage" = "Homepage";
-"Bug report" = "Bug report";
-"Feature request" = "Feature request";
-"Donate" = "Donate";
+"Homepage" = "Pagina de pornire";
+"Bug report" = "Raportați probleme";
+"Feature request" = "Solicitați o caracteristică";
+"Donate" = "Donați";
 
-"Auto switch to the active device" = "Auto switch to the active device";
+"Auto switch to the active device" = "Comutare automată la dispozitivul activ";
 "OK" = "OK";
 
 "Mouse" = "Mouse";
 "Trackpad" = "Trackpad";
-"(active)" = "(active)";
+"(active)" = "(activ)";
