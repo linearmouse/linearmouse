@@ -9,14 +9,15 @@ struct ModifierKeysSettings: View {
     var body: some View {
         DetailView {
             Form {
-                ModifierKeyActionPicker(label: "⌘ (Command)", action: $schemeState.commandAction)
-
-                ModifierKeyActionPicker(label: "⇧ (Shift)", action: $schemeState.shiftAction)
-
-                ModifierKeyActionPicker(label: "⌥ (Option)", action: $schemeState.optionAction)
-
-                ModifierKeyActionPicker(label: "⌃ (Control)", action: $schemeState.controlAction)
+                Section {
+                    ModifierKeyActionPicker(label: "⌘ (Command)", action: $schemeState.commandAction)
+                    ModifierKeyActionPicker(label: "⇧ (Shift)", action: $schemeState.shiftAction)
+                    ModifierKeyActionPicker(label: "⌥ (Option)", action: $schemeState.optionAction)
+                    ModifierKeyActionPicker(label: "⌃ (Control)", action: $schemeState.controlAction)
+                }
+                .modifier(SectionViewModifier())
             }
+            .modifier(FormViewModifier())
         }
     }
 }

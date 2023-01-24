@@ -8,19 +8,20 @@ struct ButtonsSettings: View {
 
     var body: some View {
         DetailView {
-            Toggle(isOn: $schemeState.universalBackForward) {
-                VStack(alignment: .leading) {
-                    Text("Enable universal back and forward")
-                    Text("""
-                    Convert the back and forward side buttons to \
-                    swiping gestures to allow universal back and \
-                    forward functionality.
-                    """)
-                    .controlSize(.small)
-                    .foregroundColor(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+            Form {
+                Section {
+                    Toggle(isOn: $schemeState.universalBackForward) {
+                        withDescription {
+                            Text("Enable universal back and forward")
+                            Text(
+                                "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality."
+                            )
+                        }
+                    }
                 }
+                .modifier(SectionViewModifier())
             }
+            .modifier(FormViewModifier())
         }
     }
 }

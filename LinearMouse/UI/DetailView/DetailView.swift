@@ -16,22 +16,13 @@ struct DetailView<T>: View where T: View {
                     .frame(maxWidth: .infinity,
                            maxHeight: .infinity)
             } else {
-                ScrollView(showsIndicators: false) {
-                    // FIXME: Workaround for Catalina
-                    if #unavailable(macOS 11) {
-                        Text("")
-                            .padding(.top)
-                    }
-
-                    content()
-                        .padding(.horizontal, 40)
-                        .padding(.vertical, 30)
-                        .frame(
-                            minWidth: 0,
-                            maxWidth: .infinity,
-                            alignment: .topLeading
-                        )
+                // FIXME: Workaround for Catalina
+                if #unavailable(macOS 11) {
+                    Text("")
+                        .padding(.top)
                 }
+
+                content()
             }
 
             if schemeSpecific {
@@ -39,5 +30,6 @@ struct DetailView<T>: View where T: View {
                     .edgesIgnoringSafeArea(.top)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }

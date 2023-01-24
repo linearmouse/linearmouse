@@ -15,8 +15,9 @@ struct ModifierKeyActionPicker: View {
                 Text(NSLocalizedString(type.rawValue, comment: "")).tag(type)
             }
         }
+        .modifier(PickerViewModifier())
 
-        if actionType.wrappedValue == .changeSpeed {
+        if case .some(.changeSpeed) = action {
             HStack {
                 Text("to")
                 Slider(value: self.speedFactor,
