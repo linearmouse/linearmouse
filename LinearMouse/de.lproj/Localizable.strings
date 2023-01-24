@@ -1,9 +1,9 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse benötigt Zugriff auf Bedienungshilfen";
-"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "Erlaube den Zugriff auf die Bedienungshilfen über die Systemeinstellungen > Sicherheit & Datenschutz > Bedienungshilfen.";
 "Get more help" = "Weitere Hilfe erhalten";
 "Open Accessibility" = "Öffne Bedienungshilfen";
 
-"%@ Settings..." = "%@ Settings...";
+"%@ Settings..." = "%@ Einstellungen...";
 "Start at login" = "Bei der Anmeldung starten";
 "Config" = "Konfigurationsdatei";
 "Reload" = "Neu laden";
@@ -16,17 +16,17 @@
 "Modifier Keys" = "Tastenkürzel";
 "General" = "Allgemein";
 
-"Vertical" = "Vertical";
+"Vertical" = "Vertikal";
 "Horizontal" = "Horizontal";
 "Reverse scrolling" = "Scrollen invertieren";
 "Some gestures, such as swiping back and forward, may stop working." = "Manche Gesten, beispielsweise Vor- und Zurück-Wischen, könnten nicht korrekt funktionieren.";
-"Mode" = "Mode";
-"Accelerated" = "Accelerated";
+"Mode" = "Modus";
+"Accelerated" = "Beschleunigt";
 "Speed" = "Geschwindigkeit";
 "Linear" = "Linear";
-"Unit" = "Unit";
-"Lines" = "Lines";
-"Pixels" = "Pixels";
+"Unit" = "Einheit";
+"Lines" = "Zeilen";
+"Pixels" = "Pixel";
 
 "Acceleration" = "Beschleunigung";
 "Revert to system defaults" = "Auf Systemstandards zurücksetzen";
@@ -43,7 +43,7 @@
 
 "Settings" = "Einstellungen";
 "Show in menu bar" = "In der Menüleiste anzeigen";
-"To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
+"To show the settings, launch %@ again." = "Um die Einstellungen anzuzeigen, öffne %@ erneut.";
 
 "Update" = "Update";
 "Version: %@" = "Version: %@";
@@ -56,9 +56,9 @@
 
 "Links" = "Links";
 "Homepage" = "Homepage";
-"Bug report" = "Bug report";
-"Feature request" = "Feature request";
-"Donate" = "Donate";
+"Bug report" = "Fehler melden";
+"Feature request" = "Verbesserungen vorschlagen";
+"Donate" = "Spenden";
 
 "Auto switch to the active device" = "Automatisch zum aktiven Gerät wechseln";
 "OK" = "OK";
