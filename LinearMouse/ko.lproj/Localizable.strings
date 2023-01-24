@@ -22,16 +22,17 @@
 "Some gestures, such as swiping back and forward, may stop working." = "앞뒤로 스와이프와 같은 일부 제스처가 작동하지 않을 수 있습니다.";
 "Mode" = "Mode";
 "Accelerated" = "Accelerated";
+"By Lines" = "By Lines";
+"By Pixels" = "By Pixels";
 "Speed" = "속도";
-"Linear" = "Linear";
-"Unit" = "Unit";
-"Lines" = "Lines";
-"Pixels" = "Pixels";
+"Slower" = "Slower";
+"Faster" = "Faster";
+"Distance" = "Distance";
 
+"Disable pointer acceleration" = "포인터 가속 비활성화";
 "Acceleration" = "가속";
 "Revert to system defaults" = "시스템 기본값으로 되돌리기";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z를 눌러서도 시스템 기본값으로 되돌릴 수 있습니다.";
-"Disable pointer acceleration" = "포인터 가속 비활성화";
 
 "Enable universal back and forward" = "유니버설 백/포워드";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "뒤로 및 앞으로 가기 측면 버튼을 스와이프 제스처로 변환하여 앱 호환성을 높입니다.";
@@ -45,16 +46,16 @@
 "Show in menu bar" = "메뉴 막대에서 보기";
 "To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
 
-"Update" = "업데이트";
 "Version: %@" = "버전: %@";
-"Check for Updates..." = "업데이트 확인...";
-"Automatically" = "자동으로 확인";
+"Check for updates automatically" = "Check for updates automatically";
+"Update check interval" = "Update check interval";
 "Daily" = "매일";
 "Weekly" = "매주";
 "Monthly" = "매달";
-"Include beta" = "베타 버전 포함";
+"Receive beta updates" = "Receive beta updates";
+"Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
+"Check for Updates..." = "업데이트 확인...";
 
-"Links" = "링크";
 "Homepage" = "홈페이지";
 "Bug report" = "Bug report";
 "Feature request" = "Feature request";
