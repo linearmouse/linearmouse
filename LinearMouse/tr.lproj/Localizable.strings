@@ -22,16 +22,17 @@
 "Some gestures, such as swiping back and forward, may stop working." = "İleri ve geri kaydırma gibi bazı hareketler çalışmayabilir.";
 "Mode" = "Mode";
 "Accelerated" = "Accelerated";
+"By Lines" = "By Lines";
+"By Pixels" = "By Pixels";
 "Speed" = "Hız";
-"Linear" = "Linear";
-"Unit" = "Unit";
-"Lines" = "Lines";
-"Pixels" = "Pixels";
+"Slower" = "Slower";
+"Faster" = "Faster";
+"Distance" = "Distance";
 
+"Disable pointer acceleration" = "İşaretçi ivmesini devre dışı bırak";
 "Acceleration" = "İvme";
 "Revert to system defaults" = "Fabrika ayarlarına dön";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z'a basarak da fabrika ayarlarına dönebilirsiniz.";
-"Disable pointer acceleration" = "İşaretçi ivmesini devre dışı bırak";
 
 "Enable universal back and forward" = "Evrensel ileri ve geriyi etkinleştir";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Evrensel ileri ve geri işlevine izin vermek için ileri ve geri yan düğmelerini kaydırma hareketlerine dönüştürün.";
@@ -45,16 +46,16 @@
 "Show in menu bar" = "Menüde göster";
 "To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
 
-"Update" = "Güncellemeler";
 "Version: %@" = "Sürüm: %@";
-"Check for Updates..." = "Güncellemeleri kontrol et...";
-"Automatically" = "Otomatik olarak";
+"Check for updates automatically" = "Check for updates automatically";
+"Update check interval" = "Update check interval";
 "Daily" = "Günlük";
 "Weekly" = "Haftalık";
 "Monthly" = "Aylık";
-"Include beta" = "Beta sürümlerini dahil et";
+"Receive beta updates" = "Receive beta updates";
+"Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
+"Check for Updates..." = "Güncellemeleri kontrol et...";
 
-"Links" = "Bağlantılar";
 "Homepage" = "Anasayfa";
 "Bug report" = "Bug report";
 "Feature request" = "Feature request";
