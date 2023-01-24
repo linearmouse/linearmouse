@@ -22,16 +22,17 @@
 "Some gestures, such as swiping back and forward, may stop working." = "Alcuni gesti, come scorrere avanti e indietro, potrebbero smettere di funzionare.";
 "Mode" = "Mode";
 "Accelerated" = "Accelerated";
+"By Lines" = "By Lines";
+"By Pixels" = "By Pixels";
 "Speed" = "Speed";
-"Linear" = "Linear";
-"Unit" = "Unit";
-"Lines" = "Lines";
-"Pixels" = "Pixels";
+"Slower" = "Slower";
+"Faster" = "Faster";
+"Distance" = "Distance";
 
+"Disable pointer acceleration" = "Disable pointer acceleration";
 "Acceleration" = "Accelerazione";
 "Revert to system defaults" = "Ripristina impostazioni predefinite";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Puoi anche premere ⌃⇧⌘Z per ripristinare le impostazioni predefinite.";
-"Disable pointer acceleration" = "Disable pointer acceleration";
 
 "Enable universal back and forward" = "Abilitare avanti e indietro universale";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Converti i pulsanti laterali avanti e indietro in gesti scorrevoli per consentire funzionalità di avanti e indietro universali.";
@@ -45,16 +46,16 @@
 "Show in menu bar" = "Mostra nella barra dei menu";
 "To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
 
-"Update" = "Update";
 "Version: %@" = "Versione: %@";
-"Check for Updates..." = "Controlla aggiornamenti...";
-"Automatically" = "Automaticamente";
+"Check for updates automatically" = "Check for updates automatically";
+"Update check interval" = "Update check interval";
 "Daily" = "Ogni giorno";
 "Weekly" = "Ogni settimana";
 "Monthly" = "Ogni mese";
-"Include beta" = "Includere beta";
+"Receive beta updates" = "Receive beta updates";
+"Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
+"Check for Updates..." = "Controlla aggiornamenti...";
 
-"Links" = "Links";
 "Homepage" = "Homepage";
 "Bug report" = "Bug report";
 "Feature request" = "Feature request";
