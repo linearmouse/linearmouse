@@ -1,9 +1,9 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse требуется разрешение на Универсальный доступ";
-"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
-"Get more help" = "Получить дополнительную помощь";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "Вам необходимо предоставить разрешение на Универсальный доступ. Перейдите в Системные настройки > Конфиденциальность и безопасность > Универсальный доступ.";
+"Get more help" = "Получить помощь";
 "Open Accessibility" = "Открыть Универсальный доступ";
 
-"%@ Settings..." = "%@ Settings...";
+"%@ Settings..." = "Настройки %@...";
 "Start at login" = "Запуск при входе";
 "Config" = "Конфигурация";
 "Reload" = "Обновить";
@@ -11,28 +11,28 @@
 "Quit %@" = "Завершить %@";
 
 "Scrolling" = "Прокрутка";
-"Pointer" = "Указатель";
+"Pointer" = "Курсор";
 "Buttons" = "Кнопки";
-"Modifier Keys" = "Клавиши-модификаторы";
+"Modifier Keys" = "Клавиши модификации";
 "General" = "Основные";
 
-"Vertical" = "Vertical";
-"Horizontal" = "Horizontal";
-"Reverse scrolling" = "Обратная прокрутка";
+"Vertical" = "Вертикальная";
+"Horizontal" = "Горизонтальная";
+"Reverse scrolling" = "Инвертированная прокрутка";
 "Some gestures, such as swiping back and forward, may stop working." = "Некоторые жесты, такие как смахивание «назад» и «вперед», могут перестать работать.";
-"Mode" = "Mode";
-"Accelerated" = "Accelerated";
-"By Lines" = "By Lines";
-"By Pixels" = "By Pixels";
+"Mode" = "Режим";
+"Accelerated" = "Ускорение";
+"By Lines" = "По строкам";
+"By Pixels" = "По пикселям";
 "Speed" = "Скорость";
-"Slower" = "Slower";
-"Faster" = "Faster";
-"Distance" = "Distance";
+"Slower" = "Медленнее";
+"Faster" = "Быстрее";
+"Distance" = "Количество";
 
-"Disable pointer acceleration" = "Отключить ускорение указателя";
+"Disable pointer acceleration" = "Отключить ускорение курсора";
 "Acceleration" = "Ускорение";
-"Revert to system defaults" = "Вернуться к системным настройкам по умолчанию";
-"You may also press ⌃⇧⌘Z to revert to system defaults." = "Вы также можете нажать ⌃⇧⌘Z, чтобы вернуться к системным настройкам по умолчанию.";
+"Revert to system defaults" = "Вернуться к настройкам по умолчанию";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "Вы также можете нажать ⌃⇧⌘Z, чтобы вернуться к настройкам по умолчанию.";
 
 "Enable universal back and forward" = "Включить универсальные «назад» и «вперед»";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Преобразует боковые кнопки «назад» и «вперед» в жесты смахивания, чтобы сделать их работоспособными во всех приложениях.";
@@ -44,24 +44,24 @@
 
 "Settings" = "Настройки";
 "Show in menu bar" = "Показывать в строке меню";
-"To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
+"To show the settings, launch %@ again." = "Для отображения настроек перезапустите %@.";
 
 "Version: %@" = "Версия: %@";
-"Check for updates automatically" = "Check for updates automatically";
-"Update check interval" = "Update check interval";
+"Check for updates automatically" = "Автоматически проверять наличие обновлений";
+"Update check interval" = "Частота проверки обновлений";
 "Daily" = "Ежедневно";
 "Weekly" = "Еженедельно";
 "Monthly" = "Ежемесячно";
-"Receive beta updates" = "Receive beta updates";
-"Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
+"Receive beta updates" = "Получать бета-обновления";
+"Thank you for participating in the beta test." = "Благодарим Вас за участие в бета-тестировании.";
 "Check for Updates..." = "Проверить наличие обновлений...";
 
 "Homepage" = "Домашняя страница";
-"Bug report" = "Bug report";
-"Feature request" = "Feature request";
-"Donate" = "Donate";
+"Bug report" = "Сообщить об ошибке";
+"Feature request" = "Предложить новую функцию";
+"Donate" = "Отблагодарить";
 
-"Auto switch to the active device" = "Автопереключение на активное устройство";
+"Auto switch to the active device" = "Автоматическое переключение на активное устройство";
 "OK" = "ОК";
 
 "Mouse" = "Мышь";
