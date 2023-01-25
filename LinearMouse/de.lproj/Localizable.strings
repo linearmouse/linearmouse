@@ -22,12 +22,12 @@
 "Some gestures, such as swiping back and forward, may stop working." = "Manche Gesten, beispielsweise Vor- und Zurück-Wischen, könnten nicht korrekt funktionieren.";
 "Mode" = "Modus";
 "Accelerated" = "Beschleunigt";
-"By Lines" = "Nach Zeilen";
-"By Pixels" = "Nach Pixel";
+"By Lines" = "In Zeilen";
+"By Pixels" = "In Pixel";
 "Speed" = "Geschwindigkeit";
 "Slower" = "Langsamer";
 "Faster" = "Schneller";
-"Distance" = "Distance";
+"Distance" = "Distanz";
 
 "Disable pointer acceleration" = "Zeigerbeschleunigung deaktivieren";
 "Acceleration" = "Beschleunigung";
@@ -47,13 +47,13 @@
 "To show the settings, launch %@ again." = "Um die Einstellungen anzuzeigen, öffne %@ erneut.";
 
 "Version: %@" = "Version: %@";
-"Check for updates automatically" = "Check for updates automatically";
-"Update check interval" = "Update check interval";
+"Check for updates automatically" = "Automatisch nach Aktualisierungen suchen";
+"Update check interval" = "Aktualisierungs-Prüfintervall";
 "Daily" = "Täglich";
 "Weekly" = "Wöchentlich";
 "Monthly" = "Monatlich";
-"Receive beta updates" = "Receive beta updates";
-"Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
+"Receive beta updates" = "Beta-Updates erhalten";
+"Thank you for participating in the beta test." = "Vielen Dank für die Teilnahme am Betatest.";
 "Check for Updates..." = "Nach Updates suchen...";
 
 "Homepage" = "Homepage";
