@@ -38,7 +38,7 @@
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Преобразует боковые кнопки «назад» и «вперед» в жесты смахивания, чтобы сделать их работоспособными во всех приложениях.";
 
 "No action" = "Не задано";
-"Alter orientation" = "Изменить направление";
+"Alter orientation" = "Изменить направление прокрутки";
 "Change speed" = "Изменить скорость";
 "to" = "на";
 
