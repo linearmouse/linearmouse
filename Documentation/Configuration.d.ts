@@ -350,7 +350,12 @@ declare namespace Scheme {
         | MouseWheelScrollUp
         | MouseWheelScrollDown
         | MouseWheelScrollLeft
-        | MouseWheelScrollRight;
+        | MouseWheelScrollRight
+        | MouseButtonLeft
+        | MouseButtonMiddle
+        | MouseButtonRight
+        | MouseButtonBack
+        | MouseButtonForward;
 
       /**
        * @description Do not modify the button behavior.
@@ -471,6 +476,31 @@ declare namespace Scheme {
        * @description Mouse: Wheel: Scroll right.
        */
       type MouseWheelScrollRight = "mouse.wheel.scrollRight";
+
+      /**
+       * @description Mouse: Button: Act as left button.
+       */
+      type MouseButtonLeft = "mouse.button.left";
+
+      /**
+       * @description Mouse: Button: Act as middle button.
+       */
+      type MouseButtonMiddle = "mouse.button.middle";
+
+      /**
+       * @description Mouse: Button: Act as right button.
+       */
+      type MouseButtonRight = "mouse.button.right";
+
+      /**
+       * @description Mouse: Button: Act as back button.
+       */
+      type MouseButtonBack = "mouse.button.back";
+
+      /**
+       * @description Mouse: Button: Act as forward button.
+       */
+      type MouseButtonForward = "mouse.button.forward";
 
       type Run = {
         /**

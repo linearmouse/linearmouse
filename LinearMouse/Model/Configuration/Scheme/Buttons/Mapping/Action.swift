@@ -51,6 +51,12 @@ extension Scheme.Buttons.Mapping.Action: Codable {
         case mouseWheelScrollDown = "mouse.wheel.scrollDown"
         case mouseWheelScrollLeft = "mouse.wheel.scrollLeft"
         case mouseWheelScrollRight = "mouse.wheel.scrollRight"
+
+        case mouseButtonLeft = "mouse.button.left"
+        case mouseButtonMiddle = "mouse.button.middle"
+        case mouseButtonRight = "mouse.button.right"
+        case mouseButtonBack = "mouse.button.back"
+        case mouseButtonForward = "mouse.button.forward"
     }
 
     enum ValueError: Error {

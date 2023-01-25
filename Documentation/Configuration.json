@@ -313,6 +313,31 @@
       "description": "Mission Control: Move right a space.",
       "type": "string"
     },
+    "Scheme.Buttons.Mapping.MouseButtonBack": {
+      "const": "mouse.button.back",
+      "description": "Mouse: Button: Act as back button.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.MouseButtonForward": {
+      "const": "mouse.button.forward",
+      "description": "Mouse: Button: Act as forward button.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.MouseButtonLeft": {
+      "const": "mouse.button.left",
+      "description": "Mouse: Button: Act as left button.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.MouseButtonMiddle": {
+      "const": "mouse.button.middle",
+      "description": "Mouse: Button: Act as middle button.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.MouseButtonRight": {
+      "const": "mouse.button.right",
+      "description": "Mouse: Button: Act as right button.",
+      "type": "string"
+    },
     "Scheme.Buttons.Mapping.MouseWheelScrollDown": {
       "const": "mouse.wheel.scrollDown",
       "description": "Mouse: Wheel: Scroll down.",
@@ -501,6 +526,21 @@
         },
         {
           "$ref": "#/definitions/Scheme.Buttons.Mapping.MouseWheelScrollRight"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MouseButtonLeft"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MouseButtonMiddle"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MouseButtonRight"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MouseButtonBack"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.MouseButtonForward"
         }
       ]
     },

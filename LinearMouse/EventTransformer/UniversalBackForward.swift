@@ -5,11 +5,6 @@ import Foundation
 import GestureKit
 import os.log
 
-extension CGMouseButton {
-    static let back = CGMouseButton(rawValue: 3)!
-    static let forward = CGMouseButton(rawValue: 4)!
-}
-
 class UniversalBackForward: EventTransformer {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "UniversalBackForward")
 
