@@ -13,10 +13,21 @@ class MouseEventView {
     }
 
     var mouseButton: CGMouseButton? {
-        guard let mouseButtonNumber = UInt32(exactly: event.getIntegerValueField(.mouseEventButtonNumber)) else {
-            return nil
+        get {
+            guard let mouseButtonNumber = UInt32(exactly: event.getIntegerValueField(.mouseEventButtonNumber)) else {
+                return nil
+            }
+            return CGMouseButton(rawValue: mouseButtonNumber)!
         }
-        return CGMouseButton(rawValue: mouseButtonNumber)!
+
+        set {
+            guard let newValue = newValue else {
+                return
+            }
+
+            event.type = newValue.fixedCGEventType(of: event.type)
+            event.setIntegerValueField(.mouseEventButtonNumber, value: Int64(newValue.rawValue))
+        }
     }
 
     var modifierFlags: CGEventFlags {

@@ -57,6 +57,10 @@ extension Device {
         device.serialNumber
     }
 
+    var buttonCount: Int? {
+        device.buttonCount
+    }
+
     enum Category {
         case mouse, trackpad
     }

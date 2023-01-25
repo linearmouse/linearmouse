@@ -85,3 +85,23 @@ extension pid_t {
         return pid
     }
 }
+
+extension CGMouseButton {
+    static let back = CGMouseButton(rawValue: 3)!
+    static let forward = CGMouseButton(rawValue: 4)!
+
+    func fixedCGEventType(of eventType: CGEventType) -> CGEventType {
+        func fixed(of type: CGEventType, _ l: CGEventType, _ r: CGEventType, _ o: CGEventType) -> CGEventType {
+            guard type == l || type == r || type == o else {
+                return type
+            }
+            return self == .left ? l : self == .right ? r : o
+        }
+
+        var eventType = eventType
+        eventType = fixed(of: eventType, .leftMouseDown, .rightMouseDown, .otherMouseDown)
+        eventType = fixed(of: eventType, .leftMouseUp, .rightMouseUp, .otherMouseUp)
+        eventType = fixed(of: eventType, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged)
+        return eventType
+    }
+}

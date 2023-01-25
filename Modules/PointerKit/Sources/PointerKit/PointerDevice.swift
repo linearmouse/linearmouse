@@ -95,6 +95,10 @@ public extension PointerDevice {
     var serialNumber: String? {
         client.getProperty(kIOHIDSerialNumberKey)
     }
+
+    var buttonCount: Int? {
+        client.getProperty(kIOHIDPointerButtonCountKey)
+    }
 }
 
 extension PointerDevice: CustomStringConvertible {

@@ -32,9 +32,21 @@ extension ButtonActions: EventTransformer {
         [.leftMouseUp, .rightMouseUp, .otherMouseUp]
     }
 
+    var mouseDraggedEventTypes: [CGEventType] {
+        [.leftMouseDragged, .rightMouseDragged, .otherMouseDragged]
+    }
+
+    var scrollWheelsEventTypes: [CGEventType] {
+        [.scrollWheel]
+    }
+
+    var allEventTypesOfInterest: [CGEventType] {
+        [mouseDownEventTypes, mouseUpEventTypes, mouseDraggedEventTypes, scrollWheelsEventTypes]
+            .flatMap { $0 }
+    }
+
     func transform(_ event: CGEvent) -> CGEvent? {
-        guard mouseDownEventTypes.contains(event.type) || mouseUpEventTypes.contains(event.type) || event
-            .type == .scrollWheel else {
+        guard allEventTypesOfInterest.contains(event.type) else {
             return event
         }
 
@@ -61,6 +73,10 @@ extension ButtonActions: EventTransformer {
             let keyRepeatDelay = mapping.repeat == true ? NSEvent.keyRepeatDelay : 0
             let keyRepeatInterval = mapping.repeat == true ? NSEvent.keyRepeatInterval : 0
             let keyRepeatEnabled = keyRepeatDelay > 0 && keyRepeatInterval > 0
+
+            if !keyRepeatEnabled, handleSimpleButtonMappings(event: event, action: action) {
+                return event
+            }
 
             // Actions are executed when button is down if key repeat is enabled; otherwise, actions are
             // executed when button is up.
@@ -207,6 +223,21 @@ extension ButtonActions: EventTransformer {
         case .simpleAction(.mouseWheelScrollRight):
             postScrollEvent(horizontal: -3, vertical: 0)
 
+        case .simpleAction(.mouseButtonLeft):
+            postClickEvent(mouseButton: .left)
+
+        case .simpleAction(.mouseButtonMiddle):
+            postClickEvent(mouseButton: .center)
+
+        case .simpleAction(.mouseButtonRight):
+            postClickEvent(mouseButton: .right)
+
+        case .simpleAction(.mouseButtonBack):
+            postClickEvent(mouseButton: .back)
+
+        case .simpleAction(.mouseButtonForward):
+            postClickEvent(mouseButton: .forward)
+
         case let .run(command):
             let task = Process()
             task.launchPath = "/bin/bash"
@@ -299,5 +330,57 @@ extension ButtonActions: EventTransformer {
                 postContinuousScrollEvent(horizontal: -value, vertical: 0)
             }
         }
+    }
+
+    private func handleSimpleButtonMappings(event: CGEvent, action: Scheme.Buttons.Mapping.Action) -> Bool {
+        guard [mouseDownEventTypes, mouseUpEventTypes, mouseDraggedEventTypes].flatMap({ $0 }).contains(event.type)
+        else {
+            return false
+        }
+
+        let mouseEventView = MouseEventView(event)
+
+        switch action {
+        case .simpleAction(.mouseButtonLeft):
+            mouseEventView.mouseButton = .left
+        case .simpleAction(.mouseButtonMiddle):
+            mouseEventView.mouseButton = .center
+        case .simpleAction(.mouseButtonRight):
+            mouseEventView.mouseButton = .right
+        case .simpleAction(.mouseButtonBack):
+            mouseEventView.mouseButton = .back
+        case .simpleAction(.mouseButtonForward):
+            mouseEventView.mouseButton = .forward
+        default:
+            return false
+        }
+
+        return true
+    }
+
+    private func postClickEvent(mouseButton: CGMouseButton) {
+        guard let location = CGEvent(source: nil)?.location else {
+            return
+        }
+
+        guard let mouseDownEvent = CGEvent(
+            mouseEventSource: nil,
+            mouseType: mouseButton.fixedCGEventType(of: .leftMouseDown),
+            mouseCursorPosition: location,
+            mouseButton: mouseButton
+        ) else {
+            return
+        }
+        guard let mouseUpEvent = CGEvent(
+            mouseEventSource: nil,
+            mouseType: mouseButton.fixedCGEventType(of: .leftMouseUp),
+            mouseCursorPosition: location,
+            mouseButton: mouseButton
+        ) else {
+            return
+        }
+
+        mouseDownEvent.post(tap: .cgSessionEventTap)
+        mouseUpEvent.post(tap: .cgSessionEventTap)
     }
 }

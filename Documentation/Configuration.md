@@ -494,6 +494,36 @@ If you hold <kbd>option + back</kbd>, the volume will continue to decrease.
 }
 ```
 
+### Swap back and forward buttons
+
+```json
+{
+  "schemes": [
+    {
+      "if": [
+        {
+          "device": {
+            "category": "mouse"
+          }
+        }
+      ],
+      "buttons": {
+        "mappings": [
+          {
+            "button": 3,
+            "action": "mouse.button.forward"
+          },
+          {
+            "button": 4,
+            "action": "mouse.button.back"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
 ### Action sheet
 
 #### Simple actions
@@ -508,32 +538,37 @@ A simple action is an action without any parameters.
 
 `<action>` could be one of:
 
-| Action                      | Description                          |
-| --------------------------- | ------------------------------------ |
-| `auto`                      | Do not modify the button behavior.   |
-| `none`                      | Prevent the button events.           |
-| `missionControl`            | Mission Control.                     |
-| `missionControl.spaceLeft`  | Mission Control: Move left a space.  |
-| `missionControl.spaceRight` | Mission Control: Move right a space. |
-| `appExpose`                 | App Exposé.                          |
-| `launchpad`                 | Launchpad.                           |
-| `showDesktop`               | Show desktop.                        |
-| `display.brightnessUp`      | Display: Brightness up.              |
-| `display.brightnessDown`    | Display: Brightness down.            |
-| `media.volumeUp`            | Media: Volume up.                    |
-| `media.volumeDown`          | Media: Volume down.                  |
-| `media.mute`                | Media: Toggle mute.                  |
-| `media.playPause`           | Media: Play / pause.                 |
-| `media.next`                | Media: Next.                         |
-| `media.previous`            | Media: Previous.                     |
-| `media.fastForward`         | Media: Fast forward.                 |
-| `media.rewind`              | Media: Rewind.                       |
-| `keyboard.brightnessUp`     | Keyboard: Brightness up.             |
-| `keyboard.brightnessDown`   | Keyboard: Brightness down.           |
-| `mouse.wheel.scrollUp`      | Mouse: Wheel: Scroll up.             |
-| `mouse.wheel.scrollDown`    | Mouse: Wheel: Scroll down.           |
-| `mouse.wheel.scrollLeft`    | Mouse: Wheel: Scroll left.           |
-| `mouse.wheel.scrollRight`   | Mouse: Wheel: Scroll right.          |
+| Action                      | Description                           |
+| --------------------------- | ------------------------------------- |
+| `auto`                      | Do not modify the button behavior.    |
+| `none`                      | Prevent the button events.            |
+| `missionControl`            | Mission Control.                      |
+| `missionControl.spaceLeft`  | Mission Control: Move left a space.   |
+| `missionControl.spaceRight` | Mission Control: Move right a space.  |
+| `appExpose`                 | App Exposé.                           |
+| `launchpad`                 | Launchpad.                            |
+| `showDesktop`               | Show desktop.                         |
+| `display.brightnessUp`      | Display: Brightness up.               |
+| `display.brightnessDown`    | Display: Brightness down.             |
+| `media.volumeUp`            | Media: Volume up.                     |
+| `media.volumeDown`          | Media: Volume down.                   |
+| `media.mute`                | Media: Toggle mute.                   |
+| `media.playPause`           | Media: Play / pause.                  |
+| `media.next`                | Media: Next.                          |
+| `media.previous`            | Media: Previous.                      |
+| `media.fastForward`         | Media: Fast forward.                  |
+| `media.rewind`              | Media: Rewind.                        |
+| `keyboard.brightnessUp`     | Keyboard: Brightness up.              |
+| `keyboard.brightnessDown`   | Keyboard: Brightness down.            |
+| `mouse.wheel.scrollUp`      | Mouse: Wheel: Scroll up.              |
+| `mouse.wheel.scrollDown`    | Mouse: Wheel: Scroll down.            |
+| `mouse.wheel.scrollLeft`    | Mouse: Wheel: Scroll left.            |
+| `mouse.wheel.scrollRight`   | Mouse: Wheel: Scroll right.           |
+| `mouse.button.left`         | Mouse: Button: Act as left button.    |
+| `mouse.button.middle`       | Mouse: Button: Act as middle button.  |
+| `mouse.button.right`        | Mouse: Button: Act as right button.   |
+| `mouse.button.back`         | Mouse: Button: Act as back button.    |
+| `mouse.button.forward`      | Mouse: Button: Act as forward button. |
 
 #### Run shell commands
 

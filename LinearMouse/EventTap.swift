@@ -41,14 +41,17 @@ class EventTap {
     }
 
     init() {
-        let eventsOfInterest: CGEventMask =
+        var eventsOfInterest: CGEventMask =
             1 << CGEventType.scrollWheel.rawValue
                 | 1 << CGEventType.leftMouseDown.rawValue
                 | 1 << CGEventType.leftMouseUp.rawValue
-                | 1 << CGEventType.rightMouseDown.rawValue
-                | 1 << CGEventType.rightMouseUp.rawValue
-                | 1 << CGEventType.otherMouseDown.rawValue
-                | 1 << CGEventType.otherMouseUp.rawValue
+                | 1 << CGEventType.leftMouseDragged.rawValue
+        eventsOfInterest |= 1 << CGEventType.rightMouseDown.rawValue
+            | 1 << CGEventType.rightMouseUp.rawValue
+            | 1 << CGEventType.rightMouseDragged.rawValue
+        eventsOfInterest |= 1 << CGEventType.otherMouseDown.rawValue
+            | 1 << CGEventType.otherMouseUp.rawValue
+            | 1 << CGEventType.otherMouseDragged.rawValue
         eventTap = CGEvent.tapCreate(
             tap: .cghidEventTap,
             place: .headInsertEventTap,
