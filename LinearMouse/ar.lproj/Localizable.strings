@@ -14,20 +14,20 @@
 "Pointer" = "المؤشر";
 "Buttons" = "الأزرار";
 "Modifier Keys" = "مفاتيح التعديل";
-"General" = "General";
+"General" = "عام";
 
-"Vertical" = "Vertical";
-"Horizontal" = "Horizontal";
-"Reverse scrolling" = "Reverse scrolling";
+"Vertical" = "عمودي";
+"Horizontal" = "أُفقي";
+"Reverse scrolling" = "التمرير العكسي";
 "Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
 "Mode" = "Mode";
 "Accelerated" = "Accelerated";
 "By Lines" = "By Lines";
 "By Pixels" = "By Pixels";
-"Speed" = "Speed";
-"Slower" = "Slower";
-"Faster" = "Faster";
-"Distance" = "Distance";
+"Speed" = "السرعة";
+"Slower" = "أبطأ";
+"Faster" = "أَسرعْ";
+"Distance" = "المسافة";
 
 "Disable pointer acceleration" = "Disable pointer acceleration";
 "Acceleration" = "Acceleration";
@@ -39,30 +39,30 @@
 
 "No action" = "No action";
 "Alter orientation" = "Alter orientation";
-"Change speed" = "Change speed";
+"Change speed" = "تغيير السرعة";
 "to" = "to";
 
-"Settings" = "Settings";
-"Show in menu bar" = "Show in menu bar";
+"Settings" = "الإعدادات";
+"Show in menu bar" = "عرض في شريط القوائم";
 "To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
 
-"Version: %@" = "Version: %@";
+"Version: %@" = "الإصدار: %@";
 "Check for updates automatically" = "Check for updates automatically";
 "Update check interval" = "Update check interval";
-"Daily" = "Daily";
-"Weekly" = "Weekly";
-"Monthly" = "Monthly";
+"Daily" = "يومي";
+"Weekly" = "أسبوعي";
+"Monthly" = "شهري";
 "Receive beta updates" = "Receive beta updates";
-"Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
-"Check for Updates..." = "Check for Updates...";
+"Thank you for participating in the beta test." = "شكرا لك على المشاركة في الاختبار التجريبي.";
+"Check for Updates..." = "جاري التحقق من وجود تحديثات...";
 
-"Homepage" = "Homepage";
+"Homepage" = "الصفحة الرئيسية";
 "Bug report" = "Bug report";
-"Feature request" = "Feature request";
-"Donate" = "Donate";
+"Feature request" = "طلب مِيزة غير موجودة";
+"Donate" = "تبرع";
 
 "Auto switch to the active device" = "Auto switch to the active device";
-"OK" = "OK";
+"OK" = "حسنا";
 
 "Mouse" = "Mouse";
 "Trackpad" = "Trackpad";
