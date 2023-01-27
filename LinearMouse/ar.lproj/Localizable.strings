@@ -1,19 +1,19 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
 "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
-"Get more help" = "Get more help";
+"Get more help" = "المزيد من المساعدة";
 "Open Accessibility" = "Open Accessibility";
 
-"%@ Settings..." = "%@ Settings...";
-"Start at login" = "Start at login";
+"%@ Settings..." = "%@ الإعدادات...";
+"Start at login" = "البَدْء عند تسجيل الدخول";
 "Config" = "Config";
-"Reload" = "Reload";
+"Reload" = "إعادة التحميل";
 "Reveal in Finder" = "Reveal in Finder";
-"Quit %@" = "Quit %@";
+"Quit %@" = "إغلاق %@";
 
-"Scrolling" = "Scrolling";
-"Pointer" = "Pointer";
-"Buttons" = "Buttons";
-"Modifier Keys" = "Modifier Keys";
+"Scrolling" = "التمرير";
+"Pointer" = "المؤشر";
+"Buttons" = "الأزرار";
+"Modifier Keys" = "مفاتيح التعديل";
 "General" = "General";
 
 "Vertical" = "Vertical";
