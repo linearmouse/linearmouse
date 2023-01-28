@@ -41,6 +41,10 @@ class EventTap {
     }
 
     init() {
+        guard AccessibilityPermission.enabled else {
+            return
+        }
+
         var eventsOfInterest: CGEventMask =
             1 << CGEventType.scrollWheel.rawValue
                 | 1 << CGEventType.leftMouseDown.rawValue
