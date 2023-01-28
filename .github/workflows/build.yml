@@ -43,7 +43,7 @@ jobs:
           security list-keychain -d user -s $KEYCHAIN_PATH
 
           # Configure code signing
-          make configure
+          make configure-release
       - name: Build
         run: make
       - name: Prepublish
