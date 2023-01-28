@@ -7,11 +7,16 @@ all: configure clean lint test package
 
 configure: Signing.xcconfig Version.xcconfig .git/hooks/pre-commit
 
+configure-release: configure Release.xcconfig
+
 Signing.xcconfig:
 	@./Scripts/configure-code-signing
 
 Version.xcconfig:
 	@./Scripts/configure-version
+
+Release.xcconfig:
+	@./Scripts/configure-release
 
 .git/hooks/pre-commit:
 	cp ./Scripts/pre-commit $@

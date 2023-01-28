@@ -1,5 +1,9 @@
 CURRENT_PROJECT_VERSION = dev
 MARKETING_VERSION = $(CURRENT_PROJECT_VERSION)
 
+PRODUCT_BUNDLE_IDENTIFIER = com.lujjjh.dev.LinearMouse
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIconDev
+
 #include? "Signing.xcconfig"
 #include? "Version.xcconfig"
+#include? "Release.xcconfig"
