@@ -4,7 +4,7 @@
 import Foundation
 
 extension Scheme {
-    struct Scrolling: Codable {
+    struct Scrolling: Codable, OptionalBindable {
         var reverse: Bidirectional<Bool>?
 
         var distance: Bidirectional<Distance>?
@@ -33,12 +33,16 @@ extension Scheme.Scrolling {
 }
 
 extension Scheme.Scrolling {
-    struct Bidirectional<T: Codable & Equatable> {
+    struct Bidirectional<T: Codable & Equatable>: OptionalBindable {
         var value: Value
 
         struct Value: Codable {
             var vertical: T?
             var horizontal: T?
+        }
+
+        init() {
+            self.init(vertical: nil, horizontal: nil)
         }
 
         init(vertical: T? = nil, horizontal: T? = nil) {
@@ -66,9 +70,23 @@ extension Scheme.Scrolling {
 }
 
 extension Scheme.Scrolling.Bidirectional {
-    var vertical: T? { value.vertical }
+    var vertical: T? {
+        get {
+            value.vertical
+        }
+        set {
+            value.vertical = newValue
+        }
+    }
 
-    var horizontal: T? { value.horizontal }
+    var horizontal: T? {
+        get {
+            value.horizontal
+        }
+        set {
+            value.horizontal = newValue
+        }
+    }
 }
 
 extension Scheme.Scrolling.Bidirectional: Codable {
