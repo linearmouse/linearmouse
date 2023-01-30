@@ -40,9 +40,6 @@ struct AccessibilityPermissionView: View {
     }
 
     func openAccessibility() {
-        do {
-            try AccessibilityPermission.reset()
-        } catch {}
         AccessibilityPermission.prompt()
         AccessibilityPermissionWindow.shared.moveAside()
     }
