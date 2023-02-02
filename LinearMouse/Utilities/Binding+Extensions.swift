@@ -40,11 +40,15 @@ extension Binding {
 }
 
 extension Binding {
-    func withDefault<T>(_ defaultValue: T) -> Binding<T> where Value == T? {
+    func map<T>(get: @escaping (Value) -> T, set: @escaping (T) -> Value) -> Binding<T> {
         Binding<T>(get: {
-            self.wrappedValue ?? defaultValue
+            get(wrappedValue)
         }, set: {
-            self.wrappedValue = $0
+            wrappedValue = set($0)
         })
+    }
+
+    func withDefault<T>(_ defaultValue: T) -> Binding<T> where Value == T? {
+        map(get: { $0 ?? defaultValue }, set: { $0 })
     }
 }

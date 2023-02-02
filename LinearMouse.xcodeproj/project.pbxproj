@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		36EBC3223E2CEE09F84076D8 /* Process.m in Sources */ = {isa = PBXBuildFile; fileRef = 36EBC80F80AD57E8226267BF /* Process.m */; };
 		9704BA992976E84C00C8B06D /* SettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9704BA982976E84C00C8B06D /* SettingsState.swift */; };
-		9704BA9B29796D2000C8B06D /* ScrollingSettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9704BA9A29796D2000C8B06D /* ScrollingSettingsState.swift */; };
 		971338AF289B64C1005A74D2 /* HelpButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971338AE289B64C1005A74D2 /* HelpButton.swift */; };
 		972A5E1F285CA43D00CB6440 /* DevicePickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E1E285CA43D00CB6440 /* DevicePickerSheet.swift */; };
 		972A5E22285CA49800CB6440 /* DevicePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E21285CA49800CB6440 /* DevicePicker.swift */; };
@@ -125,7 +124,6 @@
 		36EBC1359D50EDBC252FB81F /* Process.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Process.h; sourceTree = "<group>"; };
 		36EBC80F80AD57E8226267BF /* Process.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Process.m; sourceTree = "<group>"; };
 		9704BA982976E84C00C8B06D /* SettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsState.swift; sourceTree = "<group>"; };
-		9704BA9A29796D2000C8B06D /* ScrollingSettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingSettingsState.swift; sourceTree = "<group>"; };
 		971338AE289B64C1005A74D2 /* HelpButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpButton.swift; sourceTree = "<group>"; };
 		972A5E1E285CA43D00CB6440 /* DevicePickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSheet.swift; sourceTree = "<group>"; };
 		972A5E21285CA49800CB6440 /* DevicePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePicker.swift; sourceTree = "<group>"; };
@@ -401,7 +399,6 @@
 			children = (
 				B7B1D08E26B3EC4F00F48176 /* ScrollingSettings.swift */,
 				97EFAABC28675D00008E6E67 /* SchemeState+ScrollingSettings.swift */,
-				9704BA9A29796D2000C8B06D /* ScrollingSettingsState.swift */,
 			);
 			path = ScrollingSettings;
 			sourceTree = "<group>";
@@ -942,7 +939,6 @@
 				97C5DBC52868A1ED006FA6B4 /* SchemeState+ButtonsSettings.swift in Sources */,
 				972DF649285A26F700B83932 /* DeviceIndicator.swift in Sources */,
 				972DF654285ADE9600B83932 /* GeneralSettings.swift in Sources */,
-				9704BA9B29796D2000C8B06D /* ScrollingSettingsState.swift in Sources */,
 				97F77FA4285DC467007C9C2B /* DevicePickerSectionState.swift in Sources */,
 				972AFD472851E6B0009B0CBF /* AccessibilityPermission.swift in Sources */,
 				B7ADF9832748B12B0005B02D /* LinearScrollingVertical.swift in Sources */,

@@ -2,6 +2,7 @@
 // Copyright (c) 2021-2023 Jiahao Lu
 
 import Foundation
+import SwiftUI
 
 extension Scheme {
     struct Scrolling: Codable, OptionalBindable {
@@ -33,8 +34,12 @@ extension Scheme.Scrolling {
 }
 
 extension Scheme.Scrolling {
+    enum Direction {
+        case vertical, horizontal
+    }
+
     struct Bidirectional<T: Codable & Equatable>: OptionalBindable {
-        var value: Value
+        private var value: Value
 
         struct Value: Codable {
             var vertical: T?
@@ -65,6 +70,18 @@ extension Scheme.Scrolling {
             }
 
             merge(into: &into!)
+        }
+    }
+}
+
+extension Binding {
+    func optionalBinding<T>(direction: Scheme.Scrolling.Direction) -> Binding<T?>
+        where Value == Scheme.Scrolling.Bidirectional<T>? {
+        switch direction {
+        case .vertical:
+            return optionalBinding(\.vertical)
+        case .horizontal:
+            return optionalBinding(\.horizontal)
         }
     }
 }
