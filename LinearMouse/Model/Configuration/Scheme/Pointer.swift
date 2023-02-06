@@ -16,7 +16,7 @@ extension Scheme {
         static var range: ClosedRange<Value> = 0 ... 1
     }
 
-    struct Pointer: Codable {
+    struct Pointer: Codable, ImplicitInitable {
         @Clamp<Acceleration> var acceleration: Decimal?
 
         @Clamp<Speed> var speed: Decimal?

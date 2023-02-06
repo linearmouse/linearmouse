@@ -4,23 +4,35 @@
 import Foundation
 
 extension Scheme {
-    struct Scrolling: Codable {
-        var reverse: Bidirectional<Bool>?
+    struct Scrolling: Codable, ImplicitInitable {
+        @ImplicitOptional var reverse: Bidirectional<Bool>
 
-        var distance: Bidirectional<Distance>?
+        @ImplicitOptional var distance: Bidirectional<Distance>
 
-        var scale: Bidirectional<Decimal>?
+        @ImplicitOptional var scale: Bidirectional<Decimal>
 
-        var modifiers: Modifiers?
+        @ImplicitOptional var modifiers: Modifiers
+
+        init() {}
+
+        init(reverse: Bidirectional<Bool>? = nil,
+             distance: Bidirectional<Distance>? = nil,
+             scale: Bidirectional<Decimal>? = nil,
+             modifiers: Modifiers? = nil) {
+            $reverse = reverse
+            $distance = distance
+            $scale = scale
+            $modifiers = modifiers
+        }
     }
 }
 
 extension Scheme.Scrolling {
     func merge(into scrolling: inout Self) {
-        reverse?.merge(into: &scrolling.reverse)
-        distance?.merge(into: &scrolling.distance)
-        scale?.merge(into: &scrolling.scale)
-        modifiers?.merge(into: &scrolling.modifiers)
+        $reverse?.merge(into: &scrolling.reverse)
+        $distance?.merge(into: &scrolling.distance)
+        $scale?.merge(into: &scrolling.scale)
+        $modifiers?.merge(into: &scrolling.modifiers)
     }
 
     func merge(into scrolling: inout Self?) {
@@ -33,13 +45,15 @@ extension Scheme.Scrolling {
 }
 
 extension Scheme.Scrolling {
-    struct Bidirectional<T: Codable & Equatable> {
-        var value: Value
+    struct Bidirectional<T: Codable & Equatable>: ImplicitInitable {
+        var value: Value = .init()
 
         struct Value: Codable {
             var vertical: T?
             var horizontal: T?
         }
+
+        init() {}
 
         init(vertical: T? = nil, horizontal: T? = nil) {
             value = .init(vertical: vertical, horizontal: horizontal)
@@ -66,9 +80,15 @@ extension Scheme.Scrolling {
 }
 
 extension Scheme.Scrolling.Bidirectional {
-    var vertical: T? { value.vertical }
+    var vertical: T? {
+        get { value.vertical }
+        set { value.vertical = newValue }
+    }
 
-    var horizontal: T? { value.horizontal }
+    var horizontal: T? {
+        get { value.horizontal }
+        set { value.horizontal = newValue }
+    }
 }
 
 extension Scheme.Scrolling.Bidirectional: Codable {

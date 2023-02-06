@@ -7,33 +7,19 @@ import Foundation
 extension SchemeState {
     var reverseScrollingVertical: Bool {
         get {
-            scheme.scrolling?.reverse?.vertical ?? false
+            scheme.scrolling.reverse.vertical ?? false
         }
         set {
-            Scheme(
-                scrolling: .init(
-                    reverse: .init(
-                        vertical: newValue
-                    )
-                )
-            )
-            .merge(into: &scheme)
+            scheme.scrolling.reverse.vertical = newValue
         }
     }
 
     var reverseScrollingHorizontal: Bool {
         get {
-            scheme.scrolling?.reverse?.horizontal ?? false
+            scheme.scrolling.reverse.horizontal ?? false
         }
         set {
-            Scheme(
-                scrolling: .init(
-                    reverse: .init(
-                        horizontal: newValue
-                    )
-                )
-            )
-            .merge(into: &scheme)
+            scheme.scrolling.reverse.horizontal = newValue
         }
     }
 
@@ -43,7 +29,7 @@ extension SchemeState {
 
     var scrollingModeVertical: ScrollingMode {
         get {
-            switch scheme.scrolling?.distance?.vertical ?? .auto {
+            switch scheme.scrolling.distance.vertical ?? .auto {
             case .auto:
                 return .accelerated
             case .line:
@@ -80,7 +66,7 @@ extension SchemeState {
 
     var scrollingModeHorizontal: ScrollingMode {
         get {
-            switch scheme.scrolling?.distance?.horizontal ?? .auto {
+            switch scheme.scrolling.distance.horizontal ?? .auto {
             case .auto:
                 return .accelerated
             case .line:
@@ -117,7 +103,7 @@ extension SchemeState {
 
     var scrollingScaleVertical: Double {
         get {
-            scheme.scrolling?.scale?.vertical?.asTruncatedDouble ?? 1
+            scheme.scrolling.scale.vertical?.asTruncatedDouble ?? 1
         }
 
         set {
@@ -134,7 +120,7 @@ extension SchemeState {
 
     var scrollingScaleHorizontal: Double {
         get {
-            scheme.scrolling?.scale?.horizontal?.asTruncatedDouble ?? 1
+            scheme.scrolling.scale.horizontal?.asTruncatedDouble ?? 1
         }
 
         set {
@@ -151,7 +137,7 @@ extension SchemeState {
 
     var linearScrollingVerticalDistance: Scheme.Scrolling.Distance {
         get {
-            scheme.scrolling?.distance?.vertical ?? .line(3)
+            scheme.scrolling.distance.vertical ?? .line(3)
         }
         set {
             Scheme(
@@ -167,7 +153,7 @@ extension SchemeState {
 
     var linearScrollingHorizontalDistance: Scheme.Scrolling.Distance {
         get {
-            scheme.scrolling?.distance?.horizontal ?? .line(3)
+            scheme.scrolling.distance.horizontal ?? .line(3)
         }
         set {
             Scheme(

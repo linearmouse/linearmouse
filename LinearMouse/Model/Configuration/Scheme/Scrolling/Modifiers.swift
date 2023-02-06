@@ -4,7 +4,7 @@
 import Foundation
 
 extension Scheme.Scrolling {
-    struct Modifiers: Codable {
+    struct Modifiers: Codable, ImplicitInitable {
         var command: Action?
         var shift: Action?
         var option: Action?

@@ -15,11 +15,21 @@ struct Scheme: Codable {
     /// Defines the conditions under which this scheme is active.
     @SingleValueOrArray var `if`: [If]?
 
-    var scrolling: Scrolling?
+    @ImplicitOptional var scrolling: Scrolling
 
-    var pointer: Pointer?
+    @ImplicitOptional var pointer: Pointer
 
-    var buttons: Buttons?
+    @ImplicitOptional var buttons: Buttons
+
+    init(if: [If]? = nil,
+         scrolling: Scrolling? = nil,
+         pointer: Pointer? = nil,
+         buttons: Buttons? = nil) {
+        self.if = `if`
+        $scrolling = scrolling
+        $pointer = pointer
+        $buttons = buttons
+    }
 }
 
 extension Scheme {
@@ -61,9 +71,9 @@ extension Scheme {
     }
 
     func merge(into scheme: inout Self) {
-        scrolling?.merge(into: &scheme.scrolling)
-        pointer?.merge(into: &scheme.pointer)
-        buttons?.merge(into: &scheme.buttons)
+        $scrolling?.merge(into: &scheme.scrolling)
+        $pointer?.merge(into: &scheme.pointer)
+        $buttons?.merge(into: &scheme.buttons)
     }
 }
 

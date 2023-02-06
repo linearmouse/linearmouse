@@ -6,7 +6,7 @@ import Foundation
 extension SchemeState {
     var universalBackForward: Bool {
         get {
-            scheme.buttons?.universalBackForward ?? .none != .none
+            scheme.buttons.universalBackForward ?? .none != .none
         }
         set {
             Scheme(
