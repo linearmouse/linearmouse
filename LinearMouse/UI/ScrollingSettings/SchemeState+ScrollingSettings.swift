@@ -5,6 +5,38 @@ import Combine
 import Foundation
 
 extension SchemeState {
+    var reverseScrollingVertical: Bool {
+        get {
+            scheme.scrolling?.reverse?.vertical ?? false
+        }
+        set {
+            Scheme(
+                scrolling: .init(
+                    reverse: .init(
+                        vertical: newValue
+                    )
+                )
+            )
+            .merge(into: &scheme)
+        }
+    }
+
+    var reverseScrollingHorizontal: Bool {
+        get {
+            scheme.scrolling?.reverse?.horizontal ?? false
+        }
+        set {
+            Scheme(
+                scrolling: .init(
+                    reverse: .init(
+                        horizontal: newValue
+                    )
+                )
+            )
+            .merge(into: &scheme)
+        }
+    }
+
     enum ScrollingMode {
         case accelerated, byLines, byPixels
     }
