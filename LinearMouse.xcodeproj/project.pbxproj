@@ -63,8 +63,6 @@
 		97C97728288FC49F009094BA /* DockKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C97727288FC49F009094BA /* DockKit */; };
 		97C9772D28910E4F009094BA /* KeyKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C9772C28910E4F009094BA /* KeyKit */; };
 		97D3470C293CDEA000E7DFE1 /* WeakRef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97D3470B293CDEA000E7DFE1 /* WeakRef.swift */; };
-		97DF1C822986B01300B84BFE /* Binding+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97DF1C812986B01300B84BFE /* Binding+Extensions.swift */; };
-		97DF1C852986BCC900B84BFE /* BindingExtensionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97DF1C842986BCC900B84BFE /* BindingExtensionTests.swift */; };
 		97E16F4F28F9A22A00E7D09B /* LinearScrollingHorizontal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E16F4E28F9A22A00E7D09B /* LinearScrollingHorizontal.swift */; };
 		97EFAABD28675D00008E6E67 /* SchemeState+ScrollingSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97EFAABC28675D00008E6E67 /* SchemeState+ScrollingSettings.swift */; };
 		97F77FA4285DC467007C9C2B /* DevicePickerSectionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA3285DC467007C9C2B /* DevicePickerSectionState.swift */; };
@@ -179,8 +177,6 @@
 		97C9772928900298009094BA /* zh-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-HK"; path = "zh-HK.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		97C9772B28910054009094BA /* KeyKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = KeyKit; sourceTree = "<group>"; };
 		97D3470B293CDEA000E7DFE1 /* WeakRef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeakRef.swift; sourceTree = "<group>"; };
-		97DF1C812986B01300B84BFE /* Binding+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Binding+Extensions.swift"; sourceTree = "<group>"; };
-		97DF1C842986BCC900B84BFE /* BindingExtensionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BindingExtensionTests.swift; sourceTree = "<group>"; };
 		97E16F4E28F9A22A00E7D09B /* LinearScrollingHorizontal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearScrollingHorizontal.swift; sourceTree = "<group>"; };
 		97EFAABC28675D00008E6E67 /* SchemeState+ScrollingSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SchemeState+ScrollingSettings.swift"; sourceTree = "<group>"; };
 		97F77FA3285DC467007C9C2B /* DevicePickerSectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSectionState.swift; sourceTree = "<group>"; };
@@ -331,7 +327,6 @@
 				36EBC80F80AD57E8226267BF /* Process.m */,
 				972DF6302859756700B83932 /* ProcessEnvironment.swift */,
 				97D3470B293CDEA000E7DFE1 /* WeakRef.swift */,
-				97DF1C812986B01300B84BFE /* Binding+Extensions.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -520,14 +515,6 @@
 			path = Scrolling;
 			sourceTree = "<group>";
 		};
-		97DF1C832986BCB600B84BFE /* Utilities */ = {
-			isa = PBXGroup;
-			children = (
-				97DF1C842986BCC900B84BFE /* BindingExtensionTests.swift */,
-			);
-			path = Utilities;
-			sourceTree = "<group>";
-		};
 		97F77FAD285F09FA007C9C2B /* Model */ = {
 			isa = PBXGroup;
 			children = (
@@ -679,7 +666,6 @@
 		B7ADF9962748ED620005B02D /* LinearMouseUnitTests */ = {
 			isa = PBXGroup;
 			children = (
-				97DF1C832986BCB600B84BFE /* Utilities */,
 				B7ADF9A02749187A0005B02D /* Event */,
 				97F77FB2285F453F007C9C2B /* Model */,
 			);
@@ -899,7 +885,6 @@
 				972A5E32285D8B5B00CB6440 /* DeviceMatcher.swift in Sources */,
 				9735338F297F8EE200C1B5D0 /* FormViewModifier.swift in Sources */,
 				97B83CDF2860C56700ECF109 /* HexRepresentation.swift in Sources */,
-				97DF1C822986B01300B84BFE /* Binding+Extensions.swift in Sources */,
 				B7842927278D9BBC00D207F0 /* CheckForUpdatesView.swift in Sources */,
 				972A5E2D285D882500CB6440 /* DeviceState.swift in Sources */,
 				972DF6312859756700B83932 /* ProcessEnvironment.swift in Sources */,
@@ -962,7 +947,6 @@
 			files = (
 				B754147E274E3AB0003CDAD0 /* LinearScrollingTests.swift in Sources */,
 				B7541480274E3CEF003CDAD0 /* ModifierActionsTests.swift in Sources */,
-				97DF1C852986BCC900B84BFE /* BindingExtensionTests.swift in Sources */,
 				97F77FB4285F45AF007C9C2B /* ConfigurationTests.swift in Sources */,
 				B7ADF99F274918540005B02D /* ReverseScrollingTests.swift in Sources */,
 			);
