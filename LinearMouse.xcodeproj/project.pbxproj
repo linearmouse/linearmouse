@@ -11,6 +11,8 @@
 		9704BA992976E84C00C8B06D /* SettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9704BA982976E84C00C8B06D /* SettingsState.swift */; };
 		9704BA9B29796D2000C8B06D /* ScrollingSettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9704BA9A29796D2000C8B06D /* ScrollingSettingsState.swift */; };
 		971338AF289B64C1005A74D2 /* HelpButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971338AE289B64C1005A74D2 /* HelpButton.swift */; };
+		972327A5299146AA0041538A /* ImplicitOptional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972327A4299146AA0041538A /* ImplicitOptional.swift */; };
+		972327A929914C1C0041538A /* ImplicitOptionalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972327A829914C1C0041538A /* ImplicitOptionalTests.swift */; };
 		972A5E1F285CA43D00CB6440 /* DevicePickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E1E285CA43D00CB6440 /* DevicePickerSheet.swift */; };
 		972A5E22285CA49800CB6440 /* DevicePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E21285CA49800CB6440 /* DevicePicker.swift */; };
 		972A5E24285CA4AA00CB6440 /* DevicePickerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E23285CA4AA00CB6440 /* DevicePickerState.swift */; };
@@ -125,6 +127,8 @@
 		9704BA982976E84C00C8B06D /* SettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsState.swift; sourceTree = "<group>"; };
 		9704BA9A29796D2000C8B06D /* ScrollingSettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingSettingsState.swift; sourceTree = "<group>"; };
 		971338AE289B64C1005A74D2 /* HelpButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpButton.swift; sourceTree = "<group>"; };
+		972327A4299146AA0041538A /* ImplicitOptional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImplicitOptional.swift; sourceTree = "<group>"; };
+		972327A829914C1C0041538A /* ImplicitOptionalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImplicitOptionalTests.swift; sourceTree = "<group>"; };
 		972A5E1E285CA43D00CB6440 /* DevicePickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSheet.swift; sourceTree = "<group>"; };
 		972A5E21285CA49800CB6440 /* DevicePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePicker.swift; sourceTree = "<group>"; };
 		972A5E23285CA4AA00CB6440 /* DevicePickerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerState.swift; sourceTree = "<group>"; };
@@ -290,6 +294,22 @@
 				971338AE289B64C1005A74D2 /* HelpButton.swift */,
 			);
 			path = HelpButton;
+			sourceTree = "<group>";
+		};
+		972327A629914BFA0041538A /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				972327A729914C0B0041538A /* Codable */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		972327A729914C0B0041538A /* Codable */ = {
+			isa = PBXGroup;
+			children = (
+				972327A829914C1C0041538A /* ImplicitOptionalTests.swift */,
+			);
+			path = Codable;
 			sourceTree = "<group>";
 		};
 		972A5E1D285CA42500CB6440 /* DevicePickerSheet */ = {
@@ -538,6 +558,7 @@
 				97F77FB6285F53A5007C9C2B /* SingleValueOrArray.swift */,
 				97B83CDE2860C56700ECF109 /* HexRepresentation.swift */,
 				97C5DBBD286875C2006FA6B4 /* Clamp.swift */,
+				972327A4299146AA0041538A /* ImplicitOptional.swift */,
 			);
 			path = Codable;
 			sourceTree = "<group>";
@@ -666,6 +687,7 @@
 		B7ADF9962748ED620005B02D /* LinearMouseUnitTests */ = {
 			isa = PBXGroup;
 			children = (
+				972327A629914BFA0041538A /* Utilities */,
 				B7ADF9A02749187A0005B02D /* Event */,
 				97F77FB2285F453F007C9C2B /* Model */,
 			);
@@ -922,6 +944,7 @@
 				972DF63A285997CD00B83932 /* Sidebar.swift in Sources */,
 				B7BD51812672FEB5001FE742 /* EventTap.swift in Sources */,
 				97C5DBBE286875C2006FA6B4 /* Clamp.swift in Sources */,
+				972327A5299146AA0041538A /* ImplicitOptional.swift in Sources */,
 				97D3470C293CDEA000E7DFE1 /* WeakRef.swift in Sources */,
 				97C5DBBC28686EFC006FA6B4 /* Pointer.swift in Sources */,
 				97C5DBC52868A1ED006FA6B4 /* SchemeState+ButtonsSettings.swift in Sources */,
@@ -946,6 +969,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B754147E274E3AB0003CDAD0 /* LinearScrollingTests.swift in Sources */,
+				972327A929914C1C0041538A /* ImplicitOptionalTests.swift in Sources */,
 				B7541480274E3CEF003CDAD0 /* ModifierActionsTests.swift in Sources */,
 				97F77FB4285F45AF007C9C2B /* ConfigurationTests.swift in Sources */,
 				B7ADF99F274918540005B02D /* ReverseScrollingTests.swift in Sources */,
