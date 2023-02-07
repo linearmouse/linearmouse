@@ -4,11 +4,12 @@
 import Foundation
 
 class ModifierActions: EventTransformer {
-    typealias Modifiers = Scheme.Scrolling.Modifiers
+    typealias Modifiers = Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Modifiers>
+    typealias Action = Scheme.Scrolling.Modifiers.Action
 
     private let modifiers: Modifiers
 
-    init(modifiers: Scheme.Scrolling.Modifiers) {
+    init(modifiers: Modifiers) {
         self.modifiers = modifiers
     }
 
@@ -17,14 +18,21 @@ class ModifierActions: EventTransformer {
             return event
         }
 
-        let actions: [(CGEventFlags.Element, Modifiers.Action?)] = [
+        let scrollWheelEventView = ScrollWheelEventView(event)
+        guard let modifiers = scrollWheelEventView.deltaYSignum != 0
+            ? modifiers.vertical
+            : modifiers.horizontal else {
+            return event
+        }
+
+        let actions: [(CGEventFlags.Element, Action?)] = [
             (.maskCommand, modifiers.command),
             (.maskShift, modifiers.shift),
             (.maskAlternate, modifiers.option),
             (.maskControl, modifiers.control)
         ]
-        for case let (flag, action) in actions {
-            if event.flags.contains(flag) {
+        for case let (flag, action) in actions where event.flags.contains(flag) {
+            if let action = action {
                 if handleModifierKeyAction(for: event, action: action) {
                     event.flags.remove(flag)
                 }
@@ -33,20 +41,16 @@ class ModifierActions: EventTransformer {
         return event
     }
 
-    private func handleModifierKeyAction(for event: CGEvent, action: Modifiers.Action?) -> Bool {
-        guard let action = action else {
-            return false
-        }
-
-        let view = ScrollWheelEventView(event)
+    private func handleModifierKeyAction(for event: CGEvent, action: Action) -> Bool {
+        let scrollWheelEventView = ScrollWheelEventView(event)
 
         switch action {
         case .none:
             return false
         case .alterOrientation:
-            view.swapXY()
+            scrollWheelEventView.swapXY()
         case let .changeSpeed(scale: scale):
-            view.scale(factor: scale.asTruncatedDouble)
+            scrollWheelEventView.scale(factor: scale.asTruncatedDouble)
         }
 
         return true

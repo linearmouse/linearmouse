@@ -9,7 +9,7 @@ struct GeneralSettings: View {
     @Default(.showInMenuBar) var showInMenuBar
 
     var body: some View {
-        DetailView {
+        DetailView(schemeSpecific: false) {
             Form {
                 Section {
                     Toggle(isOn: $showInMenuBar.animation()) {

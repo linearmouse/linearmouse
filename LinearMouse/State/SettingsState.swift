@@ -7,7 +7,7 @@ class SettingsState: ObservableObject {
     static let shared = SettingsState()
 
     enum Navigation {
-        case scrolling, pointer, buttons, modifierKeys, general
+        case scrolling, pointer, buttons, general
     }
 
     @Published var navigation: Navigation? = .scrolling

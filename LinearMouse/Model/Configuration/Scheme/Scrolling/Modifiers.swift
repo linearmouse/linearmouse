@@ -4,7 +4,7 @@
 import Foundation
 
 extension Scheme.Scrolling {
-    struct Modifiers: Codable, ImplicitInitable {
+    struct Modifiers: Equatable, Codable, ImplicitInitable {
         var command: Action?
         var shift: Action?
         var option: Action?
@@ -13,7 +13,7 @@ extension Scheme.Scrolling {
 }
 
 extension Scheme.Scrolling.Modifiers {
-    enum Action {
+    enum Action: Equatable {
         case none
         case alterOrientation
         case changeSpeed(scale: Decimal)

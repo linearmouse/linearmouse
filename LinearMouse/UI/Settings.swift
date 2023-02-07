@@ -25,8 +25,6 @@ struct Settings: View {
                     PointerSettings()
                 case .buttons:
                     ButtonsSettings()
-                case .modifierKeys:
-                    ModifierKeysSettings()
                 case .general:
                     GeneralSettings()
                 }

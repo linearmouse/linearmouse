@@ -4,33 +4,34 @@
 import Foundation
 import SwiftUI
 
-struct ModifierKeyActionPicker: View {
-    var label: LocalizedStringKey
-    @Binding var action: Scheme.Scrolling.Modifiers.Action?
+extension ScrollingSettings.ModifierKeysSection {
+    struct ModifierKeyActionPicker: View {
+        var label: LocalizedStringKey
+        @Binding var action: Scheme.Scrolling.Modifiers.Action?
 
-    var body: some View {
-        Picker(label, selection: actionType) {
-            ForEach(ActionType.allCases) { type in
-                Text(NSLocalizedString(type.rawValue, comment: "")).tag(type)
-            }
-        }
-        .modifier(PickerViewModifier())
-
-        if case .some(.changeSpeed) = action {
-            HStack {
-                Text("to")
-                Slider(value: self.speedFactor,
-                       in: 0.05 ... 10.00)
-                HStack(spacing: 5) {
-                    Text(String(format: "%0.2f ×", self.speedFactor.wrappedValue))
+        var body: some View {
+            Picker(label, selection: actionType) {
+                ForEach(ActionType.allCases) { type in
+                    Text(NSLocalizedString(type.rawValue, comment: "")).tag(type)
                 }
-                .frame(width: 60, alignment: .trailing)
+            }
+            .modifier(PickerViewModifier())
+
+            if case .some(.changeSpeed) = action {
+                HStack {
+                    Slider(value: self.speedFactor,
+                           in: 0.05 ... 10.00)
+                    HStack(spacing: 5) {
+                        Text(String(format: "%0.2f ×", self.speedFactor.wrappedValue))
+                    }
+                    .frame(width: 60, alignment: .trailing)
+                }
             }
         }
     }
 }
 
-extension ModifierKeyActionPicker {
+extension ScrollingSettings.ModifierKeysSection.ModifierKeyActionPicker {
     enum ActionType: String, CaseIterable, Identifiable {
         var id: Self { self }
 

@@ -20,10 +20,6 @@ struct Sidebar: View {
                         text: "Buttons")
                 .tag(SettingsState.Navigation.buttons)
 
-            SidebarItem(imageName: "Modifier Keys",
-                        text: "Modifier Keys")
-                .tag(SettingsState.Navigation.modifierKeys)
-
             Spacer()
 
             SidebarItem(imageName: "General",

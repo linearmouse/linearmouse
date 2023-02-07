@@ -6,19 +6,16 @@ import Foundation
 extension Scheme {
     struct Scrolling: Codable, ImplicitInitable {
         @ImplicitOptional var reverse: Bidirectional<Bool>
-
         @ImplicitOptional var distance: Bidirectional<Distance>
-
         @ImplicitOptional var scale: Bidirectional<Decimal>
-
-        @ImplicitOptional var modifiers: Modifiers
+        @ImplicitOptional var modifiers: Bidirectional<Modifiers>
 
         init() {}
 
         init(reverse: Bidirectional<Bool>? = nil,
              distance: Bidirectional<Distance>? = nil,
              scale: Bidirectional<Decimal>? = nil,
-             modifiers: Modifiers? = nil) {
+             modifiers: Bidirectional<Modifiers>? = nil) {
             $reverse = reverse
             $distance = distance
             $scale = scale
@@ -125,10 +122,13 @@ extension Scheme.Scrolling.Bidirectional: Codable {
 
         do {
             value = try container.decode(Value.self)
-        } catch {
-            let v = try container.decode(T?.self)
-            value = .init(vertical: v, horizontal: v)
-        }
+            if value.vertical != nil || value.horizontal != nil {
+                return
+            }
+        } catch {}
+
+        let v = try container.decode(T?.self)
+        value = .init(vertical: v, horizontal: v)
     }
 
     func encode(to encoder: Encoder) throws {
