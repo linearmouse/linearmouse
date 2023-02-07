@@ -11,7 +11,7 @@ class ModifierActionsTests: XCTestCase {
                                                    shift: .alterOrientation,
                                                    option: .changeSpeed(scale: 2),
                                                    control: .changeSpeed(scale: 3))
-        let transformer = ModifierActions(modifiers: modifiers)
+        let transformer = ModifierActions(modifiers: .init(vertical: modifiers, horizontal: modifiers))
         event.flags.insert(.maskCommand)
         event.flags.insert(.maskShift)
         event.flags.insert(.maskAlternate)

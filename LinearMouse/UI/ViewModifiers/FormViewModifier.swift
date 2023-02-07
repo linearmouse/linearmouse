@@ -9,9 +9,11 @@ struct FormViewModifier: ViewModifier {
             content
                 .formStyle(.grouped)
         } else {
-            content
-                .padding(40)
-                .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
+            ScrollView {
+                content
+                    .padding(40)
+                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
+            }
         }
     }
 }

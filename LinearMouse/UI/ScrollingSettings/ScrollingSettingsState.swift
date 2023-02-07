@@ -87,4 +87,13 @@ extension ScrollingSettingsState {
             scheme.scrolling.distance[direction] = .pixel(Decimal(newValue).rounded(1))
         }
     }
+
+    var modifiers: Scheme.Scrolling.Modifiers {
+        get {
+            scheme.scrolling.modifiers[direction] ?? .init()
+        }
+        set {
+            scheme.scrolling.modifiers[direction] = newValue
+        }
+    }
 }
