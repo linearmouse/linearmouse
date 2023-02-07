@@ -3,120 +3,90 @@
 
 import Combine
 import Foundation
+import PublishedObject
 import SwiftUI
 
-extension ScrollingSettings {
-    class State: ObservableObject {
-        static let shared = State()
+class ScrollingSettingsState: ObservableObject {
+    static let shared = ScrollingSettingsState()
 
-        enum Orientation {
-            case vertical, horizontal
-        }
+    @PublishedObject private var schemeState = SchemeState.shared
 
-        @Published private var schemeState = SchemeState.shared
-
-        @Published var orientation: Orientation = .vertical
-
-        private var subscriptions = Set<AnyCancellable>()
-
-        init() {
-            schemeState.objectWillChange
-                .sink { [weak self] in
-                    self?.objectWillChange.send()
-                }
-                .store(in: &subscriptions)
-        }
-    }
+    @Published var direction: Scheme.Scrolling.BidirectionalDirection = .vertical
 }
 
-extension ScrollingSettings.State {
+extension ScrollingSettingsState {
+    var scheme: Scheme {
+        get { schemeState.scheme }
+        set { schemeState.scheme = newValue }
+    }
+
     var reverseScrolling: Bool {
+        get { scheme.scrolling.reverse[direction] ?? false }
+        set { scheme.scrolling.reverse[direction] = newValue }
+    }
+
+    enum ScrollingMode: String, Identifiable, CaseIterable {
+        var id: Self { self }
+
+        case accelerated = "Accelerated"
+        case byLines = "By Lines"
+        case byPixels = "By Pixels"
+    }
+
+    var scrollingMode: ScrollingMode {
         get {
-            orientation == .vertical ? schemeState.reverseScrollingVertical : schemeState.reverseScrollingHorizontal
+            switch scheme.scrolling.distance[direction] ?? .auto {
+            case .auto:
+                return .accelerated
+            case .line:
+                return .byLines
+            case .pixel:
+                return .byPixels
+            }
         }
         set {
-            if orientation == .vertical {
-                schemeState.reverseScrollingVertical = newValue
-            } else {
-                schemeState.reverseScrollingHorizontal = newValue
+            var distance: Scheme.Scrolling.Distance
+
+            switch newValue {
+            case .accelerated:
+                distance = .auto
+            case .byLines:
+                distance = .line(3)
+            case .byPixels:
+                distance = .pixel(36)
             }
+
+            scheme.scrolling.distance[direction] = distance
+            scheme.scrolling.scale[direction] = nil
         }
     }
 
-    var scrollingMode: SchemeState.ScrollingMode {
+    var scrollingScale: Double {
+        get { scheme.scrolling.scale[direction]?.asTruncatedDouble ?? 1 }
+        set { scheme.scrolling.scale[direction] = Decimal(newValue).rounded(2) }
+    }
+
+    var scrollingDistanceInLines: Double {
         get {
-            orientation == .vertical ? schemeState.scrollingModeVertical : schemeState.scrollingModeHorizontal
+            guard case let .line(lines) = scheme.scrolling.distance[direction] else {
+                return 3
+            }
+            return Double(lines)
         }
         set {
-            if orientation == .vertical {
-                schemeState.scrollingModeVertical = newValue
-            } else {
-                schemeState.scrollingModeHorizontal = newValue
-            }
+            scheme.scrolling.distance[direction] = .line(Int(newValue))
         }
     }
 
-    var scrollingSpeed: Double {
+    var scrollingDistanceInPixels: Double {
         get {
-            orientation == .vertical ? schemeState.scrollingScaleVertical : schemeState.scrollingScaleHorizontal
-        }
-        set {
-            if orientation == .vertical {
-                schemeState.scrollingScaleVertical = newValue
-            } else {
-                schemeState.scrollingScaleHorizontal = newValue
+            guard case let .pixel(pixels) = scheme.scrolling.distance[direction] else {
+                return 36
             }
-        }
-    }
-
-    var linearScrollingUnit: SchemeState.LinearScrollingUnit {
-        get {
-            orientation == .vertical ? schemeState.linearScrollingVerticalUnit : schemeState
-                .linearScrollingHorizontalUnit
+            return pixels.asTruncatedDouble
         }
         set {
-            if orientation == .vertical {
-                schemeState.linearScrollingVerticalUnit = newValue
-            } else {
-                schemeState.linearScrollingHorizontalUnit = newValue
-            }
-        }
-    }
-
-    var linearScrollingLines: Int {
-        get {
-            orientation == .vertical ? schemeState.linearScrollingVerticalLines : schemeState
-                .linearScrollingHorizontalLines
-        }
-        set {
-            if orientation == .vertical {
-                schemeState.linearScrollingVerticalLines = newValue
-            } else {
-                schemeState.linearScrollingHorizontalLines = newValue
-            }
-        }
-    }
-
-    var linearScrollingLinesInDouble: Double {
-        get {
-            Double(linearScrollingLines)
-        }
-        set {
-            linearScrollingLines = Int(newValue)
-        }
-    }
-
-    var linearScrollingPixels: Double {
-        get {
-            orientation == .vertical ? schemeState.linearScrollingVerticalPixels : schemeState
-                .linearScrollingHorizontalPixels
-        }
-        set {
-            if orientation == .vertical {
-                schemeState.linearScrollingVerticalPixels = newValue
-            } else {
-                schemeState.linearScrollingHorizontalPixels = newValue
-            }
+            scheme.scrolling.distance[direction] = .pixel(Decimal(newValue).rounded(1))
         }
     }
 }

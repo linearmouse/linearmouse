@@ -4,7 +4,7 @@
 import SwiftUI
 
 struct ScrollingSettings: View {
-    @ObservedObject var state = State.shared
+    @ObservedObject var state = ScrollingSettingsState.shared
 
     var body: some View {
         DetailView {
@@ -12,9 +12,10 @@ struct ScrollingSettings: View {
                 HStack {
                     Spacer()
 
-                    Picker("", selection: $state.orientation) {
-                        Text("Vertical").tag(State.Orientation.vertical)
-                        Text("Horizontal").tag(State.Orientation.horizontal)
+                    Picker("", selection: $state.direction) {
+                        ForEach(Scheme.Scrolling.BidirectionalDirection.allCases) { direction in
+                            Text(NSLocalizedString(direction.rawValue, comment: "")).tag(direction)
+                        }
                     }
                     .pickerStyle(.segmented)
                     .fixedSize()
@@ -28,7 +29,7 @@ struct ScrollingSettings: View {
                         Toggle(isOn: $state.reverseScrolling) {
                             withDescription {
                                 Text("Reverse scrolling")
-                                if state.orientation == .horizontal {
+                                if state.direction == .horizontal {
                                     Text("Some gestures, such as swiping back and forward, may stop working.")
                                 }
                             }
@@ -38,15 +39,15 @@ struct ScrollingSettings: View {
 
                     Section {
                         Picker("Mode", selection: $state.scrollingMode) {
-                            Text("Accelerated").tag(SchemeState.ScrollingMode.accelerated)
-                            Text("By Lines").tag(SchemeState.ScrollingMode.byLines)
-                            Text("By Pixels").tag(SchemeState.ScrollingMode.byPixels)
+                            ForEach(ScrollingSettingsState.ScrollingMode.allCases) { scrollingMode in
+                                Text(NSLocalizedString(scrollingMode.rawValue, comment: "")).tag(scrollingMode)
+                            }
                         }
                         .modifier(PickerViewModifier())
 
                         switch state.scrollingMode {
                         case .accelerated:
-                            Slider(value: $state.scrollingSpeed,
+                            Slider(value: $state.scrollingScale,
                                    in: 0.0 ... 10.0) {
                                 Text("Speed")
                             } minimumValueLabel: {
@@ -57,7 +58,7 @@ struct ScrollingSettings: View {
 
                         case .byLines:
                             Slider(
-                                value: $state.linearScrollingLinesInDouble,
+                                value: $state.scrollingDistanceInLines,
                                 in: 0 ... 10,
                                 step: 1
                             ) {
@@ -70,7 +71,7 @@ struct ScrollingSettings: View {
 
                         case .byPixels:
                             Slider(
-                                value: $state.linearScrollingPixels,
+                                value: $state.scrollingDistanceInPixels,
                                 in: 0 ... 128
                             ) {
                                 Text("Distance")

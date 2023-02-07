@@ -79,6 +79,15 @@ extension Scheme.Scrolling {
     }
 }
 
+extension Scheme.Scrolling {
+    enum BidirectionalDirection: String, Identifiable, CaseIterable {
+        var id: Self { self }
+
+        case vertical = "Vertical"
+        case horizontal = "Horizontal"
+    }
+}
+
 extension Scheme.Scrolling.Bidirectional {
     var vertical: T? {
         get { value.vertical }
@@ -88,6 +97,25 @@ extension Scheme.Scrolling.Bidirectional {
     var horizontal: T? {
         get { value.horizontal }
         set { value.horizontal = newValue }
+    }
+
+    subscript(direction: Scheme.Scrolling.BidirectionalDirection) -> T? {
+        get {
+            switch direction {
+            case .vertical:
+                return vertical
+            case .horizontal:
+                return horizontal
+            }
+        }
+        set {
+            switch direction {
+            case .vertical:
+                vertical = newValue
+            case .horizontal:
+                horizontal = newValue
+            }
+        }
     }
 }
 

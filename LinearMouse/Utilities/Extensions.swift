@@ -4,6 +4,7 @@
 import AppKit
 import Foundation
 import LRUCache
+import SwiftUI
 
 extension Comparable {
     func clamped(to range: ClosedRange<Self>) -> Self {
@@ -103,5 +104,11 @@ extension CGMouseButton {
         eventType = fixed(of: eventType, .leftMouseUp, .rightMouseUp, .otherMouseUp)
         eventType = fixed(of: eventType, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged)
         return eventType
+    }
+}
+
+extension Binding {
+    func `default`<UnwrappedValue>(_ value: UnwrappedValue) -> Binding<UnwrappedValue> where Value == UnwrappedValue? {
+        Binding<UnwrappedValue>(get: { wrappedValue ?? value }, set: { wrappedValue = $0 })
     }
 }
