@@ -1,9 +1,21 @@
 // MIT License
 // Copyright (c) 2021-2023 Jiahao Lu
 
+import Combine
 import Foundation
+import PublishedObject
 
-extension SchemeState {
+class ModifierKeysSettingsState: ObservableObject {
+    static let shared: ModifierKeysSettingsState = .init()
+
+    @PublishedObject private var schemeState = SchemeState.shared
+    var scheme: Scheme {
+        get { schemeState.scheme }
+        set { schemeState.scheme = newValue }
+    }
+}
+
+extension ModifierKeysSettingsState {
     var commandAction: Scheme.Scrolling.Modifiers.Action? {
         get {
             scheme.scrolling.modifiers.command

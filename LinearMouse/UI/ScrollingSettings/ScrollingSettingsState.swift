@@ -4,22 +4,20 @@
 import Combine
 import Foundation
 import PublishedObject
-import SwiftUI
 
 class ScrollingSettingsState: ObservableObject {
-    static let shared = ScrollingSettingsState()
+    static let shared: ScrollingSettingsState = .init()
 
     @PublishedObject private var schemeState = SchemeState.shared
-
-    @Published var direction: Scheme.Scrolling.BidirectionalDirection = .vertical
-}
-
-extension ScrollingSettingsState {
     var scheme: Scheme {
         get { schemeState.scheme }
         set { schemeState.scheme = newValue }
     }
 
+    @Published var direction: Scheme.Scrolling.BidirectionalDirection = .vertical
+}
+
+extension ScrollingSettingsState {
     var reverseScrolling: Bool {
         get { scheme.scrolling.reverse[direction] ?? false }
         set { scheme.scrolling.reverse[direction] = newValue }

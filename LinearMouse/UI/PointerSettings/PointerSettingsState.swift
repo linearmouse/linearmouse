@@ -1,12 +1,24 @@
 // MIT License
 // Copyright (c) 2021-2023 Jiahao Lu
 
+import Combine
 import Foundation
+import PublishedObject
 
-extension SchemeState {
+class PointerSettingsState: ObservableObject {
+    static let shared: PointerSettingsState = .init()
+
+    @PublishedObject private var schemeState = SchemeState.shared
+    var scheme: Scheme {
+        get { schemeState.scheme }
+        set { schemeState.scheme = newValue }
+    }
+}
+
+extension PointerSettingsState {
     var pointerAcceleration: Double {
         get {
-            scheme.pointer.acceleration.map(\.asTruncatedDouble)
+            scheme.pointer.acceleration?.asTruncatedDouble
                 ?? scheme.firstMatchedDevice?.pointerAcceleration
                 ?? Device.fallbackPointerAcceleration
         }
@@ -21,7 +33,7 @@ extension SchemeState {
 
     var pointerSpeed: Double {
         get {
-            scheme.pointer.speed.map(\.asTruncatedDouble)
+            scheme.pointer.speed?.asTruncatedDouble
                 ?? scheme.firstMatchedDevice?.pointerSpeed
                 ?? Device.fallbackPointerSpeed
         }

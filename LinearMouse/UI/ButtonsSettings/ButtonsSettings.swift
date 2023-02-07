@@ -4,13 +4,13 @@
 import SwiftUI
 
 struct ButtonsSettings: View {
-    @ObservedObject var schemeState = SchemeState.shared
+    @ObservedObject var state: ButtonsSettingsState = .shared
 
     var body: some View {
         DetailView {
             Form {
                 Section {
-                    Toggle(isOn: $schemeState.universalBackForward) {
+                    Toggle(isOn: $state.universalBackForward) {
                         withDescription {
                             Text("Enable universal back and forward")
                             Text(

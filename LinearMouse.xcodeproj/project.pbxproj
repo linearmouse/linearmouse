@@ -52,16 +52,15 @@
 		97C5D8FF2856E3CB00CBED2D /* GestureKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C5D8FE2856E3CB00CBED2D /* GestureKit */; };
 		97C5DBB42867EA48006FA6B4 /* SchemeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBB32867EA48006FA6B4 /* SchemeState.swift */; };
 		97C5DBB62867ECD6006FA6B4 /* DeviceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBB52867ECD6006FA6B4 /* DeviceModel.swift */; };
-		97C5DBB82868158C006FA6B4 /* SchemeState+PointerSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBB72868158C006FA6B4 /* SchemeState+PointerSettings.swift */; };
+		97C5DBB82868158C006FA6B4 /* PointerSettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBB72868158C006FA6B4 /* PointerSettingsState.swift */; };
 		97C5DBBA28682809006FA6B4 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBB928682809006FA6B4 /* Extensions.swift */; };
 		97C5DBBC28686EFC006FA6B4 /* Pointer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBBB28686EFC006FA6B4 /* Pointer.swift */; };
 		97C5DBBE286875C2006FA6B4 /* Clamp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBBD286875C2006FA6B4 /* Clamp.swift */; };
 		97C5DBC028689F7E006FA6B4 /* Buttons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBBF28689F7E006FA6B4 /* Buttons.swift */; };
 		97C5DBC328689FF9006FA6B4 /* Mapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBC228689FF9006FA6B4 /* Mapping.swift */; };
-		97C5DBC52868A1ED006FA6B4 /* SchemeState+ButtonsSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBC42868A1ED006FA6B4 /* SchemeState+ButtonsSettings.swift */; };
+		97C5DBC52868A1ED006FA6B4 /* ButtonsSettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBC42868A1ED006FA6B4 /* ButtonsSettingsState.swift */; };
 		97C5DBC82868A2C7006FA6B4 /* Modifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBC72868A2C7006FA6B4 /* Modifiers.swift */; };
-		97C5DBCA2868B1B4006FA6B4 /* SchemeState+ModifierKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBC92868B1B4006FA6B4 /* SchemeState+ModifierKeys.swift */; };
-		97C5DBCC2868B4A5006FA6B4 /* ModifierKeyActionPickerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBCB2868B4A5006FA6B4 /* ModifierKeyActionPickerState.swift */; };
+		97C5DBCA2868B1B4006FA6B4 /* ModifierKeysSettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBC92868B1B4006FA6B4 /* ModifierKeysSettingsState.swift */; };
 		97C97728288FC49F009094BA /* DockKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C97727288FC49F009094BA /* DockKit */; };
 		97C9772D28910E4F009094BA /* KeyKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C9772C28910E4F009094BA /* KeyKit */; };
 		97D3470C293CDEA000E7DFE1 /* WeakRef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97D3470B293CDEA000E7DFE1 /* WeakRef.swift */; };
@@ -166,16 +165,15 @@
 		97C5D8FD2856E3BE00CBED2D /* GestureKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = GestureKit; sourceTree = "<group>"; };
 		97C5DBB32867EA48006FA6B4 /* SchemeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemeState.swift; sourceTree = "<group>"; };
 		97C5DBB52867ECD6006FA6B4 /* DeviceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceModel.swift; sourceTree = "<group>"; };
-		97C5DBB72868158C006FA6B4 /* SchemeState+PointerSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SchemeState+PointerSettings.swift"; sourceTree = "<group>"; };
+		97C5DBB72868158C006FA6B4 /* PointerSettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointerSettingsState.swift; sourceTree = "<group>"; };
 		97C5DBB928682809006FA6B4 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		97C5DBBB28686EFC006FA6B4 /* Pointer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pointer.swift; sourceTree = "<group>"; };
 		97C5DBBD286875C2006FA6B4 /* Clamp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clamp.swift; sourceTree = "<group>"; };
 		97C5DBBF28689F7E006FA6B4 /* Buttons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Buttons.swift; sourceTree = "<group>"; };
 		97C5DBC228689FF9006FA6B4 /* Mapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mapping.swift; sourceTree = "<group>"; };
-		97C5DBC42868A1ED006FA6B4 /* SchemeState+ButtonsSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SchemeState+ButtonsSettings.swift"; sourceTree = "<group>"; };
+		97C5DBC42868A1ED006FA6B4 /* ButtonsSettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonsSettingsState.swift; sourceTree = "<group>"; };
 		97C5DBC72868A2C7006FA6B4 /* Modifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Modifiers.swift; sourceTree = "<group>"; };
-		97C5DBC92868B1B4006FA6B4 /* SchemeState+ModifierKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SchemeState+ModifierKeys.swift"; sourceTree = "<group>"; };
-		97C5DBCB2868B4A5006FA6B4 /* ModifierKeyActionPickerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierKeyActionPickerState.swift; sourceTree = "<group>"; };
+		97C5DBC92868B1B4006FA6B4 /* ModifierKeysSettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierKeysSettingsState.swift; sourceTree = "<group>"; };
 		97C97726288FC19A009094BA /* DockKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DockKit; sourceTree = "<group>"; };
 		97C9772928900298009094BA /* zh-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-HK"; path = "zh-HK.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		97C9772B28910054009094BA /* KeyKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = KeyKit; sourceTree = "<group>"; };
@@ -422,7 +420,7 @@
 			isa = PBXGroup;
 			children = (
 				B7618A0F27621EDF00527C1A /* PointerSettings.swift */,
-				97C5DBB72868158C006FA6B4 /* SchemeState+PointerSettings.swift */,
+				97C5DBB72868158C006FA6B4 /* PointerSettingsState.swift */,
 			);
 			path = PointerSettings;
 			sourceTree = "<group>";
@@ -431,9 +429,8 @@
 			isa = PBXGroup;
 			children = (
 				B7B1D09026B3ECC500F48176 /* ModifierKeysSettings.swift */,
-				97C5DBC92868B1B4006FA6B4 /* SchemeState+ModifierKeys.swift */,
+				97C5DBC92868B1B4006FA6B4 /* ModifierKeysSettingsState.swift */,
 				B7B6D83D26B2745300B0D247 /* ModifierKeyActionPicker.swift */,
-				97C5DBCB2868B4A5006FA6B4 /* ModifierKeyActionPickerState.swift */,
 			);
 			path = ModifierKeysSettings;
 			sourceTree = "<group>";
@@ -442,7 +439,7 @@
 			isa = PBXGroup;
 			children = (
 				972DF65A285AEABA00B83932 /* ButtonsSettings.swift */,
-				97C5DBC42868A1ED006FA6B4 /* SchemeState+ButtonsSettings.swift */,
+				97C5DBC42868A1ED006FA6B4 /* ButtonsSettingsState.swift */,
 			);
 			path = ButtonsSettings;
 			sourceTree = "<group>";
@@ -887,14 +884,13 @@
 				97C5DBC82868A2C7006FA6B4 /* Modifiers.swift in Sources */,
 				972A5E24285CA4AA00CB6440 /* DevicePickerState.swift in Sources */,
 				972DF651285A35B100B83932 /* DeviceIndicatorState.swift in Sources */,
-				97C5DBCA2868B1B4006FA6B4 /* SchemeState+ModifierKeys.swift in Sources */,
+				97C5DBCA2868B1B4006FA6B4 /* ModifierKeysSettingsState.swift in Sources */,
 				972DF6422859C1AC00B83932 /* SidebarItem.swift in Sources */,
-				97C5DBCC2868B4A5006FA6B4 /* ModifierKeyActionPickerState.swift in Sources */,
 				971338AF289B64C1005A74D2 /* HelpButton.swift in Sources */,
 				B7ADF98D2748E5010005B02D /* ScrollWheelEventView.swift in Sources */,
 				B7ADF9852748B25A0005B02D /* ModifierActions.swift in Sources */,
 				97E16F4F28F9A22A00E7D09B /* LinearScrollingHorizontal.swift in Sources */,
-				97C5DBB82868158C006FA6B4 /* SchemeState+PointerSettings.swift in Sources */,
+				97C5DBB82868158C006FA6B4 /* PointerSettingsState.swift in Sources */,
 				B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */,
 				972A5E34285D8E4800CB6440 /* Defaults+Workaround.swift in Sources */,
 				97B83CE52860DA9800ECF109 /* CustomDecodingError.swift in Sources */,
@@ -945,7 +941,7 @@
 				972327A5299146AA0041538A /* ImplicitOptional.swift in Sources */,
 				97D3470C293CDEA000E7DFE1 /* WeakRef.swift in Sources */,
 				97C5DBBC28686EFC006FA6B4 /* Pointer.swift in Sources */,
-				97C5DBC52868A1ED006FA6B4 /* SchemeState+ButtonsSettings.swift in Sources */,
+				97C5DBC52868A1ED006FA6B4 /* ButtonsSettingsState.swift in Sources */,
 				972DF649285A26F700B83932 /* DeviceIndicator.swift in Sources */,
 				972DF654285ADE9600B83932 /* GeneralSettings.swift in Sources */,
 				97F77FA4285DC467007C9C2B /* DevicePickerSectionState.swift in Sources */,

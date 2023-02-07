@@ -4,14 +4,14 @@
 import SwiftUI
 
 struct PointerSettings: View {
-    @ObservedObject var schemeState = SchemeState.shared
+    @ObservedObject var state = PointerSettingsState.shared
 
     var body: some View {
         DetailView {
             Form {
                 Section {
                     HStack(spacing: 15) {
-                        Toggle(isOn: $schemeState.pointerDisableAcceleration.animation()) {
+                        Toggle(isOn: $state.pointerDisableAcceleration.animation()) {
                             Text("Disable pointer acceleration")
                         }
 
@@ -21,9 +21,9 @@ struct PointerSettings: View {
                         }
                     }
 
-                    if !schemeState.pointerDisableAcceleration {
+                    if !state.pointerDisableAcceleration {
                         HStack(alignment: .top) {
-                            Slider(value: $schemeState.pointerAcceleration,
+                            Slider(value: $state.pointerAcceleration,
                                    in: 0.0 ... 20.0) {
                                 labelWithDescription {
                                     Text("Acceleration")
@@ -31,8 +31,8 @@ struct PointerSettings: View {
                                 }
                             }
                             TextField("",
-                                      value: $schemeState.pointerAcceleration,
-                                      formatter: schemeState.pointerAccelerationFormatter)
+                                      value: $state.pointerAcceleration,
+                                      formatter: state.pointerAccelerationFormatter)
                                 .labelsHidden()
                                 .textFieldStyle(.roundedBorder)
                                 .multilineTextAlignment(.trailing)
@@ -40,7 +40,7 @@ struct PointerSettings: View {
                         }
 
                         HStack(alignment: .top) {
-                            Slider(value: $schemeState.pointerSpeed,
+                            Slider(value: $state.pointerSpeed,
                                    in: 0.0 ... 1.0) {
                                 labelWithDescription {
                                     Text("Speed")
@@ -48,8 +48,8 @@ struct PointerSettings: View {
                                 }
                             }
                             TextField("",
-                                      value: $schemeState.pointerSpeed,
-                                      formatter: schemeState.pointerSpeedFormatter)
+                                      value: $state.pointerSpeed,
+                                      formatter: state.pointerSpeedFormatter)
                                 .labelsHidden()
                                 .textFieldStyle(.roundedBorder)
                                 .multilineTextAlignment(.trailing)
@@ -79,6 +79,6 @@ struct PointerSettings: View {
     }
 
     private func revertPointerSpeed() {
-        schemeState.revertPointerSpeed()
+        state.revertPointerSpeed()
     }
 }
