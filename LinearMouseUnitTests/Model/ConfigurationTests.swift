@@ -12,21 +12,21 @@ class ConfigurationTests: XCTestCase {
     func testMergeScheme() throws {
         var scheme = Scheme()
 
-        XCTAssertNil(scheme.scrolling)
+        XCTAssertNil(scheme.$scrolling)
 
         Scheme(scrolling: .init(reverse: .init(vertical: true))).merge(into: &scheme)
 
-        XCTAssertEqual(scheme.scrolling?.reverse?.vertical, true)
-        XCTAssertNil(scheme.scrolling?.reverse?.horizontal)
+        XCTAssertEqual(scheme.scrolling.reverse.vertical, true)
+        XCTAssertNil(scheme.scrolling.reverse.horizontal)
 
         Scheme(scrolling: .init(reverse: .init(vertical: false, horizontal: true))).merge(into: &scheme)
 
-        XCTAssertEqual(scheme.scrolling?.reverse?.vertical, false)
-        XCTAssertEqual(scheme.scrolling?.reverse?.horizontal, true)
+        XCTAssertEqual(scheme.scrolling.reverse.vertical, false)
+        XCTAssertEqual(scheme.scrolling.reverse.horizontal, true)
 
         Scheme(scrolling: .init(reverse: .init(vertical: true))).merge(into: &scheme)
 
-        XCTAssertEqual(scheme.scrolling?.reverse?.vertical, true)
-        XCTAssertEqual(scheme.scrolling?.reverse?.horizontal, true)
+        XCTAssertEqual(scheme.scrolling.reverse.vertical, true)
+        XCTAssertEqual(scheme.scrolling.reverse.horizontal, true)
     }
 }
