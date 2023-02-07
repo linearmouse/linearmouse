@@ -168,20 +168,20 @@ class DeviceManager: ObservableObject {
         let scheme = ConfigurationState.shared.configuration.matchScheme(withDevice: device,
                                                                          withPid: frontmostApp?.processIdentifier)
 
-        if let pointerDisableAcceleration = scheme.pointer?.disableAcceleration {
+        if let pointerDisableAcceleration = scheme.pointer.disableAcceleration {
             if pointerDisableAcceleration {
                 device.pointerAcceleration = -1
                 return
             }
         }
 
-        if let pointerSpeed = scheme.pointer?.speed {
+        if let pointerSpeed = scheme.pointer.speed {
             device.pointerSpeed = pointerSpeed.asTruncatedDouble
         } else {
             device.restorePointerSpeed()
         }
 
-        if let pointerAcceleration = scheme.pointer?.acceleration {
+        if let pointerAcceleration = scheme.pointer.acceleration {
             device.pointerAcceleration = pointerAcceleration.asTruncatedDouble
         } else {
             device.restorePointerAcceleration()

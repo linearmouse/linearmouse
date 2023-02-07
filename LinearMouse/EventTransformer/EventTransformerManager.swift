@@ -51,7 +51,7 @@ class EventTransformerManager {
 
         var eventTransformer: [EventTransformer] = []
 
-        if let reverse = scheme.scrolling?.reverse {
+        if let reverse = scheme.scrolling.$reverse {
             let vertical = reverse.vertical ?? false
             let horizontal = reverse.horizontal ?? false
 
@@ -60,27 +60,29 @@ class EventTransformerManager {
             }
         }
 
-        if let distance = scheme.scrolling?.distance?.horizontal {
+        if let distance = scheme.scrolling.distance.horizontal {
             eventTransformer.append(LinearScrollingHorizontal(distance: distance))
         }
 
-        if let distance = scheme.scrolling?.distance?.vertical {
+        if let distance = scheme.scrolling.distance.vertical {
             eventTransformer.append(LinearScrollingVertical(distance: distance))
         }
 
-        if let scale = scheme.scrolling?.scale, scale.vertical ?? 1 != 1 || scale.horizontal ?? 1 != 1 {
-            eventTransformer.append(ScrollingScale(scale: scale))
+        if let scale = scheme.scrolling.$scale {
+            if scale.vertical ?? 1 != 1 || scale.horizontal ?? 1 != 1 {
+                eventTransformer.append(ScrollingScale(scale: scale))
+            }
         }
 
-        if let modifiers = scheme.scrolling?.modifiers {
+        if let modifiers = scheme.scrolling.$modifiers {
             eventTransformer.append(ModifierActions(modifiers: modifiers))
         }
 
-        if let mappings = scheme.buttons?.mappings {
+        if let mappings = scheme.buttons.mappings {
             eventTransformer.append(ButtonActions(mappings: mappings))
         }
 
-        if let universalBackForward = scheme.buttons?.universalBackForward,
+        if let universalBackForward = scheme.buttons.universalBackForward,
            universalBackForward != .none {
             eventTransformer.append(UniversalBackForward(universalBackForward: universalBackForward))
         }

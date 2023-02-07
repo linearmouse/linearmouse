@@ -1,12 +1,24 @@
 // MIT License
 // Copyright (c) 2021-2023 Jiahao Lu
 
+import Combine
 import Foundation
+import PublishedObject
 
-extension SchemeState {
+class PointerSettingsState: ObservableObject {
+    static let shared: PointerSettingsState = .init()
+
+    @PublishedObject private var schemeState = SchemeState.shared
+    var scheme: Scheme {
+        get { schemeState.scheme }
+        set { schemeState.scheme = newValue }
+    }
+}
+
+extension PointerSettingsState {
     var pointerAcceleration: Double {
         get {
-            scheme.pointer?.acceleration.map(\.asTruncatedDouble)
+            scheme.pointer.acceleration?.asTruncatedDouble
                 ?? scheme.firstMatchedDevice?.pointerAcceleration
                 ?? Device.fallbackPointerAcceleration
         }
@@ -15,18 +27,13 @@ extension SchemeState {
                 return
             }
 
-            Scheme(
-                pointer: Scheme.Pointer(
-                    acceleration: Decimal(newValue).rounded(4)
-                )
-            )
-            .merge(into: &scheme)
+            scheme.pointer.acceleration = Decimal(newValue).rounded(4)
         }
     }
 
     var pointerSpeed: Double {
         get {
-            scheme.pointer?.speed.map(\.asTruncatedDouble)
+            scheme.pointer.speed?.asTruncatedDouble
                 ?? scheme.firstMatchedDevice?.pointerSpeed
                 ?? Device.fallbackPointerSpeed
         }
@@ -35,12 +42,7 @@ extension SchemeState {
                 return
             }
 
-            Scheme(
-                pointer: Scheme.Pointer(
-                    speed: Decimal(newValue).rounded(4)
-                )
-            )
-            .merge(into: &scheme)
+            scheme.pointer.speed = Decimal(newValue).rounded(4)
         }
     }
 
@@ -64,15 +66,10 @@ extension SchemeState {
 
     var pointerDisableAcceleration: Bool {
         get {
-            scheme.pointer?.disableAcceleration ?? false
+            scheme.pointer.disableAcceleration ?? false
         }
         set {
-            Scheme(
-                pointer: Scheme.Pointer(
-                    disableAcceleration: newValue
-                )
-            )
-            .merge(into: &scheme)
+            scheme.pointer.disableAcceleration = newValue
         }
     }
 
