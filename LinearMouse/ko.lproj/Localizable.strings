@@ -27,6 +27,7 @@
 "Slower" = "Slower";
 "Faster" = "Faster";
 "Distance" = "Distance";
+"Discrete" = "Discrete";
 "Modifier Keys" = "보조 키";
 "No action" = "동작 없음";
 "Alter orientation" = "방향 변경";

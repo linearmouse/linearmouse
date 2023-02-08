@@ -27,6 +27,7 @@
 "Slower" = "Slower";
 "Faster" = "Faster";
 "Distance" = "Distance";
+"Discrete" = "Discrete";
 "Modifier Keys" = "Klawisze modyfikujące";
 "No action" = "Brak akcji";
 "Alter orientation" = "Zmień orientację";
