@@ -858,6 +858,9 @@
         },
         {
           "$ref": "#/definitions/Scheme.Scrolling.Modifiers.ChangeSpeed"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.Zoom"
         }
       ]
     },
@@ -900,6 +903,20 @@
       "properties": {
         "type": {
           "const": "none",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "Scheme.Scrolling.Modifiers.Zoom": {
+      "additionalProperties": false,
+      "description": "Zoom in and out using ⌘+ and ⌘-.",
+      "properties": {
+        "type": {
+          "const": "zoom",
           "type": "string"
         }
       },

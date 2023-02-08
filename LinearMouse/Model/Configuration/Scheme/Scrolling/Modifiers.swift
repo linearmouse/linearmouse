@@ -17,6 +17,7 @@ extension Scheme.Scrolling.Modifiers {
         case none
         case alterOrientation
         case changeSpeed(scale: Decimal)
+        case zoom
     }
 }
 
@@ -54,7 +55,7 @@ extension Scheme.Scrolling.Modifiers.Action: Codable {
     }
 
     enum ActionType: String, Codable {
-        case none, alterOrientation, changeSpeed
+        case none, alterOrientation, changeSpeed, zoom
     }
 
     init(from decoder: Decoder) throws {
@@ -69,6 +70,8 @@ extension Scheme.Scrolling.Modifiers.Action: Codable {
         case .changeSpeed:
             let scale = try container.decode(Decimal.self, forKey: .scale)
             self = .changeSpeed(scale: scale)
+        case .zoom:
+            self = .zoom
         }
     }
 
@@ -83,6 +86,8 @@ extension Scheme.Scrolling.Modifiers.Action: Codable {
         case let .changeSpeed(scale):
             try container.encode(ActionType.changeSpeed, forKey: .type)
             try container.encode(scale, forKey: .scale)
+        case .zoom:
+            try container.encode(ActionType.zoom, forKey: .type)
         }
     }
 }
