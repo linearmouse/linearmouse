@@ -39,7 +39,9 @@ extension Configuration.ConfigurationError: LocalizedError {
                         return String(format: NSLocalizedString("Invalid JSON: %1$@", comment: ""),
                                       String(describing: underlyingError))
                     } else {
-                        return NSLocalizedString("Invalid JSON: Unknown error", comment: "")
+                        return String(format: NSLocalizedString("Invalid JSON: %1$@ at %2$@", comment: ""),
+                                      String(context.debugDescription),
+                                      String(describing: context.codingPath.map(\.stringValue).joined(separator: ".")))
                     }
                 case let .keyNotFound(codingKey, context):
                     return String(format: NSLocalizedString("Missing key %1$@ at %2$@", comment: ""),

@@ -42,6 +42,8 @@
 		97353386297ED84600C1B5D0 /* ScrollingScale.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97353385297ED84600C1B5D0 /* ScrollingScale.swift */; };
 		9735338F297F8EE200C1B5D0 /* FormViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9735338E297F8EE200C1B5D0 /* FormViewModifier.swift */; };
 		973EB9FE287EE7D90069A8EF /* Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 973EB9FD287EE7D90069A8EF /* Action.swift */; };
+		9757BB9629935445002333AA /* Bidirectional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9757BB9529935445002333AA /* Bidirectional.swift */; };
+		9757BB9A29935474002333AA /* BidirectionalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9757BB9929935474002333AA /* BidirectionalTests.swift */; };
 		977638F9286BE9EE00A698B6 /* PublishedObject in Frameworks */ = {isa = PBXBuildFile; productRef = 977638F8286BE9EE00A698B6 /* PublishedObject */; };
 		97A13AD2287094FB002F6193 /* Distance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A13AD1287094FB002F6193 /* Distance.swift */; };
 		97A2F60A29508AD800F31122 /* EventTransformerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A2F60929508AD800F31122 /* EventTransformerManager.swift */; };
@@ -157,6 +159,8 @@
 		97353385297ED84600C1B5D0 /* ScrollingScale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingScale.swift; sourceTree = "<group>"; };
 		9735338E297F8EE200C1B5D0 /* FormViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormViewModifier.swift; sourceTree = "<group>"; };
 		973EB9FD287EE7D90069A8EF /* Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Action.swift; sourceTree = "<group>"; };
+		9757BB9529935445002333AA /* Bidirectional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bidirectional.swift; sourceTree = "<group>"; };
+		9757BB9929935474002333AA /* BidirectionalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalTests.swift; sourceTree = "<group>"; };
 		97A13AD1287094FB002F6193 /* Distance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Distance.swift; sourceTree = "<group>"; };
 		97A2F60929508AD800F31122 /* EventTransformerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTransformerManager.swift; sourceTree = "<group>"; };
 		97A46B16285444BF00C07C9B /* NSWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSWindow.swift; sourceTree = "<group>"; };
@@ -468,6 +472,22 @@
 			path = Mapping;
 			sourceTree = "<group>";
 		};
+		9757BB9729935462002333AA /* Scheme */ = {
+			isa = PBXGroup;
+			children = (
+				9757BB982993546A002333AA /* Scrolling */,
+			);
+			path = Scheme;
+			sourceTree = "<group>";
+		};
+		9757BB982993546A002333AA /* Scrolling */ = {
+			isa = PBXGroup;
+			children = (
+				9757BB9929935474002333AA /* BidirectionalTests.swift */,
+			);
+			path = Scrolling;
+			sourceTree = "<group>";
+		};
 		97B9D4972865EB9400137E60 /* Scheme */ = {
 			isa = PBXGroup;
 			children = (
@@ -532,6 +552,7 @@
 				97B83CDC2860B3FD00ECF109 /* Scrolling.swift */,
 				97C5DBC72868A2C7006FA6B4 /* Modifiers.swift */,
 				97A13AD1287094FB002F6193 /* Distance.swift */,
+				9757BB9529935445002333AA /* Bidirectional.swift */,
 			);
 			path = Scrolling;
 			sourceTree = "<group>";
@@ -548,6 +569,7 @@
 		97F77FB2285F453F007C9C2B /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				9757BB9729935462002333AA /* Scheme */,
 				97F77FB3285F45AF007C9C2B /* ConfigurationTests.swift */,
 			);
 			path = Model;
@@ -921,6 +943,7 @@
 				972327AF29928FBD0041538A /* Header.swift in Sources */,
 				97F77FAC285E3055007C9C2B /* StatusItem.swift in Sources */,
 				B7B1D08F26B3EC4F00F48176 /* ScrollingSettings.swift in Sources */,
+				9757BB9629935445002333AA /* Bidirectional.swift in Sources */,
 				972DF64F285A2D7C00B83932 /* SecondaryButtonStyle.swift in Sources */,
 				97B913FE28869F0500DC920A /* ButtonActions.swift in Sources */,
 				972DF646285A269500B83932 /* SchemeIndicator.swift in Sources */,
@@ -973,6 +996,7 @@
 				B7541480274E3CEF003CDAD0 /* ModifierActionsTests.swift in Sources */,
 				97F77FB4285F45AF007C9C2B /* ConfigurationTests.swift in Sources */,
 				B7ADF99F274918540005B02D /* ReverseScrollingTests.swift in Sources */,
+				9757BB9A29935474002333AA /* BidirectionalTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
