@@ -8,6 +8,7 @@ extension Scheme {
         @ImplicitOptional var reverse: Bidirectional<Bool>
         @ImplicitOptional var distance: Bidirectional<Distance>
         @ImplicitOptional var scale: Bidirectional<Decimal>
+        @ImplicitOptional var discrete: Bidirectional<Bool>
         @ImplicitOptional var modifiers: Bidirectional<Modifiers>
 
         init() {}
@@ -15,10 +16,12 @@ extension Scheme {
         init(reverse: Bidirectional<Bool>? = nil,
              distance: Bidirectional<Distance>? = nil,
              scale: Bidirectional<Decimal>? = nil,
+             discrete: Bidirectional<Bool>? = nil,
              modifiers: Bidirectional<Modifiers>? = nil) {
             $reverse = reverse
             $distance = distance
             $scale = scale
+            $discrete = discrete
             $modifiers = modifiers
         }
     }
@@ -29,6 +32,7 @@ extension Scheme.Scrolling {
         $reverse?.merge(into: &scrolling.reverse)
         $distance?.merge(into: &scrolling.distance)
         $scale?.merge(into: &scrolling.scale)
+        $discrete?.merge(into: &scrolling.discrete)
         $modifiers?.merge(into: &scrolling.modifiers)
     }
 

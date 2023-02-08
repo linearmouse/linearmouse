@@ -27,6 +27,10 @@ extension ScrollingSettings {
                         Text("Faster")
                     }
 
+                    Toggle(isOn: $state.discrete) {
+                        Text("Discrete")
+                    }
+
                 case .byLines:
                     Slider(
                         value: $state.scrollingDistanceInLines,

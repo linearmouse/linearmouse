@@ -56,12 +56,18 @@ extension ScrollingSettingsState {
 
             scheme.scrolling.distance[direction] = distance
             scheme.scrolling.scale[direction] = nil
+            scheme.scrolling.discrete[direction] = false
         }
     }
 
     var scrollingScale: Double {
         get { scheme.scrolling.scale[direction]?.asTruncatedDouble ?? 1 }
         set { scheme.scrolling.scale[direction] = Decimal(newValue).rounded(2) }
+    }
+
+    var discrete: Bool {
+        get { scheme.scrolling.discrete[direction] ?? false }
+        set { scheme.scrolling.discrete[direction] = newValue }
     }
 
     var scrollingDistanceInLines: Double {
