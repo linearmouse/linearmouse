@@ -73,6 +73,11 @@ class EventTransformerManager {
             eventTransformer.append(ScrollingScale(scale: scale))
         }
 
+        if let discrete = scheme.scrolling.$discrete,
+           discrete.vertical == true || discrete.horizontal == true {
+            eventTransformer.append(DiscreteScrolling(discrete: discrete))
+        }
+
         if let modifiers = scheme.scrolling.$modifiers {
             eventTransformer.append(ModifierActions(modifiers: modifiers))
         }
