@@ -13,7 +13,6 @@
 "Scrolling" = "スクロール";
 "Pointer" = "ポインター";
 "Buttons" = "ボタン";
-"Modifier Keys" = "修飾キー";
 "General" = "一般";
 
 "Vertical" = "Vertical";
@@ -28,6 +27,11 @@
 "Slower" = "Slower";
 "Faster" = "Faster";
 "Distance" = "Distance";
+"Modifier Keys" = "修飾キー";
+"No action" = "何もしない";
+"Alter orientation" = "方向を変更する";
+"Change speed" = "速度変更";
+"Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "ポインター加速を無効にする。";
 "Acceleration" = "アクセラレーション";
@@ -36,10 +40,6 @@
 
 "Enable universal back and forward" = "システム全般の戻る・進むボタンを有効にする";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "戻る・進むボタンをスワイプジェスチャーに変換し、システム全般における戻る・進む機能を行えるようにします。";
-
-"No action" = "何もしない";
-"Alter orientation" = "方向を変更する";
-"Change speed" = "速度変更";
 
 "Settings" = "設定";
 "Show in menu bar" = "メニューバーに表示";
