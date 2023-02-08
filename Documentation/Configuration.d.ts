@@ -127,23 +127,23 @@ declare namespace Scheme {
     /**
      * @title Reverse scrolling
      */
-    reverse?: Scrolling.Reverse;
+    reverse?: Scrolling.Bidirectional<Scrolling.Reverse>;
 
     /**
      * @title Scroll distance
      * @description The distance after rolling the wheel.
      */
-    distance?: Scrolling.Distance;
+    distance?: Scrolling.Bidirectional<Scrolling.Distance>;
 
     /**
      * @description The scaling factor applied to the scroll distance.
      */
-    scale?: Scrolling.Scale;
+    scale?: Scrolling.Bidirectional<Scrolling.Scale>;
 
     /**
      * @title Modifier keys settings
      */
-    modifiers?: Scrolling.Modifiers;
+    modifiers?: Scrolling.Bidirectional<Scrolling.Modifiers>;
   };
 
   namespace Scrolling {
@@ -154,14 +154,14 @@ declare namespace Scheme {
           horizontal: T;
         };
 
-    type Reverse = Bidirectional<boolean | undefined>;
+    type Reverse = boolean | undefined;
 
     /**
      * @description The scrolling distance will not be modified.
      */
     type Auto = "auto";
 
-    type Distance = Bidirectional<Auto | Distance.Line | Distance.Pixel>;
+    type Distance = Auto | Distance.Line | Distance.Pixel;
 
     namespace Distance {
       /**
@@ -176,7 +176,7 @@ declare namespace Scheme {
       type Pixel = string;
     }
 
-    type Scale = Bidirectional<number>;
+    type Scale = number;
 
     type Modifiers = {
       /**

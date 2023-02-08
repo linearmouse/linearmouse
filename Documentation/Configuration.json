@@ -695,36 +695,20 @@
       "additionalProperties": false,
       "properties": {
         "distance": {
-          "$ref": "#/definitions/Scheme.Scrolling.Distance",
+          "$ref": "#/definitions/Scheme.Scrolling.Bidirectional%3CScheme.Scrolling.Distance%3E",
           "description": "The distance after rolling the wheel.",
           "title": "Scroll distance"
         },
         "modifiers": {
-          "$ref": "#/definitions/Scheme.Scrolling.Modifiers",
+          "$ref": "#/definitions/Scheme.Scrolling.Bidirectional%3CScheme.Scrolling.Modifiers%3E",
           "title": "Modifier keys settings"
         },
         "reverse": {
-          "anyOf": [
-            {
-              "type": "boolean"
-            },
-            {
-              "additionalProperties": false,
-              "properties": {
-                "horizontal": {
-                  "type": "boolean"
-                },
-                "vertical": {
-                  "type": "boolean"
-                }
-              },
-              "type": "object"
-            }
-          ],
+          "$ref": "#/definitions/Scheme.Scrolling.Bidirectional%3CScheme.Scrolling.Reverse%3E",
           "title": "Reverse scrolling"
         },
         "scale": {
-          "$ref": "#/definitions/Scheme.Scrolling.Scale",
+          "$ref": "#/definitions/Scheme.Scrolling.Bidirectional%3CScheme.Scrolling.Scale%3E",
           "description": "The scaling factor applied to the scroll distance."
         }
       },
@@ -735,45 +719,19 @@
       "description": "The scrolling distance will not be modified.",
       "type": "string"
     },
-    "Scheme.Scrolling.Bidirectional<(Scheme.Scrolling.Auto|Scheme.Scrolling.Distance.Line|Scheme.Scrolling.Distance.Pixel)>": {
+    "Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Distance>": {
       "anyOf": [
         {
-          "$ref": "#/definitions/Scheme.Scrolling.Auto"
-        },
-        {
-          "$ref": "#/definitions/Scheme.Scrolling.Distance.Line"
-        },
-        {
-          "$ref": "#/definitions/Scheme.Scrolling.Distance.Pixel"
+          "$ref": "#/definitions/Scheme.Scrolling.Distance"
         },
         {
           "additionalProperties": false,
           "properties": {
             "horizontal": {
-              "anyOf": [
-                {
-                  "$ref": "#/definitions/Scheme.Scrolling.Auto"
-                },
-                {
-                  "$ref": "#/definitions/Scheme.Scrolling.Distance.Line"
-                },
-                {
-                  "$ref": "#/definitions/Scheme.Scrolling.Distance.Pixel"
-                }
-              ]
+              "$ref": "#/definitions/Scheme.Scrolling.Distance"
             },
             "vertical": {
-              "anyOf": [
-                {
-                  "$ref": "#/definitions/Scheme.Scrolling.Auto"
-                },
-                {
-                  "$ref": "#/definitions/Scheme.Scrolling.Distance.Line"
-                },
-                {
-                  "$ref": "#/definitions/Scheme.Scrolling.Distance.Pixel"
-                }
-              ]
+              "$ref": "#/definitions/Scheme.Scrolling.Distance"
             }
           },
           "required": [
@@ -784,19 +742,61 @@
         }
       ]
     },
-    "Scheme.Scrolling.Bidirectional<number>": {
+    "Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Modifiers>": {
       "anyOf": [
         {
-          "type": "number"
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers"
         },
         {
           "additionalProperties": false,
           "properties": {
             "horizontal": {
-              "type": "number"
+              "$ref": "#/definitions/Scheme.Scrolling.Modifiers"
             },
             "vertical": {
-              "type": "number"
+              "$ref": "#/definitions/Scheme.Scrolling.Modifiers"
+            }
+          },
+          "required": [
+            "vertical",
+            "horizontal"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Reverse>": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Scheme.Scrolling.Reverse"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "horizontal": {
+              "type": "boolean"
+            },
+            "vertical": {
+              "type": "boolean"
+            }
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Scale>": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Scheme.Scrolling.Scale"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "horizontal": {
+              "$ref": "#/definitions/Scheme.Scrolling.Scale"
+            },
+            "vertical": {
+              "$ref": "#/definitions/Scheme.Scrolling.Scale"
             }
           },
           "required": [
@@ -808,7 +808,17 @@
       ]
     },
     "Scheme.Scrolling.Distance": {
-      "$ref": "#/definitions/Scheme.Scrolling.Bidirectional%3C(Scheme.Scrolling.Auto%7CScheme.Scrolling.Distance.Line%7CScheme.Scrolling.Distance.Pixel)%3E"
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Scheme.Scrolling.Auto"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Scrolling.Distance.Line"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Scrolling.Distance.Pixel"
+        }
+      ]
     },
     "Scheme.Scrolling.Distance.Line": {
       "anyOf": [
@@ -925,8 +935,18 @@
       ],
       "type": "object"
     },
+    "Scheme.Scrolling.Reverse": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "not": {}
+        }
+      ]
+    },
     "Scheme.Scrolling.Scale": {
-      "$ref": "#/definitions/Scheme.Scrolling.Bidirectional%3Cnumber%3E"
+      "type": "number"
     },
     "SingleValueOrArray<Scheme.If.Category>": {
       "anyOf": [
