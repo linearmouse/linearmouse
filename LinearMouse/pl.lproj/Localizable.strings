@@ -13,7 +13,6 @@
 "Scrolling" = "Przewijanie";
 "Pointer" = "Wskaźnik";
 "Buttons" = "Przyciski";
-"Modifier Keys" = "Klawisze modyfikujące";
 "General" = "Ogólne";
 
 "Vertical" = "Vertical";
@@ -28,6 +27,11 @@
 "Slower" = "Slower";
 "Faster" = "Faster";
 "Distance" = "Distance";
+"Modifier Keys" = "Klawisze modyfikujące";
+"No action" = "Brak akcji";
+"Alter orientation" = "Zmień orientację";
+"Change speed" = "Zmień szybkość";
+"Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "Wyłącz przyspieszenie wskaźnika";
 "Acceleration" = "Przyspieszenie";
@@ -36,10 +40,6 @@
 
 "Enable universal back and forward" = "Włącz uniwersalne przejścia w przód i w tył";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Zamienia działanie przycisków bocznych myszy na gesty przesuwania, tak aby umożliwić uniwersalne przechodzenie w przód i w tył.";
-
-"No action" = "Brak akcji";
-"Alter orientation" = "Zmień orientację";
-"Change speed" = "Zmień szybkość";
 
 "Settings" = "Ustawienia";
 "Show in menu bar" = "Pokaż na pasku menu";

@@ -13,7 +13,6 @@
 "Scrolling" = "滚动";
 "Pointer" = "指针";
 "Buttons" = "按钮";
-"Modifier Keys" = "修饰键";
 "General" = "通用";
 
 "Vertical" = "纵向";
@@ -28,6 +27,11 @@
 "Slower" = "慢";
 "Faster" = "快";
 "Distance" = "距离";
+"Modifier Keys" = "修饰键";
+"No action" = "无动作";
+"Alter orientation" = "改变方向";
+"Change speed" = "变更速度";
+"Zoom" = "缩放";
 
 "Disable pointer acceleration" = "禁用指针加速度";
 "Acceleration" = "加速度";
@@ -36,10 +40,6 @@
 
 "Enable universal back and forward" = "启用全局后退、前进";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "将后退、前进侧键转换为滑动手势，以全局启用后退、前进支持。";
-
-"No action" = "无动作";
-"Alter orientation" = "改变方向";
-"Change speed" = "变更速度";
 
 "Settings" = "设置";
 "Show in menu bar" = "在菜单栏中显示";

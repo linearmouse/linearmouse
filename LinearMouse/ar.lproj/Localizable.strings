@@ -13,7 +13,6 @@
 "Scrolling" = "التمرير";
 "Pointer" = "المؤشر";
 "Buttons" = "الأزرار";
-"Modifier Keys" = "مفاتيح التعديل";
 "General" = "عام";
 
 "Vertical" = "عمودي";
@@ -28,6 +27,11 @@
 "Slower" = "أبطأ";
 "Faster" = "أَسرعْ";
 "Distance" = "المسافة";
+"Modifier Keys" = "مفاتيح التعديل";
+"No action" = "No action";
+"Alter orientation" = "Alter orientation";
+"Change speed" = "تغيير السرعة";
+"Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "Disable pointer acceleration";
 "Acceleration" = "Acceleration";
@@ -36,10 +40,6 @@
 
 "Enable universal back and forward" = "Enable universal back and forward";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
-
-"No action" = "No action";
-"Alter orientation" = "Alter orientation";
-"Change speed" = "تغيير السرعة";
 
 "Settings" = "الإعدادات";
 "Show in menu bar" = "عرض في شريط القوائم";
