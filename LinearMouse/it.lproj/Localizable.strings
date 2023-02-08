@@ -13,7 +13,6 @@
 "Scrolling" = "Scrolling";
 "Pointer" = "Pointer";
 "Buttons" = "Buttons";
-"Modifier Keys" = "Tasti modificatori";
 "General" = "Generale";
 
 "Vertical" = "Vertical";
@@ -28,6 +27,11 @@
 "Slower" = "Slower";
 "Faster" = "Faster";
 "Distance" = "Distance";
+"Modifier Keys" = "Tasti modificatori";
+"No action" = "Nessuna azione";
+"Alter orientation" = "Cambiare orientamento";
+"Change speed" = "Cambia velocità";
+"Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "Disable pointer acceleration";
 "Acceleration" = "Accelerazione";
@@ -36,10 +40,6 @@
 
 "Enable universal back and forward" = "Abilitare avanti e indietro universale";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Converti i pulsanti laterali avanti e indietro in gesti scorrevoli per consentire funzionalità di avanti e indietro universali.";
-
-"No action" = "Nessuna azione";
-"Alter orientation" = "Cambiare orientamento";
-"Change speed" = "Cambia velocità";
 
 "Settings" = "Settings";
 "Show in menu bar" = "Mostra nella barra dei menu";
