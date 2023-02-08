@@ -13,7 +13,6 @@
 "Scrolling" = "Kaydırma";
 "Pointer" = "İşaretçi";
 "Buttons" = "Tuşlar";
-"Modifier Keys" = "Değiştirici tuşlar";
 "General" = "Genel";
 
 "Vertical" = "Vertical";
@@ -28,6 +27,11 @@
 "Slower" = "Slower";
 "Faster" = "Faster";
 "Distance" = "Distance";
+"Modifier Keys" = "Değiştirici tuşlar";
+"No action" = "Eylem yok";
+"Alter orientation" = "Yönlendirmeyi değiştir";
+"Change speed" = "Hızı değiştir";
+"Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "İşaretçi ivmesini devre dışı bırak";
 "Acceleration" = "İvme";
@@ -36,10 +40,6 @@
 
 "Enable universal back and forward" = "Evrensel ileri ve geriyi etkinleştir";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Evrensel ileri ve geri işlevine izin vermek için ileri ve geri yan düğmelerini kaydırma hareketlerine dönüştürün.";
-
-"No action" = "Eylem yok";
-"Alter orientation" = "Yönlendirmeyi değiştir";
-"Change speed" = "Hızı değiştir";
 
 "Settings" = "Ayarlar";
 "Show in menu bar" = "Menüde göster";
