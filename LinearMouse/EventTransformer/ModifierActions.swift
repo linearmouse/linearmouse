@@ -31,28 +31,51 @@ class ModifierActions: EventTransformer {
             (.maskAlternate, modifiers.option),
             (.maskControl, modifiers.control)
         ]
+        var event = event
         for case let (flag, action) in actions where event.flags.contains(flag) {
-            if let action = action {
-                if handleModifierKeyAction(for: event, action: action) {
-                    event.flags.remove(flag)
+            if let action = action, action != .none {
+                guard let handledEvent = handleModifierKeyAction(for: event, action: action) else {
+                    return nil
                 }
+                event = handledEvent
+                event.flags.remove(flag)
             }
         }
         return event
     }
 
-    private func handleModifierKeyAction(for event: CGEvent, action: Action) -> Bool {
+    private func handleModifierKeyAction(for event: CGEvent, action: Action) -> CGEvent? {
         let scrollWheelEventView = ScrollWheelEventView(event)
 
         switch action {
         case .none:
-            return false
+            break
         case .alterOrientation:
             scrollWheelEventView.swapXY()
         case let .changeSpeed(scale: scale):
             scrollWheelEventView.scale(factor: scale.asTruncatedDouble)
+        case .zoom:
+            let scrollWheelEventView = ScrollWheelEventView(event)
+            // TODO: Extract a KeyboardKit?
+            CGEvent(keyboardEventSource: nil, virtualKey: 0x37, keyDown: true)?.post(tap: .cgSessionEventTap)
+            let deltaSignum = scrollWheelEventView.deltaYSignum != 0 ? scrollWheelEventView
+                .deltaYSignum : scrollWheelEventView.deltaXSignum
+            if deltaSignum == 0 {
+                return event
+            }
+            let virtualKey: CGKeyCode = deltaSignum > 0 ? 0x45 : 0x4E
+            if let keyDownEvent = CGEvent(keyboardEventSource: nil, virtualKey: virtualKey, keyDown: true) {
+                keyDownEvent.flags = .maskCommand
+                keyDownEvent.post(tap: .cgSessionEventTap)
+            }
+            if let keyDownUp = CGEvent(keyboardEventSource: nil, virtualKey: virtualKey, keyDown: false) {
+                keyDownUp.flags = .maskCommand
+                keyDownUp.post(tap: .cgSessionEventTap)
+            }
+            CGEvent(keyboardEventSource: nil, virtualKey: 0x37, keyDown: false)?.post(tap: .cgSessionEventTap)
+            return nil
         }
 
-        return true
+        return event
     }
 }

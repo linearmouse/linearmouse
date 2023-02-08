@@ -38,6 +38,7 @@ extension ScrollingSettings.ModifierKeysSection.ModifierKeyActionPicker {
         case noAction = "No action"
         case alterOrientation = "Alter orientation"
         case changeSpeed = "Change speed"
+        case zoom = "Zoom"
     }
 
     var actionType: Binding<ActionType> {
@@ -54,6 +55,8 @@ extension ScrollingSettings.ModifierKeysSection.ModifierKeyActionPicker {
                     return .alterOrientation
                 case .changeSpeed:
                     return .changeSpeed
+                case .zoom:
+                    return .zoom
                 }
             },
 
@@ -65,6 +68,8 @@ extension ScrollingSettings.ModifierKeysSection.ModifierKeyActionPicker {
                     self.action = .alterOrientation
                 case .changeSpeed:
                     self.action = .changeSpeed(scale: 1)
+                case .zoom:
+                    self.action = .zoom
                 }
             }
         )

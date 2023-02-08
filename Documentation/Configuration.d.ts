@@ -225,7 +225,14 @@ declare namespace Scheme {
         scale: number;
       };
 
-      type Action = None | AlterOrientation | ChangeSpeed;
+      /**
+       * @description Zoom in and out using ⌘+ and ⌘-.
+       */
+      type Zoom = {
+        type: "zoom";
+      };
+
+      type Action = None | AlterOrientation | ChangeSpeed | Zoom;
     }
   }
 
