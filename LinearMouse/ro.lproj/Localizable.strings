@@ -13,7 +13,6 @@
 "Scrolling" = "Derulare";
 "Pointer" = "Indicator";
 "Buttons" = "Butoane";
-"Modifier Keys" = "Modificator de taste";
 "General" = "General";
 
 "Vertical" = "Vertical";
@@ -28,6 +27,11 @@
 "Slower" = "Mai încet";
 "Faster" = "Mai rapid";
 "Distance" = "Distanță";
+"Modifier Keys" = "Modificator de taste";
+"No action" = "Nicio acțiune";
+"Alter orientation" = "Modifică orientarea";
+"Change speed" = "Schimbă viteza";
+"Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "Dezactivează accelerația cursorului";
 "Acceleration" = "Accelerare";
@@ -36,10 +40,6 @@
 
 "Enable universal back and forward" = "Activați funcția universală înapoi și înainte";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convertește butoanele din spate și din față lateral la gesturi de glisare pentru a permite funcționalitatea universală înapoi și înainte.";
-
-"No action" = "Nicio acțiune";
-"Alter orientation" = "Modifică orientarea";
-"Change speed" = "Schimbă viteza";
 
 "Settings" = "Setări";
 "Show in menu bar" = "Arată in bara de meniu";
