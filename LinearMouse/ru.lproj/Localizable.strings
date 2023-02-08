@@ -27,6 +27,7 @@
 "Slower" = "Медленнее";
 "Faster" = "Быстрее";
 "Distance" = "Количество";
+"Discrete" = "Discrete";
 "Modifier Keys" = "Клавиши модификации";
 "No action" = "Не задано";
 "Alter orientation" = "Изменить направление прокрутки";
