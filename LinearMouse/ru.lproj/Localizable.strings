@@ -13,7 +13,6 @@
 "Scrolling" = "Прокрутка";
 "Pointer" = "Курсор";
 "Buttons" = "Кнопки";
-"Modifier Keys" = "Клавиши модификации";
 "General" = "Основные";
 
 "Vertical" = "Вертикальная";
@@ -28,6 +27,11 @@
 "Slower" = "Медленнее";
 "Faster" = "Быстрее";
 "Distance" = "Количество";
+"Modifier Keys" = "Клавиши модификации";
+"No action" = "Не задано";
+"Alter orientation" = "Изменить направление прокрутки";
+"Change speed" = "Изменить скорость";
+"Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "Отключить ускорение курсора";
 "Acceleration" = "Ускорение";
@@ -36,10 +40,6 @@
 
 "Enable universal back and forward" = "Включить универсальные «назад» и «вперед»";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Преобразует боковые кнопки «назад» и «вперед» в жесты смахивания, чтобы сделать их работоспособными во всех приложениях.";
-
-"No action" = "Не задано";
-"Alter orientation" = "Изменить направление прокрутки";
-"Change speed" = "Изменить скорость";
 
 "Settings" = "Настройки";
 "Show in menu bar" = "Показывать в строке меню";
