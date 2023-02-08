@@ -13,7 +13,6 @@
 "Scrolling" = "Scrollen";
 "Pointer" = "Zeiger";
 "Buttons" = "Tasten";
-"Modifier Keys" = "Tastenkürzel";
 "General" = "Allgemein";
 
 "Vertical" = "Vertikal";
@@ -28,6 +27,11 @@
 "Slower" = "Langsamer";
 "Faster" = "Schneller";
 "Distance" = "Distanz";
+"Modifier Keys" = "Tastenkürzel";
+"No action" = "Keine Funktion";
+"Alter orientation" = "Scrollorientierung ändern";
+"Change speed" = "Scrollgeschwindigkeit ändern";
+"Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "Zeigerbeschleunigung deaktivieren";
 "Acceleration" = "Beschleunigung";
@@ -36,10 +40,6 @@
 
 "Enable universal back and forward" = "Universelles Vor und Zurück aktivieren";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Konvertiert die Vor- und Zurück-Seitentasten in die jeweiligen Wischgesten, um eine universelle Vor- und Zurück-Funktion zu ermöglichen.";
-
-"No action" = "Keine Funktion";
-"Alter orientation" = "Scrollorientierung ändern";
-"Change speed" = "Scrollgeschwindigkeit ändern";
 
 "Settings" = "Einstellungen";
 "Show in menu bar" = "In der Menüleiste anzeigen";
