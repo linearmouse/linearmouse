@@ -13,7 +13,6 @@
 "Scrolling" = "Scrolling";
 "Pointer" = "Pointer";
 "Buttons" = "Buttons";
-"Modifier Keys" = "Teclas Modificadoras";
 "General" = "Geral";
 
 "Vertical" = "Vertical";
@@ -28,6 +27,11 @@
 "Slower" = "Slower";
 "Faster" = "Faster";
 "Distance" = "Distance";
+"Modifier Keys" = "Teclas Modificadoras";
+"No action" = "Nenhuma ação";
+"Alter orientation" = "Mudar orientação";
+"Change speed" = "Alterar velocidade";
+"Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "Disable pointer acceleration";
 "Acceleration" = "Aceleração";
@@ -36,10 +40,6 @@
 
 "Enable universal back and forward" = "Habilitar retorno e avanço universal";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Converte os botões laterais de retorno e avanço para gestos do trackpad para habilitar a funcionalidade de retorno e avanço universal.";
-
-"No action" = "Nenhuma ação";
-"Alter orientation" = "Mudar orientação";
-"Change speed" = "Alterar velocidade";
 
 "Settings" = "Settings";
 "Show in menu bar" = "Mostrar na barra de menus";
