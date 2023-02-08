@@ -149,12 +149,13 @@ declare namespace Scheme {
   namespace Scrolling {
     type Bidirectional<T> =
       | T
+      | undefined
       | {
-          vertical: T;
-          horizontal: T;
+          vertical?: T;
+          horizontal?: T;
         };
 
-    type Reverse = boolean | undefined;
+    type Reverse = boolean;
 
     /**
      * @description The scrolling distance will not be modified.

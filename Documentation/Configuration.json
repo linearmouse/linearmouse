@@ -695,20 +695,84 @@
       "additionalProperties": false,
       "properties": {
         "distance": {
-          "$ref": "#/definitions/Scheme.Scrolling.Bidirectional%3CScheme.Scrolling.Distance%3E",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Scheme.Scrolling.Distance"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "horizontal": {
+                  "$ref": "#/definitions/Scheme.Scrolling.Distance"
+                },
+                "vertical": {
+                  "$ref": "#/definitions/Scheme.Scrolling.Distance"
+                }
+              },
+              "type": "object"
+            }
+          ],
           "description": "The distance after rolling the wheel.",
           "title": "Scroll distance"
         },
         "modifiers": {
-          "$ref": "#/definitions/Scheme.Scrolling.Bidirectional%3CScheme.Scrolling.Modifiers%3E",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Scheme.Scrolling.Modifiers"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "horizontal": {
+                  "$ref": "#/definitions/Scheme.Scrolling.Modifiers"
+                },
+                "vertical": {
+                  "$ref": "#/definitions/Scheme.Scrolling.Modifiers"
+                }
+              },
+              "type": "object"
+            }
+          ],
           "title": "Modifier keys settings"
         },
         "reverse": {
-          "$ref": "#/definitions/Scheme.Scrolling.Bidirectional%3CScheme.Scrolling.Reverse%3E",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Scheme.Scrolling.Reverse"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "horizontal": {
+                  "$ref": "#/definitions/Scheme.Scrolling.Reverse"
+                },
+                "vertical": {
+                  "$ref": "#/definitions/Scheme.Scrolling.Reverse"
+                }
+              },
+              "type": "object"
+            }
+          ],
           "title": "Reverse scrolling"
         },
         "scale": {
-          "$ref": "#/definitions/Scheme.Scrolling.Bidirectional%3CScheme.Scrolling.Scale%3E",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Scheme.Scrolling.Scale"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "horizontal": {
+                  "$ref": "#/definitions/Scheme.Scrolling.Scale"
+                },
+                "vertical": {
+                  "$ref": "#/definitions/Scheme.Scrolling.Scale"
+                }
+              },
+              "type": "object"
+            }
+          ],
           "description": "The scaling factor applied to the scroll distance."
         }
       },
@@ -718,94 +782,6 @@
       "const": "auto",
       "description": "The scrolling distance will not be modified.",
       "type": "string"
-    },
-    "Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Distance>": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/Scheme.Scrolling.Distance"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "horizontal": {
-              "$ref": "#/definitions/Scheme.Scrolling.Distance"
-            },
-            "vertical": {
-              "$ref": "#/definitions/Scheme.Scrolling.Distance"
-            }
-          },
-          "required": [
-            "vertical",
-            "horizontal"
-          ],
-          "type": "object"
-        }
-      ]
-    },
-    "Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Modifiers>": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/Scheme.Scrolling.Modifiers"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "horizontal": {
-              "$ref": "#/definitions/Scheme.Scrolling.Modifiers"
-            },
-            "vertical": {
-              "$ref": "#/definitions/Scheme.Scrolling.Modifiers"
-            }
-          },
-          "required": [
-            "vertical",
-            "horizontal"
-          ],
-          "type": "object"
-        }
-      ]
-    },
-    "Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Reverse>": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/Scheme.Scrolling.Reverse"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "horizontal": {
-              "type": "boolean"
-            },
-            "vertical": {
-              "type": "boolean"
-            }
-          },
-          "type": "object"
-        }
-      ]
-    },
-    "Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Scale>": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/Scheme.Scrolling.Scale"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "horizontal": {
-              "$ref": "#/definitions/Scheme.Scrolling.Scale"
-            },
-            "vertical": {
-              "$ref": "#/definitions/Scheme.Scrolling.Scale"
-            }
-          },
-          "required": [
-            "vertical",
-            "horizontal"
-          ],
-          "type": "object"
-        }
-      ]
     },
     "Scheme.Scrolling.Distance": {
       "anyOf": [
@@ -936,14 +912,7 @@
       "type": "object"
     },
     "Scheme.Scrolling.Reverse": {
-      "anyOf": [
-        {
-          "type": "boolean"
-        },
-        {
-          "not": {}
-        }
-      ]
+      "type": "boolean"
     },
     "Scheme.Scrolling.Scale": {
       "type": "number"
