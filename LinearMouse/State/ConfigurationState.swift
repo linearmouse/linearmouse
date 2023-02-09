@@ -18,15 +18,24 @@ class ConfigurationState: ObservableObject {
         relativeTo: FileManager.default.homeDirectoryForCurrentUser
     )
 
+    private var configurationSaveDebounceTimer: Timer?
     @Published var configuration = Configuration() {
         didSet {
+            configurationSaveDebounceTimer?.invalidate()
             guard shouldAutoSaveConfiguration else {
                 return
             }
 
-            os_log("Saving new configuration: %{public}@", log: Self.log, type: .debug,
-                   String(describing: configuration))
-            save()
+            configurationSaveDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.2,
+                                                                  repeats: false) { [weak self] _ in
+                guard let self = self else {
+                    return
+                }
+
+                os_log("Saving new configuration: %{public}@", log: Self.log, type: .debug,
+                       String(describing: self.configuration))
+                self.save()
+            }
         }
     }
 
