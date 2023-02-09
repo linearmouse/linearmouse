@@ -31,9 +31,9 @@ extension ScrollingSettings {
                            in: 0.0 ... 128.0) {
                         Text("Speed")
                     } minimumValueLabel: {
-                        Text("Linear")
+                        Text("Slow")
                     } maximumValueLabel: {
-                        Text("Accelerated")
+                        Text("Fast")
                     }
 
                 case .byLines:
