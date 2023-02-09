@@ -23,11 +23,15 @@
 "Accelerated" = "Accelerated";
 "By Lines" = "By Lines";
 "By Pixels" = "By Pixels";
+"Acceleration" = "Acceleration";
+"Linear" = "Linear";
+"Accelerated" = "Accelerated";
 "Speed" = "السرعة";
-"Slower" = "أبطأ";
-"Faster" = "أَسرعْ";
+"Slow" = "Slow";
+"Fast" = "Fast";
 "Distance" = "المسافة";
-"Discrete" = "Discrete";
+"Revert to system defaults" = "Revert to system defaults";
+"Copy settings from vertical" = "Copy settings from vertical";
 "Modifier Keys" = "مفاتيح التعديل";
 "No action" = "No action";
 "Alter orientation" = "Alter orientation";
@@ -35,8 +39,6 @@
 "Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "Disable pointer acceleration";
-"Acceleration" = "Acceleration";
-"Revert to system defaults" = "Revert to system defaults";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
 
 "Enable universal back and forward" = "Enable universal back and forward";
