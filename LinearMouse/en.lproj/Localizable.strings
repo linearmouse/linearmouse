@@ -23,9 +23,12 @@
 "Accelerated" = "Accelerated";
 "By Lines" = "By Lines";
 "By Pixels" = "By Pixels";
+"Acceleration" = "Acceleration";
+"Linear" = "Linear";
+"Accelerated" = "Accelerated";
 "Speed" = "Speed";
-"Slower" = "Slower";
-"Faster" = "Faster";
+"Slow" = "Slow";
+"Fast" = "Fast";
 "Distance" = "Distance";
 "Discrete" = "Discrete";
 "Modifier Keys" = "Modifier Keys";
@@ -35,7 +38,6 @@
 "Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "Disable pointer acceleration";
-"Acceleration" = "Acceleration";
 "Revert to system defaults" = "Revert to system defaults";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
 

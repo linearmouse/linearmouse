@@ -55,19 +55,19 @@ extension ScrollingSettingsState {
             }
 
             scheme.scrolling.distance[direction] = distance
-            scheme.scrolling.scale[direction] = 1
-            scheme.scrolling.discrete[direction] = false
+            scheme.scrolling.acceleration[direction] = 1
+            scheme.scrolling.speed[direction] = 0
         }
     }
 
-    var scrollingScale: Double {
-        get { scheme.scrolling.scale[direction]?.asTruncatedDouble ?? 1 }
-        set { scheme.scrolling.scale[direction] = Decimal(newValue).rounded(2) }
+    var scrollingAcceleration: Double {
+        get { scheme.scrolling.acceleration[direction]?.asTruncatedDouble ?? 1 }
+        set { scheme.scrolling.acceleration[direction] = Decimal(newValue).rounded(2) }
     }
 
-    var discrete: Bool {
-        get { scheme.scrolling.discrete[direction] ?? false }
-        set { scheme.scrolling.discrete[direction] = newValue }
+    var scrollingSpeed: Double {
+        get { scheme.scrolling.speed[direction]?.asTruncatedDouble ?? 0 }
+        set { scheme.scrolling.speed[direction] = Decimal(newValue).rounded(2) }
     }
 
     var scrollingDistanceInLines: Double {

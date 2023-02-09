@@ -18,17 +18,22 @@ extension ScrollingSettings {
 
                 switch state.scrollingMode {
                 case .accelerated:
-                    Slider(value: $state.scrollingScale,
+                    Slider(value: $state.scrollingAcceleration,
                            in: 0.0 ... 10.0) {
-                        Text("Speed")
+                        Text("Acceleration")
                     } minimumValueLabel: {
-                        Text("Slower")
+                        Text("Linear")
                     } maximumValueLabel: {
-                        Text("Faster")
+                        Text("Accelerated")
                     }
 
-                    Toggle(isOn: $state.discrete) {
-                        Text("Discrete")
+                    Slider(value: $state.scrollingSpeed,
+                           in: 0.0 ... 128.0) {
+                        Text("Speed")
+                    } minimumValueLabel: {
+                        Text("Slow")
+                    } maximumValueLabel: {
+                        Text("Fast")
                     }
 
                 case .byLines:

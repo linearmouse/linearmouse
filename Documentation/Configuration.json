@@ -694,25 +694,26 @@
     "Scheme.Scrolling": {
       "additionalProperties": false,
       "properties": {
-        "discrete": {
+        "acceleration": {
           "anyOf": [
             {
-              "type": "boolean"
+              "type": "number"
             },
             {
               "additionalProperties": false,
               "properties": {
                 "horizontal": {
-                  "type": "boolean"
+                  "type": "number"
                 },
                 "vertical": {
-                  "type": "boolean"
+                  "type": "number"
                 }
               },
               "type": "object"
             }
           ],
-          "title": "Discrete scrolling"
+          "default": 1,
+          "description": "The scrolling acceleration."
         },
         "distance": {
           "anyOf": [
@@ -775,7 +776,7 @@
           ],
           "title": "Reverse scrolling"
         },
-        "scale": {
+        "speed": {
           "anyOf": [
             {
               "type": "number"
@@ -793,7 +794,8 @@
               "type": "object"
             }
           ],
-          "description": "The scaling factor applied to the scroll distance."
+          "default": 0,
+          "description": "The scrolling speed."
         }
       },
       "type": "object"

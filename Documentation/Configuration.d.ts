@@ -136,14 +136,16 @@ declare namespace Scheme {
     distance?: Scrolling.Bidirectional<Scrolling.Distance>;
 
     /**
-     * @description The scaling factor applied to the scroll distance.
+     * @description The scrolling acceleration.
+     * @default 1
      */
-    scale?: Scrolling.Bidirectional<number>;
+    acceleration?: Scrolling.Bidirectional<number>;
 
     /**
-     * @title Discrete scrolling
+     * @description The scrolling speed.
+     * @default 0
      */
-    discrete?: Scrolling.Bidirectional<boolean>;
+    speed?: Scrolling.Bidirectional<number>;
 
     /**
      * @title Modifier keys settings
