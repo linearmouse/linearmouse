@@ -109,9 +109,4 @@ extension Configuration {
 
         return mergedScheme
     }
-
-    var activeScheme: Scheme {
-        matchScheme(withDevice: DeviceManager.shared.lastActiveDevice,
-                    withPid: NSWorkspace.shared.frontmostApplication?.processIdentifier)
-    }
 }
