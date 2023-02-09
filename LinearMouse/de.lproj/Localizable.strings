@@ -23,11 +23,15 @@
 "Accelerated" = "Beschleunigt";
 "By Lines" = "In Zeilen";
 "By Pixels" = "In Pixel";
+"Acceleration" = "Beschleunigung";
+"Linear" = "Linear";
+"Accelerated" = "Accelerated";
 "Speed" = "Geschwindigkeit";
-"Slower" = "Langsamer";
-"Faster" = "Schneller";
+"Slow" = "Slow";
+"Fast" = "Fast";
 "Distance" = "Distanz";
-"Discrete" = "Discrete";
+"Revert to system defaults" = "Auf Systemstandards zurücksetzen";
+"Copy settings from vertical" = "Copy settings from vertical";
 "Modifier Keys" = "Tastenkürzel";
 "No action" = "Keine Funktion";
 "Alter orientation" = "Scrollorientierung ändern";
@@ -35,8 +39,6 @@
 "Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "Zeigerbeschleunigung deaktivieren";
-"Acceleration" = "Beschleunigung";
-"Revert to system defaults" = "Auf Systemstandards zurücksetzen";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Durch Drücken des Kürzels ⌃⇧⌘Z kann ebenfalls zu den Systemstandards zurückgekehrt werden.";
 
 "Enable universal back and forward" = "Universelles Vor und Zurück aktivieren";
