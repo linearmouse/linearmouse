@@ -4,22 +4,37 @@ Thank you for investing your time in contributing to LinearMouse!
 
 Read our [Code of Conduct](CODE_OF_CONDUCT.md) to keep our community approachable and respectable.
 
-## Translations
+## Build instructions
 
-If you would like to help with translations, please sign up for Crowdin and join our [Crowdin project](https://crowdin.com/project/linearmouse) to translate LinearMouse into supported languages.
+Instructions for building LinearMouse on macOS.
 
-If you want to add a new language, please [create a new issue](https://github.com/linearmouse/linearmouse/issues/new) and I will be happy to enable that language for you to translate.
+### Setup the repository
 
-##### Step 1. Select the language you want to contribute to:
+```sh
+$ git clone https://github.com/linearmouse/linearmouse.git
+$ cd linearmouse
+```
 
-<img width="738" alt="Select language" src="https://user-images.githubusercontent.com/3000535/153121581-31252890-d957-48f7-b7ed-95e829e87fcc.png">
+### Configure code signing
 
-##### Step 2. Click ‘Translate All’:
+Code signing is required by Apple. You can generate a code signing configuration by running
 
-<img width="986" alt="Translate all" src="https://user-images.githubusercontent.com/3000535/153121796-671e0206-d2a7-4c2d-a696-89a0f55c2a72.png">
+```
+$ make configure
+```
 
-It is recommended to sign in Crowdin with GitHub, so that I can add you as a co-author when I merge the pull request.
+> Note: If you want to contribute to LinearMouse, please don't modify the ‘Signing & Capabilities’ configurations directly in Xcode. Instead, use `make configure` or modify the `Signing.xcconfig`.
 
-##### Step 3. Translate and save strings.
+If there are no available code signing certificates in your Keychain, it will generate a configuration that uses ad-hoc certificates to sign the app.
 
-New translations will be synced in one hour.
+By using ad-hoc certificates, you'll have to [grant accessibility permissions](https://github.com/linearmouse/linearmouse#accessibility-permission) for each builds.
+In that case, using Apple Development certificates is recommended.
+You can create an Apple Development certificate [in Xcode](https://help.apple.com/xcode/mac/current/#/dev154b28f09), which is totally free.
+
+### Build
+
+Now, you can build and package LinearMouse by running
+
+```sh
+$ make
+```

@@ -1,5 +1,5 @@
 <h1 align="center">
-  <a href="https://linearmouse.app/">
+  <a href="https://linearmouse.app">
     <img src="logo.svg" width="128" height="128" />
     <br />
     LinearMouse
@@ -14,39 +14,29 @@
 </p>
 
 <p align="center">
-🖱 The mouse and trackpad utility for Mac.
+The mouse and trackpad utility for Mac.
 </p>
 
 ## Get started
 
-https://linearmouse.app
+Please visit https://linearmouse.app.
 
-## Build
-
-See [BUILD.md](BUILD.md).
-
-## Contributing
+## Contribute
 
 Please read the [contributing guide](CONTRIBUTING.md) before making a pull request.
 
-Thank you to all the people who already contributed to LinearMouse!
+## Help translate
 
-<a href="https://github.com/linearmouse/linearmouse/graphs/contributors">
-  <img src="https://opencollective.com/linearmouse/contributors.svg?button=0" />
-</a>
+Please sign up for Crowdin and join our [Crowdin project](https://crowdin.com/project/linearmouse) to translate LinearMouse into supported languages. It is recommended to sign in Crowdin using GitHub, so that I can add you as a co-author when I merge the pull request.
 
-## Backers
+If you want to add a new language, please [create a new issue](https://github.com/linearmouse/linearmouse/issues/new) and I will be happy to enable that language for you to translate.
 
-Thank you to all the backers on Open Collective!
+I'm not a native English speaker, so if you find any English localization issues, feel free to correct me by [creating a pull request](https://github.com/linearmouse/linearmouse/edit/main/LinearMouse/en.lproj/Localizable.strings).
 
-<p>
-  <a href="https://opencollective.com/linearmouse">
-    <img src="https://opencollective.com/linearmouse/tiers/backers.svg" />
-  </a>
-</p>
+## Sponsors
 
-And to all the one-time contributors on [Open Collective](https://opencollective.com/linearmouse#section-top-financial-contributors) and [Ko-fi](https://ko-fi.com/lujjjh#topSupportersContainerDiv)!
+Please visit https://go.linearmouse.app/donate.
 
 ## Credits
 
-* [Mac Mouse Fix](https://github.com/noah-nuebling/mac-mouse-fix) - The way to modify the pointer speed (sensitivity) is inspired by Mac Mouse Fix.
+- [Mac Mouse Fix](https://github.com/noah-nuebling/mac-mouse-fix) - The way to modify the pointer speed (sensitivity) is inspired by Mac Mouse Fix.
