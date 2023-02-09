@@ -36,6 +36,25 @@ extension ScrollingSettings {
                         Text("Fast")
                     }
 
+                    HStack(spacing: 10) {
+                        Spacer()
+
+                        Button("Revert to system defaults") {
+                            state.scrollingMode = .accelerated
+                            state.scrollingAcceleration = 1
+                            state.scrollingSpeed = 0
+                        }
+
+                        if state.direction == .horizontal {
+                            Button("Copy settings from vertical") {
+                                state.scheme.scrolling.distance.horizontal = state.scheme.scrolling.distance.vertical
+                                state.scheme.scrolling.acceleration.horizontal = state.scheme.scrolling.acceleration
+                                    .vertical
+                                state.scheme.scrolling.speed.horizontal = state.scheme.scrolling.speed.vertical
+                            }
+                        }
+                    }
+
                 case .byLines:
                     Slider(
                         value: $state.scrollingDistanceInLines,
