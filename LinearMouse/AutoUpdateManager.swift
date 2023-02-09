@@ -36,17 +36,17 @@ extension AutoUpdateManager: SPUUpdaterDelegate {
 
 class SemanticVersioningComparator: SUVersionComparison {
     func compareVersion(_ versionA: String, toVersion versionB: String) -> ComparisonResult {
-        do {
-            let a = try Version(versionA)
-            let b = try Version(versionB)
-            if a < b {
-                return .orderedAscending
-            } else if a > b {
-                return .orderedDescending
-            }
-            return .orderedSame
-        } catch {
-            return .orderedSame
+        guard let a = try? Version(versionA) else {
+            return .orderedAscending
         }
+        guard let b = try? Version(versionB) else {
+            return .orderedDescending
+        }
+        if a < b {
+            return .orderedAscending
+        } else if a > b {
+            return .orderedDescending
+        }
+        return .orderedSame
     }
 }
