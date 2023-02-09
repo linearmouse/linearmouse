@@ -23,11 +23,15 @@
 "Accelerated" = "Accelerated";
 "By Lines" = "By Lines";
 "By Pixels" = "By Pixels";
+"Acceleration" = "Zrychlení";
+"Linear" = "Linear";
+"Accelerated" = "Accelerated";
 "Speed" = "Rychlost";
-"Slower" = "Slower";
-"Faster" = "Faster";
+"Slow" = "Slow";
+"Fast" = "Fast";
 "Distance" = "Distance";
-"Discrete" = "Discrete";
+"Revert to system defaults" = "Obnovit výchozí nastavení systému";
+"Copy settings from vertical" = "Copy settings from vertical";
 "Modifier Keys" = "Modifikační klávesy";
 "No action" = "Nenastaveno";
 "Alter orientation" = "Změna oriantace";
@@ -35,8 +39,6 @@
 "Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "Deaktivovat zrychlení kurzoru";
-"Acceleration" = "Zrychlení";
-"Revert to system defaults" = "Obnovit výchozí nastavení systému";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Pro obnovení výchozího nastavení systému můžete také použít klávesovou zkratku ⌃⇧⌘Z";
 
 "Enable universal back and forward" = "Aktivovat univerzální přecházení zpět a dopředu";
