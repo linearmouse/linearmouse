@@ -134,7 +134,7 @@ class ScrollWheelEventView: MouseEventView {
         scale(factorX: factor, factorY: factor)
     }
 
-    func scale(factorX: Double, factorY: Double) {
+    func scale(factorX: Double = 1, factorY: Double = 1) {
         transform(matrix: .init([factorX, 0], [0, factorY]))
     }
 }
