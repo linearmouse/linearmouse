@@ -2,7 +2,7 @@
 // Copyright (c) 2021-2023 Jiahao Lu
 
 extension Scheme.Buttons {
-    struct Mapping: Codable {
+    struct Mapping: Codable, Equatable {
         var button: Int?
         var `repeat`: Bool?
 

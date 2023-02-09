@@ -4,7 +4,7 @@
 import Foundation
 
 extension Scheme.Buttons.Mapping {
-    enum Action {
+    enum Action: Equatable {
         case simpleAction(SimpleAction)
 
         case run(String)

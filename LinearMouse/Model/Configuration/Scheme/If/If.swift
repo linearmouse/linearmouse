@@ -4,7 +4,7 @@
 import Foundation
 
 extension Scheme {
-    struct If: Codable {
+    struct If: Codable, Equatable {
         var device: DeviceMatcher?
 
         var app: String?

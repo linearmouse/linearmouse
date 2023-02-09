@@ -4,19 +4,19 @@
 import Foundation
 
 extension Scheme {
-    struct Acceleration: ClampRange {
+    struct Acceleration: Equatable, ClampRange {
         typealias Value = Decimal
 
         static var range: ClosedRange<Value> = 0 ... 20
     }
 
-    struct Speed: ClampRange {
+    struct Speed: Equatable, ClampRange {
         typealias Value = Decimal
 
         static var range: ClosedRange<Value> = 0 ... 1
     }
 
-    struct Pointer: Codable, ImplicitInitable {
+    struct Pointer: Codable, Equatable, ImplicitInitable {
         @Clamp<Acceleration> var acceleration: Decimal?
 
         @Clamp<Speed> var speed: Decimal?

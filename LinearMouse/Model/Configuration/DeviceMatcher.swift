@@ -3,7 +3,7 @@
 
 import Defaults
 
-struct DeviceMatcher: Codable, Defaults.Serializable {
+struct DeviceMatcher: Codable, Equatable, Defaults.Serializable {
     @HexRepresentation var vendorID: Int?
     @HexRepresentation var productID: Int?
     var productName: String?

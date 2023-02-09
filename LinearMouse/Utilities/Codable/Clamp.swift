@@ -35,6 +35,8 @@ extension Clamp: Codable {
     }
 }
 
+extension Clamp: Equatable where T: Equatable {}
+
 extension KeyedDecodingContainer {
     func decode<T: ClampRange>(_ type: Clamp<T>.Type,
                                forKey key: Self.Key) throws -> Clamp<T> {

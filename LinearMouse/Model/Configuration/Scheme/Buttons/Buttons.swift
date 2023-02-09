@@ -4,7 +4,7 @@
 import Foundation
 
 extension Scheme {
-    struct Buttons: Codable, ImplicitInitable {
+    struct Buttons: Codable, Equatable, ImplicitInitable {
         var mappings: [Mapping]?
 
         enum UniversalBackForward {

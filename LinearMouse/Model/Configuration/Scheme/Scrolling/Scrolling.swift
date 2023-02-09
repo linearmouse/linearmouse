@@ -4,7 +4,7 @@
 import Foundation
 
 extension Scheme {
-    struct Scrolling: Codable, ImplicitInitable {
+    struct Scrolling: Codable, Equatable, ImplicitInitable {
         @ImplicitOptional var reverse: Bidirectional<Bool>
         @ImplicitOptional var distance: Bidirectional<Distance>
         @ImplicitOptional var acceleration: Bidirectional<Decimal>

@@ -5,7 +5,7 @@ import AppKit
 import Defaults
 import Foundation
 
-struct Configuration: Codable {
+struct Configuration: Codable, Equatable {
     let jsonSchema = "https://schema.linearmouse.app/\(LinearMouse.appVersion)"
 
     var schemes: [Scheme] = []
