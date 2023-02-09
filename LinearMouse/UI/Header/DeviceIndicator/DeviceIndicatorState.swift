@@ -15,6 +15,7 @@ class DeviceIndicatorState: ObservableObject {
     init() {
         deviceState.$currentDevice
             .receive(on: RunLoop.main)
+            .removeDuplicates()
             .sink { [weak self] device in
                 self?.activeDeviceName = device?.name
             }

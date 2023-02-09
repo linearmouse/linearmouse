@@ -79,12 +79,12 @@ class DeviceManager: ObservableObject {
 
         manager.startObservation()
 
-        ConfigurationState.shared.$configuration.sink { [weak self] _ in
-            DispatchQueue.main.async {
+        ConfigurationState.shared.$configuration
+            .debounce(for: 0.2, scheduler: RunLoop.main)
+            .sink { [weak self] _ in
                 self?.updatePointerSpeed()
             }
-        }
-        .store(in: &subscriptions)
+            .store(in: &subscriptions)
 
         activateApplicationObserver = NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didActivateApplicationNotification,

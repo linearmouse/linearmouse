@@ -15,12 +15,15 @@ class EventTransformerManager {
 
     init() {
         ConfigurationState.shared.$configuration
+            .debounce(for: 0.2, scheduler: RunLoop.main)
             .sink { [weak self] _ in
                 self?.lastEventTransformer = nil
             }
             .store(in: &subscriptions)
 
         DeviceManager.shared.$lastActiveDevice
+            .debounce(for: 0.2, scheduler: RunLoop.main)
+            .removeDuplicates()
             .sink { [weak self] _ in
                 self?.lastEventTransformer = nil
             }

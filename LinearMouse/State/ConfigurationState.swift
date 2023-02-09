@@ -20,8 +20,6 @@ class ConfigurationState: ObservableObject {
 
     @Published var configuration = Configuration() {
         didSet {
-            updateActiveScheme()
-
             guard shouldAutoSaveConfiguration else {
                 return
             }
@@ -34,19 +32,6 @@ class ConfigurationState: ObservableObject {
 
     private var shouldAutoSaveConfiguration = true
 
-    @Published var activeScheme: Scheme? {
-        didSet {
-            guard let activeScheme = activeScheme else {
-                os_log("Active scheme is updated: nil", log: Self.log, type: .debug,
-                       String(describing: activeScheme))
-                return
-            }
-
-            os_log("Active scheme is updated: %{public}@", log: Self.log, type: .debug,
-                   String(describing: activeScheme))
-        }
-    }
-
     @Published var currentDeviceSchemeIndex: Int? {
         didSet {
             os_log("Current device scheme index is updated: %{public}@", log: Self.log, type: .debug,
@@ -57,19 +42,14 @@ class ConfigurationState: ObservableObject {
     private var subscriptions = Set<AnyCancellable>()
 
     init() {
-        DeviceManager.shared.$lastActiveDevice.sink { [weak self] _ in
-            DispatchQueue.main.async {
-                self?.updateActiveScheme()
+        DeviceState.shared.$currentDevice
+            .removeDuplicates()
+            .sink { [weak self] _ in
+                DispatchQueue.main.async {
+                    self?.updateCurrentDeviceScheme()
+                }
             }
-        }
-        .store(in: &subscriptions)
-
-        DeviceState.shared.$currentDevice.sink { [weak self] _ in
-            DispatchQueue.main.async {
-                self?.updateCurrentDeviceScheme()
-            }
-        }
-        .store(in: &subscriptions)
+            .store(in: &subscriptions)
     }
 }
 
@@ -82,7 +62,6 @@ extension ConfigurationState {
 
         do {
             configuration = try Configuration.load(from: configurationPath)
-            updateActiveScheme()
             updateCurrentDeviceScheme()
         } catch CocoaError.fileReadNoSuchFile {
             os_log("No configuration file found, try creating a default one",
@@ -109,10 +88,6 @@ extension ConfigurationState {
             )
             alert.runModal()
         }
-    }
-
-    func updateActiveScheme() {
-        activeScheme = configuration.activeScheme
     }
 
     func updateCurrentDeviceScheme() {

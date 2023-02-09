@@ -37,8 +37,6 @@ extension ScrollingSettings {
                     }
 
                     HStack(spacing: 10) {
-                        Spacer()
-
                         Button("Revert to system defaults") {
                             state.scrollingMode = .accelerated
                             state.scrollingAcceleration = 1
