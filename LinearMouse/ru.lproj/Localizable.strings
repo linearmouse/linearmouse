@@ -23,11 +23,15 @@
 "Accelerated" = "Ускорение";
 "By Lines" = "По строкам";
 "By Pixels" = "По пикселям";
+"Acceleration" = "Ускорение";
+"Linear" = "Linear";
+"Accelerated" = "Accelerated";
 "Speed" = "Скорость";
-"Slower" = "Медленнее";
-"Faster" = "Быстрее";
+"Slow" = "Slow";
+"Fast" = "Fast";
 "Distance" = "Количество";
-"Discrete" = "Discrete";
+"Revert to system defaults" = "Вернуться к настройкам по умолчанию";
+"Copy settings from vertical" = "Copy settings from vertical";
 "Modifier Keys" = "Клавиши модификации";
 "No action" = "Не задано";
 "Alter orientation" = "Изменить направление прокрутки";
@@ -35,8 +39,6 @@
 "Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "Отключить ускорение курсора";
-"Acceleration" = "Ускорение";
-"Revert to system defaults" = "Вернуться к настройкам по умолчанию";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Вы также можете нажать ⌃⇧⌘Z, чтобы вернуться к настройкам по умолчанию.";
 
 "Enable universal back and forward" = "Включить универсальные «назад» и «вперед»";
