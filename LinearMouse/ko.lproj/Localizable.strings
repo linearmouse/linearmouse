@@ -23,11 +23,15 @@
 "Accelerated" = "Accelerated";
 "By Lines" = "By Lines";
 "By Pixels" = "By Pixels";
+"Acceleration" = "가속";
+"Linear" = "Linear";
+"Accelerated" = "Accelerated";
 "Speed" = "속도";
-"Slower" = "Slower";
-"Faster" = "Faster";
+"Slow" = "Slow";
+"Fast" = "Fast";
 "Distance" = "Distance";
-"Discrete" = "Discrete";
+"Revert to system defaults" = "시스템 기본값으로 되돌리기";
+"Copy settings from vertical" = "Copy settings from vertical";
 "Modifier Keys" = "보조 키";
 "No action" = "동작 없음";
 "Alter orientation" = "방향 변경";
@@ -35,8 +39,6 @@
 "Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "포인터 가속 비활성화";
-"Acceleration" = "가속";
-"Revert to system defaults" = "시스템 기본값으로 되돌리기";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z를 눌러서도 시스템 기본값으로 되돌릴 수 있습니다.";
 
 "Enable universal back and forward" = "유니버설 백/포워드";
