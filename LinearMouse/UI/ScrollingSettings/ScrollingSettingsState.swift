@@ -55,7 +55,7 @@ extension ScrollingSettingsState {
             }
 
             scheme.scrolling.distance[direction] = distance
-            scheme.scrolling.scale[direction] = nil
+            scheme.scrolling.scale[direction] = 1
             scheme.scrolling.discrete[direction] = false
         }
     }
