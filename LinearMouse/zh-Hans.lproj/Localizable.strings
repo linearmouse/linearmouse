@@ -23,11 +23,14 @@
 "Accelerated" = "带加速度";
 "By Lines" = "按行";
 "By Pixels" = "按像素";
+"Acceleration" = "加速度";
+"Linear" = "线性";
 "Speed" = "速度";
-"Slower" = "慢";
-"Faster" = "快";
+"Slow" = "慢";
+"Fast" = "快";
 "Distance" = "距离";
-"Discrete" = "离散";
+"Revert to system defaults" = "回退到系统默认值";
+"Copy settings from vertical" = "从纵向复制设置";
 "Modifier Keys" = "修饰键";
 "No action" = "无动作";
 "Alter orientation" = "改变方向";
@@ -35,8 +38,6 @@
 "Zoom" = "缩放";
 
 "Disable pointer acceleration" = "禁用指针加速度";
-"Acceleration" = "加速度";
-"Revert to system defaults" = "回退到系统默认值";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "你也可以按下 ⌃⇧⌘Z 来回退到系统默认值。";
 
 "Enable universal back and forward" = "启用全局后退、前进";

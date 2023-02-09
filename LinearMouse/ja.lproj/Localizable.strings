@@ -23,11 +23,14 @@
 "Accelerated" = "Accelerated";
 "By Lines" = "By Lines";
 "By Pixels" = "By Pixels";
+"Acceleration" = "アクセラレーション";
+"Linear" = "Linear";
 "Speed" = "速度";
-"Slower" = "Slower";
-"Faster" = "Faster";
+"Slow" = "Slow";
+"Fast" = "Fast";
 "Distance" = "Distance";
-"Discrete" = "Discrete";
+"Revert to system defaults" = "システムデフォルトに戻す";
+"Copy settings from vertical" = "Copy settings from vertical";
 "Modifier Keys" = "修飾キー";
 "No action" = "何もしない";
 "Alter orientation" = "方向を変更する";
@@ -35,8 +38,6 @@
 "Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "ポインター加速を無効にする。";
-"Acceleration" = "アクセラレーション";
-"Revert to system defaults" = "システムデフォルトに戻す";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "<unk> ⌘Z を押してデフォルトに戻れます。";
 
 "Enable universal back and forward" = "システム全般の戻る・進むボタンを有効にする";
