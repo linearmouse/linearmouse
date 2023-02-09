@@ -32,6 +32,10 @@ class AcceleratedScrolling: EventTransformer {
         }
         if scrollWheelEventView.deltaXSignum != 0 {
             scrollWheelEventView.scale(factorX: acceleration.horizontal?.asTruncatedDouble ?? 1)
+            let ptIncrement = speed.horizontal?.asTruncatedDouble ?? 0
+            let fixedPtIncrement = ptIncrement / 10
+            scrollWheelEventView.deltaXPt += Double(deltaXSignum) * ptIncrement
+            scrollWheelEventView.deltaXFixedPt += Double(deltaXSignum) * fixedPtIncrement
         }
 
         return event
