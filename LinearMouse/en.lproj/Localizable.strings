@@ -27,8 +27,8 @@
 "Linear" = "Linear";
 "Accelerated" = "Accelerated";
 "Speed" = "Speed";
-"Slower" = "Slower";
-"Faster" = "Faster";
+"Slow" = "Slow";
+"Fast" = "Fast";
 "Distance" = "Distance";
 "Discrete" = "Discrete";
 "Modifier Keys" = "Modifier Keys";
