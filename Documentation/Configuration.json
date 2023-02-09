@@ -694,6 +694,26 @@
     "Scheme.Scrolling": {
       "additionalProperties": false,
       "properties": {
+        "discrete": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "horizontal": {
+                  "type": "boolean"
+                },
+                "vertical": {
+                  "type": "boolean"
+                }
+              },
+              "type": "object"
+            }
+          ],
+          "title": "Discrete scrolling"
+        },
         "distance": {
           "anyOf": [
             {
@@ -738,16 +758,16 @@
         "reverse": {
           "anyOf": [
             {
-              "$ref": "#/definitions/Scheme.Scrolling.Reverse"
+              "type": "boolean"
             },
             {
               "additionalProperties": false,
               "properties": {
                 "horizontal": {
-                  "$ref": "#/definitions/Scheme.Scrolling.Reverse"
+                  "type": "boolean"
                 },
                 "vertical": {
-                  "$ref": "#/definitions/Scheme.Scrolling.Reverse"
+                  "type": "boolean"
                 }
               },
               "type": "object"
@@ -758,16 +778,16 @@
         "scale": {
           "anyOf": [
             {
-              "$ref": "#/definitions/Scheme.Scrolling.Scale"
+              "type": "number"
             },
             {
               "additionalProperties": false,
               "properties": {
                 "horizontal": {
-                  "$ref": "#/definitions/Scheme.Scrolling.Scale"
+                  "type": "number"
                 },
                 "vertical": {
-                  "$ref": "#/definitions/Scheme.Scrolling.Scale"
+                  "type": "number"
                 }
               },
               "type": "object"
@@ -910,12 +930,6 @@
         "type"
       ],
       "type": "object"
-    },
-    "Scheme.Scrolling.Reverse": {
-      "type": "boolean"
-    },
-    "Scheme.Scrolling.Scale": {
-      "type": "number"
     },
     "SingleValueOrArray<Scheme.If.Category>": {
       "anyOf": [

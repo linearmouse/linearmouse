@@ -127,7 +127,7 @@ declare namespace Scheme {
     /**
      * @title Reverse scrolling
      */
-    reverse?: Scrolling.Bidirectional<Scrolling.Reverse>;
+    reverse?: Scrolling.Bidirectional<boolean>;
 
     /**
      * @title Scroll distance
@@ -138,7 +138,12 @@ declare namespace Scheme {
     /**
      * @description The scaling factor applied to the scroll distance.
      */
-    scale?: Scrolling.Bidirectional<Scrolling.Scale>;
+    scale?: Scrolling.Bidirectional<number>;
+
+    /**
+     * @title Discrete scrolling
+     */
+    discrete?: Scrolling.Bidirectional<boolean>;
 
     /**
      * @title Modifier keys settings
@@ -154,8 +159,6 @@ declare namespace Scheme {
           vertical?: T;
           horizontal?: T;
         };
-
-    type Reverse = boolean;
 
     /**
      * @description The scrolling distance will not be modified.
@@ -176,8 +179,6 @@ declare namespace Scheme {
        */
       type Pixel = string;
     }
-
-    type Scale = number;
 
     type Modifiers = {
       /**
