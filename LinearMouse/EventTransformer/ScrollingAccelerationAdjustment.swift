@@ -22,8 +22,6 @@ class ScrollingAccelerationAdjustment: EventTransformer {
         }
 
         let scrollWheelEventView = ScrollWheelEventView(event)
-        let deltaYSignum = scrollWheelEventView.deltaYSignum
-        let deltaXSignum = scrollWheelEventView.deltaXSignum
 
         if scrollWheelEventView.deltaYSignum != 0,
            let acceleration = acceleration.vertical?.asTruncatedDouble, acceleration != 1 {
