@@ -26,11 +26,11 @@
 "Acceleration" = "Beschleunigung";
 "Linear" = "Linear";
 "Speed" = "Geschwindigkeit";
-"Slow" = "Slow";
-"Fast" = "Fast";
+"Slow" = "Langsam";
+"Fast" = "Schnell";
 "Distance" = "Distanz";
 "Revert to system defaults" = "Auf Systemstandards zurücksetzen";
-"Copy settings from vertical" = "Copy settings from vertical";
+"Copy settings from vertical" = "Einstellungen von Vertikal übernehmen";
 "Modifier Keys" = "Tastenkürzel";
 "No action" = "Keine Funktion";
 "Alter orientation" = "Scrollorientierung ändern";
