@@ -89,24 +89,36 @@ extension Configuration {
     }
 
     func matchScheme(withDevice device: Device? = nil,
-                     withPid pid: pid_t? = nil) -> Scheme {
+                     withApp app: String? = nil,
+                     withParentApp parentApp: String? = nil,
+                     withGroupApp groupApp: String? = nil) -> Scheme {
         // TODO: Backtrace the merge path
         // TODO: Optimize the algorithm
 
         var mergedScheme = Scheme()
 
-        var `if` = Scheme.If()
-
-        if let device = device {
-            `if`.device = DeviceMatcher(of: device)
-        }
+        let `if` = Scheme.If(device: device.map { DeviceMatcher(of: $0) },
+                             app: app,
+                             parentApp: parentApp,
+                             groupApp: groupApp)
 
         mergedScheme.if = [`if`]
 
-        for scheme in schemes where scheme.isActive(withDevice: device, withPid: pid) {
+        for scheme in schemes where scheme.isActive(withDevice: device,
+                                                    withApp: app,
+                                                    withParentApp: parentApp,
+                                                    withGroupApp: groupApp) {
             scheme.merge(into: &mergedScheme)
         }
 
         return mergedScheme
+    }
+
+    func matchScheme(withDevice device: Device? = nil,
+                     withPid pid: pid_t? = nil) -> Scheme {
+        matchScheme(withDevice: device,
+                    withApp: pid?.bundleIdentifier,
+                    withParentApp: pid?.parent?.bundleIdentifier,
+                    withGroupApp: pid?.parent?.bundleIdentifier)
     }
 }

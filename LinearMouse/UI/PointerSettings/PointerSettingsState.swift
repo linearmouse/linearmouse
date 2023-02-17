@@ -13,13 +13,24 @@ class PointerSettingsState: ObservableObject {
         get { schemeState.scheme }
         set { schemeState.scheme = newValue }
     }
+
+    var mergedScheme: Scheme { schemeState.mergedScheme }
 }
 
 extension PointerSettingsState {
+    var pointerDisableAcceleration: Bool {
+        get {
+            mergedScheme.pointer.disableAcceleration ?? false
+        }
+        set {
+            scheme.pointer.disableAcceleration = newValue
+        }
+    }
+
     var pointerAcceleration: Double {
         get {
-            scheme.pointer.acceleration?.asTruncatedDouble
-                ?? scheme.firstMatchedDevice?.pointerAcceleration
+            mergedScheme.pointer.acceleration?.asTruncatedDouble
+                ?? mergedScheme.firstMatchedDevice?.pointerAcceleration
                 ?? Device.fallbackPointerAcceleration
         }
         set {
@@ -33,8 +44,8 @@ extension PointerSettingsState {
 
     var pointerSpeed: Double {
         get {
-            scheme.pointer.speed?.asTruncatedDouble
-                ?? scheme.firstMatchedDevice?.pointerSpeed
+            mergedScheme.pointer.speed?.asTruncatedDouble
+                ?? mergedScheme.firstMatchedDevice?.pointerSpeed
                 ?? Device.fallbackPointerSpeed
         }
         set {
@@ -62,15 +73,6 @@ extension PointerSettingsState {
         formatter.maximumFractionDigits = 4
         formatter.thousandSeparator = ""
         return formatter
-    }
-
-    var pointerDisableAcceleration: Bool {
-        get {
-            scheme.pointer.disableAcceleration ?? false
-        }
-        set {
-            scheme.pointer.disableAcceleration = newValue
-        }
     }
 
     func revertPointerSpeed() {

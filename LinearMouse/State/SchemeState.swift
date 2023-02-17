@@ -7,9 +7,12 @@ import Foundation
 class SchemeState: ObservableObject {
     static let shared = SchemeState()
 
-    private let configurationState = ConfigurationState.shared
+    private let configurationState: ConfigurationState = .shared
+    private let deviceState: DeviceState = .shared
 
     private var subscriptions = Set<AnyCancellable>()
+
+    @Published var currentApp: String?
 
     init() {
         configurationState.$configuration
@@ -18,7 +21,7 @@ class SchemeState: ObservableObject {
             }
             .store(in: &subscriptions)
 
-        configurationState.$currentDeviceSchemeIndex
+        deviceState.$currentDevice
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
@@ -28,7 +31,7 @@ class SchemeState: ObservableObject {
 
 extension SchemeState {
     private var device: Device? {
-        DeviceState.shared.currentDevice
+        deviceState.currentDevice
     }
 
     var isSchemeValid: Bool {
@@ -45,20 +48,33 @@ extension SchemeState {
                 return Scheme()
             }
 
-            return configurationState.getSchemeIndex(forDevice: device)
-                .map { configurationState.configuration.schemes[$0] }
-                ?? configurationState.configuration.matchScheme(withDevice: device)
+            if let index = configurationState.getSchemeIndex(forDevice: device, forApp: currentApp) {
+                return configurationState.configuration.schemes[index]
+            }
+
+            return Scheme(if: [
+                .init(device: .init(of: device), app: currentApp)
+            ])
         }
 
         set {
             guard let device = device else { return }
 
-            guard let index = configurationState.getSchemeIndex(forDevice: device) else {
+            guard let index = configurationState.getSchemeIndex(forDevice: device, forApp: currentApp) else {
+                // TODO: Insert orders
                 configurationState.configuration.schemes.append(newValue)
                 return
             }
 
             configurationState.configuration.schemes[index] = newValue
         }
+    }
+
+    var mergedScheme: Scheme {
+        guard let device = device else {
+            return Scheme()
+        }
+
+        return configurationState.configuration.matchScheme(withDevice: device, withApp: currentApp)
     }
 }

@@ -13,12 +13,14 @@ class ButtonsSettingsState: ObservableObject {
         get { schemeState.scheme }
         set { schemeState.scheme = newValue }
     }
+
+    var mergedScheme: Scheme { schemeState.mergedScheme }
 }
 
 extension ButtonsSettingsState {
     var universalBackForward: Bool {
         get {
-            scheme.buttons.universalBackForward ?? .none != .none
+            mergedScheme.buttons.universalBackForward ?? .none != .none
         }
         set {
             scheme.buttons.universalBackForward = .some(newValue ? .both : .none)

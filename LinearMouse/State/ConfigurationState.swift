@@ -41,25 +41,7 @@ class ConfigurationState: ObservableObject {
 
     private var shouldAutoSaveConfiguration = true
 
-    @Published var currentDeviceSchemeIndex: Int? {
-        didSet {
-            os_log("Current device scheme index is updated: %{public}@", log: Self.log, type: .debug,
-                   String(describing: currentDeviceSchemeIndex))
-        }
-    }
-
     private var subscriptions = Set<AnyCancellable>()
-
-    init() {
-        DeviceState.shared.$currentDevice
-            .removeDuplicates()
-            .sink { [weak self] _ in
-                DispatchQueue.main.async {
-                    self?.updateCurrentDeviceScheme()
-                }
-            }
-            .store(in: &subscriptions)
-    }
 }
 
 extension ConfigurationState {
@@ -71,7 +53,6 @@ extension ConfigurationState {
 
         do {
             configuration = try Configuration.load(from: configurationPath)
-            updateCurrentDeviceScheme()
         } catch CocoaError.fileReadNoSuchFile {
             os_log("No configuration file found, try creating a default one",
                    log: Self.log, type: .debug)
@@ -99,21 +80,25 @@ extension ConfigurationState {
         }
     }
 
-    func updateCurrentDeviceScheme() {
-        currentDeviceSchemeIndex = DeviceState.shared.currentDevice.flatMap { device in
-            configuration.schemes.firstIndex {
-                guard $0.isDeviceSpecific else { return false }
-
-                return $0.if?.contains { $0.isSatisfied(withDevice: device) } == true
-            }
-        }
-    }
-
-    func getSchemeIndex(forDevice device: Device) -> Int? {
+    func getSchemeIndex(forDevice device: Device, forApp app: String? = nil) -> Int? {
         configuration.schemes.firstIndex {
-            guard $0.isDeviceSpecific else { return false }
+            guard $0.isDeviceSpecific else {
+                return false
+            }
 
-            return $0.if?.contains { $0.isSatisfied(withDevice: device) } == true
+            guard let condition = $0.if?.first else {
+                return false
+            }
+
+            guard condition.device?.match(with: device) == true else {
+                return false
+            }
+
+            guard condition.app == app, condition.parentApp == nil, condition.groupApp == nil else {
+                return false
+            }
+
+            return true
         }
     }
 }
