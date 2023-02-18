@@ -8,6 +8,7 @@
 "Config" = "설정";
 "Reload" = "재설정";
 "Reveal in Finder" = "Finder에서 열기";
+"Configure for %@..." = "Configure for %@...";
 "Quit %@" = "%@ 종료";
 
 "Scrolling" = "스크롤";
@@ -68,3 +69,9 @@
 "Mouse" = "마우스";
 "Trackpad" = "트랙패드";
 "(active)" = "(활성화됨)";
+
+"Configure for" = "Configure for";
+"App Apps" = "All Apps";
+"Configured" = "Configured";
+"Running" = "Running";
+"Installed" = "Installed";
