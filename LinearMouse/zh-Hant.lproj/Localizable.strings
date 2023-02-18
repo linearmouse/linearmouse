@@ -8,6 +8,7 @@
 "Config" = "設定";
 "Reload" = "重新載入";
 "Reveal in Finder" = "在 Finder 中揭示";
+"Configure for %@..." = "Configure for %@...";
 "Quit %@" = "退出 %@";
 
 "Scrolling" = "捲動";
@@ -68,3 +69,9 @@
 "Mouse" = "滑鼠";
 "Trackpad" = "觸控式軌跡板";
 "(active)" = "(活躍)";
+
+"Configure for" = "Configure for";
+"App Apps" = "All Apps";
+"Configured" = "Configured";
+"Running" = "Running";
+"Installed" = "Installed";
