@@ -8,6 +8,7 @@
 "Config" = "Konfigurační soubory";
 "Reload" = "Načíst znovu";
 "Reveal in Finder" = "Zobrazit ve Finderu";
+"Configure for %@..." = "Configure for %@...";
 "Quit %@" = "Ukončit %@";
 
 "Scrolling" = "Posouvání";
@@ -68,3 +69,9 @@
 "Mouse" = "Myš";
 "Trackpad" = "Trackpad";
 "(active)" = "(aktivní)";
+
+"Configure for" = "Configure for";
+"App Apps" = "All Apps";
+"Configured" = "Configured";
+"Running" = "Running";
+"Installed" = "Installed";

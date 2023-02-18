@@ -8,6 +8,7 @@
 "Config" = "Configurare";
 "Reload" = "Reîncărcare";
 "Reveal in Finder" = "Arată în Finder";
+"Configure for %@..." = "Configure for %@...";
 "Quit %@" = "Părăsește %@";
 
 "Scrolling" = "Derulare";
@@ -68,3 +69,9 @@
 "Mouse" = "Mouse";
 "Trackpad" = "Trackpad";
 "(active)" = "(activ)";
+
+"Configure for" = "Configure for";
+"App Apps" = "All Apps";
+"Configured" = "Configured";
+"Running" = "Running";
+"Installed" = "Installed";

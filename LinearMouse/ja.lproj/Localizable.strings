@@ -8,6 +8,7 @@
 "Config" = "設定";
 "Reload" = "再ロード";
 "Reveal in Finder" = "Finder で表示";
+"Configure for %@..." = "Configure for %@...";
 "Quit %@" = "%@を終了";
 
 "Scrolling" = "スクロール";
@@ -68,3 +69,9 @@
 "Mouse" = "マウス";
 "Trackpad" = "トラックパッド";
 "(active)" = "(有効)";
+
+"Configure for" = "Configure for";
+"App Apps" = "All Apps";
+"Configured" = "Configured";
+"Running" = "Running";
+"Installed" = "Installed";

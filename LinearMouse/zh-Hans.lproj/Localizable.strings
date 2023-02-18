@@ -8,6 +8,7 @@
 "Config" = "配置";
 "Reload" = "重新加载";
 "Reveal in Finder" = "在 Finder 中显示";
+"Configure for %@..." = "为 %@ 配置...";
 "Quit %@" = "退出 %@";
 
 "Scrolling" = "滚动";
@@ -68,3 +69,9 @@
 "Mouse" = "鼠标";
 "Trackpad" = "触控板";
 "(active)" = "(活跃)";
+
+"Configure for" = "应用于";
+"App Apps" = "所有应用";
+"Configured" = "已配置";
+"Running" = "运行中";
+"Installed" = "已安装";
