@@ -79,26 +79,4 @@ extension ConfigurationState {
             alert.runModal()
         }
     }
-
-    func getSchemeIndex(forDevice device: Device, forApp app: String? = nil) -> Int? {
-        configuration.schemes.firstIndex {
-            guard $0.isDeviceSpecific else {
-                return false
-            }
-
-            guard let condition = $0.if?.first else {
-                return false
-            }
-
-            guard condition.device?.match(with: device) == true else {
-                return false
-            }
-
-            guard condition.app == app, condition.parentApp == nil, condition.groupApp == nil else {
-                return false
-            }
-
-            return true
-        }
-    }
 }

@@ -42,14 +42,45 @@ extension SchemeState {
         return true
     }
 
+    var schemes: [Scheme] {
+        get { configurationState.configuration.schemes }
+        set { configurationState.configuration.schemes = newValue }
+    }
+
+    private enum SchemeIndex {
+        case at(Int)
+        case insertAt(Int)
+    }
+
+    private func schemeIndex(ofDevice device: Device, ofApp app: String?) -> SchemeIndex {
+        let allDeviceSpecificSchemes = schemes.enumerated().filter { _, scheme in
+            guard scheme.isDeviceSpecific else { return false }
+            guard scheme.if?.count == 1, let `if` = scheme.if?.first else { return false }
+            guard `if`.device?.match(with: device) == true else { return false }
+            return true
+        }
+
+        guard let first = allDeviceSpecificSchemes.first,
+              let last = allDeviceSpecificSchemes.last else {
+            return .insertAt(schemes.endIndex)
+        }
+
+        if let (index, _) = allDeviceSpecificSchemes
+            .first(where: { _, scheme in scheme.if?.first?.app == app }) {
+            return .at(index)
+        }
+
+        return .insertAt(app == nil ? first.offset : last.offset + 1)
+    }
+
     var scheme: Scheme {
         get {
             guard let device = device else {
                 return Scheme()
             }
 
-            if let index = configurationState.getSchemeIndex(forDevice: device, forApp: currentApp) {
-                return configurationState.configuration.schemes[index]
+            if case let .at(index) = schemeIndex(ofDevice: device, ofApp: currentApp) {
+                return schemes[index]
             }
 
             return Scheme(if: [
@@ -60,13 +91,12 @@ extension SchemeState {
         set {
             guard let device = device else { return }
 
-            guard let index = configurationState.getSchemeIndex(forDevice: device, forApp: currentApp) else {
-                // TODO: Insert orders
-                configurationState.configuration.schemes.append(newValue)
-                return
+            switch schemeIndex(ofDevice: device, ofApp: currentApp) {
+            case let .at(index):
+                schemes[index] = newValue
+            case let .insertAt(index):
+                schemes.insert(newValue, at: index)
             }
-
-            configurationState.configuration.schemes[index] = newValue
         }
     }
 
