@@ -45,10 +45,12 @@ extension ScrollingSettings {
 
                         if state.direction == .horizontal {
                             Button("Copy settings from vertical") {
-                                state.scheme.scrolling.distance.horizontal = state.scheme.scrolling.distance.vertical
-                                state.scheme.scrolling.acceleration.horizontal = state.scheme.scrolling.acceleration
+                                state.scheme.scrolling.distance.horizontal = state.mergedScheme.scrolling.distance
                                     .vertical
-                                state.scheme.scrolling.speed.horizontal = state.scheme.scrolling.speed.vertical
+                                state.scheme.scrolling.acceleration.horizontal = state.mergedScheme.scrolling
+                                    .acceleration
+                                    .vertical
+                                state.scheme.scrolling.speed.horizontal = state.mergedScheme.scrolling.speed.vertical
                             }
                         }
                     }

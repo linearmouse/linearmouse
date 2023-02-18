@@ -14,12 +14,14 @@ class ScrollingSettingsState: ObservableObject {
         set { schemeState.scheme = newValue }
     }
 
+    var mergedScheme: Scheme { schemeState.mergedScheme }
+
     @Published var direction: Scheme.Scrolling.BidirectionalDirection = .vertical
 }
 
 extension ScrollingSettingsState {
     var reverseScrolling: Bool {
-        get { scheme.scrolling.reverse[direction] ?? false }
+        get { mergedScheme.scrolling.reverse[direction] ?? false }
         set { scheme.scrolling.reverse[direction] = newValue }
     }
 
@@ -33,7 +35,7 @@ extension ScrollingSettingsState {
 
     var scrollingMode: ScrollingMode {
         get {
-            switch scheme.scrolling.distance[direction] ?? .auto {
+            switch mergedScheme.scrolling.distance[direction] ?? .auto {
             case .auto:
                 return .accelerated
             case .line:
@@ -61,18 +63,18 @@ extension ScrollingSettingsState {
     }
 
     var scrollingAcceleration: Double {
-        get { scheme.scrolling.acceleration[direction]?.asTruncatedDouble ?? 1 }
+        get { mergedScheme.scrolling.acceleration[direction]?.asTruncatedDouble ?? 1 }
         set { scheme.scrolling.acceleration[direction] = Decimal(newValue).rounded(2) }
     }
 
     var scrollingSpeed: Double {
-        get { scheme.scrolling.speed[direction]?.asTruncatedDouble ?? 0 }
+        get { mergedScheme.scrolling.speed[direction]?.asTruncatedDouble ?? 0 }
         set { scheme.scrolling.speed[direction] = Decimal(newValue).rounded(2) }
     }
 
     var scrollingDistanceInLines: Double {
         get {
-            guard case let .line(lines) = scheme.scrolling.distance[direction] else {
+            guard case let .line(lines) = mergedScheme.scrolling.distance[direction] else {
                 return 3
             }
             return Double(lines)
@@ -84,7 +86,7 @@ extension ScrollingSettingsState {
 
     var scrollingDistanceInPixels: Double {
         get {
-            guard case let .pixel(pixels) = scheme.scrolling.distance[direction] else {
+            guard case let .pixel(pixels) = mergedScheme.scrolling.distance[direction] else {
                 return 36
             }
             return pixels.asTruncatedDouble
@@ -96,7 +98,7 @@ extension ScrollingSettingsState {
 
     var modifiers: Scheme.Scrolling.Modifiers {
         get {
-            scheme.scrolling.modifiers[direction] ?? .init()
+            mergedScheme.scrolling.modifiers[direction] ?? .init()
         }
         set {
             scheme.scrolling.modifiers[direction] = newValue

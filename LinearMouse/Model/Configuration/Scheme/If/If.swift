@@ -15,7 +15,9 @@ extension Scheme {
 
 extension Scheme.If {
     func isSatisfied(withDevice targetDevice: Device? = nil,
-                     withPid pid: pid_t? = nil) -> Bool {
+                     withApp targetApp: String? = nil,
+                     withParentApp targetParentApp: String?,
+                     withGroupApp targetGroupApp: String?) -> Bool {
         if let device = device {
             guard let targetDevice = targetDevice else {
                 return false
@@ -27,19 +29,19 @@ extension Scheme.If {
         }
 
         if let app = app {
-            guard pid?.bundleIdentifier == app else {
+            guard app == targetApp else {
                 return false
             }
         }
 
         if let parentApp = parentApp {
-            guard pid?.parent?.bundleIdentifier == parentApp else {
+            guard parentApp == targetParentApp else {
                 return false
             }
         }
 
         if let groupApp = groupApp {
-            guard pid?.group?.bundleIdentifier == groupApp else {
+            guard groupApp == targetGroupApp else {
                 return false
             }
         }

@@ -26,6 +26,7 @@
 		972A5E30285D891100CB6440 /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = 972A5E2F285D891100CB6440 /* Defaults */; };
 		972A5E32285D8B5B00CB6440 /* DeviceMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E31285D8B5B00CB6440 /* DeviceMatcher.swift */; };
 		972A5E34285D8E4800CB6440 /* Defaults+Workaround.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E33285D8E4800CB6440 /* Defaults+Workaround.swift */; };
+		972AFBAE29A10F80001C5099 /* ApplicationBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972AFBAD29A10F80001C5099 /* ApplicationBundle.swift */; };
 		972AFD452851C101009B0CBF /* AccessibilityPermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972AFD442851C101009B0CBF /* AccessibilityPermissionView.swift */; };
 		972AFD472851E6B0009B0CBF /* AccessibilityPermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972AFD462851E6B0009B0CBF /* AccessibilityPermission.swift */; };
 		972AFD492851E96D009B0CBF /* AccessibilityPermissionWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972AFD482851E96D009B0CBF /* AccessibilityPermissionWindow.swift */; };
@@ -44,6 +45,10 @@
 		973EB9FE287EE7D90069A8EF /* Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 973EB9FD287EE7D90069A8EF /* Action.swift */; };
 		9757BB9629935445002333AA /* Bidirectional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9757BB9529935445002333AA /* Bidirectional.swift */; };
 		9757BB9A29935474002333AA /* BidirectionalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9757BB9929935474002333AA /* BidirectionalTests.swift */; };
+		9766C4B4299E03B900FA3A9C /* AppIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9766C4B3299E03B900FA3A9C /* AppIndicator.swift */; };
+		9766C4B8299E199200FA3A9C /* AppPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9766C4B7299E199200FA3A9C /* AppPickerSheet.swift */; };
+		9766C4BA299E1A1400FA3A9C /* AppPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9766C4B9299E1A1400FA3A9C /* AppPicker.swift */; };
+		9766C4BC299E1C5C00FA3A9C /* AppPickerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9766C4BB299E1C5C00FA3A9C /* AppPickerState.swift */; };
 		977638F9286BE9EE00A698B6 /* PublishedObject in Frameworks */ = {isa = PBXBuildFile; productRef = 977638F8286BE9EE00A698B6 /* PublishedObject */; };
 		97A13AD2287094FB002F6193 /* Distance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A13AD1287094FB002F6193 /* Distance.swift */; };
 		97A2F60A29508AD800F31122 /* EventTransformerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A2F60929508AD800F31122 /* EventTransformerManager.swift */; };
@@ -144,6 +149,7 @@
 		972A5E2C285D882500CB6440 /* DeviceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceState.swift; sourceTree = "<group>"; };
 		972A5E31285D8B5B00CB6440 /* DeviceMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceMatcher.swift; sourceTree = "<group>"; };
 		972A5E33285D8E4800CB6440 /* Defaults+Workaround.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Defaults+Workaround.swift"; sourceTree = "<group>"; };
+		972AFBAD29A10F80001C5099 /* ApplicationBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationBundle.swift; sourceTree = "<group>"; };
 		972AFD442851C101009B0CBF /* AccessibilityPermissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermissionView.swift; sourceTree = "<group>"; };
 		972AFD462851E6B0009B0CBF /* AccessibilityPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermission.swift; sourceTree = "<group>"; };
 		972AFD482851E96D009B0CBF /* AccessibilityPermissionWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermissionWindow.swift; sourceTree = "<group>"; };
@@ -162,6 +168,10 @@
 		973EB9FD287EE7D90069A8EF /* Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Action.swift; sourceTree = "<group>"; };
 		9757BB9529935445002333AA /* Bidirectional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bidirectional.swift; sourceTree = "<group>"; };
 		9757BB9929935474002333AA /* BidirectionalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalTests.swift; sourceTree = "<group>"; };
+		9766C4B3299E03B900FA3A9C /* AppIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIndicator.swift; sourceTree = "<group>"; };
+		9766C4B7299E199200FA3A9C /* AppPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPickerSheet.swift; sourceTree = "<group>"; };
+		9766C4B9299E1A1400FA3A9C /* AppPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPicker.swift; sourceTree = "<group>"; };
+		9766C4BB299E1C5C00FA3A9C /* AppPickerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPickerState.swift; sourceTree = "<group>"; };
 		97A13AD1287094FB002F6193 /* Distance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Distance.swift; sourceTree = "<group>"; };
 		97A2F60929508AD800F31122 /* EventTransformerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTransformerManager.swift; sourceTree = "<group>"; };
 		97A46B16285444BF00C07C9B /* NSWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSWindow.swift; sourceTree = "<group>"; };
@@ -362,6 +372,7 @@
 				36EBC80F80AD57E8226267BF /* Process.m */,
 				972DF6302859756700B83932 /* ProcessEnvironment.swift */,
 				97D3470B293CDEA000E7DFE1 /* WeakRef.swift */,
+				972AFBAD29A10F80001C5099 /* ApplicationBundle.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -388,6 +399,7 @@
 			isa = PBXGroup;
 			children = (
 				972DF647285A26E800B83932 /* DeviceIndicator */,
+				9766C4B5299E03C000FA3A9C /* AppIndicator */,
 				972DF645285A269500B83932 /* SchemeIndicator.swift */,
 			);
 			path = Header;
@@ -398,6 +410,7 @@
 			children = (
 				972DF648285A26F700B83932 /* DeviceIndicator.swift */,
 				972DF650285A35B100B83932 /* DeviceIndicatorState.swift */,
+				972A5E1D285CA42500CB6440 /* DevicePickerSheet */,
 			);
 			path = DeviceIndicator;
 			sourceTree = "<group>";
@@ -488,6 +501,25 @@
 				9757BB9929935474002333AA /* BidirectionalTests.swift */,
 			);
 			path = Scrolling;
+			sourceTree = "<group>";
+		};
+		9766C4B5299E03C000FA3A9C /* AppIndicator */ = {
+			isa = PBXGroup;
+			children = (
+				9766C4B3299E03B900FA3A9C /* AppIndicator.swift */,
+				9766C4B6299E197400FA3A9C /* AppPickerSheet */,
+			);
+			path = AppIndicator;
+			sourceTree = "<group>";
+		};
+		9766C4B6299E197400FA3A9C /* AppPickerSheet */ = {
+			isa = PBXGroup;
+			children = (
+				9766C4B7299E199200FA3A9C /* AppPickerSheet.swift */,
+				9766C4B9299E1A1400FA3A9C /* AppPicker.swift */,
+				9766C4BB299E1C5C00FA3A9C /* AppPickerState.swift */,
+			);
+			path = AppPickerSheet;
 			sourceTree = "<group>";
 		};
 		97B9D4972865EB9400137E60 /* Scheme */ = {
@@ -683,7 +715,6 @@
 				972DF6362859979F00B83932 /* Sidebar */,
 				972DF644285A266C00B83932 /* Header */,
 				972DF64A285A295C00B83932 /* DetailView */,
-				972A5E1D285CA42500CB6440 /* DevicePickerSheet */,
 				972DF655285AE0AA00B83932 /* ScrollingSettings */,
 				972DF657285AE10F00B83932 /* PointerSettings */,
 				972DF659285AEA9400B83932 /* ButtonsSettings */,
@@ -903,9 +934,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9766C4BC299E1C5C00FA3A9C /* AppPickerState.swift in Sources */,
 				9704BA992976E84C00C8B06D /* SettingsState.swift in Sources */,
 				972327B12992912F0041538A /* ReverseScrollingSection.swift in Sources */,
 				972DF65B285AEABA00B83932 /* ButtonsSettings.swift in Sources */,
+				9766C4B4299E03B900FA3A9C /* AppIndicator.swift in Sources */,
 				973EB9FE287EE7D90069A8EF /* Action.swift in Sources */,
 				B77D7C1727BA597E00825F54 /* Device.swift in Sources */,
 				972327AD29924C850041538A /* ScrollingSettingsState.swift in Sources */,
@@ -913,6 +946,7 @@
 				B77BA0F227480AA500E3BC5C /* EventTransformer.swift in Sources */,
 				972AFD492851E96D009B0CBF /* AccessibilityPermissionWindow.swift in Sources */,
 				B7618A1027621EDF00527C1A /* PointerSettings.swift in Sources */,
+				9766C4B8299E199200FA3A9C /* AppPickerSheet.swift in Sources */,
 				97C5DBC82868A2C7006FA6B4 /* Modifiers.swift in Sources */,
 				972A5E24285CA4AA00CB6440 /* DevicePickerState.swift in Sources */,
 				972DF651285A35B100B83932 /* DeviceIndicatorState.swift in Sources */,
@@ -942,11 +976,13 @@
 				97B83CDD2860B3FD00ECF109 /* Scrolling.swift in Sources */,
 				97B83CDB28607E2600ECF109 /* ConfigurationState.swift in Sources */,
 				97F77FAF285F0A58007C9C2B /* Configuration.swift in Sources */,
+				9766C4BA299E1A1400FA3A9C /* AppPicker.swift in Sources */,
 				972A5E22285CA49800CB6440 /* DevicePicker.swift in Sources */,
 				B7B6D83E26B2745300B0D247 /* ModifierKeyActionPicker.swift in Sources */,
 				972327AF29928FBD0041538A /* Header.swift in Sources */,
 				97F77FAC285E3055007C9C2B /* StatusItem.swift in Sources */,
 				B7B1D08F26B3EC4F00F48176 /* ScrollingSettings.swift in Sources */,
+				972AFBAE29A10F80001C5099 /* ApplicationBundle.swift in Sources */,
 				9757BB9629935445002333AA /* Bidirectional.swift in Sources */,
 				972DF64F285A2D7C00B83932 /* SecondaryButtonStyle.swift in Sources */,
 				97B913FE28869F0500DC920A /* ButtonActions.swift in Sources */,

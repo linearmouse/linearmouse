@@ -8,7 +8,7 @@ struct DeviceIndicator: View {
     @State private var showDevicePickerSheet = false
 
     var body: some View {
-        Button(action: handleClick) {
+        Button(action: { showDevicePickerSheet.toggle() }) {
             Text(state.activeDeviceName ?? "Unknown")
                 .frame(maxWidth: 150)
                 .fixedSize()
@@ -20,9 +20,5 @@ struct DeviceIndicator: View {
             DevicePickerSheet()
                 .environment(\.isPresented, $showDevicePickerSheet)
         }
-    }
-
-    private func handleClick() {
-        showDevicePickerSheet.toggle()
     }
 }
