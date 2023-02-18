@@ -8,6 +8,7 @@
 "Config" = "Konfiguracja";
 "Reload" = "Odśwież";
 "Reveal in Finder" = "Pokaż w Finderze";
+"Configure for %@..." = "Configure for %@...";
 "Quit %@" = "Zamknij %@";
 
 "Scrolling" = "Przewijanie";
@@ -68,3 +69,9 @@
 "Mouse" = "Mysz";
 "Trackpad" = "Gładzik";
 "(active)" = "(aktywne)";
+
+"Configure for" = "Configure for";
+"App Apps" = "All Apps";
+"Configured" = "Configured";
+"Running" = "Running";
+"Installed" = "Installed";
