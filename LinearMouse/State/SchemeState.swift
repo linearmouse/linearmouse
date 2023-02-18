@@ -47,18 +47,27 @@ extension SchemeState {
         set { configurationState.configuration.schemes = newValue }
     }
 
-    private enum SchemeIndex {
-        case at(Int)
-        case insertAt(Int)
+    var currentAppName: String? {
+        guard let currentApp = currentApp else { return nil }
+        return try? readInstalledApp(bundleIdentifier: currentApp)?.bundleName ?? currentApp
     }
 
-    private func schemeIndex(ofDevice device: Device, ofApp app: String?) -> SchemeIndex {
-        let allDeviceSpecificSchemes = schemes.enumerated().filter { _, scheme in
+    func allDeviceSpecficSchemes(of device: Device) -> [EnumeratedSequence<[Scheme]>.Element] {
+        schemes.enumerated().filter { _, scheme in
             guard scheme.isDeviceSpecific else { return false }
             guard scheme.if?.count == 1, let `if` = scheme.if?.first else { return false }
             guard `if`.device?.match(with: device) == true else { return false }
             return true
         }
+    }
+
+    enum SchemeIndex {
+        case at(Int)
+        case insertAt(Int)
+    }
+
+    func schemeIndex(ofDevice device: Device, ofApp app: String?) -> SchemeIndex {
+        let allDeviceSpecificSchemes = allDeviceSpecficSchemes(of: device)
 
         guard let first = allDeviceSpecificSchemes.first,
               let last = allDeviceSpecificSchemes.last else {

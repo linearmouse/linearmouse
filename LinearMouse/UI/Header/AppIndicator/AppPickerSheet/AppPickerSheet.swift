@@ -17,7 +17,6 @@ struct AppPickerSheet: View {
             .modifier(FormViewModifier())
 
             HStack {
-                Button("Delete Configuration") {}
                 Spacer()
                 Button("OK", action: onOK)
             }

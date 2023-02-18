@@ -10,7 +10,7 @@ struct AppIndicator: View {
 
     var body: some View {
         Button(action: { showAppPickerSheet.toggle() }) {
-            Text(schemeState.currentApp ?? NSLocalizedString("All Apps", comment: ""))
+            Text(schemeState.currentAppName ?? NSLocalizedString("All Apps", comment: ""))
                 .frame(maxWidth: 150)
                 .fixedSize()
                 .lineLimit(1)

@@ -26,6 +26,7 @@
 		972A5E30285D891100CB6440 /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = 972A5E2F285D891100CB6440 /* Defaults */; };
 		972A5E32285D8B5B00CB6440 /* DeviceMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E31285D8B5B00CB6440 /* DeviceMatcher.swift */; };
 		972A5E34285D8E4800CB6440 /* Defaults+Workaround.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E33285D8E4800CB6440 /* Defaults+Workaround.swift */; };
+		972AFBAE29A10F80001C5099 /* ApplicationBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972AFBAD29A10F80001C5099 /* ApplicationBundle.swift */; };
 		972AFD452851C101009B0CBF /* AccessibilityPermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972AFD442851C101009B0CBF /* AccessibilityPermissionView.swift */; };
 		972AFD472851E6B0009B0CBF /* AccessibilityPermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972AFD462851E6B0009B0CBF /* AccessibilityPermission.swift */; };
 		972AFD492851E96D009B0CBF /* AccessibilityPermissionWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972AFD482851E96D009B0CBF /* AccessibilityPermissionWindow.swift */; };
@@ -148,6 +149,7 @@
 		972A5E2C285D882500CB6440 /* DeviceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceState.swift; sourceTree = "<group>"; };
 		972A5E31285D8B5B00CB6440 /* DeviceMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceMatcher.swift; sourceTree = "<group>"; };
 		972A5E33285D8E4800CB6440 /* Defaults+Workaround.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Defaults+Workaround.swift"; sourceTree = "<group>"; };
+		972AFBAD29A10F80001C5099 /* ApplicationBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationBundle.swift; sourceTree = "<group>"; };
 		972AFD442851C101009B0CBF /* AccessibilityPermissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermissionView.swift; sourceTree = "<group>"; };
 		972AFD462851E6B0009B0CBF /* AccessibilityPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermission.swift; sourceTree = "<group>"; };
 		972AFD482851E96D009B0CBF /* AccessibilityPermissionWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermissionWindow.swift; sourceTree = "<group>"; };
@@ -370,6 +372,7 @@
 				36EBC80F80AD57E8226267BF /* Process.m */,
 				972DF6302859756700B83932 /* ProcessEnvironment.swift */,
 				97D3470B293CDEA000E7DFE1 /* WeakRef.swift */,
+				972AFBAD29A10F80001C5099 /* ApplicationBundle.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -979,6 +982,7 @@
 				972327AF29928FBD0041538A /* Header.swift in Sources */,
 				97F77FAC285E3055007C9C2B /* StatusItem.swift in Sources */,
 				B7B1D08F26B3EC4F00F48176 /* ScrollingSettings.swift in Sources */,
+				972AFBAE29A10F80001C5099 /* ApplicationBundle.swift in Sources */,
 				9757BB9629935445002333AA /* Bidirectional.swift in Sources */,
 				972DF64F285A2D7C00B83932 /* SecondaryButtonStyle.swift in Sources */,
 				97B913FE28869F0500DC920A /* ButtonActions.swift in Sources */,

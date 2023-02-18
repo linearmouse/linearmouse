@@ -8,32 +8,52 @@ import Foundation
 class AppPickerState: ObservableObject {
     static let shared: AppPickerState = .init()
 
+    private let schemeState: SchemeState = .shared
+    private let deviceState: DeviceState = .shared
+
     @Published var installedApps: [InstalledApp] = []
 
-    private var runningAppSet: Set<String?> {
-        Set(NSWorkspace.shared.runningApplications.map(\.bundleIdentifier))
+    private var runningAppSet: Set<String> {
+        Set(NSWorkspace.shared.runningApplications.map(\.bundleIdentifier).compactMap { $0 })
+    }
+
+    private var configuredAppSet: Set<String> {
+        guard let device = deviceState.currentDevice else { return [] }
+        return Set(schemeState.allDeviceSpecficSchemes(of: device).reduce([String]()) { acc, element in
+            guard let app = element.element.if?.first?.app else {
+                return acc
+            }
+            return acc + [app]
+        })
+    }
+
+    var configuredApps: [InstalledApp] {
+        configuredAppSet
+            .map {
+                try? readInstalledApp(bundleIdentifier: $0) ??
+                    .init(bundleName: $0,
+                          bundleIdentifier: $0,
+                          bundleIcon: NSWorkspace.shared.icon(forFile: ""))
+            }
+            .compactMap { $0 }
     }
 
     var runningApps: [InstalledApp] {
         let runningAppSet = runningAppSet
-        return installedApps.filter { runningAppSet.contains($0.bundleIdentifier) }
+        let configuredAppSet = configuredAppSet
+        return installedApps
+            .filter { runningAppSet.contains($0.bundleIdentifier) && !configuredAppSet.contains($0.bundleIdentifier) }
     }
 
     var otherApps: [InstalledApp] {
         let runningAppSet = runningAppSet
-        return installedApps.filter { !runningAppSet.contains($0.bundleIdentifier) }
+        let configuredAppSet = configuredAppSet
+        return installedApps
+            .filter { !runningAppSet.contains($0.bundleIdentifier) && !configuredAppSet.contains($0.bundleIdentifier) }
     }
 }
 
 extension AppPickerState {
-    struct InstalledApp: Identifiable {
-        var id: String { bundleIdentifier }
-
-        var bundleName: String
-        var bundleIdentifier: String
-        var bundleIcon: NSImage
-    }
-
     func refreshInstalledApps(at _: URL? = nil) {
         installedApps = []
 
@@ -48,21 +68,5 @@ extension AppPickerState {
                 installedApps.append(installedApp)
             }
         }
-    }
-
-    private func readInstalledApp(at url: URL) throws -> InstalledApp? {
-        guard let bundle = Bundle(url: url) else {
-            return nil
-        }
-        guard let bundleIdentifier = bundle.bundleIdentifier else {
-            return nil
-        }
-        let bundleName = bundle.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ??
-            bundle.object(forInfoDictionaryKey: kCFBundleNameKey as String) as? String ??
-            url.lastPathComponent
-        let bundleIcon = NSWorkspace.shared.icon(forFile: url.path)
-        bundleIcon.size.width = 16
-        bundleIcon.size.height = 16
-        return .init(bundleName: bundleName, bundleIdentifier: bundleIdentifier, bundleIcon: bundleIcon)
     }
 }
