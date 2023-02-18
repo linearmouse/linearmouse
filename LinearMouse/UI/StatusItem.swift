@@ -16,7 +16,7 @@ class StatusItem {
     private lazy var menu: NSMenu = {
         let menu = NSMenu()
 
-        let openPreferenceItem = NSMenuItem(
+        let openSettingsItem = NSMenuItem(
             title: String(format: NSLocalizedString("%@ Settings...", comment: ""), LinearMouse.appName),
             action: #selector(openSettings),
             keyEquivalent: ","
@@ -45,7 +45,7 @@ class StatusItem {
                                   keyEquivalent: "q")
 
         menu.items = [
-            openPreferenceItem,
+            openSettingsItem,
             .separator(),
             configurationItem,
             startAtLoginItem,
@@ -110,6 +110,7 @@ class StatusItem {
     }
 
     @objc private func openSettings() {
+        SchemeState.shared.currentApp = nil
         SettingsWindow.shared.bringToFront()
     }
 
