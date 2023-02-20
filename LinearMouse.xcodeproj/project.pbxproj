@@ -40,7 +40,7 @@
 		972DF651285A35B100B83932 /* DeviceIndicatorState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF650285A35B100B83932 /* DeviceIndicatorState.swift */; };
 		972DF654285ADE9600B83932 /* GeneralSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF653285ADE9600B83932 /* GeneralSettings.swift */; };
 		972DF65B285AEABA00B83932 /* ButtonsSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF65A285AEABA00B83932 /* ButtonsSettings.swift */; };
-		97353386297ED84600C1B5D0 /* ScrollingAccelerationAdjustment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97353385297ED84600C1B5D0 /* ScrollingAccelerationAdjustment.swift */; };
+		97353386297ED84600C1B5D0 /* ScrollingAccelerationSpeedAdjustment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97353385297ED84600C1B5D0 /* ScrollingAccelerationSpeedAdjustment.swift */; };
 		9735338F297F8EE200C1B5D0 /* FormViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9735338E297F8EE200C1B5D0 /* FormViewModifier.swift */; };
 		973EB9FE287EE7D90069A8EF /* Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 973EB9FD287EE7D90069A8EF /* Action.swift */; };
 		9757BB9629935445002333AA /* Bidirectional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9757BB9529935445002333AA /* Bidirectional.swift */; };
@@ -60,7 +60,6 @@
 		97B83CE52860DA9800ECF109 /* CustomDecodingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97B83CE42860DA9800ECF109 /* CustomDecodingError.swift */; };
 		97B913FE28869F0500DC920A /* ButtonActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97B913FD28869F0500DC920A /* ButtonActions.swift */; };
 		97B9D4992865EC0900137E60 /* If.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97B9D4982865EC0900137E60 /* If.swift */; };
-		97C5216D299BA1BA00D0AE44 /* ScrollingSpeedAdjustment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5216C299BA1BA00D0AE44 /* ScrollingSpeedAdjustment.swift */; };
 		97C5D8FF2856E3CB00CBED2D /* GestureKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C5D8FE2856E3CB00CBED2D /* GestureKit */; };
 		97C5DBB42867EA48006FA6B4 /* SchemeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBB32867EA48006FA6B4 /* SchemeState.swift */; };
 		97C5DBB62867ECD6006FA6B4 /* DeviceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBB52867ECD6006FA6B4 /* DeviceModel.swift */; };
@@ -163,7 +162,7 @@
 		972DF650285A35B100B83932 /* DeviceIndicatorState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIndicatorState.swift; sourceTree = "<group>"; };
 		972DF653285ADE9600B83932 /* GeneralSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettings.swift; sourceTree = "<group>"; };
 		972DF65A285AEABA00B83932 /* ButtonsSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonsSettings.swift; sourceTree = "<group>"; };
-		97353385297ED84600C1B5D0 /* ScrollingAccelerationAdjustment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingAccelerationAdjustment.swift; sourceTree = "<group>"; };
+		97353385297ED84600C1B5D0 /* ScrollingAccelerationSpeedAdjustment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingAccelerationSpeedAdjustment.swift; sourceTree = "<group>"; };
 		9735338E297F8EE200C1B5D0 /* FormViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormViewModifier.swift; sourceTree = "<group>"; };
 		973EB9FD287EE7D90069A8EF /* Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Action.swift; sourceTree = "<group>"; };
 		9757BB9529935445002333AA /* Bidirectional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bidirectional.swift; sourceTree = "<group>"; };
@@ -183,7 +182,6 @@
 		97B83CE42860DA9800ECF109 /* CustomDecodingError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomDecodingError.swift; sourceTree = "<group>"; };
 		97B913FD28869F0500DC920A /* ButtonActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonActions.swift; sourceTree = "<group>"; };
 		97B9D4982865EC0900137E60 /* If.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = If.swift; sourceTree = "<group>"; };
-		97C5216C299BA1BA00D0AE44 /* ScrollingSpeedAdjustment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingSpeedAdjustment.swift; sourceTree = "<group>"; };
 		97C5D8FD2856E3BE00CBED2D /* GestureKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = GestureKit; sourceTree = "<group>"; };
 		97C5DBB32867EA48006FA6B4 /* SchemeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemeState.swift; sourceTree = "<group>"; };
 		97C5DBB52867ECD6006FA6B4 /* DeviceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceModel.swift; sourceTree = "<group>"; };
@@ -685,8 +683,7 @@
 				B77BA0F127480AA500E3BC5C /* EventTransformer.swift */,
 				97A2F60929508AD800F31122 /* EventTransformerManager.swift */,
 				B7ADF97E2748991D0005B02D /* ReverseScrolling.swift */,
-				97353385297ED84600C1B5D0 /* ScrollingAccelerationAdjustment.swift */,
-				97C5216C299BA1BA00D0AE44 /* ScrollingSpeedAdjustment.swift */,
+				97353385297ED84600C1B5D0 /* ScrollingAccelerationSpeedAdjustment.swift */,
 				B7ADF9822748B12B0005B02D /* LinearScrollingVertical.swift */,
 				97E16F4E28F9A22A00E7D09B /* LinearScrollingHorizontal.swift */,
 				B7ADF9842748B25A0005B02D /* ModifierActions.swift */,
@@ -958,7 +955,6 @@
 				97E16F4F28F9A22A00E7D09B /* LinearScrollingHorizontal.swift in Sources */,
 				97C5DBB82868158C006FA6B4 /* PointerSettingsState.swift in Sources */,
 				B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */,
-				97C5216D299BA1BA00D0AE44 /* ScrollingSpeedAdjustment.swift in Sources */,
 				972A5E34285D8E4800CB6440 /* Defaults+Workaround.swift in Sources */,
 				97B83CE52860DA9800ECF109 /* CustomDecodingError.swift in Sources */,
 				97B9D4992865EC0900137E60 /* If.swift in Sources */,
@@ -1023,7 +1019,7 @@
 				972A5E2A285D5D0100CB6440 /* DeviceButtonStyle.swift in Sources */,
 				97F77FAA285E178B007C9C2B /* DevicePickerSectionItem.swift in Sources */,
 				36EBC3223E2CEE09F84076D8 /* Process.m in Sources */,
-				97353386297ED84600C1B5D0 /* ScrollingAccelerationAdjustment.swift in Sources */,
+				97353386297ED84600C1B5D0 /* ScrollingAccelerationSpeedAdjustment.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
