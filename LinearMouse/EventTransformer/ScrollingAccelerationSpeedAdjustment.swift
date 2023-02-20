@@ -46,6 +46,7 @@ class ScrollingAccelerationSpeedAdjustment: EventTransformer {
             scrollWheelEventView.deltaY = deltaYSignum * max(1, Int64(abs(targetPt) / 10))
             scrollWheelEventView.deltaYPt = targetPt
             scrollWheelEventView.deltaYFixedPt = targetPt / 10
+            // TODO: Test if ioHidScrollY needs to be modified.
             os_log("deltaY: speed=%f", log: Self.log, type: .debug, speed)
         }
 
