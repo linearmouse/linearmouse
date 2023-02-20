@@ -18,22 +18,46 @@ extension ScrollingSettings {
 
                 switch state.scrollingMode {
                 case .accelerated:
-                    Slider(value: $state.scrollingAcceleration,
-                           in: 0.0 ... 10.0) {
-                        Text("Acceleration")
-                    } minimumValueLabel: {
-                        Text("Linear")
-                    } maximumValueLabel: {
-                        Text("Accelerated")
+                    HStack(alignment: .firstTextBaseline) {
+                        Slider(value: $state.scrollingAcceleration,
+                               in: 0.0 ... 10.0) {
+                            labelWithDescription {
+                                Text("Acceleration")
+                                Text("(0–10)")
+                            }
+                        } minimumValueLabel: {
+                            Text("Linear")
+                        } maximumValueLabel: {
+                            Text("Accelerated")
+                        }
+                        TextField("",
+                                  value: $state.scrollingAcceleration,
+                                  formatter: state.scrollingAccelerationFormatter)
+                            .labelsHidden()
+                            .textFieldStyle(.roundedBorder)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 60)
                     }
 
-                    Slider(value: $state.scrollingSpeed,
-                           in: 0.0 ... 128.0) {
-                        Text("Speed")
-                    } minimumValueLabel: {
-                        Text("Slow")
-                    } maximumValueLabel: {
-                        Text("Fast")
+                    HStack(alignment: .firstTextBaseline) {
+                        Slider(value: $state.scrollingSpeed,
+                               in: 0.0 ... 128.0) {
+                            labelWithDescription {
+                                Text("Speed")
+                                Text("(0–128)")
+                            }
+                        } minimumValueLabel: {
+                            Text("Slow")
+                        } maximumValueLabel: {
+                            Text("Fast")
+                        }
+                        TextField("",
+                                  value: $state.scrollingSpeed,
+                                  formatter: state.scrollingSpeedFormatter)
+                            .labelsHidden()
+                            .textFieldStyle(.roundedBorder)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 60)
                     }
 
                     HStack(spacing: 10) {

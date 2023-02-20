@@ -22,7 +22,7 @@ struct PointerSettings: View {
                     }
 
                     if !state.pointerDisableAcceleration {
-                        HStack(alignment: .top) {
+                        HStack(alignment: .firstTextBaseline) {
                             Slider(value: $state.pointerAcceleration,
                                    in: 0.0 ... 20.0) {
                                 labelWithDescription {
@@ -39,7 +39,7 @@ struct PointerSettings: View {
                                 .frame(width: 80)
                         }
 
-                        HStack(alignment: .top) {
+                        HStack(alignment: .firstTextBaseline) {
                             Slider(value: $state.pointerSpeed,
                                    in: 0.0 ... 1.0) {
                                 labelWithDescription {

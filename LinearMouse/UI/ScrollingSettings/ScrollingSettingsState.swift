@@ -67,9 +67,27 @@ extension ScrollingSettingsState {
         set { scheme.scrolling.acceleration[direction] = Decimal(newValue).rounded(2) }
     }
 
+    var scrollingAccelerationFormatter: NumberFormatter {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = NumberFormatter.Style.decimal
+        formatter.roundingMode = NumberFormatter.RoundingMode.halfUp
+        formatter.maximumFractionDigits = 2
+        formatter.thousandSeparator = ""
+        return formatter
+    }
+
     var scrollingSpeed: Double {
         get { mergedScheme.scrolling.speed[direction]?.asTruncatedDouble ?? 0 }
         set { scheme.scrolling.speed[direction] = Decimal(newValue).rounded(2) }
+    }
+
+    var scrollingSpeedFormatter: NumberFormatter {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = NumberFormatter.Style.decimal
+        formatter.roundingMode = NumberFormatter.RoundingMode.halfUp
+        formatter.maximumFractionDigits = 2
+        formatter.thousandSeparator = ""
+        return formatter
     }
 
     var scrollingDistanceInLines: Double {
