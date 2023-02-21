@@ -8,7 +8,7 @@
 "Config" = "Konfigurationsdatei";
 "Reload" = "Neu laden";
 "Reveal in Finder" = "Im Finder anzeigen";
-"Configure for %@..." = "Configure for %@...";
+"Configure for %@..." = "Konfiguriere für %@...";
 "Quit %@" = "%@ beenden";
 
 "Scrolling" = "Scrollen";
@@ -70,8 +70,8 @@
 "Trackpad" = "Trackpad";
 "(active)" = "(aktiv)";
 
-"Configure for" = "Configure for";
-"All Apps" = "All Apps";
-"Configured" = "Configured";
-"Running" = "Running";
-"Installed" = "Installed";
+"Configure for" = "Konfiguriere für";
+"All Apps" = "Alle Anwendungen";
+"Configured" = "Konfiguriert";
+"Running" = "Aktiv";
+"Installed" = "Installiert";
