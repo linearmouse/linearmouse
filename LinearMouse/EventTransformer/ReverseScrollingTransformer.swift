@@ -3,7 +3,7 @@
 
 import Foundation
 
-class ReverseScrolling: EventTransformer {
+class ReverseScrollingTransformer: EventTransformer {
     private let vertically: Bool
     private let horizontally: Bool
 

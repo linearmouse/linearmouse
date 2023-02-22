@@ -4,6 +4,7 @@
 import Combine
 import Foundation
 import PublishedObject
+import SwiftUI
 
 class ButtonsSettingsState: ObservableObject {
     static let shared: ButtonsSettingsState = .init()
@@ -27,34 +28,34 @@ extension ButtonsSettingsState {
         }
     }
 
-    var debounceClicksEnabled: Bool {
+    var clickDebouncingEnabled: Bool {
         get {
-            mergedScheme.buttons.debounceClicks ?? 0 > 0
+            mergedScheme.buttons.clickDebouncing.timeout ?? 0 > 0
         }
         set {
-            scheme.buttons.debounceClicks = newValue ? 50 : 0
+            scheme.buttons.clickDebouncing.timeout = newValue ? 50 : 0
         }
     }
 
-    var debounceClicks: Int {
+    var clickDebouncingTimeout: Int {
         get {
-            mergedScheme.buttons.debounceClicks ?? 0
+            mergedScheme.buttons.clickDebouncing.timeout ?? 0
         }
         set {
-            scheme.buttons.debounceClicks = newValue
+            scheme.buttons.clickDebouncing.timeout = newValue
         }
     }
 
-    var debounceClicksInDouble: Double {
+    var clickDebouncingTimeoutInDouble: Double {
         get {
-            Double(debounceClicks)
+            Double(clickDebouncingTimeout)
         }
         set {
-            debounceClicks = Int(round(newValue / 10)) * 10
+            clickDebouncingTimeout = Int(round(newValue / 10)) * 10
         }
     }
 
-    var debounceClicksFormatter: NumberFormatter {
+    var clickDebouncingTimeoutFormatter: NumberFormatter {
         let formatter = NumberFormatter()
         formatter.numberStyle = NumberFormatter.Style.decimal
         formatter.roundingMode = NumberFormatter.RoundingMode.halfUp
@@ -63,5 +64,30 @@ extension ButtonsSettingsState {
         formatter.minimum = 10
         formatter.maximum = 500
         return formatter
+    }
+
+    var clickDebouncingResetTimerOnMouseUp: Bool {
+        get {
+            mergedScheme.buttons.clickDebouncing.resetTimerOnMouseUp ?? false
+        }
+        set {
+            scheme.buttons.clickDebouncing.resetTimerOnMouseUp = newValue
+        }
+    }
+
+    func clickDebouncingButtonEnabledBinding(for button: CGMouseButton) -> Binding<Bool> {
+        Binding<Bool>(
+            get: { [self] in
+                (mergedScheme.buttons.clickDebouncing.buttons ?? []).contains(button)
+            },
+            set: { [self] newValue in
+                let buttons = mergedScheme.buttons.clickDebouncing.buttons ?? []
+                if newValue {
+                    scheme.buttons.clickDebouncing.buttons = buttons + [button]
+                } else {
+                    scheme.buttons.clickDebouncing.buttons = buttons.filter { $0 != button }
+                }
+            }
+        )
     }
 }

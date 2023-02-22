@@ -7,7 +7,7 @@ import Foundation
 import KeyKit
 import os.log
 
-class ButtonActions {
+class ButtonActionsTransformer {
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ButtonActions")
 
     let mappings: [Scheme.Buttons.Mapping]
@@ -23,7 +23,7 @@ class ButtonActions {
     }
 }
 
-extension ButtonActions: EventTransformer {
+extension ButtonActionsTransformer: EventTransformer {
     var mouseDownEventTypes: [CGEventType] {
         [.leftMouseDown, .rightMouseDown, .otherMouseDown]
     }

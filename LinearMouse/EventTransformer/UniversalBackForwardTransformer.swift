@@ -5,7 +5,7 @@ import Foundation
 import GestureKit
 import os.log
 
-class UniversalBackForward: EventTransformer {
+class UniversalBackForwardTransformer: EventTransformer {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "UniversalBackForward")
 
     private static let includes = [

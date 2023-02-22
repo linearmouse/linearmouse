@@ -4,9 +4,9 @@
 @testable import LinearMouse
 import XCTest
 
-class LinearScrollingTests: XCTestCase {
+class LinearScrollingTransformerTests: XCTestCase {
     func testLinearScrollingByLines() throws {
-        let transformer = LinearScrollingVertical(distance: .line(3))
+        let transformer = LinearScrollingVerticalTransformer(distance: .line(3))
         var event = CGEvent(
             scrollWheelEvent2Source: nil,
             units: .line,
@@ -23,7 +23,7 @@ class LinearScrollingTests: XCTestCase {
     }
 
     func testLinearScrollingByPixels() throws {
-        let transformer = LinearScrollingVertical(distance: .pixel(36))
+        let transformer = LinearScrollingVerticalTransformer(distance: .pixel(36))
         var event = CGEvent(
             scrollWheelEvent2Source: nil,
             units: .line,

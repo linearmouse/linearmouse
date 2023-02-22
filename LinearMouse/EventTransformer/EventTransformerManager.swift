@@ -59,39 +59,46 @@ class EventTransformerManager {
             let horizontal = reverse.horizontal ?? false
 
             if vertical || horizontal {
-                eventTransformer.append(ReverseScrolling(vertically: vertical, horizontally: horizontal))
+                eventTransformer.append(ReverseScrollingTransformer(vertically: vertical, horizontally: horizontal))
             }
         }
 
         if let distance = scheme.scrolling.distance.horizontal {
-            eventTransformer.append(LinearScrollingHorizontal(distance: distance))
+            eventTransformer.append(LinearScrollingHorizontalTransformer(distance: distance))
         }
 
         if let distance = scheme.scrolling.distance.vertical {
-            eventTransformer.append(LinearScrollingVertical(distance: distance))
+            eventTransformer.append(LinearScrollingVerticalTransformer(distance: distance))
         }
 
         if scheme.scrolling.acceleration.vertical ?? 1 != 1 || scheme.scrolling.acceleration.horizontal ?? 1 != 1 ||
             scheme.scrolling.speed.vertical ?? 0 != 0 || scheme.scrolling.speed.horizontal ?? 0 != 0 {
-            eventTransformer.append(ScrollingAccelerationSpeedAdjustment(acceleration: scheme.scrolling.acceleration,
-                                                                         speed: scheme.scrolling.speed))
+            eventTransformer
+                .append(ScrollingAccelerationSpeedAdjustmentTransformer(acceleration: scheme.scrolling.acceleration,
+                                                                        speed: scheme.scrolling.speed))
         }
 
-        if let debounceClicks = scheme.buttons.debounceClicks, debounceClicks > 0 {
-            eventTransformer.append(DebounceClicks(interval: TimeInterval(debounceClicks) / 1000))
+        if let timeout = scheme.buttons.clickDebouncing.timeout, timeout > 0,
+           let buttons = scheme.buttons.clickDebouncing.buttons {
+            let resetTimerOnMouseUp = scheme.buttons.clickDebouncing.resetTimerOnMouseUp ?? false
+            for button in buttons {
+                eventTransformer.append(ClickDebouncingTransformer(for: button,
+                                                                   timeout: TimeInterval(timeout) / 1000,
+                                                                   resetTimerOnMouseUp: resetTimerOnMouseUp))
+            }
         }
 
         if let modifiers = scheme.scrolling.$modifiers {
-            eventTransformer.append(ModifierActions(modifiers: modifiers))
+            eventTransformer.append(ModifierActionsTransformer(modifiers: modifiers))
         }
 
         if let mappings = scheme.buttons.mappings {
-            eventTransformer.append(ButtonActions(mappings: mappings))
+            eventTransformer.append(ButtonActionsTransformer(mappings: mappings))
         }
 
         if let universalBackForward = scheme.buttons.universalBackForward,
            universalBackForward != .none {
-            eventTransformer.append(UniversalBackForward(universalBackForward: universalBackForward))
+            eventTransformer.append(UniversalBackForwardTransformer(universalBackForward: universalBackForward))
         }
 
         lastPid = pid
