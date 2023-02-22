@@ -278,6 +278,12 @@ declare namespace Scheme {
      * @default false
      */
     universalBackForward?: Buttons.UniversalBackForward;
+
+    /**
+     * @title Debounce clicks
+     * @description Indicates a duration within which rapid clicks will be ignored.
+     */
+    debounceClicks?: Int;
   };
 
   namespace Buttons {

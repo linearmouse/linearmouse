@@ -71,6 +71,11 @@
     "Scheme.Buttons": {
       "additionalProperties": false,
       "properties": {
+        "debounceClicks": {
+          "$ref": "#/definitions/Int",
+          "description": "Indicates a duration within which rapid clicks will be ignored.",
+          "title": "Debounce clicks"
+        },
         "mappings": {
           "description": "Assign actions to buttons.",
           "items": {

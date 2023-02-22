@@ -18,13 +18,12 @@ extension ScrollingSettings.ModifierKeysSection {
             .modifier(PickerViewModifier())
 
             if case .some(.changeSpeed) = action {
-                HStack {
+                HStack(spacing: 5) {
                     Slider(value: self.speedFactor,
                            in: 0.05 ... 10.00)
-                    HStack(spacing: 5) {
-                        Text(String(format: "%0.2f ×", self.speedFactor.wrappedValue))
-                    }
-                    .frame(width: 60, alignment: .trailing)
+                        .labelsHidden()
+                    Text(String(format: "%0.2f ×", self.speedFactor.wrappedValue))
+                        .frame(width: 60, alignment: .trailing)
                 }
             }
         }

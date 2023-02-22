@@ -15,6 +15,8 @@ extension Scheme {
         }
 
         var universalBackForward: UniversalBackForward?
+
+        var debounceClicks: Int?
     }
 }
 
@@ -26,6 +28,10 @@ extension Scheme.Buttons {
 
         if let universalBackForward = universalBackForward {
             buttons.universalBackForward = universalBackForward
+        }
+
+        if let debounceClicks = debounceClicks {
+            buttons.debounceClicks = debounceClicks
         }
     }
 

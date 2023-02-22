@@ -43,6 +43,9 @@
 
 "Enable universal back and forward" = "Enable universal back and forward";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
+"Debounce button clicks" = "Debounce button clicks";
+"Ignore rapid clicks within a certain duration." = "Ignore rapid clicks within a certain duration.";
+"ms" = "ms";
 
 "Settings" = "Settings";
 "Show in menu bar" = "Show in menu bar";

@@ -77,6 +77,10 @@ class EventTransformerManager {
                                                                          speed: scheme.scrolling.speed))
         }
 
+        if let debounceClicks = scheme.buttons.debounceClicks, debounceClicks > 0 {
+            eventTransformer.append(DebounceClicks(interval: TimeInterval(debounceClicks) / 1000))
+        }
+
         if let modifiers = scheme.scrolling.$modifiers {
             eventTransformer.append(ModifierActions(modifiers: modifiers))
         }

@@ -50,6 +50,9 @@
 		9766C4BA299E1A1400FA3A9C /* AppPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9766C4B9299E1A1400FA3A9C /* AppPicker.swift */; };
 		9766C4BC299E1C5C00FA3A9C /* AppPickerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9766C4BB299E1C5C00FA3A9C /* AppPickerState.swift */; };
 		977638F9286BE9EE00A698B6 /* PublishedObject in Frameworks */ = {isa = PBXBuildFile; productRef = 977638F8286BE9EE00A698B6 /* PublishedObject */; };
+		978DBC9C29A60D92002259B3 /* UniversalBackForwardSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978DBC9B29A60D92002259B3 /* UniversalBackForwardSection.swift */; };
+		978DBC9E29A60E2F002259B3 /* ClickDebouncingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978DBC9D29A60E2F002259B3 /* ClickDebouncingSection.swift */; };
+		978DBCA029A61D50002259B3 /* DebounceClicks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978DBC9F29A61D50002259B3 /* DebounceClicks.swift */; };
 		97A13AD2287094FB002F6193 /* Distance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A13AD1287094FB002F6193 /* Distance.swift */; };
 		97A2F60A29508AD800F31122 /* EventTransformerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A2F60929508AD800F31122 /* EventTransformerManager.swift */; };
 		97A46B17285444BF00C07C9B /* NSWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A46B16285444BF00C07C9B /* NSWindow.swift */; };
@@ -171,6 +174,9 @@
 		9766C4B7299E199200FA3A9C /* AppPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPickerSheet.swift; sourceTree = "<group>"; };
 		9766C4B9299E1A1400FA3A9C /* AppPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPicker.swift; sourceTree = "<group>"; };
 		9766C4BB299E1C5C00FA3A9C /* AppPickerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPickerState.swift; sourceTree = "<group>"; };
+		978DBC9B29A60D92002259B3 /* UniversalBackForwardSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniversalBackForwardSection.swift; sourceTree = "<group>"; };
+		978DBC9D29A60E2F002259B3 /* ClickDebouncingSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClickDebouncingSection.swift; sourceTree = "<group>"; };
+		978DBC9F29A61D50002259B3 /* DebounceClicks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebounceClicks.swift; sourceTree = "<group>"; };
 		97A13AD1287094FB002F6193 /* Distance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Distance.swift; sourceTree = "<group>"; };
 		97A2F60929508AD800F31122 /* EventTransformerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTransformerManager.swift; sourceTree = "<group>"; };
 		97A46B16285444BF00C07C9B /* NSWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSWindow.swift; sourceTree = "<group>"; };
@@ -464,6 +470,8 @@
 			children = (
 				972DF65A285AEABA00B83932 /* ButtonsSettings.swift */,
 				97C5DBC42868A1ED006FA6B4 /* ButtonsSettingsState.swift */,
+				978DBC9B29A60D92002259B3 /* UniversalBackForwardSection.swift */,
+				978DBC9D29A60E2F002259B3 /* ClickDebouncingSection.swift */,
 			);
 			path = ButtonsSettings;
 			sourceTree = "<group>";
@@ -688,6 +696,7 @@
 				97E16F4E28F9A22A00E7D09B /* LinearScrollingHorizontal.swift */,
 				B7ADF9842748B25A0005B02D /* ModifierActions.swift */,
 				B716F15F26BC10B80052F551 /* UniversalBackForward.swift */,
+				978DBC9F29A61D50002259B3 /* DebounceClicks.swift */,
 				97B913FD28869F0500DC920A /* ButtonActions.swift */,
 			);
 			path = EventTransformer;
@@ -931,6 +940,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				978DBC9E29A60E2F002259B3 /* ClickDebouncingSection.swift in Sources */,
 				9766C4BC299E1C5C00FA3A9C /* AppPickerState.swift in Sources */,
 				9704BA992976E84C00C8B06D /* SettingsState.swift in Sources */,
 				972327B12992912F0041538A /* ReverseScrollingSection.swift in Sources */,
@@ -999,6 +1009,7 @@
 				B7ADF98F2748E6400005B02D /* MouseEventView.swift in Sources */,
 				97F77FA8285DC828007C9C2B /* Environment.swift in Sources */,
 				97A46B17285444BF00C07C9B /* NSWindow.swift in Sources */,
+				978DBCA029A61D50002259B3 /* DebounceClicks.swift in Sources */,
 				972AFD452851C101009B0CBF /* AccessibilityPermissionView.swift in Sources */,
 				B75A061C2671E9D800BEAF77 /* AppDelegate.swift in Sources */,
 				972DF63A285997CD00B83932 /* Sidebar.swift in Sources */,
@@ -1017,6 +1028,7 @@
 				B77A16122674C21600E99A5D /* Settings.swift in Sources */,
 				972DF64C285A298600B83932 /* DetailView.swift in Sources */,
 				972A5E2A285D5D0100CB6440 /* DeviceButtonStyle.swift in Sources */,
+				978DBC9C29A60D92002259B3 /* UniversalBackForwardSection.swift in Sources */,
 				97F77FAA285E178B007C9C2B /* DevicePickerSectionItem.swift in Sources */,
 				36EBC3223E2CEE09F84076D8 /* Process.m in Sources */,
 				97353386297ED84600C1B5D0 /* ScrollingAccelerationSpeedAdjustment.swift in Sources */,
