@@ -9,6 +9,33 @@ type IntString = string;
 /** @pattern ^0x[0-9a-fA-F]+$ */
 type HexString = string;
 
+type Button = Primary | Secondary | Auxiliary | Back | Forward | number;
+
+/**
+ * @description Primary button, usually the left button.
+ */
+type Primary = 0;
+
+/**
+ * @description Secondary button, usually the right button.
+ */
+type Secondary = 1;
+
+/**
+ * @description Auxiliary button, usually the wheel button or the middle button.
+ */
+type Auxiliary = 2;
+
+/**
+ * @description Forth button, typically the back button.
+ */
+type Back = 3;
+
+/**
+ * @description Fifth button, typically the forward button.
+ */
+type Forward = 4;
+
 export type Configuration = {
   $schema?: string;
 
@@ -280,10 +307,10 @@ declare namespace Scheme {
     universalBackForward?: Buttons.UniversalBackForward;
 
     /**
-     * @title Debounce clicks
-     * @description Indicates a duration within which rapid clicks will be ignored.
+     * @title Debounce button clicks
+     * @description Ignore rapid clicks with a certain time period.
      */
-    debounceClicks?: Int;
+    clickDebouncing?: Buttons.ClickDebouncing;
   };
 
   namespace Buttons {
@@ -293,7 +320,7 @@ declare namespace Scheme {
            * @title Button number
            * @description The button number. See https://developer.apple.com/documentation/coregraphics/cgmousebutton
            */
-          button: Mapping.Button;
+          button: Button;
 
           /**
            * @description Indicates if key repeat is enabled. If the value is true, the action will be repeatedly executed when the button is hold according to the key repeat settings in System Settings.
@@ -554,33 +581,6 @@ declare namespace Scheme {
         "mouse.wheel.scrollRight": Scheme.Scrolling.Distance;
       };
 
-      type Button = Primary | Secondary | Auxiliary | Back | Forward | number;
-
-      /**
-       * @description Primary button, usually the left button.
-       */
-      type Primary = 0;
-
-      /**
-       * @description Secondary button, usually the right button.
-       */
-      type Secondary = 1;
-
-      /**
-       * @description Auxiliary button, usually the wheel button or the middle button.
-       */
-      type Auxiliary = 2;
-
-      /**
-       * @description Forth button, typically the back button.
-       */
-      type Back = 3;
-
-      /**
-       * @description Fifth button, typically the forward button.
-       */
-      type Forward = 4;
-
       /**
        * @description Scroll direction.
        */
@@ -603,5 +603,22 @@ declare namespace Scheme {
        */
       type ForwardOnly = "forwardOnly";
     }
+
+    type ClickDebouncing = {
+      /**
+       * @description The time period in which rapid clicks are ignored.
+       */
+      timeout: Int;
+
+      /**
+       * @description If the value is true, the timer will be reset on mouse up.
+       */
+      resetTimerOnMouseUp: boolean;
+
+      /**
+       * @description Buttons to debounce.
+       */
+      buttons: Button[];
+    };
   }
 }

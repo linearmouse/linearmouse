@@ -12,7 +12,7 @@ struct ClickDebouncingSection: View {
                 withDescription {
                     Text("Debounce button clicks")
                     Text(
-                        "Ignore rapid clicks within a certain duration."
+                        "Ignore rapid clicks within a certain time period."
                     )
                 }
             }
