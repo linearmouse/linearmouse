@@ -1,23 +1,23 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
 "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
-"Get more help" = "Get more help";
+"Get more help" = "Få mere hjælp";
 "Open Accessibility" = "Open Accessibility";
 
-"%@ Settings..." = "%@ Settings...";
+"%@ Settings..." = "%@ Indstillinger...";
 "Start at login" = "Start at login";
-"Config" = "Config";
-"Reload" = "Reload";
-"Reveal in Finder" = "Reveal in Finder";
-"Configure for %@..." = "Configure for %@...";
-"Quit %@" = "Quit %@";
+"Config" = "Konfiguration";
+"Reload" = "Genindlæs";
+"Reveal in Finder" = "Vis i Finder";
+"Configure for %@..." = "Indstil for %@...";
+"Quit %@" = "Afslut %@";
 
-"Scrolling" = "Scrolling";
-"Pointer" = "Pointer";
-"Buttons" = "Buttons";
-"General" = "General";
+"Scrolling" = "Rulning";
+"Pointer" = "Markør";
+"Buttons" = "Knapper";
+"General" = "Generelt";
 
-"Vertical" = "Vertical";
-"Horizontal" = "Horizontal";
+"Vertical" = "Vertikal";
+"Horizontal" = "Horisontal";
 "Reverse scrolling" = "Reverse scrolling";
 "Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
 "Mode" = "Mode";
