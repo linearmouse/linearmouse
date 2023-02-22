@@ -1,10 +1,10 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
-"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
+"LinearMouse needs Accessibility permission" = "LinearMouse skal bruge adgang til Tilgængelighed";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "Du skal give tilladelse til Tilgængelighed i Systemindstillinger... > Anonymitet & sikkerhed > Tilgængelighed.";
 "Get more help" = "Få mere hjælp";
-"Open Accessibility" = "Open Accessibility";
+"Open Accessibility" = "Åbn Tilgængelighed";
 
 "%@ Settings..." = "%@ Indstillinger...";
-"Start at login" = "Start at login";
+"Start at login" = "Start ved login";
 "Config" = "Konfiguration";
 "Reload" = "Genindlæs";
 "Reveal in Finder" = "Vis i Finder";
@@ -18,60 +18,60 @@
 
 "Vertical" = "Vertikal";
 "Horizontal" = "Horisontal";
-"Reverse scrolling" = "Reverse scrolling";
-"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
-"Mode" = "Mode";
-"Accelerated" = "Accelerated";
-"By Lines" = "By Lines";
-"By Pixels" = "By Pixels";
+"Reverse scrolling" = "Omvendt rulning";
+"Some gestures, such as swiping back and forward, may stop working." = "Nogle bevægelser, såsom at stryge tilbage og fremad, kan stoppe med at virke.";
+"Mode" = "Tilstand";
+"Accelerated" = "Accelereret";
+"By Lines" = "Efter Linjer";
+"By Pixels" = "Efter Pixels";
 "Acceleration" = "Acceleration";
-"Linear" = "Linear";
-"Speed" = "Speed";
-"Slow" = "Slow";
-"Fast" = "Fast";
-"Distance" = "Distance";
-"Revert to system defaults" = "Revert to system defaults";
-"Copy settings from vertical" = "Copy settings from vertical";
-"Modifier Keys" = "Modifier Keys";
-"No action" = "No action";
-"Alter orientation" = "Alter orientation";
-"Change speed" = "Change speed";
+"Linear" = "Lineær";
+"Speed" = "Hastighed";
+"Slow" = "Langsom";
+"Fast" = "Hurtig";
+"Distance" = "Afstand";
+"Revert to system defaults" = "Nulstil til systemets standardindstillinger";
+"Copy settings from vertical" = "Kopiér indstillinger fra vertikal";
+"Modifier Keys" = "Kombitaster";
+"No action" = "Ingen handling";
+"Alter orientation" = "Skift retning";
+"Change speed" = "Ændr hastighed";
 "Zoom" = "Zoom";
 
-"Disable pointer acceleration" = "Disable pointer acceleration";
-"You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
+"Disable pointer acceleration" = "Deaktiver markøracceleration";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "Du kan også trykke på ⌃⇧⌘Z for at vende tilbage til systemets standardindstillinger.";
 
-"Enable universal back and forward" = "Enable universal back and forward";
-"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
+"Enable universal back and forward" = "Aktivér universel frem og tilbage";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Konverter tilbage og frem sideknapperne til strygebevægelser for at tillade universel tilbage og frem funktionalitet.";
 
-"Settings" = "Settings";
-"Show in menu bar" = "Show in menu bar";
-"To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
+"Settings" = "Indstillinger";
+"Show in menu bar" = "Vis i menulinjen";
+"To show the settings, launch %@ again." = "Start %@ igen for at vise indstillingerne.";
 
 "Version: %@" = "Version: %@";
-"Check for updates automatically" = "Check for updates automatically";
-"Update check interval" = "Update check interval";
-"Daily" = "Daily";
-"Weekly" = "Weekly";
-"Monthly" = "Monthly";
-"Receive beta updates" = "Receive beta updates";
-"Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
-"Check for Updates..." = "Check for Updates...";
+"Check for updates automatically" = "Søg automatisk efter opdateringer";
+"Update check interval" = "Interval for opdateringssøgning";
+"Daily" = "Dagligt";
+"Weekly" = "Ugentligt";
+"Monthly" = "Månedligt";
+"Receive beta updates" = "Modtag betaopdateringer";
+"Thank you for participating in the beta test." = "Tak fordi du deltager i betatesten.";
+"Check for Updates..." = "Søg efter Opdateringer...";
 
-"Homepage" = "Homepage";
-"Bug report" = "Bug report";
-"Feature request" = "Feature request";
-"Donate" = "Donate";
+"Homepage" = "Hjemmeside";
+"Bug report" = "Fejlrapport";
+"Feature request" = "Ændringsønske";
+"Donate" = "Donér";
 
-"Auto switch to the active device" = "Auto switch to the active device";
-"OK" = "OK";
+"Auto switch to the active device" = "Skift automatisk til den aktive enhed";
+"OK" = "Ok";
 
-"Mouse" = "Mouse";
-"Trackpad" = "Trackpad";
-"(active)" = "(active)";
+"Mouse" = "Mus";
+"Trackpad" = "Pegefelt";
+"(active)" = "(aktiv)";
 
-"Configure for" = "Configure for";
-"All Apps" = "All Apps";
-"Configured" = "Configured";
-"Running" = "Running";
-"Installed" = "Installed";
+"Configure for" = "Indstil for";
+"All Apps" = "Alle Apps";
+"Configured" = "Indstillet";
+"Running" = "Kørende";
+"Installed" = "Installerede";
