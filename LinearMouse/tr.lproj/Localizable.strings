@@ -43,6 +43,13 @@
 
 "Enable universal back and forward" = "Evrensel ileri ve geriyi etkinleştir";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Evrensel ileri ve geri işlevine izin vermek için ileri ve geri yan düğmelerini kaydırma hareketlerine dönüştürün.";
+"Debounce button clicks" = "Debounce button clicks";
+"Ignore rapid clicks within a certain time period." = "Ignore rapid clicks within a certain time period.";
+"ms" = "ms";
+"Reset timer on mouse up" = "Reset timer on mouse up";
+"Left button" = "Left button";
+"Right button" = "Right button";
+"Middle button" = "Middle button";
 
 "Settings" = "Ayarlar";
 "Show in menu bar" = "Menüde göster";
