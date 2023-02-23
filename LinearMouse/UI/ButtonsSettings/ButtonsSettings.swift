@@ -4,22 +4,12 @@
 import SwiftUI
 
 struct ButtonsSettings: View {
-    @ObservedObject var state: ButtonsSettingsState = .shared
-
     var body: some View {
         DetailView {
             Form {
-                Section {
-                    Toggle(isOn: $state.universalBackForward) {
-                        withDescription {
-                            Text("Enable universal back and forward")
-                            Text(
-                                "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality."
-                            )
-                        }
-                    }
-                }
-                .modifier(SectionViewModifier())
+                UniversalBackForwardSection()
+
+                ClickDebouncingSection()
             }
             .modifier(FormViewModifier())
         }

@@ -2,6 +2,38 @@
   "$ref": "#/definitions/Configuration",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
+    "Auxiliary": {
+      "const": 2,
+      "description": "Auxiliary button, usually the wheel button or the middle button.",
+      "type": "number"
+    },
+    "Back": {
+      "const": 3,
+      "description": "Forth button, typically the back button.",
+      "type": "number"
+    },
+    "Button": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Primary"
+        },
+        {
+          "$ref": "#/definitions/Secondary"
+        },
+        {
+          "$ref": "#/definitions/Auxiliary"
+        },
+        {
+          "$ref": "#/definitions/Back"
+        },
+        {
+          "$ref": "#/definitions/Forward"
+        },
+        {
+          "type": "number"
+        }
+      ]
+    },
     "Configuration": {
       "additionalProperties": false,
       "properties": {
@@ -31,6 +63,11 @@
       },
       "type": "object"
     },
+    "Forward": {
+      "const": 4,
+      "description": "Fifth button, typically the forward button.",
+      "type": "number"
+    },
     "HexString": {
       "pattern": "^0x[0-9a-fA-F]+$",
       "type": "string"
@@ -41,6 +78,11 @@
     "IntString": {
       "pattern": "^\\d+$",
       "type": "string"
+    },
+    "Primary": {
+      "const": 0,
+      "description": "Primary button, usually the left button.",
+      "type": "number"
     },
     "Scheme": {
       "additionalProperties": false,
@@ -71,6 +113,11 @@
     "Scheme.Buttons": {
       "additionalProperties": false,
       "properties": {
+        "clickDebouncing": {
+          "$ref": "#/definitions/Scheme.Buttons.ClickDebouncing",
+          "description": "Ignore rapid clicks with a certain time period.",
+          "title": "Debounce button clicks"
+        },
         "mappings": {
           "description": "Assign actions to buttons.",
           "items": {
@@ -88,6 +135,32 @@
       },
       "type": "object"
     },
+    "Scheme.Buttons.ClickDebouncing": {
+      "additionalProperties": false,
+      "properties": {
+        "buttons": {
+          "description": "Buttons to debounce.",
+          "items": {
+            "$ref": "#/definitions/Button"
+          },
+          "type": "array"
+        },
+        "resetTimerOnMouseUp": {
+          "description": "If the value is true, the timer will be reset on mouse up.",
+          "type": "boolean"
+        },
+        "timeout": {
+          "$ref": "#/definitions/Int",
+          "description": "The time period in which rapid clicks are ignored."
+        }
+      },
+      "required": [
+        "timeout",
+        "resetTimerOnMouseUp",
+        "buttons"
+      ],
+      "type": "object"
+    },
     "Scheme.Buttons.Mapping": {
       "anyOf": [
         {
@@ -98,7 +171,7 @@
               "title": "Action"
             },
             "button": {
-              "$ref": "#/definitions/Scheme.Buttons.Mapping.Button",
+              "$ref": "#/definitions/Button",
               "description": "The button number. See https://developer.apple.com/documentation/coregraphics/cgmousebutton",
               "title": "Button number"
             },
@@ -196,38 +269,6 @@
       "description": "Do not modify the button behavior.",
       "type": "string"
     },
-    "Scheme.Buttons.Mapping.Auxiliary": {
-      "const": 2,
-      "description": "Auxiliary button, usually the wheel button or the middle button.",
-      "type": "number"
-    },
-    "Scheme.Buttons.Mapping.Back": {
-      "const": 3,
-      "description": "Forth button, typically the back button.",
-      "type": "number"
-    },
-    "Scheme.Buttons.Mapping.Button": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/Scheme.Buttons.Mapping.Primary"
-        },
-        {
-          "$ref": "#/definitions/Scheme.Buttons.Mapping.Secondary"
-        },
-        {
-          "$ref": "#/definitions/Scheme.Buttons.Mapping.Auxiliary"
-        },
-        {
-          "$ref": "#/definitions/Scheme.Buttons.Mapping.Back"
-        },
-        {
-          "$ref": "#/definitions/Scheme.Buttons.Mapping.Forward"
-        },
-        {
-          "type": "number"
-        }
-      ]
-    },
     "Scheme.Buttons.Mapping.DisplayBrightnessDown": {
       "const": "display.brightnessDown",
       "description": "Display: Brightness down.",
@@ -237,11 +278,6 @@
       "const": "display.brightnessUp",
       "description": "Display: Brightness up.",
       "type": "string"
-    },
-    "Scheme.Buttons.Mapping.Forward": {
-      "const": 4,
-      "description": "Fifth button, typically the forward button.",
-      "type": "number"
     },
     "Scheme.Buttons.Mapping.KeyboardBrightnessDown": {
       "const": "keyboard.brightnessDown",
@@ -415,11 +451,6 @@
       "description": "Prevent the button events.",
       "type": "string"
     },
-    "Scheme.Buttons.Mapping.Primary": {
-      "const": 0,
-      "description": "Primary button, usually the left button.",
-      "type": "number"
-    },
     "Scheme.Buttons.Mapping.Run": {
       "additionalProperties": false,
       "properties": {
@@ -442,11 +473,6 @@
         "right"
       ],
       "type": "string"
-    },
-    "Scheme.Buttons.Mapping.Secondary": {
-      "const": 1,
-      "description": "Secondary button, usually the right button.",
-      "type": "number"
     },
     "Scheme.Buttons.Mapping.ShowDesktop": {
       "const": "showDesktop",
@@ -932,6 +958,11 @@
         "type"
       ],
       "type": "object"
+    },
+    "Secondary": {
+      "const": 1,
+      "description": "Secondary button, usually the right button.",
+      "type": "number"
     },
     "SingleValueOrArray<Scheme.If.Category>": {
       "anyOf": [

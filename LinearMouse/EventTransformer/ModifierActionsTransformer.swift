@@ -3,7 +3,7 @@
 
 import Foundation
 
-class ModifierActions: EventTransformer {
+class ModifierActionsTransformer: EventTransformer {
     typealias Modifiers = Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Modifiers>
     typealias Action = Scheme.Scrolling.Modifiers.Action
 

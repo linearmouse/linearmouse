@@ -36,7 +36,7 @@ class DeviceManager: ObservableObject {
 
         for property in [kIOHIDMouseAccelerationType, kIOHIDTrackpadAccelerationType, kIOHIDPointerResolutionKey] {
             manager.observePropertyChanged(property: property) { [self] _ in
-                os_log("Property %@ changed", log: Self.log, type: .debug, property)
+                os_log("Property %{public}@ changed", log: Self.log, type: .debug, property)
                 updatePointerSpeed()
             }.tieToLifetime(of: self)
         }
@@ -91,7 +91,7 @@ class DeviceManager: ObservableObject {
             object: nil,
             queue: .main,
             using: { [weak self] _ in
-                os_log("Frontmost app changed: %@", log: Self.log, type: .debug,
+                os_log("Frontmost app changed: %{public}@", log: Self.log, type: .debug,
                        NSWorkspace.shared.frontmostApplication?.bundleIdentifier ?? "(nil)")
                 self?.updatePointerSpeed()
             }

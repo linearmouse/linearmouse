@@ -107,6 +107,8 @@ extension CGMouseButton {
     }
 }
 
+extension CGMouseButton: Codable {}
+
 extension Binding {
     func `default`<UnwrappedValue>(_ value: UnwrappedValue) -> Binding<UnwrappedValue> where Value == UnwrappedValue? {
         Binding<UnwrappedValue>(get: { wrappedValue ?? value }, set: { wrappedValue = $0 })

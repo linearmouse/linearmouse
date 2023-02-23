@@ -15,6 +15,8 @@ extension Scheme {
         }
 
         var universalBackForward: UniversalBackForward?
+
+        @ImplicitOptional var clickDebouncing: ClickDebouncing
     }
 }
 
@@ -26,6 +28,14 @@ extension Scheme.Buttons {
 
         if let universalBackForward = universalBackForward {
             buttons.universalBackForward = universalBackForward
+        }
+
+        if let clickDebouncing = $clickDebouncing {
+            buttons.clickDebouncing = clickDebouncing
+        }
+
+        if let clickDebouncing = $clickDebouncing {
+            buttons.$clickDebouncing = clickDebouncing
         }
     }
 

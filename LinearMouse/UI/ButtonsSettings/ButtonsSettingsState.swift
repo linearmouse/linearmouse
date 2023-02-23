@@ -4,6 +4,7 @@
 import Combine
 import Foundation
 import PublishedObject
+import SwiftUI
 
 class ButtonsSettingsState: ObservableObject {
     static let shared: ButtonsSettingsState = .init()
@@ -25,5 +26,68 @@ extension ButtonsSettingsState {
         set {
             scheme.buttons.universalBackForward = .some(newValue ? .both : .none)
         }
+    }
+
+    var clickDebouncingEnabled: Bool {
+        get {
+            mergedScheme.buttons.clickDebouncing.timeout ?? 0 > 0
+        }
+        set {
+            scheme.buttons.clickDebouncing.timeout = newValue ? 50 : 0
+        }
+    }
+
+    var clickDebouncingTimeout: Int {
+        get {
+            mergedScheme.buttons.clickDebouncing.timeout ?? 0
+        }
+        set {
+            scheme.buttons.clickDebouncing.timeout = newValue
+        }
+    }
+
+    var clickDebouncingTimeoutInDouble: Double {
+        get {
+            Double(clickDebouncingTimeout)
+        }
+        set {
+            clickDebouncingTimeout = Int(round(newValue / 10)) * 10
+        }
+    }
+
+    var clickDebouncingTimeoutFormatter: NumberFormatter {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = NumberFormatter.Style.decimal
+        formatter.roundingMode = NumberFormatter.RoundingMode.halfUp
+        formatter.maximumFractionDigits = 0
+        formatter.thousandSeparator = ""
+        formatter.minimum = 10
+        formatter.maximum = 500
+        return formatter
+    }
+
+    var clickDebouncingResetTimerOnMouseUp: Bool {
+        get {
+            mergedScheme.buttons.clickDebouncing.resetTimerOnMouseUp ?? false
+        }
+        set {
+            scheme.buttons.clickDebouncing.resetTimerOnMouseUp = newValue
+        }
+    }
+
+    func clickDebouncingButtonEnabledBinding(for button: CGMouseButton) -> Binding<Bool> {
+        Binding<Bool>(
+            get: { [self] in
+                (mergedScheme.buttons.clickDebouncing.buttons ?? []).contains(button)
+            },
+            set: { [self] newValue in
+                let buttons = mergedScheme.buttons.clickDebouncing.buttons ?? []
+                if newValue {
+                    scheme.buttons.clickDebouncing.buttons = buttons + [button]
+                } else {
+                    scheme.buttons.clickDebouncing.buttons = buttons.filter { $0 != button }
+                }
+            }
+        )
     }
 }
