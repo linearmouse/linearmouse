@@ -43,6 +43,13 @@
 
 "Enable universal back and forward" = "유니버설 백/포워드";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "뒤로 및 앞으로 가기 측면 버튼을 스와이프 제스처로 변환하여 앱 호환성을 높입니다.";
+"Debounce button clicks" = "Debounce button clicks";
+"Ignore rapid clicks within a certain time period." = "Ignore rapid clicks within a certain time period.";
+"ms" = "ms";
+"Reset timer on mouse up" = "Reset timer on mouse up";
+"Left button" = "Left button";
+"Right button" = "Right button";
+"Middle button" = "Middle button";
 
 "Settings" = "설정";
 "Show in menu bar" = "메뉴 막대에서 보기";
