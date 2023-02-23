@@ -43,6 +43,13 @@
 
 "Enable universal back and forward" = "啟用全局後退、前進";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "將後退、前進側鍵轉換為滑動手勢，以全局啟用後退、前進支持。";
+"Debounce button clicks" = "Debounce button clicks";
+"Ignore rapid clicks within a certain time period." = "Ignore rapid clicks within a certain time period.";
+"ms" = "ms";
+"Reset timer on mouse up" = "Reset timer on mouse up";
+"Left button" = "Left button";
+"Right button" = "Right button";
+"Middle button" = "Middle button";
 
 "Settings" = "設定";
 "Show in menu bar" = "在選單列中顯示";
