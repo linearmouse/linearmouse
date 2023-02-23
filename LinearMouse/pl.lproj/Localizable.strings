@@ -43,6 +43,13 @@
 
 "Enable universal back and forward" = "Włącz uniwersalne przejścia w przód i w tył";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Zamienia działanie przycisków bocznych myszy na gesty przesuwania, tak aby umożliwić uniwersalne przechodzenie w przód i w tył.";
+"Debounce button clicks" = "Debounce button clicks";
+"Ignore rapid clicks within a certain time period." = "Ignore rapid clicks within a certain time period.";
+"ms" = "ms";
+"Reset timer on mouse up" = "Reset timer on mouse up";
+"Left button" = "Left button";
+"Right button" = "Right button";
+"Middle button" = "Middle button";
 
 "Settings" = "Ustawienia";
 "Show in menu bar" = "Pokaż na pasku menu";

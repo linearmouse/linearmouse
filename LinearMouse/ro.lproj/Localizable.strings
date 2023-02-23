@@ -43,6 +43,13 @@
 
 "Enable universal back and forward" = "Activați funcția universală înapoi și înainte";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convertește butoanele din spate și din față lateral la gesturi de glisare pentru a permite funcționalitatea universală înapoi și înainte.";
+"Debounce button clicks" = "Debounce button clicks";
+"Ignore rapid clicks within a certain time period." = "Ignore rapid clicks within a certain time period.";
+"ms" = "ms";
+"Reset timer on mouse up" = "Reset timer on mouse up";
+"Left button" = "Left button";
+"Right button" = "Right button";
+"Middle button" = "Middle button";
 
 "Settings" = "Setări";
 "Show in menu bar" = "Arată in bara de meniu";

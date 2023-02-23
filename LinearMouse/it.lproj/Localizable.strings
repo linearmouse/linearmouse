@@ -43,6 +43,13 @@
 
 "Enable universal back and forward" = "Abilitare avanti e indietro universale";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Converti i pulsanti laterali avanti e indietro in gesti scorrevoli per consentire funzionalità di avanti e indietro universali.";
+"Debounce button clicks" = "Debounce button clicks";
+"Ignore rapid clicks within a certain time period." = "Ignore rapid clicks within a certain time period.";
+"ms" = "ms";
+"Reset timer on mouse up" = "Reset timer on mouse up";
+"Left button" = "Left button";
+"Right button" = "Right button";
+"Middle button" = "Middle button";
 
 "Settings" = "Settings";
 "Show in menu bar" = "Mostra nella barra dei menu";

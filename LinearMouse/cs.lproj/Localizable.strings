@@ -43,6 +43,13 @@
 
 "Enable universal back and forward" = "Aktivovat univerzální přecházení zpět a dopředu";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Převádí stisk bočních tlačítek myši pro pohyb zpět a dopředu na gesta přejetí prstem (swipe) a tím umožňuje využití tlačítek pro navigaci";
+"Debounce button clicks" = "Debounce button clicks";
+"Ignore rapid clicks within a certain time period." = "Ignore rapid clicks within a certain time period.";
+"ms" = "ms";
+"Reset timer on mouse up" = "Reset timer on mouse up";
+"Left button" = "Left button";
+"Right button" = "Right button";
+"Middle button" = "Middle button";
 
 "Settings" = "Nastavení";
 "Show in menu bar" = "Zobrazovat v řádku nabídek";
