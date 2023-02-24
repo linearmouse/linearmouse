@@ -53,13 +53,19 @@ class MouseEventView {
         return (modifiers + ["<button \(mouseButton.rawValue)>"]).joined(separator: "+")
     }
 
-    var targetPid: pid_t? {
-        let pid = pid_t(event.getIntegerValueField(.eventTargetUnixProcessID))
-
+    var sourcePid: pid_t? {
+        let pid = pid_t(event.getIntegerValueField(.eventSourceUnixProcessID))
         guard pid > 0 else {
             return nil
         }
+        return pid
+    }
 
+    var targetPid: pid_t? {
+        let pid = pid_t(event.getIntegerValueField(.eventTargetUnixProcessID))
+        guard pid > 0 else {
+            return nil
+        }
         return pid
     }
 }
