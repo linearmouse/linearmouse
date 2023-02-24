@@ -26,7 +26,7 @@ class ClickDebouncingTransformer: EventTransformer {
     }
 
     private var state: State = .unknown
-    private var lastClickedAt: Date = .distantPast
+    private var lastClickedAtInNanoseconds: UInt64 = 0
 
     func transform(_ event: CGEvent) -> CGEvent? {
         guard [mouseDownEventType, mouseUpEventType].contains(event.type) else {
@@ -74,8 +74,11 @@ class ClickDebouncingTransformer: EventTransformer {
     }
 
     private func touchLastClickedAt() {
-        lastClickedAt = .init()
+        lastClickedAtInNanoseconds = DispatchTime.now().uptimeNanoseconds
     }
 
-    private var intervalSinceLastClick: TimeInterval { -lastClickedAt.timeIntervalSinceNow }
+    private var intervalSinceLastClick: TimeInterval {
+        let nanosecondsPerSecond = 1e9
+        return Double(DispatchTime.now().uptimeNanoseconds - lastClickedAtInNanoseconds) / nanosecondsPerSecond
+    }
 }
