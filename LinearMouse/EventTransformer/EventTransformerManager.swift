@@ -30,7 +30,19 @@ class EventTransformerManager {
             .store(in: &subscriptions)
     }
 
-    func get(withPid pid: pid_t?) -> EventTransformer {
+    private let sourceBundleIdentifierBypassSet: Set<String> = [
+        "cc.ffitch.shottr"
+    ]
+
+    func get(withSourcePid sourcePid: pid_t?, withTargetPid pid: pid_t?) -> EventTransformer {
+        if let sourceBundleIdentifier = sourcePid?.bundleIdentifier,
+           sourceBundleIdentifierBypassSet.contains(sourceBundleIdentifier) {
+            os_log("Return noop transformer because the source application %{public}s is in the bypass set",
+                   log: Self.log, type: .debug,
+                   sourceBundleIdentifier)
+            return []
+        }
+
         if lastPid != pid {
             lastEventTransformer = nil
         }
