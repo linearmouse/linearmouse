@@ -608,17 +608,17 @@ declare namespace Scheme {
       /**
        * @description The time period in which rapid clicks are ignored.
        */
-      timeout: Int;
+      timeout?: Int;
 
       /**
        * @description If the value is true, the timer will be reset on mouse up.
        */
-      resetTimerOnMouseUp: boolean;
+      resetTimerOnMouseUp?: boolean;
 
       /**
        * @description Buttons to debounce.
        */
-      buttons: Button[];
+      buttons?: Button[];
     };
   }
 }
