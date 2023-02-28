@@ -54,6 +54,8 @@
 "Settings" = "設定";
 "Show in menu bar" = "メニューバーに表示";
 "To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
+"Bypass events from other applications" = "Bypass events from other applications";
+"If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "If enabled, %@ will not modify events sent by other applications, such as Logi Options+.";
 
 "Version: %@" = "バージョン %@";
 "Check for updates automatically" = "Check for updates automatically";
