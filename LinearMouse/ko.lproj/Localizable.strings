@@ -54,6 +54,8 @@
 "Settings" = "설정";
 "Show in menu bar" = "메뉴 막대에서 보기";
 "To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
+"Bypass events from other applications" = "Bypass events from other applications";
+"If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "If enabled, %@ will not modify events sent by other applications, such as Logi Options+.";
 
 "Version: %@" = "버전: %@";
 "Check for updates automatically" = "Check for updates automatically";
