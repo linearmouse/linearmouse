@@ -54,6 +54,8 @@
 "Settings" = "设置";
 "Show in menu bar" = "在菜单栏中显示";
 "To show the settings, launch %@ again." = "要显示设置，再次运行 %@。";
+"Bypass events from other applications" = "Bypass events from other applications";
+"If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "If enabled, %@ will not modify events sent by other applications, such as Logi Options+.";
 
 "Version: %@" = "版本：%@";
 "Check for updates automatically" = "自动检查更新";
