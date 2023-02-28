@@ -54,6 +54,8 @@
 "Settings" = "Nastavení";
 "Show in menu bar" = "Zobrazovat v řádku nabídek";
 "To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
+"Bypass events from other applications" = "Bypass events from other applications";
+"If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "If enabled, %@ will not modify events sent by other applications, such as Logi Options+.";
 
 "Version: %@" = "Verze %@";
 "Check for updates automatically" = "Check for updates automatically";
