@@ -54,6 +54,8 @@
 "Settings" = "Настройки";
 "Show in menu bar" = "Показывать в строке меню";
 "To show the settings, launch %@ again." = "Для отображения настроек перезапустите %@.";
+"Bypass events from other applications" = "Bypass events from other applications";
+"If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "If enabled, %@ will not modify events sent by other applications, such as Logi Options+.";
 
 "Version: %@" = "Версия: %@";
 "Check for updates automatically" = "Автоматически проверять наличие обновлений";
