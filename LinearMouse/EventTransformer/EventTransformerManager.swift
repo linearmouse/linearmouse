@@ -2,12 +2,15 @@
 // Copyright (c) 2021-2023 Jiahao Lu
 
 import Combine
+import Defaults
 import Foundation
 import os.log
 
 class EventTransformerManager {
     static let shared = EventTransformerManager()
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "EventTransformerManager")
+
+    @Default(.bypassEventsFromOtherApplications) var bypassEventsFromOtherApplications
 
     private var lastEventTransformer: EventTransformer?
     private var lastPid: pid_t?
@@ -35,10 +38,18 @@ class EventTransformerManager {
     ]
 
     func get(withSourcePid sourcePid: pid_t?, withTargetPid pid: pid_t?) -> EventTransformer {
+        if sourcePid != nil, bypassEventsFromOtherApplications {
+            os_log("Return noop transformer because this event is sent by %{public}s",
+                   log: Self.log,
+                   type: .debug,
+                   sourcePid?.bundleIdentifier ?? "(unknown)")
+            return []
+        }
         if let sourceBundleIdentifier = sourcePid?.bundleIdentifier,
            sourceBundleIdentifierBypassSet.contains(sourceBundleIdentifier) {
             os_log("Return noop transformer because the source application %{public}s is in the bypass set",
-                   log: Self.log, type: .debug,
+                   log: Self.log,
+                   type: .debug,
                    sourceBundleIdentifier)
             return []
         }

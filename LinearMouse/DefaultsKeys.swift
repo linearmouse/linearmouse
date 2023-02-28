@@ -6,5 +6,7 @@ import Defaults
 extension Defaults.Keys {
     static let showInMenuBar = Key<Bool>("showInMenuBar", default: true)
 
-    static let betaChannelOn = Key<Bool>("betaChannelOn", default: false)
+    static let betaChannelOn = Key("betaChannelOn", default: false)
+
+    static let bypassEventsFromOtherApplications = Key("bypassEventsFromOtherApplications", default: false)
 }
