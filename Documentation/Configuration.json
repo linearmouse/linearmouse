@@ -154,11 +154,6 @@
           "description": "The time period in which rapid clicks are ignored."
         }
       },
-      "required": [
-        "timeout",
-        "resetTimerOnMouseUp",
-        "buttons"
-      ],
       "type": "object"
     },
     "Scheme.Buttons.Mapping": {
