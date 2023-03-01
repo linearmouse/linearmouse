@@ -10,6 +10,15 @@
       }
     },
     {
+      "identity" : "jsonpatcher",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/linearmouse/JSONPatcher.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "fef582b56aff502305e4dbcfabf76cb57b5d4e15"
+      }
+    },
+    {
       "identity" : "launchatlogin",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sindresorhus/LaunchAtLogin",

@@ -4,6 +4,7 @@
 import AppKit
 import Defaults
 import Foundation
+import JSONPatcher
 
 struct Configuration: Codable, Equatable {
     let jsonSchema = "https://schema.linearmouse.app/\(LinearMouse.appVersion)"
@@ -16,6 +17,7 @@ struct Configuration: Codable, Equatable {
     }
 
     enum ConfigurationError: Error {
+        case unsupportedEncoding
         case parseError(Error)
     }
 }
@@ -23,6 +25,8 @@ struct Configuration: Codable, Equatable {
 extension Configuration.ConfigurationError: LocalizedError {
     var errorDescription: String? {
         switch self {
+        case .unsupportedEncoding:
+            return NSLocalizedString("Unsupported encoding, expected UTF-8", comment: "")
         case let .parseError(underlyingError):
             if let decodingError = underlyingError as? DecodingError {
                 switch decodingError {
@@ -30,19 +34,6 @@ extension Configuration.ConfigurationError: LocalizedError {
                     return String(format: NSLocalizedString("Type mismatch: expected %1$@ at %2$@", comment: ""),
                                   String(describing: type),
                                   String(describing: context.codingPath.map(\.stringValue).joined(separator: ".")))
-                case let .dataCorrupted(context):
-                    if let underlyingError = context.underlyingError {
-                        if let errorDescription = (underlyingError as NSError).userInfo[NSDebugDescriptionErrorKey] {
-                            return String(format: NSLocalizedString("Invalid JSON: %1$@", comment: ""),
-                                          String(describing: errorDescription))
-                        }
-                        return String(format: NSLocalizedString("Invalid JSON: %1$@", comment: ""),
-                                      String(describing: underlyingError))
-                    } else {
-                        return String(format: NSLocalizedString("Invalid JSON: %1$@ at %2$@", comment: ""),
-                                      String(context.debugDescription),
-                                      String(describing: context.codingPath.map(\.stringValue).joined(separator: ".")))
-                    }
                 case let .keyNotFound(codingKey, context):
                     return String(format: NSLocalizedString("Missing key %1$@ at %2$@", comment: ""),
                                   String(describing: codingKey.stringValue),
@@ -52,20 +43,33 @@ extension Configuration.ConfigurationError: LocalizedError {
                 }
                 return String(describing: underlyingError)
             }
-            return underlyingError.localizedDescription
+            // TODO: More detailed description in underlyingError.
+            return String(format: NSLocalizedString("Invalid JSON: %@", comment: ""),
+                          underlyingError.localizedDescription)
         }
     }
 }
 
 extension Configuration {
-    static func load(from data: Data) throws -> Configuration {
-        let decoder = JSONDecoder()
-
+    static func load(from string: String) throws -> Configuration {
         do {
+            let jsonPatcher = try JSONPatcher(original: string)
+            let json = jsonPatcher.json()
+            guard let data = json.data(using: .utf8) else {
+                throw ConfigurationError.unsupportedEncoding
+            }
+            let decoder = JSONDecoder()
             return try decoder.decode(Configuration.self, from: data)
         } catch {
             throw ConfigurationError.parseError(error)
         }
+    }
+
+    static func load(from data: Data) throws -> Configuration {
+        guard let string = String(data: data, encoding: .utf8) else {
+            throw ConfigurationError.unsupportedEncoding
+        }
+        return try load(from: string)
     }
 
     static func load(from url: URL) throws -> Configuration {

@@ -54,6 +54,7 @@
 		978DBC9E29A60E2F002259B3 /* ClickDebouncingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978DBC9D29A60E2F002259B3 /* ClickDebouncingSection.swift */; };
 		978DBCA029A61D50002259B3 /* ClickDebouncingTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978DBC9F29A61D50002259B3 /* ClickDebouncingTransformer.swift */; };
 		978DBCA329A663EB002259B3 /* ClickDebouncing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978DBCA229A663EB002259B3 /* ClickDebouncing.swift */; };
+		978DBCA629AB1732002259B3 /* JSONPatcher in Frameworks */ = {isa = PBXBuildFile; productRef = 978DBCA529AB1732002259B3 /* JSONPatcher */; };
 		97A13AD2287094FB002F6193 /* Distance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A13AD1287094FB002F6193 /* Distance.swift */; };
 		97A2F60A29508AD800F31122 /* EventTransformerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A2F60929508AD800F31122 /* EventTransformerManager.swift */; };
 		97A46B17285444BF00C07C9B /* NSWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A46B16285444BF00C07C9B /* NSWindow.swift */; };
@@ -289,6 +290,7 @@
 			files = (
 				97C9772D28910E4F009094BA /* KeyKit in Frameworks */,
 				977638F9286BE9EE00A698B6 /* PublishedObject in Frameworks */,
+				978DBCA629AB1732002259B3 /* JSONPatcher in Frameworks */,
 				B70A58F6284F987900E5C86E /* LaunchAtLogin in Frameworks */,
 				97C97728288FC49F009094BA /* DockKit in Frameworks */,
 				B784292D278DB06600D207F0 /* Sparkle in Frameworks */,
@@ -805,6 +807,7 @@
 				977638F8286BE9EE00A698B6 /* PublishedObject */,
 				97C97727288FC49F009094BA /* DockKit */,
 				97C9772C28910E4F009094BA /* KeyKit */,
+				978DBCA529AB1732002259B3 /* JSONPatcher */,
 			);
 			productName = LinearMouse;
 			productReference = B75A06182671E9D800BEAF77 /* LinearMouse.app */;
@@ -893,6 +896,7 @@
 				B70A58F4284F987900E5C86E /* XCRemoteSwiftPackageReference "LaunchAtLogin" */,
 				972A5E2E285D891100CB6440 /* XCRemoteSwiftPackageReference "Defaults" */,
 				977638F7286BE9EE00A698B6 /* XCRemoteSwiftPackageReference "PublishedObject" */,
+				978DBCA429AB1732002259B3 /* XCRemoteSwiftPackageReference "JSONPatcher" */,
 			);
 			productRefGroup = B75A06192671E9D800BEAF77 /* Products */;
 			projectDirPath = "";
@@ -1383,6 +1387,14 @@
 				minimumVersion = 0.2.0;
 			};
 		};
+		978DBCA429AB1732002259B3 /* XCRemoteSwiftPackageReference "JSONPatcher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/linearmouse/JSONPatcher.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		B70A58F4284F987900E5C86E /* XCRemoteSwiftPackageReference "LaunchAtLogin" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/LaunchAtLogin";
@@ -1427,6 +1439,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 977638F7286BE9EE00A698B6 /* XCRemoteSwiftPackageReference "PublishedObject" */;
 			productName = PublishedObject;
+		};
+		978DBCA529AB1732002259B3 /* JSONPatcher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 978DBCA429AB1732002259B3 /* XCRemoteSwiftPackageReference "JSONPatcher" */;
+			productName = JSONPatcher;
 		};
 		97A7A39B28587E8C00EE4833 /* PointerKit */ = {
 			isa = XCSwiftPackageProductDependency;
