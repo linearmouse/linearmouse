@@ -8,7 +8,7 @@
 "Config" = "Конфигурация";
 "Reload" = "Обновить";
 "Reveal in Finder" = "Показать в Finder";
-"Configure for %@..." = "Configure for %@...";
+"Configure for %@..." = "Настроить для %@...";
 "Quit %@" = "Завершить %@";
 
 "Scrolling" = "Прокрутка";
@@ -21,41 +21,41 @@
 "Reverse scrolling" = "Инвертированная прокрутка";
 "Some gestures, such as swiping back and forward, may stop working." = "Некоторые жесты, такие как смахивание «назад» и «вперед», могут перестать работать.";
 "Mode" = "Режим";
-"Accelerated" = "Ускорение";
+"Accelerated" = "Ускоренное";
 "By Lines" = "По строкам";
 "By Pixels" = "По пикселям";
 "Acceleration" = "Ускорение";
-"Linear" = "Linear";
+"Linear" = "Линейное";
 "Speed" = "Скорость";
-"Slow" = "Slow";
-"Fast" = "Fast";
+"Slow" = "Медленно";
+"Fast" = "Быстро";
 "Distance" = "Количество";
 "Revert to system defaults" = "Вернуться к настройкам по умолчанию";
-"Copy settings from vertical" = "Copy settings from vertical";
+"Copy settings from vertical" = "Скопировать настройки из вертикальной";
 "Modifier Keys" = "Клавиши модификации";
 "No action" = "Не задано";
 "Alter orientation" = "Изменить направление прокрутки";
 "Change speed" = "Изменить скорость";
-"Zoom" = "Zoom";
+"Zoom" = "Масштабирование";
 
 "Disable pointer acceleration" = "Отключить ускорение курсора";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Вы также можете нажать ⌃⇧⌘Z, чтобы вернуться к настройкам по умолчанию.";
 
 "Enable universal back and forward" = "Включить универсальные «назад» и «вперед»";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Преобразует боковые кнопки «назад» и «вперед» в жесты смахивания, чтобы сделать их работоспособными во всех приложениях.";
-"Debounce button clicks" = "Debounce button clicks";
-"Ignore rapid clicks within a certain time period." = "Ignore rapid clicks within a certain time period.";
-"ms" = "ms";
-"Reset timer on mouse up" = "Reset timer on mouse up";
-"Left button" = "Left button";
-"Right button" = "Right button";
-"Middle button" = "Middle button";
+"Debounce button clicks" = "Пропускать нажатие кнопок";
+"Ignore rapid clicks within a certain time period." = "Пропускает частые нажатие клавиш.";
+"ms" = "мсек";
+"Reset timer on mouse up" = "Сбросить таймер по нажатию кнопки мыши";
+"Left button" = "Левая кнопка мыши";
+"Right button" = "Правая кнопка мыши";
+"Middle button" = "Средняя кнопка мыши";
 
 "Settings" = "Настройки";
 "Show in menu bar" = "Показывать в строке меню";
 "To show the settings, launch %@ again." = "Для отображения настроек перезапустите %@.";
-"Bypass events from other applications" = "Bypass events from other applications";
-"If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "If enabled, %@ will not modify events sent by other applications, such as Logi Options+.";
+"Bypass events from other applications" = "Допускать события из других приложений";
+"If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "Если включено, %@ не будет изменять события, отправленные другими приложениями, такими как Logi Options+.";
 
 "Version: %@" = "Версия: %@";
 "Check for updates automatically" = "Автоматически проверять наличие обновлений";
@@ -79,8 +79,8 @@
 "Trackpad" = "Трекпад";
 "(active)" = "(активно)";
 
-"Configure for" = "Configure for";
-"All Apps" = "All Apps";
-"Configured" = "Configured";
-"Running" = "Running";
-"Installed" = "Installed";
+"Configure for" = "Настроить для";
+"All Apps" = "Все приложения";
+"Configured" = "Настроены";
+"Running" = "Запущено";
+"Installed" = "Установлены";
