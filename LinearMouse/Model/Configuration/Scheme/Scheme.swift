@@ -87,7 +87,7 @@ extension Scheme {
 extension Scheme: CustomStringConvertible {
     var description: String {
         do {
-            return String(data: try JSONEncoder().encode(self), encoding: .utf8) ?? "<Scheme>"
+            return try String(data: JSONEncoder().encode(self), encoding: .utf8) ?? "<Scheme>"
         } catch {
             return "<Scheme>"
         }

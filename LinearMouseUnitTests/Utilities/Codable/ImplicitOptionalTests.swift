@@ -31,13 +31,13 @@ class ImplicitOptionalTests: XCTestCase {
 
     func testEncodingNil() throws {
         let encoder = JSONEncoder()
-        XCTAssertEqual(String(decoding: try encoder.encode(Foo()), as: UTF8.self),
+        XCTAssertEqual(try String(decoding: encoder.encode(Foo()), as: UTF8.self),
                        "{}")
     }
 
     func testEncodingNestedNil() throws {
         let encoder = JSONEncoder()
-        XCTAssertEqual(String(decoding: try encoder.encode(Foo(bar: Bar())), as: UTF8.self),
+        XCTAssertEqual(try String(decoding: encoder.encode(Foo(bar: Bar())), as: UTF8.self),
                        "{\"bar\":{}}")
     }
 
