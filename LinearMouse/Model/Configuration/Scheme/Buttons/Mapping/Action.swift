@@ -4,7 +4,7 @@
 import Foundation
 
 extension Scheme.Buttons.Mapping {
-    enum Action: Equatable {
+    enum Action: Equatable, Hashable {
         case simpleAction(SimpleAction)
 
         case run(String)
@@ -13,6 +13,81 @@ extension Scheme.Buttons.Mapping {
         case mouseWheelScrollDown(Scheme.Scrolling.Distance)
         case mouseWheelScrollLeft(Scheme.Scrolling.Distance)
         case mouseWheelScrollRight(Scheme.Scrolling.Distance)
+    }
+}
+
+extension Scheme.Buttons.Mapping.Action: CustomStringConvertible {
+    var description: String {
+        switch self {
+        case .simpleAction(.auto):
+            return NSLocalizedString("Default action", comment: "")
+        case .simpleAction(.none):
+            return NSLocalizedString("No action", comment: "")
+        case .simpleAction(.missionControl):
+            return NSLocalizedString("Mission Control", comment: "")
+        case .simpleAction(.spaceLeftDeprecated), .simpleAction(.missionControlSpaceLeft):
+            return NSLocalizedString("Move left a space", comment: "")
+        case .simpleAction(.spaceRightDeprecated), .simpleAction(.missionControlSpaceRight):
+            return NSLocalizedString("Move right a space", comment: "")
+        case .simpleAction(.appExpose):
+            return NSLocalizedString("App Exposé", comment: "")
+        case .simpleAction(.launchpad):
+            return NSLocalizedString("Launchpad", comment: "")
+        case .simpleAction(.showDesktop):
+            return NSLocalizedString("Show desktop", comment: "")
+        case .simpleAction(.displayBrightnessUp):
+            return NSLocalizedString("Increase display brightness", comment: "")
+        case .simpleAction(.displayBrightnessDown):
+            return NSLocalizedString("Decrease display brightness", comment: "")
+        case .simpleAction(.mediaVolumeUp):
+            return NSLocalizedString("Increase volume", comment: "")
+        case .simpleAction(.mediaVolumeDown):
+            return NSLocalizedString("Decrease volume", comment: "")
+        case .simpleAction(.mediaMute):
+            return NSLocalizedString("Mute / unmute", comment: "")
+        case .simpleAction(.mediaPlayPause):
+            return NSLocalizedString("Play / pause", comment: "")
+        case .simpleAction(.mediaNext):
+            return NSLocalizedString("Next", comment: "")
+        case .simpleAction(.mediaPrevious):
+            return NSLocalizedString("Previous", comment: "")
+        case .simpleAction(.mediaFastForward):
+            return NSLocalizedString("Fast forward", comment: "")
+        case .simpleAction(.mediaRewind):
+            return NSLocalizedString("Rewind", comment: "")
+        case .simpleAction(.keyboardBrightnessUp):
+            return NSLocalizedString("Increase keyboard brightness", comment: "")
+        case .simpleAction(.keyboardBrightnessDown):
+            return NSLocalizedString("Decrease keyboard brightness", comment: "")
+        case .simpleAction(.mouseWheelScrollUp):
+            return NSLocalizedString("Scroll up", comment: "")
+        case .simpleAction(.mouseWheelScrollDown):
+            return NSLocalizedString("Scroll down", comment: "")
+        case .simpleAction(.mouseWheelScrollLeft):
+            return NSLocalizedString("Scroll left", comment: "")
+        case .simpleAction(.mouseWheelScrollRight):
+            return NSLocalizedString("Scroll right", comment: "")
+        case .simpleAction(.mouseButtonLeft):
+            return NSLocalizedString("Left click", comment: "")
+        case .simpleAction(.mouseButtonMiddle):
+            return NSLocalizedString("Middle click", comment: "")
+        case .simpleAction(.mouseButtonRight):
+            return NSLocalizedString("Right click", comment: "")
+        case .simpleAction(.mouseButtonBack):
+            return NSLocalizedString("Back", comment: "")
+        case .simpleAction(.mouseButtonForward):
+            return NSLocalizedString("Forward", comment: "")
+        case let .run(command):
+            return String(format: NSLocalizedString("Run: %@", comment: ""), command)
+        case let .mouseWheelScrollUp(distance):
+            return String(format: NSLocalizedString("Scroll up %@", comment: ""), String(describing: distance))
+        case let .mouseWheelScrollDown(distance):
+            return String(format: NSLocalizedString("Scroll down %@", comment: ""), String(describing: distance))
+        case let .mouseWheelScrollLeft(distance):
+            return String(format: NSLocalizedString("Scroll left %@", comment: ""), String(describing: distance))
+        case let .mouseWheelScrollRight(distance):
+            return String(format: NSLocalizedString("Scroll right %@", comment: ""), String(describing: distance))
+        }
     }
 }
 

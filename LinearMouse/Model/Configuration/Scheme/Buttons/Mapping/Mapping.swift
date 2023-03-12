@@ -2,7 +2,7 @@
 // Copyright (c) 2021-2023 Jiahao Lu
 
 extension Scheme.Buttons {
-    struct Mapping: Codable, Equatable {
+    struct Mapping: Codable, Equatable, Hashable {
         var button: Int?
         var `repeat`: Bool?
 
@@ -18,7 +18,7 @@ extension Scheme.Buttons {
 }
 
 extension Scheme.Buttons.Mapping {
-    enum ScrollDirection: String, Codable {
+    enum ScrollDirection: String, Codable, Hashable {
         case up, down, left, right
     }
 

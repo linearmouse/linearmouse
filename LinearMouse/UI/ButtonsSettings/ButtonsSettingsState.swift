@@ -90,4 +90,9 @@ extension ButtonsSettingsState {
             }
         )
     }
+
+    var mappings: [Scheme.Buttons.Mapping] {
+        get { mergedScheme.buttons.mappings ?? [] }
+        set { scheme.buttons.mappings = newValue }
+    }
 }
