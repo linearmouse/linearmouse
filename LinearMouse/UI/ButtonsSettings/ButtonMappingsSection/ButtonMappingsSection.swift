@@ -9,8 +9,24 @@ struct ButtonMappingsSection: View {
 
     var body: some View {
         Section {
+            Text("Assign actions to mouse buttons.")
+
             List($state.mappings, id: \.self, selection: $selection) { $mapping in
-                ButtonMapping(mapping: $mapping).tag(mapping)
+                ButtonMapping(mapping: $mapping)
+            }
+        } footer: {
+            HStack(spacing: 4) {
+                Button(action: {}) {
+                    Image("Plus")
+                }
+
+                Button(action: {
+                    state.mappings = state.mappings.filter { !selection.contains($0) }
+                    selection = []
+                }) {
+                    Image("Minus")
+                }
+                .disabled(selection.count == 0)
             }
         }
         .modifier(SectionViewModifier())

@@ -8,9 +8,11 @@ extension ButtonMappingsSection {
         @Binding var mapping: Scheme.Buttons.Mapping
 
         var body: some View {
-            VStack(alignment: .leading, spacing: 2) {
-                MappingDescription(mapping: mapping)
-                ActionDescription(action: mapping.action ?? .simpleAction(.auto))
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 2) {
+                    MappingDescription(mapping: mapping)
+                    ActionDescription(action: mapping.action ?? .simpleAction(.auto))
+                }
             }
             .padding(.vertical, 4)
         }
@@ -22,14 +24,11 @@ extension ButtonMappingsSection.ButtonMapping {
         var mapping: Scheme.Buttons.Mapping
 
         var body: some View {
-            Group {
-                if let button = mapping.button {
-                    Text("\(modifiersDescription) Button \(button)")
-                } else if let scroll = mapping.scroll {
-                    Text("\(modifiersDescription) Scroll \(String(describing: scroll))")
-                }
+            if let button = mapping.button {
+                Text("\(modifiersDescription) Button \(button)")
+            } else if let scroll = mapping.scroll {
+                Text("\(modifiersDescription) Scroll \(String(describing: scroll))")
             }
-            .font(.body.weight(.medium))
         }
 
         private var modifiersDescription: String {
