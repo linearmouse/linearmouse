@@ -44,12 +44,12 @@
 "Enable universal back and forward" = "Aktivér universel frem og tilbage";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Konverter tilbage og frem sideknapperne til strygebevægelser for at tillade universel tilbage og frem funktionalitet.";
 "Debounce button clicks" = "Debounce button clicks";
-"Ignore rapid clicks within a certain time period." = "Ignore rapid clicks within a certain time period.";
+"Ignore rapid clicks within a certain time period." = "Ignorer hurtige klik inden for et bestemt tidsrum.";
 "ms" = "ms";
 "Reset timer on mouse up" = "Reset timer on mouse up";
-"Left button" = "Left button";
-"Right button" = "Right button";
-"Middle button" = "Middle button";
+"Left button" = "Venstre knap";
+"Right button" = "Højre knap";
+"Middle button" = "Midterste knap";
 
 "Settings" = "Indstillinger";
 "Show in menu bar" = "Vis i menulinjen";
