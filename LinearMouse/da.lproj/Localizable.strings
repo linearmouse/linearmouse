@@ -54,8 +54,8 @@
 "Settings" = "Indstillinger";
 "Show in menu bar" = "Vis i menulinjen";
 "To show the settings, launch %@ again." = "Start %@ igen for at vise indstillingerne.";
-"Bypass events from other applications" = "Bypass events from other applications";
-"If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "If enabled, %@ will not modify events sent by other applications, such as Logi Options+.";
+"Bypass events from other applications" = "Omgå begivenheder fra andre applikationer";
+"If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "Hvis aktiveret, vil %@ ikke ændre begivenheder sendt af andre programmer, såsom Logi Options+.";
 
 "Version: %@" = "Version: %@";
 "Check for updates automatically" = "Søg automatisk efter opdateringer";
