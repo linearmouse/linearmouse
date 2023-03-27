@@ -15,15 +15,15 @@ class BidirectionalTests: XCTestCase {
         let encoder = JSONEncoder()
 
         var foos = Bidirectional<Bool>()
-        XCTAssertEqual(String(data: try encoder.encode(foos), encoding: .utf8),
+        XCTAssertEqual(try String(data: encoder.encode(foos), encoding: .utf8),
                        "null")
 
         foos.vertical = true
-        XCTAssertEqual(String(data: try encoder.encode(foos), encoding: .utf8),
+        XCTAssertEqual(try String(data: encoder.encode(foos), encoding: .utf8),
                        "{\"vertical\":true}")
 
         foos.horizontal = true
-        XCTAssertEqual(String(data: try encoder.encode(foos), encoding: .utf8),
+        XCTAssertEqual(try String(data: encoder.encode(foos), encoding: .utf8),
                        "true")
     }
 
@@ -31,19 +31,19 @@ class BidirectionalTests: XCTestCase {
         let encoder = JSONEncoder()
 
         var foos = Bidirectional<Foo>()
-        XCTAssertEqual(String(data: try encoder.encode(foos), encoding: .utf8),
+        XCTAssertEqual(try String(data: encoder.encode(foos), encoding: .utf8),
                        "null")
 
         foos.vertical = .init()
-        XCTAssertEqual(String(data: try encoder.encode(foos), encoding: .utf8),
+        XCTAssertEqual(try String(data: encoder.encode(foos), encoding: .utf8),
                        "{\"vertical\":{}}")
 
         foos.horizontal = .init()
-        XCTAssertEqual(String(data: try encoder.encode(foos), encoding: .utf8),
+        XCTAssertEqual(try String(data: encoder.encode(foos), encoding: .utf8),
                        "{}")
 
         foos.vertical = .init(bar: "baz")
-        XCTAssertEqual(String(data: try encoder.encode(foos), encoding: .utf8),
+        XCTAssertEqual(try String(data: encoder.encode(foos), encoding: .utf8),
                        "{\"horizontal\":{},\"vertical\":{\"bar\":\"baz\"}}")
     }
 

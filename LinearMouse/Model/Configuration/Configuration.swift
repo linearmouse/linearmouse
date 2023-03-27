@@ -73,7 +73,7 @@ extension Configuration {
     }
 
     static func load(from url: URL) throws -> Configuration {
-        try load(from: try Data(contentsOf: url))
+        try load(from: Data(contentsOf: url))
     }
 
     func dump() throws -> Data {
