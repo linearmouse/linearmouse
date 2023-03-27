@@ -90,6 +90,7 @@
 		97F77FB4285F45AF007C9C2B /* ConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FB3285F45AF007C9C2B /* ConfigurationTests.swift */; };
 		97F77FB7285F53A5007C9C2B /* SingleValueOrArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FB6285F53A5007C9C2B /* SingleValueOrArray.swift */; };
 		97FD8CEA29BE0F9D00D93212 /* ButtonMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97FD8CE929BE0F9D00D93212 /* ButtonMapping.swift */; };
+		97FD8CEC29C1ABA800D93212 /* ButtonMappingEditSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97FD8CEB29C1ABA800D93212 /* ButtonMappingEditSheet.swift */; };
 		B70A58F6284F987900E5C86E /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = B70A58F5284F987900E5C86E /* LaunchAtLogin */; };
 		B716F16026BC10B80052F551 /* UniversalBackForwardTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B716F15F26BC10B80052F551 /* UniversalBackForwardTransformer.swift */; };
 		B73AC55127C29C7C00F7D3E8 /* Version in Frameworks */ = {isa = PBXBuildFile; productRef = B73AC55027C29C7C00F7D3E8 /* Version */; };
@@ -219,6 +220,7 @@
 		97F77FB3285F45AF007C9C2B /* ConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationTests.swift; sourceTree = "<group>"; };
 		97F77FB6285F53A5007C9C2B /* SingleValueOrArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleValueOrArray.swift; sourceTree = "<group>"; };
 		97FD8CE929BE0F9D00D93212 /* ButtonMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMapping.swift; sourceTree = "<group>"; };
+		97FD8CEB29C1ABA800D93212 /* ButtonMappingEditSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMappingEditSheet.swift; sourceTree = "<group>"; };
 		B716F15F26BC10B80052F551 /* UniversalBackForwardTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniversalBackForwardTransformer.swift; sourceTree = "<group>"; };
 		B716F16226BC18AB0052F551 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		B716F16326BC19350052F551 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
@@ -649,6 +651,7 @@
 			children = (
 				97DB97C729AF79B9002F4668 /* ButtonMappingsSection.swift */,
 				97FD8CE929BE0F9D00D93212 /* ButtonMapping.swift */,
+				97FD8CEB29C1ABA800D93212 /* ButtonMappingEditSheet.swift */,
 			);
 			path = ButtonMappingsSection;
 			sourceTree = "<group>";
@@ -1031,6 +1034,7 @@
 				97C5DBB42867EA48006FA6B4 /* SchemeState.swift in Sources */,
 				97C5DBB62867ECD6006FA6B4 /* DeviceModel.swift in Sources */,
 				97DB97C829AF79B9002F4668 /* ButtonMappingsSection.swift in Sources */,
+				97FD8CEC29C1ABA800D93212 /* ButtonMappingEditSheet.swift in Sources */,
 				B716F16026BC10B80052F551 /* UniversalBackForwardTransformer.swift in Sources */,
 				B77A16172674D88E00E99A5D /* SettingsWindow.swift in Sources */,
 				B7842925278D985600D207F0 /* AutoUpdateManager.swift in Sources */,
