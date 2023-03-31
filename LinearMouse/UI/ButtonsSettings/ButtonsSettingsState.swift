@@ -37,6 +37,15 @@ extension ButtonsSettingsState {
         }
     }
 
+    var controlClickDisabled: Bool {
+        get {
+            mergedScheme.buttons.controlClickDisabled ?? false
+        }
+        set {
+            scheme.buttons.controlClickDisabled = newValue
+        }
+    }
+
     var clickDebouncingTimeout: Int {
         get {
             mergedScheme.buttons.clickDebouncing.timeout ?? 0

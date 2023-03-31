@@ -123,6 +123,11 @@ class EventTransformerManager {
             eventTransformer.append(UniversalBackForwardTransformer(universalBackForward: universalBackForward))
         }
 
+        if let controlClickDisabled = scheme.buttons.controlClickDisabled,
+           controlClickDisabled == true {
+            eventTransformer.append(ControlClickTransformer())
+        }
+
         lastPid = pid
         lastEventTransformer = eventTransformer
 

@@ -10,6 +10,8 @@ struct ButtonsSettings: View {
                 UniversalBackForwardSection()
 
                 ClickDebouncingSection()
+
+                ControlClickSection()
             }
             .modifier(FormViewModifier())
         }
