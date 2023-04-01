@@ -25,7 +25,7 @@ struct ButtonMappingEditSheet: View {
                 .formLabel(Text("Mouse button"))
 
                 if !valid, conflicted {
-                    Text("The mouse button already exists.")
+                    Text("The mouse button is already assigned.")
                         .foregroundColor(.red)
                         .controlSize(.small)
                         .fixedSize(horizontal: false, vertical: true)
