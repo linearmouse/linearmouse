@@ -24,8 +24,10 @@ struct ButtonMappingButtonRecorder: View {
         Button(action: { recording.toggle() }) {
             Group {
                 if recording {
-                    Text("Recording")
-                        .foregroundColor(.orange)
+                    ButtonMappingButtonDescription(mapping: mapping, showPartial: true) {
+                        Text("Recording")
+                    }
+                    .foregroundColor(.orange)
                 } else {
                     ButtonMappingButtonDescription(mapping: mapping) {
                         Text("Click to record")
@@ -50,7 +52,11 @@ struct ButtonMappingButtonRecorder: View {
             self.recordingMonitor = nil
         }
         if recording {
+            mapping.modifierFlags = []
+            mapping.button = nil
+            mapping.scroll = nil
             let eventsOfInterest: NSEvent.EventTypeMask = [
+                .flagsChanged,
                 .leftMouseDown,
                 .rightMouseDown,
                 .otherMouseDown,
@@ -71,7 +77,11 @@ struct ButtonMappingButtonRecorder: View {
         mapping.modifierFlags = .init(rawValue: UInt64(event.modifierFlags.rawValue))
 
         switch event.type {
+        case .flagsChanged:
+            return nil
+
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
+            mapping.button = event.buttonNumber
             return nil
 
         case .leftMouseUp, .rightMouseUp, .otherMouseUp:

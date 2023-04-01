@@ -41,6 +41,7 @@ struct ButtonMappingListItem: View {
 
 struct ButtonMappingButtonDescription<FallbackView: View>: View {
     var mapping: Scheme.Buttons.Mapping
+    var showPartial = false
     var fallback: (() -> FallbackView)?
 
     var body: some View {
@@ -54,6 +55,8 @@ struct ButtonMappingButtonDescription<FallbackView: View>: View {
                 Text(modifiersDescription)
                 Text(scrollDescription(of: scroll))
             }
+        } else if showPartial, !mapping.modifierFlags.isEmpty {
+            Text(modifiersDescription)
         } else {
             if let fallback {
                 fallback()

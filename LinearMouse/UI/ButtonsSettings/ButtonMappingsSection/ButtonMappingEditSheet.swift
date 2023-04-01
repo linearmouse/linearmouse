@@ -9,11 +9,11 @@ struct ButtonMappingEditSheet: View {
     @ObservedObject private var state: ButtonsSettingsState = .shared
 
     @Binding var mapping: Scheme.Buttons.Mapping
-    var mode: Mode = .edit
-    var completion: ((Scheme.Buttons.Mapping) -> Void)?
+    @State var mode: Mode = .edit
+    let completion: ((Scheme.Buttons.Mapping) -> Void)?
 
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
             Form {
                 Group {
                     if mode == .edit {
@@ -38,11 +38,14 @@ struct ButtonMappingEditSheet: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
-                ButtonMappingActionPicker(action: $mapping.action.default(.simpleAction(.auto)))
+                if valid {
+                    ButtonMappingActionPicker(action: $mapping.action.default(.simpleAction(.auto)))
+                }
             }
 
             Button("OK") {
                 isPresented?.wrappedValue.toggle()
+                mode = .edit
                 completion?(mapping)
             }
             .disabled(!valid)
@@ -58,18 +61,14 @@ extension ButtonMappingEditSheet {
     }
 
     var conflicted: Bool {
-        !state.mappings.allSatisfy { !mapping.conflicted(with: $0) }
+        guard mode == .create else {
+            return false
+        }
+
+        return !state.mappings.allSatisfy { !mapping.conflicted(with: $0) }
     }
 
     var valid: Bool {
-        guard mapping.valid else {
-            return false
-        }
-
-        guard mode == .edit || !conflicted else {
-            return false
-        }
-
-        return true
+        mapping.valid && !conflicted
     }
 }
