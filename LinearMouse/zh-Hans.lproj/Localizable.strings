@@ -56,7 +56,7 @@
 "Left click" = "左键点击";
 "Right click" = "右键点击";
 "Middle click" = "中键点击";
-"Button #%@ click" = "按键 #%@ 点击";
+"Button #%lld click" = "按键 #%lld 点击";
 "Scroll up" = "向上滚动";
 "Scroll down" = "向下滚动";
 "Scroll left" = "向左滚动";

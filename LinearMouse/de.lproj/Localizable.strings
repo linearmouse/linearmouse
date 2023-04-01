@@ -56,7 +56,7 @@
 "Left click" = "Left click";
 "Right click" = "Right click";
 "Middle click" = "Middle click";
-"Button #%@ click" = "Button #%@ click";
+"Button #%lld click" = "Button #%lld click";
 "Scroll up" = "Scroll up";
 "Scroll down" = "Scroll down";
 "Scroll left" = "Scroll left";
