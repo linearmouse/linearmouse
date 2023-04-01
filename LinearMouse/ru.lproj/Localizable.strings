@@ -61,6 +61,7 @@
 "Scroll down" = "Scroll down";
 "Scroll left" = "Scroll left";
 "Scroll right" = "Scroll right";
+
 "Default action" = "Default action";
 "Mission Control" = "Mission Control";
 "Move left a space" = "Move left a space";
@@ -68,8 +69,10 @@
 "Application windows" = "Application windows";
 "Launchpad" = "Launchpad";
 "Show desktop" = "Show desktop";
+"Display" = "Display";
 "Increase display brightness" = "Increase display brightness";
 "Decrease display brightness" = "Decrease display brightness";
+"Media" = "Media";
 "Increase volume" = "Increase volume";
 "Decrease volume" = "Decrease volume";
 "Mute / unmute" = "Mute / unmute";
@@ -78,8 +81,11 @@
 "Previous" = "Previous";
 "Fast forward" = "Fast forward";
 "Rewind" = "Rewind";
+"Keyboard" = "Keyboard";
 "Increase keyboard brightness" = "Increase keyboard brightness";
 "Decrease keyboard brightness" = "Decrease keyboard brightness";
+"Mouse Wheel" = "Mouse Wheel";
+"Mouse Button" = "Mouse Button";
 "Back" = "Back";
 "Forward" = "Forward";
 "Mouse button" = "Mouse button";
