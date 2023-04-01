@@ -69,10 +69,10 @@
 "Application windows" = "应用程序窗口";
 "Launchpad" = "启动台";
 "Show desktop" = "显示桌面";
-"Display" = "Display";
+"Display" = "显示器";
 "Increase display brightness" = "提高显示器亮度";
 "Decrease display brightness" = "降低显示器亮度";
-"Media" = "Media";
+"Media" = "媒体";
 "Increase volume" = "提高音量";
 "Decrease volume" = "降低音量";
 "Mute / unmute" = "静音 / 取消静音";
@@ -81,11 +81,11 @@
 "Previous" = "上一首";
 "Fast forward" = "快进";
 "Rewind" = "快退";
-"Keyboard" = "Keyboard";
+"Keyboard" = "键盘";
 "Increase keyboard brightness" = "提高键盘亮度";
 "Decrease keyboard brightness" = "降低键盘亮度";
-"Mouse Wheel" = "Mouse Wheel";
-"Mouse Button" = "Mouse Button";
+"Mouse Wheel" = "鼠标滚轮";
+"Mouse Button" = "鼠标按键";
 "Back" = "后退";
 "Forward" = "前进";
 "Mouse button" = "鼠标按键";
