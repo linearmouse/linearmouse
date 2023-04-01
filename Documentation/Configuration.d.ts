@@ -427,7 +427,7 @@ declare namespace Scheme {
       type MissionControlSpaceRight = "missionControl.spaceRight";
 
       /**
-       * @description App Exposé.
+       * @description Application windows.
        */
       type AppExpose = "appExpose";
 

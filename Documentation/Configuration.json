@@ -256,7 +256,7 @@
     },
     "Scheme.Buttons.Mapping.AppExpose": {
       "const": "appExpose",
-      "description": "App Exposé.",
+      "description": "Application windows.",
       "type": "string"
     },
     "Scheme.Buttons.Mapping.Auto": {

@@ -173,7 +173,7 @@ extension Scheme.Buttons.Mapping.Action.SimpleAction: CustomStringConvertible {
         case .spaceRightDeprecated, .missionControlSpaceRight:
             return NSLocalizedString("Move right a space", comment: "")
         case .appExpose:
-            return NSLocalizedString("App Exposé", comment: "")
+            return NSLocalizedString("Application windows", comment: "")
         case .launchpad:
             return NSLocalizedString("Launchpad", comment: "")
         case .showDesktop:
