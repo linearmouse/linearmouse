@@ -54,6 +54,9 @@ struct ButtonMappingButtonRecorder: View {
                 .leftMouseDown,
                 .rightMouseDown,
                 .otherMouseDown,
+                .leftMouseUp,
+                .rightMouseUp,
+                .otherMouseUp,
                 .scrollWheel
             ]
             recordingMonitor = NSEvent.addLocalMonitorForEvents(matching: eventsOfInterest) { event in
@@ -69,6 +72,9 @@ struct ButtonMappingButtonRecorder: View {
 
         switch event.type {
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
+            return nil
+
+        case .leftMouseUp, .rightMouseUp, .otherMouseUp:
             mapping.button = event.buttonNumber
 
         case .scrollWheel:
