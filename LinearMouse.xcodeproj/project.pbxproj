@@ -40,6 +40,9 @@
 		972DF651285A35B100B83932 /* DeviceIndicatorState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF650285A35B100B83932 /* DeviceIndicatorState.swift */; };
 		972DF654285ADE9600B83932 /* GeneralSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF653285ADE9600B83932 /* GeneralSettings.swift */; };
 		972DF65B285AEABA00B83932 /* ButtonsSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF65A285AEABA00B83932 /* ButtonsSettings.swift */; };
+		9731B40529D7D86800FC3C24 /* ButtonMappingButtonRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9731B40429D7D86800FC3C24 /* ButtonMappingButtonRecorder.swift */; };
+		9731B40729D7DAC600FC3C24 /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9731B40629D7DAC600FC3C24 /* View.swift */; };
+		9731B40B29D7FE1D00FC3C24 /* ButtonMappingActionPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9731B40A29D7FE1D00FC3C24 /* ButtonMappingActionPicker.swift */; };
 		97353386297ED84600C1B5D0 /* ScrollingAccelerationSpeedAdjustmentTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97353385297ED84600C1B5D0 /* ScrollingAccelerationSpeedAdjustmentTransformer.swift */; };
 		9735338F297F8EE200C1B5D0 /* FormViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9735338E297F8EE200C1B5D0 /* FormViewModifier.swift */; };
 		973EB9FE287EE7D90069A8EF /* Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 973EB9FD287EE7D90069A8EF /* Action.swift */; };
@@ -79,6 +82,7 @@
 		97C97728288FC49F009094BA /* DockKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C97727288FC49F009094BA /* DockKit */; };
 		97C9772D28910E4F009094BA /* KeyKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C9772C28910E4F009094BA /* KeyKit */; };
 		97D3470C293CDEA000E7DFE1 /* WeakRef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97D3470B293CDEA000E7DFE1 /* WeakRef.swift */; };
+		97DB97C829AF79B9002F4668 /* ButtonMappingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97DB97C729AF79B9002F4668 /* ButtonMappingsSection.swift */; };
 		97E16F4F28F9A22A00E7D09B /* LinearScrollingHorizontalTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E16F4E28F9A22A00E7D09B /* LinearScrollingHorizontalTransformer.swift */; };
 		97F77FA4285DC467007C9C2B /* DevicePickerSectionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA3285DC467007C9C2B /* DevicePickerSectionState.swift */; };
 		97F77FA8285DC828007C9C2B /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA7285DC828007C9C2B /* Environment.swift */; };
@@ -88,6 +92,8 @@
 		97F77FB1285F0CDC007C9C2B /* Scheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FB0285F0CDC007C9C2B /* Scheme.swift */; };
 		97F77FB4285F45AF007C9C2B /* ConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FB3285F45AF007C9C2B /* ConfigurationTests.swift */; };
 		97F77FB7285F53A5007C9C2B /* SingleValueOrArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FB6285F53A5007C9C2B /* SingleValueOrArray.swift */; };
+		97FD8CEA29BE0F9D00D93212 /* ButtonMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97FD8CE929BE0F9D00D93212 /* ButtonMapping.swift */; };
+		97FD8CEC29C1ABA800D93212 /* ButtonMappingEditSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97FD8CEB29C1ABA800D93212 /* ButtonMappingEditSheet.swift */; };
 		B70A58F6284F987900E5C86E /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = B70A58F5284F987900E5C86E /* LaunchAtLogin */; };
 		B716F16026BC10B80052F551 /* UniversalBackForwardTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B716F15F26BC10B80052F551 /* UniversalBackForwardTransformer.swift */; };
 		B73AC55127C29C7C00F7D3E8 /* Version in Frameworks */ = {isa = PBXBuildFile; productRef = B73AC55027C29C7C00F7D3E8 /* Version */; };
@@ -167,6 +173,9 @@
 		972DF650285A35B100B83932 /* DeviceIndicatorState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIndicatorState.swift; sourceTree = "<group>"; };
 		972DF653285ADE9600B83932 /* GeneralSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettings.swift; sourceTree = "<group>"; };
 		972DF65A285AEABA00B83932 /* ButtonsSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonsSettings.swift; sourceTree = "<group>"; };
+		9731B40429D7D86800FC3C24 /* ButtonMappingButtonRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMappingButtonRecorder.swift; sourceTree = "<group>"; };
+		9731B40629D7DAC600FC3C24 /* View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
+		9731B40A29D7FE1D00FC3C24 /* ButtonMappingActionPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMappingActionPicker.swift; sourceTree = "<group>"; };
 		97353385297ED84600C1B5D0 /* ScrollingAccelerationSpeedAdjustmentTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingAccelerationSpeedAdjustmentTransformer.swift; sourceTree = "<group>"; };
 		9735338E297F8EE200C1B5D0 /* FormViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormViewModifier.swift; sourceTree = "<group>"; };
 		973EB9FD287EE7D90069A8EF /* Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Action.swift; sourceTree = "<group>"; };
@@ -206,6 +215,7 @@
 		97C9772928900298009094BA /* zh-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-HK"; path = "zh-HK.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		97C9772B28910054009094BA /* KeyKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = KeyKit; sourceTree = "<group>"; };
 		97D3470B293CDEA000E7DFE1 /* WeakRef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeakRef.swift; sourceTree = "<group>"; };
+		97DB97C729AF79B9002F4668 /* ButtonMappingsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMappingsSection.swift; sourceTree = "<group>"; };
 		97E16F4E28F9A22A00E7D09B /* LinearScrollingHorizontalTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearScrollingHorizontalTransformer.swift; sourceTree = "<group>"; };
 		97F77FA3285DC467007C9C2B /* DevicePickerSectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSectionState.swift; sourceTree = "<group>"; };
 		97F77FA7285DC828007C9C2B /* Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
@@ -215,6 +225,8 @@
 		97F77FB0285F0CDC007C9C2B /* Scheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Scheme.swift; sourceTree = "<group>"; };
 		97F77FB3285F45AF007C9C2B /* ConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationTests.swift; sourceTree = "<group>"; };
 		97F77FB6285F53A5007C9C2B /* SingleValueOrArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleValueOrArray.swift; sourceTree = "<group>"; };
+		97FD8CE929BE0F9D00D93212 /* ButtonMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMapping.swift; sourceTree = "<group>"; };
+		97FD8CEB29C1ABA800D93212 /* ButtonMappingEditSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMappingEditSheet.swift; sourceTree = "<group>"; };
 		B716F15F26BC10B80052F551 /* UniversalBackForwardTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniversalBackForwardTransformer.swift; sourceTree = "<group>"; };
 		B716F16226BC18AB0052F551 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		B716F16326BC19350052F551 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
@@ -399,6 +411,7 @@
 			children = (
 				97F77FA7285DC828007C9C2B /* Environment.swift */,
 				97A46B16285444BF00C07C9B /* NSWindow.swift */,
+				9731B40629D7DAC600FC3C24 /* View.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -476,6 +489,7 @@
 				97C5DBC42868A1ED006FA6B4 /* ButtonsSettingsState.swift */,
 				978DBC9B29A60D92002259B3 /* UniversalBackForwardSection.swift */,
 				978DBC9D29A60E2F002259B3 /* ClickDebouncingSection.swift */,
+				97FD8CE829BE0F8A00D93212 /* ButtonMappingsSection */,
 			);
 			path = ButtonsSettings;
 			sourceTree = "<group>";
@@ -637,6 +651,18 @@
 				972327A4299146AA0041538A /* ImplicitOptional.swift */,
 			);
 			path = Codable;
+			sourceTree = "<group>";
+		};
+		97FD8CE829BE0F8A00D93212 /* ButtonMappingsSection */ = {
+			isa = PBXGroup;
+			children = (
+				97DB97C729AF79B9002F4668 /* ButtonMappingsSection.swift */,
+				97FD8CE929BE0F9D00D93212 /* ButtonMapping.swift */,
+				97FD8CEB29C1ABA800D93212 /* ButtonMappingEditSheet.swift */,
+				9731B40429D7D86800FC3C24 /* ButtonMappingButtonRecorder.swift */,
+				9731B40A29D7FE1D00FC3C24 /* ButtonMappingActionPicker.swift */,
+			);
+			path = ButtonMappingsSection;
 			sourceTree = "<group>";
 		};
 		B75A060F2671E9D800BEAF77 = {
@@ -967,6 +993,7 @@
 				B77A16102674B85300E99A5D /* DefaultsKeys.swift in Sources */,
 				B77BA0F227480AA500E3BC5C /* EventTransformer.swift in Sources */,
 				972AFD492851E96D009B0CBF /* AccessibilityPermissionWindow.swift in Sources */,
+				9731B40729D7DAC600FC3C24 /* View.swift in Sources */,
 				B7618A1027621EDF00527C1A /* PointerSettings.swift in Sources */,
 				9766C4B8299E199200FA3A9C /* AppPickerSheet.swift in Sources */,
 				97C5DBC82868A2C7006FA6B4 /* Modifiers.swift in Sources */,
@@ -1008,6 +1035,7 @@
 				972DF64F285A2D7C00B83932 /* SecondaryButtonStyle.swift in Sources */,
 				97B913FE28869F0500DC920A /* ButtonActionsTransformer.swift in Sources */,
 				972DF646285A269500B83932 /* SchemeIndicator.swift in Sources */,
+				97FD8CEA29BE0F9D00D93212 /* ButtonMapping.swift in Sources */,
 				B7B6D83C26B2726B00B0D247 /* ModifierKeys.swift in Sources */,
 				B77A160E2674B3DD00E99A5D /* LinearMouse.swift in Sources */,
 				97F77FB7285F53A5007C9C2B /* SingleValueOrArray.swift in Sources */,
@@ -1015,6 +1043,8 @@
 				972A5E1F285CA43D00CB6440 /* DevicePickerSheet.swift in Sources */,
 				97C5DBB42867EA48006FA6B4 /* SchemeState.swift in Sources */,
 				97C5DBB62867ECD6006FA6B4 /* DeviceModel.swift in Sources */,
+				97DB97C829AF79B9002F4668 /* ButtonMappingsSection.swift in Sources */,
+				97FD8CEC29C1ABA800D93212 /* ButtonMappingEditSheet.swift in Sources */,
 				B716F16026BC10B80052F551 /* UniversalBackForwardTransformer.swift in Sources */,
 				B77A16172674D88E00E99A5D /* SettingsWindow.swift in Sources */,
 				B7842925278D985600D207F0 /* AutoUpdateManager.swift in Sources */,
@@ -1031,7 +1061,9 @@
 				B7BD51812672FEB5001FE742 /* EventTap.swift in Sources */,
 				97C5DBBE286875C2006FA6B4 /* Clamp.swift in Sources */,
 				972327B3299291860041538A /* ScrollingModeSection.swift in Sources */,
+				9731B40529D7D86800FC3C24 /* ButtonMappingButtonRecorder.swift in Sources */,
 				978DBCA329A663EB002259B3 /* ClickDebouncing.swift in Sources */,
+				9731B40B29D7FE1D00FC3C24 /* ButtonMappingActionPicker.swift in Sources */,
 				972327A5299146AA0041538A /* ImplicitOptional.swift in Sources */,
 				97D3470C293CDEA000E7DFE1 /* WeakRef.swift in Sources */,
 				97C5DBBC28686EFC006FA6B4 /* Pointer.swift in Sources */,

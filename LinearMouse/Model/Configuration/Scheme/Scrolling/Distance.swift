@@ -4,7 +4,7 @@
 import Foundation
 
 extension Scheme.Scrolling {
-    enum Distance: Equatable {
+    enum Distance: Equatable, Hashable {
         case auto
         case line(Int)
         case pixel(Decimal)

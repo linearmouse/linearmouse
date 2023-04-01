@@ -2,7 +2,7 @@
 // Copyright (c) 2021-2023 Jiahao Lu
 
 extension Scheme.Buttons {
-    struct Mapping: Codable, Equatable {
+    struct Mapping: Codable, Equatable, Hashable {
         var button: Int?
         var `repeat`: Bool?
 
@@ -18,19 +18,40 @@ extension Scheme.Buttons {
 }
 
 extension Scheme.Buttons.Mapping {
-    enum ScrollDirection: String, Codable {
+    var valid: Bool {
+        guard button != nil || scroll != nil else {
+            return false
+        }
+
+        guard !(button == 0 && modifierFlags.isEmpty) else {
+            return false
+        }
+
+        return true
+    }
+
+    enum ScrollDirection: String, Codable, Hashable {
         case up, down, left, right
     }
 
     var modifierFlags: CGEventFlags {
-        CGEventFlags([
-            (command, CGEventFlags.maskCommand),
-            (shift, CGEventFlags.maskShift),
-            (option, CGEventFlags.maskAlternate),
-            (control, CGEventFlags.maskControl)
-        ]
-        .filter { $0.0 == true }
-        .map(\.1))
+        get {
+            CGEventFlags([
+                (command, CGEventFlags.maskCommand),
+                (shift, CGEventFlags.maskShift),
+                (option, CGEventFlags.maskAlternate),
+                (control, CGEventFlags.maskControl)
+            ]
+            .filter { $0.0 == true }
+            .map(\.1))
+        }
+
+        set {
+            command = newValue.contains(.maskCommand)
+            shift = newValue.contains(.maskShift)
+            option = newValue.contains(.maskAlternate)
+            control = newValue.contains(.maskControl)
+        }
     }
 
     func match(with event: CGEvent) -> Bool {
@@ -71,5 +92,43 @@ extension Scheme.Buttons.Mapping {
         }
 
         return view.modifierFlags == modifierFlags
+    }
+
+    func conflicted(with mapping: Self) -> Bool {
+        if button == mapping.button, scroll == mapping.scroll, modifierFlags == mapping.modifierFlags {
+            return true
+        }
+        return false
+    }
+}
+
+extension Scheme.Buttons.Mapping: Comparable {
+    static func < (lhs: Scheme.Buttons.Mapping, rhs: Scheme.Buttons.Mapping) -> Bool {
+        func score(_ mapping: Scheme.Buttons.Mapping) -> Int {
+            var score = 0
+
+            if let button = mapping.button {
+                score |= ((button & 0xFF) << 8)
+            } else if mapping.scroll != nil {
+                score |= (1 << 16)
+            }
+
+            if mapping.modifierFlags.contains(.maskCommand) {
+                score |= (1 << 0)
+            }
+            if mapping.modifierFlags.contains(.maskShift) {
+                score |= (1 << 1)
+            }
+            if mapping.modifierFlags.contains(.maskAlternate) {
+                score |= (1 << 2)
+            }
+            if mapping.modifierFlags.contains(.maskControl) {
+                score |= (1 << 3)
+            }
+
+            return score
+        }
+
+        return score(lhs) < score(rhs)
     }
 }
