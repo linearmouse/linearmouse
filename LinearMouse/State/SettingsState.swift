@@ -11,4 +11,7 @@ class SettingsState: ObservableObject {
     }
 
     @Published var navigation: Navigation? = .scrolling
+
+    /// When `recording` is true, `ButtonActionsTransformer` should be temporarily disabled.
+    @Published var recording = false
 }

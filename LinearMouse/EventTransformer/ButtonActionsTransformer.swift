@@ -50,6 +50,10 @@ extension ButtonActionsTransformer: EventTransformer {
             return event
         }
 
+        guard !SettingsState.shared.recording else {
+            return event
+        }
+
         repeatTimer?.invalidate()
 
         guard let mapping = findMapping(of: event) else {

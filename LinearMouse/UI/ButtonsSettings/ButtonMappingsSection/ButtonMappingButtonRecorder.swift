@@ -13,6 +13,7 @@ struct ButtonMappingButtonRecorder: View {
             guard oldValue != recording else {
                 return
             }
+            SettingsState.shared.recording = recording
             recordingUpdated()
         }
     }

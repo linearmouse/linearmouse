@@ -20,6 +20,7 @@ struct ButtonMappingEditSheet: View {
 
                 if !mapping.isValid, mapping.button == 0, mapping.modifierFlags.isEmpty {
                     Text("Assigning an action to the left button without any modifier keys is not allowed.")
+                        .foregroundColor(.red)
                         .controlSize(.small)
                         .fixedSize(horizontal: false, vertical: true)
                 }
