@@ -13,8 +13,10 @@ struct ButtonMappingsSection: View {
         Section {
             Text("Assign actions to mouse buttons.")
 
-            List($state.mappings, id: \.self, selection: $selection) { $mapping in
-                ButtonMappingListItem(mapping: mapping)
+            if !state.mappings.isEmpty {
+                List($state.mappings, id: \.self, selection: $selection) { $mapping in
+                    ButtonMappingListItem(mapping: mapping)
+                }
             }
         } footer: {
             HStack(spacing: 4) {

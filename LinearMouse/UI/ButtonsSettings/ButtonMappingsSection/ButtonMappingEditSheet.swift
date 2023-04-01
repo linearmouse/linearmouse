@@ -16,6 +16,12 @@ struct ButtonMappingEditSheet: View {
                     .formLabel(Text("Mouse button"))
 
                 ButtonMappingActionPicker(action: $mapping.action.default(.simpleAction(.auto)))
+
+                if !mapping.isValid, mapping.button == 0, mapping.modifierFlags.isEmpty {
+                    Text("Assigning an action to the left button without any modifier keys is not allowed.")
+                        .controlSize(.small)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
 
             Button("OK") {
@@ -25,6 +31,6 @@ struct ButtonMappingEditSheet: View {
             .disabled(!mapping.isValid)
         }
         .padding()
-        .frame(width: 320)
+        .frame(width: 400)
     }
 }

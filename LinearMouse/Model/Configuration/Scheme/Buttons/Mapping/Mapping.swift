@@ -27,10 +27,6 @@ extension Scheme.Buttons.Mapping {
             return false
         }
 
-        guard action != nil else {
-            return false
-        }
-
         return true
     }
 
