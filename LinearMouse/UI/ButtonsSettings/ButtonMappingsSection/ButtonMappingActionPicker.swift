@@ -62,7 +62,7 @@ extension ButtonMappingActionPicker {
         var id: UUID { UUID() }
 
         case actionType(ActionType)
-        case section(StringLiteralType, () -> [ActionTypeTreeNode])
+        case section(LocalizedStringKey, () -> [ActionTypeTreeNode])
     }
 
     struct ActionTypeTreeView: View {
