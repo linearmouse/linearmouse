@@ -31,7 +31,14 @@ class MouseEventView {
     }
 
     var modifierFlags: CGEventFlags {
-        event.flags.intersection([.maskCommand, .maskShift, .maskAlternate, .maskControl])
+        get {
+            event.flags.intersection([.maskCommand, .maskShift, .maskAlternate, .maskControl])
+        }
+        set {
+            event.flags = event.flags
+                .subtracting([.maskCommand, .maskShift, .maskAlternate, .maskControl])
+                .union(newValue)
+        }
     }
 
     var modifiers: [String] {
