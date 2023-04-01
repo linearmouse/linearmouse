@@ -4,20 +4,29 @@
 import SwiftUI
 
 struct ButtonMappingsSection: View {
-    @ObservedObject var state: ButtonsSettingsState = .shared
-    @State var selection: Set<Scheme.Buttons.Mapping> = []
+    @ObservedObject private var state: ButtonsSettingsState = .shared
+    @State private var selection: Set<Scheme.Buttons.Mapping> = []
+    @State private var showAddSheet = false
+    @State private var mappingToAdd: Scheme.Buttons.Mapping = .init()
 
     var body: some View {
         Section {
             Text("Assign actions to mouse buttons.")
 
             List($state.mappings, id: \.self, selection: $selection) { $mapping in
-                ButtonMapping(mapping: $mapping)
+                ButtonMappingListItem(mapping: mapping)
             }
         } footer: {
             HStack(spacing: 4) {
-                Button(action: {}) {
+                Button(action: {
+                    mappingToAdd = .init()
+                    showAddSheet.toggle()
+                }) {
                     Image("Plus")
+                }
+                .sheet(isPresented: $showAddSheet) {
+                    ButtonMappingEditSheet(mapping: $mappingToAdd)
+                        .environment(\.isPresented, $showAddSheet)
                 }
 
                 Button(action: {

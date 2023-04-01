@@ -23,14 +23,23 @@ extension Scheme.Buttons.Mapping {
     }
 
     var modifierFlags: CGEventFlags {
-        CGEventFlags([
-            (command, CGEventFlags.maskCommand),
-            (shift, CGEventFlags.maskShift),
-            (option, CGEventFlags.maskAlternate),
-            (control, CGEventFlags.maskControl)
-        ]
-        .filter { $0.0 == true }
-        .map(\.1))
+        get {
+            CGEventFlags([
+                (command, CGEventFlags.maskCommand),
+                (shift, CGEventFlags.maskShift),
+                (option, CGEventFlags.maskAlternate),
+                (control, CGEventFlags.maskControl)
+            ]
+            .filter { $0.0 == true }
+            .map(\.1))
+        }
+
+        set {
+            command = newValue.contains(.maskCommand)
+            shift = newValue.contains(.maskShift)
+            option = newValue.contains(.maskAlternate)
+            control = newValue.contains(.maskControl)
+        }
     }
 
     func match(with event: CGEvent) -> Bool {
