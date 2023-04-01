@@ -27,7 +27,7 @@ struct ButtonMappingsSection: View {
                     Image("Plus")
                 }
                 .sheet(isPresented: $showAddSheet) {
-                    ButtonMappingEditSheet(mapping: $mappingToAdd) { mapping in
+                    ButtonMappingEditSheet(mapping: $mappingToAdd, autoStartRecording: true) { mapping in
                         state.appendMapping(mapping)
                     }
                     .environment(\.isPresented, $showAddSheet)

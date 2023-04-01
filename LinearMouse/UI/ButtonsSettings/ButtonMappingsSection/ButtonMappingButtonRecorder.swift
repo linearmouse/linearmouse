@@ -5,6 +5,9 @@ import SwiftUI
 
 struct ButtonMappingButtonRecorder: View {
     @Binding var mapping: Scheme.Buttons.Mapping
+
+    var autoStartRecording = false
+
     @State private var recording = false {
         didSet {
             guard oldValue != recording else {
@@ -21,6 +24,7 @@ struct ButtonMappingButtonRecorder: View {
             Group {
                 if recording {
                     Text("Recording")
+                        .foregroundColor(.orange)
                 } else {
                     ButtonMappingButtonDescription(mapping: mapping) {
                         Text("Click to record")
@@ -28,6 +32,11 @@ struct ButtonMappingButtonRecorder: View {
                 }
             }
             .frame(maxWidth: .infinity)
+        }
+        .onAppear {
+            if autoStartRecording {
+                recording = true
+            }
         }
         .onDisappear {
             recording = false

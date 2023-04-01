@@ -7,12 +7,13 @@ struct ButtonMappingEditSheet: View {
     @Environment(\.isPresented) var isPresented
 
     @Binding var mapping: Scheme.Buttons.Mapping
+    var autoStartRecording = false
     var completion: ((Scheme.Buttons.Mapping) -> Void)?
 
     var body: some View {
         VStack {
             Form {
-                ButtonMappingButtonRecorder(mapping: $mapping)
+                ButtonMappingButtonRecorder(mapping: $mapping, autoStartRecording: autoStartRecording)
                     .formLabel(Text("Mouse button"))
 
                 ButtonMappingActionPicker(action: $mapping.action.default(.simpleAction(.auto)))
