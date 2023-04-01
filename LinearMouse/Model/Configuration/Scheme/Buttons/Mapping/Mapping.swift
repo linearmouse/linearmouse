@@ -18,6 +18,22 @@ extension Scheme.Buttons {
 }
 
 extension Scheme.Buttons.Mapping {
+    var isValid: Bool {
+        guard button != nil || scroll != nil else {
+            return false
+        }
+
+        guard !(button == 0 && modifierFlags.isEmpty) else {
+            return false
+        }
+
+        guard action != nil else {
+            return false
+        }
+
+        return true
+    }
+
     enum ScrollDirection: String, Codable, Hashable {
         case up, down, left, right
     }
@@ -80,5 +96,36 @@ extension Scheme.Buttons.Mapping {
         }
 
         return view.modifierFlags == modifierFlags
+    }
+}
+
+extension Scheme.Buttons.Mapping: Comparable {
+    static func < (lhs: Scheme.Buttons.Mapping, rhs: Scheme.Buttons.Mapping) -> Bool {
+        func score(_ mapping: Scheme.Buttons.Mapping) -> Int {
+            var score = 0
+
+            if let button = mapping.button {
+                score |= ((button & 0xFF) << 8)
+            } else if mapping.scroll != nil {
+                score |= (1 << 16)
+            }
+
+            if mapping.modifierFlags.contains(.maskCommand) {
+                score |= (1 << 0)
+            }
+            if mapping.modifierFlags.contains(.maskShift) {
+                score |= (1 << 1)
+            }
+            if mapping.modifierFlags.contains(.maskAlternate) {
+                score |= (1 << 2)
+            }
+            if mapping.modifierFlags.contains(.maskControl) {
+                score |= (1 << 3)
+            }
+
+            return score
+        }
+
+        return score(lhs) < score(rhs)
     }
 }

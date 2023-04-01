@@ -7,6 +7,7 @@ struct ButtonMappingEditSheet: View {
     @Environment(\.isPresented) var isPresented
 
     @Binding var mapping: Scheme.Buttons.Mapping
+    var completion: ((Scheme.Buttons.Mapping) -> Void)?
 
     var body: some View {
         VStack {
@@ -14,12 +15,14 @@ struct ButtonMappingEditSheet: View {
                 ButtonMappingButtonRecorder(mapping: $mapping)
                     .formLabel(Text("Mouse button"))
 
-                Picker("Action", selection: .constant(0)) {}
+                ButtonMappingActionPicker(action: $mapping.action.default(.simpleAction(.auto)))
             }
 
             Button("OK") {
                 isPresented?.wrappedValue.toggle()
+                completion?(mapping)
             }
+            .disabled(!mapping.isValid)
         }
         .padding()
         .frame(width: 320)

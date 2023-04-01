@@ -92,7 +92,9 @@ extension Scheme.Buttons.Mapping.Action: CustomStringConvertible {
 }
 
 extension Scheme.Buttons.Mapping.Action: Codable {
-    enum SimpleAction: String, Codable, CaseIterable {
+    enum SimpleAction: String, Codable, Identifiable, CaseIterable {
+        var id: Self { self }
+
         case auto
         case none
 

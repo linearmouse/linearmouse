@@ -42,6 +42,7 @@
 		972DF65B285AEABA00B83932 /* ButtonsSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF65A285AEABA00B83932 /* ButtonsSettings.swift */; };
 		9731B40529D7D86800FC3C24 /* ButtonMappingButtonRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9731B40429D7D86800FC3C24 /* ButtonMappingButtonRecorder.swift */; };
 		9731B40729D7DAC600FC3C24 /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9731B40629D7DAC600FC3C24 /* View.swift */; };
+		9731B40B29D7FE1D00FC3C24 /* ButtonMappingActionPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9731B40A29D7FE1D00FC3C24 /* ButtonMappingActionPicker.swift */; };
 		97353386297ED84600C1B5D0 /* ScrollingAccelerationSpeedAdjustmentTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97353385297ED84600C1B5D0 /* ScrollingAccelerationSpeedAdjustmentTransformer.swift */; };
 		9735338F297F8EE200C1B5D0 /* FormViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9735338E297F8EE200C1B5D0 /* FormViewModifier.swift */; };
 		973EB9FE287EE7D90069A8EF /* Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 973EB9FD287EE7D90069A8EF /* Action.swift */; };
@@ -174,6 +175,7 @@
 		972DF65A285AEABA00B83932 /* ButtonsSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonsSettings.swift; sourceTree = "<group>"; };
 		9731B40429D7D86800FC3C24 /* ButtonMappingButtonRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMappingButtonRecorder.swift; sourceTree = "<group>"; };
 		9731B40629D7DAC600FC3C24 /* View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
+		9731B40A29D7FE1D00FC3C24 /* ButtonMappingActionPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMappingActionPicker.swift; sourceTree = "<group>"; };
 		97353385297ED84600C1B5D0 /* ScrollingAccelerationSpeedAdjustmentTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingAccelerationSpeedAdjustmentTransformer.swift; sourceTree = "<group>"; };
 		9735338E297F8EE200C1B5D0 /* FormViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormViewModifier.swift; sourceTree = "<group>"; };
 		973EB9FD287EE7D90069A8EF /* Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Action.swift; sourceTree = "<group>"; };
@@ -658,6 +660,7 @@
 				97FD8CE929BE0F9D00D93212 /* ButtonMapping.swift */,
 				97FD8CEB29C1ABA800D93212 /* ButtonMappingEditSheet.swift */,
 				9731B40429D7D86800FC3C24 /* ButtonMappingButtonRecorder.swift */,
+				9731B40A29D7FE1D00FC3C24 /* ButtonMappingActionPicker.swift */,
 			);
 			path = ButtonMappingsSection;
 			sourceTree = "<group>";
@@ -1060,6 +1063,7 @@
 				972327B3299291860041538A /* ScrollingModeSection.swift in Sources */,
 				9731B40529D7D86800FC3C24 /* ButtonMappingButtonRecorder.swift in Sources */,
 				978DBCA329A663EB002259B3 /* ClickDebouncing.swift in Sources */,
+				9731B40B29D7FE1D00FC3C24 /* ButtonMappingActionPicker.swift in Sources */,
 				972327A5299146AA0041538A /* ImplicitOptional.swift in Sources */,
 				97D3470C293CDEA000E7DFE1 /* WeakRef.swift in Sources */,
 				97C5DBBC28686EFC006FA6B4 /* Pointer.swift in Sources */,

@@ -95,4 +95,8 @@ extension ButtonsSettingsState {
         get { mergedScheme.buttons.mappings ?? [] }
         set { scheme.buttons.mappings = newValue }
     }
+
+    func appendMapping(_ mapping: Scheme.Buttons.Mapping) {
+        mappings = (mappings + [mapping]).sorted()
+    }
 }
