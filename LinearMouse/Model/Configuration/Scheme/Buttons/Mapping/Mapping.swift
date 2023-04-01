@@ -18,7 +18,7 @@ extension Scheme.Buttons {
 }
 
 extension Scheme.Buttons.Mapping {
-    var isValid: Bool {
+    var valid: Bool {
         guard button != nil || scroll != nil else {
             return false
         }
@@ -92,6 +92,13 @@ extension Scheme.Buttons.Mapping {
         }
 
         return view.modifierFlags == modifierFlags
+    }
+
+    func conflicted(with mapping: Self) -> Bool {
+        if button == mapping.button, scroll == mapping.scroll, modifierFlags == mapping.modifierFlags {
+            return true
+        }
+        return false
     }
 }
 

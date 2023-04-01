@@ -5,7 +5,9 @@ import SwiftUI
 
 struct ButtonMappingsSection: View {
     @ObservedObject private var state: ButtonsSettingsState = .shared
+
     @State private var selection: Set<Scheme.Buttons.Mapping> = []
+
     @State private var showAddSheet = false
     @State private var mappingToAdd: Scheme.Buttons.Mapping = .init()
 
@@ -15,7 +17,7 @@ struct ButtonMappingsSection: View {
 
             if !state.mappings.isEmpty {
                 List($state.mappings, id: \.self, selection: $selection) { $mapping in
-                    ButtonMappingListItem(mapping: mapping)
+                    ButtonMappingListItem(mapping: $mapping)
                 }
             }
         } footer: {
@@ -27,7 +29,7 @@ struct ButtonMappingsSection: View {
                     Image("Plus")
                 }
                 .sheet(isPresented: $showAddSheet) {
-                    ButtonMappingEditSheet(mapping: $mappingToAdd, autoStartRecording: true) { mapping in
+                    ButtonMappingEditSheet(mapping: $mappingToAdd, mode: .create) { mapping in
                         state.appendMapping(mapping)
                     }
                     .environment(\.isPresented, $showAddSheet)
