@@ -346,14 +346,19 @@ extension ButtonActionsTransformer: EventTransformer {
 
         switch action {
         case .simpleAction(.mouseButtonLeft):
+            mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .left
         case .simpleAction(.mouseButtonMiddle):
+            mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .center
         case .simpleAction(.mouseButtonRight):
+            mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .right
         case .simpleAction(.mouseButtonBack):
+            mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .back
         case .simpleAction(.mouseButtonForward):
+            mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .forward
         default:
             return false
