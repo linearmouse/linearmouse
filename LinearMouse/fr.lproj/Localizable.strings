@@ -31,7 +31,7 @@
 "Fast" = "Rapide";
 "Distance" = "Distance";
 "Revert to system defaults" = "Réinitialiser aux paramètres par défaut";
-"Copy settings from vertical" = "Copy settings from vertical";
+"Copy settings from vertical" = "Copier les paramètres de la catégorie \"Vertical\"";
 "Modifier Keys" = "Modificateur de touches";
 "No action" = "Pas d'action";
 "Alter orientation" = "Altérer l'orientation";
@@ -43,7 +43,7 @@
 
 "Enable universal back and forward" = "Activer l'option universel pour revenir et avancer de pages";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convertir les boutons latéraux arrière et avant en swipant pour permettre la fonctionnalité universelle de retour et d'avant.";
-"Debounce button clicks" = "Debounce button clicks";
+"Debounce button clicks" = "Anti-rebond des clics de la souris";
 "Ignore rapid clicks within a certain time period." = "Ignorer les clics rapides dans une certaine période.";
 "ms" = "ms";
 "Reset timer on mouse up" = "Réinitialiser le chronomètre quand la souris est relâchée";
