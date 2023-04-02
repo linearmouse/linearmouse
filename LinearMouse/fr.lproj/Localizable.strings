@@ -1,4 +1,4 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse a besoin d'une permission d'Accessibilité";
+"LinearMouse needs Accessibility permission" = "LinearMouse a besoin de la permission d'Accessibilité";
 "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "Vous devez accorder l’autorisation d’accessibilité dans Paramètres système > Sécurité et confidentialité > Accessibilité.";
 "Get more help" = "Obtenir de l'aide";
 "Open Accessibility" = "Ouvrir Accessibilité";
@@ -41,7 +41,7 @@
 "Disable pointer acceleration" = "Désactiver l'accélération du pointeur";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Vous pouvez aussi appuyer sur ⌃⇧⌘Z pour réinitialiser aux paramètres par défauts du système.";
 
-"Enable universal back and forward" = "Activer l'option universel pour revenir et avancer de pages";
+"Enable universal back and forward" = "Activer l'option universelle pour revenir et avancer de pages";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convertir les boutons latéraux arrière et avant en swipant pour permettre la fonctionnalité universelle de retour et d'avant.";
 "Debounce button clicks" = "Anti-rebond des clics de la souris";
 "Ignore rapid clicks within a certain time period." = "Ignorer les clics rapides dans une certaine période.";
