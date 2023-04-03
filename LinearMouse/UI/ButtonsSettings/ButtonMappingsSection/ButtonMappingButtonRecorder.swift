@@ -21,7 +21,9 @@ struct ButtonMappingButtonRecorder: View {
     @State private var recordingMonitor: Any?
 
     var body: some View {
-        Button(action: { recording.toggle() }) {
+        Button {
+            recording.toggle()
+        } label: {
             Group {
                 if recording {
                     ButtonMappingButtonDescription(mapping: mapping, showPartial: true) {

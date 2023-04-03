@@ -14,11 +14,11 @@ struct HyperLink<Content>: View where Content: View {
     }
 
     var body: some View {
-        Button(action: {
+        Button {
             NSWorkspace.shared.open(url)
-        }, label: {
+        } label: {
             content()
-        })
+        }
         .foregroundColor(.accentColor)
         .buttonStyle(PlainButtonStyle())
         .onHover(perform: { hovering in
