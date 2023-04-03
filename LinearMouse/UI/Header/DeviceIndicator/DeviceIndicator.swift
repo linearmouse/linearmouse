@@ -8,7 +8,9 @@ struct DeviceIndicator: View {
     @State private var showDevicePickerSheet = false
 
     var body: some View {
-        Button(action: { showDevicePickerSheet.toggle() }) {
+        Button {
+            showDevicePickerSheet.toggle()
+        } label: {
             Text(state.activeDeviceName ?? "Unknown")
                 .frame(maxWidth: 150)
                 .fixedSize()

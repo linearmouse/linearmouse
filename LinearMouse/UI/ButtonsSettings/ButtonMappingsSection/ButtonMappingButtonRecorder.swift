@@ -21,7 +21,9 @@ struct ButtonMappingButtonRecorder: View {
     @State private var recordingMonitor: Any?
 
     var body: some View {
-        Button(action: { recording.toggle() }) {
+        Button {
+            recording.toggle()
+        } label: {
             Group {
                 if recording {
                     ButtonMappingButtonDescription(mapping: mapping, showPartial: true) {
@@ -54,6 +56,7 @@ struct ButtonMappingButtonRecorder: View {
         if recording {
             mapping.modifierFlags = []
             mapping.button = nil
+            mapping.repeat = nil
             mapping.scroll = nil
             let eventsOfInterest: NSEvent.EventTypeMask = [
                 .flagsChanged,

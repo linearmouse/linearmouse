@@ -27,6 +27,7 @@ struct DevicePickerSheet: View {
                     }
                     .padding([.bottom, .horizontal])
                     .controlSize(.regular)
+                    .asDefaultAction()
                 }
             }
         }

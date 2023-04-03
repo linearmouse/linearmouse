@@ -9,7 +9,9 @@ struct AppIndicator: View {
     @ObservedObject private var schemeState: SchemeState = .shared
 
     var body: some View {
-        Button(action: { showAppPickerSheet.toggle() }) {
+        Button {
+            showAppPickerSheet.toggle()
+        } label: {
             Text(schemeState.currentAppName ?? NSLocalizedString("All Apps", comment: ""))
                 .frame(maxWidth: 150)
                 .fixedSize()
