@@ -4,6 +4,7 @@
 import AppKit
 import DockKit
 import Foundation
+import GestureKit
 import KeyKit
 import os.log
 
@@ -181,6 +182,9 @@ extension ButtonActionsTransformer: EventTransformer {
 
         case .simpleAction(.lookUpAndDataDetectors):
             try postSymbolicHotKey(.lookUpWordInDictionary)
+
+        case .simpleAction(.smartZoom):
+            GestureEvent(zoomToggleSource: nil)?.post(tap: .cgSessionEventTap)
 
         case .simpleAction(.displayBrightnessUp):
             postSystemDefinedKey(.brightnessUp)

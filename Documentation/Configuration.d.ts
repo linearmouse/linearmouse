@@ -380,6 +380,7 @@ declare namespace Scheme {
         | Launchpad
         | ShowDesktop
         | LookUpAndDataDetectors
+        | SmartZoom
         | DisplayBrightnessUp
         | DisplayBrightnessDown
         | MediaVolumeUp
@@ -446,6 +447,11 @@ declare namespace Scheme {
        * @description Look up & data detectors.
        */
       type LookUpAndDataDetectors = "lookUpAndDataDetectors";
+
+      /**
+       * @description Smart zoom.
+       */
+      type SmartZoom = "smartZoom";
 
       /**
        * @description Display: Brightness up.
