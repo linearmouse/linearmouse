@@ -20,16 +20,17 @@
 "Horizontal" = "Horisontal";
 "Reverse scrolling" = "Omvendt rulning";
 "Some gestures, such as swiping back and forward, may stop working." = "Nogle bevægelser, såsom at stryge tilbage og fremad, kan stoppe med at virke.";
-"Mode" = "Tilstand";
+"Scrolling mode" = "Scrolling mode";
 "Accelerated" = "Accelereret";
 "By Lines" = "Efter Linjer";
 "By Pixels" = "Efter Pixels";
-"Acceleration" = "Acceleration";
+"Scrolling acceleration" = "Scrolling acceleration";
 "Linear" = "Lineær";
 "Speed" = "Hastighed";
 "Slow" = "Langsom";
 "Fast" = "Hurtig";
 "Distance" = "Afstand";
+"Scrolling is disabled based on the current settings." = "Scrolling is disabled based on the current settings.";
 "Revert to system defaults" = "Nulstil til systemets standardindstillinger";
 "Copy settings from vertical" = "Kopiér indstillinger fra vertikal";
 "Modifier Keys" = "Kombitaster";
@@ -39,6 +40,8 @@
 "Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "Deaktiver markøracceleration";
+"Pointer acceleration" = "Pointer acceleration";
+"Pointer speed" = "Pointer speed";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Du kan også trykke på ⌃⇧⌘Z for at vende tilbage til systemets standardindstillinger.";
 
 "Enable universal back and forward" = "Aktivér universel frem og tilbage";

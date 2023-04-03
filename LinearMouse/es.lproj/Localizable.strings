@@ -20,16 +20,17 @@
 "Horizontal" = "Horizontal";
 "Reverse scrolling" = "Invertir desplazamiento";
 "Some gestures, such as swiping back and forward, may stop working." = "Algunos gestos, como el deslizamiento hacia atrás y hacia delante, pueden dejar de funcionar.";
-"Mode" = "Mode";
+"Scrolling mode" = "Scrolling mode";
 "Accelerated" = "Accelerated";
 "By Lines" = "By Lines";
 "By Pixels" = "By Pixels";
-"Acceleration" = "Aceleración";
+"Scrolling acceleration" = "Scrolling acceleration";
 "Linear" = "Linear";
 "Speed" = "Velocidad";
 "Slow" = "Slow";
 "Fast" = "Fast";
 "Distance" = "Distance";
+"Scrolling is disabled based on the current settings." = "Scrolling is disabled based on the current settings.";
 "Revert to system defaults" = "Restablecer valores por defecto";
 "Copy settings from vertical" = "Copy settings from vertical";
 "Modifier Keys" = "Teclas modificadoras";
@@ -39,6 +40,8 @@
 "Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "Deshabilitar aceleración del cursor";
+"Pointer acceleration" = "Pointer acceleration";
+"Pointer speed" = "Pointer speed";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "También puedes pulsar ⌃⇧⌘Z para restablecer valores por defecto.";
 
 "Enable universal back and forward" = "Habilitar retroceso y avance universal";

@@ -20,16 +20,17 @@
 "Horizontal" = "Horizontal";
 "Reverse scrolling" = "逆スクロール";
 "Some gestures, such as swiping back and forward, may stop working." = "前後スワイプ等、一部のジェスチャーが動作しなくなる可能性があります。";
-"Mode" = "Mode";
+"Scrolling mode" = "Scrolling mode";
 "Accelerated" = "Accelerated";
 "By Lines" = "By Lines";
 "By Pixels" = "By Pixels";
-"Acceleration" = "アクセラレーション";
+"Scrolling acceleration" = "Scrolling acceleration";
 "Linear" = "Linear";
 "Speed" = "速度";
 "Slow" = "Slow";
 "Fast" = "Fast";
 "Distance" = "Distance";
+"Scrolling is disabled based on the current settings." = "Scrolling is disabled based on the current settings.";
 "Revert to system defaults" = "システムデフォルトに戻す";
 "Copy settings from vertical" = "Copy settings from vertical";
 "Modifier Keys" = "修飾キー";
@@ -39,6 +40,8 @@
 "Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "ポインター加速を無効にする。";
+"Pointer acceleration" = "Pointer acceleration";
+"Pointer speed" = "Pointer speed";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "<unk> ⌘Z を押してデフォルトに戻れます。";
 
 "Enable universal back and forward" = "システム全般の戻る・進むボタンを有効にする";

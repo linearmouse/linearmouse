@@ -20,16 +20,17 @@
 "Horizontal" = "Orizontal";
 "Reverse scrolling" = "Derulare inversă";
 "Some gestures, such as swiping back and forward, may stop working." = "Unele gesturi, cum ar fi glisarea înapoi și înainte, pot înceta să funcționeze.";
-"Mode" = "Mod";
+"Scrolling mode" = "Scrolling mode";
 "Accelerated" = "Accelerat";
 "By Lines" = "După linii";
 "By Pixels" = "De pixeli";
-"Acceleration" = "Accelerare";
+"Scrolling acceleration" = "Scrolling acceleration";
 "Linear" = "Linear";
 "Speed" = "Viteză";
 "Slow" = "Slow";
 "Fast" = "Fast";
 "Distance" = "Distanță";
+"Scrolling is disabled based on the current settings." = "Scrolling is disabled based on the current settings.";
 "Revert to system defaults" = "Revenire la valorile implicite ale sistemului";
 "Copy settings from vertical" = "Copy settings from vertical";
 "Modifier Keys" = "Modificator de taste";
@@ -39,6 +40,8 @@
 "Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "Dezactivează accelerația cursorului";
+"Pointer acceleration" = "Pointer acceleration";
+"Pointer speed" = "Pointer speed";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Puteți, de asemenea, să apăsați ⌃⇧⌘Z pentru a reveni la valorile implicite ale sistemului.";
 
 "Enable universal back and forward" = "Activați funcția universală înapoi și înainte";
