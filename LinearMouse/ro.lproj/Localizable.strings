@@ -95,6 +95,9 @@
 "Action" = "Action";
 "The mouse button is already assigned." = "The mouse button is already assigned.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "Assigning an action to the left button without any modifier keys is not allowed.";
+"Repeat on hold" = "Repeat on hold";
+"OK" = "OK";
+"Create" = "Create";
 
 "Settings" = "Setări";
 "Show in menu bar" = "Arată in bara de meniu";
@@ -118,7 +121,6 @@
 "Donate" = "Donați";
 
 "Auto switch to the active device" = "Comutare automată la dispozitivul activ";
-"OK" = "OK";
 
 "Mouse" = "Mouse";
 "Trackpad" = "Trackpad";
