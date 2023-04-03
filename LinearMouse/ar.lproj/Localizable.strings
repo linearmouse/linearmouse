@@ -20,16 +20,17 @@
 "Horizontal" = "أُفقي";
 "Reverse scrolling" = "التمرير العكسي";
 "Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
-"Mode" = "Mode";
-"Accelerated" = "Accelerated";
+"Scrolling mode" = "Scrolling mode";
+"Scrolling accelerated" = "Scrolling accelerated";
 "By Lines" = "By Lines";
 "By Pixels" = "By Pixels";
-"Acceleration" = "Acceleration";
+"Scrolling acceleration" = "Scrolling acceleration";
 "Linear" = "Linear";
 "Speed" = "السرعة";
 "Slow" = "Slow";
 "Fast" = "Fast";
 "Distance" = "المسافة";
+"Scrolling is disabled based on the current settings." = "Scrolling is disabled based on the current settings.";
 "Revert to system defaults" = "Revert to system defaults";
 "Copy settings from vertical" = "Copy settings from vertical";
 "Modifier Keys" = "مفاتيح التعديل";
@@ -39,6 +40,8 @@
 "Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "Disable pointer acceleration";
+"Pointer acceleration" = "Pointer acceleration";
+"Pointer speed" = "Pointer speed";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
 
 "Enable universal back and forward" = "Enable universal back and forward";
