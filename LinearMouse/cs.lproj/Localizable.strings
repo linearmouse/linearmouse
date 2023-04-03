@@ -21,7 +21,7 @@
 "Reverse scrolling" = "Obrácené posouvání";
 "Some gestures, such as swiping back and forward, may stop working." = "Po aktivaci této volby mohou některá gesta, např. zpět a dopředu, přestat fungovat";
 "Scrolling mode" = "Scrolling mode";
-"Scrolling accelerated" = "Scrolling accelerated";
+"Accelerated" = "Accelerated";
 "By Lines" = "By Lines";
 "By Pixels" = "By Pixels";
 "Scrolling acceleration" = "Scrolling acceleration";
