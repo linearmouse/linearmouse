@@ -20,16 +20,17 @@
 "Horizontal" = "Horizontal";
 "Reverse scrolling" = "역방향 스크롤";
 "Some gestures, such as swiping back and forward, may stop working." = "앞뒤로 스와이프와 같은 일부 제스처가 작동하지 않을 수 있습니다.";
-"Mode" = "Mode";
-"Accelerated" = "Accelerated";
+"Scrolling mode" = "Scrolling mode";
+"Scrolling accelerated" = "Scrolling accelerated";
 "By Lines" = "By Lines";
 "By Pixels" = "By Pixels";
-"Acceleration" = "가속";
+"Scrolling acceleration" = "Scrolling acceleration";
 "Linear" = "Linear";
 "Speed" = "속도";
 "Slow" = "Slow";
 "Fast" = "Fast";
 "Distance" = "Distance";
+"Scrolling is disabled based on the current settings." = "Scrolling is disabled based on the current settings.";
 "Revert to system defaults" = "시스템 기본값으로 되돌리기";
 "Copy settings from vertical" = "Copy settings from vertical";
 "Modifier Keys" = "보조 키";
@@ -39,6 +40,8 @@
 "Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "포인터 가속 비활성화";
+"Pointer acceleration" = "Pointer acceleration";
+"Pointer speed" = "Pointer speed";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z를 눌러서도 시스템 기본값으로 되돌릴 수 있습니다.";
 
 "Enable universal back and forward" = "유니버설 백/포워드";
