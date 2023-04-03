@@ -20,8 +20,8 @@
 "Horizontal" = "横向";
 "Reverse scrolling" = "反向滚动";
 "Some gestures, such as swiping back and forward, may stop working." = "某些手势可能无法正常工作，如滑动后退和前进。";
-"Scrolling mode" = "Scrolling mode";
-"Scrolling accelerated" = "Scrolling accelerated";
+"Scrolling mode" = "滚动模式";
+"Accelerated" = "Accelerated";
 "By Lines" = "按行";
 "By Pixels" = "按像素";
 "Scrolling acceleration" = "Scrolling acceleration";
