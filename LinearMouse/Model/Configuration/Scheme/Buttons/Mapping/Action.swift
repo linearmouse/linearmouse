@@ -53,6 +53,7 @@ extension Scheme.Buttons.Mapping.Action: Codable {
         case launchpad
         case showDesktop
         case lookUpAndDataDetectors
+        case smartZoom
 
         case displayBrightnessUp = "display.brightnessUp"
         case displayBrightnessDown = "display.brightnessDown"
@@ -181,6 +182,8 @@ extension Scheme.Buttons.Mapping.Action.SimpleAction: CustomStringConvertible {
             return NSLocalizedString("Show desktop", comment: "")
         case .lookUpAndDataDetectors:
             return NSLocalizedString("Look up & data detectors", comment: "")
+        case .smartZoom:
+            return NSLocalizedString("Smart zoom", comment: "")
         case .displayBrightnessUp:
             return NSLocalizedString("Increase display brightness", comment: "")
         case .displayBrightnessDown:

@@ -509,6 +509,9 @@
           "$ref": "#/definitions/Scheme.Buttons.Mapping.LookUpAndDataDetectors"
         },
         {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.SmartZoom"
+        },
+        {
           "$ref": "#/definitions/Scheme.Buttons.Mapping.DisplayBrightnessUp"
         },
         {
@@ -572,6 +575,11 @@
           "$ref": "#/definitions/Scheme.Buttons.Mapping.MouseButtonForward"
         }
       ]
+    },
+    "Scheme.Buttons.Mapping.SmartZoom": {
+      "const": "smartZoom",
+      "description": "Smart zoom.",
+      "type": "string"
     },
     "Scheme.Buttons.UniversalBackForward": {
       "anyOf": [

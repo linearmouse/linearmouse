@@ -18,6 +18,7 @@ struct ButtonMappingActionPicker: View {
         .actionType(.simpleAction(.launchpad)),
         .actionType(.simpleAction(.showDesktop)),
         .actionType(.simpleAction(.lookUpAndDataDetectors)),
+        .actionType(.simpleAction(.smartZoom)),
         .section("Display") { [
             .actionType(.simpleAction(.displayBrightnessUp)),
             .actionType(.simpleAction(.displayBrightnessDown))
