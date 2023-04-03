@@ -114,6 +114,17 @@ extension ScrollingSettingsState {
         }
     }
 
+    var scrollingDisabled: Bool {
+        switch scrollingMode {
+        case .accelerated:
+            return scrollingAcceleration == 0 && scrollingSpeed == 0
+        case .byLines:
+            return scrollingDistanceInLines == 0
+        case .byPixels:
+            return scrollingDistanceInPixels == 0
+        }
+    }
+
     var modifiers: Scheme.Scrolling.Modifiers {
         get {
             mergedScheme.scrolling.modifiers[direction] ?? .init()

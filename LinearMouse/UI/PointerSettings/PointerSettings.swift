@@ -26,7 +26,7 @@ struct PointerSettings: View {
                             Slider(value: $state.pointerAcceleration,
                                    in: 0.0 ... 20.0) {
                                 labelWithDescription {
-                                    Text("Acceleration")
+                                    Text("Pointer acceleration")
                                     Text("(0–20)")
                                 }
                             }
@@ -43,7 +43,7 @@ struct PointerSettings: View {
                             Slider(value: $state.pointerSpeed,
                                    in: 0.0 ... 1.0) {
                                 labelWithDescription {
-                                    Text("Speed")
+                                    Text("Pointer speed")
                                     Text("(0–1)")
                                 }
                             }
