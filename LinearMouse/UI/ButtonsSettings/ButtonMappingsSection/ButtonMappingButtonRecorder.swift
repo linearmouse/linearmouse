@@ -56,6 +56,7 @@ struct ButtonMappingButtonRecorder: View {
         if recording {
             mapping.modifierFlags = []
             mapping.button = nil
+            mapping.repeat = nil
             mapping.scroll = nil
             let eventsOfInterest: NSEvent.EventTypeMask = [
                 .flagsChanged,

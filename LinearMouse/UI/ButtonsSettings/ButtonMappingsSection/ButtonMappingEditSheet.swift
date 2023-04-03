@@ -40,6 +40,12 @@ struct ButtonMappingEditSheet: View {
 
                 if valid {
                     ButtonMappingActionPicker(action: $mapping.action.default(.simpleAction(.auto)))
+
+                    if mapping.button != nil {
+                        Toggle(isOn: $mapping.repeat.default(false)) {
+                            Text("Repeat on hold")
+                        }
+                    }
                 }
             }
 
