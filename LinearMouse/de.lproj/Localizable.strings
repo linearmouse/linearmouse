@@ -21,7 +21,7 @@
 "Reverse scrolling" = "Scrollen invertieren";
 "Some gestures, such as swiping back and forward, may stop working." = "Manche Gesten, beispielsweise Vor- und Zurück-Wischen, könnten nicht korrekt funktionieren.";
 "Scrolling mode" = "Scrolling mode";
-"Scrolling accelerated" = "Scrolling accelerated";
+"Accelerated" = "Accelerated";
 "By Lines" = "In Zeilen";
 "By Pixels" = "In Pixel";
 "Scrolling acceleration" = "Scrolling acceleration";
