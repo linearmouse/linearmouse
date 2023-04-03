@@ -548,6 +548,9 @@ A simple action is an action without any parameters.
 | `appExpose`                 | App Exposé.                           |
 | `launchpad`                 | Launchpad.                            |
 | `showDesktop`               | Show desktop.                         |
+| `showDesktop`               | Show desktop.                         |
+| `lookUpAndDataDetectors`    | Look up & data detectors.             |
+| `smartZoom`                 | Smart zoom.                           |
 | `display.brightnessUp`      | Display: Brightness up.               |
 | `display.brightnessDown`    | Display: Brightness down.             |
 | `media.volumeUp`            | Media: Volume up.                     |
