@@ -21,7 +21,7 @@
 "Reverse scrolling" = "Инвертированная прокрутка";
 "Some gestures, such as swiping back and forward, may stop working." = "Некоторые жесты, такие как смахивание «назад» и «вперед», могут перестать работать.";
 "Scrolling mode" = "Scrolling mode";
-"Scrolling accelerated" = "Scrolling accelerated";
+"Accelerated" = "Accelerated";
 "By Lines" = "По строкам";
 "By Pixels" = "По пикселям";
 "Scrolling acceleration" = "Scrolling acceleration";
