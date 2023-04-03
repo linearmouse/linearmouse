@@ -95,6 +95,9 @@
 "Action" = "Action";
 "The mouse button is already assigned." = "Le bouton de la souris est déjà utilisé.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "L'attribution d'une action au bouton gauche sans aucune touche de modification n'est pas autorisée.";
+"Repeat on hold" = "Repeat on hold";
+"OK" = "Ok";
+"Create" = "Create";
 
 "Settings" = "Paramètres";
 "Show in menu bar" = "Afficher dans la bar de menu";
@@ -118,7 +121,6 @@
 "Donate" = "Faire un don";
 
 "Auto switch to the active device" = "Basculer automatiquement vers le périphérique actif";
-"OK" = "Ok";
 
 "Mouse" = "Souris";
 "Trackpad" = "Trackpad";
