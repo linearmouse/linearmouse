@@ -21,7 +21,7 @@
 "Reverse scrolling" = "Ters kaydırma";
 "Some gestures, such as swiping back and forward, may stop working." = "İleri ve geri kaydırma gibi bazı hareketler çalışmayabilir.";
 "Scrolling mode" = "Scrolling mode";
-"Scrolling accelerated" = "Scrolling accelerated";
+"Accelerated" = "Accelerated";
 "By Lines" = "By Lines";
 "By Pixels" = "By Pixels";
 "Scrolling acceleration" = "Scrolling acceleration";
