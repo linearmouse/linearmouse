@@ -95,6 +95,9 @@
 "Action" = "Action";
 "The mouse button is already assigned." = "The mouse button is already assigned.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "Assigning an action to the left button without any modifier keys is not allowed.";
+"Repeat on hold" = "Repeat on hold";
+"OK" = "Aceptar";
+"Create" = "Create";
 
 "Settings" = "Ajustes";
 "Show in menu bar" = "Mostrar en la barra de menú";
@@ -118,7 +121,6 @@
 "Donate" = "Donate";
 
 "Auto switch to the active device" = "Cambiar automáticamente al dispositivo activo";
-"OK" = "Aceptar";
 
 "Mouse" = "Ratón";
 "Trackpad" = "Trackpad";

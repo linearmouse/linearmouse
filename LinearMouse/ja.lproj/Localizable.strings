@@ -95,6 +95,9 @@
 "Action" = "Action";
 "The mouse button is already assigned." = "The mouse button is already assigned.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "Assigning an action to the left button without any modifier keys is not allowed.";
+"Repeat on hold" = "Repeat on hold";
+"OK" = "了解";
+"Create" = "Create";
 
 "Settings" = "設定";
 "Show in menu bar" = "メニューバーに表示";
@@ -118,7 +121,6 @@
 "Donate" = "Donate";
 
 "Auto switch to the active device" = "自動的に使用中の装置に切り替え";
-"OK" = "了解";
 
 "Mouse" = "マウス";
 "Trackpad" = "トラックパッド";

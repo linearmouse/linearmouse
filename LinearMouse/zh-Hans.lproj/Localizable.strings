@@ -95,6 +95,9 @@
 "Action" = "动作";
 "The mouse button is already assigned." = "该鼠标按钮已被分配。";
 "Assigning an action to the left button without any modifier keys is not allowed." = "不能将动作分配给左键且不加修饰键。";
+"Repeat on hold" = "Repeat on hold";
+"OK" = "好";
+"Create" = "Create";
 
 "Settings" = "设置";
 "Show in menu bar" = "在菜单栏中显示";
@@ -118,7 +121,6 @@
 "Donate" = "捐赠";
 
 "Auto switch to the active device" = "自动切换到活跃设备";
-"OK" = "好";
 
 "Mouse" = "鼠标";
 "Trackpad" = "触控板";

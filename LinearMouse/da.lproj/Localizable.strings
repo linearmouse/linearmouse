@@ -95,6 +95,9 @@
 "Action" = "Action";
 "The mouse button is already assigned." = "The mouse button is already assigned.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "Assigning an action to the left button without any modifier keys is not allowed.";
+"Repeat on hold" = "Repeat on hold";
+"OK" = "Ok";
+"Create" = "Create";
 
 "Settings" = "Indstillinger";
 "Show in menu bar" = "Vis i menulinjen";
@@ -118,7 +121,6 @@
 "Donate" = "Donér";
 
 "Auto switch to the active device" = "Skift automatisk til den aktive enhed";
-"OK" = "Ok";
 
 "Mouse" = "Mus";
 "Trackpad" = "Pegefelt";

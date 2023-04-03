@@ -95,6 +95,9 @@
 "Action" = "Action";
 "The mouse button is already assigned." = "The mouse button is already assigned.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "Assigning an action to the left button without any modifier keys is not allowed.";
+"Repeat on hold" = "Repeat on hold";
+"OK" = "ОК";
+"Create" = "Create";
 
 "Settings" = "Настройки";
 "Show in menu bar" = "Показывать в строке меню";
@@ -118,7 +121,6 @@
 "Donate" = "Отблагодарить";
 
 "Auto switch to the active device" = "Автоматическое переключение на активное устройство";
-"OK" = "ОК";
 
 "Mouse" = "Мышь";
 "Trackpad" = "Трекпад";
