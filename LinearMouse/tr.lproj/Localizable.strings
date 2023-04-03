@@ -20,16 +20,17 @@
 "Horizontal" = "Horizontal";
 "Reverse scrolling" = "Ters kaydırma";
 "Some gestures, such as swiping back and forward, may stop working." = "İleri ve geri kaydırma gibi bazı hareketler çalışmayabilir.";
-"Mode" = "Mode";
-"Accelerated" = "Accelerated";
+"Scrolling mode" = "Scrolling mode";
+"Scrolling accelerated" = "Scrolling accelerated";
 "By Lines" = "By Lines";
 "By Pixels" = "By Pixels";
-"Acceleration" = "İvme";
+"Scrolling acceleration" = "Scrolling acceleration";
 "Linear" = "Linear";
 "Speed" = "Hız";
 "Slow" = "Slow";
 "Fast" = "Fast";
 "Distance" = "Distance";
+"Scrolling is disabled based on the current settings." = "Scrolling is disabled based on the current settings.";
 "Revert to system defaults" = "Fabrika ayarlarına dön";
 "Copy settings from vertical" = "Copy settings from vertical";
 "Modifier Keys" = "Değiştirici tuşlar";
@@ -39,6 +40,8 @@
 "Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "İşaretçi ivmesini devre dışı bırak";
+"Pointer acceleration" = "Pointer acceleration";
+"Pointer speed" = "Pointer speed";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z'a basarak da fabrika ayarlarına dönebilirsiniz.";
 
 "Enable universal back and forward" = "Evrensel ileri ve geriyi etkinleştir";
