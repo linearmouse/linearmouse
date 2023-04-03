@@ -43,12 +43,18 @@ struct ButtonMappingEditSheet: View {
                 }
             }
 
-            Button("OK") {
-                isPresented?.wrappedValue.toggle()
-                mode = .edit
-                completion?(mapping)
+            HStack(spacing: 8) {
+                Button("OK") {
+                    isPresented?.wrappedValue.toggle()
+                    mode = .edit
+                    completion?(mapping)
+                }
+                .disabled(!valid)
+
+                Button("Cancel") {
+                    isPresented?.wrappedValue.toggle()
+                }
             }
-            .disabled(!valid)
         }
         .padding()
         .frame(width: 400)

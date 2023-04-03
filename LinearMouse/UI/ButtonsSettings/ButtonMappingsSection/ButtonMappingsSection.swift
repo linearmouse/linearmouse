@@ -13,21 +13,32 @@ struct ButtonMappingsSection: View {
 
     var body: some View {
         Section {
-            if !state.mappings.isEmpty {
+            if #available(macOS 13.0, *) {
+                if !state.mappings.isEmpty {
+                    List($state.mappings, id: \.self, selection: $selection) { $mapping in
+                        ButtonMappingListItem(mapping: $mapping)
+                    }
+                }
+            } else {
                 List($state.mappings, id: \.self, selection: $selection) { $mapping in
                     ButtonMappingListItem(mapping: $mapping)
                 }
+                .frame(height: 200)
             }
         } header: {
             Text("Assign actions to mouse buttons")
         } footer: {
             HStack(spacing: 4) {
-                Button(action: {
+                Button {
                     mappingToAdd = .init()
                     showAddSheet.toggle()
-                }) {
-                    Image("Plus")
+                } label: {
+                    VStack {
+                        Image("Plus")
+                    }
+                    .frame(width: 16, height: 16)
                 }
+                .buttonStyle(.plain)
                 .sheet(isPresented: $showAddSheet) {
                     ButtonMappingEditSheet(mapping: $mappingToAdd, mode: .create) { mapping in
                         state.appendMapping(mapping)
@@ -35,12 +46,16 @@ struct ButtonMappingsSection: View {
                     .environment(\.isPresented, $showAddSheet)
                 }
 
-                Button(action: {
+                Button {
                     state.mappings = state.mappings.filter { !selection.contains($0) }
                     selection = []
-                }) {
-                    Image("Minus")
+                } label: {
+                    VStack {
+                        Image("Minus")
+                    }
+                    .frame(width: 16, height: 16)
                 }
+                .buttonStyle(.plain)
                 .disabled(selection.count == 0)
             }
         }
