@@ -9,7 +9,7 @@ extension ScrollingSettings {
 
         var body: some View {
             Section {
-                Picker("Mode", selection: $state.scrollingMode) {
+                Picker("Scrolling mode", selection: $state.scrollingMode) {
                     ForEach(ScrollingSettingsState.ScrollingMode.allCases) { scrollingMode in
                         Text(NSLocalizedString(scrollingMode.rawValue, comment: "")).tag(scrollingMode)
                     }
@@ -22,7 +22,7 @@ extension ScrollingSettings {
                         Slider(value: $state.scrollingAcceleration,
                                in: 0.0 ... 10.0) {
                             labelWithDescription {
-                                Text("Acceleration")
+                                Text("Scrolling acceleration")
                                 Text("(0–10)")
                             }
                         } minimumValueLabel: {
@@ -43,7 +43,7 @@ extension ScrollingSettings {
                         Slider(value: $state.scrollingSpeed,
                                in: 0.0 ... 128.0) {
                             labelWithDescription {
-                                Text("Speed")
+                                Text("Scrolling speed")
                                 Text("(0–128)")
                             }
                         } minimumValueLabel: {
@@ -58,6 +58,13 @@ extension ScrollingSettings {
                             .textFieldStyle(.roundedBorder)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 60)
+                    }
+
+                    if state.scrollingDisabled {
+                        Text("Scrolling is disabled based on the current settings.")
+                            .controlSize(.small)
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
 
                     HStack(spacing: 10) {
