@@ -95,9 +95,9 @@
 "Action" = "动作";
 "The mouse button is already assigned." = "该鼠标按钮已被分配。";
 "Assigning an action to the left button without any modifier keys is not allowed." = "不能将动作分配给左键且不加修饰键。";
-"Repeat on hold" = "Repeat on hold";
+"Repeat on hold" = "按住时重复";
 "OK" = "好";
-"Create" = "Create";
+"Create" = "创建";
 
 "Settings" = "设置";
 "Show in menu bar" = "在菜单栏中显示";
