@@ -179,6 +179,9 @@ extension ButtonActionsTransformer: EventTransformer {
         case .simpleAction(.showDesktop):
             showDesktop()
 
+        case .simpleAction(.lookUpAndDataDetectors):
+            try postSymbolicHotKey(.lookUpWordInDictionary)
+
         case .simpleAction(.displayBrightnessUp):
             postSystemDefinedKey(.brightnessUp)
 

@@ -379,6 +379,7 @@ declare namespace Scheme {
         | AppExpose
         | Launchpad
         | ShowDesktop
+        | LookUpAndDataDetectors
         | DisplayBrightnessUp
         | DisplayBrightnessDown
         | MediaVolumeUp
@@ -440,6 +441,11 @@ declare namespace Scheme {
        * @description Show desktop.
        */
       type ShowDesktop = "showDesktop";
+
+      /**
+       * @description Look up & data detectors.
+       */
+      type LookUpAndDataDetectors = "lookUpAndDataDetectors";
 
       /**
        * @description Display: Brightness up.

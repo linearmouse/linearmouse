@@ -7,13 +7,14 @@ import CoreGraphics
 // https://github.com/WebKit/WebKit/blob/ab59722dc517c798f7d88bfe4dcb7b33b8473e7e/Tools/TestRunnerShared/spi/CoreGraphicsTestSPI.h#L39
 extension CGEventField {
     static let gestureHIDType = Self(rawValue: 110)!
+    static let gestureZoomValue = Self(rawValue: 113)!
     static let gestureSwipeValue = Self(rawValue: 115)!
     static let gesturePhase = Self(rawValue: 132)!
 }
 
 // - SeeAlso:
 // https://github.com/WebKit/WebKit/blob/ab59722dc517c798f7d88bfe4dcb7b33b8473e7e/Tools/TestRunnerShared/spi/CoreGraphicsTestSPI.h#L87
-enum CGSGesturePhase: UInt8 {
+public enum CGSGesturePhase: UInt8 {
     case none = 0
     case began = 1
     case changed = 2
@@ -33,6 +34,7 @@ enum IOHIDEventType: UInt32 {
     case zoom = 8
     case digitizer = 11
     case navigationSwipe = 16
+    case zoomToggle = 22
     case force = 32
 }
 

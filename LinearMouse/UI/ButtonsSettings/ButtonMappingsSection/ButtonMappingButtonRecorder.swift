@@ -68,9 +68,8 @@ struct ButtonMappingButtonRecorder: View {
                 .otherMouseUp,
                 .scrollWheel
             ]
-            recordingMonitor = NSEvent.addLocalMonitorForEvents(matching: eventsOfInterest) { event in
-                eventReceived(event)
-            }
+            recordingMonitor = NSEvent.addLocalMonitorForEvents(matching: eventsOfInterest,
+                                                                handler: eventReceived)
         }
     }
 
