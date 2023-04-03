@@ -95,6 +95,9 @@
 "Action" = "Action";
 "The mouse button is already assigned." = "The mouse button is already assigned.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "Assigning an action to the left button without any modifier keys is not allowed.";
+"Repeat on hold" = "Repeat on hold";
+"OK" = "확인";
+"Create" = "Create";
 
 "Settings" = "설정";
 "Show in menu bar" = "메뉴 막대에서 보기";
@@ -118,7 +121,6 @@
 "Donate" = "Donate";
 
 "Auto switch to the active device" = "활성화된 장치로 자동 전환";
-"OK" = "확인";
 
 "Mouse" = "마우스";
 "Trackpad" = "트랙패드";
