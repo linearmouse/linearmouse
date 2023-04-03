@@ -30,3 +30,19 @@ public extension View {
         .alignmentGuide(.leading) { $0[.controlAlignment] }
     }
 }
+
+extension View {
+    func asDefaultAction() -> some View {
+        if #available(macOS 11, *) {
+            return keyboardShortcut(.defaultAction)
+        }
+        return self
+    }
+
+    func asCancelAction() -> some View {
+        if #available(macOS 11, *) {
+            return keyboardShortcut(.cancelAction)
+        }
+        return self
+    }
+}
