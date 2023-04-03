@@ -289,6 +289,11 @@
       "description": "Launchpad.",
       "type": "string"
     },
+    "Scheme.Buttons.Mapping.LookUpAndDataDetectors": {
+      "const": "lookUpAndDataDetectors",
+      "description": "Look up & data detectors.",
+      "type": "string"
+    },
     "Scheme.Buttons.Mapping.MediaFastForward": {
       "const": "media.fastForward",
       "description": "Media: Fast forward.",
@@ -499,6 +504,9 @@
         },
         {
           "$ref": "#/definitions/Scheme.Buttons.Mapping.ShowDesktop"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.LookUpAndDataDetectors"
         },
         {
           "$ref": "#/definitions/Scheme.Buttons.Mapping.DisplayBrightnessUp"
