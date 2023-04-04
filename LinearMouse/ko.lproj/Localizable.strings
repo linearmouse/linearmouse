@@ -1,14 +1,14 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse이(가) 손쉬운 사용 권한이 필요합니다";
-"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
+"LinearMouse needs Accessibility permission" = "LinearMouse는 손쉬운 사용 권한이 필요합니다";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "시스템 설정 > 개인정보 보호 및 보안 > 손쉬운 사용에서 이 응용 프로그램에 접근 권한을 부여하십시오.";
 "Get more help" = "도움이 필요하신가요?";
 "Open Accessibility" = "손쉬운 사용 열기";
 
-"%@ Settings..." = "%@ Settings...";
+"%@ Settings..." = "%@ 설정...";
 "Start at login" = "로그인 시 시작";
 "Config" = "설정";
-"Reload" = "재설정";
+"Reload" = "다시 로드";
 "Reveal in Finder" = "Finder에서 열기";
-"Configure for %@..." = "Configure for %@...";
+"Configure for %@..." = "%@에 대해 설정...";
 "Quit %@" = "%@ 종료";
 
 "Scrolling" = "스크롤";
@@ -16,11 +16,11 @@
 "Buttons" = "버튼";
 "General" = "일반";
 
-"Vertical" = "Vertical";
-"Horizontal" = "Horizontal";
+"Vertical" = "수직 방향";
+"Horizontal" = "수평 방향";
 "Reverse scrolling" = "역방향 스크롤";
 "Some gestures, such as swiping back and forward, may stop working." = "앞뒤로 스와이프와 같은 일부 제스처가 작동하지 않을 수 있습니다.";
-"Scrolling mode" = "Scrolling mode";
+"Scrolling mode" = "스크롤 모드";
 "Accelerated" = "Accelerated";
 "By Lines" = "By Lines";
 "By Pixels" = "By Pixels";
