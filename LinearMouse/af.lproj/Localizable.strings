@@ -1,18 +1,18 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
-"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
-"Get more help" = "Get more help";
-"Open Accessibility" = "Open Accessibility";
+"LinearMouse needs Accessibility permission" = "LinearMouse benodig toeganklikheid toestemming";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "Jy moet toeganklikheid toestemming verleen in Stelsel instellings > Sekuriteit en Privaatheid > Toeganklikheid.";
+"Get more help" = "Kry meer hulp";
+"Open Accessibility" = "Open toeganklikheid";
 
-"%@ Settings..." = "%@ Settings...";
-"Start at login" = "Start at login";
-"Config" = "Config";
-"Reload" = "Reload";
-"Reveal in Finder" = "Reveal in Finder";
-"Configure for %@..." = "Configure for %@...";
-"Quit %@" = "Quit %@";
+"%@ Settings..." = "%@ Instellings...";
+"Start at login" = "Begin by aanmelding";
+"Config" = "Konfigurasie";
+"Reload" = "Herlaai";
+"Reveal in Finder" = "Onthul in Vinder";
+"Configure for %@..." = "Stel op virr %@...";
+"Quit %@" = "Beëindig %@";
 
-"Scrolling" = "Scrolling";
-"Pointer" = "Pointer";
+"Scrolling" = "Blaai";
+"Pointer" = "Wyser";
 "Buttons" = "Buttons";
 "General" = "General";
 

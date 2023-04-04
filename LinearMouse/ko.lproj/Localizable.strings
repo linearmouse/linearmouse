@@ -95,32 +95,32 @@
 "Forward" = "앞으로 가기";
 "Mouse button" = "마우스 버튼";
 "Action" = "동작";
-"The mouse button is already assigned." = "이 마우스 버튼은 이미 지정되어 있습니다.";
+"The mouse button is already assigned." = "이 마우스 버튼은 이미 설정되어 있습니다.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "보조 키 없이 주요 버튼에 동작을 설정하는 것은 허용되지 않습니다.";
-"Repeat on hold" = "Repeat on hold";
+"Repeat on hold" = "길게 눌러 반복";
 "OK" = "확인";
-"Create" = "Create";
+"Create" = "생성";
 
 "Settings" = "설정";
 "Show in menu bar" = "메뉴 막대에서 보기";
-"To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
-"Bypass events from other applications" = "Bypass events from other applications";
-"If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "If enabled, %@ will not modify events sent by other applications, such as Logi Options+.";
+"To show the settings, launch %@ again." = "설정을 적용하려면 %@를 재시작하십시오.";
+"Bypass events from other applications" = "다른 앱에서 보낸 이벤트 무시";
+"If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "활성화되면, %@는 Logi Options+와 같은 다른 응용 프로그램에서 보낸 이벤트를 수정하지 않습니다.";
 
 "Version: %@" = "버전: %@";
-"Check for updates automatically" = "Check for updates automatically";
-"Update check interval" = "Update check interval";
+"Check for updates automatically" = "자동으로 업데이트 확인";
+"Update check interval" = "업데이트 확인 간격";
 "Daily" = "매일";
 "Weekly" = "매주";
 "Monthly" = "매달";
-"Receive beta updates" = "Receive beta updates";
-"Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
+"Receive beta updates" = "베타 업데이트 받기";
+"Thank you for participating in the beta test." = "베타 테스트에 참여해 주셔서 감사합니다.";
 "Check for Updates..." = "업데이트 확인...";
 
 "Homepage" = "홈페이지";
-"Bug report" = "Bug report";
-"Feature request" = "Feature request";
-"Donate" = "Donate";
+"Bug report" = "버그 보고";
+"Feature request" = "피드백 보내기";
+"Donate" = "후원하기";
 
 "Auto switch to the active device" = "활성화된 장치로 자동 전환";
 
@@ -128,8 +128,8 @@
 "Trackpad" = "트랙패드";
 "(active)" = "(활성화됨)";
 
-"Configure for" = "Configure for";
-"All Apps" = "All Apps";
-"Configured" = "Configured";
-"Running" = "Running";
-"Installed" = "Installed";
+"Configure for" = "에 대해 설정...";
+"All Apps" = "모든 앱";
+"Configured" = "설정됨";
+"Running" = "실행 중";
+"Installed" = "설치됨";
