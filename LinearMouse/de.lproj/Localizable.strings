@@ -117,6 +117,9 @@
 "Thank you for participating in the beta test." = "Vielen Dank für die Teilnahme am Betatest.";
 "Check for Updates..." = "Nach Updates suchen...";
 
+"Export the logs for the last 5 minutes." = "Export the logs for the last 5 minutes.";
+"Export logs" = "Export logs";
+
 "Homepage" = "Homepage";
 "Bug report" = "Fehler melden";
 "Feature request" = "Verbesserungen vorschlagen";
