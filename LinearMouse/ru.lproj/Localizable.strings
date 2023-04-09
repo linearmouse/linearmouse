@@ -117,6 +117,9 @@
 "Thank you for participating in the beta test." = "Благодарим Вас за участие в бета-тестировании.";
 "Check for Updates..." = "Проверить наличие обновлений...";
 
+"Export the logs for the last 5 minutes." = "Export the logs for the last 5 minutes.";
+"Export logs" = "Export logs";
+
 "Homepage" = "Домашняя страница";
 "Bug report" = "Сообщить об ошибке";
 "Feature request" = "Предложить новую функцию";
