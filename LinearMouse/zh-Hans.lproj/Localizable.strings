@@ -117,8 +117,8 @@
 "Thank you for participating in the beta test." = "感谢你参加 beta 测试。";
 "Check for Updates..." = "检查更新...";
 
-"Export the logs for the last 5 minutes." = "Export the logs for the last 5 minutes.";
-"Export logs" = "Export logs";
+"Export the logs for the last 5 minutes." = "导出最近 5 分钟的日志。";
+"Export logs" = "导出日志";
 
 "Homepage" = "主页";
 "Bug report" = "Bug 反馈";
