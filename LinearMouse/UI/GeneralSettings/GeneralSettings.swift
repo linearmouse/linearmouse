@@ -42,6 +42,8 @@ struct GeneralSettings: View {
                 }
                 .modifier(SectionViewModifier())
 
+                ExportLogs()
+
                 Section {
                     HyperLink(URLs.homepage) {
                         HStack(alignment: .firstTextBaseline, spacing: 5) {
