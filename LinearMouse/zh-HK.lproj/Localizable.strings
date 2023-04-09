@@ -117,6 +117,9 @@
 "Thank you for participating in the beta test." = "感謝你參與 beta 測試。";
 "Check for Updates..." = "檢查更新...";
 
+"Export the logs for the last 5 minutes." = "Export the logs for the last 5 minutes.";
+"Export logs" = "Export logs";
+
 "Homepage" = "首頁";
 "Bug report" = "Bug 報告";
 "Feature request" = "功能建議";
