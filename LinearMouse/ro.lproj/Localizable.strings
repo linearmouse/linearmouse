@@ -117,6 +117,9 @@
 "Thank you for participating in the beta test." = "Vă mulțumim că ați participat la testul beta.";
 "Check for Updates..." = "Verificați dacă există actualizări...";
 
+"Export the logs for the last 5 minutes." = "Export the logs for the last 5 minutes.";
+"Export logs" = "Export logs";
+
 "Homepage" = "Pagina de pornire";
 "Bug report" = "Raportați probleme";
 "Feature request" = "Solicitați o caracteristică";
