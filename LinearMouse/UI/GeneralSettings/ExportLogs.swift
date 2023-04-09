@@ -5,7 +5,7 @@ import OSLog
 import SwiftUI
 
 struct ExportLogs: View {
-    private let logExportDispatchQueue = DispatchQueue(label: "log-export")
+    private let exportQueue = DispatchQueue(label: "log-export")
     @State private var exporting = false
 
     var body: some View {
@@ -47,7 +47,7 @@ extension ExportLogs {
     }
 
     func exportLogs() {
-        logExportDispatchQueue.async {
+        exportQueue.async {
             exporting = true
             defer { exporting = false }
 
