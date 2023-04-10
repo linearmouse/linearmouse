@@ -145,7 +145,11 @@ extension Device {
     }
 
     private func inputValueCallback(_ device: PointerDevice, _ value: IOHIDValue) {
+        os_log("Received input value from %{public}@: %{public}@", log: Self.log, type: .debug,
+               String(describing: device), String(describing: value))
+
         guard let manager = manager else {
+            os_log("manager is nil", log: Self.log, type: .error)
             return
         }
 
