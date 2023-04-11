@@ -4,42 +4,42 @@
 "Open Accessibility" = "Open Accessibility";
 
 "%@ Settings..." = "%@ Settings...";
-"Start at login" = "Start at login";
+"Start at login" = "Автозапуск";
 "Config" = "Config";
-"Reload" = "Reload";
+"Reload" = "Перезавантажити";
 "Reveal in Finder" = "Reveal in Finder";
 "Configure for %@..." = "Configure for %@...";
 "Quit %@" = "Quit %@";
 
 "Scrolling" = "Scrolling";
-"Pointer" = "Pointer";
-"Buttons" = "Buttons";
-"General" = "General";
+"Pointer" = "Курсор";
+"Buttons" = "Клавіші";
+"General" = "Загальні";
 
-"Vertical" = "Vertical";
-"Horizontal" = "Horizontal";
+"Vertical" = "Вертикальні";
+"Horizontal" = "Горизонтальні";
 "Reverse scrolling" = "Reverse scrolling";
 "Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
-"Scrolling mode" = "Scrolling mode";
-"Accelerated" = "Accelerated";
-"By Lines" = "By Lines";
-"By Pixels" = "By Pixels";
-"Scrolling acceleration" = "Scrolling acceleration";
-"Linear" = "Linear";
-"Speed" = "Speed";
-"Slow" = "Slow";
-"Fast" = "Fast";
-"Distance" = "Distance";
+"Scrolling mode" = "Режим прокручування";
+"Accelerated" = "Прискорений";
+"By Lines" = "За Рядками";
+"By Pixels" = "За Пікселями";
+"Scrolling acceleration" = "Пришвидшення прокручування";
+"Linear" = "Лінійно";
+"Speed" = "Швидкість";
+"Slow" = "Повільно";
+"Fast" = "Швидко";
+"Distance" = "Відстань";
 "Scrolling is disabled based on the current settings." = "Scrolling is disabled based on the current settings.";
 "Revert to system defaults" = "Revert to system defaults";
 "Copy settings from vertical" = "Copy settings from vertical";
-"Modifier Keys" = "Modifier Keys";
+"Modifier Keys" = "Клавіші-модифікатори";
 "No action" = "No action";
 "Alter orientation" = "Alter orientation";
 "Change speed" = "Change speed";
-"Zoom" = "Zoom";
+"Zoom" = "Масштабування";
 
-"Disable pointer acceleration" = "Disable pointer acceleration";
+"Disable pointer acceleration" = "Вимкнути прискорення курсору";
 "Pointer acceleration" = "Pointer acceleration";
 "Pointer speed" = "Pointer speed";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
@@ -50,20 +50,20 @@
 "Ignore rapid clicks within a certain time period." = "Ignore rapid clicks within a certain time period.";
 "ms" = "мс";
 "Reset timer on mouse up" = "Reset timer on mouse up";
-"Left button" = "Left button";
-"Right button" = "Right button";
-"Middle button" = "Middle button";
+"Left button" = "Ліва клавіша";
+"Right button" = "Права клавіша";
+"Middle button" = "Середня клавіша";
 
-"Assign actions to mouse buttons" = "Assign actions to mouse buttons";
-"Edit" = "Edit";
+"Assign actions to mouse buttons" = "Призначити дії для клавіш миші";
+"Edit" = "Редагувати";
 "Left click" = "Left click";
 "Right click" = "Right click";
 "Middle click" = "Middle click";
 "Button #%lld click" = "Button #%lld click";
 "Scroll up" = "Scroll up";
 "Scroll down" = "Scroll down";
-"Scroll left" = "Scroll left";
-"Scroll right" = "Scroll right";
+"Scroll left" = "Прокрутка ліворуч";
+"Scroll right" = "Прокрутка праворуч";
 
 "Default action" = "Default action";
 "Mission Control" = "Mission Control";
@@ -71,7 +71,7 @@
 "Move right a space" = "Move right a space";
 "Application windows" = "Application windows";
 "Launchpad" = "Launchpad";
-"Show desktop" = "Show desktop";
+"Show desktop" = "Показати робочий стіл";
 "Look up & data detectors" = "Look up & data detectors";
 "Smart zoom" = "Smart zoom";
 "Display" = "Display";
@@ -86,14 +86,14 @@
 "Previous" = "Previous";
 "Fast forward" = "Fast forward";
 "Rewind" = "Rewind";
-"Keyboard" = "Keyboard";
+"Keyboard" = "Клавіатура";
 "Increase keyboard brightness" = "Increase keyboard brightness";
 "Decrease keyboard brightness" = "Decrease keyboard brightness";
-"Mouse Wheel" = "Mouse Wheel";
+"Mouse Wheel" = "Коліщатко Миші";
 "Mouse Button" = "Mouse Button";
 "Back" = "Back";
 "Forward" = "Forward";
-"Mouse button" = "Mouse button";
+"Mouse button" = "Клавіші миші";
 "Action" = "Action";
 "The mouse button is already assigned." = "The mouse button is already assigned.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "Assigning an action to the left button without any modifier keys is not allowed.";
@@ -101,7 +101,7 @@
 "OK" = "OK";
 "Create" = "Create";
 
-"Settings" = "Settings";
+"Settings" = "Налаштування";
 "Show in menu bar" = "Show in menu bar";
 "To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
 "Bypass events from other applications" = "Bypass events from other applications";
@@ -117,20 +117,20 @@
 "Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
 "Check for Updates..." = "Check for Updates...";
 
-"Export the logs for the last 5 minutes." = "Export the logs for the last 5 minutes.";
+"Export the logs for the last 5 minutes." = "Експортувати логи за останні 5 хвилин.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "If you are reporting a bug, it would be helpful to attach the logs.";
 "Export logs" = "Export logs";
 
 "Homepage" = "Homepage";
-"Bug report" = "Bug report";
+"Bug report" = "Сповістити про помилку";
 "Feature request" = "Feature request";
-"Donate" = "Donate";
+"Donate" = "Допомогти";
 
 "Auto switch to the active device" = "Auto switch to the active device";
 
 "Mouse" = "Mouse";
-"Trackpad" = "Trackpad";
-"(active)" = "(active)";
+"Trackpad" = "Трекпад";
+"(active)" = "(активно)";
 
 "Configure for" = "Configure for";
 "All Apps" = "All Apps";
