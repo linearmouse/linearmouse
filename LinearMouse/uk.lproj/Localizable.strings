@@ -48,7 +48,7 @@
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
 "Debounce button clicks" = "Debounce button clicks";
 "Ignore rapid clicks within a certain time period." = "Ignore rapid clicks within a certain time period.";
-"ms" = "ms";
+"ms" = "мс";
 "Reset timer on mouse up" = "Reset timer on mouse up";
 "Left button" = "Left button";
 "Right button" = "Right button";
