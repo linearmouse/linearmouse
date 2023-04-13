@@ -42,7 +42,7 @@ struct GeneralSettings: View {
                 }
                 .modifier(SectionViewModifier())
 
-                ExportLogs()
+                LoggingSection()
 
                 Section {
                     HyperLink(URLs.homepage) {
