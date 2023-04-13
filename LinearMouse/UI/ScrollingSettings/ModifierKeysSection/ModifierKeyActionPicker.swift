@@ -19,10 +19,10 @@ extension ScrollingSettings.ModifierKeysSection {
 
             if case .some(.changeSpeed) = action {
                 HStack(spacing: 5) {
-                    Slider(value: self.speedFactor,
+                    Slider(value: speedFactor,
                            in: 0.05 ... 10.00)
                         .labelsHidden()
-                    Text(String(format: "%0.2f ×", self.speedFactor.wrappedValue))
+                    Text(String(format: "%0.2f ×", speedFactor.wrappedValue))
                         .frame(width: 60, alignment: .trailing)
                 }
             }
