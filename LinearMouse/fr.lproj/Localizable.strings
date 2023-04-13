@@ -20,11 +20,11 @@
 "Horizontal" = "Horizontal";
 "Reverse scrolling" = "Inverser le sens de défilement";
 "Some gestures, such as swiping back and forward, may stop working." = "Certains gestes, comme le balayage avant et arrière, peuvent cesser de fonctionner.";
-"Scrolling mode" = "Scrolling mode";
+"Scrolling mode" = "Mode de défilement";
 "Accelerated" = "Accéléré";
 "By Lines" = "Par lignes";
 "By Pixels" = "Par pixels";
-"Scrolling acceleration" = "Scrolling acceleration";
+"Scrolling acceleration" = "Accélération du défilement";
 "Linear" = "Linéaire";
 "Speed" = "Vitesse";
 "Slow" = "Lent";
@@ -40,8 +40,8 @@
 "Zoom" = "Zoom";
 
 "Disable pointer acceleration" = "Désactiver l'accélération du pointeur";
-"Pointer acceleration" = "Pointer acceleration";
-"Pointer speed" = "Pointer speed";
+"Pointer acceleration" = "Accélération du pointeur";
+"Pointer speed" = "Vitesse du pointeur";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Vous pouvez aussi appuyer sur ⌃⇧⌘Z pour réinitialiser aux paramètres par défauts du système.";
 
 "Enable universal back and forward" = "Activer l'option universelle pour revenir et avancer de pages";
@@ -73,7 +73,7 @@
 "Launchpad" = "Launchpad";
 "Show desktop" = "Montrer le bureau";
 "Look up & data detectors" = "Look up & data detectors";
-"Smart zoom" = "Smart zoom";
+"Smart zoom" = "Zoom intelligent";
 "Display" = "Afficher";
 "Increase display brightness" = "Augmenter la luminosité d'affichage";
 "Decrease display brightness" = "Baisser la luminosité d'affichage";
@@ -97,9 +97,9 @@
 "Action" = "Action";
 "The mouse button is already assigned." = "Le bouton de la souris est déjà utilisé.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "L'attribution d'une action au bouton gauche sans aucune touche de modification n'est pas autorisée.";
-"Repeat on hold" = "Repeat on hold";
+"Repeat on hold" = "Répéter en boucle";
 "OK" = "Ok";
-"Create" = "Create";
+"Create" = "Créer";
 
 "Settings" = "Paramètres";
 "Show in menu bar" = "Afficher dans la bar de menu";
@@ -117,9 +117,9 @@
 "Thank you for participating in the beta test." = "Merci d'avoir participé au test beta.";
 "Check for Updates..." = "Rechercher des mises à jour...";
 
-"Export the logs for the last 5 minutes." = "Export the logs for the last 5 minutes.";
-"If you are reporting a bug, it would be helpful to attach the logs." = "If you are reporting a bug, it would be helpful to attach the logs.";
-"Export logs" = "Export logs";
+"Export the logs for the last 5 minutes." = "Exporter les journaux pour les 5 dernières minutes.";
+"If you are reporting a bug, it would be helpful to attach the logs." = "Si vous signalez un bug, il serait utile d'attacher les journaux.";
+"Export logs" = "Exporter les journaux";
 
 "Homepage" = "Page d'accueil";
 "Bug report" = "Signaler un Bug";
