@@ -30,7 +30,7 @@
 "Slow" = "Lent";
 "Fast" = "Rapide";
 "Distance" = "Distance";
-"Scrolling is disabled based on the current settings." = "Scrolling is disabled based on the current settings.";
+"Scrolling is disabled based on the current settings." = "Le défilement est désactivé selon les paramètres actuels.";
 "Revert to system defaults" = "Réinitialiser aux paramètres par défaut";
 "Copy settings from vertical" = "Copier les paramètres de la catégorie \"Vertical\"";
 "Modifier Keys" = "Modificateur de touches";
@@ -72,7 +72,7 @@
 "Application windows" = "Fenêtre d''application";
 "Launchpad" = "Launchpad";
 "Show desktop" = "Montrer le bureau";
-"Look up & data detectors" = "Look up & data detectors";
+"Look up & data detectors" = "Recherche & Détecteurs de données";
 "Smart zoom" = "Zoom intelligent";
 "Display" = "Afficher";
 "Increase display brightness" = "Augmenter la luminosité d'affichage";
