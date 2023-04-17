@@ -123,6 +123,6 @@ extension Configuration {
         matchScheme(withDevice: device,
                     withApp: pid?.bundleIdentifier,
                     withParentApp: pid?.parent?.bundleIdentifier,
-                    withGroupApp: pid?.parent?.bundleIdentifier)
+                    withGroupApp: pid?.group?.bundleIdentifier)
     }
 }
