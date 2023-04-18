@@ -117,6 +117,7 @@
 "Thank you for participating in the beta test." = "베타 테스트에 참여해 주셔서 감사합니다.";
 "Check for Updates..." = "업데이트 확인...";
 
+"Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting.";
 "Export the logs for the last 5 minutes." = "지난 5분 동안 로그 내보내기";
 "If you are reporting a bug, it would be helpful to attach the logs." = "버그를 보고하는 경우 로그를 첨부하면 도움이 됩니다.";
 "Export logs" = "로그 내보내기";

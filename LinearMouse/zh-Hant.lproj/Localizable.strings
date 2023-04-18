@@ -117,6 +117,7 @@
 "Thank you for participating in the beta test." = "感謝你參與 beta 測試。";
 "Check for Updates..." = "檢查更新...";
 
+"Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "啟用此選項將記錄所有輸入事件，這可能增加使用 %@ 時的 CPU 使用率，但有助於排除故障。";
 "Export the logs for the last 5 minutes." = "匯出最近 5 分鐘的記錄。";
 "If you are reporting a bug, it would be helpful to attach the logs." = "如果你要報告 bug，附上記錄會很有幫助。";
 "Export logs" = "匯出記錄";

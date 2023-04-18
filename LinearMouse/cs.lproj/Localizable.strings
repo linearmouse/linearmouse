@@ -117,6 +117,7 @@
 "Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
 "Check for Updates..." = "Zkontrolovat aktualizace...";
 
+"Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting.";
 "Export the logs for the last 5 minutes." = "Export the logs for the last 5 minutes.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "If you are reporting a bug, it would be helpful to attach the logs.";
 "Export logs" = "Export logs";
