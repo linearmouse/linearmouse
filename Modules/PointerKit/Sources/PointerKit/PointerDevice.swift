@@ -30,6 +30,7 @@ public class PointerDevice {
 
         if let device = device {
             IOHIDDeviceOpen(device, IOOptionBits(kIOHIDOptionsTypeNone))
+            IOHIDDeviceSetInputValueMatching(device, nil)
             IOHIDDeviceRegisterInputValueCallback(device,
                                                   Self.inputValueCallback,
                                                   Unmanaged.passUnretained(self).toOpaque())

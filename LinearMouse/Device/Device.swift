@@ -1,6 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2023 Jiahao Lu
 
+import Defaults
 import Foundation
 import os.log
 import PointerKit
@@ -14,6 +15,8 @@ class Device {
 
     private weak var manager: DeviceManager?
     let device: PointerDevice
+
+    @Default(.detailedLoggingOn) private var detailedLoggingOn
 
     private let initialPointerResolution: Double
 
@@ -145,43 +148,31 @@ extension Device {
     }
 
     private func inputValueCallback(_ device: PointerDevice, _ value: IOHIDValue) {
+        if detailedLoggingOn {
+            os_log("Received input value from %{public}@: %{public}@", log: Self.log, type: .debug,
+                   String(describing: device), String(describing: value))
+        }
+
         guard let manager = manager else {
+            os_log("manager is nil", log: Self.log, type: .error)
             return
         }
 
-        guard manager.lastActiveDevice != self || manager.lastActiveDeviceIncludingMovements != self else {
+        guard manager.lastActiveDevice != self else {
             return
         }
 
-        let element = IOHIDValueGetElement(value)
+        let element = value.element
 
-        let usagePage = IOHIDElementGetUsagePage(element)
-        let usage = IOHIDElementGetUsage(element)
+        let usagePage = element.usagePage
+        let usage = element.usage
 
         guard usagePage == kHIDPage_GenericDesktop || usagePage == kHIDPage_Digitizer || usagePage == kHIDPage_Button
         else {
             return
         }
 
-        if usagePage == kHIDPage_GenericDesktop {
-            if usage == kHIDUsage_GD_X || usage == kHIDUsage_GD_Y || usage == kHIDUsage_GD_Z {
-                guard IOHIDValueGetIntegerValue(value) != 0 else {
-                    return
-                }
-            }
-        }
-
-        if usagePage == kHIDPage_GenericDesktop || usagePage == kHIDPage_Digitizer {
-            if manager.lastActiveDeviceIncludingMovements != self {
-                manager.lastActiveDeviceIncludingMovements = self
-            }
-
-            return
-        }
-
-        if manager.lastActiveDevice != self {
-            manager.lastActiveDevice = self
-        }
+        manager.lastActiveDevice = self
 
         os_log("""
                Last active device changed: %{public}@, category=%{public}@ \

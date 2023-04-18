@@ -1,15 +1,27 @@
 // MIT License
 // Copyright (c) 2021-2023 Jiahao Lu
 
+import Defaults
 import OSLog
 import SwiftUI
 
-struct ExportLogs: View {
+struct LoggingSection: View {
+    @Default(.detailedLoggingOn) private var detailedLoggingOn
+
     private let exportQueue = DispatchQueue(label: "log-export")
     @State private var exporting = false
 
     var body: some View {
         Section {
+            Toggle(isOn: $detailedLoggingOn) {
+                withDescription {
+                    Text("Enable detailed logging")
+                    Text(
+                        "Enabling this option will log all input events, which may increase CPU usage while using \(LinearMouse.appName), but can be useful for troubleshooting."
+                    )
+                }
+            }
+
             VStack(alignment: .leading) {
                 Text("Export the logs for the last 5 minutes.")
                 Text("If you are reporting a bug, it would be helpful to attach the logs.")
@@ -26,7 +38,7 @@ struct ExportLogs: View {
     }
 }
 
-extension ExportLogs {
+extension LoggingSection {
     private func level(_ level: OSLogEntryLog.Level) -> String {
         switch level {
         case .undefined:

@@ -16,7 +16,7 @@ class DeviceModel: ObservableObject {
     init(device: Device) {
         self.device = device
 
-        DeviceManager.shared.$lastActiveDeviceIncludingMovements
+        DeviceManager.shared.$lastActiveDevice
             .throttle(for: 0.5, scheduler: RunLoop.main, latest: true)
             .removeDuplicates()
             .map { $0 == device }
