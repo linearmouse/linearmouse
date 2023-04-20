@@ -2,6 +2,7 @@
 // Copyright (c) 2021-2023 Jiahao Lu
 
 import Combine
+import LaunchAtLogin
 import os.log
 import SwiftUI
 
@@ -21,6 +22,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             AccessibilityPermissionWindow.shared.bringToFront()
             return
         }
+
+        LaunchAtLogin.migrateIfNeeded()
 
         setup()
 

@@ -25,7 +25,6 @@
 		972A5E2D285D882500CB6440 /* DeviceState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E2C285D882500CB6440 /* DeviceState.swift */; };
 		972A5E30285D891100CB6440 /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = 972A5E2F285D891100CB6440 /* Defaults */; };
 		972A5E32285D8B5B00CB6440 /* DeviceMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E31285D8B5B00CB6440 /* DeviceMatcher.swift */; };
-		972A5E34285D8E4800CB6440 /* Defaults+Workaround.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E33285D8E4800CB6440 /* Defaults+Workaround.swift */; };
 		972AFBAE29A10F80001C5099 /* ApplicationBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972AFBAD29A10F80001C5099 /* ApplicationBundle.swift */; };
 		972AFD452851C101009B0CBF /* AccessibilityPermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972AFD442851C101009B0CBF /* AccessibilityPermissionView.swift */; };
 		972AFD472851E6B0009B0CBF /* AccessibilityPermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972AFD462851E6B0009B0CBF /* AccessibilityPermission.swift */; };
@@ -159,7 +158,6 @@
 		972A5E29285D5D0100CB6440 /* DeviceButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceButtonStyle.swift; sourceTree = "<group>"; };
 		972A5E2C285D882500CB6440 /* DeviceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceState.swift; sourceTree = "<group>"; };
 		972A5E31285D8B5B00CB6440 /* DeviceMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceMatcher.swift; sourceTree = "<group>"; };
-		972A5E33285D8E4800CB6440 /* Defaults+Workaround.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Defaults+Workaround.swift"; sourceTree = "<group>"; };
 		972AFBAD29A10F80001C5099 /* ApplicationBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationBundle.swift; sourceTree = "<group>"; };
 		972AFD442851C101009B0CBF /* AccessibilityPermissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermissionView.swift; sourceTree = "<group>"; };
 		972AFD462851E6B0009B0CBF /* AccessibilityPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermission.swift; sourceTree = "<group>"; };
@@ -713,7 +711,6 @@
 				B76173462675AD8700CC9412 /* Localizable.strings */,
 				B7B6D83B26B2726B00B0D247 /* ModifierKeys.swift */,
 				B7842924278D985600D207F0 /* AutoUpdateManager.swift */,
-				972A5E33285D8E4800CB6440 /* Defaults+Workaround.swift */,
 				B77A160F2674B85300E99A5D /* DefaultsKeys.swift */,
 			);
 			path = LinearMouse;
@@ -1010,7 +1007,6 @@
 				97E16F4F28F9A22A00E7D09B /* LinearScrollingHorizontalTransformer.swift in Sources */,
 				97C5DBB82868158C006FA6B4 /* PointerSettingsState.swift in Sources */,
 				B77A161B2674EF0E00E99A5D /* HyperLink.swift in Sources */,
-				972A5E34285D8E4800CB6440 /* Defaults+Workaround.swift in Sources */,
 				97B83CE52860DA9800ECF109 /* CustomDecodingError.swift in Sources */,
 				97B9D4992865EC0900137E60 /* If.swift in Sources */,
 				B7ADF97F2748991D0005B02D /* ReverseScrollingTransformer.swift in Sources */,
@@ -1436,7 +1432,7 @@
 			repositoryURL = "https://github.com/sindresorhus/LaunchAtLogin";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 4.0.0;
+				minimumVersion = 5.0.0;
 			};
 		};
 		B73AC54F27C29C7C00F7D3E8 /* XCRemoteSwiftPackageReference "Version" */ = {
