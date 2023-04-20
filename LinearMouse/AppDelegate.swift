@@ -2,6 +2,7 @@
 // Copyright (c) 2021-2023 Jiahao Lu
 
 import Combine
+import LaunchAtLogin
 import os.log
 import SwiftUI
 
@@ -13,6 +14,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private let statusItem = StatusItem.shared
     private var subscriptions = Set<AnyCancellable>()
     private var eventTap: EventTap?
+
+    override init() {
+        LaunchAtLogin.migrateIfNeeded()
+    }
 
     func applicationDidFinishLaunching(_: Notification) {
         guard ProcessEnvironment.isRunningApp else { return }

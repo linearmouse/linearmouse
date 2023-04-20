@@ -6,7 +6,7 @@
       "location" : "https://github.com/sindresorhus/Defaults",
       "state" : {
         "branch" : "main",
-        "revision" : "981ccb0a01c54abbe3c12ccb8226108527bbf115"
+        "revision" : "8584d1d6ed36c195258977f2ed0cf95357efb160"
       }
     },
     {
@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sindresorhus/LaunchAtLogin",
       "state" : {
-        "revision" : "e8171b3e38a2816f579f58f3dac1522aa39efe41",
-        "version" : "4.2.0"
+        "revision" : "7ad6331f9c38953eb1ce8737758e18f7607e984a",
+        "version" : "5.0.0"
       }
     },
     {
@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/nicklockwood/LRUCache.git",
       "state" : {
-        "revision" : "b2bd97c3b75e5042c5ab464fdc71fcd8217d11b4",
-        "version" : "1.0.2"
+        "revision" : "6d2b5246c9c98dcd498552bb22f08d55b12a8371",
+        "version" : "1.0.4"
       }
     },
     {
