@@ -15,6 +15,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var subscriptions = Set<AnyCancellable>()
     private var eventTap: EventTap?
 
+    override init() {
+        LaunchAtLogin.migrateIfNeeded()
+    }
+
     func applicationDidFinishLaunching(_: Notification) {
         guard ProcessEnvironment.isRunningApp else { return }
 
@@ -22,8 +26,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             AccessibilityPermissionWindow.shared.bringToFront()
             return
         }
-
-        LaunchAtLogin.migrateIfNeeded()
 
         setup()
 
