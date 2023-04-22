@@ -24,7 +24,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard ProcessEnvironment.isRunningApp else { return }
 
         #if !DEBUG
-            AppMover.moveIfNecessary()
+            if AppMover.moveIfNecessary() {
+                return
+            }
         #endif
 
         guard AccessibilityPermission.enabled else {
