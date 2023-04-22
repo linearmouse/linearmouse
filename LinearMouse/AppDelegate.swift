@@ -23,7 +23,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_: Notification) {
         guard ProcessEnvironment.isRunningApp else { return }
 
-        #if RELEASE
+        #if !DEBUG
             AppMover.moveIfNecessary()
         #endif
 
