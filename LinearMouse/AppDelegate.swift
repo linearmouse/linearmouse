@@ -1,6 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2023 Jiahao Lu
 
+import AppMover
 import Combine
 import LaunchAtLogin
 import os.log
@@ -21,6 +22,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_: Notification) {
         guard ProcessEnvironment.isRunningApp else { return }
+
+        #if !DEBUG
+            if AppMover.moveIfNecessary() {
+                return
+            }
+        #endif
 
         guard AccessibilityPermission.enabled else {
             AccessibilityPermissionWindow.shared.bringToFront()

@@ -1,6 +1,15 @@
 {
   "pins" : [
     {
+      "identity" : "appmover",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/linearmouse/AppMover",
+      "state" : {
+        "branch" : "master",
+        "revision" : "fbd0e88e24b606245beac62da0b8a30c2b905934"
+      }
+    },
+    {
       "identity" : "defaults",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sindresorhus/Defaults",

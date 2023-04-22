@@ -28,6 +28,7 @@ DerivedData/
 ## Configuration
 /Signing.xcconfig
 /Version.xcconfig
+/Release.xcconfig
 
 # macOS
 .DS_Store
