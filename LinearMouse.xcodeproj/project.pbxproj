@@ -92,6 +92,7 @@
 		97F77FB1285F0CDC007C9C2B /* Scheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FB0285F0CDC007C9C2B /* Scheme.swift */; };
 		97F77FB4285F45AF007C9C2B /* ConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FB3285F45AF007C9C2B /* ConfigurationTests.swift */; };
 		97F77FB7285F53A5007C9C2B /* SingleValueOrArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FB6285F53A5007C9C2B /* SingleValueOrArray.swift */; };
+		97FC692F29F44D0100859859 /* AppMover in Frameworks */ = {isa = PBXBuildFile; productRef = 97FC692E29F44D0100859859 /* AppMover */; };
 		97FD8CEA29BE0F9D00D93212 /* ButtonMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97FD8CE929BE0F9D00D93212 /* ButtonMapping.swift */; };
 		97FD8CEC29C1ABA800D93212 /* ButtonMappingEditSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97FD8CEB29C1ABA800D93212 /* ButtonMappingEditSheet.swift */; };
 		B70A58F6284F987900E5C86E /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = B70A58F5284F987900E5C86E /* LaunchAtLogin */; };
@@ -306,6 +307,7 @@
 				B70A58F6284F987900E5C86E /* LaunchAtLogin in Frameworks */,
 				97C97728288FC49F009094BA /* DockKit in Frameworks */,
 				B784292D278DB06600D207F0 /* Sparkle in Frameworks */,
+				97FC692F29F44D0100859859 /* AppMover in Frameworks */,
 				972A5E30285D891100CB6440 /* Defaults in Frameworks */,
 				97A7A39C28587E8C00EE4833 /* PointerKit in Frameworks */,
 				97C5D8FF2856E3CB00CBED2D /* GestureKit in Frameworks */,
@@ -834,6 +836,7 @@
 				97C97727288FC49F009094BA /* DockKit */,
 				97C9772C28910E4F009094BA /* KeyKit */,
 				978DBCA529AB1732002259B3 /* JSONPatcher */,
+				97FC692E29F44D0100859859 /* AppMover */,
 			);
 			productName = LinearMouse;
 			productReference = B75A06182671E9D800BEAF77 /* LinearMouse.app */;
@@ -923,6 +926,7 @@
 				972A5E2E285D891100CB6440 /* XCRemoteSwiftPackageReference "Defaults" */,
 				977638F7286BE9EE00A698B6 /* XCRemoteSwiftPackageReference "PublishedObject" */,
 				978DBCA429AB1732002259B3 /* XCRemoteSwiftPackageReference "JSONPatcher" */,
+				97FC692B29F44CE000859859 /* XCRemoteSwiftPackageReference "AppMover" */,
 			);
 			productRefGroup = B75A06192671E9D800BEAF77 /* Products */;
 			projectDirPath = "";
@@ -1427,6 +1431,14 @@
 				kind = branch;
 			};
 		};
+		97FC692B29F44CE000859859 /* XCRemoteSwiftPackageReference "AppMover" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/linearmouse/AppMover";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		B70A58F4284F987900E5C86E /* XCRemoteSwiftPackageReference "LaunchAtLogin" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/LaunchAtLogin";
@@ -1492,6 +1504,11 @@
 		97C9772C28910E4F009094BA /* KeyKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = KeyKit;
+		};
+		97FC692E29F44D0100859859 /* AppMover */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 97FC692B29F44CE000859859 /* XCRemoteSwiftPackageReference "AppMover" */;
+			productName = AppMover;
 		};
 		B70A58F5284F987900E5C86E /* LaunchAtLogin */ = {
 			isa = XCSwiftPackageProductDependency;
