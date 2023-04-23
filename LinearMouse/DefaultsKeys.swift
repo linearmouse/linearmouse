@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2023 Jiahao Lu
+// Copyright (c) 2021-2023 LinearMouse
 
 import Defaults
 

@@ -1,4 +1,4 @@
 --commas inline
 --disable wrapMultilineStatementBraces
---header "MIT License\nCopyright (c) 2021-{year} Jiahao Lu"
+--header "MIT License\nCopyright (c) 2021-{year} LinearMouse"
 --maxwidth 120

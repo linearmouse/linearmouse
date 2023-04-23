@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2023 Jiahao Lu
+// Copyright (c) 2021-2023 LinearMouse
 
 // https://github.com/sindresorhus/Defaults/blob/54f970b9d7c269193756599c7ae5318878dcab1a/Sources/Defaults/util.swift
 
