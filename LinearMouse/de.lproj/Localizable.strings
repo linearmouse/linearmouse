@@ -118,9 +118,9 @@
 "Check for Updates..." = "Nach Updates suchen...";
 
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Wenn diese Option aktiviert ist, werden alle Eingabeereignisse protokolliert, was die CPU-Auslastung während der Verwendung von %@ erhöhen kann, jedoch bei der Fehlersuche nützlich sein kann.";
-"Export the logs for the last 5 minutes." = "Export the logs for the last 5 minutes.";
-"If you are reporting a bug, it would be helpful to attach the logs." = "If you are reporting a bug, it would be helpful to attach the logs.";
-"Export logs" = "Export logs";
+"Export the logs for the last 5 minutes." = "Exportieren der Logdateien für die letzten 5 Minuten.";
+"If you are reporting a bug, it would be helpful to attach the logs." = "Wenn Sie einen Fehler melden, wäre es hilfreich, die Logdateien anzuhängen.";
+"Export logs" = "Logdateien exportieren";
 
 "Homepage" = "Homepage";
 "Bug report" = "Fehler melden";
