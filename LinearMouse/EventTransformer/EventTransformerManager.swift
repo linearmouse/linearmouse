@@ -40,7 +40,7 @@ class EventTransformerManager {
         if sourcePid != nil, bypassEventsFromOtherApplications {
             os_log("Return noop transformer because this event is sent by %{public}s",
                    log: Self.log,
-                   type: .debug,
+                   type: .info,
                    sourcePid?.bundleIdentifier ?? "(unknown)")
             return []
         }
@@ -48,7 +48,7 @@ class EventTransformerManager {
            sourceBundleIdentifierBypassSet.contains(sourceBundleIdentifier) {
             os_log("Return noop transformer because the source application %{public}s is in the bypass set",
                    log: Self.log,
-                   type: .debug,
+                   type: .info,
                    sourceBundleIdentifier)
             return []
         }
@@ -69,7 +69,7 @@ class EventTransformerManager {
         // TODO: Patch EventTransformer instead of rebuilding it
 
         os_log("Initialize EventTransformer with scheme: %{public}@ (device=%{public}@, pid=%{public}@)",
-               log: Self.log, type: .debug,
+               log: Self.log, type: .info,
                String(describing: scheme),
                String(describing: device),
                String(describing: pid))

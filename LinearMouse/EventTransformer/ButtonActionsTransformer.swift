@@ -143,7 +143,7 @@ extension ButtonActionsTransformer: EventTransformer {
 
     private func executeIgnoreErrors(action: Scheme.Buttons.Mapping.Action) {
         do {
-            os_log("Execute action: %{public}@", log: Self.log, type: .debug,
+            os_log("Execute action: %{public}@", log: Self.log, type: .info,
                    String(describing: action))
 
             try execute(action: action)

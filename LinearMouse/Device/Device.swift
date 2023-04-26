@@ -32,7 +32,7 @@ class Device {
         }).tieToLifetime(of: self)
 
         os_log("Device initialized: %{public}@: HIDPointerResolution=%{public}f, HIDPointerAccelerationType=%{public}@",
-               log: Self.log, type: .debug,
+               log: Self.log, type: .info,
                String(describing: device),
                initialPointerResolution,
                device.pointerAccelerationType ?? "(unknown)")
@@ -91,7 +91,7 @@ extension Device {
         }
         set {
             os_log("Update pointer acceleration for device: %{public}@: %{public}f",
-                   log: Self.log, type: .debug,
+                   log: Self.log, type: .info,
                    String(describing: self), newValue)
             device.pointerAcceleration = newValue
         }
@@ -114,7 +114,7 @@ extension Device {
         }
         set {
             os_log("Update pointer speed for device: %{public}@: %{public}f",
-                   log: Self.log, type: .debug,
+                   log: Self.log, type: .info,
                    String(describing: self), newValue)
             device.pointerResolution = Self.pointerResolution(fromPointerSpeed: newValue)
         }
@@ -126,7 +126,7 @@ extension Device {
             .map { Double($0) / 65536 } ?? Self.fallbackPointerAcceleration
 
         os_log("Restore pointer acceleration for device: %{public}@: %{public}f",
-               log: Self.log, type: .debug,
+               log: Self.log, type: .info,
                String(describing: device),
                systemPointerAcceleration)
 
@@ -135,7 +135,7 @@ extension Device {
 
     func restorePointerSpeed() {
         os_log("Restore pointer speed for device: %{public}@: %{public}f",
-               log: Self.log, type: .debug,
+               log: Self.log, type: .info,
                String(describing: device),
                Self.pointerSpeed(fromPointerResolution: initialPointerResolution))
 
@@ -149,7 +149,7 @@ extension Device {
 
     private func inputValueCallback(_ device: PointerDevice, _ value: IOHIDValue) {
         if detailedLoggingOn {
-            os_log("Received input value from %{public}@: %{public}@", log: Self.log, type: .debug,
+            os_log("Received input value from %{public}@: %{public}@", log: Self.log, type: .info,
                    String(describing: device), String(describing: value))
         }
 
@@ -178,7 +178,7 @@ extension Device {
                Last active device changed: %{public}@, category=%{public}@ \
                (Reason: Received input value: usagePage=0x%{public}02X, usage=0x%{public}02X)
                """,
-               log: Self.log, type: .debug,
+               log: Self.log, type: .info,
                String(describing: device),
                String(describing: category),
                usagePage,

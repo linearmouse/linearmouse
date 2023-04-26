@@ -71,7 +71,7 @@ class UniversalBackForwardTransformer: EventTransformer {
             return event
         }
 
-        os_log("Convert to swipe: %{public}@", log: Self.log, type: .debug, targetBundleIdentifierString)
+        os_log("Convert to swipe: %{public}@", log: Self.log, type: .info, targetBundleIdentifierString)
         switch view.mouseButton {
         case CGMouseButton.back:
             if let event = GestureEvent(navigationSwipeSource: nil, direction: .swipeLeft) {

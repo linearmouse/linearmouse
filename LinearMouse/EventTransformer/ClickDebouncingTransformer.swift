@@ -45,7 +45,7 @@ class ClickDebouncingTransformer: EventTransformer {
                 state = .waitForDown
                 os_log("Mouse down ignored because interval since last click %{public}f <= %{public}f",
                        log: Self.log,
-                       type: .debug,
+                       type: .info,
                        intervalSinceLastClick,
                        timeout)
                 return nil
@@ -56,7 +56,7 @@ class ClickDebouncingTransformer: EventTransformer {
             if state == .waitForDown {
                 os_log("Mouse up ignored because last mouse down ignored",
                        log: Self.log,
-                       type: .debug,
+                       type: .info,
                        intervalSinceLastClick,
                        timeout)
                 return nil
