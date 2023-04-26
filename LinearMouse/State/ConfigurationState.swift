@@ -32,7 +32,7 @@ class ConfigurationState: ObservableObject {
                     return
                 }
 
-                os_log("Saving new configuration: %{public}@", log: Self.log, type: .debug,
+                os_log("Saving new configuration: %{public}@", log: Self.log, type: .info,
                        String(describing: self.configuration))
                 self.save()
             }
@@ -55,7 +55,7 @@ extension ConfigurationState {
             configuration = try Configuration.load(from: configurationPath)
         } catch CocoaError.fileReadNoSuchFile {
             os_log("No configuration file found, try creating a default one",
-                   log: Self.log, type: .debug)
+                   log: Self.log, type: .info)
             save()
         } catch {
             let alert = NSAlert()

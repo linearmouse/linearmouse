@@ -34,7 +34,7 @@ class DeviceManager: ObservableObject {
 
         for property in [kIOHIDMouseAccelerationType, kIOHIDTrackpadAccelerationType, kIOHIDPointerResolutionKey] {
             manager.observePropertyChanged(property: property) { [self] _ in
-                os_log("Property %{public}@ changed", log: Self.log, type: .debug, property)
+                os_log("Property %{public}@ changed", log: Self.log, type: .info, property)
                 updatePointerSpeed()
             }.tieToLifetime(of: self)
         }
@@ -89,7 +89,7 @@ class DeviceManager: ObservableObject {
             object: nil,
             queue: .main,
             using: { [weak self] _ in
-                os_log("Frontmost app changed: %{public}@", log: Self.log, type: .debug,
+                os_log("Frontmost app changed: %{public}@", log: Self.log, type: .info,
                        NSWorkspace.shared.frontmostApplication?.bundleIdentifier ?? "(nil)")
                 self?.updatePointerSpeed()
             }
@@ -105,7 +105,7 @@ class DeviceManager: ObservableObject {
         devices.append(device)
 
         os_log("Device added: %{public}@",
-               log: Self.log, type: .debug,
+               log: Self.log, type: .info,
                String(describing: device))
 
         updatePointerSpeed(for: device)
@@ -124,7 +124,7 @@ class DeviceManager: ObservableObject {
         devices.removeAll { $0 == device }
 
         os_log("Device removed: %{public}@",
-               log: Self.log, type: .debug,
+               log: Self.log, type: .info,
                String(describing: device))
     }
 
@@ -141,7 +141,7 @@ class DeviceManager: ObservableObject {
                    Last active device changed: %{public}@, category=%{public}@ \
                    (Reason: Received event from DeviceManager)
                    """,
-                   log: Self.log, type: .debug,
+                   log: Self.log, type: .info,
                    String(describing: device),
                    String(describing: device.category))
         }

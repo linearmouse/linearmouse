@@ -31,13 +31,13 @@ class ScrollingAccelerationSpeedAdjustmentTransformer: EventTransformer {
         if deltaYSignum != 0,
            let acceleration = acceleration.vertical?.asTruncatedDouble, acceleration != 1 {
             scrollWheelEventView.scale(factorY: acceleration)
-            os_log("deltaY: acceleration=%{public}f", log: Self.log, type: .debug, acceleration)
+            os_log("deltaY: acceleration=%{public}f", log: Self.log, type: .info, acceleration)
         }
 
         if deltaXSignum != 0,
            let acceleration = acceleration.horizontal?.asTruncatedDouble, acceleration != 1 {
             scrollWheelEventView.scale(factorX: acceleration)
-            os_log("deltaX: acceleration=%{public}f", log: Self.log, type: .debug, acceleration)
+            os_log("deltaX: acceleration=%{public}f", log: Self.log, type: .info, acceleration)
         }
 
         if deltaYSignum != 0,
@@ -47,7 +47,7 @@ class ScrollingAccelerationSpeedAdjustmentTransformer: EventTransformer {
             scrollWheelEventView.deltaYPt = targetPt
             scrollWheelEventView.deltaYFixedPt = targetPt / 10
             // TODO: Test if ioHidScrollY needs to be modified.
-            os_log("deltaY: speed=%{public}f", log: Self.log, type: .debug, speed)
+            os_log("deltaY: speed=%{public}f", log: Self.log, type: .info, speed)
         }
 
         if deltaXSignum != 0,
@@ -56,10 +56,10 @@ class ScrollingAccelerationSpeedAdjustmentTransformer: EventTransformer {
             scrollWheelEventView.deltaX = deltaXSignum * max(1, Int64(abs(targetPt) / 10))
             scrollWheelEventView.deltaXPt = targetPt
             scrollWheelEventView.deltaXFixedPt = targetPt / 10
-            os_log("deltaX: speed=%{public}f", log: Self.log, type: .debug, speed)
+            os_log("deltaX: speed=%{public}f", log: Self.log, type: .info, speed)
         }
 
-        os_log("newValue=%{public}@", log: Self.log, type: .debug, String(describing: scrollWheelEventView.matrixValue))
+        os_log("newValue=%{public}@", log: Self.log, type: .info, String(describing: scrollWheelEventView.matrixValue))
 
         return event
     }

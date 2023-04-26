@@ -23,7 +23,7 @@ class AccessibilityPermission {
     static func pollingUntilEnabled(completion: @escaping () -> Void) {
         guard enabled else {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                os_log("Polling accessibility permission", log: log, type: .debug)
+                os_log("Polling accessibility permission", log: log, type: .info)
                 pollingUntilEnabled(completion: completion)
             }
             return

@@ -77,7 +77,7 @@ extension AppDelegate {
             object: nil,
             queue: .main,
             using: { [weak self] _ in
-                os_log("Session inactive", log: Self.log, type: .debug)
+                os_log("Session inactive", log: Self.log, type: .info)
                 self?.stop()
             }
         )
@@ -87,7 +87,7 @@ extension AppDelegate {
             object: nil,
             queue: .main,
             using: { [weak self] _ in
-                os_log("Session active", log: Self.log, type: .debug)
+                os_log("Session active", log: Self.log, type: .info)
                 self?.start()
             }
         )
