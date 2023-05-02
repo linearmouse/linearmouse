@@ -10,6 +10,7 @@ class EventTap {
     static let shared = EventTap()
 
     var eventTap: CFMachPort?
+    var runLoopSource: CFRunLoopSource?
 
     private let eventTapCallback: CGEventTapCallBack = { _, type, event, refcon in
         // TODO: Weak self reference?
@@ -65,9 +66,8 @@ class EventTap {
             callback: eventTapCallback,
             userInfo: Unmanaged.passUnretained(self).toOpaque()
         )
-        let eventTapThread = EventTapThread(eventTap: eventTap)
-        eventTapThread.start()
-        // TOOD: Exit eventTapThread in deinit?
+        runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
     }
 
     func start() {
@@ -80,19 +80,5 @@ class EventTap {
         if let eventTap = eventTap {
             CGEvent.tapEnable(tap: eventTap, enable: false)
         }
-    }
-}
-
-class EventTapThread: Thread {
-    private let eventTap: CFMachPort?
-
-    init(eventTap: CFMachPort?) {
-        self.eventTap = eventTap
-    }
-
-    override func main() {
-        let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
-        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
-        CFRunLoopRun()
     }
 }
