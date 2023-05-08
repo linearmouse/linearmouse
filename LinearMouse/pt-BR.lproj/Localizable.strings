@@ -1,10 +1,10 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse solicita permissão de acessibilidade";
-"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "Você precisa conceder permissão de acessibilidade em Configurações do Sistema > Segurança & Privacidade > Acessibilidade.";
-"Get more help" = "Obter mais ajuda";
-"Open Accessibility" = "Abrir Acessibilidade";
+"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
+"Get more help" = "Get more help";
+"Open Accessibility" = "Open Accessibility";
 
-"%@ Settings..." = "%@ Configurações...";
-"Start at login" = "Iniciar ao entrar";
+"%@ Settings..." = "%@ Settings...";
+"Start at login" = "Start at login";
 "Config" = "Config";
 "Reload" = "Reload";
 "Reveal in Finder" = "Reveal in Finder";
