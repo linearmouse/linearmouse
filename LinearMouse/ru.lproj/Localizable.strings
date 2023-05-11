@@ -117,7 +117,7 @@
 "Thank you for participating in the beta test." = "Благодарим Вас за участие в бета-тестировании.";
 "Check for Updates..." = "Проверить наличие обновлений...";
 
-"Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting.";
+"Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Включение этой опции влияет на запись в журнал всех входящих событий, что может увеличить нагрузку на ЦП при использовании %@, но будет полезно для поиска неполадок.";
 "Export the logs for the last 5 minutes." = "Экспорт логов за последние 5 минут.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "Если вы сообщаете об ошибке, пожалуйста, прикрепляйте логи.";
 "Export logs" = "Экспорт логов";
