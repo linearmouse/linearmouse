@@ -132,8 +132,20 @@ class DeviceManager: ObservableObject {
     ///
     /// It seems that extenal Trackpads do not trigger to `IOHIDDevice`'s inputValueCallback.
     /// That's why we need to observe events from `DeviceManager` too.
-    private func eventReceived(_: PointerDeviceManager, _ pointerDevice: PointerDevice, _: IOHIDEvent) {
-        guard let device = pointerDeviceToDevice[pointerDevice] else { return }
+    private func eventReceived(_: PointerDeviceManager, _ pointerDevice: PointerDevice, _ event: IOHIDEvent) {
+        guard let device = pointerDeviceToDevice[pointerDevice] else {
+            return
+        }
+
+        guard IOHIDEventGetType(event) == kIOHIDEventTypeScroll else {
+            return
+        }
+
+        let scrollX = IOHIDEventGetFloatValue(event, kIOHIDEventFieldScrollX)
+        let scrollY = IOHIDEventGetFloatValue(event, kIOHIDEventFieldScrollY)
+        guard scrollX != 0 || scrollY != 0 else {
+            return
+        }
 
         if lastActiveDevice != device {
             lastActiveDevice = device
@@ -145,6 +157,18 @@ class DeviceManager: ObservableObject {
                    String(describing: device),
                    String(describing: device.category))
         }
+    }
+
+    func deviceFromCGEvent(_ cgEvent: CGEvent) -> Device? {
+        guard let ioHIDEvent = CGEventCopyIOHIDEvent(cgEvent) else {
+            return lastActiveDevice
+        }
+
+        guard let pointerDevice = manager.pointerDeviceFromIOHIDEvent(ioHIDEvent) else {
+            return lastActiveDevice
+        }
+
+        return pointerDeviceToDevice[pointerDevice]
     }
 
     func updatePointerSpeed() {

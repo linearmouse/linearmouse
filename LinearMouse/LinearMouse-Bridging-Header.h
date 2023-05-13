@@ -35,6 +35,7 @@ static const IOHIDEventField kIOHIDEventFieldScrollX = (kIOHIDEventFieldScrollBa
 static const IOHIDEventField kIOHIDEventFieldScrollY = (kIOHIDEventFieldScrollBase | 1);
 
 IOHIDEventRef CGEventCopyIOHIDEvent(CGEventRef);
+IOHIDEventType IOHIDEventGetType(IOHIDEventRef);
 IOHIDFloat IOHIDEventGetFloatValue(IOHIDEventRef, IOHIDEventField);
 void IOHIDEventSetFloatValue(IOHIDEventRef, IOHIDEventField, IOHIDFloat);
 

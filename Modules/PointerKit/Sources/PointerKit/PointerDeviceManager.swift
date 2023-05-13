@@ -217,4 +217,10 @@ extension PointerDeviceManager {
             callback(self, device)
         }
     }
+
+    public func pointerDeviceFromIOHIDEvent(_ ioHidEvent: IOHIDEvent) -> PointerDevice? {
+        let senderID = IOHIDEventGetSenderID(ioHidEvent)
+        let serviceClient = IOHIDEventSystemClientCopyServiceForRegistryID(eventSystemClient, senderID)
+        return serviceClient.flatMap { serviceClientToPointerDevice[$0] }
+    }
 }

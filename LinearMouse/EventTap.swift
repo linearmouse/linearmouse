@@ -32,7 +32,8 @@ class EventTap {
         }
 
         let mouseEventView = MouseEventView(event)
-        let eventTransformer = EventTransformerManager.shared.get(withSourcePid: mouseEventView.sourcePid,
+        let eventTransformer = EventTransformerManager.shared.get(withCGEvent: event,
+                                                                  withSourcePid: mouseEventView.sourcePid,
                                                                   withTargetPid: mouseEventView.targetPid)
 
         if let event = eventTransformer.transform(event) {

@@ -167,8 +167,19 @@ extension Device {
         let usagePage = element.usagePage
         let usage = element.usage
 
-        guard usagePage == kHIDPage_GenericDesktop || usagePage == kHIDPage_Digitizer || usagePage == kHIDPage_Button
-        else {
+        switch Int(usagePage) {
+        case kHIDPage_GenericDesktop:
+            switch Int(usage) {
+            case kHIDUsage_GD_X, kHIDUsage_GD_Y, kHIDUsage_GD_Z:
+                guard IOHIDValueGetIntegerValue(value) != 0 else {
+                    return
+                }
+            default:
+                return
+            }
+        case kHIDPage_Button:
+            break
+        default:
             return
         }
 
