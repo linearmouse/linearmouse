@@ -4,6 +4,7 @@
 import Combine
 import Defaults
 import Foundation
+import LRUCache
 import os.log
 
 class EventTransformerManager {
@@ -12,22 +13,20 @@ class EventTransformerManager {
 
     @Default(.bypassEventsFromOtherApplications) var bypassEventsFromOtherApplications
 
-    private var lastEventTransformer: EventTransformer?
-    private var lastPid: pid_t?
+    private var eventTransformerCache = LRUCache<CacheKey, EventTransformer>(countLimit: 16)
+
+    struct CacheKey: Hashable {
+        weak var device: Device?
+        var pid: pid_t?
+    }
+
     private var subscriptions = Set<AnyCancellable>()
 
     init() {
         ConfigurationState.shared.$configuration
             .removeDuplicates()
             .sink { [weak self] _ in
-                self?.lastEventTransformer = nil
-            }
-            .store(in: &subscriptions)
-
-        DeviceManager.shared.$lastActiveDevice
-            .removeDuplicates()
-            .sink { [weak self] _ in
-                self?.lastEventTransformer = nil
+                self?.eventTransformerCache.removeAllValues()
             }
             .store(in: &subscriptions)
     }
@@ -36,7 +35,9 @@ class EventTransformerManager {
         "cc.ffitch.shottr"
     ]
 
-    func get(withSourcePid sourcePid: pid_t?, withTargetPid pid: pid_t?) -> EventTransformer {
+    func get(withCGEvent cgEvent: CGEvent,
+             withSourcePid sourcePid: pid_t?,
+             withTargetPid pid: pid_t?) -> EventTransformer {
         if sourcePid != nil, bypassEventsFromOtherApplications {
             os_log("Return noop transformer because this event is sent by %{public}s",
                    log: Self.log,
@@ -53,15 +54,11 @@ class EventTransformerManager {
             return []
         }
 
-        if lastPid != pid {
-            lastEventTransformer = nil
-        }
-
-        if let eventTransformer = lastEventTransformer {
+        let device = DeviceManager.shared.deviceFromCGEvent(cgEvent)
+        let cacheKey = CacheKey(device: device, pid: pid)
+        if let eventTransformer = eventTransformerCache.value(forKey: cacheKey) {
             return eventTransformer
         }
-
-        let device = DeviceManager.shared.lastActiveDevice
 
         let scheme = ConfigurationState.shared.configuration.matchScheme(withDevice: device,
                                                                          withPid: pid)
@@ -123,8 +120,7 @@ class EventTransformerManager {
             eventTransformer.append(UniversalBackForwardTransformer(universalBackForward: universalBackForward))
         }
 
-        lastPid = pid
-        lastEventTransformer = eventTransformer
+        eventTransformerCache.setValue(eventTransformer, forKey: cacheKey)
 
         return eventTransformer
     }
