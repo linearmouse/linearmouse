@@ -16,7 +16,9 @@ class EventTransformerManager {
     private var eventTransformerCache = LRUCache<CacheKey, EventTransformer>(countLimit: 16)
 
     struct CacheKey: Hashable {
-        weak var device: Device?
+        // FIXME: Minor memory leak here. However, using weak reference here will result in crashes
+        // as the hash of CacheKey could change.
+        var device: Device?
         var pid: pid_t?
     }
 
