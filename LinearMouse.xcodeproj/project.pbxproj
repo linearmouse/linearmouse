@@ -48,6 +48,8 @@
 		973EB9FE287EE7D90069A8EF /* Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 973EB9FD287EE7D90069A8EF /* Action.swift */; };
 		9757BB9629935445002333AA /* Bidirectional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9757BB9529935445002333AA /* Bidirectional.swift */; };
 		9757BB9A29935474002333AA /* BidirectionalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9757BB9929935474002333AA /* BidirectionalTests.swift */; };
+		975805592A24CF0F0046E55E /* Action+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 975805582A24CF0F0046E55E /* Action+CustomStringConvertible.swift */; };
+		9758055B2A24CF800046E55E /* Action+Codable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9758055A2A24CF800046E55E /* Action+Codable.swift */; };
 		9766C4B4299E03B900FA3A9C /* AppIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9766C4B3299E03B900FA3A9C /* AppIndicator.swift */; };
 		9766C4B8299E199200FA3A9C /* AppPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9766C4B7299E199200FA3A9C /* AppPickerSheet.swift */; };
 		9766C4BA299E1A1400FA3A9C /* AppPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9766C4B9299E1A1400FA3A9C /* AppPicker.swift */; };
@@ -182,6 +184,8 @@
 		973EB9FD287EE7D90069A8EF /* Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Action.swift; sourceTree = "<group>"; };
 		9757BB9529935445002333AA /* Bidirectional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bidirectional.swift; sourceTree = "<group>"; };
 		9757BB9929935474002333AA /* BidirectionalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalTests.swift; sourceTree = "<group>"; };
+		975805582A24CF0F0046E55E /* Action+CustomStringConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Action+CustomStringConvertible.swift"; sourceTree = "<group>"; };
+		9758055A2A24CF800046E55E /* Action+Codable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Action+Codable.swift"; sourceTree = "<group>"; };
 		9766C4B3299E03B900FA3A9C /* AppIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIndicator.swift; sourceTree = "<group>"; };
 		9766C4B7299E199200FA3A9C /* AppPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPickerSheet.swift; sourceTree = "<group>"; };
 		9766C4B9299E1A1400FA3A9C /* AppPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPicker.swift; sourceTree = "<group>"; };
@@ -510,6 +514,8 @@
 			children = (
 				97C5DBC228689FF9006FA6B4 /* Mapping.swift */,
 				973EB9FD287EE7D90069A8EF /* Action.swift */,
+				975805582A24CF0F0046E55E /* Action+CustomStringConvertible.swift */,
+				9758055A2A24CF800046E55E /* Action+Codable.swift */,
 			);
 			path = Mapping;
 			sourceTree = "<group>";
@@ -1040,6 +1046,7 @@
 				972DF646285A269500B83932 /* SchemeIndicator.swift in Sources */,
 				97FD8CEA29BE0F9D00D93212 /* ButtonMapping.swift in Sources */,
 				B7B6D83C26B2726B00B0D247 /* ModifierKeys.swift in Sources */,
+				9758055B2A24CF800046E55E /* Action+Codable.swift in Sources */,
 				B77A160E2674B3DD00E99A5D /* LinearMouse.swift in Sources */,
 				97F77FB7285F53A5007C9C2B /* SingleValueOrArray.swift in Sources */,
 				972A5E28285D4EB500CB6440 /* DevicePickerSection.swift in Sources */,
@@ -1072,6 +1079,7 @@
 				97C5DBBC28686EFC006FA6B4 /* Pointer.swift in Sources */,
 				97C5DBC52868A1ED006FA6B4 /* ButtonsSettingsState.swift in Sources */,
 				972DF649285A26F700B83932 /* DeviceIndicator.swift in Sources */,
+				975805592A24CF0F0046E55E /* Action+CustomStringConvertible.swift in Sources */,
 				972DF654285ADE9600B83932 /* GeneralSettings.swift in Sources */,
 				97F77FA4285DC467007C9C2B /* DevicePickerSectionState.swift in Sources */,
 				972AFD472851E6B0009B0CBF /* AccessibilityPermission.swift in Sources */,
