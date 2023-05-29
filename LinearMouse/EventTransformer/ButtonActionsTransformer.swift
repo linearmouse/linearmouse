@@ -160,12 +160,10 @@ extension ButtonActionsTransformer: EventTransformer {
         case .simpleAction(.none), .simpleAction(.auto):
             return
 
-        case .simpleAction(.missionControlSpaceLeft),
-             .simpleAction(.spaceLeftDeprecated):
+        case .simpleAction(.missionControlSpaceLeft):
             try postSymbolicHotKey(.spaceLeft)
 
-        case .simpleAction(.missionControlSpaceRight),
-             .simpleAction(.spaceRightDeprecated):
+        case .simpleAction(.missionControlSpaceRight):
             try postSymbolicHotKey(.spaceRight)
 
         case .simpleAction(.missionControl):
