@@ -31,9 +31,9 @@ extension Scheme.Buttons.Mapping.Action.SimpleAction: CustomStringConvertible {
             return NSLocalizedString("No action", comment: "")
         case .missionControl:
             return NSLocalizedString("Mission Control", comment: "")
-        case .spaceLeftDeprecated, .missionControlSpaceLeft:
+        case .missionControlSpaceLeft:
             return NSLocalizedString("Move left a space", comment: "")
-        case .spaceRightDeprecated, .missionControlSpaceRight:
+        case .missionControlSpaceRight:
             return NSLocalizedString("Move right a space", comment: "")
         case .appExpose:
             return NSLocalizedString("Application windows", comment: "")

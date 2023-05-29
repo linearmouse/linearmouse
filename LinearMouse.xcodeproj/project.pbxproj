@@ -514,8 +514,8 @@
 			children = (
 				97C5DBC228689FF9006FA6B4 /* Mapping.swift */,
 				973EB9FD287EE7D90069A8EF /* Action.swift */,
-				975805582A24CF0F0046E55E /* Action+CustomStringConvertible.swift */,
 				9758055A2A24CF800046E55E /* Action+Codable.swift */,
+				975805582A24CF0F0046E55E /* Action+CustomStringConvertible.swift */,
 			);
 			path = Mapping;
 			sourceTree = "<group>";

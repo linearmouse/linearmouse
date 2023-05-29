@@ -10,9 +10,6 @@ extension Scheme.Buttons.Mapping.Action: Codable {
         case auto
         case none
 
-        case spaceLeftDeprecated = "spaceLeft"
-        case spaceRightDeprecated = "spaceRight"
-
         case missionControl
         case missionControlSpaceLeft = "missionControl.spaceLeft"
         case missionControlSpaceRight = "missionControl.spaceRight"
@@ -48,10 +45,6 @@ extension Scheme.Buttons.Mapping.Action: Codable {
         case mouseButtonRight = "mouse.button.right"
         case mouseButtonBack = "mouse.button.back"
         case mouseButtonForward = "mouse.button.forward"
-    }
-
-    enum ValueError: Error {
-        case invalidValue
     }
 
     enum CodingKeys: String, CodingKey {
@@ -97,7 +90,7 @@ extension Scheme.Buttons.Mapping.Action: Codable {
             }
         }
 
-        throw CustomDecodingError(codingPath: decoder.codingPath, error: ValueError.invalidValue)
+        self = .simpleAction(.auto)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -125,18 +118,6 @@ extension Scheme.Buttons.Mapping.Action: Codable {
         case let .mouseWheelScrollRight(distance):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(distance, forKey: .mouseWheelScrollRight)
-        }
-    }
-}
-
-extension Scheme.Buttons.Mapping.Action.ValueError: LocalizedError {
-    var errorDescription: String? {
-        switch self {
-        case .invalidValue:
-            let simpleActions = Scheme.Buttons.Mapping.Action.SimpleAction.allCases
-                .map { "\"\($0)\"" }
-                .joined(separator: ", ")
-            return NSLocalizedString("Action must be \(simpleActions) or { \"run\": \"<command>\" }", comment: "")
         }
     }
 }
