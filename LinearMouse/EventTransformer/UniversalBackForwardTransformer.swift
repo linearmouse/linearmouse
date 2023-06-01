@@ -11,7 +11,8 @@ class UniversalBackForwardTransformer: EventTransformer {
     private static let includes = [
         "com.apple.*",
         "com.binarynights.ForkLift*",
-        "org.mozilla.firefox"
+        "org.mozilla.firefox",
+        "com.operasoftware.Opera"
     ]
 
     private let interestedButtons: Set<CGMouseButton>
