@@ -4,49 +4,36 @@
 import Foundation
 
 extension Scheme.Buttons.Mapping.Action: Codable {
-    enum SimpleAction: String, Codable, Identifiable, CaseIterable {
-        var id: Self { self }
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
 
-        case auto
-        case none
+        if let value = try? container.decode(Arg0.self) {
+            self = .arg0(value)
+            return
+        }
 
-        case missionControl
-        case missionControlSpaceLeft = "missionControl.spaceLeft"
-        case missionControlSpaceRight = "missionControl.spaceRight"
+        if let value = try? container.decode(Arg1.self) {
+            self = .arg1(value)
+            return
+        }
 
-        case appExpose
-        case launchpad
-        case showDesktop
-        case lookUpAndDataDetectors
-        case smartZoom
-
-        case displayBrightnessUp = "display.brightnessUp"
-        case displayBrightnessDown = "display.brightnessDown"
-
-        case mediaVolumeUp = "media.volumeUp"
-        case mediaVolumeDown = "media.volumeDown"
-        case mediaMute = "media.mute"
-        case mediaPlayPause = "media.playPause"
-        case mediaNext = "media.next"
-        case mediaPrevious = "media.previous"
-        case mediaFastForward = "media.fastForward"
-        case mediaRewind = "media.rewind"
-
-        case keyboardBrightnessUp = "keyboard.brightnessUp"
-        case keyboardBrightnessDown = "keyboard.brightnessDown"
-
-        case mouseWheelScrollUp = "mouse.wheel.scrollUp"
-        case mouseWheelScrollDown = "mouse.wheel.scrollDown"
-        case mouseWheelScrollLeft = "mouse.wheel.scrollLeft"
-        case mouseWheelScrollRight = "mouse.wheel.scrollRight"
-
-        case mouseButtonLeft = "mouse.button.left"
-        case mouseButtonMiddle = "mouse.button.middle"
-        case mouseButtonRight = "mouse.button.right"
-        case mouseButtonBack = "mouse.button.back"
-        case mouseButtonForward = "mouse.button.forward"
+        self = .arg0(.auto)
     }
 
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+
+        switch self {
+        case let .arg0(value):
+            try container.encode(value)
+
+        case let .arg1(value):
+            try container.encode(value)
+        }
+    }
+}
+
+extension Scheme.Buttons.Mapping.Action.Arg1: Codable {
     enum CodingKeys: String, CodingKey {
         case run
 
@@ -57,48 +44,38 @@ extension Scheme.Buttons.Mapping.Action: Codable {
     }
 
     init(from decoder: Decoder) throws {
-        if let container = try? decoder.singleValueContainer(),
-           let simpleAction = try? container.decode(SimpleAction.self) {
-            self = .simpleAction(simpleAction)
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        if let command = try? container.decode(String.self, forKey: .run) {
+            self = .run(command)
             return
         }
 
-        if let container = try? decoder.container(keyedBy: CodingKeys.self) {
-            if let command = try? container.decode(String.self, forKey: .run) {
-                self = .run(command)
-                return
-            }
-
-            if let distance = try? container.decode(Scheme.Scrolling.Distance.self, forKey: .mouseWheelScrollUp) {
-                self = .mouseWheelScrollUp(distance)
-                return
-            }
-
-            if let distance = try? container.decode(Scheme.Scrolling.Distance.self, forKey: .mouseWheelScrollDown) {
-                self = .mouseWheelScrollDown(distance)
-                return
-            }
-
-            if let distance = try? container.decode(Scheme.Scrolling.Distance.self, forKey: .mouseWheelScrollLeft) {
-                self = .mouseWheelScrollLeft(distance)
-                return
-            }
-
-            if let distance = try? container.decode(Scheme.Scrolling.Distance.self, forKey: .mouseWheelScrollRight) {
-                self = .mouseWheelScrollRight(distance)
-                return
-            }
+        if let distance = try? container.decode(Scheme.Scrolling.Distance.self, forKey: .mouseWheelScrollUp) {
+            self = .mouseWheelScrollUp(distance)
+            return
         }
 
-        self = .simpleAction(.auto)
+        if let distance = try? container.decode(Scheme.Scrolling.Distance.self, forKey: .mouseWheelScrollDown) {
+            self = .mouseWheelScrollDown(distance)
+            return
+        }
+
+        if let distance = try? container.decode(Scheme.Scrolling.Distance.self, forKey: .mouseWheelScrollLeft) {
+            self = .mouseWheelScrollLeft(distance)
+            return
+        }
+
+        if let distance = try? container.decode(Scheme.Scrolling.Distance.self, forKey: .mouseWheelScrollRight) {
+            self = .mouseWheelScrollRight(distance)
+            return
+        }
+
+        throw CustomDecodingError(in: container, error: DecodingError.invalidValue)
     }
 
     func encode(to encoder: Encoder) throws {
         switch self {
-        case let .simpleAction(simpleAction):
-            var container = encoder.singleValueContainer()
-            try container.encode(simpleAction)
-
         case let .run(command):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(command, forKey: .run)
@@ -119,5 +96,9 @@ extension Scheme.Buttons.Mapping.Action: Codable {
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(distance, forKey: .mouseWheelScrollRight)
         }
+    }
+
+    enum DecodingError: Error {
+        case invalidValue
     }
 }

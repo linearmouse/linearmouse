@@ -39,7 +39,7 @@ struct ButtonMappingEditSheet: View {
                 }
 
                 if valid {
-                    ButtonMappingActionPicker(action: $mapping.action.default(.simpleAction(.auto)))
+                    ButtonMappingActionPicker(action: $mapping.action.default(.arg0(.auto)))
 
                     if mapping.button != nil {
                         Toggle(isOn: $mapping.repeat.default(false)) {

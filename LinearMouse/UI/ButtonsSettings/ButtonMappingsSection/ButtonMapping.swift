@@ -15,7 +15,7 @@ struct ButtonMappingListItem: View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 ButtonMappingButtonDescription<EmptyView>(mapping: mapping)
-                ButtonMappingActionDescription(action: mapping.action ?? .simpleAction(.auto))
+                ButtonMappingActionDescription(action: mapping.action ?? .arg0(.auto))
             }
 
             Spacer()

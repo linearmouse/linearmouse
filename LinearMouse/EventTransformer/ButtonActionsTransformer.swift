@@ -65,7 +65,7 @@ extension ButtonActionsTransformer: EventTransformer {
             return event
         }
 
-        if case .simpleAction(.auto) = action {
+        if case .arg0(.auto) = action {
             return event
         }
 
@@ -157,112 +157,112 @@ extension ButtonActionsTransformer: EventTransformer {
     // swiftlint:disable:next cyclomatic_complexity
     private func execute(action: Scheme.Buttons.Mapping.Action) throws {
         switch action {
-        case .simpleAction(.none), .simpleAction(.auto):
+        case .arg0(.none), .arg0(.auto):
             return
 
-        case .simpleAction(.missionControlSpaceLeft):
+        case .arg0(.missionControlSpaceLeft):
             try postSymbolicHotKey(.spaceLeft)
 
-        case .simpleAction(.missionControlSpaceRight):
+        case .arg0(.missionControlSpaceRight):
             try postSymbolicHotKey(.spaceRight)
 
-        case .simpleAction(.missionControl):
+        case .arg0(.missionControl):
             missionControl()
 
-        case .simpleAction(.appExpose):
+        case .arg0(.appExpose):
             appExpose()
 
-        case .simpleAction(.launchpad):
+        case .arg0(.launchpad):
             launchpad()
 
-        case .simpleAction(.showDesktop):
+        case .arg0(.showDesktop):
             showDesktop()
 
-        case .simpleAction(.lookUpAndDataDetectors):
+        case .arg0(.lookUpAndDataDetectors):
             try postSymbolicHotKey(.lookUpWordInDictionary)
 
-        case .simpleAction(.smartZoom):
+        case .arg0(.smartZoom):
             GestureEvent(zoomToggleSource: nil)?.post(tap: .cgSessionEventTap)
 
-        case .simpleAction(.displayBrightnessUp):
+        case .arg0(.displayBrightnessUp):
             postSystemDefinedKey(.brightnessUp)
 
-        case .simpleAction(.displayBrightnessDown):
+        case .arg0(.displayBrightnessDown):
             postSystemDefinedKey(.brightnessDown)
 
-        case .simpleAction(.mediaVolumeUp):
+        case .arg0(.mediaVolumeUp):
             postSystemDefinedKey(.soundUp)
 
-        case .simpleAction(.mediaVolumeDown):
+        case .arg0(.mediaVolumeDown):
             postSystemDefinedKey(.soundDown)
 
-        case .simpleAction(.mediaMute):
+        case .arg0(.mediaMute):
             postSystemDefinedKey(.mute)
 
-        case .simpleAction(.mediaPlayPause):
+        case .arg0(.mediaPlayPause):
             postSystemDefinedKey(.play)
 
-        case .simpleAction(.mediaNext):
+        case .arg0(.mediaNext):
             postSystemDefinedKey(.next)
 
-        case .simpleAction(.mediaPrevious):
+        case .arg0(.mediaPrevious):
             postSystemDefinedKey(.previous)
 
-        case .simpleAction(.mediaFastForward):
+        case .arg0(.mediaFastForward):
             postSystemDefinedKey(.fast)
 
-        case .simpleAction(.mediaRewind):
+        case .arg0(.mediaRewind):
             postSystemDefinedKey(.rewind)
 
-        case .simpleAction(.keyboardBrightnessUp):
+        case .arg0(.keyboardBrightnessUp):
             postSystemDefinedKey(.illuminationUp)
 
-        case .simpleAction(.keyboardBrightnessDown):
+        case .arg0(.keyboardBrightnessDown):
             postSystemDefinedKey(.illuminationDown)
 
-        case .simpleAction(.mouseWheelScrollUp):
+        case .arg0(.mouseWheelScrollUp):
             postScrollEvent(horizontal: 0, vertical: 3)
 
-        case .simpleAction(.mouseWheelScrollDown):
+        case .arg0(.mouseWheelScrollDown):
             postScrollEvent(horizontal: 0, vertical: -3)
 
-        case .simpleAction(.mouseWheelScrollLeft):
+        case .arg0(.mouseWheelScrollLeft):
             postScrollEvent(horizontal: 3, vertical: 0)
 
-        case .simpleAction(.mouseWheelScrollRight):
+        case .arg0(.mouseWheelScrollRight):
             postScrollEvent(horizontal: -3, vertical: 0)
 
-        case .simpleAction(.mouseButtonLeft):
+        case .arg0(.mouseButtonLeft):
             postClickEvent(mouseButton: .left)
 
-        case .simpleAction(.mouseButtonMiddle):
+        case .arg0(.mouseButtonMiddle):
             postClickEvent(mouseButton: .center)
 
-        case .simpleAction(.mouseButtonRight):
+        case .arg0(.mouseButtonRight):
             postClickEvent(mouseButton: .right)
 
-        case .simpleAction(.mouseButtonBack):
+        case .arg0(.mouseButtonBack):
             postClickEvent(mouseButton: .back)
 
-        case .simpleAction(.mouseButtonForward):
+        case .arg0(.mouseButtonForward):
             postClickEvent(mouseButton: .forward)
 
-        case let .run(command):
+        case let .arg1(.run(command)):
             let task = Process()
             task.launchPath = "/bin/bash"
             task.arguments = ["-c", command]
             task.launch()
 
-        case let .mouseWheelScrollUp(distance):
+        case let .arg1(.mouseWheelScrollUp(distance)):
             postScrollEvent(direction: .up, distance: distance)
 
-        case let .mouseWheelScrollDown(distance):
+        case let .arg1(.mouseWheelScrollDown(distance)):
             postScrollEvent(direction: .down, distance: distance)
 
-        case let .mouseWheelScrollLeft(distance):
+        case let .arg1(.mouseWheelScrollLeft(distance)):
             postScrollEvent(direction: .left, distance: distance)
 
-        case let .mouseWheelScrollRight(distance):
+        case let .arg1(.mouseWheelScrollRight(distance)):
             postScrollEvent(direction: .right, distance: distance)
         }
     }
@@ -350,19 +350,19 @@ extension ButtonActionsTransformer: EventTransformer {
         let mouseEventView = MouseEventView(event)
 
         switch action {
-        case .simpleAction(.mouseButtonLeft):
+        case .arg0(.mouseButtonLeft):
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .left
-        case .simpleAction(.mouseButtonMiddle):
+        case .arg0(.mouseButtonMiddle):
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .center
-        case .simpleAction(.mouseButtonRight):
+        case .arg0(.mouseButtonRight):
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .right
-        case .simpleAction(.mouseButtonBack):
+        case .arg0(.mouseButtonBack):
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .back
-        case .simpleAction(.mouseButtonForward):
+        case .arg0(.mouseButtonForward):
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .forward
         default:
