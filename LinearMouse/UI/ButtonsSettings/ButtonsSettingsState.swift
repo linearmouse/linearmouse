@@ -61,7 +61,7 @@ extension ButtonsSettingsState {
         formatter.roundingMode = NumberFormatter.RoundingMode.halfUp
         formatter.maximumFractionDigits = 0
         formatter.thousandSeparator = ""
-        formatter.minimum = 10
+        formatter.minimum = 5
         formatter.maximum = 500
         return formatter
     }
