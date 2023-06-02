@@ -20,7 +20,7 @@ struct ClickDebouncingSection: View {
             if state.clickDebouncingEnabled {
                 HStack(spacing: 5) {
                     Slider(value: $state.clickDebouncingTimeoutInDouble,
-                           in: 10 ... 500)
+                           in: 5 ... 500)
                         .labelsHidden()
                     TextField("",
                               value: $state.clickDebouncingTimeout,

@@ -51,7 +51,7 @@ extension ButtonsSettingsState {
             Double(clickDebouncingTimeout)
         }
         set {
-            clickDebouncingTimeout = Int(round(newValue / 10)) * 10
+            clickDebouncingTimeout = newValue <= 10 ? Int(round(newValue)) : Int(round(newValue / 10)) * 10
         }
     }
 
