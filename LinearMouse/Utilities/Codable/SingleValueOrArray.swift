@@ -21,6 +21,8 @@ extension SingleValueOrArray: CustomStringConvertible {
 
 extension SingleValueOrArray: Equatable where Value: Equatable {}
 
+extension SingleValueOrArray: Hashable where Value: Hashable {}
+
 extension SingleValueOrArray: Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()

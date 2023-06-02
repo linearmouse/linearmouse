@@ -16,9 +16,7 @@ class EventTransformerManager {
     private var eventTransformerCache = LRUCache<CacheKey, EventTransformer>(countLimit: 16)
 
     struct CacheKey: Hashable {
-        // FIXME: Minor memory leak here. However, using weak reference here will result in crashes
-        // as the hash of CacheKey could change.
-        var device: Device?
+        var deviceMatcher: DeviceMatcher?
         var pid: pid_t?
     }
 
@@ -57,7 +55,8 @@ class EventTransformerManager {
         }
 
         let device = DeviceManager.shared.deviceFromCGEvent(cgEvent)
-        let cacheKey = CacheKey(device: device, pid: pid)
+        let cacheKey = CacheKey(deviceMatcher: device.map { DeviceMatcher(of: $0) },
+                                pid: pid)
         if let eventTransformer = eventTransformerCache.value(forKey: cacheKey) {
             return eventTransformer
         }
