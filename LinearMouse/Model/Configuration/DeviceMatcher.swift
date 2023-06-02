@@ -3,14 +3,14 @@
 
 import Defaults
 
-struct DeviceMatcher: Codable, Equatable, Defaults.Serializable {
+struct DeviceMatcher: Codable, Equatable, Hashable, Defaults.Serializable {
     @HexRepresentation var vendorID: Int?
     @HexRepresentation var productID: Int?
     var productName: String?
     var serialNumber: String?
     @SingleValueOrArray var category: [Category]?
 
-    enum Category: String, Codable {
+    enum Category: String, Codable, Hashable {
         case mouse, trackpad
     }
 }

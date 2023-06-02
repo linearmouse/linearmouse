@@ -4,7 +4,7 @@
 import Foundation
 
 @propertyWrapper
-struct HexRepresentation<Value: BinaryInteger & Codable>: Equatable {
+struct HexRepresentation<Value: BinaryInteger & Codable>: Equatable, Hashable {
     var wrappedValue: Value?
 
     init(wrappedValue value: Value?) {
