@@ -51,7 +51,7 @@ extension ButtonsSettingsState {
             Double(clickDebouncingTimeout)
         }
         set {
-            clickDebouncingTimeout = Int(round(newValue / 10)) * 10
+            clickDebouncingTimeout = newValue <= 10 ? Int(round(newValue)) : Int(round(newValue / 10)) * 10
         }
     }
 
@@ -61,7 +61,7 @@ extension ButtonsSettingsState {
         formatter.roundingMode = NumberFormatter.RoundingMode.halfUp
         formatter.maximumFractionDigits = 0
         formatter.thousandSeparator = ""
-        formatter.minimum = 10
+        formatter.minimum = 5
         formatter.maximum = 500
         return formatter
     }
