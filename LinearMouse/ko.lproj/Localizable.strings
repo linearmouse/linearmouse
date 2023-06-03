@@ -107,6 +107,9 @@
 "Bypass events from other applications" = "다른 앱에서 보낸 이벤트 무시";
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "활성화되면, %@는 Logi Options+와 같은 다른 응용 프로그램에서 보낸 이벤트를 수정하지 않습니다.";
 
+"Reload Config" = "Reload Config";
+"Reveal Config in Finder..." = "Reveal Config in Finder...";
+
 "Version: %@" = "버전: %@";
 "Check for updates automatically" = "자동으로 업데이트 확인";
 "Update check interval" = "업데이트 확인 간격";
