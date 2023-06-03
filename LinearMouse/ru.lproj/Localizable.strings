@@ -107,6 +107,9 @@
 "Bypass events from other applications" = "Допускать события из других приложений";
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "Если включено, %@ не будет изменять события, отправленные другими приложениями, такими как Logi Options+.";
 
+"Reload Config" = "Reload Config";
+"Reveal Config in Finder..." = "Reveal Config in Finder...";
+
 "Version: %@" = "Версия: %@";
 "Check for updates automatically" = "Автоматически проверять наличие обновлений";
 "Update check interval" = "Частота проверки обновлений";
