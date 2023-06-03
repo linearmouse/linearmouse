@@ -37,6 +37,8 @@ struct GeneralSettings: View {
                 }
                 .modifier(SectionViewModifier())
 
+                ConfigurationSection()
+
                 Section {
                     CheckForUpdatesView()
                 }

@@ -22,7 +22,7 @@ class ConfigurationState: ObservableObject {
     @Published var configuration = Configuration() {
         didSet {
             configurationSaveDebounceTimer?.invalidate()
-            guard shouldAutoSaveConfiguration else {
+            guard !loading else {
                 return
             }
 
@@ -39,16 +39,20 @@ class ConfigurationState: ObservableObject {
         }
     }
 
-    private var shouldAutoSaveConfiguration = true
+    @Published private(set) var loading = false
 
     private var subscriptions = Set<AnyCancellable>()
 }
 
 extension ConfigurationState {
+    func revealInFinder() {
+        NSWorkspace.shared.activateFileViewerSelecting([ConfigurationState.shared.configurationPath.absoluteURL])
+    }
+
     func load() {
-        shouldAutoSaveConfiguration = false
+        loading = true
         defer {
-            shouldAutoSaveConfiguration = true
+            loading = false
         }
 
         do {
