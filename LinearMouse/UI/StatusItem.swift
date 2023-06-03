@@ -152,7 +152,7 @@ class StatusItem {
     }
 
     @objc private func revealConfigurationInFinder() {
-        NSWorkspace.shared.activateFileViewerSelecting([ConfigurationState.shared.configurationPath.absoluteURL])
+        ConfigurationState.shared.revealInFinder()
     }
 
     @objc private func toggleStartAtLogin() {

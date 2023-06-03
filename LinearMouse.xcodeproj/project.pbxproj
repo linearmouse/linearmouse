@@ -55,6 +55,7 @@
 		9766C4BA299E1A1400FA3A9C /* AppPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9766C4B9299E1A1400FA3A9C /* AppPicker.swift */; };
 		9766C4BC299E1C5C00FA3A9C /* AppPickerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9766C4BB299E1C5C00FA3A9C /* AppPickerState.swift */; };
 		977638F9286BE9EE00A698B6 /* PublishedObject in Frameworks */ = {isa = PBXBuildFile; productRef = 977638F8286BE9EE00A698B6 /* PublishedObject */; };
+		9781C1062A2AF2EB0065E0B6 /* ConfigurationSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9781C1052A2AF2EB0065E0B6 /* ConfigurationSection.swift */; };
 		978DBC9C29A60D92002259B3 /* UniversalBackForwardSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978DBC9B29A60D92002259B3 /* UniversalBackForwardSection.swift */; };
 		978DBC9E29A60E2F002259B3 /* ClickDebouncingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978DBC9D29A60E2F002259B3 /* ClickDebouncingSection.swift */; };
 		978DBCA029A61D50002259B3 /* ClickDebouncingTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978DBC9F29A61D50002259B3 /* ClickDebouncingTransformer.swift */; };
@@ -190,6 +191,7 @@
 		9766C4B7299E199200FA3A9C /* AppPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPickerSheet.swift; sourceTree = "<group>"; };
 		9766C4B9299E1A1400FA3A9C /* AppPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPicker.swift; sourceTree = "<group>"; };
 		9766C4BB299E1C5C00FA3A9C /* AppPickerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPickerState.swift; sourceTree = "<group>"; };
+		9781C1052A2AF2EB0065E0B6 /* ConfigurationSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationSection.swift; sourceTree = "<group>"; };
 		978DBC9B29A60D92002259B3 /* UniversalBackForwardSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniversalBackForwardSection.swift; sourceTree = "<group>"; };
 		978DBC9D29A60E2F002259B3 /* ClickDebouncingSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClickDebouncingSection.swift; sourceTree = "<group>"; };
 		978DBC9F29A61D50002259B3 /* ClickDebouncingTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClickDebouncingTransformer.swift; sourceTree = "<group>"; };
@@ -462,6 +464,7 @@
 			isa = PBXGroup;
 			children = (
 				972DF653285ADE9600B83932 /* GeneralSettings.swift */,
+				9781C1052A2AF2EB0065E0B6 /* ConfigurationSection.swift */,
 				973ADFCD29E2F18C00443649 /* LoggingSection.swift */,
 			);
 			path = GeneralSettings;
@@ -1079,6 +1082,7 @@
 				97C5DBBC28686EFC006FA6B4 /* Pointer.swift in Sources */,
 				97C5DBC52868A1ED006FA6B4 /* ButtonsSettingsState.swift in Sources */,
 				972DF649285A26F700B83932 /* DeviceIndicator.swift in Sources */,
+				9781C1062A2AF2EB0065E0B6 /* ConfigurationSection.swift in Sources */,
 				975805592A24CF0F0046E55E /* Action+CustomStringConvertible.swift in Sources */,
 				972DF654285ADE9600B83932 /* GeneralSettings.swift in Sources */,
 				97F77FA4285DC467007C9C2B /* DevicePickerSectionState.swift in Sources */,
