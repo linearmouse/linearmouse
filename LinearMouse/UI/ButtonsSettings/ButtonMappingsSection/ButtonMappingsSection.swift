@@ -40,10 +40,10 @@ struct ButtonMappingsSection: View {
                 }
                 .buttonStyle(.plain)
                 .sheet(isPresented: $showAddSheet) {
-                    ButtonMappingEditSheet(mapping: $mappingToAdd, mode: .create) { mapping in
+                    ButtonMappingEditSheet(isPresented: $showAddSheet, mapping: $mappingToAdd,
+                                           mode: .create) { mapping in
                         state.appendMapping(mapping)
                     }
-                    .environment(\.isPresented, $showAddSheet)
                 }
 
                 Button {

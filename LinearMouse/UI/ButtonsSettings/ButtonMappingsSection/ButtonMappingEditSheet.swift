@@ -4,7 +4,7 @@
 import SwiftUI
 
 struct ButtonMappingEditSheet: View {
-    @Environment(\.isPresented) var isPresented
+    @Binding var isPresented: Bool
 
     @ObservedObject private var state: ButtonsSettingsState = .shared
 
@@ -53,11 +53,11 @@ struct ButtonMappingEditSheet: View {
                 Spacer()
 
                 Button("Cancel") {
-                    isPresented?.wrappedValue.toggle()
+                    isPresented = false
                 }
 
                 Button(mode == .create ? "Create" : "OK") {
-                    isPresented?.wrappedValue.toggle()
+                    isPresented = false
                     mode = .edit
                     completion?(mapping)
                 }

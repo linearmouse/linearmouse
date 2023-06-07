@@ -28,10 +28,9 @@ struct ButtonMappingListItem: View {
         }
         .padding(.vertical, 4)
         .sheet(isPresented: $showEditSheet) {
-            ButtonMappingEditSheet(mapping: $mappingToEdit) { mapping in
+            ButtonMappingEditSheet(isPresented: $showEditSheet, mapping: $mappingToEdit) { mapping in
                 self.mapping = mapping
             }
-            .environment(\.isPresented, $showEditSheet)
         }
         .onHover {
             hover = $0

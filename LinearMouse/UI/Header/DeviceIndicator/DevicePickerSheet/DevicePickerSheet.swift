@@ -5,13 +5,13 @@ import Defaults
 import SwiftUI
 
 struct DevicePickerSheet: View {
-    @Environment(\.isPresented) var isPresented
+    @Binding var isPresented: Bool
     @Default(.autoSwitchToActiveDevice) var autoSwitchToActiveDevice
 
     var body: some View {
         VStack(spacing: 10) {
             if !autoSwitchToActiveDevice {
-                DevicePicker()
+                DevicePicker(isPresented: $isPresented)
                     .frame(minHeight: 300)
             }
 
@@ -23,7 +23,7 @@ struct DevicePickerSheet: View {
                     Spacer()
 
                     Button("OK") {
-                        isPresented?.wrappedValue.toggle()
+                        isPresented = false
                     }
                     .padding([.bottom, .horizontal])
                     .controlSize(.regular)
@@ -31,11 +31,5 @@ struct DevicePickerSheet: View {
                 }
             }
         }
-    }
-}
-
-struct DevicePickerSheet_Previews: PreviewProvider {
-    static var previews: some View {
-        DevicePickerSheet()
     }
 }

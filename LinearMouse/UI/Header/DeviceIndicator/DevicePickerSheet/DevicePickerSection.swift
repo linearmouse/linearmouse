@@ -4,9 +4,10 @@
 import SwiftUI
 
 struct DevicePickerSection: View {
+    @Binding var isPresented: Bool
+
     var title: LocalizedStringKey
     var devices: [DeviceModel]
-    @Environment(\.isPresented) var isPresented
 
     @ObservedObject var state = DevicePickerSectionState.shared
 
@@ -15,7 +16,7 @@ struct DevicePickerSection: View {
             ForEach(devices) { deviceModel in
                 DevicePickerSectionItem(deviceModel: deviceModel) {
                     state.setDevice(deviceModel)
-                    isPresented?.wrappedValue = false
+                    isPresented = false
                 }
             }
         }
