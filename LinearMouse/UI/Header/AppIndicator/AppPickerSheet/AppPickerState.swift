@@ -57,6 +57,8 @@ extension AppPickerState {
     func refreshInstalledApps(at _: URL? = nil) {
         installedApps = []
 
+        var seenBundleIdentifiers = Set<String>()
+
         let fileManager = FileManager.default
         for applicationDirectoryURL in fileManager.urls(for: .applicationDirectory, in: .allDomainsMask) {
             let appURLs = (try? fileManager
@@ -65,7 +67,11 @@ extension AppPickerState {
                 guard let installedApp = try? readInstalledApp(at: appURL) else {
                     continue
                 }
+                guard !seenBundleIdentifiers.contains(installedApp.bundleIdentifier) else {
+                    continue
+                }
                 installedApps.append(installedApp)
+                seenBundleIdentifiers.insert(installedApp.bundleIdentifier)
             }
         }
     }
