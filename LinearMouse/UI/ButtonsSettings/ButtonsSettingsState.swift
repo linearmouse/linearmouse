@@ -92,7 +92,7 @@ extension ButtonsSettingsState {
     }
 
     var mappings: [Scheme.Buttons.Mapping] {
-        get { mergedScheme.buttons.mappings ?? [] }
+        get { scheme.buttons.mappings ?? [] }
         set { scheme.buttons.mappings = newValue }
     }
 
