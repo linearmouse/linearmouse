@@ -3,12 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		36EBC3223E2CEE09F84076D8 /* Process.m in Sources */ = {isa = PBXBuildFile; fileRef = 36EBC80F80AD57E8226267BF /* Process.m */; };
 		9704BA992976E84C00C8B06D /* SettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9704BA982976E84C00C8B06D /* SettingsState.swift */; };
+		970C04CD2A344AF4008E17E2 /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 970C04CC2A344AF4008E17E2 /* VisualEffectView.swift */; };
 		971338AF289B64C1005A74D2 /* HelpButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971338AE289B64C1005A74D2 /* HelpButton.swift */; };
 		972327A5299146AA0041538A /* ImplicitOptional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972327A4299146AA0041538A /* ImplicitOptional.swift */; };
 		972327A929914C1C0041538A /* ImplicitOptionalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972327A829914C1C0041538A /* ImplicitOptionalTests.swift */; };
@@ -88,7 +89,6 @@
 		97DB97C829AF79B9002F4668 /* ButtonMappingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97DB97C729AF79B9002F4668 /* ButtonMappingsSection.swift */; };
 		97E16F4F28F9A22A00E7D09B /* LinearScrollingHorizontalTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E16F4E28F9A22A00E7D09B /* LinearScrollingHorizontalTransformer.swift */; };
 		97F77FA4285DC467007C9C2B /* DevicePickerSectionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA3285DC467007C9C2B /* DevicePickerSectionState.swift */; };
-		97F77FA8285DC828007C9C2B /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA7285DC828007C9C2B /* Environment.swift */; };
 		97F77FAA285E178B007C9C2B /* DevicePickerSectionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA9285E178B007C9C2B /* DevicePickerSectionItem.swift */; };
 		97F77FAC285E3055007C9C2B /* StatusItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FAB285E3055007C9C2B /* StatusItem.swift */; };
 		97F77FAF285F0A58007C9C2B /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FAE285F0A58007C9C2B /* Configuration.swift */; };
@@ -147,6 +147,7 @@
 		36EBC1359D50EDBC252FB81F /* Process.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Process.h; sourceTree = "<group>"; };
 		36EBC80F80AD57E8226267BF /* Process.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Process.m; sourceTree = "<group>"; };
 		9704BA982976E84C00C8B06D /* SettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsState.swift; sourceTree = "<group>"; };
+		970C04CC2A344AF4008E17E2 /* VisualEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectView.swift; sourceTree = "<group>"; };
 		971338AE289B64C1005A74D2 /* HelpButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpButton.swift; sourceTree = "<group>"; };
 		972327A4299146AA0041538A /* ImplicitOptional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImplicitOptional.swift; sourceTree = "<group>"; };
 		972327A829914C1C0041538A /* ImplicitOptionalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImplicitOptionalTests.swift; sourceTree = "<group>"; };
@@ -225,7 +226,6 @@
 		97DB97C729AF79B9002F4668 /* ButtonMappingsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMappingsSection.swift; sourceTree = "<group>"; };
 		97E16F4E28F9A22A00E7D09B /* LinearScrollingHorizontalTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearScrollingHorizontalTransformer.swift; sourceTree = "<group>"; };
 		97F77FA3285DC467007C9C2B /* DevicePickerSectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSectionState.swift; sourceTree = "<group>"; };
-		97F77FA7285DC828007C9C2B /* Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
 		97F77FA9285E178B007C9C2B /* DevicePickerSectionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSectionItem.swift; sourceTree = "<group>"; };
 		97F77FAB285E3055007C9C2B /* StatusItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusItem.swift; sourceTree = "<group>"; };
 		97F77FAE285F0A58007C9C2B /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
@@ -417,7 +417,6 @@
 		972DF63E28599F4500B83932 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				97F77FA7285DC828007C9C2B /* Environment.swift */,
 				97A46B16285444BF00C07C9B /* NSWindow.swift */,
 				9731B40629D7DAC600FC3C24 /* View.swift */,
 			);
@@ -783,6 +782,7 @@
 				972AFD482851E96D009B0CBF /* AccessibilityPermissionWindow.swift */,
 				972AFD442851C101009B0CBF /* AccessibilityPermissionView.swift */,
 				B7842926278D9BBC00D207F0 /* CheckForUpdatesView.swift */,
+				970C04CC2A344AF4008E17E2 /* VisualEffectView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -1065,7 +1065,6 @@
 				B77D7C1527BA58F300825F54 /* DeviceManager.swift in Sources */,
 				97C5DBBA28682809006FA6B4 /* Extensions.swift in Sources */,
 				B7ADF98F2748E6400005B02D /* MouseEventView.swift in Sources */,
-				97F77FA8285DC828007C9C2B /* Environment.swift in Sources */,
 				97A46B17285444BF00C07C9B /* NSWindow.swift in Sources */,
 				978DBCA029A61D50002259B3 /* ClickDebouncingTransformer.swift in Sources */,
 				972AFD452851C101009B0CBF /* AccessibilityPermissionView.swift in Sources */,
@@ -1078,6 +1077,7 @@
 				978DBCA329A663EB002259B3 /* ClickDebouncing.swift in Sources */,
 				9731B40B29D7FE1D00FC3C24 /* ButtonMappingActionPicker.swift in Sources */,
 				972327A5299146AA0041538A /* ImplicitOptional.swift in Sources */,
+				970C04CD2A344AF4008E17E2 /* VisualEffectView.swift in Sources */,
 				97D3470C293CDEA000E7DFE1 /* WeakRef.swift in Sources */,
 				97C5DBBC28686EFC006FA6B4 /* Pointer.swift in Sources */,
 				97C5DBC52868A1ED006FA6B4 /* ButtonsSettingsState.swift in Sources */,

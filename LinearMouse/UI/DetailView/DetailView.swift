@@ -10,7 +10,11 @@ struct DetailView<T>: View where T: View {
     @ObservedObject var schemeState = SchemeState.shared
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
+        VStack(alignment: .leading, spacing: 0) {
+            if schemeSpecific {
+                SchemeIndicator()
+            }
+
             if schemeSpecific, !schemeState.isSchemeValid {
                 Text("No device selected.")
                     .frame(maxWidth: .infinity,
@@ -24,12 +28,8 @@ struct DetailView<T>: View where T: View {
 
                 content()
             }
-
-            if schemeSpecific {
-                SchemeIndicator()
-                    .edgesIgnoringSafeArea(.top)
-            }
         }
+        .edgesIgnoringSafeArea(.top)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }

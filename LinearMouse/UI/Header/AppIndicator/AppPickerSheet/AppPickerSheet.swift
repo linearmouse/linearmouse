@@ -4,7 +4,7 @@
 import SwiftUI
 
 struct AppPickerSheet: View {
-    @Environment(\.isPresented) var isPresented
+    @Binding var isPresented: Bool
     @State var selectedApp = ""
 
     private let schemeState: SchemeState = .shared
@@ -29,13 +29,9 @@ struct AppPickerSheet: View {
     }
 
     private func onOK() {
-        schemeState.currentApp = selectedApp == "" ? nil : selectedApp
-        isPresented?.wrappedValue.toggle()
-    }
-}
-
-struct AppPickerSheet_Previews: PreviewProvider {
-    static var previews: some View {
-        AppPickerSheet()
+        isPresented = false
+        DispatchQueue.main.async {
+            schemeState.currentApp = selectedApp == "" ? nil : selectedApp
+        }
     }
 }

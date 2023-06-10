@@ -4,29 +4,23 @@
 import SwiftUI
 
 struct Sidebar: View {
-    @ObservedObject var settingsState = SettingsState.shared
-
     var body: some View {
-        List(selection: $settingsState.navigation) {
-            SidebarItem(imageName: "Scrolling",
+        VStack(spacing: 0) {
+            SidebarItem(id: .scrolling,
+                        imageName: "Scrolling",
                         text: "Scrolling")
-                .tag(SettingsState.Navigation.scrolling)
 
-            SidebarItem(imageName: "Pointer",
+            SidebarItem(id: .pointer,
+                        imageName: "Pointer",
                         text: "Pointer")
-                .tag(SettingsState.Navigation.pointer)
 
-            SidebarItem(imageName: "Buttons",
+            SidebarItem(id: .buttons,
+                        imageName: "Buttons",
                         text: "Buttons")
-                .tag(SettingsState.Navigation.buttons)
 
-            Spacer()
-
-            SidebarItem(imageName: "General",
+            SidebarItem(id: .general,
+                        imageName: "General",
                         text: "General")
-                .tag(SettingsState.Navigation.general)
         }
-        .listStyle(SidebarListStyle())
-        .frame(width: 220)
     }
 }

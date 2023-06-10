@@ -9,13 +9,11 @@ struct Settings: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            if #available(macOS 11, *) {
-                Sidebar()
-            } else {
-                // FIXME: Workaround for Catalina
-                Sidebar()
-                    .padding(.top)
-            }
+            Sidebar()
+                .padding(5)
+                .frame(minWidth: 200, maxWidth: 200, maxHeight: .infinity, alignment: .top)
+                .background(VisualEffectView(material: .sidebar, blendingMode: .behindWindow)
+                    .edgesIgnoringSafeArea(.top))
 
             if let navigation = state.navigation {
                 switch navigation {
@@ -30,6 +28,6 @@ struct Settings: View {
                 }
             }
         }
-        .frame(minWidth: 600, minHeight: 600)
+        .frame(minWidth: 600, minHeight: 600, alignment: .top)
     }
 }

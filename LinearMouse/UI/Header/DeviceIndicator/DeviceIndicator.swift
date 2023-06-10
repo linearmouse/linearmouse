@@ -19,8 +19,7 @@ struct DeviceIndicator: View {
         .controlSize(.small)
         .buttonStyle(SecondaryButtonStyle())
         .sheet(isPresented: $showDevicePickerSheet) {
-            DevicePickerSheet()
-                .environment(\.isPresented, $showDevicePickerSheet)
+            DevicePickerSheet(isPresented: $showDevicePickerSheet)
         }
     }
 }

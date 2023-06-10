@@ -20,8 +20,7 @@ struct AppIndicator: View {
         .controlSize(.small)
         .buttonStyle(SecondaryButtonStyle())
         .sheet(isPresented: $showAppPickerSheet) {
-            AppPickerSheet()
-                .environment(\.isPresented, $showAppPickerSheet)
+            AppPickerSheet(isPresented: $showAppPickerSheet)
         }
     }
 }
