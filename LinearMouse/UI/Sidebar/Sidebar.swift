@@ -25,6 +25,9 @@ struct Sidebar: View {
             }
             .frame(width: 220)
             .padding(5)
+            .padding(.top, 30)
         }
+        .background(VisualEffectView(material: .sidebar, blendingMode: .behindWindow))
+        .edgesIgnoringSafeArea(.top)
     }
 }

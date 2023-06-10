@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		36EBC3223E2CEE09F84076D8 /* Process.m in Sources */ = {isa = PBXBuildFile; fileRef = 36EBC80F80AD57E8226267BF /* Process.m */; };
 		9704BA992976E84C00C8B06D /* SettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9704BA982976E84C00C8B06D /* SettingsState.swift */; };
+		970C04CD2A344AF4008E17E2 /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 970C04CC2A344AF4008E17E2 /* VisualEffectView.swift */; };
 		971338AF289B64C1005A74D2 /* HelpButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971338AE289B64C1005A74D2 /* HelpButton.swift */; };
 		972327A5299146AA0041538A /* ImplicitOptional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972327A4299146AA0041538A /* ImplicitOptional.swift */; };
 		972327A929914C1C0041538A /* ImplicitOptionalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972327A829914C1C0041538A /* ImplicitOptionalTests.swift */; };
@@ -146,6 +147,7 @@
 		36EBC1359D50EDBC252FB81F /* Process.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Process.h; sourceTree = "<group>"; };
 		36EBC80F80AD57E8226267BF /* Process.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Process.m; sourceTree = "<group>"; };
 		9704BA982976E84C00C8B06D /* SettingsState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsState.swift; sourceTree = "<group>"; };
+		970C04CC2A344AF4008E17E2 /* VisualEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectView.swift; sourceTree = "<group>"; };
 		971338AE289B64C1005A74D2 /* HelpButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpButton.swift; sourceTree = "<group>"; };
 		972327A4299146AA0041538A /* ImplicitOptional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImplicitOptional.swift; sourceTree = "<group>"; };
 		972327A829914C1C0041538A /* ImplicitOptionalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImplicitOptionalTests.swift; sourceTree = "<group>"; };
@@ -780,6 +782,7 @@
 				972AFD482851E96D009B0CBF /* AccessibilityPermissionWindow.swift */,
 				972AFD442851C101009B0CBF /* AccessibilityPermissionView.swift */,
 				B7842926278D9BBC00D207F0 /* CheckForUpdatesView.swift */,
+				970C04CC2A344AF4008E17E2 /* VisualEffectView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -1074,6 +1077,7 @@
 				978DBCA329A663EB002259B3 /* ClickDebouncing.swift in Sources */,
 				9731B40B29D7FE1D00FC3C24 /* ButtonMappingActionPicker.swift in Sources */,
 				972327A5299146AA0041538A /* ImplicitOptional.swift in Sources */,
+				970C04CD2A344AF4008E17E2 /* VisualEffectView.swift in Sources */,
 				97D3470C293CDEA000E7DFE1 /* WeakRef.swift in Sources */,
 				97C5DBBC28686EFC006FA6B4 /* Pointer.swift in Sources */,
 				97C5DBC52868A1ED006FA6B4 /* ButtonsSettingsState.swift in Sources */,
