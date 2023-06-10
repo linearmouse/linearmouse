@@ -148,15 +148,35 @@ public extension PointerDevice {
         }
     }
 
+    var useLinearScalingMouseAcceleration: Bool? {
+        get {
+            client.getProperty(kIOHIDUseLinearScalingMouseAccelerationKey)
+        }
+        set {
+            client.setProperty(newValue, forKey: kIOHIDUseLinearScalingMouseAccelerationKey)
+        }
+    }
+
     /**
      Indicates the pointer acceleration.
 
      This value is in the range [0, 20] ∪ { -1 }. -1 means acceleration and sensitivity are disabled.
      */
     var pointerAcceleration: Double? {
-        get { client.getPropertyIOFixed(pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey) }
+        get {
+            if useLinearScalingMouseAcceleration == true {
+                return -1
+            }
+            return client.getPropertyIOFixed(pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey)
+        }
 
         set {
+            if useLinearScalingMouseAcceleration != nil, let value = newValue {
+                useLinearScalingMouseAcceleration = value == -1 ? true : false
+                if value == -1 {
+                    return
+                }
+            }
             client.setPropertyIOFixed(newValue.map { $0 == -1 ? $0 : $0.clamp(0, 20) },
                                       forKey: pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey)
         }
