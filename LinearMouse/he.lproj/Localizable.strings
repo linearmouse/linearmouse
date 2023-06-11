@@ -1,13 +1,13 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
-"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
-"Get more help" = "Get more help";
-"Open Accessibility" = "Open Accessibility";
+"LinearMouse needs Accessibility permission" = "LinearMouse זקוק להרשאות נגישות";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "יש לתת השראות נגישות תחת ״הגדרות המערכת״ > ״פרטיות ואבטחה״ > ״נגישות״.";
+"Get more help" = "קבל עזרה נוספת";
+"Open Accessibility" = "פתיחת הרשאות נגישות";
 
-"%@ Settings..." = "%@ Settings...";
-"Start at login" = "Start at login";
-"Config" = "Config";
-"Reload" = "Reload";
-"Reveal in Finder" = "Reveal in Finder";
+"%@ Settings..." = "הגדרות %@...";
+"Start at login" = "התחל עם עליית המחשב";
+"Config" = "הגדרות";
+"Reload" = "טעינה מחדש";
+"Reveal in Finder" = "גלה ב-Finder";
 "Configure for %@..." = "Configure for %@...";
 "Quit %@" = "Quit %@";
 
