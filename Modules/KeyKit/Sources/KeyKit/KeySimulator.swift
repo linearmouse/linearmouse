@@ -17,7 +17,9 @@ public enum KeySimulatorError: Error {
 public class KeySimulator {
     private let keyCodeResolver = KeyCodeResolver()
 
-    private func postKey(_ key: Key, keyDown: Bool) throws {
+    public init() {}
+
+    private func postKey(_ key: Key, keyDown: Bool, tap: CGEventTapLocation? = nil) throws {
         guard let keyCode = keyCodeResolver.keyCode(for: key) else {
             throw KeySimulatorError.unsupportedKey
         }
@@ -26,35 +28,39 @@ public class KeySimulator {
             return
         }
 
-        event.post(tap: .cghidEventTap)
-    }
+        event.flags = .init(rawValue: 0)
 
-    func down(keys: [Key]) throws {
+        event.post(tap: tap ?? .cghidEventTap)
+    }
+}
+
+public extension KeySimulator {
+    func down(keys: [Key], tap: CGEventTapLocation? = nil) throws {
         for key in keys {
-            try postKey(key, keyDown: true)
+            try postKey(key, keyDown: true, tap: tap)
         }
     }
 
-    func down(_ keys: Key...) throws {
-        try down(keys: keys)
+    func down(_ keys: Key..., tap: CGEventTapLocation? = nil) throws {
+        try down(keys: keys, tap: tap)
     }
 
-    func up(keys: [Key]) throws {
+    func up(keys: [Key], tap: CGEventTapLocation? = nil) throws {
         for key in keys {
-            try postKey(key, keyDown: false)
+            try postKey(key, keyDown: false, tap: tap)
         }
     }
 
-    func up(_ keys: Key...) throws {
-        try up(keys: keys)
+    func up(_ keys: Key..., tap: CGEventTapLocation? = nil) throws {
+        try up(keys: keys, tap: tap)
     }
 
-    func press(keys: [Key]) throws {
-        try down(keys: keys)
-        try up(keys: keys)
+    func press(keys: [Key], tap: CGEventTapLocation? = nil) throws {
+        try down(keys: keys, tap: tap)
+        try up(keys: keys, tap: tap)
     }
 
-    func press(_ keys: Key...) throws {
-        try press(keys: keys)
+    func press(_ keys: Key..., tap: CGEventTapLocation? = nil) throws {
+        try press(keys: keys, tap: tap)
     }
 }

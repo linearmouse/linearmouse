@@ -15,6 +15,8 @@ class ButtonActionsTransformer {
 
     var repeatTimer: Timer?
 
+    let keySimulator = KeySimulator()
+
     init(mappings: [Scheme.Buttons.Mapping]) {
         self.mappings = mappings
     }
@@ -266,7 +268,7 @@ extension ButtonActionsTransformer: EventTransformer {
             postScrollEvent(direction: .right, distance: distance)
 
         case let .arg1(.keyPress(keys)):
-            break
+            try keySimulator.press(keys: keys)
         }
     }
 
