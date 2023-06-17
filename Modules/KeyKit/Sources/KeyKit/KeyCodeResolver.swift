@@ -51,6 +51,7 @@ class KeyCodeResolver {
         mapping = newMapping
     }
 
+    // swiftlint:disable cyclomatic_complexity
     func keyCode(for key: Key) -> CGKeyCode? {
         switch key {
         case .enter: return 0x4C
