@@ -2,6 +2,7 @@
 // Copyright (c) 2021-2023 LinearMouse
 
 import Foundation
+import KeyKit
 
 extension Scheme.Buttons.Mapping.Action: Codable {
     init(from decoder: Decoder) throws {
@@ -41,6 +42,7 @@ extension Scheme.Buttons.Mapping.Action.Arg1: Codable {
         case mouseWheelScrollDown = "mouse.wheel.scrollDown"
         case mouseWheelScrollLeft = "mouse.wheel.scrollLeft"
         case mouseWheelScrollRight = "mouse.wheel.scrollRight"
+        case keyPress
     }
 
     init(from decoder: Decoder) throws {
@@ -71,6 +73,11 @@ extension Scheme.Buttons.Mapping.Action.Arg1: Codable {
             return
         }
 
+        if let keys = try? container.decode([Key].self, forKey: .keyPress) {
+            self = .keyPress(keys)
+            return
+        }
+
         throw CustomDecodingError(in: container, error: DecodingError.invalidValue)
     }
 
@@ -95,6 +102,10 @@ extension Scheme.Buttons.Mapping.Action.Arg1: Codable {
         case let .mouseWheelScrollRight(distance):
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(distance, forKey: .mouseWheelScrollRight)
+
+        case let .keyPress(keys):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(keys, forKey: .keyPress)
         }
     }
 

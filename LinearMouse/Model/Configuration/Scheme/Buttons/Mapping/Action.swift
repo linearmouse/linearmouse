@@ -2,6 +2,7 @@
 // Copyright (c) 2021-2023 LinearMouse
 
 import Foundation
+import KeyKit
 
 extension Scheme.Buttons.Mapping {
     enum Action: Equatable, Hashable {
@@ -61,5 +62,7 @@ extension Scheme.Buttons.Mapping.Action {
         case mouseWheelScrollDown(Scheme.Scrolling.Distance)
         case mouseWheelScrollLeft(Scheme.Scrolling.Distance)
         case mouseWheelScrollRight(Scheme.Scrolling.Distance)
+
+        case keyPress([Key])
     }
 }

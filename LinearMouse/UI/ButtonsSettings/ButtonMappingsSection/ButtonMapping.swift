@@ -67,10 +67,10 @@ struct ButtonMappingButtonDescription<FallbackView: View>: View {
 
     private var modifiersDescription: String {
         [
-            (mapping.command, "⌘"),
-            (mapping.shift, "⇧"),
+            (mapping.control, "⌃"),
             (mapping.option, "⌥"),
-            (mapping.control, "⌃")
+            (mapping.shift, "⇧"),
+            (mapping.command, "⌘")
         ]
         .compactMap { $0.0 == true ? $0.1 : nil }
         .joined()

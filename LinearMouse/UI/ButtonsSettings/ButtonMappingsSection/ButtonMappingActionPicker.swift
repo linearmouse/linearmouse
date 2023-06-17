@@ -109,6 +109,8 @@ extension ButtonMappingActionPicker {
                 return .mouseWheelScrollLeft
             case .arg1(.mouseWheelScrollRight):
                 return .mouseWheelScrollRight
+            case .arg1(.keyPress):
+                return .keyPress
             }
         } set: { action in
             switch action {
@@ -127,6 +129,7 @@ extension ButtonMappingActionPicker {
         case arg0(Scheme.Buttons.Mapping.Action.Arg0)
         case run
         case mouseWheelScrollUp, mouseWheelScrollDown, mouseWheelScrollLeft, mouseWheelScrollRight
+        case keyPress
     }
 }
 
@@ -145,6 +148,8 @@ extension ButtonMappingActionPicker.ActionType: CustomStringConvertible {
             return NSLocalizedString("Scroll left...", comment: "")
         case .mouseWheelScrollRight:
             return NSLocalizedString("Scroll right...", comment: "")
+        case .keyPress:
+            return NSLocalizedString("Key press...", comment: "")
         }
     }
 }

@@ -264,6 +264,9 @@ extension ButtonActionsTransformer: EventTransformer {
 
         case let .arg1(.mouseWheelScrollRight(distance)):
             postScrollEvent(direction: .right, distance: distance)
+
+        case let .arg1(.keyPress(keys)):
+            break
         }
     }
 

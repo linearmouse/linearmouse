@@ -96,6 +96,8 @@ extension Scheme.Buttons.Mapping.Action.Arg1: CustomStringConvertible {
             return String(format: NSLocalizedString("Scroll left %@", comment: ""), String(describing: distance))
         case let .mouseWheelScrollRight(distance):
             return String(format: NSLocalizedString("Scroll right %@", comment: ""), String(describing: distance))
+        case let .keyPress(keys):
+            return String(format: NSLocalizedString("Key press: %@", comment: ""), keys.map(\.rawValue).joined())
         }
     }
 }
