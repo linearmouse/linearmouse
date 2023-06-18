@@ -368,7 +368,8 @@ declare namespace Scheme {
         | MouseWheelScrollUpWithDistance
         | MouseWheelScrollDownWithDistance
         | MouseWheelScrollLeftWithDistance
-        | MouseWheelScrollRightWithDistance;
+        | MouseWheelScrollRightWithDistance
+        | KeyPress;
 
       type SimpleAction =
         | Auto
@@ -593,10 +594,101 @@ declare namespace Scheme {
         "mouse.wheel.scrollRight": Scheme.Scrolling.Distance;
       };
 
+      type KeyPress = {
+        /**
+         * @description Keyboard: Press specific keys.
+         */
+        keyPress: [Key];
+      };
+
       /**
        * @description Scroll direction.
        */
       type ScrollDirection = "up" | "down" | "left" | "right";
+
+      type Key =
+        | "enter"
+        | "tab"
+        | "space"
+        | "delete"
+        | "escape"
+        | "command"
+        | "shift"
+        | "capsLock"
+        | "option"
+        | "control"
+        | "commandRight"
+        | "shiftRight"
+        | "optionRight"
+        | "controlRight"
+        | "arrowLeft"
+        | "arrowRight"
+        | "arrowDown"
+        | "arrowUp"
+        | "home"
+        | "pageUp"
+        | "backspace"
+        | "end"
+        | "pageDown"
+        | "f1"
+        | "f2"
+        | "f3"
+        | "f4"
+        | "f5"
+        | "f6"
+        | "f7"
+        | "f8"
+        | "f9"
+        | "f10"
+        | "f11"
+        | "f12"
+        | "a"
+        | "b"
+        | "c"
+        | "d"
+        | "e"
+        | "f"
+        | "g"
+        | "h"
+        | "i"
+        | "j"
+        | "k"
+        | "l"
+        | "m"
+        | "n"
+        | "o"
+        | "p"
+        | "q"
+        | "r"
+        | "s"
+        | "t"
+        | "u"
+        | "v"
+        | "w"
+        | "x"
+        | "y"
+        | "z"
+        | "0"
+        | "1"
+        | "2"
+        | "3"
+        | "4"
+        | "5"
+        | "6"
+        | "7"
+        | "8"
+        | "9"
+        | "="
+        | "-"
+        | ";"
+        | "'"
+        | ","
+        | "."
+        | "/"
+        | "\\"
+        | "`"
+        | "["
+        | "]";
     }
 
     type UniversalBackForward =

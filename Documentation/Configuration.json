@@ -251,6 +251,9 @@
         },
         {
           "$ref": "#/definitions/Scheme.Buttons.Mapping.MouseWheelScrollRightWithDistance"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.KeyPress"
         }
       ]
     },
@@ -273,6 +276,111 @@
       "const": "display.brightnessUp",
       "description": "Display: Brightness up.",
       "type": "string"
+    },
+    "Scheme.Buttons.Mapping.Key": {
+      "enum": [
+        "enter",
+        "tab",
+        "space",
+        "delete",
+        "escape",
+        "command",
+        "shift",
+        "capsLock",
+        "option",
+        "control",
+        "commandRight",
+        "shiftRight",
+        "optionRight",
+        "controlRight",
+        "arrowLeft",
+        "arrowRight",
+        "arrowDown",
+        "arrowUp",
+        "home",
+        "pageUp",
+        "backspace",
+        "end",
+        "pageDown",
+        "f1",
+        "f2",
+        "f3",
+        "f4",
+        "f5",
+        "f6",
+        "f7",
+        "f8",
+        "f9",
+        "f10",
+        "f11",
+        "f12",
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "h",
+        "i",
+        "j",
+        "k",
+        "l",
+        "m",
+        "n",
+        "o",
+        "p",
+        "q",
+        "r",
+        "s",
+        "t",
+        "u",
+        "v",
+        "w",
+        "x",
+        "y",
+        "z",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "=",
+        "-",
+        ";",
+        "'",
+        ",",
+        ".",
+        "/",
+        "\\",
+        "`",
+        "[",
+        "]"
+      ],
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.KeyPress": {
+      "additionalProperties": false,
+      "properties": {
+        "keyPress": {
+          "description": "Keyboard: Press specific keys.",
+          "items": {
+            "$ref": "#/definitions/Scheme.Buttons.Mapping.Key"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "keyPress"
+      ],
+      "type": "object"
     },
     "Scheme.Buttons.Mapping.KeyboardBrightnessDown": {
       "const": "keyboard.brightnessDown",
