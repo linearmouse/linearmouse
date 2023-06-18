@@ -59,7 +59,7 @@ class KeyCodeResolver {
         case .space: return 0x31
         case .delete: return 0x33
         case .escape: return 0x35
-        case .command: return 0x37
+        case .command, .commandRight: return 0x37
         case .shift: return 0x38
         case .capsLock: return 0x39
         case .option: return 0x3A

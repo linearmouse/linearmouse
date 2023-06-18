@@ -17,9 +17,38 @@ public enum KeySimulatorError: Error {
 public class KeySimulator {
     private let keyCodeResolver = KeyCodeResolver()
 
+    private var flags = CGEventFlags()
+
     public init() {}
 
     private func postKey(_ key: Key, keyDown: Bool, tap: CGEventTapLocation? = nil) throws {
+        var flagsToToggle = CGEventFlags()
+        switch key {
+        case .command, .commandRight:
+            flagsToToggle.insert(.maskCommand)
+            flagsToToggle.insert(.init(rawValue: UInt64(key == .command ? NX_DEVICELCMDKEYMASK : NX_DEVICERCMDKEYMASK)))
+        case .shift, .shiftRight:
+            flagsToToggle.insert(.maskShift)
+            flagsToToggle
+                .insert(.init(rawValue: UInt64(key == .shift ? NX_DEVICELSHIFTKEYMASK : NX_DEVICERSHIFTKEYMASK)))
+        case .option, .optionRight:
+            flagsToToggle.insert(.maskAlternate)
+            flagsToToggle.insert(.init(rawValue: UInt64(key == .option ? NX_DEVICELALTKEYMASK : NX_DEVICERALTKEYMASK)))
+        case .control, .controlRight:
+            flagsToToggle.insert(.maskControl)
+            flagsToToggle.insert(.init(rawValue: UInt64(key == .control ? NX_DEVICELCTLKEYMASK : NX_DEVICERCTLKEYMASK)))
+        default:
+            break
+        }
+
+        if !flagsToToggle.isEmpty {
+            if keyDown {
+                flags.insert(flagsToToggle)
+            } else {
+                flags.remove(flagsToToggle)
+            }
+        }
+
         guard let keyCode = keyCodeResolver.keyCode(for: key) else {
             throw KeySimulatorError.unsupportedKey
         }
@@ -28,7 +57,11 @@ public class KeySimulator {
             return
         }
 
-        event.flags = .init(rawValue: 0)
+        event.flags = flags
+
+        if !flagsToToggle.isEmpty {
+            event.type = .flagsChanged
+        }
 
         event.post(tap: tap ?? .cghidEventTap)
     }

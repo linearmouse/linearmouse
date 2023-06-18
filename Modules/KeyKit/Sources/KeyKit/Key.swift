@@ -12,6 +12,7 @@ public enum Key: String, Codable {
     case capsLock
     case option
     case control
+    case commandRight
     case shiftRight
     case optionRight
     case controlRight
@@ -83,4 +84,23 @@ public enum Key: String, Codable {
     case backquote = "`"
     case backetLeft = "["
     case backetRight = "]"
+}
+
+extension Key: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .enter:
+            return "↩"
+        case .command, .commandRight:
+            return "⌘"
+        case .shift, .shiftRight:
+            return "⇧"
+        case .option, .optionRight:
+            return "⌥"
+        case .control, .controlRight:
+            return "⌃"
+        default:
+            return rawValue.capitalized
+        }
+    }
 }
