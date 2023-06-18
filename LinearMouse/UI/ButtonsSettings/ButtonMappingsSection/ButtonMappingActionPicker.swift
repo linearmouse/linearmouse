@@ -7,54 +7,80 @@ struct ButtonMappingActionPicker: View {
     @Binding var action: Scheme.Buttons.Mapping.Action
 
     static let actionTypeTree: [ActionTypeTreeNode] = [
-        .actionType(.simpleAction(.auto)),
-        .actionType(.simpleAction(.none)),
+        .actionType(.arg0(.auto)),
+        .actionType(.arg0(.none)),
         .section("Mission Control") { [
-            .actionType(.simpleAction(.missionControl)),
-            .actionType(.simpleAction(.missionControlSpaceLeft)),
-            .actionType(.simpleAction(.missionControlSpaceRight))
+            .actionType(.arg0(.missionControl)),
+            .actionType(.arg0(.missionControlSpaceLeft)),
+            .actionType(.arg0(.missionControlSpaceRight))
         ] },
-        .actionType(.simpleAction(.appExpose)),
-        .actionType(.simpleAction(.launchpad)),
-        .actionType(.simpleAction(.showDesktop)),
-        .actionType(.simpleAction(.lookUpAndDataDetectors)),
-        .actionType(.simpleAction(.smartZoom)),
+        .actionType(.arg0(.appExpose)),
+        .actionType(.arg0(.launchpad)),
+        .actionType(.arg0(.showDesktop)),
+        .actionType(.arg0(.lookUpAndDataDetectors)),
+        .actionType(.arg0(.smartZoom)),
         .section("Display") { [
-            .actionType(.simpleAction(.displayBrightnessUp)),
-            .actionType(.simpleAction(.displayBrightnessDown))
+            .actionType(.arg0(.displayBrightnessUp)),
+            .actionType(.arg0(.displayBrightnessDown))
         ] },
         .section("Media") { [
-            .actionType(.simpleAction(.mediaVolumeUp)),
-            .actionType(.simpleAction(.mediaVolumeDown)),
-            .actionType(.simpleAction(.mediaMute)),
-            .actionType(.simpleAction(.mediaPlayPause)),
-            .actionType(.simpleAction(.mediaPrevious)),
-            .actionType(.simpleAction(.mediaNext)),
-            .actionType(.simpleAction(.mediaFastForward)),
-            .actionType(.simpleAction(.mediaRewind))
+            .actionType(.arg0(.mediaVolumeUp)),
+            .actionType(.arg0(.mediaVolumeDown)),
+            .actionType(.arg0(.mediaMute)),
+            .actionType(.arg0(.mediaPlayPause)),
+            .actionType(.arg0(.mediaPrevious)),
+            .actionType(.arg0(.mediaNext)),
+            .actionType(.arg0(.mediaFastForward)),
+            .actionType(.arg0(.mediaRewind))
         ] },
         .section("Keyboard") { [
-            .actionType(.simpleAction(.keyboardBrightnessUp)),
-            .actionType(.simpleAction(.keyboardBrightnessDown))
+            .actionType(.arg0(.keyboardBrightnessUp)),
+            .actionType(.arg0(.keyboardBrightnessDown))
         ] },
         .section("Mouse Wheel") { [
-            .actionType(.simpleAction(.mouseWheelScrollUp)),
-            .actionType(.simpleAction(.mouseWheelScrollDown)),
-            .actionType(.simpleAction(.mouseWheelScrollLeft)),
-            .actionType(.simpleAction(.mouseWheelScrollRight))
+            .actionType(.arg0(.mouseWheelScrollUp)),
+            .actionType(.arg0(.mouseWheelScrollDown)),
+            .actionType(.arg0(.mouseWheelScrollLeft)),
+            .actionType(.arg0(.mouseWheelScrollRight))
         ] },
         .section("Mouse Button") { [
-            .actionType(.simpleAction(.mouseButtonLeft)),
-            .actionType(.simpleAction(.mouseButtonMiddle)),
-            .actionType(.simpleAction(.mouseButtonRight)),
-            .actionType(.simpleAction(.mouseButtonBack)),
-            .actionType(.simpleAction(.mouseButtonForward))
+            .actionType(.arg0(.mouseButtonLeft)),
+            .actionType(.arg0(.mouseButtonMiddle)),
+            .actionType(.arg0(.mouseButtonRight)),
+            .actionType(.arg0(.mouseButtonBack)),
+            .actionType(.arg0(.mouseButtonForward))
+        ] },
+        .section("Execute") { [
+            .actionType(.run)
         ] }
     ]
 
     var body: some View {
         Picker("Action", selection: actionType) {
             ActionTypeTreeView(nodes: Self.actionTypeTree)
+        }
+
+        switch action {
+        case .arg0:
+            EmptyView()
+        case .arg1(.run):
+            // TODO: TBD.
+            EmptyView()
+        case .arg1(.mouseWheelScrollUp):
+            // TODO: TBD.
+            EmptyView()
+        case .arg1(.mouseWheelScrollDown):
+            // TODO: TBD.
+            EmptyView()
+        case .arg1(.mouseWheelScrollLeft):
+            // TODO: TBD.
+            EmptyView()
+        case .arg1(.mouseWheelScrollRight):
+            // TODO: TBD.
+            EmptyView()
+        case .arg1(.keyPress):
+            // TODO: TBD.
+            EmptyView()
         }
     }
 }
@@ -87,44 +113,56 @@ extension ButtonMappingActionPicker {
     var actionType: Binding<ActionType> {
         Binding {
             switch action {
-            case let .simpleAction(simpleAction):
-                return .simpleAction(simpleAction)
-            case .run:
+            case let .arg0(value):
+                return .arg0(value)
+            case .arg1(.run):
                 return .run
-            case .mouseWheelScrollUp:
+            case .arg1(.mouseWheelScrollUp):
                 return .mouseWheelScrollUp
-            case .mouseWheelScrollDown:
+            case .arg1(.mouseWheelScrollDown):
                 return .mouseWheelScrollDown
-            case .mouseWheelScrollLeft:
+            case .arg1(.mouseWheelScrollLeft):
                 return .mouseWheelScrollLeft
-            case .mouseWheelScrollRight:
+            case .arg1(.mouseWheelScrollRight):
                 return .mouseWheelScrollRight
+            case .arg1(.keyPress):
+                return .keyPress
             }
         } set: { action in
             switch action {
-            case let .simpleAction(simpleAction):
-                self.action = .simpleAction(simpleAction)
-            default:
-                // TODO: TBD.
-                break
+            case let .arg0(value):
+                self.action = .arg0(value)
+            case .run:
+                self.action = .arg1(.run(""))
+            case .mouseWheelScrollUp:
+                self.action = .arg1(.mouseWheelScrollUp(.line(3)))
+            case .mouseWheelScrollDown:
+                self.action = .arg1(.mouseWheelScrollDown(.line(3)))
+            case .mouseWheelScrollLeft:
+                self.action = .arg1(.mouseWheelScrollLeft(.line(3)))
+            case .mouseWheelScrollRight:
+                self.action = .arg1(.mouseWheelScrollRight(.line(3)))
+            case .keyPress:
+                self.action = .arg1(.keyPress([]))
             }
         }
     }
 
     enum ActionType: Hashable {
-        case simpleAction(Scheme.Buttons.Mapping.Action.SimpleAction)
+        case arg0(Scheme.Buttons.Mapping.Action.Arg0)
         case run
         case mouseWheelScrollUp, mouseWheelScrollDown, mouseWheelScrollLeft, mouseWheelScrollRight
+        case keyPress
     }
 }
 
 extension ButtonMappingActionPicker.ActionType: CustomStringConvertible {
     var description: String {
         switch self {
-        case let .simpleAction(simpleAction):
-            return simpleAction.description
+        case let .arg0(value):
+            return value.description
         case .run:
-            return NSLocalizedString("Run command", comment: "")
+            return NSLocalizedString("Run shell command", comment: "")
         case .mouseWheelScrollUp:
             return NSLocalizedString("Scroll up...", comment: "")
         case .mouseWheelScrollDown:
@@ -133,6 +171,8 @@ extension ButtonMappingActionPicker.ActionType: CustomStringConvertible {
             return NSLocalizedString("Scroll left...", comment: "")
         case .mouseWheelScrollRight:
             return NSLocalizedString("Scroll right...", comment: "")
+        case .keyPress:
+            return NSLocalizedString("Key press...", comment: "")
         }
     }
 }

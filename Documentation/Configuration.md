@@ -606,3 +606,15 @@ The `<command>` will be executed with bash.
   }
 }
 ```
+
+#### Press specific keys
+
+```json
+{
+  "action": {
+    "keyPress": ["shift", "command", "4"]
+  }
+}
+```
+
+To see the full list of keys, please refer to [Configuration.d.ts#L609](Configuration.d.ts#L609).

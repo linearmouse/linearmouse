@@ -5,6 +5,11 @@
 import XCTest
 
 final class KeyKitTests: XCTestCase {
+    func testPressKey() throws {
+        let keySimulator = KeySimulator()
+        try keySimulator.press(.home)
+    }
+
     func testPostSymbolicHotKey() throws {
         try postSymbolicHotKey(.spaceLeft)
     }

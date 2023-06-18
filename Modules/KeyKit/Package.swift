@@ -5,6 +5,9 @@ import PackageDescription
 
 let package = Package(
     name: "KeyKit",
+    platforms: [
+        .macOS(.v10_15)
+    ],
     products: [
         .library(
             name: "KeyKit",

@@ -1,3 +1,3 @@
 # KeyKit
 
-Post symbolic hotkeys and system defined keys such as media keys.
+Post keys, symbolic hotkeys and system defined keys such as media keys.

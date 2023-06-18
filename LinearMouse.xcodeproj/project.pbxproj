@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -18,6 +18,7 @@
 		972327B12992912F0041538A /* ReverseScrollingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972327B02992912F0041538A /* ReverseScrollingSection.swift */; };
 		972327B3299291860041538A /* ScrollingModeSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972327B2299291860041538A /* ScrollingModeSection.swift */; };
 		972327B5299291F40041538A /* ModifierKeysSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972327B4299291F40041538A /* ModifierKeysSection.swift */; };
+		9724FACA2A3E04DE00622F5A /* KeyKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9724FAC92A3E04DE00622F5A /* KeyKit */; };
 		972A5E1F285CA43D00CB6440 /* DevicePickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E1E285CA43D00CB6440 /* DevicePickerSheet.swift */; };
 		972A5E22285CA49800CB6440 /* DevicePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E21285CA49800CB6440 /* DevicePicker.swift */; };
 		972A5E24285CA4AA00CB6440 /* DevicePickerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E23285CA4AA00CB6440 /* DevicePickerState.swift */; };
@@ -84,7 +85,6 @@
 		97C5DBC52868A1ED006FA6B4 /* ButtonsSettingsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBC42868A1ED006FA6B4 /* ButtonsSettingsState.swift */; };
 		97C5DBC82868A2C7006FA6B4 /* Modifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97C5DBC72868A2C7006FA6B4 /* Modifiers.swift */; };
 		97C97728288FC49F009094BA /* DockKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C97727288FC49F009094BA /* DockKit */; };
-		97C9772D28910E4F009094BA /* KeyKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C9772C28910E4F009094BA /* KeyKit */; };
 		97D3470C293CDEA000E7DFE1 /* WeakRef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97D3470B293CDEA000E7DFE1 /* WeakRef.swift */; };
 		97DB97C829AF79B9002F4668 /* ButtonMappingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97DB97C729AF79B9002F4668 /* ButtonMappingsSection.swift */; };
 		97E16F4F28F9A22A00E7D09B /* LinearScrollingHorizontalTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E16F4E28F9A22A00E7D09B /* LinearScrollingHorizontalTransformer.swift */; };
@@ -307,10 +307,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				97C9772D28910E4F009094BA /* KeyKit in Frameworks */,
 				977638F9286BE9EE00A698B6 /* PublishedObject in Frameworks */,
 				978DBCA629AB1732002259B3 /* JSONPatcher in Frameworks */,
 				B70A58F6284F987900E5C86E /* LaunchAtLogin in Frameworks */,
+				9724FACA2A3E04DE00622F5A /* KeyKit in Frameworks */,
 				97C97728288FC49F009094BA /* DockKit in Frameworks */,
 				B784292D278DB06600D207F0 /* Sparkle in Frameworks */,
 				97FC692F29F44D0100859859 /* AppMover in Frameworks */,
@@ -843,9 +843,9 @@
 				972A5E2F285D891100CB6440 /* Defaults */,
 				977638F8286BE9EE00A698B6 /* PublishedObject */,
 				97C97727288FC49F009094BA /* DockKit */,
-				97C9772C28910E4F009094BA /* KeyKit */,
 				978DBCA529AB1732002259B3 /* JSONPatcher */,
 				97FC692E29F44D0100859859 /* AppMover */,
+				9724FAC92A3E04DE00622F5A /* KeyKit */,
 			);
 			productName = LinearMouse;
 			productReference = B75A06182671E9D800BEAF77 /* LinearMouse.app */;
@@ -1486,6 +1486,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		9724FAC92A3E04DE00622F5A /* KeyKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = KeyKit;
+		};
 		972A5E2F285D891100CB6440 /* Defaults */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 972A5E2E285D891100CB6440 /* XCRemoteSwiftPackageReference "Defaults" */;
@@ -1512,10 +1516,6 @@
 		97C97727288FC49F009094BA /* DockKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DockKit;
-		};
-		97C9772C28910E4F009094BA /* KeyKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = KeyKit;
 		};
 		97FC692E29F44D0100859859 /* AppMover */ = {
 			isa = XCSwiftPackageProductDependency;

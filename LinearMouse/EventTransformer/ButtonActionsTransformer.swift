@@ -15,6 +15,8 @@ class ButtonActionsTransformer {
 
     var repeatTimer: Timer?
 
+    let keySimulator = KeySimulator()
+
     init(mappings: [Scheme.Buttons.Mapping]) {
         self.mappings = mappings
     }
@@ -41,8 +43,12 @@ extension ButtonActionsTransformer: EventTransformer {
         [.scrollWheel]
     }
 
+    var keyTypes: [CGEventType] {
+        [.keyDown, .keyUp]
+    }
+
     var allEventTypesOfInterest: [CGEventType] {
-        [mouseDownEventTypes, mouseUpEventTypes, mouseDraggedEventTypes, scrollWheelsEventTypes]
+        [mouseDownEventTypes, mouseUpEventTypes, mouseDraggedEventTypes, scrollWheelsEventTypes, keyTypes]
             .flatMap { $0 }
     }
 
@@ -55,6 +61,11 @@ extension ButtonActionsTransformer: EventTransformer {
             return event
         }
 
+        if keyTypes.contains(event.type), let flags = keySimulator.updateCGEventFlags(event) {
+            os_log("CGEvent flags updated to %{public}@", log: Self.log, type: .info,
+                   String(describing: flags))
+        }
+
         repeatTimer?.invalidate()
 
         guard let mapping = findMapping(of: event) else {
@@ -65,13 +76,12 @@ extension ButtonActionsTransformer: EventTransformer {
             return event
         }
 
-        if case .simpleAction(.auto) = action {
+        if case .arg0(.auto) = action {
             return event
         }
 
-        var eventsOfInterest: [CGEventType] = []
         if event.type == .scrollWheel {
-            queueActions(action: action)
+            queueActions(event: event.copy(), action: action)
         } else {
             // FIXME: `NSEvent.keyRepeatDelay` and `NSEvent.keyRepeatInterval` are not kept up to date
             // TODO: Support override `repeatDelay` and `repeatInterval`
@@ -79,19 +89,25 @@ extension ButtonActionsTransformer: EventTransformer {
             let keyRepeatInterval = mapping.repeat == true ? NSEvent.keyRepeatInterval : 0
             let keyRepeatEnabled = keyRepeatDelay > 0 && keyRepeatInterval > 0
 
-            if !keyRepeatEnabled, handleSimpleButtonMappings(event: event, action: action) {
-                return event
+            if !keyRepeatEnabled {
+                if handleButtonSwaps(event: event, action: action) {
+                    return event
+                }
+                if handleKeyPress(event: event, action: action) {
+                    return nil
+                }
             }
 
             // Actions are executed when button is down if key repeat is enabled; otherwise, actions are
             // executed when button is up.
-            eventsOfInterest = keyRepeatEnabled ? mouseDownEventTypes : mouseUpEventTypes
+            let eventsOfInterest = keyRepeatEnabled ? mouseDownEventTypes : mouseUpEventTypes
 
             guard eventsOfInterest.contains(event.type) else {
                 return nil
             }
 
-            queueActions(action: action,
+            queueActions(event: event.copy(),
+                         action: action,
                          keyRepeatEnabled: keyRepeatEnabled,
                          keyRepeatDelay: keyRepeatDelay,
                          keyRepeatInterval: keyRepeatInterval)
@@ -104,7 +120,8 @@ extension ButtonActionsTransformer: EventTransformer {
         mappings.last { $0.match(with: event) }
     }
 
-    private func queueActions(action: Scheme.Buttons.Mapping.Action,
+    private func queueActions(event _: CGEvent?,
+                              action: Scheme.Buttons.Mapping.Action,
                               keyRepeatEnabled: Bool = false,
                               keyRepeatDelay: TimeInterval = 0,
                               keyRepeatInterval: TimeInterval = 0) {
@@ -157,113 +174,117 @@ extension ButtonActionsTransformer: EventTransformer {
     // swiftlint:disable:next cyclomatic_complexity
     private func execute(action: Scheme.Buttons.Mapping.Action) throws {
         switch action {
-        case .simpleAction(.none), .simpleAction(.auto):
+        case .arg0(.none), .arg0(.auto):
             return
 
-        case .simpleAction(.missionControlSpaceLeft):
+        case .arg0(.missionControlSpaceLeft):
             try postSymbolicHotKey(.spaceLeft)
 
-        case .simpleAction(.missionControlSpaceRight):
+        case .arg0(.missionControlSpaceRight):
             try postSymbolicHotKey(.spaceRight)
 
-        case .simpleAction(.missionControl):
+        case .arg0(.missionControl):
             missionControl()
 
-        case .simpleAction(.appExpose):
+        case .arg0(.appExpose):
             appExpose()
 
-        case .simpleAction(.launchpad):
+        case .arg0(.launchpad):
             launchpad()
 
-        case .simpleAction(.showDesktop):
+        case .arg0(.showDesktop):
             showDesktop()
 
-        case .simpleAction(.lookUpAndDataDetectors):
+        case .arg0(.lookUpAndDataDetectors):
             try postSymbolicHotKey(.lookUpWordInDictionary)
 
-        case .simpleAction(.smartZoom):
+        case .arg0(.smartZoom):
             GestureEvent(zoomToggleSource: nil)?.post(tap: .cgSessionEventTap)
 
-        case .simpleAction(.displayBrightnessUp):
+        case .arg0(.displayBrightnessUp):
             postSystemDefinedKey(.brightnessUp)
 
-        case .simpleAction(.displayBrightnessDown):
+        case .arg0(.displayBrightnessDown):
             postSystemDefinedKey(.brightnessDown)
 
-        case .simpleAction(.mediaVolumeUp):
+        case .arg0(.mediaVolumeUp):
             postSystemDefinedKey(.soundUp)
 
-        case .simpleAction(.mediaVolumeDown):
+        case .arg0(.mediaVolumeDown):
             postSystemDefinedKey(.soundDown)
 
-        case .simpleAction(.mediaMute):
+        case .arg0(.mediaMute):
             postSystemDefinedKey(.mute)
 
-        case .simpleAction(.mediaPlayPause):
+        case .arg0(.mediaPlayPause):
             postSystemDefinedKey(.play)
 
-        case .simpleAction(.mediaNext):
+        case .arg0(.mediaNext):
             postSystemDefinedKey(.next)
 
-        case .simpleAction(.mediaPrevious):
+        case .arg0(.mediaPrevious):
             postSystemDefinedKey(.previous)
 
-        case .simpleAction(.mediaFastForward):
+        case .arg0(.mediaFastForward):
             postSystemDefinedKey(.fast)
 
-        case .simpleAction(.mediaRewind):
+        case .arg0(.mediaRewind):
             postSystemDefinedKey(.rewind)
 
-        case .simpleAction(.keyboardBrightnessUp):
+        case .arg0(.keyboardBrightnessUp):
             postSystemDefinedKey(.illuminationUp)
 
-        case .simpleAction(.keyboardBrightnessDown):
+        case .arg0(.keyboardBrightnessDown):
             postSystemDefinedKey(.illuminationDown)
 
-        case .simpleAction(.mouseWheelScrollUp):
+        case .arg0(.mouseWheelScrollUp):
             postScrollEvent(horizontal: 0, vertical: 3)
 
-        case .simpleAction(.mouseWheelScrollDown):
+        case .arg0(.mouseWheelScrollDown):
             postScrollEvent(horizontal: 0, vertical: -3)
 
-        case .simpleAction(.mouseWheelScrollLeft):
+        case .arg0(.mouseWheelScrollLeft):
             postScrollEvent(horizontal: 3, vertical: 0)
 
-        case .simpleAction(.mouseWheelScrollRight):
+        case .arg0(.mouseWheelScrollRight):
             postScrollEvent(horizontal: -3, vertical: 0)
 
-        case .simpleAction(.mouseButtonLeft):
+        case .arg0(.mouseButtonLeft):
             postClickEvent(mouseButton: .left)
 
-        case .simpleAction(.mouseButtonMiddle):
+        case .arg0(.mouseButtonMiddle):
             postClickEvent(mouseButton: .center)
 
-        case .simpleAction(.mouseButtonRight):
+        case .arg0(.mouseButtonRight):
             postClickEvent(mouseButton: .right)
 
-        case .simpleAction(.mouseButtonBack):
+        case .arg0(.mouseButtonBack):
             postClickEvent(mouseButton: .back)
 
-        case .simpleAction(.mouseButtonForward):
+        case .arg0(.mouseButtonForward):
             postClickEvent(mouseButton: .forward)
 
-        case let .run(command):
+        case let .arg1(.run(command)):
             let task = Process()
             task.launchPath = "/bin/bash"
             task.arguments = ["-c", command]
             task.launch()
 
-        case let .mouseWheelScrollUp(distance):
+        case let .arg1(.mouseWheelScrollUp(distance)):
             postScrollEvent(direction: .up, distance: distance)
 
-        case let .mouseWheelScrollDown(distance):
+        case let .arg1(.mouseWheelScrollDown(distance)):
             postScrollEvent(direction: .down, distance: distance)
 
-        case let .mouseWheelScrollLeft(distance):
+        case let .arg1(.mouseWheelScrollLeft(distance)):
             postScrollEvent(direction: .left, distance: distance)
 
-        case let .mouseWheelScrollRight(distance):
+        case let .arg1(.mouseWheelScrollRight(distance)):
             postScrollEvent(direction: .right, distance: distance)
+
+        case let .arg1(.keyPress(keys)):
+            try keySimulator.press(keys: keys)
+            keySimulator.reset()
         }
     }
 
@@ -341,8 +362,9 @@ extension ButtonActionsTransformer: EventTransformer {
         }
     }
 
-    private func handleSimpleButtonMappings(event: CGEvent, action: Scheme.Buttons.Mapping.Action) -> Bool {
-        guard [mouseDownEventTypes, mouseUpEventTypes, mouseDraggedEventTypes].flatMap({ $0 }).contains(event.type)
+    private func handleButtonSwaps(event: CGEvent, action: Scheme.Buttons.Mapping.Action) -> Bool {
+        guard [mouseDownEventTypes, mouseUpEventTypes, mouseDraggedEventTypes]
+            .flatMap({ $0 }).contains(event.type)
         else {
             return false
         }
@@ -350,26 +372,53 @@ extension ButtonActionsTransformer: EventTransformer {
         let mouseEventView = MouseEventView(event)
 
         switch action {
-        case .simpleAction(.mouseButtonLeft):
+        case .arg0(.mouseButtonLeft):
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .left
-        case .simpleAction(.mouseButtonMiddle):
+        case .arg0(.mouseButtonMiddle):
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .center
-        case .simpleAction(.mouseButtonRight):
+        case .arg0(.mouseButtonRight):
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .right
-        case .simpleAction(.mouseButtonBack):
+        case .arg0(.mouseButtonBack):
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .back
-        case .simpleAction(.mouseButtonForward):
+        case .arg0(.mouseButtonForward):
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .forward
         default:
             return false
         }
 
+        os_log("Set mouse button to %{public}@", log: Self.log, type: .info,
+               String(describing: mouseEventView.mouseButtonDescription))
+
         return true
+    }
+
+    private func handleKeyPress(event: CGEvent, action: Scheme.Buttons.Mapping.Action) -> Bool {
+        guard [mouseDownEventTypes, mouseUpEventTypes, mouseDraggedEventTypes]
+            .flatMap({ $0 }).contains(event.type)
+        else {
+            return false
+        }
+
+        switch action {
+        case let .arg1(.keyPress(keys)) where mouseDownEventTypes.contains(event.type):
+            os_log("Down keys: %{public}@", log: Self.log, type: .info,
+                   String(describing: keys))
+            try? keySimulator.down(keys: keys)
+            return true
+        case let .arg1(.keyPress(keys)) where mouseUpEventTypes.contains(event.type):
+            os_log("Up keys: %{public}@", log: Self.log, type: .info,
+                   String(describing: keys))
+            try? keySimulator.up(keys: keys)
+            keySimulator.reset()
+            return true
+        default:
+            return false
+        }
     }
 
     private func postClickEvent(mouseButton: CGMouseButton) {
