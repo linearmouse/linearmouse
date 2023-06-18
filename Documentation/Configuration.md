@@ -617,4 +617,4 @@ The `<command>` will be executed with bash.
 }
 ```
 
-To see the full list of keys, please refer to [Configuration.d.ts#L597](Configuration.d.ts#L597).
+To see the full list of keys, please refer to [Configuration.d.ts#L609](Configuration.d.ts#L609).
