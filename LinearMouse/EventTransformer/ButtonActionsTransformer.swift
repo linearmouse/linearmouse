@@ -71,9 +71,8 @@ extension ButtonActionsTransformer: EventTransformer {
             return event
         }
 
-        var eventsOfInterest: [CGEventType] = []
         if event.type == .scrollWheel {
-            queueActions(action: action)
+            queueActions(event: event.copy(), action: action)
         } else {
             // FIXME: `NSEvent.keyRepeatDelay` and `NSEvent.keyRepeatInterval` are not kept up to date
             // TODO: Support override `repeatDelay` and `repeatInterval`
@@ -81,19 +80,23 @@ extension ButtonActionsTransformer: EventTransformer {
             let keyRepeatInterval = mapping.repeat == true ? NSEvent.keyRepeatInterval : 0
             let keyRepeatEnabled = keyRepeatDelay > 0 && keyRepeatInterval > 0
 
-            if !keyRepeatEnabled, handleSimpleButtonMappings(event: event, action: action) {
-                return event
+            if !keyRepeatEnabled {
+                let (event, ok) = handleImmediateActions(event: event, action: action)
+                if ok {
+                    return event
+                }
             }
 
             // Actions are executed when button is down if key repeat is enabled; otherwise, actions are
             // executed when button is up.
-            eventsOfInterest = keyRepeatEnabled ? mouseDownEventTypes : mouseUpEventTypes
+            let eventsOfInterest = keyRepeatEnabled ? mouseDownEventTypes : mouseUpEventTypes
 
             guard eventsOfInterest.contains(event.type) else {
                 return nil
             }
 
-            queueActions(action: action,
+            queueActions(event: event.copy(),
+                         action: action,
                          keyRepeatEnabled: keyRepeatEnabled,
                          keyRepeatDelay: keyRepeatDelay,
                          keyRepeatInterval: keyRepeatInterval)
@@ -106,7 +109,8 @@ extension ButtonActionsTransformer: EventTransformer {
         mappings.last { $0.match(with: event) }
     }
 
-    private func queueActions(action: Scheme.Buttons.Mapping.Action,
+    private func queueActions(event _: CGEvent?,
+                              action: Scheme.Buttons.Mapping.Action,
                               keyRepeatEnabled: Bool = false,
                               keyRepeatDelay: TimeInterval = 0,
                               keyRepeatInterval: TimeInterval = 0) {
@@ -346,35 +350,56 @@ extension ButtonActionsTransformer: EventTransformer {
         }
     }
 
-    private func handleSimpleButtonMappings(event: CGEvent, action: Scheme.Buttons.Mapping.Action) -> Bool {
-        guard [mouseDownEventTypes, mouseUpEventTypes, mouseDraggedEventTypes].flatMap({ $0 }).contains(event.type)
+    private func handleImmediateActions(event: CGEvent, action: Scheme.Buttons.Mapping.Action) -> (CGEvent?, Bool) {
+        guard [mouseDownEventTypes, mouseUpEventTypes, mouseDraggedEventTypes]
+            .flatMap({ $0 }).contains(event.type)
         else {
-            return false
+            return (nil, false)
         }
 
         let mouseEventView = MouseEventView(event)
 
         switch action {
         case .arg0(.mouseButtonLeft):
+            os_log("Set mouse button to %@", log: Self.log, type: .info,
+                   String(describing: mouseEventView.mouseButtonDescription))
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .left
         case .arg0(.mouseButtonMiddle):
+            os_log("Set mouse button to %@", log: Self.log, type: .info,
+                   String(describing: mouseEventView.mouseButtonDescription))
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .center
         case .arg0(.mouseButtonRight):
+            os_log("Set mouse button to %@", log: Self.log, type: .info,
+                   String(describing: mouseEventView.mouseButtonDescription))
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .right
         case .arg0(.mouseButtonBack):
+            os_log("Set mouse button to %@", log: Self.log, type: .info,
+                   String(describing: mouseEventView.mouseButtonDescription))
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .back
         case .arg0(.mouseButtonForward):
+            os_log("Set mouse button to %@", log: Self.log, type: .info,
+                   String(describing: mouseEventView.mouseButtonDescription))
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .forward
+        case let .arg1(.keyPress(keys)) where mouseDownEventTypes.contains(event.type):
+            os_log("Down keys: %@", log: Self.log, type: .info,
+                   String(describing: keys))
+            try? keySimulator.down(keys: keys)
+            return (nil, true)
+        case let .arg1(.keyPress(keys)) where mouseUpEventTypes.contains(event.type):
+            os_log("Up keys: %@", log: Self.log, type: .info,
+                   String(describing: keys))
+            try? keySimulator.up(keys: keys)
+            return (nil, true)
         default:
-            return false
+            return (nil, false)
         }
 
-        return true
+        return (event, true)
     }
 
     private func postClickEvent(mouseButton: CGMouseButton) {

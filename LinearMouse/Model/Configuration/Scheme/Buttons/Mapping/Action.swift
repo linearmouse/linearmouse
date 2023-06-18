@@ -5,6 +5,7 @@ import Foundation
 import KeyKit
 
 extension Scheme.Buttons.Mapping {
+    // TODO: Refactor enum with protocol.
     enum Action: Equatable, Hashable {
         case arg0(Arg0)
         case arg1(Arg1)
