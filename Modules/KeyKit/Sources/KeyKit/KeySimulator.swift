@@ -68,6 +68,10 @@ public class KeySimulator {
 }
 
 public extension KeySimulator {
+    func reset() {
+        flags = []
+    }
+
     func down(keys: [Key], tap: CGEventTapLocation? = nil) throws {
         for key in keys {
             try postKey(key, keyDown: true, tap: tap)
@@ -95,5 +99,17 @@ public extension KeySimulator {
 
     func press(_ keys: Key..., tap: CGEventTapLocation? = nil) throws {
         try press(keys: keys, tap: tap)
+    }
+
+    func updateCGEvent(_ event: CGEvent) {
+        guard !flags.isEmpty else {
+            return
+        }
+
+        guard event.type == .keyDown || event.type == .keyUp else {
+            return
+        }
+
+        event.flags = flags
     }
 }

@@ -61,9 +61,25 @@ struct ButtonMappingActionPicker: View {
         }
 
         switch action {
-        case let .arg1(.run(command)):
+        case .arg0:
             EmptyView()
-        default:
+        case .arg1(.run):
+            // TODO: TBD.
+            EmptyView()
+        case .arg1(.mouseWheelScrollUp):
+            // TODO: TBD.
+            EmptyView()
+        case .arg1(.mouseWheelScrollDown):
+            // TODO: TBD.
+            EmptyView()
+        case .arg1(.mouseWheelScrollLeft):
+            // TODO: TBD.
+            EmptyView()
+        case .arg1(.mouseWheelScrollRight):
+            // TODO: TBD.
+            EmptyView()
+        case .arg1(.keyPress):
+            // TODO: TBD.
             EmptyView()
         }
     }
@@ -118,9 +134,16 @@ extension ButtonMappingActionPicker {
                 self.action = .arg0(value)
             case .run:
                 self.action = .arg1(.run(""))
-            default:
-                // TODO: TBD.
-                break
+            case .mouseWheelScrollUp:
+                self.action = .arg1(.mouseWheelScrollUp(.line(3)))
+            case .mouseWheelScrollDown:
+                self.action = .arg1(.mouseWheelScrollDown(.line(3)))
+            case .mouseWheelScrollLeft:
+                self.action = .arg1(.mouseWheelScrollLeft(.line(3)))
+            case .mouseWheelScrollRight:
+                self.action = .arg1(.mouseWheelScrollRight(.line(3)))
+            case .keyPress:
+                self.action = .arg1(.keyPress([]))
             }
         }
     }

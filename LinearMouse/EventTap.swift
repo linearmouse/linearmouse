@@ -59,6 +59,8 @@ class EventTap {
         eventsOfInterest |= 1 << CGEventType.otherMouseDown.rawValue
             | 1 << CGEventType.otherMouseUp.rawValue
             | 1 << CGEventType.otherMouseDragged.rawValue
+        eventsOfInterest |= 1 << CGEventType.keyDown.rawValue
+            | 1 << CGEventType.keyUp.rawValue
         eventTap = CGEvent.tapCreate(
             tap: .cghidEventTap,
             place: .headInsertEventTap,

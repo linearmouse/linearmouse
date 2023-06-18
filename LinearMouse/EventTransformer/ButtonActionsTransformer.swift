@@ -43,8 +43,12 @@ extension ButtonActionsTransformer: EventTransformer {
         [.scrollWheel]
     }
 
+    var keyTypes: [CGEventType] {
+        [.keyDown, .keyUp]
+    }
+
     var allEventTypesOfInterest: [CGEventType] {
-        [mouseDownEventTypes, mouseUpEventTypes, mouseDraggedEventTypes, scrollWheelsEventTypes]
+        [mouseDownEventTypes, mouseUpEventTypes, mouseDraggedEventTypes, scrollWheelsEventTypes, keyTypes]
             .flatMap { $0 }
     }
 
@@ -55,6 +59,10 @@ extension ButtonActionsTransformer: EventTransformer {
 
         guard !SettingsState.shared.recording else {
             return event
+        }
+
+        if keyTypes.contains(event.type) {
+            keySimulator.updateCGEvent(event)
         }
 
         repeatTimer?.invalidate()
@@ -81,9 +89,11 @@ extension ButtonActionsTransformer: EventTransformer {
             let keyRepeatEnabled = keyRepeatDelay > 0 && keyRepeatInterval > 0
 
             if !keyRepeatEnabled {
-                let (event, ok) = handleImmediateActions(event: event, action: action)
-                if ok {
+                if handleButtonSwaps(event: event, action: action) {
                     return event
+                }
+                if handleKeyPress(event: event, action: action) {
+                    return nil
                 }
             }
 
@@ -273,6 +283,7 @@ extension ButtonActionsTransformer: EventTransformer {
 
         case let .arg1(.keyPress(keys)):
             try keySimulator.press(keys: keys)
+            keySimulator.reset()
         }
     }
 
@@ -350,56 +361,63 @@ extension ButtonActionsTransformer: EventTransformer {
         }
     }
 
-    private func handleImmediateActions(event: CGEvent, action: Scheme.Buttons.Mapping.Action) -> (CGEvent?, Bool) {
+    private func handleButtonSwaps(event: CGEvent, action: Scheme.Buttons.Mapping.Action) -> Bool {
         guard [mouseDownEventTypes, mouseUpEventTypes, mouseDraggedEventTypes]
             .flatMap({ $0 }).contains(event.type)
         else {
-            return (nil, false)
+            return false
         }
 
         let mouseEventView = MouseEventView(event)
 
         switch action {
         case .arg0(.mouseButtonLeft):
-            os_log("Set mouse button to %@", log: Self.log, type: .info,
-                   String(describing: mouseEventView.mouseButtonDescription))
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .left
         case .arg0(.mouseButtonMiddle):
-            os_log("Set mouse button to %@", log: Self.log, type: .info,
-                   String(describing: mouseEventView.mouseButtonDescription))
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .center
         case .arg0(.mouseButtonRight):
-            os_log("Set mouse button to %@", log: Self.log, type: .info,
-                   String(describing: mouseEventView.mouseButtonDescription))
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .right
         case .arg0(.mouseButtonBack):
-            os_log("Set mouse button to %@", log: Self.log, type: .info,
-                   String(describing: mouseEventView.mouseButtonDescription))
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .back
         case .arg0(.mouseButtonForward):
-            os_log("Set mouse button to %@", log: Self.log, type: .info,
-                   String(describing: mouseEventView.mouseButtonDescription))
             mouseEventView.modifierFlags = []
             mouseEventView.mouseButton = .forward
+        default:
+            return false
+        }
+
+        os_log("Set mouse button to %@", log: Self.log, type: .info,
+               String(describing: mouseEventView.mouseButtonDescription))
+
+        return true
+    }
+
+    private func handleKeyPress(event: CGEvent, action: Scheme.Buttons.Mapping.Action) -> Bool {
+        guard [mouseDownEventTypes, mouseUpEventTypes, mouseDraggedEventTypes]
+            .flatMap({ $0 }).contains(event.type)
+        else {
+            return false
+        }
+
+        switch action {
         case let .arg1(.keyPress(keys)) where mouseDownEventTypes.contains(event.type):
             os_log("Down keys: %@", log: Self.log, type: .info,
                    String(describing: keys))
             try? keySimulator.down(keys: keys)
-            return (nil, true)
+            return true
         case let .arg1(.keyPress(keys)) where mouseUpEventTypes.contains(event.type):
             os_log("Up keys: %@", log: Self.log, type: .info,
                    String(describing: keys))
             try? keySimulator.up(keys: keys)
-            return (nil, true)
+            keySimulator.reset()
+            return true
         default:
-            return (nil, false)
+            return false
         }
-
-        return (event, true)
     }
 
     private func postClickEvent(mouseButton: CGMouseButton) {
