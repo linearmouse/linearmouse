@@ -61,8 +61,9 @@ extension ButtonActionsTransformer: EventTransformer {
             return event
         }
 
-        if keyTypes.contains(event.type) {
-            keySimulator.updateCGEvent(event)
+        if keyTypes.contains(event.type), let flags = keySimulator.updateCGEventFlags(event) {
+            os_log("CGEvent flags updated to %{public}@", log: Self.log, type: .info,
+                   String(describing: flags))
         }
 
         repeatTimer?.invalidate()
@@ -390,7 +391,7 @@ extension ButtonActionsTransformer: EventTransformer {
             return false
         }
 
-        os_log("Set mouse button to %@", log: Self.log, type: .info,
+        os_log("Set mouse button to %{public}@", log: Self.log, type: .info,
                String(describing: mouseEventView.mouseButtonDescription))
 
         return true
@@ -405,12 +406,12 @@ extension ButtonActionsTransformer: EventTransformer {
 
         switch action {
         case let .arg1(.keyPress(keys)) where mouseDownEventTypes.contains(event.type):
-            os_log("Down keys: %@", log: Self.log, type: .info,
+            os_log("Down keys: %{public}@", log: Self.log, type: .info,
                    String(describing: keys))
             try? keySimulator.down(keys: keys)
             return true
         case let .arg1(.keyPress(keys)) where mouseUpEventTypes.contains(event.type):
-            os_log("Up keys: %@", log: Self.log, type: .info,
+            os_log("Up keys: %{public}@", log: Self.log, type: .info,
                    String(describing: keys))
             try? keySimulator.up(keys: keys)
             keySimulator.reset()
