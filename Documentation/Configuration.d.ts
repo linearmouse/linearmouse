@@ -598,7 +598,7 @@ declare namespace Scheme {
         /**
          * @description Keyboard: Press specific keys.
          */
-        keyPress: [Key];
+        keyPress: Array<Key>;
       };
 
       /**

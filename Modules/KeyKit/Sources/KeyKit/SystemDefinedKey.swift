@@ -32,13 +32,35 @@ public enum SystemDefinedKey: Int {
          illuminationToggle
 }
 
+public func postSystemDefinedKey(_ key: SystemDefinedKey, keyDown: Bool) {
+    var iter: mach_port_t = 0
+
+    guard IOServiceGetMatchingServices(kIOMasterPortDefault, IOServiceMatching(kIOHIDSystemClass), &iter) ==
+        KERN_SUCCESS else {
+        return
+    }
+    defer { IOObjectRelease(iter) }
+
+    let service = IOIteratorNext(iter)
+    guard service != 0 else {
+        return
+    }
+    defer { IOObjectRelease(service) }
+
+    var handle: io_connect_t = .zero
+    guard IOServiceOpen(service, mach_task_self_, UInt32(kIOHIDParamConnectType), &handle) == KERN_SUCCESS else {
+        return
+    }
+    defer { IOServiceClose(handle) }
+
+    var event = NXEventData()
+    event.compound.subType = Int16(NX_SUBTYPE_AUX_CONTROL_BUTTONS)
+    event.compound.misc.L.0 = Int32(key.rawValue) << 16 | (keyDown ? NX_KEYDOWN : NX_KEYUP) << 8
+    IOHIDPostEvent(handle, UInt32(NX_SYSDEFINED), .init(x: 0, y: 0), &event,
+                   UInt32(kNXEventDataVersion), IOOptionBits(0), IOOptionBits(kIOHIDSetGlobalEventFlags))
+}
+
 public func postSystemDefinedKey(_ key: SystemDefinedKey) {
-    let down = NSEvent.otherEvent(with: .systemDefined, location: .zero, modifierFlags: .init(rawValue: 0xA00),
-                                  timestamp: 0, windowNumber: 0, context: nil, subtype: 8,
-                                  data1: (key.rawValue << 16) | (0xA << 8), data2: -1)
-    let up = NSEvent.otherEvent(with: .systemDefined, location: .zero, modifierFlags: .init(rawValue: 0xB00),
-                                timestamp: 0, windowNumber: 0, context: nil, subtype: 8,
-                                data1: (key.rawValue << 16) | (0xB << 8), data2: -1)
-    down?.cgEvent?.post(tap: .cgSessionEventTap)
-    up?.cgEvent?.post(tap: .cgSessionEventTap)
+    postSystemDefinedKey(key, keyDown: true)
+    postSystemDefinedKey(key, keyDown: false)
 }

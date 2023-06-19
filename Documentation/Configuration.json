@@ -372,8 +372,6 @@
           "items": {
             "$ref": "#/definitions/Scheme.Buttons.Mapping.Key"
           },
-          "maxItems": 1,
-          "minItems": 1,
           "type": "array"
         }
       },

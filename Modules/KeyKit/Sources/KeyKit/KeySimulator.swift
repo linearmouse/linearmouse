@@ -1,12 +1,6 @@
 // MIT License
 // Copyright (c) 2021-2023 LinearMouse
 
-//
-//  File.swift
-//
-//
-//  Created by Jiahao Lu on 2023/6/17.
-//
 import AppKit
 
 public enum KeySimulatorError: Error {
@@ -47,6 +41,14 @@ public class KeySimulator {
             } else {
                 flags.remove(flagsToToggle)
             }
+        }
+
+        switch key {
+        case .capsLock:
+            postSystemDefinedKey(.capsLock, keyDown: keyDown)
+            return
+        default:
+            break
         }
 
         guard let keyCode = keyCodeResolver.keyCode(for: key) else {
