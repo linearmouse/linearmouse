@@ -39,16 +39,19 @@ public func postSystemDefinedKey(_ key: SystemDefinedKey, keyDown: Bool) {
         KERN_SUCCESS else {
         return
     }
+    defer { IOObjectRelease(iter) }
 
     let service = IOIteratorNext(iter)
     guard service != 0 else {
         return
     }
+    defer { IOObjectRelease(service) }
 
     var handle: io_connect_t = .zero
     guard IOServiceOpen(service, mach_task_self_, UInt32(kIOHIDParamConnectType), &handle) == KERN_SUCCESS else {
         return
     }
+    defer { IOServiceClose(handle) }
 
     var event = NXEventData()
     event.compound.subType = Int16(NX_SUBTYPE_AUX_CONTROL_BUTTONS)
