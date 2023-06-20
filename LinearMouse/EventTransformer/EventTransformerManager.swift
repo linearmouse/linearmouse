@@ -14,6 +14,7 @@ class EventTransformerManager {
     @Default(.bypassEventsFromOtherApplications) var bypassEventsFromOtherApplications
 
     private var eventTransformerCache = LRUCache<CacheKey, EventTransformer>(countLimit: 16)
+    private var activeCacheKey: CacheKey?
 
     struct CacheKey: Hashable {
         var deviceMatcher: DeviceMatcher?
@@ -38,6 +39,22 @@ class EventTransformerManager {
     func get(withCGEvent cgEvent: CGEvent,
              withSourcePid sourcePid: pid_t?,
              withTargetPid pid: pid_t?) -> EventTransformer {
+        let prevActiveCacheKey = activeCacheKey
+        defer {
+            if let prevActiveCacheKey = prevActiveCacheKey,
+               prevActiveCacheKey != activeCacheKey {
+                if let eventTransformer = eventTransformerCache.value(forKey: prevActiveCacheKey) as? Deactivatable {
+                    eventTransformer.deactivate()
+                }
+                if let activeCacheKey = activeCacheKey,
+                   let eventTransformer = eventTransformerCache.value(forKey: activeCacheKey) as? Deactivatable {
+                    eventTransformer.reactivate()
+                }
+            }
+        }
+
+        activeCacheKey = nil
+
         if sourcePid != nil, bypassEventsFromOtherApplications {
             os_log("Return noop transformer because this event is sent by %{public}s",
                    log: Self.log,
@@ -57,6 +74,7 @@ class EventTransformerManager {
         let device = DeviceManager.shared.deviceFromCGEvent(cgEvent)
         let cacheKey = CacheKey(deviceMatcher: device.map { DeviceMatcher(of: $0) },
                                 pid: pid)
+        activeCacheKey = cacheKey
         if let eventTransformer = eventTransformerCache.value(forKey: cacheKey) {
             return eventTransformer
         }

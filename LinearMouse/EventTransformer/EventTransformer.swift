@@ -20,3 +20,31 @@ extension [EventTransformer]: EventTransformer {
         return event
     }
 }
+
+protocol Deactivatable {
+    func deactivate()
+    func reactivate()
+}
+
+extension Deactivatable {
+    func deactivate() {}
+    func reactivate() {}
+}
+
+extension [EventTransformer]: Deactivatable {
+    func deactivate() {
+        for eventTransformer in self {
+            if let eventTransformer = eventTransformer as? Deactivatable {
+                eventTransformer.deactivate()
+            }
+        }
+    }
+
+    func reactivate() {
+        for eventTransformer in self {
+            if let eventTransformer = eventTransformer as? Deactivatable {
+                eventTransformer.reactivate()
+            }
+        }
+    }
+}
