@@ -67,6 +67,7 @@ extension ButtonActionsTransformer: EventTransformer {
         }
 
         repeatTimer?.invalidate()
+        repeatTimer = nil
 
         guard let mapping = findMapping(of: event) else {
             return event
@@ -445,5 +446,15 @@ extension ButtonActionsTransformer: EventTransformer {
 
         mouseDownEvent.post(tap: .cgSessionEventTap)
         mouseUpEvent.post(tap: .cgSessionEventTap)
+    }
+}
+
+extension ButtonActionsTransformer: Deactivatable {
+    func deactivate() {
+        if let repeatTimer = repeatTimer {
+            os_log("ButtonActionsTransformer is inactive, invalidate the repeat timer", log: Self.log, type: .info)
+            repeatTimer.invalidate()
+            self.repeatTimer = nil
+        }
     }
 }
