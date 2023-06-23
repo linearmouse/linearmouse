@@ -1,25 +1,25 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
-"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
-"Get more help" = "Get more help";
-"Open Accessibility" = "Open Accessibility";
+"LinearMouse needs Accessibility permission" = "LinearMouse потребує дозволу на спеціальні можливості";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "Вам потрібно надати дозвіл на доступ до спеціальних можливостей в Налаштуваннях > Безпека та Конфіденційність > Доступність.";
+"Get more help" = "Отримати додаткову допомогу";
+"Open Accessibility" = "Відкрити Доступність";
 
-"%@ Settings..." = "%@ Settings...";
+"%@ Settings..." = "%@ Налаштування...";
 "Start at login" = "Автозапуск";
-"Config" = "Config";
+"Config" = "Налаштування";
 "Reload" = "Перезавантажити";
-"Reveal in Finder" = "Reveal in Finder";
-"Configure for %@..." = "Configure for %@...";
-"Quit %@" = "Quit %@";
+"Reveal in Finder" = "Показати у Finder";
+"Configure for %@..." = "Налаштування для %@...";
+"Quit %@" = "Вийти %@";
 
-"Scrolling" = "Scrolling";
+"Scrolling" = "Прокручування";
 "Pointer" = "Курсор";
 "Buttons" = "Клавіші";
 "General" = "Загальні";
 
 "Vertical" = "Вертикальні";
 "Horizontal" = "Горизонтальні";
-"Reverse scrolling" = "Reverse scrolling";
-"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
+"Reverse scrolling" = "Зворотня прокрутка";
+"Some gestures, such as swiping back and forward, may stop working." = "Деякі жести, такі як свайп назад і вперед, можуть припинити працювати.";
 "Scrolling mode" = "Режим прокручування";
 "Accelerated" = "Прискорений";
 "By Lines" = "За Рядками";
@@ -30,13 +30,13 @@
 "Slow" = "Повільно";
 "Fast" = "Швидко";
 "Distance" = "Відстань";
-"Scrolling is disabled based on the current settings." = "Scrolling is disabled based on the current settings.";
-"Revert to system defaults" = "Revert to system defaults";
-"Copy settings from vertical" = "Copy settings from vertical";
+"Scrolling is disabled based on the current settings." = "Прокрутка вимкнена на основі поточних параметрів.";
+"Revert to system defaults" = "Повернути типові налаштування";
+"Copy settings from vertical" = "Копіювати налаштування з вертикальних";
 "Modifier Keys" = "Клавіші-модифікатори";
-"No action" = "No action";
-"Alter orientation" = "Alter orientation";
-"Change speed" = "Change speed";
+"No action" = "Без дії";
+"Alter orientation" = "Змінити орієнтацію";
+"Change speed" = "Змінити швидкість";
 "Zoom" = "Масштабування";
 
 "Disable pointer acceleration" = "Вимкнути прискорення курсору";
