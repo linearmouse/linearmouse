@@ -29,7 +29,7 @@ extension SingleValueOrArray: Codable {
         do {
             wrappedValue = try container.decode([Value].self)
         } catch {
-            wrappedValue = [try container.decode(Value.self)]
+            wrappedValue = try [container.decode(Value.self)]
         }
     }
 
