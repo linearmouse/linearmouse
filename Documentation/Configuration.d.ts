@@ -596,7 +596,7 @@ declare namespace Scheme {
 
       type KeyPress = {
         /**
-         * @description Keyboard: Press specific keys.
+         * @description Keyboard: Keyboard shortcut.
          */
         keyPress: Array<Key>;
       };

@@ -607,7 +607,7 @@ The `<command>` will be executed with bash.
 }
 ```
 
-#### Press specific keys
+#### Press keyboard shortcuts
 
 ```json
 {
