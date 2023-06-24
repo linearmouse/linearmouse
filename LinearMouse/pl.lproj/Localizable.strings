@@ -56,6 +56,8 @@
 
 "Assign actions to mouse buttons" = "Przypisz akcje do przycisków myszy";
 "Edit" = "Edytuj";
+"Click to record" = "Click to record";
+"Recording" = "Recording";
 "Left click" = "Lewy przycisk";
 "Right click" = "Prawy przycisk";
 "Middle click" = "Środkowy przycisk";
@@ -98,6 +100,7 @@
 "The mouse button is already assigned." = "Przycisk myszy jest już przypisany.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "Przypisywanie akcji do lewego przycisku myszy bez jakichkolwiek klawiszy modyfikujących jest niedozwolone.";
 "Repeat on hold" = "Powtarzaj podczas przytrzymania";
+"Cancel" = "Cancel";
 "OK" = "OK";
 "Create" = "Utwórz";
 
