@@ -177,7 +177,7 @@ extension ButtonMappingActionPicker.ActionType: CustomStringConvertible {
         case .mouseWheelScrollRight:
             return NSLocalizedString("Scroll right...", comment: "")
         case .keyPress:
-            return NSLocalizedString("Key press...", comment: "")
+            return NSLocalizedString("Keyboard shortcut...", comment: "")
         }
     }
 }
