@@ -56,8 +56,8 @@
 
 "Assign actions to mouse buttons" = "分配滑鼠按鈕的動作";
 "Edit" = "編輯";
-"Click to record" = "Click to record";
-"Recording" = "Recording";
+"Click to record" = "點擊錄製";
+"Recording" = "正在錄製";
 "Left click" = "左鍵點擊";
 "Right click" = "右鍵點擊";
 "Middle click" = "中鍵點擊";
@@ -100,7 +100,7 @@
 "The mouse button is already assigned." = "該滑鼠按鍵已被分配。";
 "Assigning an action to the left button without any modifier keys is not allowed." = "不能將動作分配給左鍵且不加變更鍵。";
 "Repeat on hold" = "按住時重複";
-"Cancel" = "Cancel";
+"Cancel" = "取消";
 "OK" = "確認";
 "Create" = "建立";
 
