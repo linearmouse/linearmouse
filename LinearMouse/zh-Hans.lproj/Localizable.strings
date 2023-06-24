@@ -56,6 +56,8 @@
 
 "Assign actions to mouse buttons" = "分配鼠标按钮的动作";
 "Edit" = "编辑";
+"Click to record" = "Click to record";
+"Recording" = "Recording";
 "Left click" = "左键点击";
 "Right click" = "右键点击";
 "Middle click" = "中键点击";
@@ -98,6 +100,7 @@
 "The mouse button is already assigned." = "该鼠标按钮已被分配。";
 "Assigning an action to the left button without any modifier keys is not allowed." = "不能将动作分配给左键且不加修饰键。";
 "Repeat on hold" = "按住时重复";
+"Cancel" = "Cancel";
 "OK" = "好";
 "Create" = "创建";
 
