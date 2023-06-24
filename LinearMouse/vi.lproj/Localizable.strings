@@ -133,14 +133,14 @@
 "Feature request" = "Yêu cầu tính năng";
 "Donate" = "Ủng hộ";
 
-"Auto switch to the active device" = "Auto switch to the active device";
+"Auto switch to the active device" = "Tự động chuyển qua thiết bị hoạt động";
 
-"Mouse" = "Mouse";
+"Mouse" = "Chuột";
 "Trackpad" = "Trackpad";
-"(active)" = "(active)";
+"(active)" = "(hoạt động)";
 
-"Configure for" = "Configure for";
-"All Apps" = "All Apps";
-"Configured" = "Configured";
-"Running" = "Running";
-"Installed" = "Installed";
+"Configure for" = "Cấu hình cho";
+"All Apps" = "Tất cả ứng dụng";
+"Configured" = "Đã cấu hình";
+"Running" = "Đang hoạt động";
+"Installed" = "Đã cài đặt";
