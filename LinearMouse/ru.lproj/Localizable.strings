@@ -56,6 +56,8 @@
 
 "Assign actions to mouse buttons" = "Назначить действия на кнопки мыши";
 "Edit" = "Редактировать";
+"Click to record" = "Click to record";
+"Recording" = "Recording";
 "Left click" = "ЛКМ";
 "Right click" = "ПКМ";
 "Middle click" = "СКМ";
@@ -98,6 +100,7 @@
 "The mouse button is already assigned." = "Кнопка мыши уже назначена.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "Назначение стандартного действия на левую кнопку мыши не допускается.";
 "Repeat on hold" = "Повторять удерживание";
+"Cancel" = "Cancel";
 "OK" = "ОК";
 "Create" = "Создать";
 

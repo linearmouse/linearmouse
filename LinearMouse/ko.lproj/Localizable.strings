@@ -56,6 +56,8 @@
 
 "Assign actions to mouse buttons" = "마우스 버튼에 동작 할당";
 "Edit" = "편집";
+"Click to record" = "Click to record";
+"Recording" = "Recording";
 "Left click" = "좌클릭";
 "Right click" = "우클릭";
 "Middle click" = "휠 클릭";
@@ -98,6 +100,7 @@
 "The mouse button is already assigned." = "이 마우스 버튼은 이미 설정되어 있습니다.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "보조 키 없이 주요 버튼에 동작을 설정하는 것은 허용되지 않습니다.";
 "Repeat on hold" = "길게 눌러 반복";
+"Cancel" = "Cancel";
 "OK" = "확인";
 "Create" = "생성";
 

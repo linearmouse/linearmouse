@@ -56,6 +56,8 @@
 
 "Assign actions to mouse buttons" = "Maustasten Aktionen zuweisen";
 "Edit" = "Bearbeiten";
+"Click to record" = "Click to record";
+"Recording" = "Recording";
 "Left click" = "Linksklick";
 "Right click" = "Rechtsklick";
 "Middle click" = "Mittlere Maustaste";
@@ -98,6 +100,7 @@
 "The mouse button is already assigned." = "Diese Maustaste ist bereits zugewiesen.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "Die Zuweisung einer Aktion an die linke Maustaste ist ohne Modifikatortasten nicht zulässig.";
 "Repeat on hold" = "Wiederholen beim Halten";
+"Cancel" = "Cancel";
 "OK" = "OK";
 "Create" = "Erstellen";
 
