@@ -35,13 +35,18 @@ struct ButtonMappingActionPicker: View {
         ] },
         .section("Keyboard") { [
             .actionType(.arg0(.keyboardBrightnessUp)),
-            .actionType(.arg0(.keyboardBrightnessDown))
+            .actionType(.arg0(.keyboardBrightnessDown)),
+            .actionType(.keyPress)
         ] },
         .section("Mouse Wheel") { [
             .actionType(.arg0(.mouseWheelScrollUp)),
+            .actionType(.mouseWheelScrollUp),
             .actionType(.arg0(.mouseWheelScrollDown)),
+            .actionType(.mouseWheelScrollDown),
             .actionType(.arg0(.mouseWheelScrollLeft)),
-            .actionType(.arg0(.mouseWheelScrollRight))
+            .actionType(.mouseWheelScrollLeft),
+            .actionType(.arg0(.mouseWheelScrollRight)),
+            .actionType(.mouseWheelScrollRight)
         ] },
         .section("Mouse Button") { [
             .actionType(.arg0(.mouseButtonLeft)),
@@ -162,7 +167,7 @@ extension ButtonMappingActionPicker.ActionType: CustomStringConvertible {
         case let .arg0(value):
             return value.description
         case .run:
-            return NSLocalizedString("Run shell command", comment: "")
+            return NSLocalizedString("Run shell command...", comment: "")
         case .mouseWheelScrollUp:
             return NSLocalizedString("Scroll up...", comment: "")
         case .mouseWheelScrollDown:
