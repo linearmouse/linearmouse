@@ -56,8 +56,8 @@
 
 "Assign actions to mouse buttons" = "Fare düğmelerine eylem ata";
 "Edit" = "Düzenle";
-"Click to record" = "Click to record";
-"Recording" = "Recording";
+"Click to record" = "Kaydetmek için tıklayın";
+"Recording" = "Kaydediliyor";
 "Left click" = "Sol tık";
 "Right click" = "Sağ tık";
 "Middle click" = "Orta tık";
@@ -100,7 +100,7 @@
 "The mouse button is already assigned." = "Fare düğmesi zaten atanmış.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "Herhangi bir değiştirici tuş olmadan sol düğmeye atama yapılamaz.";
 "Repeat on hold" = "Basılı tutulduğunda tekrarla";
-"Cancel" = "Cancel";
+"Cancel" = "Vazgeç";
 "OK" = "Tamam";
 "Create" = "Oluştur";
 
