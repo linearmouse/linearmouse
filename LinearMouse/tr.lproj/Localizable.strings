@@ -46,7 +46,7 @@
 
 "Enable universal back and forward" = "Evrensel ileri ve geriyi etkinleştir";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Evrensel ileri ve geri işlevine izin vermek için ileri ve geri yan düğmelerini kaydırma hareketlerine dönüştürün.";
-"Debounce button clicks" = "Debounce button clicks";
+"Debounce button clicks" = "Ardışık düğme tıklamalarını yoksay";
 "Ignore rapid clicks within a certain time period." = "Belli bir süre içerisindeki ardışık klikleri yoksay.";
 "ms" = "ms";
 "Reset timer on mouse up" = "Fare düğmesi bırakıldığında zamanlayıcıyı sıfırla";
@@ -61,7 +61,7 @@
 "Left click" = "Sol tık";
 "Right click" = "Sağ tık";
 "Middle click" = "Orta tık";
-"Button #%lld click" = "Button #%lld click";
+"Button #%lld click" = "#%lld Düğme tıklaması";
 "Scroll up" = "Yukarı kaydır";
 "Scroll down" = "Aşağı kaydır";
 "Scroll left" = "Sola kaydır";
@@ -74,8 +74,8 @@
 "Application windows" = "Uygulama pencereleri";
 "Launchpad" = "Launchpad";
 "Show desktop" = "Masaüstünü göster";
-"Look up & data detectors" = "Look up & data detectors";
-"Smart zoom" = "Smart zoom";
+"Look up & data detectors" = "Gözat & veri algılama";
+"Smart zoom" = "Akıllı yakınlaştırma";
 "Display" = "Ekran";
 "Increase display brightness" = "Ekran parlaklığını arttır";
 "Decrease display brightness" = "Ekran parlaklığını azalt";
