@@ -61,9 +61,10 @@ extension ButtonActionsTransformer: EventTransformer {
             return event
         }
 
-        if keyTypes.contains(event.type), let flags = keySimulator.updateCGEventFlags(event) {
-            os_log("CGEvent flags updated to %{public}@", log: Self.log, type: .info,
-                   String(describing: flags))
+        if keyTypes.contains(event.type), let newFlags = keySimulator.modifiedCGEventFlags(of: event) {
+            os_log("Update CGEventFlags from %{public}llu to %{public}llu", log: Self.log, type: .info,
+                   event.flags.rawValue, newFlags.rawValue)
+            event.flags = newFlags
         }
 
         repeatTimer?.invalidate()

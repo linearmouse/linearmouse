@@ -103,7 +103,7 @@ public extension KeySimulator {
         try press(keys: keys, tap: tap)
     }
 
-    func updateCGEventFlags(_ event: CGEvent) -> CGEventFlags? {
+    func modifiedCGEventFlags(of event: CGEvent) -> CGEventFlags? {
         guard !flags.isEmpty else {
             return nil
         }
@@ -111,8 +111,6 @@ public extension KeySimulator {
         guard event.type == .keyDown || event.type == .keyUp else {
             return nil
         }
-
-        event.flags = flags
 
         return flags
     }
