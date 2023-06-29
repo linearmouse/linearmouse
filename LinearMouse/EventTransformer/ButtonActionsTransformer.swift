@@ -284,7 +284,7 @@ extension ButtonActionsTransformer: EventTransformer {
             postScrollEvent(direction: .right, distance: distance)
 
         case let .arg1(.keyPress(keys)):
-            try keySimulator.press(keys: keys)
+            try keySimulator.press(keys: keys, tap: .cgSessionEventTap)
             keySimulator.reset()
         }
     }
@@ -409,12 +409,12 @@ extension ButtonActionsTransformer: EventTransformer {
         case let .arg1(.keyPress(keys)) where mouseDownEventTypes.contains(event.type):
             os_log("Down keys: %{public}@", log: Self.log, type: .info,
                    String(describing: keys))
-            try? keySimulator.down(keys: keys)
+            try? keySimulator.down(keys: keys, tap: .cgSessionEventTap)
             return true
         case let .arg1(.keyPress(keys)) where mouseUpEventTypes.contains(event.type):
             os_log("Up keys: %{public}@", log: Self.log, type: .info,
                    String(describing: keys))
-            try? keySimulator.up(keys: keys)
+            try? keySimulator.up(keys: keys.reversed(), tap: .cgSessionEventTap)
             keySimulator.reset()
             return true
         default:

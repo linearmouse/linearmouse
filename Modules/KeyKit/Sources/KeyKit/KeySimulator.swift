@@ -96,7 +96,7 @@ public extension KeySimulator {
 
     func press(keys: [Key], tap: CGEventTapLocation? = nil) throws {
         try down(keys: keys, tap: tap)
-        try up(keys: keys, tap: tap)
+        try up(keys: keys.reversed(), tap: tap)
     }
 
     func press(_ keys: Key..., tap: CGEventTapLocation? = nil) throws {
