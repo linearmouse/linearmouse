@@ -20,11 +20,11 @@
 "Horizontal" = "Horizontal";
 "Reverse scrolling" = "Invertir desplazamiento";
 "Some gestures, such as swiping back and forward, may stop working." = "Algunos gestos, como el deslizamiento hacia atrás y hacia delante, pueden dejar de funcionar.";
-"Scrolling mode" = "Scrolling mode";
+"Scrolling mode" = "Modo de desplazamiento";
 "Accelerated" = "Accelerated";
-"By Lines" = "By Lines";
-"By Pixels" = "By Pixels";
-"Scrolling acceleration" = "Scrolling acceleration";
+"By Lines" = "Por líneas";
+"By Pixels" = "Por píxeles";
+"Scrolling acceleration" = "Aceleración de desplazamiento";
 "Linear" = "Linear";
 "Speed" = "Velocidad";
 "Slow" = "Slow";
@@ -75,7 +75,7 @@
 "Launchpad" = "Launchpad";
 "Show desktop" = "Show desktop";
 "Look up & data detectors" = "Look up & data detectors";
-"Smart zoom" = "Smart zoom";
+"Smart zoom" = "Zoom inteligente";
 "Display" = "Display";
 "Increase display brightness" = "Increase display brightness";
 "Decrease display brightness" = "Decrease display brightness";
@@ -86,27 +86,27 @@
 "Play / pause" = "Play / pause";
 "Next" = "Next";
 "Previous" = "Previous";
-"Fast forward" = "Fast forward";
-"Rewind" = "Rewind";
-"Keyboard" = "Keyboard";
+"Fast forward" = "Avance rápido";
+"Rewind" = "Rebobinar";
+"Keyboard" = "Teclado";
 "Increase keyboard brightness" = "Increase keyboard brightness";
 "Decrease keyboard brightness" = "Decrease keyboard brightness";
-"Mouse Wheel" = "Mouse Wheel";
+"Mouse Wheel" = "Rueda del ratón";
 "Mouse Button" = "Mouse Button";
-"Back" = "Back";
-"Forward" = "Forward";
-"Mouse button" = "Mouse button";
-"Action" = "Action";
-"The mouse button is already assigned." = "The mouse button is already assigned.";
+"Back" = "Volver";
+"Forward" = "Adelante";
+"Mouse button" = "Botón del mouse";
+"Action" = "Acción";
+"The mouse button is already assigned." = "El botón del mouse ya ha sido asignado.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "Assigning an action to the left button without any modifier keys is not allowed.";
 "Repeat on hold" = "Repeat on hold";
-"Cancel" = "Cancel";
+"Cancel" = "Cancelar";
 "OK" = "Aceptar";
-"Create" = "Create";
+"Create" = "Crear";
 
 "Settings" = "Ajustes";
 "Show in menu bar" = "Mostrar en la barra de menú";
-"To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
+"To show the settings, launch %@ again." = "Para mostrar las preferencias, vuelve a lanzar %@.";
 "Bypass events from other applications" = "Bypass events from other applications";
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "If enabled, %@ will not modify events sent by other applications, such as Logi Options+.";
 
@@ -114,7 +114,7 @@
 "Reveal Config in Finder..." = "Reveal Config in Finder...";
 
 "Version: %@" = "Versión: %@";
-"Check for updates automatically" = "Check for updates automatically";
+"Check for updates automatically" = "Buscar actualizaciones automáticamente";
 "Update check interval" = "Update check interval";
 "Daily" = "Cada día";
 "Weekly" = "Cada semana";
