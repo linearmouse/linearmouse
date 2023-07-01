@@ -86,6 +86,15 @@ public enum Key: String, Codable {
     case backetRight = "]"
 }
 
+extension Key {
+    private static let modifiersKeys: Set<Key> = [.command, .shift, .option, .control,
+                                                  .commandRight, .shiftRight, .optionRight, .controlRight]
+
+    public var isModifier: Bool {
+        Self.modifiersKeys.contains(self)
+    }
+}
+
 extension Key: CustomStringConvertible {
     public var description: String {
         switch self {

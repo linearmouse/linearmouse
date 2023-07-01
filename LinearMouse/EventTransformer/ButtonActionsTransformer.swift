@@ -96,7 +96,7 @@ extension ButtonActionsTransformer: EventTransformer {
                 if handleButtonSwaps(event: event, action: action) {
                     return event
                 }
-                if handleKeyPress(event: event, action: action) {
+                if handleModifiersHold(event: event, action: action) {
                     return nil
                 }
             }
@@ -400,28 +400,37 @@ extension ButtonActionsTransformer: EventTransformer {
         return true
     }
 
-    private func handleKeyPress(event: CGEvent, action: Scheme.Buttons.Mapping.Action) -> Bool {
-        guard [mouseDownEventTypes, mouseUpEventTypes, mouseDraggedEventTypes]
+    private func handleModifiersHold(event: CGEvent, action: Scheme.Buttons.Mapping.Action) -> Bool {
+        guard [mouseDownEventTypes, mouseUpEventTypes]
             .flatMap({ $0 }).contains(event.type)
         else {
             return false
         }
 
-        switch action {
-        case let .arg1(.keyPress(keys)) where mouseDownEventTypes.contains(event.type):
+        guard case let .arg1(.keyPress(keys)) = action else {
+            return false
+        }
+
+        guard keys.allSatisfy(\.isModifier) else {
+            return false
+        }
+
+        if mouseDownEventTypes.contains(event.type) {
             os_log("Down keys: %{public}@", log: Self.log, type: .info,
                    String(describing: keys))
             try? keySimulator.down(keys: keys, tap: .cgSessionEventTap)
             return true
-        case let .arg1(.keyPress(keys)) where mouseUpEventTypes.contains(event.type):
+        }
+
+        if mouseUpEventTypes.contains(event.type) {
             os_log("Up keys: %{public}@", log: Self.log, type: .info,
                    String(describing: keys))
             try? keySimulator.up(keys: keys.reversed(), tap: .cgSessionEventTap)
             keySimulator.reset()
             return true
-        default:
-            return false
         }
+
+        return false
     }
 
     private func postClickEvent(mouseButton: CGMouseButton) {
