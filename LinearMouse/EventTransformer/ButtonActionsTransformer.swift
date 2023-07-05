@@ -15,7 +15,8 @@ class ButtonActionsTransformer {
 
     var repeatTimer: Timer?
 
-    let keySimulator = KeySimulator()
+    static let keySimulator = KeySimulator()
+    var keySimulator: KeySimulator { Self.keySimulator }
 
     init(mappings: [Scheme.Buttons.Mapping]) {
         self.mappings = mappings
@@ -61,9 +62,10 @@ extension ButtonActionsTransformer: EventTransformer {
             return event
         }
 
-        if keyTypes.contains(event.type), let flags = keySimulator.updateCGEventFlags(event) {
-            os_log("CGEvent flags updated to %{public}@", log: Self.log, type: .info,
-                   String(describing: flags))
+        if keyTypes.contains(event.type), let newFlags = keySimulator.modifiedCGEventFlags(of: event) {
+            os_log("Update CGEventFlags from %{public}llu to %{public}llu", log: Self.log, type: .info,
+                   event.flags.rawValue, newFlags.rawValue)
+            event.flags = newFlags
         }
 
         repeatTimer?.invalidate()
@@ -94,7 +96,7 @@ extension ButtonActionsTransformer: EventTransformer {
                 if handleButtonSwaps(event: event, action: action) {
                     return event
                 }
-                if handleKeyPress(event: event, action: action) {
+                if handleModifiersHold(event: event, action: action) {
                     return nil
                 }
             }
@@ -284,7 +286,7 @@ extension ButtonActionsTransformer: EventTransformer {
             postScrollEvent(direction: .right, distance: distance)
 
         case let .arg1(.keyPress(keys)):
-            try keySimulator.press(keys: keys)
+            try keySimulator.press(keys: keys, tap: .cgSessionEventTap)
             keySimulator.reset()
         }
     }
@@ -398,28 +400,37 @@ extension ButtonActionsTransformer: EventTransformer {
         return true
     }
 
-    private func handleKeyPress(event: CGEvent, action: Scheme.Buttons.Mapping.Action) -> Bool {
-        guard [mouseDownEventTypes, mouseUpEventTypes, mouseDraggedEventTypes]
+    private func handleModifiersHold(event: CGEvent, action: Scheme.Buttons.Mapping.Action) -> Bool {
+        guard [mouseDownEventTypes, mouseUpEventTypes]
             .flatMap({ $0 }).contains(event.type)
         else {
             return false
         }
 
-        switch action {
-        case let .arg1(.keyPress(keys)) where mouseDownEventTypes.contains(event.type):
-            os_log("Down keys: %{public}@", log: Self.log, type: .info,
-                   String(describing: keys))
-            try? keySimulator.down(keys: keys)
-            return true
-        case let .arg1(.keyPress(keys)) where mouseUpEventTypes.contains(event.type):
-            os_log("Up keys: %{public}@", log: Self.log, type: .info,
-                   String(describing: keys))
-            try? keySimulator.up(keys: keys)
-            keySimulator.reset()
-            return true
-        default:
+        guard case let .arg1(.keyPress(keys)) = action else {
             return false
         }
+
+        guard keys.allSatisfy(\.isModifier) else {
+            return false
+        }
+
+        if mouseDownEventTypes.contains(event.type) {
+            os_log("Down keys: %{public}@", log: Self.log, type: .info,
+                   String(describing: keys))
+            try? keySimulator.down(keys: keys, tap: .cgSessionEventTap)
+            return true
+        }
+
+        if mouseUpEventTypes.contains(event.type) {
+            os_log("Up keys: %{public}@", log: Self.log, type: .info,
+                   String(describing: keys))
+            try? keySimulator.up(keys: keys.reversed(), tap: .cgSessionEventTap)
+            keySimulator.reset()
+            return true
+        }
+
+        return false
     }
 
     private func postClickEvent(mouseButton: CGMouseButton) {
