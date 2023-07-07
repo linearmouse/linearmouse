@@ -56,8 +56,8 @@
 
 "Assign actions to mouse buttons" = "Назначить действия на кнопки мыши";
 "Edit" = "Редактировать";
-"Click to record" = "Click to record";
-"Recording" = "Recording";
+"Click to record" = "Нажмите для записи";
+"Recording" = "Запись";
 "Left click" = "ЛКМ";
 "Right click" = "ПКМ";
 "Middle click" = "СКМ";
@@ -69,8 +69,8 @@
 
 "Default action" = "Действие по умолчанию";
 "Mission Control" = "Mission Control";
-"Move left a space" = "Move left a space";
-"Move right a space" = "Move right a space";
+"Move left a space" = "На одно пространство влево";
+"Move right a space" = "На одно пространство вправо";
 "Application windows" = "Application windows";
 "Launchpad" = "Launchpad";
 "Show desktop" = "Показать рабочий стол";
