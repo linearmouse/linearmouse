@@ -71,10 +71,10 @@
 "Mission Control" = "Mission Control";
 "Move left a space" = "На одно пространство влево";
 "Move right a space" = "На одно пространство вправо";
-"Application windows" = "Application windows";
+"Application windows" = "Окна программы";
 "Launchpad" = "Launchpad";
 "Show desktop" = "Показать рабочий стол";
-"Look up & data detectors" = "Look up & data detectors";
+"Look up & data detectors" = "Поиск и детекторы данных";
 "Smart zoom" = "Умное увеличение";
 "Display" = "Экран";
 "Increase display brightness" = "Увеличить яркость экрана";
@@ -86,7 +86,7 @@
 "Play / pause" = "Воспроизведение / пауза";
 "Next" = "Далее";
 "Previous" = "Назад";
-"Fast forward" = "Fast forward";
+"Fast forward" = "Перемотка вперед";
 "Rewind" = "Перемотка";
 "Keyboard" = "Keyboard";
 "Increase keyboard brightness" = "Увеличить яркость клавиатуры";
@@ -100,7 +100,7 @@
 "The mouse button is already assigned." = "Кнопка мыши уже назначена.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "Назначение стандартного действия на левую кнопку мыши не допускается.";
 "Repeat on hold" = "Повторять удерживание";
-"Cancel" = "Cancel";
+"Cancel" = "Отмена";
 "OK" = "ОК";
 "Create" = "Создать";
 
@@ -110,7 +110,7 @@
 "Bypass events from other applications" = "Допускать события из других приложений";
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "Если включено, %@ не будет изменять события, отправленные другими приложениями, такими как Logi Options+.";
 
-"Reload Config" = "Reload Config";
+"Reload Config" = "Перезагрузить конфигурацию";
 "Reveal Config in Finder..." = "Показать конфигурацию в Finder...";
 
 "Version: %@" = "Версия: %@";
