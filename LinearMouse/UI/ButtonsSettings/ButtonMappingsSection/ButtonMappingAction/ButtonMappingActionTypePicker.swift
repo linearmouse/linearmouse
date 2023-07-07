@@ -10,6 +10,7 @@ struct ButtonMappingActionTypePicker: View, Equatable {
         Picker("Action", selection: $actionType) {
             ActionTypeTreeView(nodes: Self.actionTypeTree)
         }
+        .modifier(PickerViewModifier())
     }
 
     static func == (lhs: Self, rhs: Self) -> Bool {

@@ -6,7 +6,7 @@ import SwiftUI
 struct ButtonMappingActionPickerRun: View {
     @Binding var action: Scheme.Buttons.Mapping.Action
 
-    private var commandBinding: Binding<String> {
+    private var command: Binding<String> {
         Binding<String>(
             get: {
                 guard case let .arg1(.run(command)) = action else {
@@ -21,7 +21,7 @@ struct ButtonMappingActionPickerRun: View {
     }
 
     var body: some View {
-        TextField("", text: commandBinding)
+        TextField("", text: command)
             .labelsHidden()
     }
 }

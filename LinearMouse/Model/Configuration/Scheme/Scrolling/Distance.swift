@@ -15,11 +15,11 @@ extension Scheme.Scrolling.Distance: CustomStringConvertible {
     var description: String {
         switch self {
         case .auto:
-            return "auto"
+            return NSLocalizedString("auto", comment: "")
         case let .line(value):
-            return String(value)
+            return String(format: NSLocalizedString("%d line(s)", comment: ""), value)
         case let .pixel(value):
-            return "\(value)px"
+            return String(format: NSLocalizedString("%.1f pixel(s)", comment: ""), value.asTruncatedDouble)
         }
     }
 }

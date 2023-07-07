@@ -15,18 +15,11 @@ struct ButtonMappingAction: View {
             EmptyView()
         case .arg1(.run):
             ButtonMappingActionPickerRun(action: $action)
-        case .arg1(.mouseWheelScrollUp):
-            // TODO: TBD.
-            EmptyView()
-        case .arg1(.mouseWheelScrollDown):
-            // TODO: TBD.
-            EmptyView()
-        case .arg1(.mouseWheelScrollLeft):
-            // TODO: TBD.
-            EmptyView()
-        case .arg1(.mouseWheelScrollRight):
-            // TODO: TBD.
-            EmptyView()
+        case .arg1(.mouseWheelScrollUp),
+             .arg1(.mouseWheelScrollDown),
+             .arg1(.mouseWheelScrollLeft),
+             .arg1(.mouseWheelScrollRight):
+            ButtonMappingActionScroll(action: $action)
         case .arg1(.keyPress):
             // TODO: TBD.
             EmptyView()
