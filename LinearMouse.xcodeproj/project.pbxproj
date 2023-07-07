@@ -43,7 +43,7 @@
 		972DF65B285AEABA00B83932 /* ButtonsSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972DF65A285AEABA00B83932 /* ButtonsSettings.swift */; };
 		9731B40529D7D86800FC3C24 /* ButtonMappingButtonRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9731B40429D7D86800FC3C24 /* ButtonMappingButtonRecorder.swift */; };
 		9731B40729D7DAC600FC3C24 /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9731B40629D7DAC600FC3C24 /* View.swift */; };
-		9731B40B29D7FE1D00FC3C24 /* ButtonMappingActionPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9731B40A29D7FE1D00FC3C24 /* ButtonMappingActionPicker.swift */; };
+		9731B40B29D7FE1D00FC3C24 /* ButtonMappingAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9731B40A29D7FE1D00FC3C24 /* ButtonMappingAction.swift */; };
 		97353386297ED84600C1B5D0 /* ScrollingAccelerationSpeedAdjustmentTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97353385297ED84600C1B5D0 /* ScrollingAccelerationSpeedAdjustmentTransformer.swift */; };
 		9735338F297F8EE200C1B5D0 /* FormViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9735338E297F8EE200C1B5D0 /* FormViewModifier.swift */; };
 		973ADFCE29E2F18C00443649 /* LoggingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 973ADFCD29E2F18C00443649 /* LoggingSection.swift */; };
@@ -88,6 +88,8 @@
 		97D3470C293CDEA000E7DFE1 /* WeakRef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97D3470B293CDEA000E7DFE1 /* WeakRef.swift */; };
 		97DB97C829AF79B9002F4668 /* ButtonMappingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97DB97C729AF79B9002F4668 /* ButtonMappingsSection.swift */; };
 		97E16F4F28F9A22A00E7D09B /* LinearScrollingHorizontalTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E16F4E28F9A22A00E7D09B /* LinearScrollingHorizontalTransformer.swift */; };
+		97E1B7B52A571D3200655EEC /* ButtonMappingActionPickerRun.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E1B7B42A571D3200655EEC /* ButtonMappingActionPickerRun.swift */; };
+		97E1B7B92A57BD9100655EEC /* ButtonMappingActionTypePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E1B7B82A57BD9100655EEC /* ButtonMappingActionTypePicker.swift */; };
 		97F77FA4285DC467007C9C2B /* DevicePickerSectionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA3285DC467007C9C2B /* DevicePickerSectionState.swift */; };
 		97F77FAA285E178B007C9C2B /* DevicePickerSectionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA9285E178B007C9C2B /* DevicePickerSectionItem.swift */; };
 		97F77FAC285E3055007C9C2B /* StatusItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FAB285E3055007C9C2B /* StatusItem.swift */; };
@@ -179,7 +181,7 @@
 		972DF65A285AEABA00B83932 /* ButtonsSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonsSettings.swift; sourceTree = "<group>"; };
 		9731B40429D7D86800FC3C24 /* ButtonMappingButtonRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMappingButtonRecorder.swift; sourceTree = "<group>"; };
 		9731B40629D7DAC600FC3C24 /* View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
-		9731B40A29D7FE1D00FC3C24 /* ButtonMappingActionPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMappingActionPicker.swift; sourceTree = "<group>"; };
+		9731B40A29D7FE1D00FC3C24 /* ButtonMappingAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMappingAction.swift; sourceTree = "<group>"; };
 		97353385297ED84600C1B5D0 /* ScrollingAccelerationSpeedAdjustmentTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingAccelerationSpeedAdjustmentTransformer.swift; sourceTree = "<group>"; };
 		9735338E297F8EE200C1B5D0 /* FormViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormViewModifier.swift; sourceTree = "<group>"; };
 		973ADFCD29E2F18C00443649 /* LoggingSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggingSection.swift; sourceTree = "<group>"; };
@@ -225,6 +227,8 @@
 		97D3470B293CDEA000E7DFE1 /* WeakRef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeakRef.swift; sourceTree = "<group>"; };
 		97DB97C729AF79B9002F4668 /* ButtonMappingsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMappingsSection.swift; sourceTree = "<group>"; };
 		97E16F4E28F9A22A00E7D09B /* LinearScrollingHorizontalTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearScrollingHorizontalTransformer.swift; sourceTree = "<group>"; };
+		97E1B7B42A571D3200655EEC /* ButtonMappingActionPickerRun.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMappingActionPickerRun.swift; sourceTree = "<group>"; };
+		97E1B7B82A57BD9100655EEC /* ButtonMappingActionTypePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMappingActionTypePicker.swift; sourceTree = "<group>"; };
 		97F77FA3285DC467007C9C2B /* DevicePickerSectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSectionState.swift; sourceTree = "<group>"; };
 		97F77FA9285E178B007C9C2B /* DevicePickerSectionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSectionItem.swift; sourceTree = "<group>"; };
 		97F77FAB285E3055007C9C2B /* StatusItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusItem.swift; sourceTree = "<group>"; };
@@ -635,6 +639,16 @@
 			path = Scrolling;
 			sourceTree = "<group>";
 		};
+		97E1B7B32A571D1700655EEC /* ButtonMappingAction */ = {
+			isa = PBXGroup;
+			children = (
+				9731B40A29D7FE1D00FC3C24 /* ButtonMappingAction.swift */,
+				97E1B7B82A57BD9100655EEC /* ButtonMappingActionTypePicker.swift */,
+				97E1B7B42A571D3200655EEC /* ButtonMappingActionPickerRun.swift */,
+			);
+			path = ButtonMappingAction;
+			sourceTree = "<group>";
+		};
 		97F77FAD285F09FA007C9C2B /* Model */ = {
 			isa = PBXGroup;
 			children = (
@@ -671,7 +685,7 @@
 				97FD8CE929BE0F9D00D93212 /* ButtonMapping.swift */,
 				97FD8CEB29C1ABA800D93212 /* ButtonMappingEditSheet.swift */,
 				9731B40429D7D86800FC3C24 /* ButtonMappingButtonRecorder.swift */,
-				9731B40A29D7FE1D00FC3C24 /* ButtonMappingActionPicker.swift */,
+				97E1B7B32A571D1700655EEC /* ButtonMappingAction */,
 			);
 			path = ButtonMappingsSection;
 			sourceTree = "<group>";
@@ -1043,6 +1057,7 @@
 				97F77FAC285E3055007C9C2B /* StatusItem.swift in Sources */,
 				B7B1D08F26B3EC4F00F48176 /* ScrollingSettings.swift in Sources */,
 				972AFBAE29A10F80001C5099 /* ApplicationBundle.swift in Sources */,
+				97E1B7B52A571D3200655EEC /* ButtonMappingActionPickerRun.swift in Sources */,
 				9757BB9629935445002333AA /* Bidirectional.swift in Sources */,
 				972DF64F285A2D7C00B83932 /* SecondaryButtonStyle.swift in Sources */,
 				97B913FE28869F0500DC920A /* ButtonActionsTransformer.swift in Sources */,
@@ -1075,7 +1090,7 @@
 				972327B3299291860041538A /* ScrollingModeSection.swift in Sources */,
 				9731B40529D7D86800FC3C24 /* ButtonMappingButtonRecorder.swift in Sources */,
 				978DBCA329A663EB002259B3 /* ClickDebouncing.swift in Sources */,
-				9731B40B29D7FE1D00FC3C24 /* ButtonMappingActionPicker.swift in Sources */,
+				9731B40B29D7FE1D00FC3C24 /* ButtonMappingAction.swift in Sources */,
 				972327A5299146AA0041538A /* ImplicitOptional.swift in Sources */,
 				970C04CD2A344AF4008E17E2 /* VisualEffectView.swift in Sources */,
 				97D3470C293CDEA000E7DFE1 /* WeakRef.swift in Sources */,
@@ -1095,6 +1110,7 @@
 				97F77FAA285E178B007C9C2B /* DevicePickerSectionItem.swift in Sources */,
 				36EBC3223E2CEE09F84076D8 /* Process.m in Sources */,
 				97353386297ED84600C1B5D0 /* ScrollingAccelerationSpeedAdjustmentTransformer.swift in Sources */,
+				97E1B7B92A57BD9100655EEC /* ButtonMappingActionTypePicker.swift in Sources */,
 				973ADFCE29E2F18C00443649 /* LoggingSection.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
