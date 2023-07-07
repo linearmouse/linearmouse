@@ -111,7 +111,7 @@
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "Если включено, %@ не будет изменять события, отправленные другими приложениями, такими как Logi Options+.";
 
 "Reload Config" = "Reload Config";
-"Reveal Config in Finder..." = "Reveal Config in Finder...";
+"Reveal Config in Finder..." = "Показать конфигурацию в Finder...";
 
 "Version: %@" = "Версия: %@";
 "Check for updates automatically" = "Автоматически проверять наличие обновлений";
