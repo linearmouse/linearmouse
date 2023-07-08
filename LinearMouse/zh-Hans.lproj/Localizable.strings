@@ -56,6 +56,14 @@
 
 "Assign actions to mouse buttons" = "分配鼠标按钮的动作";
 "Edit" = "编辑";
+
+"Run: %@" = "Run: %@";
+"Scroll up %@" = "Scroll up %@";
+"Scroll down %@" = "Scroll down %@";
+"Scroll left %@" = "Scroll left %@";
+"Scroll right %@" = "Scroll right %@";
+"Keyboard shortcut %@" = "Keyboard shortcut %@";
+
 "Click to record" = "点击录制";
 "Recording" = "正在录制";
 "Left click" = "左键点击";
@@ -95,6 +103,14 @@
 "Mouse Button" = "鼠标按键";
 "Back" = "后退";
 "Forward" = "前进";
+"Execute" = "Execute";
+"Run shell command..." = "Run shell command...";
+"Scroll up..." = "Scroll up...";
+"Scroll down..." = "Scroll down...";
+"Scroll left..." = "Scroll left...";
+"Scroll right..." = "Scroll right...";
+"Keyboard shortcut..." = "Keyboard shortcut...";
+
 "Mouse button" = "鼠标按键";
 "Action" = "动作";
 "The mouse button is already assigned." = "该鼠标按钮已被分配。";
