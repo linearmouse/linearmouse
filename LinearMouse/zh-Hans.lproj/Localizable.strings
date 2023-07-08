@@ -57,12 +57,12 @@
 "Assign actions to mouse buttons" = "分配鼠标按钮的动作";
 "Edit" = "编辑";
 
-"Run: %@" = "Run: %@";
-"Scroll up %@" = "Scroll up %@";
-"Scroll down %@" = "Scroll down %@";
-"Scroll left %@" = "Scroll left %@";
-"Scroll right %@" = "Scroll right %@";
-"Keyboard shortcut %@" = "Keyboard shortcut %@";
+"Run: %@" = "运行：%@";
+"Scroll up %@" = "向上滚动 %@";
+"Scroll down %@" = "向上滚动 %@";
+"Scroll left %@" = "向左滚动 %@";
+"Scroll right %@" = "向右滚动 %@";
+"Keyboard shortcut %@" = "键盘快捷键 %@";
 
 "Click to record" = "点击录制";
 "Recording" = "正在录制";
@@ -103,13 +103,13 @@
 "Mouse Button" = "鼠标按键";
 "Back" = "后退";
 "Forward" = "前进";
-"Execute" = "Execute";
-"Run shell command..." = "Run shell command...";
-"Scroll up..." = "Scroll up...";
-"Scroll down..." = "Scroll down...";
-"Scroll left..." = "Scroll left...";
-"Scroll right..." = "Scroll right...";
-"Keyboard shortcut..." = "Keyboard shortcut...";
+"Execute" = "执行";
+"Run shell command..." = "运行 shell 命令...";
+"Scroll up..." = "向上滚动...";
+"Scroll down..." = "向下滚动...";
+"Scroll left..." = "向左滚动...";
+"Scroll right..." = "向右滚动...";
+"Keyboard shortcut..." = "键盘快捷键...";
 
 "Mouse button" = "鼠标按键";
 "Action" = "动作";
