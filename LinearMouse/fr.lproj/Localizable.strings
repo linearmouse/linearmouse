@@ -26,7 +26,7 @@
 "By Pixels" = "Par pixels";
 "Scrolling acceleration" = "Accélération du défilement";
 "Linear" = "Linéaire";
-"Speed" = "Vitesse";
+"Scrolling speed" = "Scrolling speed";
 "Slow" = "Lent";
 "Fast" = "Rapide";
 "Distance" = "Distance";
@@ -56,6 +56,14 @@
 
 "Assign actions to mouse buttons" = "Assigner des actions aux boutons de la souris";
 "Edit" = "Éditer";
+
+"Run: %@" = "Run: %@";
+"Scroll up %@" = "Scroll up %@";
+"Scroll down %@" = "Scroll down %@";
+"Scroll left %@" = "Scroll left %@";
+"Scroll right %@" = "Scroll right %@";
+"Keyboard shortcut %@" = "Keyboard shortcut %@";
+
 "Click to record" = "Click to record";
 "Recording" = "Recording";
 "Left click" = "Clic gauche";
@@ -95,6 +103,14 @@
 "Mouse Button" = "Bouton de la souris";
 "Back" = "Précédent";
 "Forward" = "Suivant";
+"Execute" = "Execute";
+"Run shell command..." = "Run shell command...";
+"Scroll up..." = "Scroll up...";
+"Scroll down..." = "Scroll down...";
+"Scroll left..." = "Scroll left...";
+"Scroll right..." = "Scroll right...";
+"Keyboard shortcut..." = "Keyboard shortcut...";
+
 "Mouse button" = "Bouton de la souris";
 "Action" = "Action";
 "The mouse button is already assigned." = "Le bouton de la souris est déjà utilisé.";
@@ -123,6 +139,7 @@
 "Thank you for participating in the beta test." = "Merci d'avoir participé au test beta.";
 "Check for Updates..." = "Rechercher des mises à jour...";
 
+"Enable detailed logging" = "Enable detailed logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Activer cette option va enregistrer tous les événements d'entrée, ce qui peut augmenter l'utilisation du processeur en utilisant %@, mais peut être utile pour le dépannage.";
 "Export the logs for the last 5 minutes." = "Exporter les journaux pour les 5 dernières minutes.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "Si vous signalez un bug, il serait utile d'attacher les journaux.";
