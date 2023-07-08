@@ -26,7 +26,7 @@
 "By Pixels" = "Theo điểm ảnh";
 "Scrolling acceleration" = "Tốc độ cuộn";
 "Linear" = "Thẳng";
-"Speed" = "Tốc độ";
+"Scrolling speed" = "Scrolling speed";
 "Slow" = "Chậm";
 "Fast" = "Nhanh";
 "Distance" = "Khoảng cách";
@@ -56,6 +56,14 @@
 
 "Assign actions to mouse buttons" = "Gán hành động cho các nút của chuột";
 "Edit" = "Sửa";
+
+"Run: %@" = "Run: %@";
+"Scroll up %@" = "Scroll up %@";
+"Scroll down %@" = "Scroll down %@";
+"Scroll left %@" = "Scroll left %@";
+"Scroll right %@" = "Scroll right %@";
+"Keyboard shortcut %@" = "Keyboard shortcut %@";
+
 "Click to record" = "Nhấn để ghi";
 "Recording" = "Đang ghi lại";
 "Left click" = "Chuột trái";
@@ -95,6 +103,14 @@
 "Mouse Button" = "Nút chuột";
 "Back" = "Quay Lại";
 "Forward" = "Chuyển tiếp";
+"Execute" = "Execute";
+"Run shell command..." = "Run shell command...";
+"Scroll up..." = "Scroll up...";
+"Scroll down..." = "Scroll down...";
+"Scroll left..." = "Scroll left...";
+"Scroll right..." = "Scroll right...";
+"Keyboard shortcut..." = "Keyboard shortcut...";
+
 "Mouse button" = "Nút chuột";
 "Action" = "Hành động";
 "The mouse button is already assigned." = "Nút chuột này đã được gán trước đó.";
@@ -123,6 +139,7 @@
 "Thank you for participating in the beta test." = "Cảm ơn bạn đã tham gia phiên bản dùng thử.";
 "Check for Updates..." = "Kiểm tra cập nhật...";
 
+"Enable detailed logging" = "Enable detailed logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Bật tùy chọn này sẽ ghi nhật ký tất cả các sự kiện đầu vào, điều này có thể làm tăng mức sử dụng CPU khi sử dụng %@, nhưng có thể hữu ích cho việc khắc phục sự cố.";
 "Export the logs for the last 5 minutes." = "Xuất log trong 5 phút vừa rồi.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "Nếu bạn muốn báo lỗi, sẽ tốt hơn nếu bạn đính kèm tệp log.";
