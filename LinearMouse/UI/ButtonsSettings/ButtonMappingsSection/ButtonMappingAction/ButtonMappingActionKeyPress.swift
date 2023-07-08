@@ -40,6 +40,8 @@ struct KeyboardShortcutRecorder: View {
 
     @State private var recordingMonitor: Any?
 
+    @State private var recordingModifiers: NSEvent.ModifierFlags = []
+
     var body: some View {
         Button {
             recording.toggle()
@@ -66,6 +68,7 @@ struct KeyboardShortcutRecorder: View {
             self.recordingMonitor = nil
         }
         if recording {
+            recordingModifiers = []
             let eventsOfInterest: NSEvent.EventTypeMask = [
                 .flagsChanged,
                 .keyDown
@@ -75,32 +78,40 @@ struct KeyboardShortcutRecorder: View {
         }
     }
 
+    private func buildKeysFromModifierFlags(_ modifierFlags: NSEvent.ModifierFlags) -> [Key] {
+        var keys: [Key] = []
+        if modifierFlags.contains(.control) {
+            keys.append(modifierFlags.contains(.init(rawValue: UInt(NX_DEVICERCTLKEYMASK))) ? .controlRight : .control)
+        }
+        if modifierFlags.contains(.shift) {
+            keys.append(modifierFlags.contains(.init(rawValue: UInt(NX_DEVICERSHIFTKEYMASK))) ? .shiftRight : .shift)
+        }
+        if modifierFlags.contains(.option) {
+            keys.append(modifierFlags.contains(.init(rawValue: UInt(NX_DEVICERALTKEYMASK))) ? .optionRight : .option)
+        }
+        if modifierFlags.contains(.command) {
+            keys.append(modifierFlags.contains(.init(rawValue: UInt(NX_DEVICERCMDKEYMASK))) ? .command : .commandRight)
+        }
+        return keys
+    }
+
     private func eventReceived(_ event: NSEvent) -> NSEvent? {
         switch event.type {
+        case .flagsChanged:
+            recordingModifiers.insert(event.modifierFlags)
+            // If all modifier keys are released without and other key pressed,
+            // just record the modifier keys.
+            if event.modifierFlags.intersection([.control, .shift, .option, .command]).isEmpty {
+                keys = buildKeysFromModifierFlags(recordingModifiers)
+                recording = false
+            }
         case .keyDown:
             let keyCodeResolver = KeyCodeResolver()
             guard let key = keyCodeResolver.key(from: event.keyCode) else {
                 break
             }
-
-            var keys: [Key] = []
-            let modifiers = event.modifierFlags
-            if modifiers.contains(.control) {
-                keys.append(modifiers.contains(.init(rawValue: UInt(NX_DEVICERCTLKEYMASK))) ? .controlRight : .control)
-            }
-            if modifiers.contains(.shift) {
-                keys.append(modifiers.contains(.init(rawValue: UInt(NX_DEVICERSHIFTKEYMASK))) ? .shiftRight : .shift)
-            }
-            if modifiers.contains(.option) {
-                keys.append(modifiers.contains(.init(rawValue: UInt(NX_DEVICERALTKEYMASK))) ? .optionRight : .option)
-            }
-            if modifiers.contains(.command) {
-                keys.append(modifiers.contains(.init(rawValue: UInt(NX_DEVICERCMDKEYMASK))) ? .command : .commandRight)
-            }
-            keys.append(key)
-
+            keys = buildKeysFromModifierFlags(event.modifierFlags) + [key]
             recording = false
-            self.keys = keys
         default:
             break
         }
