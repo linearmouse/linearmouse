@@ -26,7 +26,7 @@
 "By Pixels" = "Efter Pixels";
 "Scrolling acceleration" = "Rulleacceleration";
 "Linear" = "Lineær";
-"Speed" = "Hastighed";
+"Scrolling speed" = "Scrolling speed";
 "Slow" = "Langsom";
 "Fast" = "Hurtig";
 "Distance" = "Afstand";
@@ -56,6 +56,14 @@
 
 "Assign actions to mouse buttons" = "Tildel handlinger til museknapper";
 "Edit" = "Rediger";
+
+"Run: %@" = "Run: %@";
+"Scroll up %@" = "Scroll up %@";
+"Scroll down %@" = "Scroll down %@";
+"Scroll left %@" = "Scroll left %@";
+"Scroll right %@" = "Scroll right %@";
+"Keyboard shortcut %@" = "Keyboard shortcut %@";
+
 "Click to record" = "Klik for at optage";
 "Recording" = "Optager";
 "Left click" = "Venstreklik";
@@ -95,6 +103,14 @@
 "Mouse Button" = "Museknap";
 "Back" = "Tilbage";
 "Forward" = "Frem";
+"Execute" = "Execute";
+"Run shell command..." = "Run shell command...";
+"Scroll up..." = "Scroll up...";
+"Scroll down..." = "Scroll down...";
+"Scroll left..." = "Scroll left...";
+"Scroll right..." = "Scroll right...";
+"Keyboard shortcut..." = "Keyboard shortcut...";
+
 "Mouse button" = "Museknap";
 "Action" = "Handling";
 "The mouse button is already assigned." = "Museknappen er allerede tildelt.";
@@ -123,6 +139,7 @@
 "Thank you for participating in the beta test." = "Tak fordi du deltager i betatesten.";
 "Check for Updates..." = "Søg efter Opdateringer...";
 
+"Enable detailed logging" = "Enable detailed logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Aktivering af denne indstilling vil logge alle input-begivenheder, hvilket kan øge CPU-forbruget mens du bruger %@, men kan være nyttigt til fejlfinding.";
 "Export the logs for the last 5 minutes." = "Eksporter logfilerne for de sidste 5 minutter.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "Hvis du rapporterer en fejl, er det være nyttigt at vedhæfte logfilerne.";

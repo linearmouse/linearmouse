@@ -26,7 +26,7 @@
 "By Pixels" = "По пикселям";
 "Scrolling acceleration" = "Ускорение прокрутки";
 "Linear" = "Линейное";
-"Speed" = "Скорость";
+"Scrolling speed" = "Scrolling speed";
 "Slow" = "Медленно";
 "Fast" = "Быстро";
 "Distance" = "Количество";
@@ -56,6 +56,14 @@
 
 "Assign actions to mouse buttons" = "Назначить действия на кнопки мыши";
 "Edit" = "Редактировать";
+
+"Run: %@" = "Run: %@";
+"Scroll up %@" = "Scroll up %@";
+"Scroll down %@" = "Scroll down %@";
+"Scroll left %@" = "Scroll left %@";
+"Scroll right %@" = "Scroll right %@";
+"Keyboard shortcut %@" = "Keyboard shortcut %@";
+
 "Click to record" = "Нажмите для записи";
 "Recording" = "Запись";
 "Left click" = "ЛКМ";
@@ -95,6 +103,14 @@
 "Mouse Button" = "Кнопка мыши";
 "Back" = "Назад";
 "Forward" = "Вперёд";
+"Execute" = "Execute";
+"Run shell command..." = "Run shell command...";
+"Scroll up..." = "Scroll up...";
+"Scroll down..." = "Scroll down...";
+"Scroll left..." = "Scroll left...";
+"Scroll right..." = "Scroll right...";
+"Keyboard shortcut..." = "Keyboard shortcut...";
+
 "Mouse button" = "Кнопка мыши";
 "Action" = "Действие";
 "The mouse button is already assigned." = "Кнопка мыши уже назначена.";
@@ -123,6 +139,7 @@
 "Thank you for participating in the beta test." = "Благодарим Вас за участие в бета-тестировании.";
 "Check for Updates..." = "Проверить наличие обновлений...";
 
+"Enable detailed logging" = "Enable detailed logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Включение этой опции влияет на запись в журнал всех входящих событий, что может увеличить нагрузку на ЦП при использовании %@, но будет полезно для поиска неполадок.";
 "Export the logs for the last 5 minutes." = "Экспорт логов за последние 5 минут.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "Если вы сообщаете об ошибке, пожалуйста, прикрепляйте логи.";

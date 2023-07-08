@@ -26,7 +26,7 @@
 "By Pixels" = "按像素";
 "Scrolling acceleration" = "捲動加速度";
 "Linear" = "線性";
-"Speed" = "速度";
+"Scrolling speed" = "捲動速度";
 "Slow" = "慢";
 "Fast" = "快";
 "Distance" = "距離";
@@ -56,6 +56,14 @@
 
 "Assign actions to mouse buttons" = "分配滑鼠按鈕的動作";
 "Edit" = "編輯";
+
+"Run: %@" = "執行：%@";
+"Scroll up %@" = "向上捲動 %@";
+"Scroll down %@" = "向下捲動 %@";
+"Scroll left %@" = "向左捲動 %@";
+"Scroll right %@" = "向右捲動 %@";
+"Keyboard shortcut %@" = "鍵盤捷徑鍵 %@";
+
 "Click to record" = "點擊錄製";
 "Recording" = "正在錄製";
 "Left click" = "左鍵點擊";
@@ -95,6 +103,14 @@
 "Mouse Button" = "滑鼠按鍵";
 "Back" = "後退";
 "Forward" = "前進";
+"Execute" = "執行";
+"Run shell command..." = "執行 shell 指令...";
+"Scroll up..." = "向上捲動...";
+"Scroll down..." = "向下捲動...";
+"Scroll left..." = "向左捲動...";
+"Scroll right..." = "向右捲動...";
+"Keyboard shortcut..." = "鍵盤捷徑鍵...";
+
 "Mouse button" = "滑鼠按鍵";
 "Action" = "動作";
 "The mouse button is already assigned." = "該滑鼠按鍵已被分配。";
@@ -123,6 +139,7 @@
 "Thank you for participating in the beta test." = "感謝你參與 beta 測試。";
 "Check for Updates..." = "檢查更新...";
 
+"Enable detailed logging" = "啟用詳細日誌記錄";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "啟用此選項將記錄所有輸入事件，這可能增加使用 %@ 時的 CPU 使用率，但有助於排除故障。";
 "Export the logs for the last 5 minutes." = "匯出最近 5 分鐘的記錄。";
 "If you are reporting a bug, it would be helpful to attach the logs." = "如果你要報告 bug，附上記錄會很有幫助。";
