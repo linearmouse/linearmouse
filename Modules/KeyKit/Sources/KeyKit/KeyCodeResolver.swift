@@ -7,11 +7,12 @@ import Combine
 import Foundation
 
 /// Keyboard layout-independent key code resolver.
-class KeyCodeResolver {
+public class KeyCodeResolver {
     private var subscriptions = Set<AnyCancellable>()
     private var mapping: [String: CGKeyCode] = [:]
+    private var reversedMapping: [CGKeyCode: Key] = [:]
 
-    init() {
+    public init() {
         DistributedNotificationCenter.default
             .publisher(for: .init(kTISNotifyEnabledKeyboardInputSourcesChanged as String))
             .sink { [weak self] _ in
@@ -31,11 +32,13 @@ class KeyCodeResolver {
 
     private func updateMapping() {
         var newMapping: [String: CGKeyCode] = [:]
+        var newReversedMapping: [CGKeyCode: Key] = [:]
 
         for keyCode: CGKeyCode in 0 ..< 128 {
             guard let cgEvent = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: true) else {
                 continue
             }
+            cgEvent.flags = []
             guard let nsEvent = NSEvent(cgEvent: cgEvent) else {
                 continue
             }
@@ -48,47 +51,53 @@ class KeyCodeResolver {
             newMapping[characters] = keyCode
         }
 
+        newMapping[Key.enter.rawValue] = 0x24
+        newMapping[Key.tab.rawValue] = 0x30
+        newMapping[Key.space.rawValue] = 0x31
+        newMapping[Key.delete.rawValue] = 0x33
+        newMapping[Key.escape.rawValue] = 0x35
+        newMapping[Key.command.rawValue] = 0x37
+        newMapping[Key.commandRight.rawValue] = 0x37
+        newMapping[Key.shift.rawValue] = 0x38
+        newMapping[Key.capsLock.rawValue] = 0x39
+        newMapping[Key.option.rawValue] = 0x3A
+        newMapping[Key.control.rawValue] = 0x3B
+        newMapping[Key.shiftRight.rawValue] = 0x3C
+        newMapping[Key.optionRight.rawValue] = 0x3D
+        newMapping[Key.controlRight.rawValue] = 0x3E
+        newMapping[Key.arrowLeft.rawValue] = 0x7B
+        newMapping[Key.arrowRight.rawValue] = 0x7C
+        newMapping[Key.arrowDown.rawValue] = 0x7D
+        newMapping[Key.arrowUp.rawValue] = 0x7E
+        newMapping[Key.home.rawValue] = 0x73
+        newMapping[Key.pageUp.rawValue] = 0x74
+        newMapping[Key.backspace.rawValue] = 0x75
+        newMapping[Key.end.rawValue] = 0x77
+        newMapping[Key.pageDown.rawValue] = 0x79
+        newMapping[Key.f1.rawValue] = 0x7A
+        newMapping[Key.f2.rawValue] = 0x78
+        newMapping[Key.f3.rawValue] = 0x63
+        newMapping[Key.f4.rawValue] = 0x76
+        newMapping[Key.f5.rawValue] = 0x60
+        newMapping[Key.f6.rawValue] = 0x61
+        newMapping[Key.f7.rawValue] = 0x62
+        newMapping[Key.f8.rawValue] = 0x64
+        newMapping[Key.f9.rawValue] = 0x65
+        newMapping[Key.f10.rawValue] = 0x6D
+        newMapping[Key.f11.rawValue] = 0x67
+        newMapping[Key.f12.rawValue] = 0x6F
+
+        for (keyString, keyCode) in newMapping {
+            if let key = Key(rawValue: keyString) {
+                newReversedMapping[keyCode] = key
+            }
+        }
+
         mapping = newMapping
+        reversedMapping = newReversedMapping
     }
 
-    // swiftlint:disable cyclomatic_complexity
-    func keyCode(for key: Key) -> CGKeyCode? {
-        switch key {
-        case .enter: return 0x4C
-        case .tab: return 0x30
-        case .space: return 0x31
-        case .delete: return 0x33
-        case .escape: return 0x35
-        case .command, .commandRight: return 0x37
-        case .shift: return 0x38
-        case .capsLock: return 0x39
-        case .option: return 0x3A
-        case .control: return 0x3B
-        case .shiftRight: return 0x3C
-        case .optionRight: return 0x3D
-        case .controlRight: return 0x3E
-        case .arrowLeft: return 0x7B
-        case .arrowRight: return 0x7C
-        case .arrowDown: return 0x7D
-        case .arrowUp: return 0x7E
-        case .home: return 0x73
-        case .pageUp: return 0x74
-        case .backspace: return 0x75
-        case .end: return 0x77
-        case .pageDown: return 0x79
-        case .f1: return 0x7A
-        case .f2: return 0x78
-        case .f3: return 0x63
-        case .f4: return 0x76
-        case .f5: return 0x60
-        case .f6: return 0x61
-        case .f7: return 0x62
-        case .f8: return 0x64
-        case .f9: return 0x65
-        case .f10: return 0x6D
-        case .f11: return 0x67
-        case .f12: return 0x6F
-        default: return mapping[key.rawValue]
-        }
-    }
+    public func keyCode(for key: Key) -> CGKeyCode? { mapping[key.rawValue] }
+
+    public func key(from keyCode: CGKeyCode) -> Key? { reversedMapping[keyCode] }
 }

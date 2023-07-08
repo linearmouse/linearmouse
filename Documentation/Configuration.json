@@ -368,7 +368,7 @@
       "additionalProperties": false,
       "properties": {
         "keyPress": {
-          "description": "Keyboard: Press specific keys.",
+          "description": "Keyboard: Keyboard shortcut.",
           "items": {
             "$ref": "#/definitions/Scheme.Buttons.Mapping.Key"
           },
