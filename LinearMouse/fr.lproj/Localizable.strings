@@ -139,7 +139,7 @@
 "Thank you for participating in the beta test." = "Merci d'avoir participé au test beta.";
 "Check for Updates..." = "Rechercher des mises à jour...";
 
-"Enable detailed logging" = "Enable detailed logging";
+"Enable verbose logging" = "Enable verbose logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Activer cette option va enregistrer tous les événements d'entrée, ce qui peut augmenter l'utilisation du processeur en utilisant %@, mais peut être utile pour le dépannage.";
 "Export the logs for the last 5 minutes." = "Exporter les journaux pour les 5 dernières minutes.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "Si vous signalez un bug, il serait utile d'attacher les journaux.";

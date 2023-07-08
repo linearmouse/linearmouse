@@ -15,7 +15,7 @@ struct LoggingSection: View {
         Section {
             Toggle(isOn: $detailedLoggingOn) {
                 withDescription {
-                    Text("Enable detailed logging")
+                    Text("Enable verbose logging")
                     Text(
                         "Enabling this option will log all input events, which may increase CPU usage while using \(LinearMouse.appName), but can be useful for troubleshooting."
                     )

@@ -139,7 +139,7 @@
 "Thank you for participating in the beta test." = "Tak fordi du deltager i betatesten.";
 "Check for Updates..." = "Søg efter Opdateringer...";
 
-"Enable detailed logging" = "Enable detailed logging";
+"Enable verbose logging" = "Enable verbose logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Aktivering af denne indstilling vil logge alle input-begivenheder, hvilket kan øge CPU-forbruget mens du bruger %@, men kan være nyttigt til fejlfinding.";
 "Export the logs for the last 5 minutes." = "Eksporter logfilerne for de sidste 5 minutter.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "Hvis du rapporterer en fejl, er det være nyttigt at vedhæfte logfilerne.";

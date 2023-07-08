@@ -139,7 +139,7 @@
 "Thank you for participating in the beta test." = "Cảm ơn bạn đã tham gia phiên bản dùng thử.";
 "Check for Updates..." = "Kiểm tra cập nhật...";
 
-"Enable detailed logging" = "Enable detailed logging";
+"Enable verbose logging" = "Enable verbose logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Bật tùy chọn này sẽ ghi nhật ký tất cả các sự kiện đầu vào, điều này có thể làm tăng mức sử dụng CPU khi sử dụng %@, nhưng có thể hữu ích cho việc khắc phục sự cố.";
 "Export the logs for the last 5 minutes." = "Xuất log trong 5 phút vừa rồi.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "Nếu bạn muốn báo lỗi, sẽ tốt hơn nếu bạn đính kèm tệp log.";

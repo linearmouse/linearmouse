@@ -139,7 +139,7 @@
 "Thank you for participating in the beta test." = "베타 테스트에 참여해 주셔서 감사합니다.";
 "Check for Updates..." = "업데이트 확인...";
 
-"Enable detailed logging" = "Enable detailed logging";
+"Enable verbose logging" = "Enable verbose logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "이 옵션을 활성화하면 모든 입력 이벤트가 기록되며, 이는 %@를 사용하는 동안 CPU 사용량을 증가시킬 수 있지만 문제 해결에 유용할 수 있습니다.";
 "Export the logs for the last 5 minutes." = "지난 5분 동안 로그 내보내기";
 "If you are reporting a bug, it would be helpful to attach the logs." = "버그를 보고하는 경우 로그를 첨부하면 도움이 됩니다.";

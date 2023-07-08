@@ -139,7 +139,7 @@
 "Thank you for participating in the beta test." = "Vă mulțumim că ați participat la testul beta.";
 "Check for Updates..." = "Verificați dacă există actualizări...";
 
-"Enable detailed logging" = "Enable detailed logging";
+"Enable verbose logging" = "Enable verbose logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting.";
 "Export the logs for the last 5 minutes." = "Export the logs for the last 5 minutes.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "If you are reporting a bug, it would be helpful to attach the logs.";

@@ -139,7 +139,7 @@
 "Thank you for participating in the beta test." = "Beta testine katıldığınız için teşekkürler.";
 "Check for Updates..." = "Güncellemeleri kontrol et...";
 
-"Enable detailed logging" = "Enable detailed logging";
+"Enable verbose logging" = "Enable verbose logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Bu seçeneğin etkinleştirilmesi, %@ kullanılırken CPU kullanımını arttırabilir, ancak sorun giderme için faydalı olabilecek tüm giriş olaylarını loglara kaydedecektir.";
 "Export the logs for the last 5 minutes." = "Son 5 dakikanın loglarını dışa aktar.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "Bir hatayı bildiriyorsanız, logları eklemeniz yararlı olacaktır.";
