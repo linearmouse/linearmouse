@@ -109,7 +109,7 @@ extension Key: CustomStringConvertible {
         case .control, .controlRight:
             return "⌃"
         default:
-            return rawValue.capitalized
+            return rawValue.prefix(1).capitalized + rawValue.dropFirst()
         }
     }
 }

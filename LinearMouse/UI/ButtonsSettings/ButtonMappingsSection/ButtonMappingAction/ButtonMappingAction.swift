@@ -7,28 +7,27 @@ struct ButtonMappingAction: View {
     @Binding var action: Scheme.Buttons.Mapping.Action
 
     var body: some View {
-        ButtonMappingActionTypePicker(actionType: actionType)
+        ButtonMappingActionPicker(actionType: actionType)
             .equatable()
 
         switch action {
         case .arg0:
             EmptyView()
         case .arg1(.run):
-            ButtonMappingActionPickerRun(action: $action)
+            ButtonMappingActionRun(action: $action)
         case .arg1(.mouseWheelScrollUp),
              .arg1(.mouseWheelScrollDown),
              .arg1(.mouseWheelScrollLeft),
              .arg1(.mouseWheelScrollRight):
             ButtonMappingActionScroll(action: $action)
         case .arg1(.keyPress):
-            // TODO: TBD.
-            EmptyView()
+            ButtonMappingActionKeyPress(action: $action)
         }
     }
 }
 
 extension ButtonMappingAction {
-    var actionType: Binding<ButtonMappingActionTypePicker.ActionType> {
+    var actionType: Binding<ButtonMappingActionPicker.ActionType> {
         Binding {
             switch action {
             case let .arg0(value):

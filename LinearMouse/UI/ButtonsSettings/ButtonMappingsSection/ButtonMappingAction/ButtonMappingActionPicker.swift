@@ -3,7 +3,7 @@
 
 import SwiftUI
 
-struct ButtonMappingActionTypePicker: View, Equatable {
+struct ButtonMappingActionPicker: View, Equatable {
     @Binding var actionType: ActionType
 
     var body: some View {
@@ -18,7 +18,7 @@ struct ButtonMappingActionTypePicker: View, Equatable {
     }
 }
 
-extension ButtonMappingActionTypePicker {
+extension ButtonMappingActionPicker {
     enum ActionType: Equatable, Hashable {
         case arg0(Scheme.Buttons.Mapping.Action.Arg0)
         case run
@@ -105,7 +105,7 @@ extension ButtonMappingActionTypePicker {
     ]
 }
 
-extension ButtonMappingActionTypePicker.ActionType: CustomStringConvertible {
+extension ButtonMappingActionPicker.ActionType: CustomStringConvertible {
     var description: String {
         switch self {
         case let .arg0(value):

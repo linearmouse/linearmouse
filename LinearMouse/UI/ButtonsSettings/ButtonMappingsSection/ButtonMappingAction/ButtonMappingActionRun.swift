@@ -3,7 +3,7 @@
 
 import SwiftUI
 
-struct ButtonMappingActionPickerRun: View {
+struct ButtonMappingActionRun: View {
     @Binding var action: Scheme.Buttons.Mapping.Action
 
     private var command: Binding<String> {
