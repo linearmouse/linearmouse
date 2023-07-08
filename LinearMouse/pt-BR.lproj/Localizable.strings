@@ -62,7 +62,7 @@
 "Scroll down %@" = "Scroll down %@";
 "Scroll left %@" = "Scroll left %@";
 "Scroll right %@" = "Scroll right %@";
-"Keyboard shortcut %@" = "Keyboard shortcut %@";
+"Keyboard shortcut: %@" = "Keyboard shortcut: %@";
 
 "Click to record" = "Click to record";
 "Recording" = "Recording";
