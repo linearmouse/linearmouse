@@ -26,7 +26,7 @@
 "By Pixels" = "Par pixels";
 "Scrolling acceleration" = "Accélération du défilement";
 "Linear" = "Linéaire";
-"Scrolling speed" = "Scrolling speed";
+"Scrolling speed" = "Vitesse de défilement";
 "Slow" = "Lent";
 "Fast" = "Rapide";
 "Distance" = "Distance";
@@ -62,10 +62,10 @@
 "Scroll down %@" = "Scroll down %@";
 "Scroll left %@" = "Scroll left %@";
 "Scroll right %@" = "Scroll right %@";
-"Keyboard shortcut: %@" = "Keyboard shortcut: %@";
+"Keyboard shortcut: %@" = "Raccourci clavier : %@";
 
 "Click to record" = "Click to record";
-"Recording" = "Recording";
+"Recording" = "Enregistrement";
 "Left click" = "Clic gauche";
 "Right click" = "Clic droit";
 "Middle click" = "Clic du milieu";
@@ -79,10 +79,10 @@
 "Mission Control" = "Mission Control";
 "Move left a space" = "Déplacer vers la gauche un espace";
 "Move right a space" = "Déplacer vers la gauche un espace";
-"Application windows" = "Fenêtre d''application";
+"Application windows" = "Fenêtre d'application";
 "Launchpad" = "Launchpad";
 "Show desktop" = "Montrer le bureau";
-"Look up & data detectors" = "Recherche & Détecteurs de données";
+"Look up & data detectors" = "Recherche et détecteurs de données";
 "Smart zoom" = "Zoom intelligent";
 "Display" = "Afficher";
 "Increase display brightness" = "Augmenter la luminosité d'affichage";
@@ -103,13 +103,13 @@
 "Mouse Button" = "Bouton de la souris";
 "Back" = "Précédent";
 "Forward" = "Suivant";
-"Execute" = "Execute";
-"Run shell command..." = "Run shell command...";
+"Execute" = "Exécuter";
+"Run shell command..." = "Exécuter une commande shell...";
 "Scroll up..." = "Scroll up...";
 "Scroll down..." = "Scroll down...";
 "Scroll left..." = "Scroll left...";
 "Scroll right..." = "Scroll right...";
-"Keyboard shortcut..." = "Keyboard shortcut...";
+"Keyboard shortcut..." = "Raccourci clavier...";
 
 "Mouse button" = "Bouton de la souris";
 "Action" = "Action";
@@ -121,32 +121,32 @@
 "Create" = "Créer";
 
 "Settings" = "Paramètres";
-"Show in menu bar" = "Afficher dans la bar de menu";
+"Show in menu bar" = "Afficher dans la barre des menus";
 "To show the settings, launch %@ again." = "Pour afficher les paramètres, lancez %@ à nouveau.";
 "Bypass events from other applications" = "Éviter les événements d'autres applications";
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "Si activé, %@ ne modifiera pas les événements envoyés par d'autres applications, telles que Logi Options+.";
 
-"Reload Config" = "Reload Config";
-"Reveal Config in Finder..." = "Reveal Config in Finder...";
+"Reload Config" = "Recharger la configuration";
+"Reveal Config in Finder..." = "Afficher la configuration dans Finder...";
 
-"Version: %@" = "Version %@";
+"Version: %@" = "Version : %@";
 "Check for updates automatically" = "Rechercher des mises à jour automatiquement";
 "Update check interval" = "Intervalle de vérification des mises à jour";
 "Daily" = "Tous les jours";
 "Weekly" = "Toutes les semaines";
 "Monthly" = "Tous les mois";
 "Receive beta updates" = "Recevoir les mises à jour bêta";
-"Thank you for participating in the beta test." = "Merci d'avoir participé au test beta.";
+"Thank you for participating in the beta test." = "Merci de votre participation au bêta-test.";
 "Check for Updates..." = "Rechercher des mises à jour...";
 
-"Enable verbose logging" = "Enable verbose logging";
+"Enable verbose logging" = "Activer le journal détaillé";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Activer cette option va enregistrer tous les événements d'entrée, ce qui peut augmenter l'utilisation du processeur en utilisant %@, mais peut être utile pour le dépannage.";
-"Export the logs for the last 5 minutes." = "Exporter les journaux pour les 5 dernières minutes.";
-"If you are reporting a bug, it would be helpful to attach the logs." = "Si vous signalez un bug, il serait utile d'attacher les journaux.";
+"Export the logs for the last 5 minutes." = "Exporter les journaux des 5 dernières minutes.";
+"If you are reporting a bug, it would be helpful to attach the logs." = "Si vous signalez un bug, il serait utile de joindre les journaux.";
 "Export logs" = "Exporter les journaux";
 
 "Homepage" = "Page d'accueil";
-"Bug report" = "Signaler un Bug";
+"Bug report" = "Signaler un bug";
 "Feature request" = "Demande de fonctionnalité";
 "Donate" = "Faire un don";
 
