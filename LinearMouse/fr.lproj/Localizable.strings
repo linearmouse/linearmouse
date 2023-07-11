@@ -3,7 +3,7 @@
 "Get more help" = "Obtenir de l'aide";
 "Open Accessibility" = "Ouvrir Accessibilité";
 
-"%@ Settings..." = "%@ Paramètres...";
+"%@ Settings..." = "Paramètres %@...";
 "Start at login" = "Lancer au démarrage";
 "Config" = "Configuration";
 "Reload" = "Rafraichir";
@@ -16,7 +16,7 @@
 "Buttons" = "Boutons";
 "General" = "Général";
 
-"Vertical" = "Verical";
+"Vertical" = "Vertical";
 "Horizontal" = "Horizontal";
 "Reverse scrolling" = "Inverser le sens de défilement";
 "Some gestures, such as swiping back and forward, may stop working." = "Certains gestes, comme le balayage avant et arrière, peuvent cesser de fonctionner.";
