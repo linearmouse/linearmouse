@@ -26,7 +26,7 @@
 "By Pixels" = "In Pixel";
 "Scrolling acceleration" = "Scrollbeschleunigung";
 "Linear" = "Linear";
-"Scrolling speed" = "Scrolling speed";
+"Scrolling speed" = "Scroll-Geschwindigkeit";
 "Slow" = "Langsam";
 "Fast" = "Schnell";
 "Distance" = "Distanz";
@@ -57,12 +57,12 @@
 "Assign actions to mouse buttons" = "Maustasten Aktionen zuweisen";
 "Edit" = "Bearbeiten";
 
-"Run: %@" = "Run: %@";
-"Scroll up %@" = "Scroll up %@";
-"Scroll down %@" = "Scroll down %@";
-"Scroll left %@" = "Scroll left %@";
-"Scroll right %@" = "Scroll right %@";
-"Keyboard shortcut: %@" = "Keyboard shortcut: %@";
+"Run: %@" = "Ausführen: %@";
+"Scroll up %@" = "Nach oben scrollen %@";
+"Scroll down %@" = "Nach unten scrollen %@";
+"Scroll left %@" = "Nach links scrollen %@";
+"Scroll right %@" = "Nach rechts scrollen %@";
+"Keyboard shortcut: %@" = "Tastenkürzel: %@";
 
 "Click to record" = "Klicke zum Aufzeichnen";
 "Recording" = "Aufzeichnen";
@@ -103,13 +103,13 @@
 "Mouse Button" = "Maustasten";
 "Back" = "Zurück";
 "Forward" = "Vor";
-"Execute" = "Execute";
-"Run shell command..." = "Run shell command...";
-"Scroll up..." = "Scroll up...";
-"Scroll down..." = "Scroll down...";
-"Scroll left..." = "Scroll left...";
-"Scroll right..." = "Scroll right...";
-"Keyboard shortcut..." = "Keyboard shortcut...";
+"Execute" = "Ausführen";
+"Run shell command..." = "Shell-Befehl ausführen...";
+"Scroll up..." = "Nach oben scrollen...";
+"Scroll down..." = "Nach unten scrollen...";
+"Scroll left..." = "Nach links scrollen...";
+"Scroll right..." = "Nach rechts scrollen...";
+"Keyboard shortcut..." = "Tastenkürzel...";
 
 "Mouse button" = "Maustaste";
 "Action" = "Aktion";
@@ -139,7 +139,7 @@
 "Thank you for participating in the beta test." = "Vielen Dank für die Teilnahme am Betatest.";
 "Check for Updates..." = "Nach Updates suchen...";
 
-"Enable verbose logging" = "Enable verbose logging";
+"Enable verbose logging" = "Ausführliche Protokollierung aktivieren";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Wenn diese Option aktiviert ist, werden alle Eingabeereignisse protokolliert, was die CPU-Auslastung während der Verwendung von %@ erhöhen kann, jedoch bei der Fehlersuche nützlich sein kann.";
 "Export the logs for the last 5 minutes." = "Exportieren der Logdateien für die letzten 5 Minuten.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "Wenn Sie einen Fehler melden, wäre es hilfreich, die Logdateien anzuhängen.";
