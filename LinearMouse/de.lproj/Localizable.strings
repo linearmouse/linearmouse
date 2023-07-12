@@ -26,7 +26,7 @@
 "By Pixels" = "In Pixel";
 "Scrolling acceleration" = "Scrollbeschleunigung";
 "Linear" = "Linear";
-"Scrolling speed" = "Scrolling speed";
+"Scrolling speed" = "Scroll-Geschwindigkeit";
 "Slow" = "Langsam";
 "Fast" = "Schnell";
 "Distance" = "Distanz";
@@ -57,12 +57,12 @@
 "Assign actions to mouse buttons" = "Maustasten Aktionen zuweisen";
 "Edit" = "Bearbeiten";
 
-"Run: %@" = "Run: %@";
-"Scroll up %@" = "Scroll up %@";
-"Scroll down %@" = "Scroll down %@";
-"Scroll left %@" = "Scroll left %@";
-"Scroll right %@" = "Scroll right %@";
-"Keyboard shortcut: %@" = "Keyboard shortcut: %@";
+"Run: %@" = "Ausführen: %@";
+"Scroll up %@" = "Nach oben scrollen %@";
+"Scroll down %@" = "Nach unten scrollen %@";
+"Scroll left %@" = "Nach links scrollen %@";
+"Scroll right %@" = "Nach rechts scrollen %@";
+"Keyboard shortcut: %@" = "Tastenkürzel: %@";
 
 "Click to record" = "Klicke zum Aufzeichnen";
 "Recording" = "Aufzeichnen";
@@ -104,7 +104,7 @@
 "Back" = "Zurück";
 "Forward" = "Vor";
 "Execute" = "Ausführen";
-"Run shell command..." = "Run shell command...";
+"Run shell command..." = "Shell-Befehl ausführen...";
 "Scroll up..." = "Nach oben scrollen...";
 "Scroll down..." = "Nach unten scrollen...";
 "Scroll left..." = "Nach links scrollen...";
