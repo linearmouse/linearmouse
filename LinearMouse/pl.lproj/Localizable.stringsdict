@@ -13,13 +13,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>%d line</string>
+        <string>%d linia</string>
         <key>few</key>
-        <string>%d lines</string>
+        <string>%d linie</string>
         <key>many</key>
-        <string>%d lines</string>
+        <string>%d linii</string>
         <key>other</key>
-        <string>%d lines</string>
+        <string>%d linii</string>
       </dict>
     </dict>
     <key>%.1f pixel(s)</key>
@@ -33,13 +33,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>f</string>
         <key>one</key>
-        <string>%.1f pixel</string>
+        <string>%.1f piksel</string>
         <key>few</key>
-        <string>%.1f pixels</string>
+        <string>%.1f piksele</string>
         <key>many</key>
-        <string>%.1f pixels</string>
+        <string>%.1f pikseli</string>
         <key>other</key>
-        <string>%.1f pixels</string>
+        <string>%.1f piksela</string>
       </dict>
     </dict>
   </dict>
