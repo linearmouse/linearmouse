@@ -26,7 +26,7 @@
 "By Pixels" = "Według pikseli";
 "Scrolling acceleration" = "Przyspieszenie przewijania";
 "Linear" = "Liniowe";
-"Scrolling speed" = "Scrolling speed";
+"Scrolling speed" = "Prędkość przewijania";
 "Slow" = "Wolno";
 "Fast" = "Szybko";
 "Distance" = "Dystans";
@@ -57,19 +57,19 @@
 "Assign actions to mouse buttons" = "Przypisz akcje do przycisków myszy";
 "Edit" = "Edytuj";
 
-"Run: %@" = "Run: %@";
-"Scroll up %@" = "Scroll up %@";
-"Scroll down %@" = "Scroll down %@";
-"Scroll left %@" = "Scroll left %@";
-"Scroll right %@" = "Scroll right %@";
-"Keyboard shortcut: %@" = "Keyboard shortcut: %@";
+"Run: %@" = "Uruchom: %@";
+"Scroll up %@" = "Przewiń w górę %@";
+"Scroll down %@" = "Przewiń w dół %@";
+"Scroll left %@" = "Przewiń w lewo %@";
+"Scroll right %@" = "Przewiń w prawo %@";
+"Keyboard shortcut: %@" = "Skrót klawiaturowy: %@";
 
-"Click to record" = "Click to record";
-"Recording" = "Recording";
+"Click to record" = "Kliknij, aby zarejestrować";
+"Recording" = "Rejestrowanie";
 "Left click" = "Lewy przycisk";
 "Right click" = "Prawy przycisk";
 "Middle click" = "Środkowy przycisk";
-"Button #%lld click" = "Button #%lld click";
+"Button #%lld click" = "Kliknięcie przycisku #%lld";
 "Scroll up" = "Przewiń w górę";
 "Scroll down" = "Przewiń w dół";
 "Scroll left" = "Przewiń w lewo";
@@ -103,20 +103,20 @@
 "Mouse Button" = "Przycisk Myszy";
 "Back" = "Wstecz";
 "Forward" = "Dalej";
-"Execute" = "Execute";
-"Run shell command..." = "Run shell command...";
-"Scroll up..." = "Scroll up...";
-"Scroll down..." = "Scroll down...";
-"Scroll left..." = "Scroll left...";
-"Scroll right..." = "Scroll right...";
-"Keyboard shortcut..." = "Keyboard shortcut...";
+"Execute" = "Wykonaj";
+"Run shell command..." = "Uruchom polecenie...";
+"Scroll up..." = "Przewiń w górę...";
+"Scroll down..." = "Przewiń w dół...";
+"Scroll left..." = "Przewiń w lewo...";
+"Scroll right..." = "Przewiń w prawo...";
+"Keyboard shortcut..." = "Skrót klawiszowy...";
 
 "Mouse button" = "Przycisk myszy";
 "Action" = "Akcja";
 "The mouse button is already assigned." = "Przycisk myszy jest już przypisany.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "Przypisywanie akcji do lewego przycisku myszy bez jakichkolwiek klawiszy modyfikujących jest niedozwolone.";
 "Repeat on hold" = "Powtarzaj podczas przytrzymania";
-"Cancel" = "Cancel";
+"Cancel" = "Anuluj";
 "OK" = "OK";
 "Create" = "Utwórz";
 
@@ -139,7 +139,7 @@
 "Thank you for participating in the beta test." = "Dziękujemy za uczestniczenie w beta testach.";
 "Check for Updates..." = "Sprawdź aktualizacje...";
 
-"Enable verbose logging" = "Enable verbose logging";
+"Enable verbose logging" = "Włącz szczegółowe logowanie";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Włączenie tej opcji spowoduje rejestrowanie wszystkich zdarzeń wejściowych, co może zwiększyć użycie procesora podczas używania %@, ale może być użyteczne przy rozwiązywaniu problemów.";
 "Export the logs for the last 5 minutes." = "Eksportuj logi z ostatnich 5 minut.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "Jeżeli zgłaszasz błąd, pomocne byłoby załączenie logów.";
