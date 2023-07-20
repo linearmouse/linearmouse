@@ -14,11 +14,15 @@ class Device {
     static let fallbackPointerSpeed = pointerSpeed(fromPointerResolution: fallbackPointerResolution)
 
     private weak var manager: DeviceManager?
-    let device: PointerDevice
+    private let device: PointerDevice
 
-    @Default(.detailedLoggingOn) private var detailedLoggingOn
+    private var removed = false
+
+    @Default(.verbosedLoggingOn) private var verbosedLoggingOn
 
     private let initialPointerResolution: Double
+
+    private var inputObservationToken: ObservationToken?
 
     init(_ manager: DeviceManager, _ device: PointerDevice) {
         self.manager = manager
@@ -27,15 +31,19 @@ class Device {
         initialPointerResolution = device.pointerResolution ?? Self.fallbackPointerResolution
 
         // TODO: More elegant way?
-        device.observeInput(using: { [weak self] in
+        inputObservationToken = device.observeInput(using: { [weak self] in
             self?.inputValueCallback($0, $1)
-        }).tieToLifetime(of: self)
+        })
 
         os_log("Device initialized: %{public}@: HIDPointerResolution=%{public}f, HIDPointerAccelerationType=%{public}@",
                log: Self.log, type: .info,
                String(describing: device),
                initialPointerResolution,
                device.pointerAccelerationType ?? "(unknown)")
+    }
+
+    func markRemoved() {
+        removed = true
     }
 }
 
@@ -148,8 +156,17 @@ extension Device {
     }
 
     private func inputValueCallback(_ device: PointerDevice, _ value: IOHIDValue) {
-        if detailedLoggingOn {
-            os_log("Received input value from %{public}@: %{public}@", log: Self.log, type: .info,
+        guard !removed else {
+            os_log("Received input from removed device: %{public}@", log: Self.log, type: .error,
+                   String(describing: device))
+            os_log("Cancelling input observation for removed device: %{public}@", log: Self.log, type: .error,
+                   String(describing: device))
+            inputObservationToken = nil
+            return
+        }
+
+        if verbosedLoggingOn {
+            os_log("Received input value from: %{public}@: %{public}@", log: Self.log, type: .info,
                    String(describing: device), String(describing: value))
         }
 
@@ -158,7 +175,7 @@ extension Device {
             return
         }
 
-        guard manager.lastActiveDevice != self else {
+        guard manager.lastActiveDeviceRef?.value != self else {
             return
         }
 
@@ -183,7 +200,7 @@ extension Device {
             return
         }
 
-        manager.lastActiveDevice = self
+        manager.lastActiveDeviceRef = .init(self)
 
         os_log("""
                Last active device changed: %{public}@, category=%{public}@ \

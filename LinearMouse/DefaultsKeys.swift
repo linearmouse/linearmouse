@@ -10,5 +10,5 @@ extension Defaults.Keys {
 
     static let bypassEventsFromOtherApplications = Key("bypassEventsFromOtherApplications", default: false)
 
-    static let detailedLoggingOn = Key("detailedLoggingOn", default: false)
+    static let verbosedLoggingOn = Key("verbosedLoggingOn", default: false)
 }

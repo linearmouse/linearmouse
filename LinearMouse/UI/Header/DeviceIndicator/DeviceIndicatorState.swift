@@ -13,11 +13,11 @@ class DeviceIndicatorState: ObservableObject {
     private var subscriptions = Set<AnyCancellable>()
 
     init() {
-        deviceState.$currentDevice
+        deviceState.$currentDeviceRef
             .receive(on: RunLoop.main)
             .removeDuplicates()
-            .sink { [weak self] device in
-                self?.activeDeviceName = device?.name
+            .sink { [weak self] deviceRef in
+                self?.activeDeviceName = deviceRef?.value?.name
             }
             .store(in: &subscriptions)
     }

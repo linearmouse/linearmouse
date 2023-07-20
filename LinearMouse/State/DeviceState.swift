@@ -16,13 +16,13 @@ class DeviceState: ObservableObject {
 
     private var subscriptions = Set<AnyCancellable>()
 
-    @Published var currentDevice: Device? {
+    @Published var currentDeviceRef: WeakRef<Device>? {
         didSet {
             guard !Defaults[.autoSwitchToActiveDevice] else {
                 return
             }
 
-            Defaults[.selectedDevice] = currentDevice.map { DeviceMatcher(of: $0) }
+            Defaults[.selectedDevice] = currentDeviceRef?.value.map { DeviceMatcher(of: $0) }
         }
     }
 
@@ -39,11 +39,11 @@ class DeviceState: ObservableObject {
         }
         .tieToLifetime(of: self)
 
-        deviceManager.$lastActiveDevice
+        deviceManager.$lastActiveDeviceRef
             .throttle(for: 0.5, scheduler: RunLoop.main, latest: true)
             .removeDuplicates()
-            .sink { [weak self] lastActiveDevice in
-                self?.updateCurrentDevice(lastActiveDevice: lastActiveDevice)
+            .sink { [weak self] lastActiveDeviceRef in
+                self?.updateCurrentDeviceRef(lastActiveDeviceRef: lastActiveDeviceRef)
             }
             .store(in: &subscriptions)
     }
@@ -52,23 +52,25 @@ class DeviceState: ObservableObject {
 extension DeviceState {
     private var deviceManager: DeviceManager { DeviceManager.shared }
 
-    private func updateCurrentDevice(lastActiveDevice: Device?) {
+    private func updateCurrentDeviceRef(lastActiveDeviceRef: WeakRef<Device>?) {
         guard !Defaults[.autoSwitchToActiveDevice] else {
-            currentDevice = lastActiveDevice
+            currentDeviceRef = lastActiveDeviceRef
             return
         }
 
         guard let userSelectedDevice = Defaults[.selectedDevice] else {
-            currentDevice = lastActiveDevice
+            currentDeviceRef = lastActiveDeviceRef
             return
         }
 
-        let matchedDevice = deviceManager.devices.first { userSelectedDevice.match(with: $0) }
+        let matchedDeviceRef = deviceManager.devices
+            .first { userSelectedDevice.match(with: $0) }
+            .map { WeakRef($0) }
 
-        currentDevice = matchedDevice ?? lastActiveDevice
+        currentDeviceRef = matchedDeviceRef ?? lastActiveDeviceRef
     }
 
     private func updateCurrentDevice() {
-        updateCurrentDevice(lastActiveDevice: deviceManager.lastActiveDevice)
+        updateCurrentDeviceRef(lastActiveDeviceRef: deviceManager.lastActiveDeviceRef)
     }
 }

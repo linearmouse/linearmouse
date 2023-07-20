@@ -21,7 +21,7 @@ class SchemeState: ObservableObject {
             }
             .store(in: &subscriptions)
 
-        deviceState.$currentDevice
+        deviceState.$currentDeviceRef
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
@@ -31,7 +31,7 @@ class SchemeState: ObservableObject {
 
 extension SchemeState {
     private var device: Device? {
-        deviceState.currentDevice
+        deviceState.currentDeviceRef?.value
     }
 
     var isSchemeValid: Bool {

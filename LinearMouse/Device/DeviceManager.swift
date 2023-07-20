@@ -17,7 +17,7 @@ class DeviceManager: ObservableObject {
     private var pointerDeviceToDevice = [PointerDevice: Device]()
     @Published var devices: [Device] = []
 
-    @Published var lastActiveDevice: Device?
+    @Published var lastActiveDeviceRef: WeakRef<Device>?
 
     init() {
         manager.observeDeviceAdded(using: { [weak self] in
@@ -113,11 +113,12 @@ class DeviceManager: ObservableObject {
 
     private func deviceRemoved(_: PointerDeviceManager, _ pointerDevice: PointerDevice) {
         guard let device = pointerDeviceToDevice[pointerDevice] else { return }
+        device.markRemoved()
 
         objectWillChange.send()
 
-        if lastActiveDevice == device {
-            lastActiveDevice = nil
+        if lastActiveDeviceRef?.value == device {
+            lastActiveDeviceRef = nil
         }
 
         pointerDeviceToDevice.removeValue(forKey: pointerDevice)
@@ -147,8 +148,8 @@ class DeviceManager: ObservableObject {
             return
         }
 
-        if lastActiveDevice != device {
-            lastActiveDevice = device
+        if lastActiveDeviceRef?.value != device {
+            lastActiveDeviceRef = .init(device)
             os_log("""
                    Last active device changed: %{public}@, category=%{public}@ \
                    (Reason: Received event from DeviceManager)
@@ -161,11 +162,11 @@ class DeviceManager: ObservableObject {
 
     func deviceFromCGEvent(_ cgEvent: CGEvent) -> Device? {
         guard let ioHIDEvent = CGEventCopyIOHIDEvent(cgEvent) else {
-            return lastActiveDevice
+            return lastActiveDeviceRef?.value
         }
 
         guard let pointerDevice = manager.pointerDeviceFromIOHIDEvent(ioHIDEvent) else {
-            return lastActiveDevice
+            return lastActiveDeviceRef?.value
         }
 
         return pointerDeviceToDevice[pointerDevice]

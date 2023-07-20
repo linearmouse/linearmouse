@@ -10,6 +10,6 @@ class DevicePickerSectionState: ObservableObject {
     let deviceState = DeviceState.shared
 
     func setDevice(_ deviceModel: DeviceModel) {
-        deviceState.currentDevice = deviceModel.device
+        deviceState.currentDeviceRef = deviceModel.deviceRef
     }
 }
