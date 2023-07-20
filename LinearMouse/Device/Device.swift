@@ -22,6 +22,8 @@ class Device {
 
     private let initialPointerResolution: Double
 
+    private var inputObservationToken: ObservationToken?
+
     init(_ manager: DeviceManager, _ device: PointerDevice) {
         self.manager = manager
         self.device = device
@@ -29,9 +31,9 @@ class Device {
         initialPointerResolution = device.pointerResolution ?? Self.fallbackPointerResolution
 
         // TODO: More elegant way?
-        device.observeInput(using: { [weak self] in
+        inputObservationToken = device.observeInput(using: { [weak self] in
             self?.inputValueCallback($0, $1)
-        }).tieToLifetime(of: self)
+        })
 
         os_log("Device initialized: %{public}@: HIDPointerResolution=%{public}f, HIDPointerAccelerationType=%{public}@",
                log: Self.log, type: .info,
@@ -157,6 +159,9 @@ extension Device {
         guard !removed else {
             os_log("Received input from removed device: %{public}@", log: Self.log, type: .error,
                    String(describing: device))
+            os_log("Cancelling input observation for removed device: %{public}@", log: Self.log, type: .error,
+                   String(describing: device))
+            inputObservationToken = nil
             return
         }
 
