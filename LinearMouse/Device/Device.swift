@@ -14,9 +14,11 @@ class Device {
     static let fallbackPointerSpeed = pointerSpeed(fromPointerResolution: fallbackPointerResolution)
 
     private weak var manager: DeviceManager?
-    let device: PointerDevice
+    private let device: PointerDevice
 
-    @Default(.detailedLoggingOn) private var detailedLoggingOn
+    private var removed = false
+
+    @Default(.verbosedLoggingOn) private var verbosedLoggingOn
 
     private let initialPointerResolution: Double
 
@@ -36,6 +38,10 @@ class Device {
                String(describing: device),
                initialPointerResolution,
                device.pointerAccelerationType ?? "(unknown)")
+    }
+
+    func markRemoved() {
+        removed = true
     }
 }
 
@@ -148,8 +154,14 @@ extension Device {
     }
 
     private func inputValueCallback(_ device: PointerDevice, _ value: IOHIDValue) {
-        if detailedLoggingOn {
-            os_log("Received input value from %{public}@: %{public}@", log: Self.log, type: .info,
+        guard !removed else {
+            os_log("Received input from removed device: %{public}@", log: Self.log, type: .error,
+                   String(describing: device))
+            return
+        }
+
+        if verbosedLoggingOn {
+            os_log("Received input value from: %{public}@: %{public}@", log: Self.log, type: .info,
                    String(describing: device), String(describing: value))
         }
 
@@ -158,7 +170,7 @@ extension Device {
             return
         }
 
-        guard manager.lastActiveDevice != self else {
+        guard manager.lastActiveDeviceRef?.value != self else {
             return
         }
 
@@ -183,7 +195,7 @@ extension Device {
             return
         }
 
-        manager.lastActiveDevice = self
+        manager.lastActiveDeviceRef = .init(self)
 
         os_log("""
                Last active device changed: %{public}@, category=%{public}@ \

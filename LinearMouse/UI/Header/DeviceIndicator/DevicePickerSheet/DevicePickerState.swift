@@ -14,7 +14,7 @@ class DevicePickerState: ObservableObject {
     init() {
         DeviceManager.shared.$devices.map {
             $0
-                .map { DeviceModel(device: $0) }
+                .map { DeviceModel(deviceRef: WeakRef($0)) }
         }
         .receive(on: RunLoop.main)
         .sink { [weak self] value in

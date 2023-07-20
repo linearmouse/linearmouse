@@ -6,7 +6,7 @@ import OSLog
 import SwiftUI
 
 struct LoggingSection: View {
-    @Default(.detailedLoggingOn) private var detailedLoggingOn
+    @Default(.verbosedLoggingOn) private var detailedLoggingOn
 
     private let exportQueue = DispatchQueue(label: "log-export")
     @State private var exporting = false

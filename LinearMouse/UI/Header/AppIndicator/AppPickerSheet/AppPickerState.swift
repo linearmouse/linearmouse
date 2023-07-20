@@ -18,7 +18,8 @@ class AppPickerState: ObservableObject {
     }
 
     private var configuredAppSet: Set<String> {
-        guard let device = deviceState.currentDevice else { return [] }
+        guard let device = deviceState.currentDeviceRef?.value else { return [] }
+
         return Set(schemeState.allDeviceSpecficSchemes(of: device).reduce([String]()) { acc, element in
             guard let app = element.element.if?.first?.app else {
                 return acc
