@@ -1,6 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2023 LinearMouse
 
+import ObservationToken
 import SwiftUI
 
 struct ButtonMappingButtonRecorder: View {
@@ -18,7 +19,7 @@ struct ButtonMappingButtonRecorder: View {
         }
     }
 
-    @State private var recordingMonitor: Any?
+    @State private var recordingObservationToken: ObservationToken?
 
     var body: some View {
         Button {
@@ -49,54 +50,55 @@ struct ButtonMappingButtonRecorder: View {
     }
 
     private func recordingUpdated() {
-        if let recordingMonitor = recordingMonitor {
-            NSEvent.removeMonitor(recordingMonitor)
-            self.recordingMonitor = nil
-        }
+        recordingObservationToken = nil
+
         if recording {
             mapping.modifierFlags = []
             mapping.button = nil
             mapping.repeat = nil
             mapping.scroll = nil
-            let eventsOfInterest: NSEvent.EventTypeMask = [
+
+            recordingObservationToken = try? EventTap.observe([
                 .flagsChanged,
-                .leftMouseDown,
-                .rightMouseDown,
-                .otherMouseDown,
-                .leftMouseUp,
-                .rightMouseUp,
-                .otherMouseUp,
-                .scrollWheel
-            ]
-            recordingMonitor = NSEvent.addLocalMonitorForEvents(matching: eventsOfInterest,
-                                                                handler: eventReceived)
+                .scrollWheel,
+                .leftMouseDown, .leftMouseUp,
+                .rightMouseDown, .rightMouseUp,
+                .otherMouseDown, .otherMouseUp
+            ]) { _, event in
+                eventReceived(event)
+            }
+
+            if recordingObservationToken == nil {
+                recording = false
+            }
         }
     }
 
-    private func eventReceived(_ event: NSEvent) -> NSEvent? {
+    private func eventReceived(_ event: CGEvent) -> CGEvent? {
         mapping.button = nil
         mapping.scroll = nil
-        mapping.modifierFlags = .init(rawValue: UInt64(event.modifierFlags.rawValue))
+        mapping.modifierFlags = .init(rawValue: UInt64(event.flags.rawValue))
 
         switch event.type {
         case .flagsChanged:
             return nil
 
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
-            mapping.button = event.buttonNumber
+            mapping.button = Int(event.getIntegerValueField(.mouseEventButtonNumber))
             return nil
 
         case .leftMouseUp, .rightMouseUp, .otherMouseUp:
-            mapping.button = event.buttonNumber
+            mapping.button = Int(event.getIntegerValueField(.mouseEventButtonNumber))
 
         case .scrollWheel:
-            if event.deltaY > 0 {
+            let scrollWheelEventView = ScrollWheelEventView(event)
+            if scrollWheelEventView.deltaYSignum < 0 {
                 mapping.scroll = .up
-            } else if event.deltaY < 0 {
+            } else if scrollWheelEventView.deltaYSignum > 0 {
                 mapping.scroll = .down
-            } else if event.deltaX > 0 {
+            } else if scrollWheelEventView.deltaXSignum < 0 {
                 mapping.scroll = .left
-            } else if event.deltaX < 0 {
+            } else if scrollWheelEventView.deltaXSignum > 0 {
                 mapping.scroll = .right
             }
 
