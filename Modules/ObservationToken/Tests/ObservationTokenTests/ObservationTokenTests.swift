@@ -5,10 +5,35 @@
 import XCTest
 
 final class ObservationTokenTests: XCTestCase {
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
-        XCTAssertEqual(ObservationToken().text, "Hello, World!")
+    func testCancel() throws {
+        var cancelled = false
+
+        do {
+            ObservationToken {
+                cancelled = true
+            }
+        }
+
+        XCTAssertTrue(cancelled)
+    }
+
+    func testTieToLifetime() throws {
+        var cancelled = false
+
+        class A {}
+
+        do {
+            let a = A()
+
+            do {
+                ObservationToken {
+                    cancelled = true
+                }.tieToLifetime(of: a)
+            }
+
+            XCTAssertFalse(cancelled)
+        }
+
+        XCTAssertTrue(cancelled)
     }
 }

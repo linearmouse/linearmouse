@@ -1,4 +1,4 @@
-// swift-tools-version: 5.8
+// swift-tools-version: 5.6
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -16,6 +16,10 @@ let package = Package(
         .target(
             name: "ObservationToken",
             dependencies: []
+        ),
+        .testTarget(
+            name: "ObservationTokenTests",
+            dependencies: ["ObservationToken"]
         )
     ]
 )
