@@ -1,3 +1,3 @@
 # ObservationToken
 
-A description of this package.
+An ObservationToken that can be tied to the specific lifetime.
