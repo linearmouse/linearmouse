@@ -2,6 +2,7 @@
 // Copyright (c) 2021-2023 LinearMouse
 
 import KeyKit
+import ObservationToken
 import SwiftUI
 
 struct ButtonMappingActionKeyPress: View {
@@ -38,9 +39,9 @@ struct KeyboardShortcutRecorder: View {
         }
     }
 
-    @State private var recordingMonitor: Any?
+    @State private var recordingObservationToken: ObservationToken?
 
-    @State private var recordingModifiers: NSEvent.ModifierFlags = []
+    @State private var recordingModifiers: CGEventFlags = []
 
     var body: some View {
         Button {
@@ -63,55 +64,71 @@ struct KeyboardShortcutRecorder: View {
     }
 
     private func recordingUpdated() {
-        if let recordingMonitor = recordingMonitor {
-            NSEvent.removeMonitor(recordingMonitor)
-            self.recordingMonitor = nil
-        }
+        recordingObservationToken = nil
+
         if recording {
             recordingModifiers = []
-            let eventsOfInterest: NSEvent.EventTypeMask = [
+
+            recordingObservationToken = try? EventTap.observe([
                 .flagsChanged,
                 .keyDown
-            ]
-            recordingMonitor = NSEvent.addLocalMonitorForEvents(matching: eventsOfInterest,
-                                                                handler: eventReceived)
+            ]) { _, event in
+                eventReceived(event)
+            }
+
+            if recordingObservationToken == nil {
+                recording = false
+            }
         }
     }
 
-    private func buildKeysFromModifierFlags(_ modifierFlags: NSEvent.ModifierFlags) -> [Key] {
+    private func buildKeysFromModifierFlags(_ modifierFlags: CGEventFlags) -> [Key] {
         var keys: [Key] = []
-        if modifierFlags.contains(.control) {
-            keys.append(modifierFlags.contains(.init(rawValue: UInt(NX_DEVICERCTLKEYMASK))) ? .controlRight : .control)
+
+        if modifierFlags.contains(.maskControl) {
+            keys
+                .append(modifierFlags
+                    .contains(.init(rawValue: UInt64(NX_DEVICERCTLKEYMASK))) ? .controlRight : .control)
         }
-        if modifierFlags.contains(.shift) {
-            keys.append(modifierFlags.contains(.init(rawValue: UInt(NX_DEVICERSHIFTKEYMASK))) ? .shiftRight : .shift)
+
+        if modifierFlags.contains(.maskShift) {
+            keys.append(modifierFlags.contains(.init(rawValue: UInt64(NX_DEVICERSHIFTKEYMASK))) ? .shiftRight : .shift)
         }
-        if modifierFlags.contains(.option) {
-            keys.append(modifierFlags.contains(.init(rawValue: UInt(NX_DEVICERALTKEYMASK))) ? .optionRight : .option)
+
+        if modifierFlags.contains(.maskAlternate) {
+            keys.append(modifierFlags.contains(.init(rawValue: UInt64(NX_DEVICERALTKEYMASK))) ? .optionRight : .option)
         }
-        if modifierFlags.contains(.command) {
-            keys.append(modifierFlags.contains(.init(rawValue: UInt(NX_DEVICERCMDKEYMASK))) ? .command : .commandRight)
+
+        if modifierFlags.contains(.maskCommand) {
+            keys
+                .append(modifierFlags
+                    .contains(.init(rawValue: UInt64(NX_DEVICERCMDKEYMASK))) ? .command : .commandRight)
         }
+
         return keys
     }
 
-    private func eventReceived(_ event: NSEvent) -> NSEvent? {
+    private func eventReceived(_ event: CGEvent) -> CGEvent? {
         switch event.type {
         case .flagsChanged:
-            recordingModifiers.insert(event.modifierFlags)
+            recordingModifiers.insert(event.flags)
+
             // If all modifier keys are released without and other key pressed,
             // just record the modifier keys.
-            if event.modifierFlags.intersection([.control, .shift, .option, .command]).isEmpty {
+            if event.flags.intersection([.maskControl, .maskShift, .maskAlternate, .maskCommand]).isEmpty {
                 keys = buildKeysFromModifierFlags(recordingModifiers)
                 recording = false
             }
+
         case .keyDown:
             let keyCodeResolver = KeyCodeResolver()
-            guard let key = keyCodeResolver.key(from: event.keyCode) else {
+            guard let key = keyCodeResolver.key(from: CGKeyCode(event.getIntegerValueField(.keyboardEventKeycode)))
+            else {
                 break
             }
-            keys = buildKeysFromModifierFlags(event.modifierFlags) + [key]
+            keys = buildKeysFromModifierFlags(event.flags) + [key]
             recording = false
+
         default:
             break
         }
