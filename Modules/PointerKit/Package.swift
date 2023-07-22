@@ -11,7 +11,9 @@ let package = Package(
             targets: ["PointerKit"]
         )
     ],
-    dependencies: [],
+    dependencies: [
+        .package(name: "ObservationToken", path: "../ObservationToken")
+    ],
     targets: [
         .target(
             name: "PointerKitC",
@@ -19,7 +21,10 @@ let package = Package(
         ),
         .target(
             name: "PointerKit",
-            dependencies: ["PointerKitC"]
+            dependencies: [
+                "ObservationToken",
+                "PointerKitC"
+            ]
         ),
         .testTarget(
             name: "PointerKitTests",
