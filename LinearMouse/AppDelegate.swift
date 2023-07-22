@@ -14,7 +14,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private let autoUpdateManager = AutoUpdateManager.shared
     private let statusItem = StatusItem.shared
     private var subscriptions = Set<AnyCancellable>()
-    private var eventTap: EventTap?
 
     override init() {
         LaunchAtLogin.migrateIfNeeded()
@@ -95,11 +94,11 @@ extension AppDelegate {
 
     func start() {
         DeviceManager.shared.start()
-        EventTap.shared.start()
+        GlobalEventTap.shared.start()
     }
 
     func stop() {
         DeviceManager.shared.stop()
-        EventTap.shared.stop()
+        GlobalEventTap.shared.stop()
     }
 }

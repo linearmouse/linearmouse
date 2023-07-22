@@ -52,6 +52,8 @@
 		9757BB9A29935474002333AA /* BidirectionalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9757BB9929935474002333AA /* BidirectionalTests.swift */; };
 		975805592A24CF0F0046E55E /* Action+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 975805582A24CF0F0046E55E /* Action+CustomStringConvertible.swift */; };
 		9758055B2A24CF800046E55E /* Action+Codable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9758055A2A24CF800046E55E /* Action+Codable.swift */; };
+		975979D02A6B7A3800016EDF /* EventTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 975979CF2A6B7A3800016EDF /* EventTap.swift */; };
+		975979DB2A6BA1A700016EDF /* ObservationToken in Frameworks */ = {isa = PBXBuildFile; productRef = 975979DA2A6BA1A700016EDF /* ObservationToken */; };
 		9766C4B4299E03B900FA3A9C /* AppIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9766C4B3299E03B900FA3A9C /* AppIndicator.swift */; };
 		9766C4B8299E199200FA3A9C /* AppPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9766C4B7299E199200FA3A9C /* AppPickerSheet.swift */; };
 		9766C4BA299E1A1400FA3A9C /* AppPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9766C4B9299E1A1400FA3A9C /* AppPicker.swift */; };
@@ -134,7 +136,7 @@
 		B7B1D08F26B3EC4F00F48176 /* ScrollingSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7B1D08E26B3EC4F00F48176 /* ScrollingSettings.swift */; };
 		B7B6D83C26B2726B00B0D247 /* ModifierKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7B6D83B26B2726B00B0D247 /* ModifierKeys.swift */; };
 		B7B6D83E26B2745300B0D247 /* ModifierKeyActionPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7B6D83D26B2745300B0D247 /* ModifierKeyActionPicker.swift */; };
-		B7BD51812672FEB5001FE742 /* EventTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BD51802672FEB5001FE742 /* EventTap.swift */; };
+		B7BD51812672FEB5001FE742 /* GlobalEventTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7BD51802672FEB5001FE742 /* GlobalEventTap.swift */; };
 		B7F6C5F827A4F6A800E5400B /* LRUCache in Frameworks */ = {isa = PBXBuildFile; productRef = B7F6C5F727A4F6A800E5400B /* LRUCache */; };
 /* End PBXBuildFile section */
 
@@ -193,6 +195,8 @@
 		9757BB9929935474002333AA /* BidirectionalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalTests.swift; sourceTree = "<group>"; };
 		975805582A24CF0F0046E55E /* Action+CustomStringConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Action+CustomStringConvertible.swift"; sourceTree = "<group>"; };
 		9758055A2A24CF800046E55E /* Action+Codable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Action+Codable.swift"; sourceTree = "<group>"; };
+		975979CF2A6B7A3800016EDF /* EventTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTap.swift; sourceTree = "<group>"; };
+		975979D72A6BA07100016EDF /* ObservationToken */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ObservationToken; sourceTree = "<group>"; };
 		9766C4B3299E03B900FA3A9C /* AppIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIndicator.swift; sourceTree = "<group>"; };
 		9766C4B7299E199200FA3A9C /* AppPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPickerSheet.swift; sourceTree = "<group>"; };
 		9766C4B9299E1A1400FA3A9C /* AppPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPicker.swift; sourceTree = "<group>"; };
@@ -279,7 +283,7 @@
 		B7B1D08E26B3EC4F00F48176 /* ScrollingSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingSettings.swift; sourceTree = "<group>"; };
 		B7B6D83B26B2726B00B0D247 /* ModifierKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierKeys.swift; sourceTree = "<group>"; };
 		B7B6D83D26B2745300B0D247 /* ModifierKeyActionPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierKeyActionPicker.swift; sourceTree = "<group>"; };
-		B7BD51802672FEB5001FE742 /* EventTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTap.swift; sourceTree = "<group>"; };
+		B7BD51802672FEB5001FE742 /* GlobalEventTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalEventTap.swift; sourceTree = "<group>"; };
 		B7BE467927B28A8600168BB9 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		B7BE467A27B28B8700168BB9 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 		B7BE467B27B3619300168BB9 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -328,6 +332,7 @@
 				97A7A39C28587E8C00EE4833 /* PointerKit in Frameworks */,
 				97C5D8FF2856E3CB00CBED2D /* GestureKit in Frameworks */,
 				B73AC55127C29C7C00F7D3E8 /* Version in Frameworks */,
+				975979DB2A6BA1A700016EDF /* ObservationToken in Frameworks */,
 				B7F6C5F827A4F6A800E5400B /* LRUCache in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -611,6 +616,7 @@
 				97C97726288FC19A009094BA /* DockKit */,
 				97C5D8FD2856E3BE00CBED2D /* GestureKit */,
 				97C9772B28910054009094BA /* KeyKit */,
+				975979D72A6BA07100016EDF /* ObservationToken */,
 				97A7A39928572FB600EE4833 /* PointerKit */,
 				97A7A3982857266700EE4833 /* README.md */,
 			);
@@ -738,7 +744,8 @@
 				B75A06282671E9DA00BEAF77 /* LinearMouse.entitlements */,
 				B75A06212671E9DA00BEAF77 /* Preview Content */,
 				972AFD462851E6B0009B0CBF /* AccessibilityPermission.swift */,
-				B7BD51802672FEB5001FE742 /* EventTap.swift */,
+				975979CF2A6B7A3800016EDF /* EventTap.swift */,
+				B7BD51802672FEB5001FE742 /* GlobalEventTap.swift */,
 				B77A160D2674B3DD00E99A5D /* LinearMouse.swift */,
 				B76173462675AD8700CC9412 /* Localizable.strings */,
 				97E1B7C02A5871C600655EEC /* Localizable.stringsdict */,
@@ -869,6 +876,7 @@
 				978DBCA529AB1732002259B3 /* JSONPatcher */,
 				97FC692E29F44D0100859859 /* AppMover */,
 				9724FAC92A3E04DE00622F5A /* KeyKit */,
+				975979DA2A6BA1A700016EDF /* ObservationToken */,
 			);
 			productName = LinearMouse;
 			productReference = B75A06182671E9D800BEAF77 /* LinearMouse.app */;
@@ -1062,6 +1070,7 @@
 				97B83CDB28607E2600ECF109 /* ConfigurationState.swift in Sources */,
 				97F77FAF285F0A58007C9C2B /* Configuration.swift in Sources */,
 				9766C4BA299E1A1400FA3A9C /* AppPicker.swift in Sources */,
+				975979D02A6B7A3800016EDF /* EventTap.swift in Sources */,
 				972A5E22285CA49800CB6440 /* DevicePicker.swift in Sources */,
 				B7B6D83E26B2745300B0D247 /* ModifierKeyActionPicker.swift in Sources */,
 				972327AF29928FBD0041538A /* Header.swift in Sources */,
@@ -1096,7 +1105,7 @@
 				972AFD452851C101009B0CBF /* AccessibilityPermissionView.swift in Sources */,
 				B75A061C2671E9D800BEAF77 /* AppDelegate.swift in Sources */,
 				972DF63A285997CD00B83932 /* Sidebar.swift in Sources */,
-				B7BD51812672FEB5001FE742 /* EventTap.swift in Sources */,
+				B7BD51812672FEB5001FE742 /* GlobalEventTap.swift in Sources */,
 				97C5DBBE286875C2006FA6B4 /* Clamp.swift in Sources */,
 				972327B3299291860041538A /* ScrollingModeSection.swift in Sources */,
 				9731B40529D7D86800FC3C24 /* ButtonMappingButtonRecorder.swift in Sources */,
@@ -1530,6 +1539,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 972A5E2E285D891100CB6440 /* XCRemoteSwiftPackageReference "Defaults" */;
 			productName = Defaults;
+		};
+		975979DA2A6BA1A700016EDF /* ObservationToken */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ObservationToken;
 		};
 		977638F8286BE9EE00A698B6 /* PublishedObject */ = {
 			isa = XCSwiftPackageProductDependency;

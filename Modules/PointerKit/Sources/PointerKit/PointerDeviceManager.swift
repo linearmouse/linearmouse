@@ -2,6 +2,7 @@
 // Copyright (c) 2021-2023 LinearMouse
 
 import Foundation
+import ObservationToken
 import PointerKitC
 
 public final class PointerDeviceManager {

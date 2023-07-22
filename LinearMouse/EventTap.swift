@@ -2,86 +2,103 @@
 // Copyright (c) 2021-2023 LinearMouse
 
 import Foundation
+import ObservationToken
 import os.log
 
-class EventTap {
+enum EventTap {}
+
+extension EventTap {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "EventTap")
 
-    static let shared = EventTap()
+    typealias Callback = (_ proxy: CGEventTapProxy, _ event: CGEvent) -> CGEvent?
 
-    var eventTap: CFMachPort?
-    var runLoopSource: CFRunLoopSource?
+    private class ContextHolder {
+        var tap: CFMachPort?
+        let callback: Callback
 
-    private let eventTapCallback: CGEventTapCallBack = { _, type, event, refcon in
-        // TODO: Weak self reference?
-        guard let unwrappedRefcon = refcon else {
+        init(_ callback: @escaping Callback) {
+            self.callback = callback
+        }
+    }
+
+    private static let callbackInvoker: CGEventTapCallBack = { proxy, type, event, refcon -> Unmanaged<CGEvent>? in
+        // If no refcon (aka userInfo) is passed in, just bypass the event.
+        guard let refcon = refcon else {
             return Unmanaged.passUnretained(event)
         }
 
-        let this = Unmanaged<EventTap>.fromOpaque(unwrappedRefcon).takeUnretainedValue()
+        // Get the tap and the callback from contextHolder.
+        let contextHolder = Unmanaged<ContextHolder>.fromOpaque(refcon).takeUnretainedValue()
+        let tap = contextHolder.tap
+        let callback = contextHolder.callback
 
-        if type == .tapDisabledByUserInput {
+        switch type {
+        case .tapDisabledByUserInput:
             return Unmanaged.passUnretained(event)
-        }
 
-        // FIXME: Avoid timeout?
-        if type == .tapDisabledByTimeout {
+        case .tapDisabledByTimeout:
             os_log("EventTap disabled by timeout, re-enable it", log: log, type: .error, String(describing: type))
-            this.start()
+            guard let tap = tap else {
+                os_log("Cannot find the tap", log: log, type: .error, String(describing: type))
+                return Unmanaged.passUnretained(event)
+            }
+            CGEvent.tapEnable(tap: tap, enable: true)
+            return Unmanaged.passUnretained(event)
+
+        default:
+
+            // If the callback returns nil, ignore the event.
+            guard let event = callback(proxy, event) else {
+                return nil
+            }
+
+            // Or, return the event reference.
             return Unmanaged.passUnretained(event)
         }
-
-        let mouseEventView = MouseEventView(event)
-        let eventTransformer = EventTransformerManager.shared.get(withCGEvent: event,
-                                                                  withSourcePid: mouseEventView.sourcePid,
-                                                                  withTargetPid: mouseEventView.targetPid)
-
-        if let event = eventTransformer.transform(event) {
-            return Unmanaged.passUnretained(event)
-        }
-
-        return nil
     }
 
-    init() {
-        guard AccessibilityPermission.enabled else {
-            return
+    /**
+     Create an `EventTap` to observe the `events` and add it to the `runLoop`.
+
+     - Parameters:
+        - events: The event types to observe.
+        - runLoop: The target `RunLoop` to run the event tap.
+        - callback: The callback of the event tap.
+     */
+    static func observe(_ events: [CGEventType], at runLoop: RunLoop,
+                        callback: @escaping Callback) throws -> ObservationToken {
+        // Create a context holder. The lifetime of contextHolder should be the same as ObservationToken's.
+        let contextHolder = ContextHolder(callback)
+
+        // Create event tap.
+        let eventsOfInterest = events.reduce(CGEventMask(0)) { $0 | (1 << $1.rawValue) }
+        guard let tap = CGEvent.tapCreate(tap: .cghidEventTap,
+                                          place: .headInsertEventTap,
+                                          options: .defaultTap,
+                                          eventsOfInterest: eventsOfInterest,
+                                          callback: callbackInvoker,
+                                          userInfo: Unmanaged.passUnretained(contextHolder).toOpaque()) else {
+            throw EventTapError.failedToCreate
         }
 
-        var eventsOfInterest: CGEventMask =
-            1 << CGEventType.scrollWheel.rawValue
-                | 1 << CGEventType.leftMouseDown.rawValue
-                | 1 << CGEventType.leftMouseUp.rawValue
-                | 1 << CGEventType.leftMouseDragged.rawValue
-        eventsOfInterest |= 1 << CGEventType.rightMouseDown.rawValue
-            | 1 << CGEventType.rightMouseUp.rawValue
-            | 1 << CGEventType.rightMouseDragged.rawValue
-        eventsOfInterest |= 1 << CGEventType.otherMouseDown.rawValue
-            | 1 << CGEventType.otherMouseUp.rawValue
-            | 1 << CGEventType.otherMouseDragged.rawValue
-        eventsOfInterest |= 1 << CGEventType.keyDown.rawValue
-            | 1 << CGEventType.keyUp.rawValue
-        eventTap = CGEvent.tapCreate(
-            tap: .cghidEventTap,
-            place: .headInsertEventTap,
-            options: .defaultTap,
-            eventsOfInterest: eventsOfInterest,
-            callback: eventTapCallback,
-            userInfo: Unmanaged.passUnretained(self).toOpaque()
-        )
-        runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
-        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
-    }
+        // Attach tap to contextHolder.
+        contextHolder.tap = tap
 
-    func start() {
-        if let eventTap = eventTap {
-            CGEvent.tapEnable(tap: eventTap, enable: true)
+        // Create and add run loop source to the run loop.
+        let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
+        let cfRunLoop = runLoop.getCFRunLoop()
+        CFRunLoopAddSource(cfRunLoop, runLoopSource, .commonModes)
+
+        return ObservationToken {
+            // The lifetime of contextHolder needs to be extended until the observation token is cancelled.
+            withExtendedLifetime(contextHolder) {
+                CGEvent.tapEnable(tap: tap, enable: false)
+                CFRunLoopRemoveSource(cfRunLoop, runLoopSource, .commonModes)
+            }
         }
     }
+}
 
-    func stop() {
-        if let eventTap = eventTap {
-            CGEvent.tapEnable(tap: eventTap, enable: false)
-        }
-    }
+enum EventTapError: Error {
+    case failedToCreate
 }
