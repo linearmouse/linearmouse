@@ -22,6 +22,8 @@ class SchemeState: ObservableObject {
             .store(in: &subscriptions)
 
         deviceState.$currentDeviceRef
+            .debounce(for: 0.1, scheduler: RunLoop.main)
+            .removeDuplicates()
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }

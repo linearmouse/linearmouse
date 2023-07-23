@@ -78,7 +78,7 @@ class DeviceManager: ObservableObject {
         manager.startObservation()
 
         ConfigurationState.shared.$configuration
-            .debounce(for: 0.2, scheduler: RunLoop.main)
+            .debounce(for: 0.1, scheduler: RunLoop.main)
             .sink { [weak self] _ in
                 self?.updatePointerSpeed()
             }

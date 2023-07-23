@@ -25,7 +25,7 @@ class DeviceModel: ObservableObject, Identifiable {
         category = deviceRef.value?.category ?? .mouse
 
         DeviceManager.shared.$lastActiveDeviceRef
-            .throttle(for: 0.5, scheduler: RunLoop.main, latest: true)
+            .debounce(for: 0.1, scheduler: RunLoop.main)
             .removeDuplicates()
             .map { deviceRef.value != nil && $0?.value == deviceRef.value }
             .sink { [weak self] value in
