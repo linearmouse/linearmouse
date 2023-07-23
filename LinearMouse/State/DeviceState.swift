@@ -40,7 +40,7 @@ class DeviceState: ObservableObject {
         .tieToLifetime(of: self)
 
         deviceManager.$lastActiveDeviceRef
-            .throttle(for: 0.5, scheduler: RunLoop.main, latest: true)
+            .debounce(for: 0.1, scheduler: RunLoop.main)
             .removeDuplicates()
             .sink { [weak self] lastActiveDeviceRef in
                 self?.updateCurrentDeviceRef(lastActiveDeviceRef: lastActiveDeviceRef)
