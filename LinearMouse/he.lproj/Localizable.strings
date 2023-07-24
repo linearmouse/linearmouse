@@ -34,6 +34,8 @@
 "Revert to system defaults" = "שחזור להגדרות ברירת מחדל";
 "Copy settings from vertical" = "העתקת הגדרות מ'אנכי'";
 "Modifier Keys" = "Modifier Keys";
+"Default action" = "Default action";
+"Ignore modifier" = "Ignore modifier";
 "No action" = "No action";
 "Alter orientation" = "Alter orientation";
 "Change speed" = "Change speed";
@@ -75,7 +77,6 @@
 "Scroll left" = "Scroll left";
 "Scroll right" = "Scroll right";
 
-"Default action" = "Default action";
 "Mission Control" = "Mission Control";
 "Move left a space" = "Move left a space";
 "Move right a space" = "Move right a space";
