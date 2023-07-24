@@ -34,6 +34,8 @@
 "Revert to system defaults" = "Fabrika ayarlarına dön";
 "Copy settings from vertical" = "Ayarları \"Dikey\" kategorisinden kopyala";
 "Modifier Keys" = "Değiştirici tuşlar";
+"Default action" = "Varsayılan Eylem";
+"Ignore modifier" = "Ignore modifier";
 "No action" = "Eylem yok";
 "Alter orientation" = "Yönlendirmeyi değiştir";
 "Change speed" = "Hızı değiştir";
@@ -75,7 +77,6 @@
 "Scroll left" = "Sola kaydır";
 "Scroll right" = "Sağa Kaydır";
 
-"Default action" = "Varsayılan Eylem";
 "Mission Control" = "Görev Kontrol";
 "Move left a space" = "Sağa bir boşluk kaydır";
 "Move right a space" = "Sağa bir boşluk kaydır";
