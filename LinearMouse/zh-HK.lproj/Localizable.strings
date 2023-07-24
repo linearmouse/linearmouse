@@ -34,6 +34,8 @@
 "Revert to system defaults" = "恢復到系統預設值";
 "Copy settings from vertical" = "從縱向拷貝設定";
 "Modifier Keys" = "變更鍵";
+"Default action" = "預設動作";
+"Ignore modifier" = "忽略變更鍵";
 "No action" = "無動作";
 "Alter orientation" = "改變方向";
 "Change speed" = "變更速度";
@@ -75,7 +77,6 @@
 "Scroll left" = "向左捲動";
 "Scroll right" = "向右捲動";
 
-"Default action" = "預設動作";
 "Mission Control" = "指揮中心";
 "Move left a space" = "向左移動一個空間";
 "Move right a space" = "向右移動一個空間";

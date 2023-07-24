@@ -34,6 +34,8 @@
 "Revert to system defaults" = "Ripristina impostazioni predefinite";
 "Copy settings from vertical" = "Copia le impostazioni dalla verticale";
 "Modifier Keys" = "Tasti modificatori";
+"Default action" = "Azione predefinita";
+"Ignore modifier" = "Ignore modifier";
 "No action" = "Nessuna azione";
 "Alter orientation" = "Cambiare orientamento";
 "Change speed" = "Cambia velocità";
@@ -75,7 +77,6 @@
 "Scroll left" = "Scorri a sinistra";
 "Scroll right" = "Scorri a destra";
 
-"Default action" = "Azione predefinita";
 "Mission Control" = "Controllo Missione";
 "Move left a space" = "Sposta a sinistra di uno spazio";
 "Move right a space" = "Sposta a destra di uno spazio";

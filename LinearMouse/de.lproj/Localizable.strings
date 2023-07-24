@@ -34,6 +34,8 @@
 "Revert to system defaults" = "Auf Systemstandards zurücksetzen";
 "Copy settings from vertical" = "Einstellungen von Vertikal übernehmen";
 "Modifier Keys" = "Tastenkürzel";
+"Default action" = "Standardaktion";
+"Ignore modifier" = "Ignore modifier";
 "No action" = "Keine Funktion";
 "Alter orientation" = "Scrollorientierung ändern";
 "Change speed" = "Scrollgeschwindigkeit ändern";
@@ -75,7 +77,6 @@
 "Scroll left" = "Nach links scrollen";
 "Scroll right" = "Nach rechts scrollen";
 
-"Default action" = "Standardaktion";
 "Mission Control" = "Mission Control";
 "Move left a space" = "Ein Leerzeichen nach links bewegen";
 "Move right a space" = "Ein Leerzeichen nach rechts bewegen";

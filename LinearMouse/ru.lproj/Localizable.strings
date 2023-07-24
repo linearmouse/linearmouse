@@ -34,6 +34,8 @@
 "Revert to system defaults" = "Вернуться к настройкам по умолчанию";
 "Copy settings from vertical" = "Скопировать настройки из вертикальной";
 "Modifier Keys" = "Клавиши модификации";
+"Default action" = "Действие по умолчанию";
+"Ignore modifier" = "Ignore modifier";
 "No action" = "Не задано";
 "Alter orientation" = "Изменить направление прокрутки";
 "Change speed" = "Изменить скорость";
@@ -75,7 +77,6 @@
 "Scroll left" = "Прокрутка влево";
 "Scroll right" = "Прокрутка вправо";
 
-"Default action" = "Действие по умолчанию";
 "Mission Control" = "Mission Control";
 "Move left a space" = "На одно пространство влево";
 "Move right a space" = "На одно пространство вправо";

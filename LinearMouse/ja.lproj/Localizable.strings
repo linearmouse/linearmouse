@@ -34,6 +34,8 @@
 "Revert to system defaults" = "システムデフォルトに戻す";
 "Copy settings from vertical" = "Copy settings from vertical";
 "Modifier Keys" = "修飾キー";
+"Default action" = "Default action";
+"Ignore modifier" = "Ignore modifier";
 "No action" = "何もしない";
 "Alter orientation" = "方向を変更する";
 "Change speed" = "速度変更";
@@ -75,7 +77,6 @@
 "Scroll left" = "Scroll left";
 "Scroll right" = "Scroll right";
 
-"Default action" = "Default action";
 "Mission Control" = "Mission Control";
 "Move left a space" = "Move left a space";
 "Move right a space" = "Move right a space";

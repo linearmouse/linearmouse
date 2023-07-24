@@ -34,6 +34,8 @@
 "Revert to system defaults" = "Réinitialiser aux paramètres par défaut";
 "Copy settings from vertical" = "Copier les paramètres de la catégorie \"Vertical\"";
 "Modifier Keys" = "Modificateur de touches";
+"Default action" = "Action par défaut";
+"Ignore modifier" = "Ignore modifier";
 "No action" = "Pas d'action";
 "Alter orientation" = "Altérer l'orientation";
 "Change speed" = "Changer la vitesse";
@@ -75,7 +77,6 @@
 "Scroll left" = "Défiler vers la gauche";
 "Scroll right" = "Défiler vers la droite";
 
-"Default action" = "Action par défaut";
 "Mission Control" = "Mission Control";
 "Move left a space" = "Déplacer vers la gauche un espace";
 "Move right a space" = "Déplacer vers la gauche un espace";

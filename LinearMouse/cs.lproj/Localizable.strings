@@ -34,6 +34,8 @@
 "Revert to system defaults" = "Obnovit výchozí nastavení systému";
 "Copy settings from vertical" = "Copy settings from vertical";
 "Modifier Keys" = "Modifikační klávesy";
+"Default action" = "Default action";
+"Ignore modifier" = "Ignore modifier";
 "No action" = "Nenastaveno";
 "Alter orientation" = "Změna oriantace";
 "Change speed" = "Změna rychlosti";
@@ -75,7 +77,6 @@
 "Scroll left" = "Scroll left";
 "Scroll right" = "Scroll right";
 
-"Default action" = "Default action";
 "Mission Control" = "Mission Control";
 "Move left a space" = "Move left a space";
 "Move right a space" = "Move right a space";

@@ -34,6 +34,8 @@
 "Revert to system defaults" = "Przywróć ustawienia systemowe";
 "Copy settings from vertical" = "Skopiuj ustawienia z pionu";
 "Modifier Keys" = "Klawisze modyfikujące";
+"Default action" = "Domyślna akcja";
+"Ignore modifier" = "Ignore modifier";
 "No action" = "Brak akcji";
 "Alter orientation" = "Zmień orientację";
 "Change speed" = "Zmień szybkość";
@@ -75,7 +77,6 @@
 "Scroll left" = "Przewiń w lewo";
 "Scroll right" = "Przewiń w prawo";
 
-"Default action" = "Domyślna akcja";
 "Mission Control" = "Mission Control";
 "Move left a space" = "Przejdź w lewo o przestrzeń";
 "Move right a space" = "Przejdź w prawo o przestrzeń";

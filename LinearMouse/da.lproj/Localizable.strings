@@ -34,6 +34,8 @@
 "Revert to system defaults" = "Nulstil til systemets standardindstillinger";
 "Copy settings from vertical" = "Kopiér indstillinger fra vertikal";
 "Modifier Keys" = "Kombitaster";
+"Default action" = "Standardhandling";
+"Ignore modifier" = "Ignore modifier";
 "No action" = "Ingen handling";
 "Alter orientation" = "Skift retning";
 "Change speed" = "Ændr hastighed";
@@ -75,7 +77,6 @@
 "Scroll left" = "Rul til venstre";
 "Scroll right" = "Rul til højre";
 
-"Default action" = "Standardhandling";
 "Mission Control" = "Mission Control";
 "Move left a space" = "Flyt et Space til venstre";
 "Move right a space" = "Flyt et Space til højre";

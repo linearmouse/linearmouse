@@ -34,6 +34,8 @@
 "Revert to system defaults" = "Revert to system defaults";
 "Copy settings from vertical" = "Copy settings from vertical";
 "Modifier Keys" = "مفاتيح التعديل";
+"Default action" = "Default action";
+"Ignore modifier" = "Ignore modifier";
 "No action" = "No action";
 "Alter orientation" = "Alter orientation";
 "Change speed" = "تغيير السرعة";
@@ -75,7 +77,6 @@
 "Scroll left" = "Scroll left";
 "Scroll right" = "Scroll right";
 
-"Default action" = "Default action";
 "Mission Control" = "Mission Control";
 "Move left a space" = "Move left a space";
 "Move right a space" = "Move right a space";
