@@ -34,6 +34,8 @@
 "Revert to system defaults" = "回退到系统默认值";
 "Copy settings from vertical" = "从纵向复制设置";
 "Modifier Keys" = "修饰键";
+"Default action" = "默认动作";
+"Ignore modifier" = "Ignore modifier";
 "No action" = "无动作";
 "Alter orientation" = "改变方向";
 "Change speed" = "变更速度";
@@ -75,7 +77,6 @@
 "Scroll left" = "向左滚动";
 "Scroll right" = "向右滚动";
 
-"Default action" = "默认动作";
 "Mission Control" = "调度中心";
 "Move left a space" = "向左移动一个空间";
 "Move right a space" = "向右移动一个空间";
