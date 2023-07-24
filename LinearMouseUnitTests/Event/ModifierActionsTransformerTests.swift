@@ -7,7 +7,7 @@ import XCTest
 class ModifierActionsTransformerTests: XCTestCase {
     func testModifierActions() throws {
         var event = CGEvent(scrollWheelEvent2Source: nil, units: .line, wheelCount: 2, wheel1: 1, wheel2: 2, wheel3: 0)!
-        let modifiers = Scheme.Scrolling.Modifiers(command: Scheme.Scrolling.Modifiers.Action.preventDefault,
+        let modifiers = Scheme.Scrolling.Modifiers(command: .auto,
                                                    shift: .alterOrientation,
                                                    option: .changeSpeed(scale: 2),
                                                    control: .changeSpeed(scale: 3))
