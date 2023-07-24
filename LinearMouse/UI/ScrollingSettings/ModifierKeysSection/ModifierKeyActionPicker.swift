@@ -12,7 +12,7 @@ extension ScrollingSettings.ModifierKeysSection {
         var body: some View {
             Picker(label, selection: actionType) {
                 ForEach(ActionType.allCases) { type in
-                    Text(NSLocalizedString(type.rawValue, comment: "")).tag(type)
+                    Text(NSLocalizedString(type.rawValue, comment: "").capitalized).tag(type)
                 }
             }
             .modifier(PickerViewModifier())
@@ -34,6 +34,8 @@ extension ScrollingSettings.ModifierKeysSection.ModifierKeyActionPicker {
     enum ActionType: String, CaseIterable, Identifiable {
         var id: Self { self }
 
+        case defaultAction = "Default action"
+        case ignore = "Ignore modifier"
         case noAction = "No action"
         case alterOrientation = "Alter orientation"
         case changeSpeed = "Change speed"
@@ -48,7 +50,11 @@ extension ScrollingSettings.ModifierKeysSection.ModifierKeyActionPicker {
                 }
 
                 switch action {
-                case .none:
+                case .auto:
+                    return .defaultAction
+                case .ignore:
+                    return .ignore
+                case .preventDefault:
                     return .noAction
                 case .alterOrientation:
                     return .alterOrientation
@@ -61,8 +67,12 @@ extension ScrollingSettings.ModifierKeysSection.ModifierKeyActionPicker {
 
             set: { action in
                 switch action {
+                case .defaultAction:
+                    self.action = .auto
+                case .ignore:
+                    self.action = .ignore
                 case .noAction:
-                    self.action = Scheme.Scrolling.Modifiers.Action.none
+                    self.action = .preventDefault
                 case .alterOrientation:
                     self.action = .alterOrientation
                 case .changeSpeed:

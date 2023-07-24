@@ -1005,6 +1005,15 @@
           "$ref": "#/definitions/Scheme.Scrolling.Modifiers.None"
         },
         {
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.Auto"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.Ignore"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.PreventDefault"
+        },
+        {
           "$ref": "#/definitions/Scheme.Scrolling.Modifiers.AlterOrientation"
         },
         {
@@ -1021,6 +1030,20 @@
       "properties": {
         "type": {
           "const": "alterOrientation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "Scheme.Scrolling.Modifiers.Auto": {
+      "additionalProperties": false,
+      "description": "Default action.",
+      "properties": {
+        "type": {
+          "const": "auto",
           "type": "string"
         }
       },
@@ -1048,12 +1071,41 @@
       ],
       "type": "object"
     },
+    "Scheme.Scrolling.Modifiers.Ignore": {
+      "additionalProperties": false,
+      "description": "Ignore modifier.",
+      "properties": {
+        "type": {
+          "const": "ignore",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
     "Scheme.Scrolling.Modifiers.None": {
       "additionalProperties": false,
-      "description": "No actions.",
+      "deprecated": true,
+      "description": "Default action.",
       "properties": {
         "type": {
           "const": "none",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "Scheme.Scrolling.Modifiers.PreventDefault": {
+      "additionalProperties": false,
+      "description": "No action.",
+      "properties": {
+        "type": {
+          "const": "preventDefault",
           "type": "string"
         }
       },

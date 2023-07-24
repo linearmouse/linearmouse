@@ -18,7 +18,7 @@ extension ModifierKeyAction {
     var schemeAction: Scheme.Scrolling.Modifiers.Action {
         switch type {
         case .noAction:
-            return .none
+            return .preventDefault
         case .alterOrientation:
             return .alterOrientation
         case .changeSpeed:

@@ -33,7 +33,7 @@ class ModifierActionsTransformer: EventTransformer {
         ]
         var event = event
         for case let (flag, action) in actions where event.flags.contains(flag) {
-            if let action = action, action != .none {
+            if let action = action, action != .auto {
                 guard let handledEvent = handleModifierKeyAction(for: event, action: action) else {
                     return nil
                 }
@@ -48,8 +48,10 @@ class ModifierActionsTransformer: EventTransformer {
         let scrollWheelEventView = ScrollWheelEventView(event)
 
         switch action {
-        case .none:
+        case .auto, .ignore:
             break
+        case .preventDefault:
+            return nil
         case .alterOrientation:
             scrollWheelEventView.swapXY()
         case let .changeSpeed(scale: scale):
