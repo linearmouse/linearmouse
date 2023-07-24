@@ -12,7 +12,10 @@ extension ScrollingSettings.ModifierKeysSection {
         var body: some View {
             Picker(label, selection: actionType) {
                 ForEach(ActionType.allCases) { type in
-                    Text(NSLocalizedString(type.rawValue, comment: "").capitalized).tag(type)
+                    Text(type.description).tag(type)
+                    if type == .noAction {
+                        Divider()
+                    }
                 }
             }
             .modifier(PickerViewModifier())
@@ -31,7 +34,7 @@ extension ScrollingSettings.ModifierKeysSection {
 }
 
 extension ScrollingSettings.ModifierKeysSection.ModifierKeyActionPicker {
-    enum ActionType: String, CaseIterable, Identifiable {
+    enum ActionType: String, CaseIterable, Identifiable, CustomStringConvertible {
         var id: Self { self }
 
         case defaultAction = "Default action"
@@ -40,6 +43,10 @@ extension ScrollingSettings.ModifierKeysSection.ModifierKeyActionPicker {
         case alterOrientation = "Alter orientation"
         case changeSpeed = "Change speed"
         case zoom = "Zoom"
+
+        var description: String {
+            NSLocalizedString(rawValue, comment: "").capitalized
+        }
     }
 
     var actionType: Binding<ActionType> {
