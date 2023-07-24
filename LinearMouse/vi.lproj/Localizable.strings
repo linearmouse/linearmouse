@@ -34,6 +34,8 @@
 "Revert to system defaults" = "Khôi phục về mặc định";
 "Copy settings from vertical" = "Sao chép cài đặt";
 "Modifier Keys" = "Cài đặt bàn phím";
+"Default action" = "Mặc định";
+"Ignore modifier" = "Ignore modifier";
 "No action" = "Không có hành động";
 "Alter orientation" = "Thay đổi hướng cuộn";
 "Change speed" = "Thay đổi tốc độ";
@@ -75,7 +77,6 @@
 "Scroll left" = "Cuộn sang trái";
 "Scroll right" = "Cuộn sang phải";
 
-"Default action" = "Mặc định";
 "Mission Control" = "Mission Control";
 "Move left a space" = "Di chuyển qua không gian bên trái";
 "Move right a space" = "Di chuyển kqua không gian bên phải";
