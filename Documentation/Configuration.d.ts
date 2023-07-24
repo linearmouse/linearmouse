@@ -233,9 +233,25 @@ declare namespace Scheme {
 
     namespace Modifiers {
       /**
-       * @description No actions.
+       * @deprecated
+       * @description Default action.
        */
       type None = { type: "none" };
+
+      /**
+       * @description Default action.
+       */
+      type Auto = { type: "auto" };
+
+      /**
+       * @description Ignore modifier.
+       */
+      type Ignore = { type: "ignore" };
+
+      /**
+       * @description No action.
+       */
+      type PreventDefault = { type: "preventDefault" };
 
       /**
        * @description Alter the scrolling orientation from vertical to horizontal or vice versa.
@@ -263,7 +279,14 @@ declare namespace Scheme {
         type: "zoom";
       };
 
-      type Action = None | AlterOrientation | ChangeSpeed | Zoom;
+      type Action =
+        | None
+        | Auto
+        | Ignore
+        | PreventDefault
+        | AlterOrientation
+        | ChangeSpeed
+        | Zoom;
     }
   }
 
