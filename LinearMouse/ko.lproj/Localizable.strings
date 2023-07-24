@@ -34,6 +34,8 @@
 "Revert to system defaults" = "시스템 기본값으로 되돌리기";
 "Copy settings from vertical" = "수직 방향 설정 가져오기";
 "Modifier Keys" = "보조 키";
+"Default action" = "기본 동작";
+"Ignore modifier" = "Ignore modifier";
 "No action" = "동작 없음";
 "Alter orientation" = "방향 변경";
 "Change speed" = "속도 변경";
@@ -75,7 +77,6 @@
 "Scroll left" = "왼쪽으로 스크롤";
 "Scroll right" = "오른쪽으로 스크롤";
 
-"Default action" = "기본 동작";
 "Mission Control" = "Mission Control";
 "Move left a space" = "왼쪽으로 Space 이동";
 "Move right a space" = "오른쪽으로 Space 이동";
