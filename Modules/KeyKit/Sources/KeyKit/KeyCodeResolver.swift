@@ -16,14 +16,18 @@ public class KeyCodeResolver {
         DistributedNotificationCenter.default
             .publisher(for: .init(kTISNotifyEnabledKeyboardInputSourcesChanged as String))
             .sink { [weak self] _ in
-                self?.updateMapping()
+                DispatchQueue.main.async {
+                    self?.updateMapping()
+                }
             }
             .store(in: &subscriptions)
 
         DistributedNotificationCenter.default
             .publisher(for: .init(kTISNotifySelectedKeyboardInputSourceChanged as String))
             .sink { [weak self] _ in
-                self?.updateMapping()
+                DispatchQueue.main.async {
+                    self?.updateMapping()
+                }
             }
             .store(in: &subscriptions)
 
