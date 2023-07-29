@@ -1,12 +1,12 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse necesita permiso de Accesibilidad";
 "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "Necesitas conceder permiso de Accesibilidad en Preferencias del sistema > Seguridad y privacidad > Accesibilidad.";
-"Get more help" = "Ayuda";
+"Get more help" = "Obtener más ayuda";
 "Open Accessibility" = "Abrir Accesibilidad";
 
-"%@ Settings..." = "%@ Ajustes...";
+"%@ Settings..." = "%@ Ajustes…";
 "Start at login" = "Abrir al iniciar sesión";
 "Config" = "Configuración";
-"Reload" = "Volver a cargar";
+"Reload" = "Recargar";
 "Reveal in Finder" = "Mostrar en el Finder";
 "Configure for %@..." = "Configurar para %@...";
 "Quit %@" = "Salir de %@";
@@ -26,7 +26,7 @@
 "By Pixels" = "Por píxeles";
 "Scrolling acceleration" = "Aceleración de desplazamiento";
 "Linear" = "Lineal";
-"Scrolling speed" = "Scrolling speed";
+"Scrolling speed" = "Velocidad de desplazamiento";
 "Slow" = "Lento";
 "Fast" = "Rápido";
 "Distance" = "Distancia";
@@ -35,7 +35,7 @@
 "Copy settings from vertical" = "Copiar ajustes de la vertical";
 "Modifier Keys" = "Teclas modificadoras";
 "Default action" = "Acción predeterminada";
-"Ignore modifier" = "Ignore modifier";
+"Ignore modifier" = "Ignorar modificador";
 "No action" = "No hacer nada";
 "Alter orientation" = "Cambiar orientación";
 "Change speed" = "Cambiar velocidad";
@@ -59,12 +59,12 @@
 "Assign actions to mouse buttons" = "Asignar acciones a los botones del ratón";
 "Edit" = "Cambiar";
 
-"Run: %@" = "Run: %@";
-"Scroll up %@" = "Scroll up %@";
-"Scroll down %@" = "Scroll down %@";
-"Scroll left %@" = "Scroll left %@";
-"Scroll right %@" = "Scroll right %@";
-"Keyboard shortcut: %@" = "Keyboard shortcut: %@";
+"Run: %@" = "Ejecutar: %@";
+"Scroll up %@" = "Desplazarse arriba %@";
+"Scroll down %@" = "Desplazarse abajo %@";
+"Scroll left %@" = "Desplazarse izquierda %@";
+"Scroll right %@" = "Desplazarse derecha %@";
+"Keyboard shortcut: %@" = "Atajo de teclado: %@";
 
 "Click to record" = "Clic para grabar";
 "Recording" = "Grabando";
@@ -104,13 +104,13 @@
 "Mouse Button" = "Botón del mouse";
 "Back" = "Volver";
 "Forward" = "Adelante";
-"Execute" = "Execute";
-"Run shell command..." = "Run shell command...";
-"Scroll up..." = "Scroll up...";
-"Scroll down..." = "Scroll down...";
-"Scroll left..." = "Scroll left...";
-"Scroll right..." = "Scroll right...";
-"Keyboard shortcut..." = "Keyboard shortcut...";
+"Execute" = "Ejecutar";
+"Run shell command..." = "Ejecutar comando…";
+"Scroll up..." = "Desplazarse arriba…";
+"Scroll down..." = "Desplazarse abajo…";
+"Scroll left..." = "Desplazarse izquierda…";
+"Scroll right..." = "Desplazarse derecha…";
+"Keyboard shortcut..." = "Atajo de teclado…";
 
 "Mouse button" = "Botón del mouse";
 "Action" = "Acción";
@@ -140,7 +140,7 @@
 "Thank you for participating in the beta test." = "Gracias por participar en la prueba beta.";
 "Check for Updates..." = "Buscar actualizaciones...";
 
-"Enable verbose logging" = "Enable verbose logging";
+"Enable verbose logging" = "Habilitar registro detallado";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Habilitar esta opción registrará todos los eventos de entrada, lo que puede aumentar el uso de CPU al usar %@, pero puede ser útil para solucionar problemas.";
 "Export the logs for the last 5 minutes." = "Exportar los registros de los últimos 5 minutos.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "Si está informando de un error, sería útil adjuntar los registros.";

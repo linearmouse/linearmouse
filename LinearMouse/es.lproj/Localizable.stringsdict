@@ -13,9 +13,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>%d line</string>
+        <string>%d línea</string>
         <key>other</key>
-        <string>%d lines</string>
+        <string>%d líneas</string>
       </dict>
     </dict>
     <key>%.1f pixel(s)</key>
@@ -29,9 +29,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>f</string>
         <key>one</key>
-        <string>%.1f pixel</string>
+        <string>%.1f píxel</string>
         <key>other</key>
-        <string>%.1f pixels</string>
+        <string>%.1f píxels</string>
       </dict>
     </dict>
   </dict>
