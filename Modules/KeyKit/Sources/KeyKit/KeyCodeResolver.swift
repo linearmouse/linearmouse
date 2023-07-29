@@ -16,7 +16,7 @@ public class KeyCodeResolver {
         DistributedNotificationCenter.default
             .publisher(for: .init(kTISNotifyEnabledKeyboardInputSourcesChanged as String))
             .sink { [weak self] _ in
-                DispatchQueue.main.async {
+                Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { _ in
                     self?.updateMapping()
                 }
             }
@@ -25,7 +25,7 @@ public class KeyCodeResolver {
         DistributedNotificationCenter.default
             .publisher(for: .init(kTISNotifySelectedKeyboardInputSourceChanged as String))
             .sink { [weak self] _ in
-                DispatchQueue.main.async {
+                Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { _ in
                     self?.updateMapping()
                 }
             }
