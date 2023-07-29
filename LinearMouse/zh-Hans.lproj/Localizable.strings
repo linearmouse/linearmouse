@@ -3,12 +3,12 @@
 "Get more help" = "获得更多帮助";
 "Open Accessibility" = "打开辅助功能";
 
-"%@ Settings..." = "%@ 设置...";
+"%@ Settings…" = "%@ 设置…";
 "Start at login" = "登录时启动";
 "Config" = "配置";
 "Reload" = "重新加载";
 "Reveal in Finder" = "在 Finder 中显示";
-"Configure for %@..." = "为 %@ 配置...";
+"Configure for %@…" = "为 %@ 配置…";
 "Quit %@" = "退出 %@";
 
 "Scrolling" = "滚动";
@@ -105,12 +105,12 @@
 "Back" = "后退";
 "Forward" = "前进";
 "Execute" = "执行";
-"Run shell command..." = "运行 shell 命令...";
-"Scroll up..." = "向上滚动...";
-"Scroll down..." = "向下滚动...";
-"Scroll left..." = "向左滚动...";
-"Scroll right..." = "向右滚动...";
-"Keyboard shortcut..." = "键盘快捷键...";
+"Run shell command…" = "运行 shell 命令…";
+"Scroll up…" = "向上滚动…";
+"Scroll down…" = "向下滚动…";
+"Scroll left…" = "向左滚动…";
+"Scroll right…" = "向右滚动…";
+"Keyboard shortcut…" = "键盘快捷键…";
 
 "Mouse button" = "鼠标按键";
 "Action" = "动作";
@@ -128,7 +128,7 @@
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "如果启用， %@ 将不会修改其他应用程序发送的事件，如 Logi Options+。";
 
 "Reload Config" = "重新加载配置";
-"Reveal Config in Finder..." = "在 Finder 中显示配置...";
+"Reveal Config in Finder…" = "在 Finder 中显示配置…";
 
 "Version: %@" = "版本：%@";
 "Check for updates automatically" = "自动检查更新";
@@ -138,7 +138,7 @@
 "Monthly" = "每月";
 "Receive beta updates" = "接收测试版本（beta）更新";
 "Thank you for participating in the beta test." = "感谢你参加 beta 测试。";
-"Check for Updates..." = "检查更新...";
+"Check for Updates…" = "检查更新…";
 
 "Enable verbose logging" = "启用详细日志记录";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "启用此选项将记录所有输入事件，这可能增加使用 %@ 时的 CPU 使用率，但有助于排除故障。";

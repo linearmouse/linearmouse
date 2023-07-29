@@ -3,12 +3,12 @@
 "Get more help" = "Ricevi ulteriore supporto";
 "Open Accessibility" = "Apri Accessibilità";
 
-"%@ Settings..." = "%@ Impostazioni...";
+"%@ Settings…" = "%@ Impostazioni…";
 "Start at login" = "Avvia all'accesso";
 "Config" = "Config";
 "Reload" = "Ricarica";
 "Reveal in Finder" = "Mostra nel Finder";
-"Configure for %@..." = "Configura per %@...";
+"Configure for %@…" = "Configura per %@…";
 "Quit %@" = "Chiudi %@";
 
 "Scrolling" = "Scorrimento";
@@ -105,12 +105,12 @@
 "Back" = "Indietro";
 "Forward" = "Avanti";
 "Execute" = "Esegui";
-"Run shell command..." = "Esegui comando da terminale...";
-"Scroll up..." = "Scorri in alto...";
-"Scroll down..." = "Scorri in basso...";
-"Scroll left..." = "Scorri a sinistra...";
-"Scroll right..." = "Scorri a destra...";
-"Keyboard shortcut..." = "Scorciatoia da tastiera...";
+"Run shell command…" = "Esegui comando da terminale…";
+"Scroll up…" = "Scorri in alto…";
+"Scroll down…" = "Scorri in basso…";
+"Scroll left…" = "Scorri a sinistra…";
+"Scroll right…" = "Scorri a destra…";
+"Keyboard shortcut…" = "Scorciatoia da tastiera…";
 
 "Mouse button" = "Pulsante del mouse";
 "Action" = "Azione";
@@ -128,7 +128,7 @@
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "Se abilitato, %@ non modificherà gli eventi inviati da altre applicazioni, come Logi Options+.";
 
 "Reload Config" = "Ricarica Configurazione";
-"Reveal Config in Finder..." = "Mostra la Configurazione nel Finder...";
+"Reveal Config in Finder…" = "Mostra la Configurazione nel Finder…";
 
 "Version: %@" = "Versione: %@";
 "Check for updates automatically" = "Verifica automaticamente gli aggiornamenti";
@@ -138,7 +138,7 @@
 "Monthly" = "Ogni mese";
 "Receive beta updates" = "Ricevi aggiornamenti beta";
 "Thank you for participating in the beta test." = "Grazie per aver partecipato al beta test.";
-"Check for Updates..." = "Controlla aggiornamenti...";
+"Check for Updates…" = "Controlla aggiornamenti…";
 
 "Enable verbose logging" = "Attiva logging dettagliato";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Abilitare quest'opzione registrerà tutti gli eventi di inserimento, il che potrebbe incrementare l'utilizzo della CPU, utilizzando %@, ma può essere utile per la risoluzione dei problemi.";

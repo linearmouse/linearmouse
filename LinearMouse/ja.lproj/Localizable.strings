@@ -3,12 +3,12 @@
 "Get more help" = "ヘルプ";
 "Open Accessibility" = "アクセシビリティの設定を開く";
 
-"%@ Settings..." = "%@ Settings...";
+"%@ Settings…" = "%@ Settings…";
 "Start at login" = "ログイン時の自動起動";
 "Config" = "設定";
 "Reload" = "再ロード";
 "Reveal in Finder" = "Finder で表示";
-"Configure for %@..." = "Configure for %@...";
+"Configure for %@…" = "Configure for %@…";
 "Quit %@" = "%@を終了";
 
 "Scrolling" = "スクロール";
@@ -105,12 +105,12 @@
 "Back" = "Back";
 "Forward" = "Forward";
 "Execute" = "Execute";
-"Run shell command..." = "Run shell command...";
-"Scroll up..." = "Scroll up...";
-"Scroll down..." = "Scroll down...";
-"Scroll left..." = "Scroll left...";
-"Scroll right..." = "Scroll right...";
-"Keyboard shortcut..." = "Keyboard shortcut...";
+"Run shell command…" = "Run shell command…";
+"Scroll up…" = "Scroll up…";
+"Scroll down…" = "Scroll down…";
+"Scroll left…" = "Scroll left…";
+"Scroll right…" = "Scroll right…";
+"Keyboard shortcut…" = "Keyboard shortcut…";
 
 "Mouse button" = "Mouse button";
 "Action" = "Action";
@@ -128,7 +128,7 @@
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "If enabled, %@ will not modify events sent by other applications, such as Logi Options+.";
 
 "Reload Config" = "Reload Config";
-"Reveal Config in Finder..." = "Reveal Config in Finder...";
+"Reveal Config in Finder…" = "Reveal Config in Finder…";
 
 "Version: %@" = "バージョン %@";
 "Check for updates automatically" = "Check for updates automatically";
@@ -138,7 +138,7 @@
 "Monthly" = "毎月";
 "Receive beta updates" = "Receive beta updates";
 "Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
-"Check for Updates..." = "アップデートを確認";
+"Check for Updates…" = "アップデートを確認";
 
 "Enable verbose logging" = "Enable verbose logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting.";

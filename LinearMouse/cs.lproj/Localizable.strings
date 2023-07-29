@@ -3,12 +3,12 @@
 "Get more help" = "Více informací";
 "Open Accessibility" = "Přejít na obrazovku Zpřístupnění";
 
-"%@ Settings..." = "%@ Settings...";
+"%@ Settings…" = "%@ Settings…";
 "Start at login" = "Spustit při startu systému";
 "Config" = "Konfigurační soubory";
 "Reload" = "Načíst znovu";
 "Reveal in Finder" = "Zobrazit ve Finderu";
-"Configure for %@..." = "Configure for %@...";
+"Configure for %@…" = "Configure for %@…";
 "Quit %@" = "Ukončit %@";
 
 "Scrolling" = "Posouvání";
@@ -105,12 +105,12 @@
 "Back" = "Back";
 "Forward" = "Forward";
 "Execute" = "Execute";
-"Run shell command..." = "Run shell command...";
-"Scroll up..." = "Scroll up...";
-"Scroll down..." = "Scroll down...";
-"Scroll left..." = "Scroll left...";
-"Scroll right..." = "Scroll right...";
-"Keyboard shortcut..." = "Keyboard shortcut...";
+"Run shell command…" = "Run shell command…";
+"Scroll up…" = "Scroll up…";
+"Scroll down…" = "Scroll down…";
+"Scroll left…" = "Scroll left…";
+"Scroll right…" = "Scroll right…";
+"Keyboard shortcut…" = "Keyboard shortcut…";
 
 "Mouse button" = "Mouse button";
 "Action" = "Action";
@@ -128,7 +128,7 @@
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "If enabled, %@ will not modify events sent by other applications, such as Logi Options+.";
 
 "Reload Config" = "Reload Config";
-"Reveal Config in Finder..." = "Reveal Config in Finder...";
+"Reveal Config in Finder…" = "Reveal Config in Finder…";
 
 "Version: %@" = "Verze %@";
 "Check for updates automatically" = "Check for updates automatically";
@@ -138,7 +138,7 @@
 "Monthly" = "Měsíčně";
 "Receive beta updates" = "Receive beta updates";
 "Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
-"Check for Updates..." = "Zkontrolovat aktualizace...";
+"Check for Updates…" = "Zkontrolovat aktualizace…";
 
 "Enable verbose logging" = "Enable verbose logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting.";

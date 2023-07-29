@@ -3,12 +3,12 @@
 "Get more help" = "Cần giúp đỡ";
 "Open Accessibility" = "Mở Trợ năng";
 
-"%@ Settings..." = "Cài đặt %@...";
+"%@ Settings…" = "Cài đặt %@…";
 "Start at login" = "Mở lúc khởi động";
 "Config" = "Cấu hình";
 "Reload" = "Tải lại";
 "Reveal in Finder" = "Xem trong Finder";
-"Configure for %@..." = "Cấu hình cho %@...";
+"Configure for %@…" = "Cấu hình cho %@…";
 "Quit %@" = "Thoát %@";
 
 "Scrolling" = "Cuộn";
@@ -105,12 +105,12 @@
 "Back" = "Quay Lại";
 "Forward" = "Chuyển tiếp";
 "Execute" = "Execute";
-"Run shell command..." = "Run shell command...";
-"Scroll up..." = "Scroll up...";
-"Scroll down..." = "Scroll down...";
-"Scroll left..." = "Scroll left...";
-"Scroll right..." = "Scroll right...";
-"Keyboard shortcut..." = "Keyboard shortcut...";
+"Run shell command…" = "Run shell command…";
+"Scroll up…" = "Scroll up…";
+"Scroll down…" = "Scroll down…";
+"Scroll left…" = "Scroll left…";
+"Scroll right…" = "Scroll right…";
+"Keyboard shortcut…" = "Keyboard shortcut…";
 
 "Mouse button" = "Nút chuột";
 "Action" = "Hành động";
@@ -128,7 +128,7 @@
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "Nếu được bật, %@ sẽ không sửa đổi các sự kiện được gửi bởi các ứng dụng khác, chẳng hạn như Logi Options+.";
 
 "Reload Config" = "Tải lại cấu hình";
-"Reveal Config in Finder..." = "Tải lại cấu hình trong Finder...";
+"Reveal Config in Finder…" = "Tải lại cấu hình trong Finder…";
 
 "Version: %@" = "Phiên bản: %@";
 "Check for updates automatically" = "Kiểm tra cập nhật tự động";
@@ -138,7 +138,7 @@
 "Monthly" = "Hàng tháng";
 "Receive beta updates" = "Nhận các bản cập nhật thử nghiệm";
 "Thank you for participating in the beta test." = "Cảm ơn bạn đã tham gia phiên bản dùng thử.";
-"Check for Updates..." = "Kiểm tra cập nhật...";
+"Check for Updates…" = "Kiểm tra cập nhật…";
 
 "Enable verbose logging" = "Enable verbose logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Bật tùy chọn này sẽ ghi nhật ký tất cả các sự kiện đầu vào, điều này có thể làm tăng mức sử dụng CPU khi sử dụng %@, nhưng có thể hữu ích cho việc khắc phục sự cố.";

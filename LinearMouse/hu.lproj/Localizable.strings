@@ -3,12 +3,12 @@
 "Get more help" = "Get more help";
 "Open Accessibility" = "Open Accessibility";
 
-"%@ Settings..." = "%@ Settings...";
+"%@ Settings…" = "%@ Settings…";
 "Start at login" = "Start at login";
 "Config" = "Config";
 "Reload" = "Reload";
 "Reveal in Finder" = "Reveal in Finder";
-"Configure for %@..." = "Configure for %@...";
+"Configure for %@…" = "Configure for %@…";
 "Quit %@" = "Quit %@";
 
 "Scrolling" = "Scrolling";
@@ -105,12 +105,12 @@
 "Back" = "Back";
 "Forward" = "Forward";
 "Execute" = "Execute";
-"Run shell command..." = "Run shell command...";
-"Scroll up..." = "Scroll up...";
-"Scroll down..." = "Scroll down...";
-"Scroll left..." = "Scroll left...";
-"Scroll right..." = "Scroll right...";
-"Keyboard shortcut..." = "Keyboard shortcut...";
+"Run shell command…" = "Run shell command…";
+"Scroll up…" = "Scroll up…";
+"Scroll down…" = "Scroll down…";
+"Scroll left…" = "Scroll left…";
+"Scroll right…" = "Scroll right…";
+"Keyboard shortcut…" = "Keyboard shortcut…";
 
 "Mouse button" = "Mouse button";
 "Action" = "Action";
@@ -128,7 +128,7 @@
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "If enabled, %@ will not modify events sent by other applications, such as Logi Options+.";
 
 "Reload Config" = "Reload Config";
-"Reveal Config in Finder..." = "Reveal Config in Finder...";
+"Reveal Config in Finder…" = "Reveal Config in Finder…";
 
 "Version: %@" = "Version: %@";
 "Check for updates automatically" = "Check for updates automatically";
@@ -138,7 +138,7 @@
 "Monthly" = "Havonta";
 "Receive beta updates" = "Receive beta updates";
 "Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
-"Check for Updates..." = "Check for Updates...";
+"Check for Updates…" = "Check for Updates…";
 
 "Enable verbose logging" = "Enable verbose logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting.";

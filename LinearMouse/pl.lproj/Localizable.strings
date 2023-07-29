@@ -3,12 +3,12 @@
 "Get more help" = "Uzyskaj więcej pomocy";
 "Open Accessibility" = "Otwórz Dostępność";
 
-"%@ Settings..." = "Ustawienia %@...";
+"%@ Settings…" = "Ustawienia %@…";
 "Start at login" = "Otwieraj podczas logowania";
 "Config" = "Konfiguracja";
 "Reload" = "Odśwież";
 "Reveal in Finder" = "Pokaż w Finderze";
-"Configure for %@..." = "Konfiguruj dla %@...";
+"Configure for %@…" = "Konfiguruj dla %@…";
 "Quit %@" = "Zamknij %@";
 
 "Scrolling" = "Przewijanie";
@@ -105,12 +105,12 @@
 "Back" = "Wstecz";
 "Forward" = "Dalej";
 "Execute" = "Wykonaj";
-"Run shell command..." = "Uruchom polecenie...";
-"Scroll up..." = "Przewiń w górę...";
-"Scroll down..." = "Przewiń w dół...";
-"Scroll left..." = "Przewiń w lewo...";
-"Scroll right..." = "Przewiń w prawo...";
-"Keyboard shortcut..." = "Skrót klawiszowy...";
+"Run shell command…" = "Uruchom polecenie…";
+"Scroll up…" = "Przewiń w górę…";
+"Scroll down…" = "Przewiń w dół…";
+"Scroll left…" = "Przewiń w lewo…";
+"Scroll right…" = "Przewiń w prawo…";
+"Keyboard shortcut…" = "Skrót klawiszowy…";
 
 "Mouse button" = "Przycisk myszy";
 "Action" = "Akcja";
@@ -128,7 +128,7 @@
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "Jeżeli włączone, %@ nie będzie modyfikował zdarzeń wysłanych przez inne aplikacje, takich jak Logi Options+.";
 
 "Reload Config" = "Odśwież konfigurację";
-"Reveal Config in Finder..." = "Pokaż konfigurację w Finderze...";
+"Reveal Config in Finder…" = "Pokaż konfigurację w Finderze…";
 
 "Version: %@" = "Wersja: %@";
 "Check for updates automatically" = "Sprawdzaj aktualizacje automatyczne";
@@ -138,7 +138,7 @@
 "Monthly" = "Co miesiąc";
 "Receive beta updates" = "Otrzymuj aktualizacje beta";
 "Thank you for participating in the beta test." = "Dziękujemy za uczestniczenie w beta testach.";
-"Check for Updates..." = "Sprawdź aktualizacje...";
+"Check for Updates…" = "Sprawdź aktualizacje…";
 
 "Enable verbose logging" = "Włącz szczegółowe logowanie";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Włączenie tej opcji spowoduje rejestrowanie wszystkich zdarzeń wejściowych, co może zwiększyć użycie procesora podczas używania %@, ale może być użyteczne przy rozwiązywaniu problemów.";

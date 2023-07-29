@@ -3,12 +3,12 @@
 "Get more help" = "Daha fazla yardım";
 "Open Accessibility" = "Erişilebilirliği Aç";
 
-"%@ Settings..." = "%@ Ayarları...";
+"%@ Settings…" = "%@ Ayarları…";
 "Start at login" = "Başlangıçta çalıştır";
 "Config" = "Ayarlar";
 "Reload" = "Yenile";
 "Reveal in Finder" = "Finder'da göster";
-"Configure for %@..." = "%@ için ayarla...";
+"Configure for %@…" = "%@ için ayarla…";
 "Quit %@" = "%@ 'dan çık";
 
 "Scrolling" = "Kaydırma";
@@ -105,12 +105,12 @@
 "Back" = "Geri";
 "Forward" = "İleri";
 "Execute" = "Execute";
-"Run shell command..." = "Run shell command...";
-"Scroll up..." = "Scroll up...";
-"Scroll down..." = "Scroll down...";
-"Scroll left..." = "Scroll left...";
-"Scroll right..." = "Scroll right...";
-"Keyboard shortcut..." = "Keyboard shortcut...";
+"Run shell command…" = "Run shell command…";
+"Scroll up…" = "Scroll up…";
+"Scroll down…" = "Scroll down…";
+"Scroll left…" = "Scroll left…";
+"Scroll right…" = "Scroll right…";
+"Keyboard shortcut…" = "Keyboard shortcut…";
 
 "Mouse button" = "Fare düğmesi";
 "Action" = "Eylem";
@@ -128,7 +128,7 @@
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "Etkinleştirilirse, %@, Logi Options+ gibi diğer uygulamalar tarafından gönderilen olayları değiştirmeyecektir.";
 
 "Reload Config" = "Konfigürasyonu yeniden yükle";
-"Reveal Config in Finder..." = "Konfigürasyon dosyasını Finder ile aç...";
+"Reveal Config in Finder…" = "Konfigürasyon dosyasını Finder ile aç…";
 
 "Version: %@" = "Sürüm: %@";
 "Check for updates automatically" = "Güncellemeleri otomatik kontrol et";
@@ -138,7 +138,7 @@
 "Monthly" = "Aylık";
 "Receive beta updates" = "Beta güncellemeleri al";
 "Thank you for participating in the beta test." = "Beta testine katıldığınız için teşekkürler.";
-"Check for Updates..." = "Güncellemeleri kontrol et...";
+"Check for Updates…" = "Güncellemeleri kontrol et…";
 
 "Enable verbose logging" = "Enable verbose logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Bu seçeneğin etkinleştirilmesi, %@ kullanılırken CPU kullanımını arttırabilir, ancak sorun giderme için faydalı olabilecek tüm giriş olaylarını loglara kaydedecektir.";

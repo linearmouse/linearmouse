@@ -1,14 +1,14 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse skal bruge adgang til Tilgængelighed";
-"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "Du skal give tilladelse til Tilgængelighed i Systemindstillinger... > Anonymitet & sikkerhed > Tilgængelighed.";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "Du skal give tilladelse til Tilgængelighed i Systemindstillinger… > Anonymitet & sikkerhed > Tilgængelighed.";
 "Get more help" = "Få mere hjælp";
 "Open Accessibility" = "Åbn Tilgængelighed";
 
-"%@ Settings..." = "%@ Indstillinger...";
+"%@ Settings…" = "%@ Indstillinger…";
 "Start at login" = "Start ved login";
 "Config" = "Konfiguration";
 "Reload" = "Genindlæs";
 "Reveal in Finder" = "Vis i Finder";
-"Configure for %@..." = "Indstil for %@...";
+"Configure for %@…" = "Indstil for %@…";
 "Quit %@" = "Afslut %@";
 
 "Scrolling" = "Rulning";
@@ -105,12 +105,12 @@
 "Back" = "Tilbage";
 "Forward" = "Frem";
 "Execute" = "Execute";
-"Run shell command..." = "Run shell command...";
-"Scroll up..." = "Scroll up...";
-"Scroll down..." = "Scroll down...";
-"Scroll left..." = "Scroll left...";
-"Scroll right..." = "Scroll right...";
-"Keyboard shortcut..." = "Keyboard shortcut...";
+"Run shell command…" = "Run shell command…";
+"Scroll up…" = "Scroll up…";
+"Scroll down…" = "Scroll down…";
+"Scroll left…" = "Scroll left…";
+"Scroll right…" = "Scroll right…";
+"Keyboard shortcut…" = "Keyboard shortcut…";
 
 "Mouse button" = "Museknap";
 "Action" = "Handling";
@@ -128,7 +128,7 @@
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "Hvis aktiveret, vil %@ ikke ændre begivenheder sendt af andre programmer, såsom Logi Options+.";
 
 "Reload Config" = "Genindlæs konfiguration";
-"Reveal Config in Finder..." = "Vis konfiguration i Finder...";
+"Reveal Config in Finder…" = "Vis konfiguration i Finder…";
 
 "Version: %@" = "Version: %@";
 "Check for updates automatically" = "Søg automatisk efter opdateringer";
@@ -138,7 +138,7 @@
 "Monthly" = "Månedligt";
 "Receive beta updates" = "Modtag betaopdateringer";
 "Thank you for participating in the beta test." = "Tak fordi du deltager i betatesten.";
-"Check for Updates..." = "Søg efter Opdateringer...";
+"Check for Updates…" = "Søg efter Opdateringer…";
 
 "Enable verbose logging" = "Enable verbose logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Aktivering af denne indstilling vil logge alle input-begivenheder, hvilket kan øge CPU-forbruget mens du bruger %@, men kan være nyttigt til fejlfinding.";

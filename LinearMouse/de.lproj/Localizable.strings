@@ -3,12 +3,12 @@
 "Get more help" = "Weitere Hilfe erhalten";
 "Open Accessibility" = "Öffne Bedienungshilfen";
 
-"%@ Settings..." = "%@ Einstellungen...";
+"%@ Settings…" = "%@ Einstellungen…";
 "Start at login" = "Bei der Anmeldung starten";
 "Config" = "Konfigurationsdatei";
 "Reload" = "Neu laden";
 "Reveal in Finder" = "Im Finder anzeigen";
-"Configure for %@..." = "Konfiguriere für %@...";
+"Configure for %@…" = "Konfiguriere für %@…";
 "Quit %@" = "%@ beenden";
 
 "Scrolling" = "Scrollen";
@@ -105,12 +105,12 @@
 "Back" = "Zurück";
 "Forward" = "Vor";
 "Execute" = "Ausführen";
-"Run shell command..." = "Shell-Befehl ausführen...";
-"Scroll up..." = "Nach oben scrollen...";
-"Scroll down..." = "Nach unten scrollen...";
-"Scroll left..." = "Nach links scrollen...";
-"Scroll right..." = "Nach rechts scrollen...";
-"Keyboard shortcut..." = "Tastenkürzel...";
+"Run shell command…" = "Shell-Befehl ausführen…";
+"Scroll up…" = "Nach oben scrollen…";
+"Scroll down…" = "Nach unten scrollen…";
+"Scroll left…" = "Nach links scrollen…";
+"Scroll right…" = "Nach rechts scrollen…";
+"Keyboard shortcut…" = "Tastenkürzel…";
 
 "Mouse button" = "Maustaste";
 "Action" = "Aktion";
@@ -128,7 +128,7 @@
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "Wenn aktiviert, verändert %@ keine Ereignisse, die von anderen Anwendungen, wie z. B. Logi Options+, gesendet werden.";
 
 "Reload Config" = "Konfigurationsdatei neu laden";
-"Reveal Config in Finder..." = "Konfigurationsdatei im Finder anzeigen...";
+"Reveal Config in Finder…" = "Konfigurationsdatei im Finder anzeigen…";
 
 "Version: %@" = "Version: %@";
 "Check for updates automatically" = "Automatisch nach Aktualisierungen suchen";
@@ -138,7 +138,7 @@
 "Monthly" = "Monatlich";
 "Receive beta updates" = "Beta-Updates erhalten";
 "Thank you for participating in the beta test." = "Vielen Dank für die Teilnahme am Betatest.";
-"Check for Updates..." = "Nach Updates suchen...";
+"Check for Updates…" = "Nach Updates suchen…";
 
 "Enable verbose logging" = "Ausführliche Protokollierung aktivieren";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Wenn diese Option aktiviert ist, werden alle Eingabeereignisse protokolliert, was die CPU-Auslastung während der Verwendung von %@ erhöhen kann, jedoch bei der Fehlersuche nützlich sein kann.";

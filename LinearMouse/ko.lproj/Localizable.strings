@@ -3,12 +3,12 @@
 "Get more help" = "도움이 필요하신가요?";
 "Open Accessibility" = "손쉬운 사용 열기";
 
-"%@ Settings..." = "%@ 설정...";
+"%@ Settings…" = "%@ 설정…";
 "Start at login" = "로그인 시 시작";
 "Config" = "설정";
 "Reload" = "재설정";
 "Reveal in Finder" = "Finder에서 열기";
-"Configure for %@..." = "%@에 대해 설정...";
+"Configure for %@…" = "%@에 대해 설정…";
 "Quit %@" = "%@ 종료";
 
 "Scrolling" = "스크롤";
@@ -105,12 +105,12 @@
 "Back" = "뒤로가기";
 "Forward" = "앞으로 가기";
 "Execute" = "Execute";
-"Run shell command..." = "Run shell command...";
-"Scroll up..." = "Scroll up...";
-"Scroll down..." = "Scroll down...";
-"Scroll left..." = "Scroll left...";
-"Scroll right..." = "Scroll right...";
-"Keyboard shortcut..." = "Keyboard shortcut...";
+"Run shell command…" = "Run shell command…";
+"Scroll up…" = "Scroll up…";
+"Scroll down…" = "Scroll down…";
+"Scroll left…" = "Scroll left…";
+"Scroll right…" = "Scroll right…";
+"Keyboard shortcut…" = "Keyboard shortcut…";
 
 "Mouse button" = "마우스 버튼";
 "Action" = "동작";
@@ -128,7 +128,7 @@
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "활성화되면, %@는 Logi Options+와 같은 다른 응용 프로그램에서 보낸 이벤트를 수정하지 않습니다.";
 
 "Reload Config" = "Reload Config";
-"Reveal Config in Finder..." = "Reveal Config in Finder...";
+"Reveal Config in Finder…" = "Reveal Config in Finder…";
 
 "Version: %@" = "버전: %@";
 "Check for updates automatically" = "자동으로 업데이트 확인";
@@ -138,7 +138,7 @@
 "Monthly" = "매달";
 "Receive beta updates" = "베타 업데이트 받기";
 "Thank you for participating in the beta test." = "베타 테스트에 참여해 주셔서 감사합니다.";
-"Check for Updates..." = "업데이트 확인...";
+"Check for Updates…" = "업데이트 확인…";
 
 "Enable verbose logging" = "Enable verbose logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "이 옵션을 활성화하면 모든 입력 이벤트가 기록되며, 이는 %@를 사용하는 동안 CPU 사용량을 증가시킬 수 있지만 문제 해결에 유용할 수 있습니다.";
@@ -157,7 +157,7 @@
 "Trackpad" = "트랙패드";
 "(active)" = "(활성화됨)";
 
-"Configure for" = "에 대해 설정...";
+"Configure for" = "에 대해 설정…";
 "All Apps" = "모든 앱";
 "Configured" = "설정됨";
 "Running" = "실행 중";

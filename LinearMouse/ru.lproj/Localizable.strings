@@ -3,12 +3,12 @@
 "Get more help" = "Получить помощь";
 "Open Accessibility" = "Открыть Универсальный доступ";
 
-"%@ Settings..." = "Настройки %@...";
+"%@ Settings…" = "Настройки %@…";
 "Start at login" = "Запуск при входе";
 "Config" = "Конфигурация";
 "Reload" = "Обновить";
 "Reveal in Finder" = "Показать в Finder";
-"Configure for %@..." = "Настроить для %@...";
+"Configure for %@…" = "Настроить для %@…";
 "Quit %@" = "Завершить %@";
 
 "Scrolling" = "Прокрутка";
@@ -105,12 +105,12 @@
 "Back" = "Назад";
 "Forward" = "Вперёд";
 "Execute" = "Execute";
-"Run shell command..." = "Run shell command...";
-"Scroll up..." = "Scroll up...";
-"Scroll down..." = "Scroll down...";
-"Scroll left..." = "Scroll left...";
-"Scroll right..." = "Scroll right...";
-"Keyboard shortcut..." = "Keyboard shortcut...";
+"Run shell command…" = "Run shell command…";
+"Scroll up…" = "Scroll up…";
+"Scroll down…" = "Scroll down…";
+"Scroll left…" = "Scroll left…";
+"Scroll right…" = "Scroll right…";
+"Keyboard shortcut…" = "Keyboard shortcut…";
 
 "Mouse button" = "Кнопка мыши";
 "Action" = "Действие";
@@ -128,7 +128,7 @@
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "Если включено, %@ не будет изменять события, отправленные другими приложениями, такими как Logi Options+.";
 
 "Reload Config" = "Перезагрузить конфигурацию";
-"Reveal Config in Finder..." = "Показать конфигурацию в Finder...";
+"Reveal Config in Finder…" = "Показать конфигурацию в Finder…";
 
 "Version: %@" = "Версия: %@";
 "Check for updates automatically" = "Автоматически проверять наличие обновлений";
@@ -138,7 +138,7 @@
 "Monthly" = "Ежемесячно";
 "Receive beta updates" = "Получать бета-обновления";
 "Thank you for participating in the beta test." = "Благодарим Вас за участие в бета-тестировании.";
-"Check for Updates..." = "Проверить наличие обновлений...";
+"Check for Updates…" = "Проверить наличие обновлений…";
 
 "Enable verbose logging" = "Enable verbose logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Включение этой опции влияет на запись в журнал всех входящих событий, что может увеличить нагрузку на ЦП при использовании %@, но будет полезно для поиска неполадок.";
