@@ -102,7 +102,7 @@ struct KeyboardShortcutRecorder: View {
         if modifierFlags.contains(.maskCommand) {
             keys
                 .append(modifierFlags
-                    .contains(.init(rawValue: UInt64(NX_DEVICERCMDKEYMASK))) ? .command : .commandRight)
+                    .contains(.init(rawValue: UInt64(NX_DEVICERCMDKEYMASK))) ? .commandRight : .command)
         }
 
         return keys
