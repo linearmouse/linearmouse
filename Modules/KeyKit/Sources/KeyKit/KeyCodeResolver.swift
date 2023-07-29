@@ -48,6 +48,9 @@ public class KeyCodeResolver {
             guard let characters = nsEvent.characters, characters.count == 1 else {
                 continue
             }
+            guard newMapping[characters] == nil else {
+                continue
+            }
             newMapping[characters] = keyCode
         }
 
@@ -57,7 +60,6 @@ public class KeyCodeResolver {
         newMapping[Key.delete.rawValue] = 0x33
         newMapping[Key.escape.rawValue] = 0x35
         newMapping[Key.command.rawValue] = 0x37
-        newMapping[Key.commandRight.rawValue] = 0x37
         newMapping[Key.shift.rawValue] = 0x38
         newMapping[Key.capsLock.rawValue] = 0x39
         newMapping[Key.option.rawValue] = 0x3A
@@ -86,12 +88,16 @@ public class KeyCodeResolver {
         newMapping[Key.f10.rawValue] = 0x6D
         newMapping[Key.f11.rawValue] = 0x67
         newMapping[Key.f12.rawValue] = 0x6F
-
         for (keyString, keyCode) in newMapping {
-            if let key = Key(rawValue: keyString) {
-                newReversedMapping[keyCode] = key
+            guard let key = Key(rawValue: keyString) else {
+                continue
             }
+            newReversedMapping[keyCode] = key
         }
+        // As the keyCode of command and the keyCode of commandRight
+        // are the same, avoid inserting commandRight into the reversed
+        // mapping.
+        newMapping[Key.commandRight.rawValue] = 0x37
 
         mapping = newMapping
         reversedMapping = newReversedMapping
