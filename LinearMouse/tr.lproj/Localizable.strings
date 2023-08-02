@@ -26,7 +26,7 @@
 "By Pixels" = "Piksele göre";
 "Scrolling acceleration" = "Kaydırma ivmesi";
 "Linear" = "Doğrusal";
-"Scrolling speed" = "Scrolling speed";
+"Scrolling speed" = "Kaydırma hızı";
 "Slow" = "Yavaş";
 "Fast" = "Hızlı";
 "Distance" = "Mesafe";
@@ -35,7 +35,7 @@
 "Copy settings from vertical" = "Ayarları \"Dikey\" kategorisinden kopyala";
 "Modifier Keys" = "Değiştirici tuşlar";
 "Default action" = "Varsayılan Eylem";
-"Ignore modifier" = "Ignore modifier";
+"Ignore modifier" = "Nitelemeyi yoksay";
 "No action" = "Eylem yok";
 "Alter orientation" = "Yönlendirmeyi değiştir";
 "Change speed" = "Hızı değiştir";
@@ -106,11 +106,11 @@
 "Forward" = "İleri";
 "Execute" = "Execute";
 "Run shell command…" = "Run shell command…";
-"Scroll up…" = "Scroll up…";
+"Scroll up…" = "Yukarı kaydır…";
 "Scroll down…" = "Scroll down…";
 "Scroll left…" = "Scroll left…";
 "Scroll right…" = "Scroll right…";
-"Keyboard shortcut…" = "Keyboard shortcut…";
+"Keyboard shortcut…" = "Klavye kestirmesi…";
 
 "Mouse button" = "Fare düğmesi";
 "Action" = "Eylem";
