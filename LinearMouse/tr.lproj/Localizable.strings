@@ -1,5 +1,5 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse erişim iznine ihtiyaç duyuyor";
-"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "Sistem Ayarları > Güvenlik & Gizlilik > Erişilebilirlik üzerinden Erişilebilirlik izni vermeniz gerekiyor.";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "Sistem Ayarları > Gizlilik & Güvenlik > Erişilebilirlik üzerinden Erişilebilirlik izni vermeniz gerekiyor.";
 "Get more help" = "Daha fazla yardım";
 "Open Accessibility" = "Erişilebilirliği Aç";
 
@@ -9,7 +9,7 @@
 "Reload" = "Yenile";
 "Reveal in Finder" = "Finder'da göster";
 "Configure for %@…" = "%@ için ayarla…";
-"Quit %@" = "%@ 'dan çık";
+"Quit %@" = "%@'tan çık";
 
 "Scrolling" = "Kaydırma";
 "Pointer" = "İşaretçi";
@@ -19,8 +19,8 @@
 "Vertical" = "Dikey";
 "Horizontal" = "Yatay";
 "Reverse scrolling" = "Ters kaydırma";
-"Some gestures, such as swiping back and forward, may stop working." = "İleri ve geri kaydırma gibi bazı hareketler çalışmayabilir.";
-"Scrolling mode" = "Kaydırma Biçimi";
+"Some gestures, such as swiping back and forward, may stop working." = "İleri ve geri kaydırma gibi bazı hareketler çalışmayı durdurabilir.";
+"Scrolling mode" = "Kaydırma modu";
 "Accelerated" = "İvmeli";
 "By Lines" = "Satıra göre";
 "By Pixels" = "Piksele göre";
@@ -33,9 +33,9 @@
 "Scrolling is disabled based on the current settings." = "Mevcut ayarlara göre kaydırma devre dışı.";
 "Revert to system defaults" = "Fabrika ayarlarına dön";
 "Copy settings from vertical" = "Ayarları \"Dikey\" kategorisinden kopyala";
-"Modifier Keys" = "Değiştirici tuşlar";
-"Default action" = "Varsayılan Eylem";
-"Ignore modifier" = "Nitelemeyi yoksay";
+"Modifier Keys" = "Niteleme Tuşları";
+"Default action" = "Varsayılan eylem";
+"Ignore modifier" = "Nitelemeyi yok say";
 "No action" = "Eylem yok";
 "Alter orientation" = "Yönlendirmeyi değiştir";
 "Change speed" = "Hızı değiştir";
@@ -48,8 +48,8 @@
 
 "Enable universal back and forward" = "Evrensel ileri ve geriyi etkinleştir";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Evrensel ileri ve geri işlevine izin vermek için ileri ve geri yan düğmelerini kaydırma hareketlerine dönüştürün.";
-"Debounce button clicks" = "Ardışık düğme tıklamalarını yoksay";
-"Ignore rapid clicks within a certain time period." = "Belli bir süre içerisindeki ardışık klikleri yoksay.";
+"Debounce button clicks" = "Buton arkını engelle";
+"Ignore rapid clicks within a certain time period." = "Belli bir süre içindeki hızlı tıklamaları yok say.";
 "ms" = "ms";
 "Reset timer on mouse up" = "Fare düğmesi bırakıldığında zamanlayıcıyı sıfırla";
 "Left button" = "Sol düğme";
@@ -59,12 +59,12 @@
 "Assign actions to mouse buttons" = "Fare düğmelerine eylem ata";
 "Edit" = "Düzenle";
 
-"Run: %@" = "Run: %@";
-"Scroll up %@" = "Scroll up %@";
-"Scroll down %@" = "Scroll down %@";
-"Scroll left %@" = "Scroll left %@";
-"Scroll right %@" = "Scroll right %@";
-"Keyboard shortcut: %@" = "Keyboard shortcut: %@";
+"Run: %@" = "Çalıştır: %@";
+"Scroll up %@" = "Yukarı kaydır %@";
+"Scroll down %@" = "Aşağı kaydır %@";
+"Scroll left %@" = "Sola kaydır %@";
+"Scroll right %@" = "Sağa kaydır %@";
+"Keyboard shortcut: %@" = "Klavye kestirmesi: %@";
 
 "Click to record" = "Kaydetmek için tıklayın";
 "Recording" = "Kaydediliyor";
@@ -104,12 +104,12 @@
 "Mouse Button" = "Fare Düğmesi";
 "Back" = "Geri";
 "Forward" = "İleri";
-"Execute" = "Execute";
-"Run shell command…" = "Run shell command…";
+"Execute" = "Yürütme";
+"Run shell command…" = "Kabuk komutunu çalıştır…";
 "Scroll up…" = "Yukarı kaydır…";
-"Scroll down…" = "Scroll down…";
-"Scroll left…" = "Scroll left…";
-"Scroll right…" = "Scroll right…";
+"Scroll down…" = "Aşağı kaydır…";
+"Scroll left…" = "Sola kaydır…";
+"Scroll right…" = "Sağa kaydır…";
 "Keyboard shortcut…" = "Klavye kestirmesi…";
 
 "Mouse button" = "Fare düğmesi";
@@ -140,7 +140,7 @@
 "Thank you for participating in the beta test." = "Beta testine katıldığınız için teşekkürler.";
 "Check for Updates…" = "Güncellemeleri kontrol et…";
 
-"Enable verbose logging" = "Enable verbose logging";
+"Enable verbose logging" = "Ayrıntılı günlük kaydını etkinleştir";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Bu seçeneğin etkinleştirilmesi, %@ kullanılırken CPU kullanımını arttırabilir, ancak sorun giderme için faydalı olabilecek tüm giriş olaylarını loglara kaydedecektir.";
 "Export the logs for the last 5 minutes." = "Son 5 dakikanın loglarını dışa aktar.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "Bir hatayı bildiriyorsanız, logları eklemeniz yararlı olacaktır.";
@@ -154,11 +154,11 @@
 "Auto switch to the active device" = "Otomatik olarak aktif cihaza değiştir";
 
 "Mouse" = "Fare";
-"Trackpad" = "Dokunmatik yüzey";
+"Trackpad" = "İzleme Dörtgeni";
 "(active)" = "(aktif)";
 
 "Configure for" = "Yapılandır";
-"All Apps" = "Tüm uygulamalar";
+"All Apps" = "Tüm Uygulamalar";
 "Configured" = "Yapılandırılmış";
 "Running" = "Çalışan";
 "Installed" = "Kurulu";
