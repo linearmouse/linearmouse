@@ -78,8 +78,8 @@
 "Scroll right" = "Défiler vers la droite";
 
 "Mission Control" = "Mission Control";
-"Move left a space" = "Déplacer vers la gauche un espace";
-"Move right a space" = "Déplacer vers la gauche un espace";
+"Move left a space" = "Déplacer vers la gauche d'un espace";
+"Move right a space" = "Déplacer vers la droite d'un espace";
 "Application windows" = "Fenêtre d'application";
 "Launchpad" = "Launchpad";
 "Show desktop" = "Montrer le bureau";
