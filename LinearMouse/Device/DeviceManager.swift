@@ -32,7 +32,12 @@ class DeviceManager: ObservableObject {
             self?.eventReceived($0, $1, $2)
         }).tieToLifetime(of: self)
 
-        for property in [kIOHIDMouseAccelerationType, kIOHIDTrackpadAccelerationType, kIOHIDPointerResolutionKey] {
+        for property in [
+            kIOHIDMouseAccelerationType,
+            kIOHIDTrackpadAccelerationType,
+            kIOHIDPointerResolutionKey,
+            "HIDUseLinearScalingMouseAcceleration"
+        ] {
             manager.observePropertyChanged(property: property) { [self] _ in
                 os_log("Property %{public}@ changed", log: Self.log, type: .info, property)
                 updatePointerSpeed()
