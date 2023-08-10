@@ -149,14 +149,14 @@ public extension PointerDevice {
         }
     }
 
-    var useLinearScalingMouseAcceleration: Bool? {
+    var useLinearScalingMouseAcceleration: Int? {
         get {
             // TODO: Use `kIOHIDUseLinearScalingMouseAccelerationKey`.
-            client.getProperty("IOHIDUseLinearScalingMouseAcceleration")
+            client.getProperty("HIDUseLinearScalingMouseAcceleration")
         }
         set {
             // TODO: Use `kIOHIDUseLinearScalingMouseAccelerationKey`.
-            client.setProperty(newValue, forKey: "IOHIDUseLinearScalingMouseAcceleration")
+            client.setProperty(newValue, forKey: "HIDUseLinearScalingMouseAcceleration")
         }
     }
 
@@ -167,7 +167,7 @@ public extension PointerDevice {
      */
     var pointerAcceleration: Double? {
         get {
-            if useLinearScalingMouseAcceleration == true {
+            if useLinearScalingMouseAcceleration == 1 {
                 return -1
             }
             return client.getPropertyIOFixed(pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey)
@@ -175,7 +175,7 @@ public extension PointerDevice {
 
         set {
             if useLinearScalingMouseAcceleration != nil, let value = newValue {
-                useLinearScalingMouseAcceleration = value == -1 ? true : false
+                useLinearScalingMouseAcceleration = value == -1 ? 1 : 0
                 if value == -1 {
                     return
                 }

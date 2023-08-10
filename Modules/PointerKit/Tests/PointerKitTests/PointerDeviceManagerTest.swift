@@ -1,6 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2023 LinearMouse
 
+import ObservationToken
 @testable import PointerKit
 import XCTest
 
@@ -63,6 +64,7 @@ class PointerDeviceManagerTest: XCTestCase {
                 print("Pointer resolution:", device.pointerResolution ?? "(nil)")
                 print("Pointer acceleration type:", device.pointerAccelerationType ?? "(nil)")
                 print("Pointer acceleration:", device.pointerAcceleration ?? "(nil)")
+                print("Use linear scaling mouse acceleration:", device.useLinearScalingMouseAcceleration ?? "(nil)")
                 print("==========================")
             }
         }
