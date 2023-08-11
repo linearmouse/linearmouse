@@ -188,11 +188,30 @@ class DeviceManager: ObservableObject {
         let scheme = ConfigurationState.shared.configuration.matchScheme(withDevice: device,
                                                                          withPid: frontmostApp?.processIdentifier)
 
-        if let pointerDisableAcceleration = scheme.pointer.disableAcceleration {
-            if pointerDisableAcceleration {
+        if let pointerDisableAcceleration = scheme.pointer.disableAcceleration, pointerDisableAcceleration {
+            // If the pointer acceleration is turned off, it is preferable to utilize
+            // the new API introduced by macOS Sonoma.
+            // Otherwise, set pointer acceleration to -1.
+            if device.disablePointerAcceleration != nil {
+                device.disablePointerAcceleration = true
+
+                // This might be a bit confusing because of the historical naming
+                // convention, but here, the pointerAcceleration actually refers to
+                // the tracking speed.
+                if let pointerAcceleration = scheme.pointer.acceleration {
+                    device.pointerAcceleration = pointerAcceleration.asTruncatedDouble
+                } else {
+                    device.restorePointerAcceleration()
+                }
+            } else {
                 device.pointerAcceleration = -1
-                return
             }
+
+            return
+        }
+
+        if device.disablePointerAcceleration != nil {
+            device.disablePointerAcceleration = false
         }
 
         if let pointerSpeed = scheme.pointer.speed {

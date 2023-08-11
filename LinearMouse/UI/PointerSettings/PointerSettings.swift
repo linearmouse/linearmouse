@@ -70,6 +70,32 @@ struct PointerSettings: View {
                                 revertPointerSpeed()
                             }
                         }
+                    } else if #available(macOS 14, *) {
+                        HStack(alignment: .firstTextBaseline) {
+                            Slider(value: $state.pointerAcceleration,
+                                   in: 0.0 ... 20.0) {
+                                labelWithDescription {
+                                    Text("Tracking speed")
+                                    Text("(0–20)")
+                                }
+                            }
+                            TextField("",
+                                      value: $state.pointerAcceleration,
+                                      formatter: state.pointerAccelerationFormatter)
+                                .labelsHidden()
+                                .textFieldStyle(.roundedBorder)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 80)
+                        }
+
+                        Button("Revert to system defaults") {
+                            revertPointerSpeed()
+                        }
+                        .keyboardShortcut("z", modifiers: [.control, .command, .shift])
+
+                        Text("You may also press ⌃⇧⌘Z to revert to system defaults.")
+                            .controlSize(.small)
+                            .foregroundColor(.secondary)
                     }
                 }
                 .modifier(SectionViewModifier())

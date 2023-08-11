@@ -94,6 +94,22 @@ extension Device {
         return .mouse
     }
 
+    /**
+     This feature was introduced in macOS Sonoma. In the earlier versions of
+     macOS, this value would be nil.
+     */
+    var disablePointerAcceleration: Bool? {
+        get {
+            device.useLinearScalingMouseAcceleration.map { $0 != 0 }
+        }
+        set {
+            guard device.useLinearScalingMouseAcceleration != nil, let newValue = newValue else {
+                return
+            }
+            device.useLinearScalingMouseAcceleration = newValue ? 1 : 0
+        }
+    }
+
     var pointerAcceleration: Double {
         get {
             device.pointerAcceleration ?? Self.fallbackPointerAcceleration
