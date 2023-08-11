@@ -39,9 +39,17 @@ class Device {
             self?.inputValueCallback($0, $1)
         })
 
-        reportObservationToken = device.observeReport(using: { [weak self] in
-            self?.inputReportCallback($0, $1)
-        })
+        // Some bluetooth devices, such as Mi Dual Mode Wireless Mouse Silent Edition, report only
+        // 3 buttons in the HID report descriptor. As a result, macOS does not recognize side button
+        // clicks from these devices.
+        //
+        // To work around this issue, we subscribe to the input reports and monitor the side button
+        // states. When the side buttons are clicked, we simulate those events.
+        if buttonCount == 3 {
+            reportObservationToken = device.observeReport(using: { [weak self] in
+                self?.inputReportCallback($0, $1)
+            })
+        }
 
         os_log("Device initialized: %{public}@: HIDPointerResolution=%{public}f, HIDPointerAccelerationType=%{public}@",
                log: Self.log, type: .info,
@@ -238,13 +246,7 @@ extension Device {
                    String(describing: device), String(describing: reportHex))
         }
 
-        // Some bluetooth devices, such as Mi Dual Mode Wireless Mouse Silent Edition, report only
-        // 3 buttons in the HID report descriptor. As a result, macOS does not recognize side button
-        // clicks from these devices.
-        //
-        // To work around this issue, we subscribe to the input reports and monitor the side button
-        // states. When the side buttons are clicked, we simulate those events.
-        guard let buttonCount = device.buttonCount, buttonCount == 3, report.count >= 2 else {
+        guard report.count >= 2 else {
             return
         }
         // | Button 0 (1 bit) | ... | Button 4 (1 bit) | Not Used (3 bits) |

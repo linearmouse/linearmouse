@@ -12,6 +12,8 @@ public class PointerDevice {
     public typealias InputValueClosure = (PointerDevice, IOHIDValue) -> Void
     public typealias InputReportClosure = (PointerDevice, Data) -> Void
 
+    private var inputReportCallbackRegistered = false
+
     private var observations = (
         inputValue: [UUID: InputValueClosure](),
         inputReport: [UUID: InputReportClosure](),
@@ -45,9 +47,6 @@ public class PointerDevice {
             IOHIDDeviceSetInputValueMatching(device, nil)
             let this = Unmanaged.passUnretained(self).toOpaque()
             IOHIDDeviceRegisterInputValueCallback(device, Self.inputValueCallback, this)
-            let reportLength = 8
-            let report = UnsafeMutablePointer<UInt8>.allocate(capacity: reportLength)
-            IOHIDDeviceRegisterInputReportCallback(device, report, reportLength, Self.inputReportCallback, this)
             IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
         }
     }
@@ -227,6 +226,16 @@ extension PointerDevice {
     }
 
     public func observeReport(using closure: @escaping InputReportClosure) -> ObservationToken {
+        if !inputReportCallbackRegistered {
+            if let device = device {
+                let reportLength = 8
+                let report = UnsafeMutablePointer<UInt8>.allocate(capacity: reportLength)
+                let this = Unmanaged.passUnretained(self).toOpaque()
+                IOHIDDeviceRegisterInputReportCallback(device, report, reportLength, Self.inputReportCallback, this)
+            }
+            inputReportCallbackRegistered = true
+        }
+
         let id = observations.inputReport.insert(closure)
 
         return ObservationToken { [weak self] in
