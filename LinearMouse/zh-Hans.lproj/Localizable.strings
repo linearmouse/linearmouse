@@ -44,6 +44,7 @@
 "Disable pointer acceleration" = "禁用指针加速度";
 "Pointer acceleration" = "指针加速度";
 "Pointer speed" = "指针速度";
+"Tracking speed" = "跟踪速度";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "你也可以按下 ⌃⇧⌘Z 来回退到系统默认值。";
 
 "Enable universal back and forward" = "启用全局后退、前进";

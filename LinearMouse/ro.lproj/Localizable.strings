@@ -44,6 +44,7 @@
 "Disable pointer acceleration" = "Dezactivează accelerația cursorului";
 "Pointer acceleration" = "Pointer acceleration";
 "Pointer speed" = "Pointer speed";
+"Tracking speed" = "Tracking speed";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Puteți, de asemenea, să apăsați ⌃⇧⌘Z pentru a reveni la valorile implicite ale sistemului.";
 
 "Enable universal back and forward" = "Activați funcția universală înapoi și înainte";

@@ -44,6 +44,7 @@
 "Disable pointer acceleration" = "Tắt tăng tốc con trỏ";
 "Pointer acceleration" = "Tăng tốc con trỏ";
 "Pointer speed" = "Tốc độ con trỏ";
+"Tracking speed" = "Tracking speed";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Bạn có thể ấn ⌃⇧⌘Z để khôi phục hệ thống mặc định.";
 
 "Enable universal back and forward" = "Sử dụng nút quay lại và chuyển tiếp chung";
