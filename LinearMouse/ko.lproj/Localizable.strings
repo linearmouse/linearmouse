@@ -44,6 +44,7 @@
 "Disable pointer acceleration" = "포인터 가속 비활성화";
 "Pointer acceleration" = "포인터 가속";
 "Pointer speed" = "포인터 속도";
+"Tracking speed" = "Tracking speed";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z를 눌러 시스템 기본값으로 되돌릴 수도 있습니다.";
 
 "Enable universal back and forward" = "범용 뒤로/앞으로 가기 활성화";
