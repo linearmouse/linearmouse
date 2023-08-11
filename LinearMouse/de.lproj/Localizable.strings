@@ -44,6 +44,7 @@
 "Disable pointer acceleration" = "Zeigerbeschleunigung deaktivieren";
 "Pointer acceleration" = "Zeigerbeschleunigung";
 "Pointer speed" = "Zeigergeschwindigkeit";
+"Tracking speed" = "Tracking speed";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Durch Drücken des Kürzels ⌃⇧⌘Z kann ebenfalls zu den Systemstandards zurückgekehrt werden.";
 
 "Enable universal back and forward" = "Universelles Vor und Zurück aktivieren";
