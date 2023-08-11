@@ -44,6 +44,7 @@
 "Disable pointer acceleration" = "İşaretçi ivmesini devre dışı bırak";
 "Pointer acceleration" = "İmleç ivmesi";
 "Pointer speed" = "İmleç hızı";
+"Tracking speed" = "Tracking speed";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z'a basarak da fabrika ayarlarına dönebilirsiniz.";
 
 "Enable universal back and forward" = "Evrensel ileri ve geriyi etkinleştir";
