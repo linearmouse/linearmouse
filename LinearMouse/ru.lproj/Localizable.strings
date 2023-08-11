@@ -44,6 +44,7 @@
 "Disable pointer acceleration" = "Отключить ускорение курсора";
 "Pointer acceleration" = "Ускорение указателя";
 "Pointer speed" = "Скорость указателя";
+"Tracking speed" = "Tracking speed";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Вы также можете нажать ⌃⇧⌘Z, чтобы вернуться к настройкам по умолчанию.";
 
 "Enable universal back and forward" = "Включить универсальные «назад» и «вперед»";
