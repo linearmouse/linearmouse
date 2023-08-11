@@ -44,6 +44,7 @@
 "Disable pointer acceleration" = "Deaktivovat zrychlení kurzoru";
 "Pointer acceleration" = "Pointer acceleration";
 "Pointer speed" = "Pointer speed";
+"Tracking speed" = "Tracking speed";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Pro obnovení výchozího nastavení systému můžete také použít klávesovou zkratku ⌃⇧⌘Z";
 
 "Enable universal back and forward" = "Aktivovat univerzální přecházení zpět a dopředu";
