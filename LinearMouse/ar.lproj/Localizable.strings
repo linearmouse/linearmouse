@@ -44,6 +44,7 @@
 "Disable pointer acceleration" = "Disable pointer acceleration";
 "Pointer acceleration" = "Pointer acceleration";
 "Pointer speed" = "Pointer speed";
+"Tracking speed" = "Tracking speed";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
 
 "Enable universal back and forward" = "Enable universal back and forward";
