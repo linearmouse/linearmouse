@@ -24,6 +24,9 @@ class Device {
     private let initialPointerResolution: Double
 
     private var inputObservationToken: ObservationToken?
+    private var reportObservationToken: ObservationToken?
+
+    private var lastButtonStates: UInt8 = 0
 
     init(_ manager: DeviceManager, _ device: PointerDevice) {
         self.manager = manager
@@ -36,6 +39,18 @@ class Device {
             self?.inputValueCallback($0, $1)
         })
 
+        // Some bluetooth devices, such as Mi Dual Mode Wireless Mouse Silent Edition, report only
+        // 3 buttons in the HID report descriptor. As a result, macOS does not recognize side button
+        // clicks from these devices.
+        //
+        // To work around this issue, we subscribe to the input reports and monitor the side button
+        // states. When the side buttons are clicked, we simulate those events.
+        if buttonCount == 3 {
+            reportObservationToken = device.observeReport(using: { [weak self] in
+                self?.inputReportCallback($0, $1)
+            })
+        }
+
         os_log("Device initialized: %{public}@: HIDPointerResolution=%{public}f, HIDPointerAccelerationType=%{public}@",
                log: Self.log, type: .info,
                String(describing: device),
@@ -45,6 +60,9 @@ class Device {
 
     func markRemoved() {
         removed = true
+
+        inputObservationToken = nil
+        reportObservationToken = nil
     }
 }
 
@@ -173,15 +191,6 @@ extension Device {
     }
 
     private func inputValueCallback(_ device: PointerDevice, _ value: IOHIDValue) {
-        guard !removed else {
-            os_log("Received input from removed device: %{public}@", log: Self.log, type: .error,
-                   String(describing: device))
-            os_log("Cancelling input observation for removed device: %{public}@", log: Self.log, type: .error,
-                   String(describing: device))
-            inputObservationToken = nil
-            return
-        }
-
         if verbosedLoggingOn {
             os_log("Received input value from: %{public}@: %{public}@", log: Self.log, type: .info,
                    String(describing: device), String(describing: value))
@@ -228,6 +237,43 @@ extension Device {
                String(describing: category),
                usagePage,
                usage)
+    }
+
+    private func inputReportCallback(_ device: PointerDevice, _ report: Data) {
+        if verbosedLoggingOn {
+            let reportHex = report.map { String(format: "%02X", $0) }.joined(separator: " ")
+            os_log("Received input report from: %{public}@: %{public}@", log: Self.log, type: .info,
+                   String(describing: device), String(describing: reportHex))
+        }
+
+        guard report.count >= 2 else {
+            return
+        }
+        // | Button 0 (1 bit) | ... | Button 4 (1 bit) | Not Used (3 bits) |
+        let buttonStates = report[1] & 0x18
+        let toggled = lastButtonStates ^ buttonStates
+        guard toggled != 0 else {
+            return
+        }
+        for button in 3 ... 4 {
+            guard toggled & (1 << button) != 0 else {
+                continue
+            }
+            let down = buttonStates & (1 << button) != 0
+            os_log("Simulate button %{public}d %{public}@ event for device: %{public}@", log: Self.log, type: .info,
+                   button, down ? "down" : "up", String(describing: device))
+            guard let location = CGEvent(source: nil)?.location else {
+                continue
+            }
+            guard let event = CGEvent(mouseEventSource: nil,
+                                      mouseType: down ? .otherMouseDown : .otherMouseUp,
+                                      mouseCursorPosition: location,
+                                      mouseButton: .init(rawValue: UInt32(button))!) else {
+                continue
+            }
+            event.post(tap: .cghidEventTap)
+        }
+        lastButtonStates = buttonStates
     }
 }
 
