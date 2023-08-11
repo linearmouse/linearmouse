@@ -44,6 +44,7 @@
 "Disable pointer acceleration" = "ポインター加速を無効にする。";
 "Pointer acceleration" = "Pointer acceleration";
 "Pointer speed" = "Pointer speed";
+"Tracking speed" = "Tracking speed";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "<unk> ⌘Z を押してデフォルトに戻れます。";
 
 "Enable universal back and forward" = "システム全般の戻る・進むボタンを有効にする";
