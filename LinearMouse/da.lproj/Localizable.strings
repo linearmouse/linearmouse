@@ -44,6 +44,7 @@
 "Disable pointer acceleration" = "Deaktiver markøracceleration";
 "Pointer acceleration" = "Markøracceleration";
 "Pointer speed" = "Markørens hastighed";
+"Tracking speed" = "Tracking speed";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Du kan også trykke på ⌃⇧⌘Z for at vende tilbage til systemets standardindstillinger.";
 
 "Enable universal back and forward" = "Aktivér universel frem og tilbage";
