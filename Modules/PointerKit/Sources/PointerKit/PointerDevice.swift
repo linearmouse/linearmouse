@@ -10,9 +10,11 @@ public class PointerDevice {
     internal let device: IOHIDDevice?
 
     public typealias InputValueClosure = (PointerDevice, IOHIDValue) -> Void
+    public typealias InputReportClosure = (PointerDevice, Data) -> Void
 
     private var observations = (
         inputValue: [UUID: InputValueClosure](),
+        inputReport: [UUID: InputReportClosure](),
         ()
     )
 
@@ -20,9 +22,18 @@ public class PointerDevice {
         guard let context = context else {
             return
         }
-
         let this = Unmanaged<PointerDevice>.fromOpaque(context).takeUnretainedValue()
+
         this.inputValueCallback(value)
+    }
+
+    private static let inputReportCallback: IOHIDReportCallback = { context, _, _, _, _, report, reportLength in
+        guard let context = context else {
+            return
+        }
+        let this = Unmanaged<PointerDevice>.fromOpaque(context).takeUnretainedValue()
+
+        this.inputReportCallback(Data(bytes: report, count: reportLength))
     }
 
     init(_ client: IOHIDServiceClient) {
@@ -32,9 +43,11 @@ public class PointerDevice {
         if let device = device {
             IOHIDDeviceOpen(device, IOOptionBits(kIOHIDOptionsTypeNone))
             IOHIDDeviceSetInputValueMatching(device, nil)
-            IOHIDDeviceRegisterInputValueCallback(device,
-                                                  Self.inputValueCallback,
-                                                  Unmanaged.passUnretained(self).toOpaque())
+            let this = Unmanaged.passUnretained(self).toOpaque()
+            IOHIDDeviceRegisterInputValueCallback(device, Self.inputValueCallback, this)
+            let reportLength = 8
+            let report = UnsafeMutablePointer<UInt8>.allocate(capacity: reportLength)
+            IOHIDDeviceRegisterInputReportCallback(device, report, reportLength, Self.inputReportCallback, this)
             IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
         }
     }
@@ -200,6 +213,24 @@ extension PointerDevice {
 
         return ObservationToken { [weak self] in
             self?.observations.inputValue.removeValue(forKey: id)
+        }
+    }
+}
+
+// MARK: Observe input reports
+
+extension PointerDevice {
+    private func inputReportCallback(_ report: Data) {
+        for (_, callback) in observations.inputReport {
+            callback(self, report)
+        }
+    }
+
+    public func observeReport(using closure: @escaping InputReportClosure) -> ObservationToken {
+        let id = observations.inputReport.insert(closure)
+
+        return ObservationToken { [weak self] in
+            self?.observations.inputReport.removeValue(forKey: id)
         }
     }
 }
