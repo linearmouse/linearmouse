@@ -44,7 +44,7 @@
 "Disable pointer acceleration" = "포인터 가속 비활성화";
 "Pointer acceleration" = "포인터 가속";
 "Pointer speed" = "포인터 속도";
-"Tracking speed" = "Tracking speed";
+"Tracking speed" = "추적 속도";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "⌃⇧⌘Z를 눌러 시스템 기본값으로 되돌릴 수도 있습니다.";
 
 "Enable universal back and forward" = "범용 뒤로/앞으로 가기 활성화";
@@ -60,14 +60,14 @@
 "Assign actions to mouse buttons" = "마우스 버튼에 동작 할당";
 "Edit" = "편집";
 
-"Run: %@" = "Run: %@";
-"Scroll up %@" = "Scroll up %@";
-"Scroll down %@" = "Scroll down %@";
-"Scroll left %@" = "Scroll left %@";
-"Scroll right %@" = "Scroll right %@";
-"Keyboard shortcut: %@" = "Keyboard shortcut: %@";
+"Run: %@" = "실행: %@";
+"Scroll up %@" = "%@ 위로 스크롤";
+"Scroll down %@" = "%@ 아래로 스크롤";
+"Scroll left %@" = "%@ 왼쪽으로 스크롤";
+"Scroll right %@" = "%@ 오른쪽으로 스크롤";
+"Keyboard shortcut: %@" = "키보드 단축기: %@";
 
-"Click to record" = "Click to record";
+"Click to record" = "클릭하여 입력";
 "Recording" = "Recording";
 "Left click" = "좌클릭";
 "Right click" = "우클릭";
