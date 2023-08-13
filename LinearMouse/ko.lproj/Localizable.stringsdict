@@ -13,7 +13,7 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>other</key>
-        <string>%d lines</string>
+        <string>%d줄</string>
       </dict>
     </dict>
     <key>%.1f pixel(s)</key>
@@ -27,7 +27,7 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>f</string>
         <key>other</key>
-        <string>%.1f pixels</string>
+        <string>%.1f픽셀</string>
       </dict>
     </dict>
   </dict>
