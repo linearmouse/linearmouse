@@ -14,7 +14,7 @@ struct ConfigurationSection: View {
                 }
                 .disabled(configurationState.loading)
 
-                Button("Reveal Config in Finder...") {
+                Button("Reveal Config in Finder…") {
                     configurationState.revealInFinder()
                 }
             }

@@ -111,17 +111,17 @@ extension ButtonMappingActionPicker.ActionType: CustomStringConvertible {
         case let .arg0(value):
             return value.description
         case .run:
-            return NSLocalizedString("Run shell command...", comment: "")
+            return NSLocalizedString("Run shell command…", comment: "")
         case .mouseWheelScrollUp:
-            return NSLocalizedString("Scroll up...", comment: "")
+            return NSLocalizedString("Scroll up…", comment: "")
         case .mouseWheelScrollDown:
-            return NSLocalizedString("Scroll down...", comment: "")
+            return NSLocalizedString("Scroll down…", comment: "")
         case .mouseWheelScrollLeft:
-            return NSLocalizedString("Scroll left...", comment: "")
+            return NSLocalizedString("Scroll left…", comment: "")
         case .mouseWheelScrollRight:
-            return NSLocalizedString("Scroll right...", comment: "")
+            return NSLocalizedString("Scroll right…", comment: "")
         case .keyPress:
-            return NSLocalizedString("Keyboard shortcut...", comment: "")
+            return NSLocalizedString("Keyboard shortcut…", comment: "")
         }
     }
 }

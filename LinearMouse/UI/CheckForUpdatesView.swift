@@ -87,7 +87,7 @@ struct CheckForUpdatesView: View {
             }
         }
 
-        Button("Check for Updates...", action: updaterViewModel.checkForUpdates)
+        Button("Check for Updates…", action: updaterViewModel.checkForUpdates)
             .disabled(!updaterViewModel.canCheckForUpdates)
     }
 }

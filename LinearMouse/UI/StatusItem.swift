@@ -17,7 +17,7 @@ class StatusItem {
         let menu = NSMenu()
 
         let openSettingsItem = NSMenuItem(
-            title: String(format: NSLocalizedString("%@ Settings...", comment: ""), LinearMouse.appName),
+            title: String(format: NSLocalizedString("%@ Settings…", comment: ""), LinearMouse.appName),
             action: #selector(openSettings),
             keyEquivalent: ","
         )
@@ -53,7 +53,7 @@ class StatusItem {
             }
             openSettingsForFrontmostApplicationItem.isHidden = false
             openSettingsForFrontmostApplicationItem.title = String(
-                format: NSLocalizedString("Configure for %@...", comment: ""),
+                format: NSLocalizedString("Configure for %@…", comment: ""),
                 name
             )
         }
