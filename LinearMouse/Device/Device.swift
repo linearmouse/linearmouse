@@ -143,11 +143,11 @@ extension Device {
     private static let pointerSpeedRange = 1.0 / 1200 ... 1.0 / 40
 
     static func pointerSpeed(fromPointerResolution pointerResolution: Double) -> Double {
-        (1 / pointerResolution).normalized(from: Self.pointerSpeedRange)
+        (1 / pointerResolution).normalized(from: pointerSpeedRange)
     }
 
     static func pointerResolution(fromPointerSpeed pointerSpeed: Double) -> Double {
-        1 / (pointerSpeed.normalized(to: Self.pointerSpeedRange))
+        1 / (pointerSpeed.normalized(to: pointerSpeedRange))
     }
 
     var pointerSpeed: Double {
@@ -221,6 +221,8 @@ extension Device {
                 return
             }
         case kHIDPage_Button:
+            break
+        case kHIDPage_Digitizer:
             break
         default:
             return
