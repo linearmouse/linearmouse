@@ -35,7 +35,7 @@
 "Copy settings from vertical" = "Copier les paramètres de la catégorie \"Vertical\"";
 "Modifier Keys" = "Modificateur de touches";
 "Default action" = "Action par défaut";
-"Ignore modifier" = "Ignore modifier";
+"Ignore modifier" = "Ignorer le modificateur";
 "No action" = "Pas d'action";
 "Alter orientation" = "Altérer l'orientation";
 "Change speed" = "Changer la vitesse";
@@ -44,7 +44,7 @@
 "Disable pointer acceleration" = "Désactiver l'accélération du pointeur";
 "Pointer acceleration" = "Accélération du pointeur";
 "Pointer speed" = "Vitesse du pointeur";
-"Tracking speed" = "Tracking speed";
+"Tracking speed" = "Vitesse de défilement";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Vous pouvez aussi appuyer sur ⌃⇧⌘Z pour réinitialiser aux paramètres par défauts du système.";
 
 "Enable universal back and forward" = "Activer l'option universelle pour revenir et avancer de pages";
@@ -60,14 +60,14 @@
 "Assign actions to mouse buttons" = "Assigner des actions aux boutons de la souris";
 "Edit" = "Éditer";
 
-"Run: %@" = "Run: %@";
-"Scroll up %@" = "Scroll up %@";
-"Scroll down %@" = "Scroll down %@";
-"Scroll left %@" = "Scroll left %@";
-"Scroll right %@" = "Scroll right %@";
+"Run: %@" = "Exécuter : %@";
+"Scroll up %@" = "Défiler vers le haut %@";
+"Scroll down %@" = "Défiler vers le bas %@";
+"Scroll left %@" = "Défiler vers la gauche %@";
+"Scroll right %@" = "Défiler vers la droite %@";
 "Keyboard shortcut: %@" = "Raccourci clavier : %@";
 
-"Click to record" = "Click to record";
+"Click to record" = "Cliquez pour enregistrer";
 "Recording" = "Enregistrement";
 "Left click" = "Clic gauche";
 "Right click" = "Clic droit";
@@ -107,10 +107,10 @@
 "Forward" = "Suivant";
 "Execute" = "Exécuter";
 "Run shell command…" = "Exécuter une commande shell…";
-"Scroll up…" = "Scroll up…";
-"Scroll down…" = "Scroll down…";
-"Scroll left…" = "Scroll left…";
-"Scroll right…" = "Scroll right…";
+"Scroll up…" = "Défiler vers le haut…";
+"Scroll down…" = "Défiler vers le bas…";
+"Scroll left…" = "Défiler vers la gauche…";
+"Scroll right…" = "Défiler vers la droite…";
 "Keyboard shortcut…" = "Raccourci clavier…";
 
 "Mouse button" = "Bouton de la souris";
