@@ -105,13 +105,13 @@
 "Mouse Button" = "Nút chuột";
 "Back" = "Quay Lại";
 "Forward" = "Chuyển tiếp";
-"Execute" = "Execute";
-"Run shell command…" = "Run shell command…";
-"Scroll up…" = "Scroll up…";
-"Scroll down…" = "Scroll down…";
-"Scroll left…" = "Scroll left…";
-"Scroll right…" = "Scroll right…";
-"Keyboard shortcut…" = "Keyboard shortcut…";
+"Execute" = "Thực thi";
+"Run shell command…" = "Chạy lệnh shell…";
+"Scroll up…" = "Cuộn lên…";
+"Scroll down…" = "Cuộn xuống…";
+"Scroll left…" = "Cuộn sang trái…";
+"Scroll right…" = "Cuộn sang phải…";
+"Keyboard shortcut…" = "Phím tắt…";
 
 "Mouse button" = "Nút chuột";
 "Action" = "Hành động";
@@ -141,7 +141,7 @@
 "Thank you for participating in the beta test." = "Cảm ơn bạn đã tham gia phiên bản dùng thử.";
 "Check for Updates…" = "Kiểm tra cập nhật…";
 
-"Enable verbose logging" = "Enable verbose logging";
+"Enable verbose logging" = "Bật chế độ verbose";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Bật tùy chọn này sẽ ghi nhật ký tất cả các sự kiện đầu vào, điều này có thể làm tăng mức sử dụng CPU khi sử dụng %@, nhưng có thể hữu ích cho việc khắc phục sự cố.";
 "Export the logs for the last 5 minutes." = "Xuất log trong 5 phút vừa rồi.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "Nếu bạn muốn báo lỗi, sẽ tốt hơn nếu bạn đính kèm tệp log.";
