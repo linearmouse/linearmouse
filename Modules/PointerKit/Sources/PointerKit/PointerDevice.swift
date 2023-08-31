@@ -6,8 +6,8 @@ import ObservationToken
 import PointerKitC
 
 public class PointerDevice {
-    internal let client: IOHIDServiceClient
-    internal let device: IOHIDDevice?
+    let client: IOHIDServiceClient
+    let device: IOHIDDevice?
 
     public typealias InputValueClosure = (PointerDevice, IOHIDValue) -> Void
     public typealias InputReportClosure = (PointerDevice, Data) -> Void
