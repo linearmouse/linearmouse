@@ -2,6 +2,7 @@
 // Copyright (c) 2021-2023 LinearMouse
 
 import Foundation
+import KeyKit
 
 class ModifierActionsTransformer: EventTransformer {
     typealias Modifiers = Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Modifiers>
@@ -58,23 +59,17 @@ class ModifierActionsTransformer: EventTransformer {
             scrollWheelEventView.scale(factor: scale.asTruncatedDouble)
         case .zoom:
             let scrollWheelEventView = ScrollWheelEventView(event)
-            // TODO: Extract a KeyboardKit?
-            CGEvent(keyboardEventSource: nil, virtualKey: 0x37, keyDown: true)?.post(tap: .cgSessionEventTap)
             let deltaSignum = scrollWheelEventView.deltaYSignum != 0 ? scrollWheelEventView
                 .deltaYSignum : scrollWheelEventView.deltaXSignum
             if deltaSignum == 0 {
                 return event
             }
-            let virtualKey: CGKeyCode = deltaSignum > 0 ? 0x45 : 0x4E
-            if let keyDownEvent = CGEvent(keyboardEventSource: nil, virtualKey: virtualKey, keyDown: true) {
-                keyDownEvent.flags = .maskCommand
-                keyDownEvent.post(tap: .cgSessionEventTap)
+            let keySimulator = KeySimulator()
+            if deltaSignum > 0 {
+                try? keySimulator.press(.command, .numpadPlus, tap: .cgSessionEventTap)
+            } else {
+                try? keySimulator.press(.command, .numpadMinus, tap: .cgSessionEventTap)
             }
-            if let keyDownUp = CGEvent(keyboardEventSource: nil, virtualKey: virtualKey, keyDown: false) {
-                keyDownUp.flags = .maskCommand
-                keyDownUp.post(tap: .cgSessionEventTap)
-            }
-            CGEvent(keyboardEventSource: nil, virtualKey: 0x37, keyDown: false)?.post(tap: .cgSessionEventTap)
             return nil
         }
 

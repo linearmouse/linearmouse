@@ -84,6 +84,8 @@ public enum Key: String, Codable {
     case backquote = "`"
     case backetLeft = "["
     case backetRight = "]"
+    case numpadPlus
+    case numpadMinus
 }
 
 extension Key {
