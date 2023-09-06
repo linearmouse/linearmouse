@@ -55,10 +55,20 @@ extension Scheme.Buttons.Mapping {
     }
 
     func match(with event: CGEvent) -> Bool {
-        let view = MouseEventView(event)
+        let view = EventView(event)
+
+        guard view.modifierFlags == modifierFlags else {
+            return false
+        }
 
         if let button = button {
-            guard let mouseButton = view.mouseButton,
+            guard [.leftMouseDown, .leftMouseUp, .leftMouseDragged,
+                   .rightMouseDown, .rightMouseUp, .rightMouseDragged,
+                   .otherMouseDown, .otherMouseUp, .otherMouseDragged].contains(event.type) else {
+                return false
+            }
+
+            guard let mouseButton = MouseEventView(event).mouseButton,
                   mouseButton.rawValue == button else {
                 return false
             }
@@ -91,7 +101,7 @@ extension Scheme.Buttons.Mapping {
             }
         }
 
-        return view.modifierFlags == modifierFlags
+        return true
     }
 
     func conflicted(with mapping: Self) -> Bool {
