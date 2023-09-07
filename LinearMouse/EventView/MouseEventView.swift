@@ -5,13 +5,7 @@ import AppKit
 import Foundation
 import LRUCache
 
-class MouseEventView {
-    let event: CGEvent
-
-    init(_ event: CGEvent) {
-        self.event = event
-    }
-
+class MouseEventView: EventView {
     var mouseButton: CGMouseButton? {
         get {
             guard let mouseButtonNumber = UInt32(exactly: event.getIntegerValueField(.mouseEventButtonNumber)) else {
@@ -28,28 +22,6 @@ class MouseEventView {
             event.type = newValue.fixedCGEventType(of: event.type)
             event.setIntegerValueField(.mouseEventButtonNumber, value: Int64(newValue.rawValue))
         }
-    }
-
-    var modifierFlags: CGEventFlags {
-        get {
-            event.flags.intersection([.maskCommand, .maskShift, .maskAlternate, .maskControl])
-        }
-        set {
-            event.flags = event.flags
-                .subtracting([.maskCommand, .maskShift, .maskAlternate, .maskControl])
-                .union(newValue)
-        }
-    }
-
-    var modifiers: [String] {
-        [
-            (CGEventFlags.maskCommand, "command"),
-            (CGEventFlags.maskShift, "shift"),
-            (CGEventFlags.maskAlternate, "option"),
-            (CGEventFlags.maskControl, "control")
-        ]
-        .filter { modifierFlags.contains($0.0) }
-        .map(\.1)
     }
 
     var mouseButtonDescription: String {

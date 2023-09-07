@@ -95,6 +95,7 @@
 		97E1B7BB2A585EA700655EEC /* ButtonMappingActionScroll.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E1B7BA2A585EA700655EEC /* ButtonMappingActionScroll.swift */; };
 		97E1B7BE2A5871C600655EEC /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = 97E1B7C02A5871C600655EEC /* Localizable.stringsdict */; };
 		97E1B7C22A59258D00655EEC /* ButtonMappingActionKeyPress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E1B7C12A59258D00655EEC /* ButtonMappingActionKeyPress.swift */; };
+		97EF39952AA8CE6E00E30B32 /* EventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97EF39942AA8CE6E00E30B32 /* EventView.swift */; };
 		97F77FA4285DC467007C9C2B /* DevicePickerSectionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA3285DC467007C9C2B /* DevicePickerSectionState.swift */; };
 		97F77FAA285E178B007C9C2B /* DevicePickerSectionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FA9285E178B007C9C2B /* DevicePickerSectionItem.swift */; };
 		97F77FAC285E3055007C9C2B /* StatusItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F77FAB285E3055007C9C2B /* StatusItem.swift */; };
@@ -239,6 +240,7 @@
 		97E1B7BA2A585EA700655EEC /* ButtonMappingActionScroll.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMappingActionScroll.swift; sourceTree = "<group>"; };
 		97E1B7BF2A5871C600655EEC /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = en; path = en.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		97E1B7C12A59258D00655EEC /* ButtonMappingActionKeyPress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMappingActionKeyPress.swift; sourceTree = "<group>"; };
+		97EF39942AA8CE6E00E30B32 /* EventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventView.swift; sourceTree = "<group>"; };
 		97F77FA3285DC467007C9C2B /* DevicePickerSectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSectionState.swift; sourceTree = "<group>"; };
 		97F77FA9285E178B007C9C2B /* DevicePickerSectionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSectionItem.swift; sourceTree = "<group>"; };
 		97F77FAB285E3055007C9C2B /* StatusItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusItem.swift; sourceTree = "<group>"; };
@@ -731,7 +733,7 @@
 			isa = PBXGroup;
 			children = (
 				972DF62F2859754D00B83932 /* Utilities */,
-				B7ADF9902748EAB80005B02D /* MouseEventView */,
+				B7ADF9902748EAB80005B02D /* EventView */,
 				B77BA0F027480A9700E3BC5C /* EventTransformer */,
 				B7ADF9892748B65D0005B02D /* UI */,
 				972A5E2B285D881700CB6440 /* State */,
@@ -817,13 +819,14 @@
 			path = UI;
 			sourceTree = "<group>";
 		};
-		B7ADF9902748EAB80005B02D /* MouseEventView */ = {
+		B7ADF9902748EAB80005B02D /* EventView */ = {
 			isa = PBXGroup;
 			children = (
+				97EF39942AA8CE6E00E30B32 /* EventView.swift */,
 				B7ADF98E2748E6400005B02D /* MouseEventView.swift */,
 				B7ADF98C2748E5010005B02D /* ScrollWheelEventView.swift */,
 			);
-			path = MouseEventView;
+			path = EventView;
 			sourceTree = "<group>";
 		};
 		B7ADF9962748ED620005B02D /* LinearMouseUnitTests */ = {
@@ -1101,6 +1104,7 @@
 				97C5DBBA28682809006FA6B4 /* Extensions.swift in Sources */,
 				B7ADF98F2748E6400005B02D /* MouseEventView.swift in Sources */,
 				97A46B17285444BF00C07C9B /* NSWindow.swift in Sources */,
+				97EF39952AA8CE6E00E30B32 /* EventView.swift in Sources */,
 				978DBCA029A61D50002259B3 /* ClickDebouncingTransformer.swift in Sources */,
 				972AFD452851C101009B0CBF /* AccessibilityPermissionView.swift in Sources */,
 				B75A061C2671E9D800BEAF77 /* AppDelegate.swift in Sources */,
