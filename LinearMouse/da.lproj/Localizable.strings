@@ -35,7 +35,7 @@
 "Copy settings from vertical" = "Kopiér indstillinger fra vertikal";
 "Modifier Keys" = "Kombitaster";
 "Default action" = "Standardhandling";
-"Ignore modifier" = "Ignore modifier";
+"Ignore modifier" = "Ignorer modifikationstast";
 "No action" = "Ingen handling";
 "Alter orientation" = "Skift retning";
 "Change speed" = "Ændr hastighed";
@@ -44,7 +44,7 @@
 "Disable pointer acceleration" = "Deaktiver markøracceleration";
 "Pointer acceleration" = "Markøracceleration";
 "Pointer speed" = "Markørens hastighed";
-"Tracking speed" = "Tracking speed";
+"Tracking speed" = "Sporingshastighed";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Du kan også trykke på ⌃⇧⌘Z for at vende tilbage til systemets standardindstillinger.";
 
 "Enable universal back and forward" = "Aktivér universel frem og tilbage";
@@ -52,7 +52,7 @@
 "Debounce button clicks" = "Undgå gentagelse af klik";
 "Ignore rapid clicks within a certain time period." = "Ignorer hurtige klik inden for et bestemt tidsrum.";
 "ms" = "ms";
-"Reset timer on mouse up" = "Reset timer on mouse up";
+"Reset timer on mouse up" = "Nulstil timer ved mus op";
 "Left button" = "Venstre knap";
 "Right button" = "Højre knap";
 "Middle button" = "Midterste knap";
@@ -60,12 +60,12 @@
 "Assign actions to mouse buttons" = "Tildel handlinger til museknapper";
 "Edit" = "Rediger";
 
-"Run: %@" = "Run: %@";
-"Scroll up %@" = "Scroll up %@";
-"Scroll down %@" = "Scroll down %@";
-"Scroll left %@" = "Scroll left %@";
-"Scroll right %@" = "Scroll right %@";
-"Keyboard shortcut: %@" = "Keyboard shortcut: %@";
+"Run: %@" = "Kør: %@";
+"Scroll up %@" = "Rul op %@";
+"Scroll down %@" = "Rul ned %@";
+"Scroll left %@" = "Rul til venstre %@";
+"Scroll right %@" = "Rul til højre %@";
+"Keyboard shortcut: %@" = "Tastaturgenvej: %@";
 
 "Click to record" = "Klik for at optage";
 "Recording" = "Optager";
@@ -105,13 +105,13 @@
 "Mouse Button" = "Museknap";
 "Back" = "Tilbage";
 "Forward" = "Frem";
-"Execute" = "Execute";
-"Run shell command…" = "Run shell command…";
-"Scroll up…" = "Scroll up…";
-"Scroll down…" = "Scroll down…";
-"Scroll left…" = "Scroll left…";
-"Scroll right…" = "Scroll right…";
-"Keyboard shortcut…" = "Keyboard shortcut…";
+"Execute" = "Eksekvér";
+"Run shell command…" = "Kør shell-kommando…";
+"Scroll up…" = "Rul op…";
+"Scroll down…" = "Rul ned…";
+"Scroll left…" = "Rul til venstre…";
+"Scroll right…" = "Rul til højre…";
+"Keyboard shortcut…" = "Tastaturgenvej…";
 
 "Mouse button" = "Museknap";
 "Action" = "Handling";
@@ -141,7 +141,7 @@
 "Thank you for participating in the beta test." = "Tak fordi du deltager i betatesten.";
 "Check for Updates…" = "Søg efter Opdateringer…";
 
-"Enable verbose logging" = "Enable verbose logging";
+"Enable verbose logging" = "Aktivér detaljeret logning";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Aktivering af denne indstilling vil logge alle input-begivenheder, hvilket kan øge CPU-forbruget mens du bruger %@, men kan være nyttigt til fejlfinding.";
 "Export the logs for the last 5 minutes." = "Eksporter logfilerne for de sidste 5 minutter.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "Hvis du rapporterer en fejl, er det være nyttigt at vedhæfte logfilerne.";
