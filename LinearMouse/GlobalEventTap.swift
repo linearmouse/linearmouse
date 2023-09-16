@@ -43,7 +43,7 @@ class GlobalEventTap {
                                                      .leftMouseDown, .leftMouseUp, .leftMouseDragged,
                                                      .rightMouseDown, .rightMouseUp, .rightMouseDragged,
                                                      .otherMouseDown, .otherMouseUp, .otherMouseDragged,
-                                                     .keyDown, .keyUp]) { [weak self] _, event in
+                                                     .keyDown, .keyUp, .flagsChanged]) { [weak self] _, event in
                 self?.callback(event: event)
             }
         } catch {
