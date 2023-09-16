@@ -40,6 +40,7 @@
 "Alter orientation" = "Cambiar orientación";
 "Change speed" = "Cambiar velocidad";
 "Zoom" = "Zoom";
+"Pinch zoom" = "Pinch zoom";
 
 "Disable pointer acceleration" = "Deshabilitar aceleración del cursor";
 "Pointer acceleration" = "Aceleración del puntero";
