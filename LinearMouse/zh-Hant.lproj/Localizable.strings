@@ -40,7 +40,7 @@
 "Alter orientation" = "改變方向";
 "Change speed" = "變更速度";
 "Zoom" = "縮放";
-"Pinch zoom" = "Pinch zoom";
+"Pinch zoom" = "手勢縮放";
 
 "Disable pointer acceleration" = "禁用指標加速度";
 "Pointer acceleration" = "指標加速度";
