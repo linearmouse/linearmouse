@@ -49,9 +49,9 @@
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Je kunt ook ⌃⇧⌘Z indrukken om terug te keren naar de standaard systeeminstellingen.";
 
 "Enable universal back and forward" = "Universeel achter en vooruit inschakelen";
-"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
-"Debounce button clicks" = "Debounce button clicks";
-"Ignore rapid clicks within a certain time period." = "Ignore rapid clicks within a certain time period.";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Verander de functie van de heen- en terugknoppen naar veeggebaren om de universele heen- en terug functie in te schakelen.";
+"Debounce button clicks" = "Onbedoelde dubbelklik negeren";
+"Ignore rapid clicks within a certain time period." = "Negeer snelle klikken binnen een bepaalde periode.";
 "ms" = "ms";
 "Reset timer on mouse up" = "Reset timer on mouse up";
 "Left button" = "Left button";
@@ -105,26 +105,26 @@
 "Mouse Wheel" = "Mouse Wheel";
 "Mouse Button" = "Mouse Button";
 "Back" = "Back";
-"Forward" = "Forward";
-"Execute" = "Execute";
-"Run shell command…" = "Run shell command…";
-"Scroll up…" = "Scroll up…";
-"Scroll down…" = "Scroll down…";
-"Scroll left…" = "Scroll left…";
-"Scroll right…" = "Scroll right…";
-"Keyboard shortcut…" = "Keyboard shortcut…";
+"Forward" = "Heen";
+"Execute" = "Uitvoeren";
+"Run shell command…" = "Shellopdracht uitvoeren…";
+"Scroll up…" = "Naar boven bladeren…";
+"Scroll down…" = "Naar beneden bladeren…";
+"Scroll left…" = "Naar links bladeren…";
+"Scroll right…" = "Naar rechts bladeren…";
+"Keyboard shortcut…" = "Sneltoetsen…";
 
-"Mouse button" = "Mouse button";
-"Action" = "Action";
-"The mouse button is already assigned." = "The mouse button is already assigned.";
-"Assigning an action to the left button without any modifier keys is not allowed." = "Assigning an action to the left button without any modifier keys is not allowed.";
-"Repeat on hold" = "Repeat on hold";
-"Cancel" = "Cancel";
-"OK" = "OK";
-"Create" = "Create";
+"Mouse button" = "Muisknop";
+"Action" = "Actie";
+"The mouse button is already assigned." = "De muisknop is al toegewezen.";
+"Assigning an action to the left button without any modifier keys is not allowed." = "Een actie toewijzen aan de linker knop zonder aanpassingstoets is niet toegestaan.";
+"Repeat on hold" = "Herhaal bij ingedrukt houden";
+"Cancel" = "Annuleren";
+"OK" = "Oké";
+"Create" = "Aanmaken";
 
-"Settings" = "Settings";
-"Show in menu bar" = "Show in menu bar";
+"Settings" = "Instellingen";
+"Show in menu bar" = "Toon in menubalk";
 "To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
 "Bypass events from other applications" = "Bypass events from other applications";
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "If enabled, %@ will not modify events sent by other applications, such as Logi Options+.";
