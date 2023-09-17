@@ -125,42 +125,42 @@
 
 "Settings" = "Instellingen";
 "Show in menu bar" = "Toon in menubalk";
-"To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
-"Bypass events from other applications" = "Bypass events from other applications";
-"If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "If enabled, %@ will not modify events sent by other applications, such as Logi Options+.";
+"To show the settings, launch %@ again." = "Start %@ opnieuw om de instellingen te tonen.";
+"Bypass events from other applications" = "Instellingen van andere toepassingen negeren";
+"If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "Indien ingeschakeld, zal %@ instellingen die door andere applicaties worden beheerd, zoals Logi Options+, niet wijzigen.";
 
-"Reload Config" = "Reload Config";
-"Reveal Config in Finder…" = "Reveal Config in Finder…";
+"Reload Config" = "Configuratie opnieuw laden";
+"Reveal Config in Finder…" = "Toon configuratie in Finder…";
 
-"Version: %@" = "Version: %@";
-"Check for updates automatically" = "Check for updates automatically";
-"Update check interval" = "Update check interval";
-"Daily" = "Daily";
-"Weekly" = "Weekly";
-"Monthly" = "Monthly";
-"Receive beta updates" = "Receive beta updates";
-"Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
-"Check for Updates…" = "Check for Updates…";
+"Version: %@" = "Versie: %@";
+"Check for updates automatically" = "Automatisch controleren op updates";
+"Update check interval" = "Interval controle naar updates";
+"Daily" = "Dagelijks";
+"Weekly" = "Wekelijks";
+"Monthly" = "Maandelijks";
+"Receive beta updates" = "Ontvang bètaversies";
+"Thank you for participating in the beta test." = "Bedankt voor je deelname aan de bèta-test.";
+"Check for Updates…" = "Controleer op Updates…";
 
-"Enable verbose logging" = "Enable verbose logging";
-"Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting.";
-"Export the logs for the last 5 minutes." = "Export the logs for the last 5 minutes.";
-"If you are reporting a bug, it would be helpful to attach the logs." = "If you are reporting a bug, it would be helpful to attach the logs.";
-"Export logs" = "Export logs";
+"Enable verbose logging" = "Uitgebreide logboekregistratie inschakelen";
+"Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Het inschakelen van deze optie zal alle invoer-gebeurtenissen loggen, wat het CPU-gebruik kan verhogen terwijl je %@ gebruikt, maar kan nuttig zijn voor het oplossen van problemen.";
+"Export the logs for the last 5 minutes." = "Exporteer de logs van de laatste 5 minuten.";
+"If you are reporting a bug, it would be helpful to attach the logs." = "Als je een bug vindt, ontvangen we ook graag een logbestand.";
+"Export logs" = "Logs exporteren";
 
 "Homepage" = "Homepage";
-"Bug report" = "Bug report";
-"Feature request" = "Feature request";
-"Donate" = "Donate";
+"Bug report" = "Bug rapporteren";
+"Feature request" = "Functie voorstellen";
+"Donate" = "Doneer";
 
-"Auto switch to the active device" = "Auto switch to the active device";
+"Auto switch to the active device" = "Schakel automatisch naar het actieve apparaat";
 
-"Mouse" = "Mouse";
+"Mouse" = "Muis";
 "Trackpad" = "Trackpad";
-"(active)" = "(active)";
+"(active)" = "(actief)";
 
-"Configure for" = "Configure for";
-"All Apps" = "All Apps";
-"Configured" = "Configured";
-"Running" = "Running";
-"Installed" = "Installed";
+"Configure for" = "Configureer voor";
+"All Apps" = "Alle apps";
+"Configured" = "Geconfigureerd";
+"Running" = "Actief";
+"Installed" = "Geïnstalleerd";
