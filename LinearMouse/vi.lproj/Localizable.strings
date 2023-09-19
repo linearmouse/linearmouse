@@ -1,6 +1,6 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse cần quyền truy cập vào Trợ năng";
 "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "Bạn cần phải cấp quyền truy cập Trợ năng trong Cài đặt -> Quyền riêng tư & Bảo mật -> Trợ năng.";
-"Get more help" = "Cần giúp đỡ";
+"Get more help" = "Nhận trợ giúp";
 "Open Accessibility" = "Mở Trợ năng";
 
 "%@ Settings…" = "Cài đặt %@…";
@@ -19,33 +19,33 @@
 "Vertical" = "Cuộn dọc";
 "Horizontal" = "Cuộn ngang";
 "Reverse scrolling" = "Đảo ngược hướng cuộn";
-"Some gestures, such as swiping back and forward, may stop working." = "Một vài cử chỉ như quay lại và chuyển tiếp có thể dừng hoạt động";
-"Scrolling mode" = "Chế độ Cuộn";
+"Some gestures, such as swiping back and forward, may stop working." = "Một số cử chỉ như quay lại và chuyển tiếp có thể dừng hoạt động.";
+"Scrolling mode" = "Chế độ cuộn";
 "Accelerated" = "Tăng tốc";
 "By Lines" = "Theo hàng";
 "By Pixels" = "Theo điểm ảnh";
-"Scrolling acceleration" = "Tốc độ cuộn";
-"Linear" = "Thẳng";
-"Scrolling speed" = "Scrolling speed";
+"Scrolling acceleration" = "Gia tốc cuộn";
+"Linear" = "Tuyến tính";
+"Scrolling speed" = "Tốc độ cuộn";
 "Slow" = "Chậm";
 "Fast" = "Nhanh";
 "Distance" = "Khoảng cách";
 "Scrolling is disabled based on the current settings." = "Chế độ cuộn đã tắt dựa trên cài đặt hiện tại.";
 "Revert to system defaults" = "Khôi phục về mặc định";
 "Copy settings from vertical" = "Sao chép cài đặt";
-"Modifier Keys" = "Cài đặt bàn phím";
+"Modifier Keys" = "Phím bổ trợ";
 "Default action" = "Mặc định";
-"Ignore modifier" = "Ignore modifier";
+"Ignore modifier" = "Bỏ qua phím bổ trợ";
 "No action" = "Không có hành động";
-"Alter orientation" = "Thay đổi hướng cuộn";
+"Alter orientation" = "Hoán đổi hướng cuộn";
 "Change speed" = "Thay đổi tốc độ";
 "Zoom" = "Thu phóng";
-"Pinch zoom" = "Pinch zoom";
+"Pinch zoom" = "Thu phóng";
 
-"Disable pointer acceleration" = "Tắt tăng tốc con trỏ";
-"Pointer acceleration" = "Tăng tốc con trỏ";
+"Disable pointer acceleration" = "Tắt gia tốc con trỏ";
+"Pointer acceleration" = "Gia tốc con trỏ";
 "Pointer speed" = "Tốc độ con trỏ";
-"Tracking speed" = "Tracking speed";
+"Tracking speed" = "Tốc độ di chuột";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Bạn có thể ấn ⌃⇧⌘Z để khôi phục hệ thống mặc định.";
 
 "Enable universal back and forward" = "Sử dụng nút quay lại và chuyển tiếp chung";
@@ -53,20 +53,20 @@
 "Debounce button clicks" = "Sửa lỗi nháy chuột nhiều lần";
 "Ignore rapid clicks within a certain time period." = "Bỏ qua các nhấp chuột nhanh chóng trong một khoảng thời gian nhất định.";
 "ms" = "ms";
-"Reset timer on mouse up" = "Đặt lại bộ hẹn giờ khi đưa chuột lên";
+"Reset timer on mouse up" = "Đặt lại thời gian khi thả nút";
 "Left button" = "Nút bên trái";
 "Right button" = "Nút bên phải";
 "Middle button" = "Nút ở giữa";
 
-"Assign actions to mouse buttons" = "Gán hành động cho các nút của chuột";
+"Assign actions to mouse buttons" = "Gán hành động cho các nút chuột";
 "Edit" = "Sửa";
 
-"Run: %@" = "Run: %@";
-"Scroll up %@" = "Scroll up %@";
-"Scroll down %@" = "Scroll down %@";
-"Scroll left %@" = "Scroll left %@";
-"Scroll right %@" = "Scroll right %@";
-"Keyboard shortcut: %@" = "Keyboard shortcut: %@";
+"Run: %@" = "Chạy: %@";
+"Scroll up %@" = "Cuộn lên %@";
+"Scroll down %@" = "Cuộn xuống %@";
+"Scroll left %@" = "Cuộn sang trái %@";
+"Scroll right %@" = "Cuộn sang phải %@";
+"Keyboard shortcut: %@" = "Phím tắt: %@";
 
 "Click to record" = "Nhấn để ghi";
 "Recording" = "Đang ghi lại";
@@ -80,9 +80,9 @@
 "Scroll right" = "Cuộn sang phải";
 
 "Mission Control" = "Mission Control";
-"Move left a space" = "Di chuyển qua không gian bên trái";
-"Move right a space" = "Di chuyển kqua không gian bên phải";
-"Application windows" = "Application windows";
+"Move left a space" = "Di chuyển sang trái một khoảng";
+"Move right a space" = "Di chuyển sang phải một khoảng";
+"Application windows" = "Cửa sổ ứng dụng";
 "Launchpad" = "Launchpad";
 "Show desktop" = "Hiển thị màn hình nền";
 "Look up & data detectors" = "Tra cứu & bộ dò tìm dữ liệu";
@@ -90,11 +90,11 @@
 "Display" = "Màn hình";
 "Increase display brightness" = "Tăng độ sáng màn hình";
 "Decrease display brightness" = "Giảm độ sáng màn hình";
-"Media" = "Âm thanh";
+"Media" = "Phương tiện";
 "Increase volume" = "Tăng âm lượng";
 "Decrease volume" = "Giảm âm lượng";
-"Mute / unmute" = "Tắt tiếng / bật tiếng";
-"Play / pause" = "Phát / tạm dừng";
+"Mute / unmute" = "Bật / Tắt tiếng";
+"Play / pause" = "Phát / Tạm dừng";
 "Next" = "Tiếp theo";
 "Previous" = "Trước đó";
 "Fast forward" = "Tua đi";
@@ -102,7 +102,7 @@
 "Keyboard" = "Bàn phím";
 "Increase keyboard brightness" = "Tăng độ sáng bàn phím";
 "Decrease keyboard brightness" = "Giảm độ sáng bàn phím";
-"Mouse Wheel" = "Cuộn chuột";
+"Mouse Wheel" = "Con lăn chuột";
 "Mouse Button" = "Nút chuột";
 "Back" = "Quay Lại";
 "Forward" = "Chuyển tiếp";
@@ -118,19 +118,19 @@
 "Action" = "Hành động";
 "The mouse button is already assigned." = "Nút chuột này đã được gán trước đó.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "Không được phép gán một hành động cho nút bên trái mà không có bất kỳ phím bổ trợ nào.";
-"Repeat on hold" = "Giữ lặp lại";
-"Cancel" = "Huỷ";
+"Repeat on hold" = "Lặp lại khi nhấn giữ";
+"Cancel" = "Huỷ bỏ";
 "OK" = "OK";
 "Create" = "Tạo";
 
 "Settings" = "Cài đặt";
 "Show in menu bar" = "Hiển thị trên thanh menu";
 "To show the settings, launch %@ again." = "Để hiển thị cài đặt, hãy mở lại %@.";
-"Bypass events from other applications" = "Bỏ qua các sự kiện từ các ứng dụng khác";
-"If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "Nếu được bật, %@ sẽ không sửa đổi các sự kiện được gửi bởi các ứng dụng khác, chẳng hạn như Logi Options+.";
+"Bypass events from other applications" = "Bỏ qua sự kiện từ các ứng dụng khác";
+"If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "Khi bật, %@ sẽ không sửa đổi các sự kiện được gửi bởi ứng dụng khác, chẳng hạn như Logi Options+.";
 
 "Reload Config" = "Tải lại cấu hình";
-"Reveal Config in Finder…" = "Tải lại cấu hình trong Finder…";
+"Reveal Config in Finder…" = "Xem tệp cấu hình trong Finder…";
 
 "Version: %@" = "Phiên bản: %@";
 "Check for updates automatically" = "Kiểm tra cập nhật tự động";
@@ -144,9 +144,9 @@
 
 "Enable verbose logging" = "Bật chế độ verbose";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Bật tùy chọn này sẽ ghi nhật ký tất cả các sự kiện đầu vào, điều này có thể làm tăng mức sử dụng CPU khi sử dụng %@, nhưng có thể hữu ích cho việc khắc phục sự cố.";
-"Export the logs for the last 5 minutes." = "Xuất log trong 5 phút vừa rồi.";
-"If you are reporting a bug, it would be helpful to attach the logs." = "Nếu bạn muốn báo lỗi, sẽ tốt hơn nếu bạn đính kèm tệp log.";
-"Export logs" = "Trích xuất log";
+"Export the logs for the last 5 minutes." = "Xuất nhật ký trong 5 phút vừa rồi.";
+"If you are reporting a bug, it would be helpful to attach the logs." = "Nếu bạn muốn báo lỗi, sẽ tốt hơn nếu bạn đính kèm tệp nhật ký.";
+"Export logs" = "Trích xuất nhật ký";
 
 "Homepage" = "Trang chủ";
 "Bug report" = "Báo cáo lỗi";
