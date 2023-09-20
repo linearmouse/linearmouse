@@ -3,9 +3,9 @@
 "Get more help" = "Ricevi ulteriore supporto";
 "Open Accessibility" = "Apri Accessibilità";
 
-"%@ Settings…" = "%@ Impostazioni…";
+"%@ Settings…" = "Impostazioni di %@…";
 "Start at login" = "Avvia all'accesso";
-"Config" = "Config";
+"Config" = "Configurazione";
 "Reload" = "Ricarica";
 "Reveal in Finder" = "Mostra nel Finder";
 "Configure for %@…" = "Configura per %@…";
@@ -30,17 +30,17 @@
 "Slow" = "Lento";
 "Fast" = "Veloce";
 "Distance" = "Distanza";
-"Scrolling is disabled based on the current settings." = "Scorrimento disabilitato secondo le impostazioni correnti.";
+"Scrolling is disabled based on the current settings." = "Scorrimento disabilitato in base alle impostazioni correnti.";
 "Revert to system defaults" = "Ripristina impostazioni predefinite";
 "Copy settings from vertical" = "Copia le impostazioni dalla verticale";
 "Modifier Keys" = "Tasti modificatori";
 "Default action" = "Azione predefinita";
 "Ignore modifier" = "Ignorare il modificatore";
 "No action" = "Nessuna azione";
-"Alter orientation" = "Cambiare orientamento";
+"Alter orientation" = "Cambia direzione";
 "Change speed" = "Cambia velocità";
 "Zoom" = "Ingrandimento";
-"Pinch zoom" = "Pinch zoom";
+"Pinch zoom" = "Zoom con due dita";
 
 "Disable pointer acceleration" = "Disabilita l'accelerazione del puntatore";
 "Pointer acceleration" = "Accelerazione del puntatore";
