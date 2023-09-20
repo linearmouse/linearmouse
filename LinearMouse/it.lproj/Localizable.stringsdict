@@ -31,7 +31,7 @@
         <key>one</key>
         <string>%.1f pixel</string>
         <key>other</key>
-        <string>%.1f pixels</string>
+        <string>%.1f pixel</string>
       </dict>
     </dict>
   </dict>
