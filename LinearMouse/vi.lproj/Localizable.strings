@@ -50,6 +50,7 @@
 
 "Enable universal back and forward" = "Sử dụng nút quay lại và chuyển tiếp chung";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Chuyển đổi các nút quay lại và chuyển tiếp sang cử chỉ vuốt để cho phép chức năng quay lại và chuyển tiếp phổ biến.";
+"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
 "Debounce button clicks" = "Sửa lỗi nháy chuột nhiều lần";
 "Ignore rapid clicks within a certain time period." = "Bỏ qua các nhấp chuột nhanh chóng trong một khoảng thời gian nhất định.";
 "ms" = "ms";

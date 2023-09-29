@@ -50,6 +50,7 @@
 
 "Enable universal back and forward" = "Activer l'option universelle pour revenir et avancer de pages";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convertir les boutons latéraux arrière et avant en swipant pour permettre la fonctionnalité universelle de retour et d'avant.";
+"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
 "Debounce button clicks" = "Anti-rebond des clics de la souris";
 "Ignore rapid clicks within a certain time period." = "Ignorer les clics rapides dans une certaine période.";
 "ms" = "ms";

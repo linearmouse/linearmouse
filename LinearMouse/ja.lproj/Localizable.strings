@@ -50,6 +50,7 @@
 
 "Enable universal back and forward" = "システム全般の戻る・進むボタンを有効にする";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "戻る・進むボタンをスワイプジェスチャーに変換し、システム全般における戻る・進む機能を行えるようにします。";
+"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
 "Debounce button clicks" = "Debounce button clicks";
 "Ignore rapid clicks within a certain time period." = "Ignore rapid clicks within a certain time period.";
 "ms" = "ms";

@@ -50,6 +50,7 @@
 
 "Enable universal back and forward" = "Abilitare avanti e indietro universale";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Converti i pulsanti laterali avanti e indietro in gesti scorrevoli per consentire funzionalità di avanti e indietro universali.";
+"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
 "Debounce button clicks" = "Antirimbalzo dei click del pulsante";
 "Ignore rapid clicks within a certain time period." = "Ignora click rapidi entro un certo periodo di tempo.";
 "ms" = "ms";

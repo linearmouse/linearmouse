@@ -50,6 +50,7 @@
 
 "Enable universal back and forward" = "Habilitar retorno e avanço universal";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Converte os botões laterais de retorno e avanço para gestos do trackpad para habilitar a funcionalidade de retorno e avanço universal.";
+"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
 "Debounce button clicks" = "Debounce de cliques do botão";
 "Ignore rapid clicks within a certain time period." = "Ignora cliques rápidos dentro de um período determinado.";
 "ms" = "ms";
