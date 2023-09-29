@@ -64,7 +64,7 @@ struct ButtonMappingButtonRecorder: View {
                 .leftMouseDown, .leftMouseUp,
                 .rightMouseDown, .rightMouseUp,
                 .otherMouseDown, .otherMouseUp
-            ]) { _, event in
+            ], place: .tailAppendEventTap) { _, event in
                 eventReceived(event)
             }
 
@@ -93,13 +93,13 @@ struct ButtonMappingButtonRecorder: View {
         case .scrollWheel:
             let scrollWheelEventView = ScrollWheelEventView(event)
             if scrollWheelEventView.deltaYSignum < 0 {
-                mapping.scroll = .up
-            } else if scrollWheelEventView.deltaYSignum > 0 {
                 mapping.scroll = .down
+            } else if scrollWheelEventView.deltaYSignum > 0 {
+                mapping.scroll = .up
             } else if scrollWheelEventView.deltaXSignum < 0 {
-                mapping.scroll = .left
-            } else if scrollWheelEventView.deltaXSignum > 0 {
                 mapping.scroll = .right
+            } else if scrollWheelEventView.deltaXSignum > 0 {
+                mapping.scroll = .left
             }
 
         default:

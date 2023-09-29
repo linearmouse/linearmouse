@@ -66,6 +66,7 @@ extension EventTap {
         - callback: The callback of the event tap.
      */
     static func observe(_ events: [CGEventType],
+                        place _: CGEventTapPlacement = .headInsertEventTap,
                         at runLoop: RunLoop = .current,
                         callback: @escaping Callback) throws -> ObservationToken {
         // Create a context holder. The lifetime of contextHolder should be the same as ObservationToken's.
