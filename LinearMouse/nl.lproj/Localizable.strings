@@ -50,6 +50,7 @@
 
 "Enable universal back and forward" = "Universeel achter en vooruit inschakelen";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Verander de functie van de heen- en terugknoppen naar veeggebaren om de universele heen- en terug functie in te schakelen.";
+"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
 "Debounce button clicks" = "Onbedoelde dubbelklik negeren";
 "Ignore rapid clicks within a certain time period." = "Negeer snelle klikken binnen een bepaalde periode.";
 "ms" = "ms";
