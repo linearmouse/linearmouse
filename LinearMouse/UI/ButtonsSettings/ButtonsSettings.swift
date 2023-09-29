@@ -9,6 +9,8 @@ struct ButtonsSettings: View {
             Form {
                 UniversalBackForwardSection()
 
+                SwitchPrimaryAndSecondaryButtonsSection()
+
                 ClickDebouncingSection()
 
                 ButtonMappingsSection()
