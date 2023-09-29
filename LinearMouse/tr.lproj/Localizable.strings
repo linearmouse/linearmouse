@@ -50,6 +50,7 @@
 
 "Enable universal back and forward" = "Evrensel ileri ve geriyi etkinleştir";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Evrensel ileri ve geri işlevine izin vermek için ileri ve geri yan düğmelerini kaydırma hareketlerine dönüştürün.";
+"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
 "Debounce button clicks" = "Buton arkını engelle";
 "Ignore rapid clicks within a certain time period." = "Belli bir süre içindeki hızlı tıklamaları yok say.";
 "ms" = "ms";
