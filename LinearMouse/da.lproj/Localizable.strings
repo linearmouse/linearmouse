@@ -50,6 +50,7 @@
 
 "Enable universal back and forward" = "Aktivér universel frem og tilbage";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Konverter tilbage og frem sideknapperne til strygebevægelser for at tillade universel tilbage og frem funktionalitet.";
+"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
 "Debounce button clicks" = "Undgå gentagelse af klik";
 "Ignore rapid clicks within a certain time period." = "Ignorer hurtige klik inden for et bestemt tidsrum.";
 "ms" = "ms";
