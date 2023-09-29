@@ -126,6 +126,12 @@
           "title": "Button mappings",
           "type": "array"
         },
+        "switchPrimaryButtonAndSecondaryButtons": {
+          "default": false,
+          "description": "If the value is true, the primary button will be the right button and the secondary button will be the left button.",
+          "title": "Switch primary and secondary buttons",
+          "type": "boolean"
+        },
         "universalBackForward": {
           "$ref": "#/definitions/Scheme.Buttons.UniversalBackForward",
           "default": false,

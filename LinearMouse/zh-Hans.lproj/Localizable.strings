@@ -50,6 +50,7 @@
 
 "Enable universal back and forward" = "启用全局后退、前进";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "将后退、前进侧键转换为滑动手势，以全局启用后退、前进支持。";
+"Switch primary and secondary buttons" = "交换主要和次要按钮";
 "Debounce button clicks" = "按钮点击去抖动";
 "Ignore rapid clicks within a certain time period." = "忽略在特定时间段内的快速点击。";
 "ms" = "毫秒";

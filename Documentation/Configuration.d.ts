@@ -330,6 +330,13 @@ declare namespace Scheme {
     universalBackForward?: Buttons.UniversalBackForward;
 
     /**
+     * @title Switch primary and secondary buttons
+     * @description If the value is true, the primary button will be the right button and the secondary button will be the left button.
+     * @default false
+     */
+    switchPrimaryButtonAndSecondaryButtons?: boolean;
+
+    /**
      * @title Debounce button clicks
      * @description Ignore rapid clicks with a certain time period.
      */

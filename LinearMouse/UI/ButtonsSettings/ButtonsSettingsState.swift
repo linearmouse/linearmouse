@@ -28,6 +28,15 @@ extension ButtonsSettingsState {
         }
     }
 
+    var switchPrimaryAndSecondaryButtons: Bool {
+        get {
+            mergedScheme.buttons.switchPrimaryButtonAndSecondaryButtons ?? false
+        }
+        set {
+            scheme.buttons.switchPrimaryButtonAndSecondaryButtons = newValue
+        }
+    }
+
     var clickDebouncingEnabled: Bool {
         get {
             mergedScheme.buttons.clickDebouncing.timeout ?? 0 > 0

@@ -130,6 +130,10 @@ class EventTransformerManager {
             eventTransformer.append(ModifierActionsTransformer(modifiers: modifiers))
         }
 
+        if scheme.buttons.switchPrimaryButtonAndSecondaryButtons == true {
+            eventTransformer.append(SwitchPrimaryAndSecondaryButtonsTransformer())
+        }
+
         if let mappings = scheme.buttons.mappings {
             eventTransformer.append(ButtonActionsTransformer(mappings: mappings))
         }

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -48,6 +48,8 @@
 		9735338F297F8EE200C1B5D0 /* FormViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9735338E297F8EE200C1B5D0 /* FormViewModifier.swift */; };
 		973ADFCE29E2F18C00443649 /* LoggingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 973ADFCD29E2F18C00443649 /* LoggingSection.swift */; };
 		973EB9FE287EE7D90069A8EF /* Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 973EB9FD287EE7D90069A8EF /* Action.swift */; };
+		9754A7C62AC6BCC60021AB4A /* SwitchPrimaryAndSecondaryButtonsTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9754A7C52AC6BCC60021AB4A /* SwitchPrimaryAndSecondaryButtonsTransformer.swift */; };
+		9754A7C92AC6C25B0021AB4A /* SwitchPrimaryAndSecondaryButtonsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9754A7C82AC6C25B0021AB4A /* SwitchPrimaryAndSecondaryButtonsSection.swift */; };
 		9757BB9629935445002333AA /* Bidirectional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9757BB9529935445002333AA /* Bidirectional.swift */; };
 		9757BB9A29935474002333AA /* BidirectionalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9757BB9929935474002333AA /* BidirectionalTests.swift */; };
 		975805592A24CF0F0046E55E /* Action+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 975805582A24CF0F0046E55E /* Action+CustomStringConvertible.swift */; };
@@ -192,6 +194,8 @@
 		9735338E297F8EE200C1B5D0 /* FormViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormViewModifier.swift; sourceTree = "<group>"; };
 		973ADFCD29E2F18C00443649 /* LoggingSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggingSection.swift; sourceTree = "<group>"; };
 		973EB9FD287EE7D90069A8EF /* Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Action.swift; sourceTree = "<group>"; };
+		9754A7C52AC6BCC60021AB4A /* SwitchPrimaryAndSecondaryButtonsTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchPrimaryAndSecondaryButtonsTransformer.swift; sourceTree = "<group>"; };
+		9754A7C82AC6C25B0021AB4A /* SwitchPrimaryAndSecondaryButtonsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwitchPrimaryAndSecondaryButtonsSection.swift; sourceTree = "<group>"; };
 		9757BB9529935445002333AA /* Bidirectional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bidirectional.swift; sourceTree = "<group>"; };
 		9757BB9929935474002333AA /* BidirectionalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalTests.swift; sourceTree = "<group>"; };
 		975805582A24CF0F0046E55E /* Action+CustomStringConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Action+CustomStringConvertible.swift"; sourceTree = "<group>"; };
@@ -514,6 +518,7 @@
 				972DF65A285AEABA00B83932 /* ButtonsSettings.swift */,
 				97C5DBC42868A1ED006FA6B4 /* ButtonsSettingsState.swift */,
 				978DBC9B29A60D92002259B3 /* UniversalBackForwardSection.swift */,
+				9754A7C82AC6C25B0021AB4A /* SwitchPrimaryAndSecondaryButtonsSection.swift */,
 				978DBC9D29A60E2F002259B3 /* ClickDebouncingSection.swift */,
 				97FD8CE829BE0F8A00D93212 /* ButtonMappingsSection */,
 			);
@@ -779,6 +784,7 @@
 				B716F15F26BC10B80052F551 /* UniversalBackForwardTransformer.swift */,
 				978DBC9F29A61D50002259B3 /* ClickDebouncingTransformer.swift */,
 				97B913FD28869F0500DC920A /* ButtonActionsTransformer.swift */,
+				9754A7C52AC6BCC60021AB4A /* SwitchPrimaryAndSecondaryButtonsTransformer.swift */,
 			);
 			path = EventTransformer;
 			sourceTree = "<group>";
@@ -1070,6 +1076,7 @@
 				97A13AD2287094FB002F6193 /* Distance.swift in Sources */,
 				97B83CDD2860B3FD00ECF109 /* Scrolling.swift in Sources */,
 				97E1B7BB2A585EA700655EEC /* ButtonMappingActionScroll.swift in Sources */,
+				9754A7C92AC6C25B0021AB4A /* SwitchPrimaryAndSecondaryButtonsSection.swift in Sources */,
 				97B83CDB28607E2600ECF109 /* ConfigurationState.swift in Sources */,
 				97F77FAF285F0A58007C9C2B /* Configuration.swift in Sources */,
 				9766C4BA299E1A1400FA3A9C /* AppPicker.swift in Sources */,
@@ -1120,6 +1127,7 @@
 				97D3470C293CDEA000E7DFE1 /* WeakRef.swift in Sources */,
 				97C5DBBC28686EFC006FA6B4 /* Pointer.swift in Sources */,
 				97E1B7C22A59258D00655EEC /* ButtonMappingActionKeyPress.swift in Sources */,
+				9754A7C62AC6BCC60021AB4A /* SwitchPrimaryAndSecondaryButtonsTransformer.swift in Sources */,
 				97C5DBC52868A1ED006FA6B4 /* ButtonsSettingsState.swift in Sources */,
 				972DF649285A26F700B83932 /* DeviceIndicator.swift in Sources */,
 				9781C1062A2AF2EB0065E0B6 /* ConfigurationSection.swift in Sources */,
