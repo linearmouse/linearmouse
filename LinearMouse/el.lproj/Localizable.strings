@@ -50,6 +50,7 @@
 
 "Enable universal back and forward" = "Ενεργοποίηση λειτουργίας πίσω και εμπρός καθολικά";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Μετατρέψτε τα πίσω και προς τα εμπρός πλευρικά κουμπιά σε χειρονομίες για την καθολική ενεργοποίηση της λειτουργίας πίσω και εμπρός.";
+"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
 "Debounce button clicks" = "Παράβλεψη γρήγορων κλικ";
 "Ignore rapid clicks within a certain time period." = "Παράβλεψη γρήγορων κλικ μέσα σε ένα ορισμένο χρονικό διάστημα.";
 "ms" = "ms";
