@@ -21,8 +21,8 @@ class GlobalEventTap {
         let eventTransformer = EventTransformerManager.shared.get(withCGEvent: event,
                                                                   withSourcePid: mouseEventView.sourcePid,
                                                                   withTargetPid: mouseEventView.targetPid,
-                                                                  withScreen: ScreenManager.shared.currentScreen?
-                                                                      .localizedName)
+                                                                  withDisplay: ScreenManager.shared.currentScreen?
+                                                                      .nameOrLocalizedName)
         return eventTransformer.transform(event)
     }
 

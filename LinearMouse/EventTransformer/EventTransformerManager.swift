@@ -40,7 +40,7 @@ class EventTransformerManager {
     func get(withCGEvent cgEvent: CGEvent,
              withSourcePid sourcePid: pid_t?,
              withTargetPid pid: pid_t?,
-             withScreen screen: String?) -> EventTransformer {
+             withDisplay display: String?) -> EventTransformer {
         let prevActiveCacheKey = activeCacheKey
         defer {
             if let prevActiveCacheKey = prevActiveCacheKey,
@@ -76,7 +76,7 @@ class EventTransformerManager {
         let device = DeviceManager.shared.deviceFromCGEvent(cgEvent)
         let cacheKey = CacheKey(deviceMatcher: device.map { DeviceMatcher(of: $0) },
                                 pid: pid,
-                                screen: screen)
+                                screen: display)
         activeCacheKey = cacheKey
         if let eventTransformer = eventTransformerCache.value(forKey: cacheKey) {
             return eventTransformer
@@ -84,7 +84,7 @@ class EventTransformerManager {
 
         let scheme = ConfigurationState.shared.configuration.matchScheme(withDevice: device,
                                                                          withPid: pid,
-                                                                         withDisplay: screen)
+                                                                         withDisplay: display)
 
         // TODO: Patch EventTransformer instead of rebuilding it
 
@@ -95,7 +95,7 @@ class EventTransformerManager {
             String(describing: scheme),
             String(describing: device),
             String(describing: pid),
-            String(describing: screen)
+            String(describing: display)
         )
 
         var eventTransformer: [EventTransformer] = []
