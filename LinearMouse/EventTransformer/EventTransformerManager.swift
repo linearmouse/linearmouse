@@ -19,6 +19,7 @@ class EventTransformerManager {
     struct CacheKey: Hashable {
         var deviceMatcher: DeviceMatcher?
         var pid: pid_t?
+        var screen: String?
     }
 
     private var subscriptions = Set<AnyCancellable>()
@@ -38,7 +39,8 @@ class EventTransformerManager {
 
     func get(withCGEvent cgEvent: CGEvent,
              withSourcePid sourcePid: pid_t?,
-             withTargetPid pid: pid_t?) -> EventTransformer {
+             withTargetPid pid: pid_t?,
+             withScreen screen: String?) -> EventTransformer {
         let prevActiveCacheKey = activeCacheKey
         defer {
             if let prevActiveCacheKey = prevActiveCacheKey,
@@ -73,22 +75,28 @@ class EventTransformerManager {
 
         let device = DeviceManager.shared.deviceFromCGEvent(cgEvent)
         let cacheKey = CacheKey(deviceMatcher: device.map { DeviceMatcher(of: $0) },
-                                pid: pid)
+                                pid: pid,
+                                screen: screen)
         activeCacheKey = cacheKey
         if let eventTransformer = eventTransformerCache.value(forKey: cacheKey) {
             return eventTransformer
         }
 
         let scheme = ConfigurationState.shared.configuration.matchScheme(withDevice: device,
-                                                                         withPid: pid)
+                                                                         withPid: pid,
+                                                                         withScreen: screen)
 
         // TODO: Patch EventTransformer instead of rebuilding it
 
-        os_log("Initialize EventTransformer with scheme: %{public}@ (device=%{public}@, pid=%{public}@)",
-               log: Self.log, type: .info,
-               String(describing: scheme),
-               String(describing: device),
-               String(describing: pid))
+        os_log(
+            "Initialize EventTransformer with scheme: %{public}@ (device=%{public}@, pid=%{public}@, screen=%{public}@)",
+            log: Self.log,
+            type: .info,
+            String(describing: scheme),
+            String(describing: device),
+            String(describing: pid),
+            String(describing: screen)
+        )
 
         var eventTransformer: [EventTransformer] = []
 

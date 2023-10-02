@@ -20,6 +20,7 @@
 		972327B12992912F0041538A /* ReverseScrollingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972327B02992912F0041538A /* ReverseScrollingSection.swift */; };
 		972327B3299291860041538A /* ScrollingModeSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972327B2299291860041538A /* ScrollingModeSection.swift */; };
 		972327B5299291F40041538A /* ModifierKeysSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972327B4299291F40041538A /* ModifierKeysSection.swift */; };
+		9724A9D12ACAF1B400EA5DE3 /* ScreenManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9724A9D02ACAF1B400EA5DE3 /* ScreenManager.swift */; };
 		9724FACA2A3E04DE00622F5A /* KeyKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9724FAC92A3E04DE00622F5A /* KeyKit */; };
 		972A5E1F285CA43D00CB6440 /* DevicePickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E1E285CA43D00CB6440 /* DevicePickerSheet.swift */; };
 		972A5E22285CA49800CB6440 /* DevicePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E21285CA49800CB6440 /* DevicePicker.swift */; };
@@ -170,6 +171,7 @@
 		972327B02992912F0041538A /* ReverseScrollingSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReverseScrollingSection.swift; sourceTree = "<group>"; };
 		972327B2299291860041538A /* ScrollingModeSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingModeSection.swift; sourceTree = "<group>"; };
 		972327B4299291F40041538A /* ModifierKeysSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierKeysSection.swift; sourceTree = "<group>"; };
+		9724A9D02ACAF1B400EA5DE3 /* ScreenManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenManager.swift; sourceTree = "<group>"; };
 		972A5E1E285CA43D00CB6440 /* DevicePickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSheet.swift; sourceTree = "<group>"; };
 		972A5E21285CA49800CB6440 /* DevicePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePicker.swift; sourceTree = "<group>"; };
 		972A5E23285CA4AA00CB6440 /* DevicePickerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerState.swift; sourceTree = "<group>"; };
@@ -430,6 +432,23 @@
 				B7B6D83D26B2745300B0D247 /* ModifierKeyActionPicker.swift */,
 			);
 			path = ModifierKeysSection;
+			sourceTree = "<group>";
+		};
+		9724A9CE2ACAF18000EA5DE3 /* EventTap */ = {
+			isa = PBXGroup;
+			children = (
+				975979CF2A6B7A3800016EDF /* EventTap.swift */,
+				B7BD51802672FEB5001FE742 /* GlobalEventTap.swift */,
+			);
+			path = EventTap;
+			sourceTree = "<group>";
+		};
+		9724A9CF2ACAF1A000EA5DE3 /* ScreenManager */ = {
+			isa = PBXGroup;
+			children = (
+				9724A9D02ACAF1B400EA5DE3 /* ScreenManager.swift */,
+			);
+			path = ScreenManager;
 			sourceTree = "<group>";
 		};
 		972A5E1D285CA42500CB6440 /* DevicePickerSheet */ = {
@@ -785,6 +804,7 @@
 			isa = PBXGroup;
 			children = (
 				972DF62F2859754D00B83932 /* Utilities */,
+				9724A9CE2ACAF18000EA5DE3 /* EventTap */,
 				B7ADF9902748EAB80005B02D /* EventView */,
 				B77BA0F027480A9700E3BC5C /* EventTransformer */,
 				B7ADF9892748B65D0005B02D /* UI */,
@@ -792,6 +812,7 @@
 				97F77FAD285F09FA007C9C2B /* Model */,
 				B77D7C1327BA58DB00825F54 /* Device */,
 				970AA57D2B346AE10050B5A2 /* EventTap */,
+				9724A9CF2ACAF1A000EA5DE3 /* ScreenManager */,
 				B794BFE126BC0B2F003B11EF /* LinearMouse-Bridging-Header.h */,
 				B75A061B2671E9D800BEAF77 /* AppDelegate.swift */,
 				B75A061F2671E9DA00BEAF77 /* Assets.xcassets */,
@@ -1191,6 +1212,7 @@
 				978DBC9C29A60D92002259B3 /* UniversalBackForwardSection.swift in Sources */,
 				97F77FAA285E178B007C9C2B /* DevicePickerSectionItem.swift in Sources */,
 				36EBC3223E2CEE09F84076D8 /* Process.m in Sources */,
+				9724A9D12ACAF1B400EA5DE3 /* ScreenManager.swift in Sources */,
 				97353386297ED84600C1B5D0 /* ScrollingAccelerationSpeedAdjustmentTransformer.swift in Sources */,
 				97E1B7B92A57BD9100655EEC /* ButtonMappingActionPicker.swift in Sources */,
 				973ADFCE29E2F18C00443649 /* LoggingSection.swift in Sources */,

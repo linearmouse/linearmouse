@@ -36,7 +36,8 @@ extension Scheme {
     func isActive(withDevice device: Device? = nil,
                   withApp app: String? = nil,
                   withParentApp parentApp: String? = nil,
-                  withGroupApp groupApp: String? = nil) -> Bool {
+                  withGroupApp groupApp: String? = nil,
+                  withScreen screen: String? = nil) -> Bool {
         guard let `if` = `if` else {
             return true
         }
@@ -45,7 +46,8 @@ extension Scheme {
             $0.isSatisfied(withDevice: device,
                            withApp: app,
                            withParentApp: parentApp,
-                           withGroupApp: groupApp)
+                           withGroupApp: groupApp,
+                           withScreen: screen)
         }
     }
 

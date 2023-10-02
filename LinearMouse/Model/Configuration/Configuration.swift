@@ -95,7 +95,8 @@ extension Configuration {
     func matchScheme(withDevice device: Device? = nil,
                      withApp app: String? = nil,
                      withParentApp parentApp: String? = nil,
-                     withGroupApp groupApp: String? = nil) -> Scheme {
+                     withGroupApp groupApp: String? = nil,
+                     withScreen screen: String? = nil) -> Scheme {
         // TODO: Backtrace the merge path
         // TODO: Optimize the algorithm
 
@@ -104,14 +105,16 @@ extension Configuration {
         let `if` = Scheme.If(device: device.map { DeviceMatcher(of: $0) },
                              app: app,
                              parentApp: parentApp,
-                             groupApp: groupApp)
+                             groupApp: groupApp,
+                             screen: screen)
 
         mergedScheme.if = [`if`]
 
         for scheme in schemes where scheme.isActive(withDevice: device,
                                                     withApp: app,
                                                     withParentApp: parentApp,
-                                                    withGroupApp: groupApp) {
+                                                    withGroupApp: groupApp,
+                                                    withScreen: screen) {
             scheme.merge(into: &mergedScheme)
         }
 
@@ -119,10 +122,12 @@ extension Configuration {
     }
 
     func matchScheme(withDevice device: Device? = nil,
-                     withPid pid: pid_t? = nil) -> Scheme {
+                     withPid pid: pid_t? = nil,
+                     withScreen screen: String? = nil) -> Scheme {
         matchScheme(withDevice: device,
                     withApp: pid?.bundleIdentifier,
                     withParentApp: pid?.parent?.bundleIdentifier,
-                    withGroupApp: pid?.group?.bundleIdentifier)
+                    withGroupApp: pid?.group?.bundleIdentifier,
+                    withScreen: screen)
     }
 }
