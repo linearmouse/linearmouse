@@ -96,7 +96,7 @@ extension Configuration {
                      withApp app: String? = nil,
                      withParentApp parentApp: String? = nil,
                      withGroupApp groupApp: String? = nil,
-                     withScreen screen: String? = nil) -> Scheme {
+                     withDisplay display: String? = nil) -> Scheme {
         // TODO: Backtrace the merge path
         // TODO: Optimize the algorithm
 
@@ -106,7 +106,7 @@ extension Configuration {
                              app: app,
                              parentApp: parentApp,
                              groupApp: groupApp,
-                             screen: screen)
+                             display: display)
 
         mergedScheme.if = [`if`]
 
@@ -114,7 +114,7 @@ extension Configuration {
                                                     withApp: app,
                                                     withParentApp: parentApp,
                                                     withGroupApp: groupApp,
-                                                    withScreen: screen) {
+                                                    withDisplay: display) {
             scheme.merge(into: &mergedScheme)
         }
 
@@ -123,11 +123,11 @@ extension Configuration {
 
     func matchScheme(withDevice device: Device? = nil,
                      withPid pid: pid_t? = nil,
-                     withScreen screen: String? = nil) -> Scheme {
+                     withDisplay display: String? = nil) -> Scheme {
         matchScheme(withDevice: device,
                     withApp: pid?.bundleIdentifier,
                     withParentApp: pid?.parent?.bundleIdentifier,
                     withGroupApp: pid?.group?.bundleIdentifier,
-                    withScreen: screen)
+                    withDisplay: display)
     }
 }

@@ -37,7 +37,7 @@ extension Scheme {
                   withApp app: String? = nil,
                   withParentApp parentApp: String? = nil,
                   withGroupApp groupApp: String? = nil,
-                  withScreen screen: String? = nil) -> Bool {
+                  withDisplay display: String? = nil) -> Bool {
         guard let `if` = `if` else {
             return true
         }
@@ -47,7 +47,7 @@ extension Scheme {
                            withApp: app,
                            withParentApp: parentApp,
                            withGroupApp: groupApp,
-                           withScreen: screen)
+                           withDisplay: display)
         }
     }
 

@@ -84,7 +84,7 @@ class EventTransformerManager {
 
         let scheme = ConfigurationState.shared.configuration.matchScheme(withDevice: device,
                                                                          withPid: pid,
-                                                                         withScreen: screen)
+                                                                         withDisplay: screen)
 
         // TODO: Patch EventTransformer instead of rebuilding it
 

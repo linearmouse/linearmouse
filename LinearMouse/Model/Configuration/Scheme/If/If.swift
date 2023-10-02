@@ -12,7 +12,7 @@ extension Scheme {
         var parentApp: String?
         var groupApp: String?
 
-        var screen: String?
+        var display: String?
     }
 }
 
@@ -21,7 +21,7 @@ extension Scheme.If {
                      withApp targetApp: String? = nil,
                      withParentApp targetParentApp: String?,
                      withGroupApp targetGroupApp: String?,
-                     withScreen targetScreen: String? = nil) -> Bool {
+                     withDisplay targetDisplay: String? = nil) -> Bool {
         if let device = device {
             guard let targetDevice = targetDevice else {
                 return false
@@ -50,12 +50,12 @@ extension Scheme.If {
             }
         }
 
-        if let screen = screen {
-            guard let targetScreen = targetScreen else {
+        if let display = display {
+            guard let targetDisplay = targetDisplay else {
                 return false
             }
 
-            guard screen == targetScreen else {
+            guard display == targetDisplay else {
                 return false
             }
         }
