@@ -59,7 +59,9 @@ public class KeySimulator {
             return
         }
 
-        event.flags = flags
+        event.flags = event.flags
+            .subtracting([.maskCommand, .maskShift, .maskAlternate, .maskControl])
+            .union(flags)
 
         if !flagsToToggle.isEmpty {
             event.type = .flagsChanged
