@@ -50,7 +50,7 @@
 
 "Enable universal back and forward" = "범용 뒤로/앞으로 가기 활성화";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "뒤로 및 앞으로 가기 측면 버튼을 스와이프 제스처로 변환하여 앱 호환성을 향상시킵니다.";
-"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
+"Switch primary and secondary buttons" = "주 버튼과 보조 버튼 기능 바꾸기";
 "Debounce button clicks" = "디바운스 시간 설정";
 "Ignore rapid clicks within a certain time period." = "특정 시간 내의 빠른 클릭을 무시합니다.";
 "ms" = "밀리초";
