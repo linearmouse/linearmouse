@@ -77,8 +77,8 @@
 "Button #%lld click" = "Button #%lld click";
 "Scroll up" = "上にスクロール";
 "Scroll down" = "下にスクロール";
-"Scroll left" = "Scroll left";
-"Scroll right" = "Scroll right";
+"Scroll left" = "左にスクロール";
+"Scroll right" = "右にスクロール";
 
 "Mission Control" = "Mission Control";
 "Move left a space" = "Move left a space";
@@ -105,24 +105,24 @@
 "Decrease keyboard brightness" = "Decrease keyboard brightness";
 "Mouse Wheel" = "Mouse Wheel";
 "Mouse Button" = "Mouse Button";
-"Back" = "Back";
+"Back" = "戻る";
 "Forward" = "Forward";
 "Execute" = "Execute";
 "Run shell command…" = "Run shell command…";
-"Scroll up…" = "Scroll up…";
-"Scroll down…" = "Scroll down…";
-"Scroll left…" = "Scroll left…";
-"Scroll right…" = "Scroll right…";
+"Scroll up…" = "上にスクロール";
+"Scroll down…" = "下にスクロール";
+"Scroll left…" = "左にスクロール";
+"Scroll right…" = "右にスクロール";
 "Keyboard shortcut…" = "Keyboard shortcut…";
 
-"Mouse button" = "Mouse button";
+"Mouse button" = "マウスボタン";
 "Action" = "Action";
 "The mouse button is already assigned." = "The mouse button is already assigned.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "Assigning an action to the left button without any modifier keys is not allowed.";
 "Repeat on hold" = "Repeat on hold";
-"Cancel" = "Cancel";
+"Cancel" = "取消";
 "OK" = "了解";
-"Create" = "Create";
+"Create" = "作成";
 
 "Settings" = "設定";
 "Show in menu bar" = "メニューバーに表示";
@@ -139,19 +139,19 @@
 "Daily" = "毎日";
 "Weekly" = "毎週";
 "Monthly" = "毎月";
-"Receive beta updates" = "Receive beta updates";
-"Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
+"Receive beta updates" = "ベータ版のアップデートを受け取る";
+"Thank you for participating in the beta test." = "ベータテストにご参加頂き、ありがとうございます。";
 "Check for Updates…" = "アップデートを確認";
 
-"Enable verbose logging" = "Enable verbose logging";
-"Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting.";
-"Export the logs for the last 5 minutes." = "Export the logs for the last 5 minutes.";
-"If you are reporting a bug, it would be helpful to attach the logs." = "If you are reporting a bug, it would be helpful to attach the logs.";
-"Export logs" = "Export logs";
+"Enable verbose logging" = "詳細ログを有効化";
+"Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "このオプションを有効にすると、すべての入力イベントが記録されるため、 %@の使用中に CPU 使用率が増加する可能性があります。トラブルシューティングに役立ちます。";
+"Export the logs for the last 5 minutes." = "過去5分間のログを取る。";
+"If you are reporting a bug, it would be helpful to attach the logs." = "バグを報告する場合、ログを添付して頂けると助かります。";
+"Export logs" = "ログを取る";
 
 "Homepage" = "ホームページ";
-"Bug report" = "Bug report";
-"Feature request" = "Feature request";
+"Bug report" = "問題を報告";
+"Feature request" = "機能の提案";
 "Donate" = "Donate";
 
 "Auto switch to the active device" = "自動的に使用中の装置に切り替え";
@@ -161,7 +161,7 @@
 "(active)" = "(有効)";
 
 "Configure for" = "Configure for";
-"All Apps" = "All Apps";
-"Configured" = "Configured";
-"Running" = "Running";
-"Installed" = "Installed";
+"All Apps" = "全てのアプリ";
+"Configured" = "設定済みのアプリ";
+"Running" = "実行中のアプリ";
+"Installed" = "設置されているアプリ";
