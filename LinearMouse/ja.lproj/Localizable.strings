@@ -1,14 +1,14 @@
 "LinearMouse needs Accessibility permission" = "LinearMouseにはアクセシビリティの許可が必要です";
-"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "システム環境設定 > セキュリティ & プライバシー > アクセシビリティで、Linear Mouseのアクセシビリティの許可が必要です。";
 "Get more help" = "ヘルプ";
 "Open Accessibility" = "アクセシビリティの設定を開く";
 
-"%@ Settings…" = "%@ Settings…";
+"%@ Settings…" = "%@ 設定…";
 "Start at login" = "ログイン時の自動起動";
 "Config" = "設定";
 "Reload" = "再ロード";
 "Reveal in Finder" = "Finder で表示";
-"Configure for %@…" = "Configure for %@…";
+"Configure for %@…" = "%@… の設定";
 "Quit %@" = "%@を終了";
 
 "Scrolling" = "スクロール";
@@ -16,31 +16,31 @@
 "Buttons" = "ボタン";
 "General" = "一般";
 
-"Vertical" = "Vertical";
-"Horizontal" = "Horizontal";
+"Vertical" = "縦方向";
+"Horizontal" = "横方向";
 "Reverse scrolling" = "逆スクロール";
 "Some gestures, such as swiping back and forward, may stop working." = "前後スワイプ等、一部のジェスチャーが動作しなくなる可能性があります。";
-"Scrolling mode" = "Scrolling mode";
-"Accelerated" = "Accelerated";
-"By Lines" = "By Lines";
-"By Pixels" = "By Pixels";
-"Scrolling acceleration" = "Scrolling acceleration";
-"Linear" = "Linear";
-"Scrolling speed" = "Scrolling speed";
-"Slow" = "Slow";
-"Fast" = "Fast";
-"Distance" = "Distance";
-"Scrolling is disabled based on the current settings." = "Scrolling is disabled based on the current settings.";
+"Scrolling mode" = "スクロールモード";
+"Accelerated" = "加速";
+"By Lines" = "行";
+"By Pixels" = "ピクセル数";
+"Scrolling acceleration" = "スクロールの加速";
+"Linear" = "線形";
+"Scrolling speed" = "スクロールの速さ";
+"Slow" = "遅い";
+"Fast" = "速い";
+"Distance" = "距離";
+"Scrolling is disabled based on the current settings." = "現在の設定では、スクロールが無効となっています。";
 "Revert to system defaults" = "システムデフォルトに戻す";
-"Copy settings from vertical" = "Copy settings from vertical";
+"Copy settings from vertical" = "縦方向と同じ設定を適用";
 "Modifier Keys" = "修飾キー";
-"Default action" = "Default action";
-"Ignore modifier" = "Ignore modifier";
+"Default action" = "デフォルト動作";
+"Ignore modifier" = "モディファイアーキーを無視";
 "No action" = "何もしない";
 "Alter orientation" = "方向を変更する";
 "Change speed" = "速度変更";
-"Zoom" = "Zoom";
-"Pinch zoom" = "Pinch zoom";
+"Zoom" = "拡大";
+"Pinch zoom" = "ピンチズーム";
 
 "Disable pointer acceleration" = "ポインター加速を無効にする。";
 "Pointer acceleration" = "Pointer acceleration";
@@ -75,8 +75,8 @@
 "Right click" = "Right click";
 "Middle click" = "Middle click";
 "Button #%lld click" = "Button #%lld click";
-"Scroll up" = "Scroll up";
-"Scroll down" = "Scroll down";
+"Scroll up" = "上にスクロール";
+"Scroll down" = "下にスクロール";
 "Scroll left" = "Scroll left";
 "Scroll right" = "Scroll right";
 
