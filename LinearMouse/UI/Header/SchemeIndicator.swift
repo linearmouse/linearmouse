@@ -8,6 +8,7 @@ struct SchemeIndicator: View {
         HStack {
             DeviceIndicator()
             AppIndicator()
+            DisplayIndicator()
         }
         .padding(.horizontal, 10)
         .frame(height: 35, alignment: .leading)

@@ -95,3 +95,28 @@ extension Scheme: CustomStringConvertible {
         }
     }
 }
+
+extension [Scheme] {
+    enum SchemeIndex {
+        case at(Int)
+        case insertAt(Int)
+    }
+
+    func schemeIndex(ofDevice device: Device,
+                     ofApp app: String?,
+                     ofDisplay display: String?) -> SchemeIndex {
+        let allDeviceSpecificSchemes = allDeviceSpecficSchemes(of: device)
+
+        guard let first = allDeviceSpecificSchemes.first,
+              let last = allDeviceSpecificSchemes.last else {
+            return .insertAt(schemes.endIndex)
+        }
+
+        if let (index, _) = allDeviceSpecificSchemes
+            .first(where: { _, scheme in scheme.if?.first?.app == app && scheme.if?.first?.display == display }) {
+            return .at(index)
+        }
+
+        return .insertAt(app == nil && display == nil ? first.offset : last.offset + 1)
+    }
+}

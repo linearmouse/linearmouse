@@ -132,7 +132,7 @@ extension NSScreen {
         return productNames?.allValues.first as? String
     }
 
-    var nameOrLocalizedName: String? {
+    var nameOrLocalizedName: String {
         name ?? localizedName
     }
 }
