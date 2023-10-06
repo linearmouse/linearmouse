@@ -114,6 +114,6 @@ public extension KeySimulator {
             return nil
         }
 
-        return flags
+        return event.flags.union(flags)
     }
 }
