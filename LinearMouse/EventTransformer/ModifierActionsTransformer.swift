@@ -2,18 +2,32 @@
 // Copyright (c) 2021-2023 LinearMouse
 
 import Foundation
+import GestureKit
+import KeyKit
+import os.log
 
 class ModifierActionsTransformer: EventTransformer {
+    private static let log = OSLog(
+        subsystem: Bundle.main.bundleIdentifier!,
+        category: "ModifierActionsTransformer"
+    )
+
     typealias Modifiers = Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Modifiers>
     typealias Action = Scheme.Scrolling.Modifiers.Action
 
     private let modifiers: Modifiers
+
+    private var pinchZoomBegan = false
 
     init(modifiers: Modifiers) {
         self.modifiers = modifiers
     }
 
     func transform(_ event: CGEvent) -> CGEvent? {
+        if pinchZoomBegan {
+            return handlePinchZoom(event)
+        }
+
         guard event.type == .scrollWheel else {
             return event
         }
@@ -58,26 +72,48 @@ class ModifierActionsTransformer: EventTransformer {
             scrollWheelEventView.scale(factor: scale.asTruncatedDouble)
         case .zoom:
             let scrollWheelEventView = ScrollWheelEventView(event)
-            // TODO: Extract a KeyboardKit?
-            CGEvent(keyboardEventSource: nil, virtualKey: 0x37, keyDown: true)?.post(tap: .cgSessionEventTap)
             let deltaSignum = scrollWheelEventView.deltaYSignum != 0 ? scrollWheelEventView
                 .deltaYSignum : scrollWheelEventView.deltaXSignum
             if deltaSignum == 0 {
                 return event
             }
-            let virtualKey: CGKeyCode = deltaSignum > 0 ? 0x45 : 0x4E
-            if let keyDownEvent = CGEvent(keyboardEventSource: nil, virtualKey: virtualKey, keyDown: true) {
-                keyDownEvent.flags = .maskCommand
-                keyDownEvent.post(tap: .cgSessionEventTap)
+            let keySimulator = KeySimulator()
+            if deltaSignum > 0 {
+                try? keySimulator.press(.command, .numpadPlus, tap: .cgSessionEventTap)
+            } else {
+                try? keySimulator.press(.command, .numpadMinus, tap: .cgSessionEventTap)
             }
-            if let keyDownUp = CGEvent(keyboardEventSource: nil, virtualKey: virtualKey, keyDown: false) {
-                keyDownUp.flags = .maskCommand
-                keyDownUp.post(tap: .cgSessionEventTap)
-            }
-            CGEvent(keyboardEventSource: nil, virtualKey: 0x37, keyDown: false)?.post(tap: .cgSessionEventTap)
             return nil
+        case .pinchZoom:
+            return handlePinchZoom(event)
         }
 
         return event
+    }
+
+    private func handlePinchZoom(_ event: CGEvent) -> CGEvent? {
+        guard event.type == .scrollWheel || event.type == .flagsChanged else {
+            return event
+        }
+
+        if event.type == .flagsChanged {
+            pinchZoomBegan = false
+            GestureEvent(zoomSource: nil, phase: .ended, magnification: 0)?.post(tap: .cgSessionEventTap)
+            os_log("pinch zoom ended", log: Self.log, type: .info)
+            return nil
+        }
+
+        if !pinchZoomBegan {
+            GestureEvent(zoomSource: nil, phase: .began, magnification: 0)?.post(tap: .cgSessionEventTap)
+            pinchZoomBegan = true
+            os_log("pinch zoom began", log: Self.log, type: .info)
+        }
+
+        let scrollWheelEventView = ScrollWheelEventView(event)
+        let magnification = Double(scrollWheelEventView.deltaYPt) * 0.005
+        GestureEvent(zoomSource: nil, phase: .changed, magnification: magnification)?.post(tap: .cgSessionEventTap)
+        os_log("pinch zoom changed: magnification=%f", log: Self.log, type: .info, magnification)
+
+        return nil
     }
 }

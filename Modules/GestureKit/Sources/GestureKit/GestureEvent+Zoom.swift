@@ -15,15 +15,15 @@ public extension GestureEvent {
         self.init(cgEvents: [event])
     }
 
-    convenience init?(zoomSource: CGEventSource?, phase: CGSGesturePhase, magnification _: Double) {
+    convenience init?(zoomSource: CGEventSource?, phase: CGSGesturePhase, magnification: Double) {
         guard let event = CGEvent(source: zoomSource) else {
             return nil
         }
 
         event.type = .init(nsEventType: .gesture)!
-        event.setIntegerValueField(.gestureHIDType, value: Int64(IOHIDEventType.zoomToggle.rawValue))
+        event.setIntegerValueField(.gestureHIDType, value: Int64(IOHIDEventType.zoom.rawValue))
         event.setIntegerValueField(.gesturePhase, value: Int64(phase.rawValue))
-        event.setIntegerValueField(.gestureZoomValue, value: Int64(phase.rawValue))
+        event.setDoubleValueField(.gestureZoomValue, value: magnification)
 
         self.init(cgEvents: [event])
     }

@@ -14,6 +14,16 @@ class Device {
     static let fallbackPointerResolution = 400.0
     static let fallbackPointerSpeed = pointerSpeed(fromPointerResolution: fallbackPointerResolution)
 
+    private struct Product: Hashable {
+        let vendorID: Int
+        let productID: Int
+    }
+
+    private static let productsToApplySideButtonFixes: Set<Product> = [
+        .init(vendorID: 0x2717, productID: 0x5014), // Mi Silent Mouse
+        .init(vendorID: 0x248A, productID: 0x8266) // Delux M729DB mouse
+    ]
+
     private weak var manager: DeviceManager?
     private let device: PointerDevice
 
@@ -45,7 +55,9 @@ class Device {
         //
         // To work around this issue, we subscribe to the input reports and monitor the side button
         // states. When the side buttons are clicked, we simulate those events.
-        if buttonCount == 3 {
+        if buttonCount == 3,
+           let vendorID = vendorID, let productID = productID,
+           Self.productsToApplySideButtonFixes.contains(.init(vendorID: vendorID, productID: productID)) {
             reportObservationToken = device.observeReport(using: { [weak self] in
                 self?.inputReportCallback($0, $1)
             })
@@ -248,6 +260,7 @@ extension Device {
                    String(describing: device), String(describing: reportHex))
         }
 
+        // FIXME: Correct HID Report parsing?
         guard report.count >= 2 else {
             return
         }

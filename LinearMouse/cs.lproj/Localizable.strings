@@ -40,6 +40,7 @@
 "Alter orientation" = "Změna oriantace";
 "Change speed" = "Změna rychlosti";
 "Zoom" = "Zoom";
+"Pinch zoom" = "Pinch zoom";
 
 "Disable pointer acceleration" = "Deaktivovat zrychlení kurzoru";
 "Pointer acceleration" = "Pointer acceleration";
@@ -49,6 +50,7 @@
 
 "Enable universal back and forward" = "Aktivovat univerzální přecházení zpět a dopředu";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Převádí stisk bočních tlačítek myši pro pohyb zpět a dopředu na gesta přejetí prstem (swipe) a tím umožňuje využití tlačítek pro navigaci";
+"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
 "Debounce button clicks" = "Debounce button clicks";
 "Ignore rapid clicks within a certain time period." = "Ignore rapid clicks within a certain time period.";
 "ms" = "ms";

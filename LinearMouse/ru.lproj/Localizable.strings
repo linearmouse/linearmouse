@@ -40,6 +40,7 @@
 "Alter orientation" = "Изменить направление прокрутки";
 "Change speed" = "Изменить скорость";
 "Zoom" = "Масштабирование";
+"Pinch zoom" = "Pinch zoom";
 
 "Disable pointer acceleration" = "Отключить ускорение курсора";
 "Pointer acceleration" = "Ускорение указателя";
@@ -49,6 +50,7 @@
 
 "Enable universal back and forward" = "Включить универсальные «назад» и «вперед»";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Преобразует боковые кнопки «назад» и «вперед» в жесты смахивания, чтобы сделать их работоспособными во всех приложениях.";
+"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
 "Debounce button clicks" = "Пропускать нажатие кнопок";
 "Ignore rapid clicks within a certain time period." = "Пропускает частые нажатие клавиш.";
 "ms" = "мсек";

@@ -40,6 +40,7 @@
 "Alter orientation" = "Alter orientation";
 "Change speed" = "Change speed";
 "Zoom" = "Zoom";
+"Pinch zoom" = "Pinch zoom";
 
 "Disable pointer acceleration" = "Disable pointer acceleration";
 "Pointer acceleration" = "Pointer acceleration";
@@ -49,6 +50,7 @@
 
 "Enable universal back and forward" = "Enable universal back and forward";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
+"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
 "Debounce button clicks" = "Debounce button clicks";
 "Ignore rapid clicks within a certain time period." = "Ignore rapid clicks within a certain time period.";
 "ms" = "ms";

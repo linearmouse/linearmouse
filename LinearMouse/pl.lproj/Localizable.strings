@@ -40,6 +40,7 @@
 "Alter orientation" = "Zmień orientację";
 "Change speed" = "Zmień szybkość";
 "Zoom" = "Powiększanie";
+"Pinch zoom" = "Pinch zoom";
 
 "Disable pointer acceleration" = "Wyłącz przyspieszenie wskaźnika";
 "Pointer acceleration" = "Przyspieszenie wskaźnika";
@@ -49,6 +50,7 @@
 
 "Enable universal back and forward" = "Włącz uniwersalne przejścia w przód i w tył";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Zamienia działanie przycisków bocznych myszy na gesty przesuwania, tak aby umożliwić uniwersalne przechodzenie w przód i w tył.";
+"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
 "Debounce button clicks" = "Debounce button clicks";
 "Ignore rapid clicks within a certain time period." = "Ignoruj szybkie kliknięcia w określonym czasie.";
 "ms" = "ms";

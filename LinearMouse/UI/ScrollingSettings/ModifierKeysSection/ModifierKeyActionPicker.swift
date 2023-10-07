@@ -43,6 +43,7 @@ extension ScrollingSettings.ModifierKeysSection.ModifierKeyActionPicker {
         case alterOrientation = "Alter orientation"
         case changeSpeed = "Change speed"
         case zoom = "Zoom"
+        case pinchZoom = "Pinch zoom"
 
         var description: String {
             NSLocalizedString(rawValue, comment: "").capitalized
@@ -69,6 +70,8 @@ extension ScrollingSettings.ModifierKeysSection.ModifierKeyActionPicker {
                     return .changeSpeed
                 case .zoom:
                     return .zoom
+                case .pinchZoom:
+                    return .pinchZoom
                 }
             },
 
@@ -86,6 +89,8 @@ extension ScrollingSettings.ModifierKeysSection.ModifierKeyActionPicker {
                     self.action = .changeSpeed(scale: 1)
                 case .zoom:
                     self.action = .zoom
+                case .pinchZoom:
+                    self.action = .pinchZoom
                 }
             }
         )

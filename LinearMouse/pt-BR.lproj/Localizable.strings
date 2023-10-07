@@ -40,15 +40,17 @@
 "Alter orientation" = "Mudar orientação";
 "Change speed" = "Alterar velocidade";
 "Zoom" = "Zoom";
+"Pinch zoom" = "Pinch zoom";
 
 "Disable pointer acceleration" = "Desabilitar aceleração de ponteiro";
 "Pointer acceleration" = "Aceleração de ponteiro";
 "Pointer speed" = "Velocidade do ponteiro";
-"Tracking speed" = "Tracking speed";
+"Tracking speed" = "Velocidade de rastreamento";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Você também pode pressionar ⌃⇧⌘Z para restaurar os padrões.";
 
 "Enable universal back and forward" = "Habilitar retorno e avanço universal";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Converte os botões laterais de retorno e avanço para gestos do trackpad para habilitar a funcionalidade de retorno e avanço universal.";
+"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
 "Debounce button clicks" = "Debounce de cliques do botão";
 "Ignore rapid clicks within a certain time period." = "Ignora cliques rápidos dentro de um período determinado.";
 "ms" = "ms";

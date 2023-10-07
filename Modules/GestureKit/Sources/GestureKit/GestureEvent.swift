@@ -7,7 +7,7 @@ import CoreGraphics
 public class GestureEvent {
     let cgEvents: [CGEvent]
 
-    internal init(cgEvents: [CGEvent]) {
+    init(cgEvents: [CGEvent]) {
         self.cgEvents = cgEvents
     }
 
