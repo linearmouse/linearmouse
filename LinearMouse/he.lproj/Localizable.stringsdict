@@ -13,13 +13,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>%d line</string>
+        <string>%d שורה</string>
         <key>two</key>
-        <string>%d lines</string>
+        <string>%d שורות</string>
         <key>many</key>
-        <string>%d lines</string>
+        <string>%d שורות</string>
         <key>other</key>
-        <string>%d lines</string>
+        <string>%d שורות</string>
       </dict>
     </dict>
     <key>%.1f pixel(s)</key>
@@ -33,13 +33,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>f</string>
         <key>one</key>
-        <string>%.1f pixel</string>
+        <string>%.1f פיקסל</string>
         <key>two</key>
-        <string>%.1f pixels</string>
+        <string>%.1f פיקסלים</string>
         <key>many</key>
-        <string>%.1f pixels</string>
+        <string>%.1f פיקסלים</string>
         <key>other</key>
-        <string>%.1f pixels</string>
+        <string>%.1f פיקסלים</string>
       </dict>
     </dict>
   </dict>
