@@ -26,7 +26,7 @@
 "By Pixels" = "По пикселям";
 "Scrolling acceleration" = "Ускорение прокрутки";
 "Linear" = "Линейное";
-"Scrolling speed" = "Scrolling speed";
+"Scrolling speed" = "Скорость прокрутки";
 "Slow" = "Медленно";
 "Fast" = "Быстро";
 "Distance" = "Количество";
@@ -35,22 +35,22 @@
 "Copy settings from vertical" = "Скопировать настройки из вертикальной";
 "Modifier Keys" = "Клавиши модификации";
 "Default action" = "Действие по умолчанию";
-"Ignore modifier" = "Ignore modifier";
+"Ignore modifier" = "Игнорировать модификации";
 "No action" = "Не задано";
 "Alter orientation" = "Изменить направление прокрутки";
 "Change speed" = "Изменить скорость";
 "Zoom" = "Масштабирование";
-"Pinch zoom" = "Pinch zoom";
+"Pinch zoom" = "Увеличение щипком";
 
 "Disable pointer acceleration" = "Отключить ускорение курсора";
 "Pointer acceleration" = "Ускорение указателя";
 "Pointer speed" = "Скорость указателя";
-"Tracking speed" = "Tracking speed";
+"Tracking speed" = "Скорость перемещения";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Вы также можете нажать ⌃⇧⌘Z, чтобы вернуться к настройкам по умолчанию.";
 
 "Enable universal back and forward" = "Включить универсальные «назад» и «вперед»";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Преобразует боковые кнопки «назад» и «вперед» в жесты смахивания, чтобы сделать их работоспособными во всех приложениях.";
-"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
+"Switch primary and secondary buttons" = "Поменять левую и правую кнопки";
 "Debounce button clicks" = "Пропускать нажатие кнопок";
 "Ignore rapid clicks within a certain time period." = "Пропускает частые нажатие клавиш.";
 "ms" = "мсек";
@@ -62,7 +62,7 @@
 "Assign actions to mouse buttons" = "Назначить действия на кнопки мыши";
 "Edit" = "Редактировать";
 
-"Run: %@" = "Run: %@";
+"Run: %@" = "Запустить: %@";
 "Scroll up %@" = "Scroll up %@";
 "Scroll down %@" = "Scroll down %@";
 "Scroll left %@" = "Scroll left %@";
