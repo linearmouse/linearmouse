@@ -63,11 +63,11 @@
 "Edit" = "Редактировать";
 
 "Run: %@" = "Запустить: %@";
-"Scroll up %@" = "Scroll up %@";
-"Scroll down %@" = "Scroll down %@";
-"Scroll left %@" = "Scroll left %@";
-"Scroll right %@" = "Scroll right %@";
-"Keyboard shortcut: %@" = "Keyboard shortcut: %@";
+"Scroll up %@" = "Прокрутка вверх %@";
+"Scroll down %@" = "Прокрутка вниз %@";
+"Scroll left %@" = "Прокрутка влево %@";
+"Scroll right %@" = "Прокрутка вправо %@";
+"Keyboard shortcut: %@" = "Сочетание клавиш %@";
 
 "Click to record" = "Нажмите для записи";
 "Recording" = "Запись";
@@ -107,13 +107,13 @@
 "Mouse Button" = "Кнопка мыши";
 "Back" = "Назад";
 "Forward" = "Вперёд";
-"Execute" = "Execute";
-"Run shell command…" = "Run shell command…";
-"Scroll up…" = "Scroll up…";
-"Scroll down…" = "Scroll down…";
-"Scroll left…" = "Scroll left…";
-"Scroll right…" = "Scroll right…";
-"Keyboard shortcut…" = "Keyboard shortcut…";
+"Execute" = "Выполнить";
+"Run shell command…" = "Выполнить shell команду…";
+"Scroll up…" = "Прокрутка вверх…";
+"Scroll down…" = "Прокрутка вниз…";
+"Scroll left…" = "Прокрутка влево…";
+"Scroll right…" = "Прокрутка вправо…";
+"Keyboard shortcut…" = "Сочетание клавиш…";
 
 "Mouse button" = "Кнопка мыши";
 "Action" = "Действие";
@@ -143,7 +143,7 @@
 "Thank you for participating in the beta test." = "Благодарим Вас за участие в бета-тестировании.";
 "Check for Updates…" = "Проверить наличие обновлений…";
 
-"Enable verbose logging" = "Enable verbose logging";
+"Enable verbose logging" = "Включить подробное ведение журнала";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Включение этой опции влияет на запись в журнал всех входящих событий, что может увеличить нагрузку на ЦП при использовании %@, но будет полезно для поиска неполадок.";
 "Export the logs for the last 5 minutes." = "Экспорт логов за последние 5 минут.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "Если вы сообщаете об ошибке, пожалуйста, прикрепляйте логи.";
