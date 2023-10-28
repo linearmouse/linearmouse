@@ -72,6 +72,7 @@
 "Click to record" = "Πατήστε για εγγραφή";
 "Recording" = "Γίνεται εγγραφή";
 "Left click" = "Αριστερό κλικ";
+"Left double-click" = "Left double-click";
 "Right click" = "Δεξί κλικ";
 "Middle click" = "Μεσαίο κλικ";
 "Button #%lld click" = "Κουμπί #%lld κλικ";
