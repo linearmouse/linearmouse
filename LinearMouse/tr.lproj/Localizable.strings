@@ -72,6 +72,7 @@
 "Click to record" = "Kaydetmek için tıklayın";
 "Recording" = "Kaydediliyor";
 "Left click" = "Sol tık";
+"Left double-click" = "Left double-click";
 "Right click" = "Sağ tık";
 "Middle click" = "Orta tık";
 "Button #%lld click" = "#%lld Düğme tıklaması";
