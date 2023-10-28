@@ -72,6 +72,7 @@
 "Click to record" = "Нажмите для записи";
 "Recording" = "Запись";
 "Left click" = "ЛКМ";
+"Left double-click" = "Left double-click";
 "Right click" = "ПКМ";
 "Middle click" = "СКМ";
 "Button #%lld click" = "Нажатие #%lld";

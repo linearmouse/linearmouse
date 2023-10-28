@@ -72,6 +72,7 @@
 "Click to record" = "Cliquez pour enregistrer";
 "Recording" = "Enregistrement";
 "Left click" = "Clic gauche";
+"Left double-click" = "Left double-click";
 "Right click" = "Clic droit";
 "Middle click" = "Clic du milieu";
 "Button #%lld click" = "Clic du bouton #%lld";

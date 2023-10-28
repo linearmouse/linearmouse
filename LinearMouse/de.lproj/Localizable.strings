@@ -35,22 +35,22 @@
 "Copy settings from vertical" = "Einstellungen von Vertikal übernehmen";
 "Modifier Keys" = "Tastenkürzel";
 "Default action" = "Standardaktion";
-"Ignore modifier" = "Ignore modifier";
+"Ignore modifier" = "Tastenkürzel ignorieren";
 "No action" = "Keine Funktion";
 "Alter orientation" = "Scrollorientierung ändern";
 "Change speed" = "Scrollgeschwindigkeit ändern";
 "Zoom" = "Zoom";
-"Pinch zoom" = "Pinch zoom";
+"Pinch zoom" = "Zoomen mit zwei Fingern";
 
 "Disable pointer acceleration" = "Zeigerbeschleunigung deaktivieren";
 "Pointer acceleration" = "Zeigerbeschleunigung";
 "Pointer speed" = "Zeigergeschwindigkeit";
-"Tracking speed" = "Tracking speed";
+"Tracking speed" = "Tracking-Geschwindigkeit";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Durch Drücken des Kürzels ⌃⇧⌘Z kann ebenfalls zu den Systemstandards zurückgekehrt werden.";
 
 "Enable universal back and forward" = "Universelles Vor und Zurück aktivieren";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Konvertiert die Vor- und Zurück-Seitentasten in die jeweiligen Wischgesten, um eine universelle Vor- und Zurück-Funktion zu ermöglichen.";
-"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
+"Switch primary and secondary buttons" = "Primär- und Sekundärtasten tauschen";
 "Debounce button clicks" = "Entprellen von Mausklicks";
 "Ignore rapid clicks within a certain time period." = "Schnelle, aufeinanderfolgende Klicks innerhalb einer bestimmten Zeitspanne ignorieren.";
 "ms" = "ms";
@@ -72,6 +72,7 @@
 "Click to record" = "Klicke zum Aufzeichnen";
 "Recording" = "Aufzeichnen";
 "Left click" = "Linksklick";
+"Left double-click" = "Left double-click";
 "Right click" = "Rechtsklick";
 "Middle click" = "Mittlere Maustaste";
 "Button #%lld click" = "Taste #%lld drücken";
