@@ -72,6 +72,7 @@
 "Click to record" = "클릭하여 입력";
 "Recording" = "입력을 기다리는 중";
 "Left click" = "좌클릭";
+"Left double-click" = "Left double-click";
 "Right click" = "우클릭";
 "Middle click" = "휠 클릭";
 "Button #%lld click" = "버튼 #%lld 클릭";
