@@ -71,6 +71,8 @@ extension Scheme.Buttons.Mapping.Action.Arg0: CustomStringConvertible {
             return NSLocalizedString("Scroll right", comment: "")
         case .mouseButtonLeft:
             return NSLocalizedString("Left click", comment: "")
+        case .mouseButtonLeftDouble:
+            return NSLocalizedString("Left double-click", comment: "")
         case .mouseButtonMiddle:
             return NSLocalizedString("Middle click", comment: "")
         case .mouseButtonRight:

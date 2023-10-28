@@ -94,6 +94,7 @@ extension ButtonMappingActionPicker {
         ] },
         .section("Mouse Button") { [
             .actionType(.arg0(.mouseButtonLeft)),
+            .actionType(.arg0(.mouseButtonLeftDouble)),
             .actionType(.arg0(.mouseButtonMiddle)),
             .actionType(.arg0(.mouseButtonRight)),
             .actionType(.arg0(.mouseButtonBack)),

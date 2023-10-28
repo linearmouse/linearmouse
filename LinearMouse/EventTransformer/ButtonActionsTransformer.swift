@@ -255,6 +255,10 @@ extension ButtonActionsTransformer: EventTransformer {
         case .arg0(.mouseButtonLeft):
             postClickEvent(mouseButton: .left)
 
+        case .arg0(.mouseButtonLeftDouble):
+            postClickEvent(mouseButton: .left)
+            postClickEvent(mouseButton: .left, clickState: 2)
+
         case .arg0(.mouseButtonMiddle):
             postClickEvent(mouseButton: .center)
 
@@ -433,7 +437,7 @@ extension ButtonActionsTransformer: EventTransformer {
         return false
     }
 
-    private func postClickEvent(mouseButton: CGMouseButton) {
+    private func postClickEvent(mouseButton: CGMouseButton, clickState: Int64? = nil) {
         guard let location = CGEvent(source: nil)?.location else {
             return
         }
@@ -453,6 +457,11 @@ extension ButtonActionsTransformer: EventTransformer {
             mouseButton: mouseButton
         ) else {
             return
+        }
+
+        if let clickState = clickState {
+            mouseDownEvent.setIntegerValueField(.mouseEventClickState, value: clickState)
+            mouseUpEvent.setIntegerValueField(.mouseEventClickState, value: clickState)
         }
 
         mouseDownEvent.post(tap: .cgSessionEventTap)

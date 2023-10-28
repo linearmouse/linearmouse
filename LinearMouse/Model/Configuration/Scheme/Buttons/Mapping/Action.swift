@@ -50,6 +50,7 @@ extension Scheme.Buttons.Mapping.Action {
         case mouseWheelScrollRight = "mouse.wheel.scrollRight"
 
         case mouseButtonLeft = "mouse.button.left"
+        case mouseButtonLeftDouble = "mouse.button.leftDouble"
         case mouseButtonMiddle = "mouse.button.middle"
         case mouseButtonRight = "mouse.button.right"
         case mouseButtonBack = "mouse.button.back"
