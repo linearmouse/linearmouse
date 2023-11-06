@@ -13,9 +13,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>%d line</string>
+        <string>%d линия</string>
         <key>few</key>
-        <string>%d lines</string>
+        <string>%d линии</string>
         <key>many</key>
         <string>%d lines</string>
         <key>other</key>
@@ -33,9 +33,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>f</string>
         <key>one</key>
-        <string>%.1f pixel</string>
+        <string>%.1f пиксель</string>
         <key>few</key>
-        <string>%.1f pixels</string>
+        <string>%.1f пикселя</string>
         <key>many</key>
         <string>%.1f pixels</string>
         <key>other</key>
