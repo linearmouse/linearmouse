@@ -17,9 +17,9 @@
         <key>few</key>
         <string>%d линии</string>
         <key>many</key>
-        <string>%d lines</string>
+        <string>%d линии</string>
         <key>other</key>
-        <string>%d lines</string>
+        <string>%d линии</string>
       </dict>
     </dict>
     <key>%.1f pixel(s)</key>
@@ -37,9 +37,9 @@
         <key>few</key>
         <string>%.1f пикселя</string>
         <key>many</key>
-        <string>%.1f pixels</string>
+        <string>%.1f пикселя</string>
         <key>other</key>
-        <string>%.1f pixels</string>
+        <string>%.1f пикселя</string>
       </dict>
     </dict>
   </dict>
