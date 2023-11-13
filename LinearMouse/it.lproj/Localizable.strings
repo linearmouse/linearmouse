@@ -4,7 +4,7 @@
 "Open Accessibility" = "Apri Accessibilità";
 
 "%@ Settings…" = "Impostazioni di %@…";
-"Start at login" = "Avvia all'accesso";
+"Start at login" = "Avvia al login";
 "Config" = "Configurazione";
 "Reload" = "Ricarica";
 "Reveal in Finder" = "Mostra nel Finder";
@@ -22,8 +22,8 @@
 "Some gestures, such as swiping back and forward, may stop working." = "Alcuni gesti, come scorrere avanti e indietro, potrebbero smettere di funzionare.";
 "Scrolling mode" = "Modalità di scorrimento";
 "Accelerated" = "Accelerato";
-"By Lines" = "Per Riga";
-"By Pixels" = "Per Pixel";
+"By Lines" = "Per riga";
+"By Pixels" = "Per pixel";
 "Scrolling acceleration" = "Accelerazione di scorrimento";
 "Linear" = "Lineare";
 "Scrolling speed" = "Velocità di scorrimento";
@@ -35,7 +35,7 @@
 "Copy settings from vertical" = "Copia le impostazioni dalla verticale";
 "Modifier Keys" = "Tasti modificatori";
 "Default action" = "Azione predefinita";
-"Ignore modifier" = "Ignorare il modificatore";
+"Ignore modifier" = "Ignora il modificatore";
 "No action" = "Nessuna azione";
 "Alter orientation" = "Cambia direzione";
 "Change speed" = "Cambia velocità";
@@ -49,10 +49,10 @@
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Puoi anche premere ⌃⇧⌘Z per ripristinare le impostazioni predefinite.";
 
 "Enable universal back and forward" = "Abilitare avanti e indietro universale";
-"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Converti i pulsanti laterali avanti e indietro in gesti scorrevoli per consentire funzionalità di avanti e indietro universali.";
-"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
-"Debounce button clicks" = "Antirimbalzo dei click del pulsante";
-"Ignore rapid clicks within a certain time period." = "Ignora click rapidi entro un certo periodo di tempo.";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Converti i pulsanti laterali avanti e indietro in gesti di scorrimento per consentire funzionalità di avanti e indietro universali.";
+"Switch primary and secondary buttons" = "Inverti i pulsanti primario e secondario";
+"Debounce button clicks" = "Antirimbalzo dei clic del pulsante";
+"Ignore rapid clicks within a certain time period." = "Ignora clic rapidi entro un certo periodo di tempo.";
 "ms" = "ms";
 "Reset timer on mouse up" = "Ripristina il timer allo spostamento in su del mouse";
 "Left button" = "Pulsante sinistro";
@@ -69,43 +69,43 @@
 "Scroll right %@" = "Scorri a destra %@";
 "Keyboard shortcut: %@" = "Scorciatoia da tastiera: %@";
 
-"Click to record" = "Clicca per registrare";
+"Click to record" = "Fai clic per registrare";
 "Recording" = "Registrazione";
-"Left click" = "Click sinistro";
-"Left double-click" = "Left double-click";
-"Right click" = "Click destro";
-"Middle click" = "Click centrale";
-"Button #%lld click" = "Click Pulsante #%lld";
+"Left click" = "Clic sinistro";
+"Left double-click" = "Doppio clic sinistro";
+"Right click" = "Clic destro";
+"Middle click" = "Clic centrale";
+"Button #%lld click" = "Clic del pulsante numero %lld";
 "Scroll up" = "Scorri in su";
 "Scroll down" = "Scorri in giù";
 "Scroll left" = "Scorri a sinistra";
 "Scroll right" = "Scorri a destra";
 
-"Mission Control" = "Controllo Missione";
+"Mission Control" = "Mission Control";
 "Move left a space" = "Sposta a sinistra di uno spazio";
 "Move right a space" = "Sposta a destra di uno spazio";
 "Application windows" = "Finestre dell'applicazione";
 "Launchpad" = "Launchpad";
 "Show desktop" = "Mostra desktop";
-"Look up & data detectors" = "Rilevatori di ricerca e dati";
-"Smart zoom" = "Ingrandimento intelligente";
+"Look up & data detectors" = "Cerca info e rilevatori dati";
+"Smart zoom" = "Zoom smart";
 "Display" = "Schermo";
 "Increase display brightness" = "Aumenta la luminosità dello schermo";
 "Decrease display brightness" = "Riduci la luminosità dello schermo";
 "Media" = "Media";
-"Increase volume" = "Incrementa Volume";
-"Decrease volume" = "Riduci Volume";
-"Mute / unmute" = "Attiva/Disattiva audio";
+"Increase volume" = "Aumenta il volume";
+"Decrease volume" = "Diminuisci il volume";
+"Mute / unmute" = "Attiva / Disattiva audio";
 "Play / pause" = "Riproduci / Interrompi";
 "Next" = "Successivo";
 "Previous" = "Precedente";
 "Fast forward" = "Avanzamento rapido";
 "Rewind" = "Riavvolgi";
 "Keyboard" = "Tastiera";
-"Increase keyboard brightness" = "Incrementa la luminosità della tastiera";
-"Decrease keyboard brightness" = "Riduci la luminosità della tastiera";
-"Mouse Wheel" = "Rotella del mouse";
-"Mouse Button" = "Pulsante del Mouse";
+"Increase keyboard brightness" = "Aumenta la luminosità della tastiera";
+"Decrease keyboard brightness" = "Diminuisci la luminosità della tastiera";
+"Mouse Wheel" = "Rotellina del mouse";
+"Mouse Button" = "Pulsante del mouse";
 "Back" = "Indietro";
 "Forward" = "Avanti";
 "Execute" = "Esegui";
@@ -118,9 +118,9 @@
 
 "Mouse button" = "Pulsante del mouse";
 "Action" = "Azione";
-"The mouse button is already assigned." = "Il pulsante del mouse è già installato.";
+"The mouse button is already assigned." = "Il pulsante del mouse è già assegnato.";
 "Assigning an action to the left button without any modifier keys is not allowed." = "L'assegnazione di un'azione al pulsante sinistro, senza alcun tasto modificatore, non è consentita.";
-"Repeat on hold" = "Ripeti in attesa";
+"Repeat on hold" = "Ripeti tenendo premuto il pulsante";
 "Cancel" = "Annulla";
 "OK" = "OK";
 "Create" = "Crea";
@@ -131,12 +131,12 @@
 "Bypass events from other applications" = "Ignora gli eventi da altre applicazioni";
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "Se abilitato, %@ non modificherà gli eventi inviati da altre applicazioni, come Logi Options+.";
 
-"Reload Config" = "Ricarica Configurazione";
-"Reveal Config in Finder…" = "Mostra la Configurazione nel Finder…";
+"Reload Config" = "Ricarica la configurazione";
+"Reveal Config in Finder…" = "Mostra la configurazione nel Finder…";
 
 "Version: %@" = "Versione: %@";
 "Check for updates automatically" = "Verifica automaticamente gli aggiornamenti";
-"Update check interval" = "Intervallo di controllo degli aggiornamenti";
+"Update check interval" = "Frequenza di rilevamento degli aggiornamenti";
 "Daily" = "Ogni giorno";
 "Weekly" = "Ogni settimana";
 "Monthly" = "Ogni mese";
@@ -150,7 +150,7 @@
 "If you are reporting a bug, it would be helpful to attach the logs." = "Se stai segnalando un bug, sarebbe utile allegare i registri.";
 "Export logs" = "Esporta i registri";
 
-"Homepage" = "Homepage";
+"Homepage" = "Home page";
 "Bug report" = "Segnalazione di bug";
 "Feature request" = "Richiesta di funzionalità";
 "Donate" = "Dona";
@@ -164,5 +164,5 @@
 "Configure for" = "Configura per";
 "All Apps" = "Tutte le App";
 "Configured" = "Configurato";
-"Running" = "In Esecuzione";
+"Running" = "In esecuzione";
 "Installed" = "Installato";
