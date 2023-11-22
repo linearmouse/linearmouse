@@ -9,6 +9,8 @@ class SwitchPrimaryAndSecondaryButtonsTransformer {
         subsystem: Bundle.main.bundleIdentifier!,
         category: "SwitchPrimaryAndSecondaryButtonsTransformer"
     )
+
+    init() {}
 }
 
 extension SwitchPrimaryAndSecondaryButtonsTransformer: EventTransformer {

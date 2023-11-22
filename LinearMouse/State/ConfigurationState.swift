@@ -13,10 +13,33 @@ class ConfigurationState: ObservableObject {
 
     static let shared = ConfigurationState()
 
-    let configurationPath = URL(
-        fileURLWithPath: ".config/linearmouse/linearmouse.json",
-        relativeTo: FileManager.default.homeDirectoryForCurrentUser
-    )
+    var configurationPaths: [URL] {
+        var urls: [URL] = []
+
+        if let applicationSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)
+            .first {
+            urls.append(
+                URL(
+                    fileURLWithPath: "linearmouse/linearmouse.json",
+                    relativeTo: applicationSupportURL
+                )
+            )
+        }
+
+        urls.append(
+            URL(
+                fileURLWithPath: ".config/linearmouse/linearmouse.json",
+                relativeTo: FileManager.default.homeDirectoryForCurrentUser
+            )
+        )
+
+        return urls
+    }
+
+    var configurationPath: URL {
+        configurationPaths.first { FileManager.default.fileExists(atPath: $0.absoluteString) } ?? configurationPaths
+            .last!
+    }
 
     private var configurationSaveDebounceTimer: Timer?
     @Published var configuration = Configuration() {
