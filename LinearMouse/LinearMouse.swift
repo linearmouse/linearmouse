@@ -3,7 +3,7 @@
 
 import Foundation
 
-class LinearMouse {
+enum LinearMouse {
     public static var appBundleIdentifier: String {
         Bundle.main.infoDictionary?[kCFBundleIdentifierKey as String] as? String ?? "com.lujjjh.LinearMouse"
     }

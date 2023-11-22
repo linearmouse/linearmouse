@@ -5,7 +5,7 @@ import Foundation
 import os.log
 import SwiftUI
 
-class AccessibilityPermission {
+enum AccessibilityPermission {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "AccessibilityPermission")
 
     static var enabled: Bool {

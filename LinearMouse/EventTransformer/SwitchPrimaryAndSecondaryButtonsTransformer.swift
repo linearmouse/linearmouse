@@ -4,7 +4,7 @@
 import Foundation
 import os.log
 
-class SwitchPrimaryAndSecondaryButtonsTransformer {
+enum SwitchPrimaryAndSecondaryButtonsTransformer {
     static let log = OSLog(
         subsystem: Bundle.main.bundleIdentifier!,
         category: "SwitchPrimaryAndSecondaryButtonsTransformer"
