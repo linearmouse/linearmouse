@@ -13,13 +13,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>%d line</string>
+        <string>%d riadok</string>
         <key>few</key>
-        <string>%d lines</string>
+        <string>%d riadky</string>
         <key>many</key>
-        <string>%d lines</string>
+        <string>%d riadkov</string>
         <key>other</key>
-        <string>%d lines</string>
+        <string>%d riadkov</string>
       </dict>
     </dict>
     <key>%.1f pixel(s)</key>
@@ -35,11 +35,11 @@
         <key>one</key>
         <string>%.1f pixel</string>
         <key>few</key>
-        <string>%.1f pixels</string>
+        <string>%.1f pixely</string>
         <key>many</key>
-        <string>%.1f pixels</string>
+        <string>%.1f pixelov</string>
         <key>other</key>
-        <string>%.1f pixels</string>
+        <string>%.1f pixelov</string>
       </dict>
     </dict>
   </dict>
