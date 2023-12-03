@@ -55,9 +55,9 @@
 "Ignore rapid clicks within a certain time period." = "Ignorovať rýchle kliknutia v určitom časovom období.";
 "ms" = "ms";
 "Reset timer on mouse up" = "Reset timer on mouse up";
-"Left button" = "Left button";
-"Right button" = "Right button";
-"Middle button" = "Middle button";
+"Left button" = "Ľavé tlačidlo";
+"Right button" = "Pravé tlačidlo";
+"Middle button" = "Stredné tlačidlo";
 
 "Assign actions to mouse buttons" = "Assign actions to mouse buttons";
 "Edit" = "Edit";
@@ -67,13 +67,13 @@
 "Scroll down %@" = "Scroll down %@";
 "Scroll left %@" = "Scroll left %@";
 "Scroll right %@" = "Scroll right %@";
-"Keyboard shortcut: %@" = "Keyboard shortcut: %@";
+"Keyboard shortcut: %@" = "Klávesová skratka: %@";
 
-"Click to record" = "Click to record";
-"Recording" = "Recording";
-"Left click" = "Left click";
+"Click to record" = "Kliknutím nahráte";
+"Recording" = "Nahrávanie";
+"Left click" = "Ľavý klik";
 "Left double-click" = "Left double-click";
-"Right click" = "Right click";
+"Right click" = "Pravý klik";
 "Middle click" = "Middle click";
 "Button #%lld click" = "Button #%lld click";
 "Scroll up" = "Scroll up";
@@ -86,15 +86,15 @@
 "Move right a space" = "Move right a space";
 "Application windows" = "Application windows";
 "Launchpad" = "Launchpad";
-"Show desktop" = "Show desktop";
+"Show desktop" = "Zobraziť plochu";
 "Look up & data detectors" = "Look up & data detectors";
 "Smart zoom" = "Smart zoom";
 "Display" = "Display";
-"Increase display brightness" = "Increase display brightness";
-"Decrease display brightness" = "Decrease display brightness";
-"Media" = "Media";
-"Increase volume" = "Increase volume";
-"Decrease volume" = "Decrease volume";
+"Increase display brightness" = "Zvýšenie jasu displeja";
+"Decrease display brightness" = "Zníženie jasu displeja";
+"Media" = "Médiá";
+"Increase volume" = "Zvýšiť hlasitosť";
+"Decrease volume" = "Znížiť hlasitosť";
 "Mute / unmute" = "Mute / unmute";
 "Play / pause" = "Play / pause";
 "Next" = "Next";
@@ -107,13 +107,13 @@
 "Mouse Wheel" = "Koliesko myši";
 "Mouse Button" = "Tlačidlo myši";
 "Back" = "Späť";
-"Forward" = "Forward";
+"Forward" = "Vpred";
 "Execute" = "Vykonať";
-"Run shell command…" = "Run shell command…";
-"Scroll up…" = "Scroll up…";
-"Scroll down…" = "Scroll down…";
-"Scroll left…" = "Scroll left…";
-"Scroll right…" = "Scroll right…";
+"Run shell command…" = "Spustiť shell príkaz…";
+"Scroll up…" = "Posunúť nahor…";
+"Scroll down…" = "Posunúť nadol…";
+"Scroll left…" = "Posunúť doľava…";
+"Scroll right…" = "Posunúť doprava…";
 "Keyboard shortcut…" = "Klávesová skratka…";
 
 "Mouse button" = "Tlačidlo myši";
@@ -126,13 +126,13 @@
 "Create" = "Vytvoriť";
 
 "Settings" = "Nastavenia";
-"Show in menu bar" = "Show in menu bar";
-"To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
-"Bypass events from other applications" = "Bypass events from other applications";
-"If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "If enabled, %@ will not modify events sent by other applications, such as Logi Options+.";
+"Show in menu bar" = "Zobraziť v lište";
+"To show the settings, launch %@ again." = "Pre zobrazenie nastavení, spustite %@ znova.";
+"Bypass events from other applications" = "Ignorovať udalosti z iných aplikácií";
+"If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "Po zapnutí %@ nebude upravovať udalosti odoslané inými aplikáciami, ako napr. Logi Options+.";
 
-"Reload Config" = "Reload Config";
-"Reveal Config in Finder…" = "Reveal Config in Finder…";
+"Reload Config" = "Znova načítať konfiguráciu";
+"Reveal Config in Finder…" = "Zobraziť konfiguráciu vo Finderi…";
 
 "Version: %@" = "Verzia: %@";
 "Check for updates automatically" = "Automaticky kontrolovať aktualizácie";
@@ -144,15 +144,15 @@
 "Thank you for participating in the beta test." = "Ďakujeme za účasť na beta teste.";
 "Check for Updates…" = "Vyhľadať aktualizácie…";
 
-"Enable verbose logging" = "Enable verbose logging";
-"Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting.";
+"Enable verbose logging" = "Povoliť podrobné zaznamenávanie";
+"Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Zapnutím tejto možnosti sa zaznamenajú všetky vstupné udalosti, čo môže zvýšiť využitie procesora pri používaní %@, ale môže to byť užitočné pri riešení problémov.";
 "Export the logs for the last 5 minutes." = "Exportujte záznamy za posledných 5 minút.";
 "If you are reporting a bug, it would be helpful to attach the logs." = "Ak nahlasujete chybu, bolo by užitočné priložiť záznamy.";
 "Export logs" = "Exportovať záznamy";
 
 "Homepage" = "Domovská stránka";
 "Bug report" = "Nahlásenie chyby";
-"Feature request" = "Feature request";
+"Feature request" = "Požiadavka na funkciu";
 "Donate" = "Podporiť";
 
 "Auto switch to the active device" = "Automaticky prepnúť na aktívne zariadenie";
