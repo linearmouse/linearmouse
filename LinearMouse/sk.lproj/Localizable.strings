@@ -31,28 +31,28 @@
 "Fast" = "Rychlá";
 "Distance" = "Vzdialenosť";
 "Scrolling is disabled based on the current settings." = "Posúvanie je zakázané na základe aktuálnych nastavení.";
-"Revert to system defaults" = "Revert to system defaults";
-"Copy settings from vertical" = "Copy settings from vertical";
-"Modifier Keys" = "Modifier Keys";
-"Default action" = "Default action";
-"Ignore modifier" = "Ignore modifier";
-"No action" = "No action";
-"Alter orientation" = "Alter orientation";
-"Change speed" = "Change speed";
-"Zoom" = "Zoom";
-"Pinch zoom" = "Pinch zoom";
+"Revert to system defaults" = "Návrat k predvoleným nastaveniam systému";
+"Copy settings from vertical" = "Kopírovať nastavenia z vertikálneho";
+"Modifier Keys" = "Modifikačné klávesy";
+"Default action" = "Predvolená akcia";
+"Ignore modifier" = "Ignorovať modifikátor";
+"No action" = "Žiadna akcia";
+"Alter orientation" = "Zmeniť orientáciu";
+"Change speed" = "Zmeniť rýchlosť";
+"Zoom" = "Zväčšiť";
+"Pinch zoom" = "Zväčšenie priblížením prstov";
 
-"Disable pointer acceleration" = "Disable pointer acceleration";
-"Pointer acceleration" = "Pointer acceleration";
-"Pointer speed" = "Pointer speed";
-"Tracking speed" = "Tracking speed";
-"You may also press ⌃⇧⌘Z to revert to system defaults." = "You may also press ⌃⇧⌘Z to revert to system defaults.";
+"Disable pointer acceleration" = "Vypnúť zrýchlenia ukazovateľa";
+"Pointer acceleration" = "Zrýchlenie ukazovateľa";
+"Pointer speed" = "Rýchlosť ukazovateľa";
+"Tracking speed" = "Rýchlosť sledovania";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "Môžete tiež stlačiť ⌃⇧⌘Z pre návrat k predvoleným nastaveniam systému.";
 
 "Enable universal back and forward" = "Enable universal back and forward";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
 "Switch primary and secondary buttons" = "Switch primary and secondary buttons";
-"Debounce button clicks" = "Debounce button clicks";
-"Ignore rapid clicks within a certain time period." = "Ignore rapid clicks within a certain time period.";
+"Debounce button clicks" = "Čas odozvy kliknutia na tlačidlá";
+"Ignore rapid clicks within a certain time period." = "Ignorovať rýchle kliknutia v určitom časovom období.";
 "ms" = "ms";
 "Reset timer on mouse up" = "Reset timer on mouse up";
 "Left button" = "Left button";
@@ -137,12 +137,12 @@
 "Version: %@" = "Version: %@";
 "Check for updates automatically" = "Check for updates automatically";
 "Update check interval" = "Update check interval";
-"Daily" = "Daily";
-"Weekly" = "Weekly";
-"Monthly" = "Monthly";
-"Receive beta updates" = "Receive beta updates";
-"Thank you for participating in the beta test." = "Thank you for participating in the beta test.";
-"Check for Updates…" = "Check for Updates…";
+"Daily" = "Denne";
+"Weekly" = "Týždenne";
+"Monthly" = "Mesačne";
+"Receive beta updates" = "Dostávať beta aktualizácie";
+"Thank you for participating in the beta test." = "Ďakujeme za účasť na beta teste.";
+"Check for Updates…" = "Vyhľadať aktualizácie…";
 
 "Enable verbose logging" = "Enable verbose logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting.";
@@ -150,10 +150,10 @@
 "If you are reporting a bug, it would be helpful to attach the logs." = "If you are reporting a bug, it would be helpful to attach the logs.";
 "Export logs" = "Export logs";
 
-"Homepage" = "Homepage";
-"Bug report" = "Bug report";
+"Homepage" = "Domovská stránka";
+"Bug report" = "Nahlásenie chyby";
 "Feature request" = "Feature request";
-"Donate" = "Donate";
+"Donate" = "Podporiť";
 
 "Auto switch to the active device" = "Auto switch to the active device";
 
