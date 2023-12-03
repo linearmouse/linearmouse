@@ -1,17 +1,17 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse vyžaduje oprávnenie na Prístupnosť";
-"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
-"Get more help" = "Get more help";
-"Open Accessibility" = "Open Accessibility";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "Oprávnenie na Prístupnosť musíte udeliť v časti Systémové Nastavenia > Súkromie a bezpečnosť > Prístupnosť.";
+"Get more help" = "Získať ďalšiu pomoc";
+"Open Accessibility" = "Otvoriť Prístupnosť";
 
-"%@ Settings…" = "%@ Settings…";
-"Start at login" = "Start at login";
-"Config" = "Config";
-"Reload" = "Reload";
-"Reveal in Finder" = "Reveal in Finder";
-"Configure for %@…" = "Configure for %@…";
-"Quit %@" = "Quit %@";
+"%@ Settings…" = "%@ Nastavenia…";
+"Start at login" = "Spustiť pri štarte";
+"Config" = "Konfigurácia";
+"Reload" = "Obnoviť";
+"Reveal in Finder" = "Zobraziť vo Finderi";
+"Configure for %@…" = "Konfigurovať pre %@…";
+"Quit %@" = "Ukončiť %@";
 
-"Scrolling" = "Scrolling";
+"Scrolling" = "Posúvanie";
 "Pointer" = "Pointer";
 "Buttons" = "Buttons";
 "General" = "General";
