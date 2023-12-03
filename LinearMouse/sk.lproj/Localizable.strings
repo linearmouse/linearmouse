@@ -104,28 +104,28 @@
 "Keyboard" = "Keyboard";
 "Increase keyboard brightness" = "Increase keyboard brightness";
 "Decrease keyboard brightness" = "Decrease keyboard brightness";
-"Mouse Wheel" = "Mouse Wheel";
-"Mouse Button" = "Mouse Button";
-"Back" = "Back";
+"Mouse Wheel" = "Koliesko myši";
+"Mouse Button" = "Tlačidlo myši";
+"Back" = "Späť";
 "Forward" = "Forward";
-"Execute" = "Execute";
+"Execute" = "Vykonať";
 "Run shell command…" = "Run shell command…";
 "Scroll up…" = "Scroll up…";
 "Scroll down…" = "Scroll down…";
 "Scroll left…" = "Scroll left…";
 "Scroll right…" = "Scroll right…";
-"Keyboard shortcut…" = "Keyboard shortcut…";
+"Keyboard shortcut…" = "Klávesová skratka…";
 
-"Mouse button" = "Mouse button";
-"Action" = "Action";
-"The mouse button is already assigned." = "The mouse button is already assigned.";
-"Assigning an action to the left button without any modifier keys is not allowed." = "Assigning an action to the left button without any modifier keys is not allowed.";
-"Repeat on hold" = "Repeat on hold";
-"Cancel" = "Cancel";
+"Mouse button" = "Tlačidlo myši";
+"Action" = "Akcia";
+"The mouse button is already assigned." = "Tlačidlo myši je už priradené.";
+"Assigning an action to the left button without any modifier keys is not allowed." = "Priradenie akcie ľavému tlačidlu bez modifikačných klávesov nie je povolené.";
+"Repeat on hold" = "Opakovať pri podržaní";
+"Cancel" = "Zrušiť";
 "OK" = "OK";
-"Create" = "Create";
+"Create" = "Vytvoriť";
 
-"Settings" = "Settings";
+"Settings" = "Nastavenia";
 "Show in menu bar" = "Show in menu bar";
 "To show the settings, launch %@ again." = "To show the settings, launch %@ again.";
 "Bypass events from other applications" = "Bypass events from other applications";
@@ -134,9 +134,9 @@
 "Reload Config" = "Reload Config";
 "Reveal Config in Finder…" = "Reveal Config in Finder…";
 
-"Version: %@" = "Version: %@";
-"Check for updates automatically" = "Check for updates automatically";
-"Update check interval" = "Update check interval";
+"Version: %@" = "Verzia: %@";
+"Check for updates automatically" = "Automaticky kontrolovať aktualizácie";
+"Update check interval" = "Interval kontroly aktualizácií";
 "Daily" = "Denne";
 "Weekly" = "Týždenne";
 "Monthly" = "Mesačne";
@@ -146,23 +146,23 @@
 
 "Enable verbose logging" = "Enable verbose logging";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting.";
-"Export the logs for the last 5 minutes." = "Export the logs for the last 5 minutes.";
-"If you are reporting a bug, it would be helpful to attach the logs." = "If you are reporting a bug, it would be helpful to attach the logs.";
-"Export logs" = "Export logs";
+"Export the logs for the last 5 minutes." = "Exportujte záznamy za posledných 5 minút.";
+"If you are reporting a bug, it would be helpful to attach the logs." = "Ak nahlasujete chybu, bolo by užitočné priložiť záznamy.";
+"Export logs" = "Exportovať záznamy";
 
 "Homepage" = "Domovská stránka";
 "Bug report" = "Nahlásenie chyby";
 "Feature request" = "Feature request";
 "Donate" = "Podporiť";
 
-"Auto switch to the active device" = "Auto switch to the active device";
+"Auto switch to the active device" = "Automaticky prepnúť na aktívne zariadenie";
 
-"Mouse" = "Mouse";
+"Mouse" = "Myš";
 "Trackpad" = "Trackpad";
-"(active)" = "(active)";
+"(active)" = "(aktívne)";
 
-"Configure for" = "Configure for";
-"All Apps" = "All Apps";
-"Configured" = "Configured";
-"Running" = "Running";
-"Installed" = "Installed";
+"Configure for" = "Konfigurovať pre";
+"All Apps" = "Všetky aplikácie";
+"Configured" = "Nakonfigurované";
+"Running" = "Spustené";
+"Installed" = "Nainštalované";
