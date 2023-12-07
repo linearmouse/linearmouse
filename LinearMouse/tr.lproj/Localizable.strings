@@ -40,7 +40,7 @@
 "Alter orientation" = "Yönlendirmeyi değiştir";
 "Change speed" = "Hızı değiştir";
 "Zoom" = "Yakınlaştır";
-"Pinch zoom" = "Pinch zoom";
+"Pinch zoom" = "Belirli alanı yakınlaştır";
 
 "Disable pointer acceleration" = "İşaretçi ivmesini devre dışı bırak";
 "Pointer acceleration" = "İmleç ivmesi";
