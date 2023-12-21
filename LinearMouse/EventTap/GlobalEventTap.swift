@@ -12,6 +12,7 @@ class GlobalEventTap {
     static let shared = GlobalEventTap()
 
     private var observationToken: ObservationToken?
+    private lazy var watchdog = GlobalEventTapWatchdog()
 
     init() {}
 
@@ -49,9 +50,13 @@ class GlobalEventTap {
         } catch {
             NSAlert(error: error).runModal()
         }
+
+        watchdog.start()
     }
 
     func stop() {
         observationToken = nil
+
+        watchdog.stop()
     }
 }
