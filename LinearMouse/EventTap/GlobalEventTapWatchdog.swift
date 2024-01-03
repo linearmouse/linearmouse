@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2023 LinearMouse
+// Copyright (c) 2021-2024 LinearMouse
 
 import AppKit
 import os.log
