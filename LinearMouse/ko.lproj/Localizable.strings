@@ -32,7 +32,7 @@
 "Distance" = "간격";
 "Scrolling is disabled based on the current settings." = "현재 설정에 따라 스크롤이 비활성화됩니다.";
 "Revert to system defaults" = "시스템 기본값으로 되돌리기";
-"Copy settings from vertical" = "수직 방향 설정 가져오기";
+"Copy settings from vertical" = "수직 방향 설정 복사";
 "Modifier Keys" = "보조 키";
 "Default action" = "기본 동작";
 "Ignore modifier" = "보조 키 무시";
@@ -51,12 +51,12 @@
 "Enable universal back and forward" = "범용 뒤로/앞으로 가기 활성화";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "뒤로 및 앞으로 가기 측면 버튼을 스와이프 제스처로 변환하여 앱 호환성을 향상시킵니다.";
 "Switch primary and secondary buttons" = "주 버튼과 보조 버튼 기능 바꾸기";
-"Debounce button clicks" = "디바운스 시간 설정";
+"Debounce button clicks" = "버튼 클릭 간격";
 "Ignore rapid clicks within a certain time period." = "특정 시간 내의 빠른 클릭을 무시합니다.";
-"ms" = "밀리초";
+"ms" = "ms";
 "Reset timer on mouse up" = "마우스를 올리면 타이머 재설정";
-"Left button" = "주요 버튼";
-"Right button" = "보조 버튼";
+"Left button" = "왼쪽 버튼";
+"Right button" = "오른쪽 버튼";
 "Middle button" = "휠 버튼";
 
 "Assign actions to mouse buttons" = "마우스 버튼에 동작 할당";
@@ -72,7 +72,7 @@
 "Click to record" = "클릭하여 입력";
 "Recording" = "입력을 기다리는 중";
 "Left click" = "좌클릭";
-"Left double-click" = "Left double-click";
+"Left double-click" = "왼쪽 더블 클릭";
 "Right click" = "우클릭";
 "Middle click" = "휠 클릭";
 "Button #%lld click" = "버튼 #%lld 클릭";
