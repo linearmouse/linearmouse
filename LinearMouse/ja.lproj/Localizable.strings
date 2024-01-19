@@ -34,9 +34,9 @@
 "Revert to system defaults" = "システムデフォルトに戻す";
 "Copy settings from vertical" = "縦方向と同じ設定を適用";
 "Modifier Keys" = "修飾キー";
-"Default action" = "デフォルト動作";
-"Ignore modifier" = "モディファイアーキーを無視";
-"No action" = "何もしない";
+"Default action" = "デフォルトの動作";
+"Ignore modifier" = "修飾キーを無視";
+"No action" = "何もしない";  
 "Alter orientation" = "方向を変更する";
 "Change speed" = "速度変更";
 "Zoom" = "拡大";
@@ -57,7 +57,7 @@
 "Reset timer on mouse up" = "マウスアップ時にタイマーをリセット";
 "Left button" = "左ボタン";
 "Right button" = "右ボタン";
-"Middle button" = "中央ボタン";
+"Middle button" = "中ボタン";
 
 "Assign actions to mouse buttons" = "マウスボタンに操作を割り当てる";
 "Edit" = "編集";
@@ -74,7 +74,7 @@
 "Left click" = "左クリック";
 "Left double-click" = "左ダブルクリック";
 "Right click" = "右クリック";
-"Middle click" = "ミドルクリック";
+"Middle click" = "中クリック";
 "Button #%lld click" = "ボタン #%lld クリック";
 "Scroll up" = "上にスクロール";
 "Scroll down" = "下にスクロール";
@@ -145,7 +145,7 @@
 "Check for Updates…" = "アップデートを確認";
 
 "Enable verbose logging" = "詳細ログを有効化";
-"Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "このオプションを有効にすると、すべての入力イベントが記録されるため、 %@の使用中に CPU 使用率が増加する可能性があります。トラブルシューティングに役立ちます。";
+"Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "このオプションを有効にすると、すべての入力イベントが記録されるため、 %@の使用中に CPU 使用率が増加する可能性がありますが、トラブルシューティングに役立ちます。";
 "Export the logs for the last 5 minutes." = "過去5分間のログを取る。";
 "If you are reporting a bug, it would be helpful to attach the logs." = "バグを報告する場合、ログを添付して頂けると助かります。";
 "Export logs" = "ログを取る";
@@ -155,7 +155,7 @@
 "Feature request" = "機能の提案";
 "Donate" = "支援する";
 
-"Auto switch to the active device" = "自動的に使用中の装置に切り替え";
+"Auto switch to the active device" = "自動的に使用中のデバイスに切り替え";
 
 "Mouse" = "マウス";
 "Trackpad" = "トラックパッド";
