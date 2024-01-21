@@ -97,6 +97,15 @@ extension Scheme: CustomStringConvertible {
 }
 
 extension [Scheme] {
+    func allDeviceSpecficSchemes(of device: Device) -> [EnumeratedSequence<[Scheme]>.Element] {
+        self.enumerated().filter { _, scheme in
+            guard scheme.isDeviceSpecific else { return false }
+            guard scheme.if?.count == 1, let `if` = scheme.if?.first else { return false }
+            guard `if`.device?.match(with: device) == true else { return false }
+            return true
+        }
+    }
+
     enum SchemeIndex {
         case at(Int)
         case insertAt(Int)
@@ -109,7 +118,7 @@ extension [Scheme] {
 
         guard let first = allDeviceSpecificSchemes.first,
               let last = allDeviceSpecificSchemes.last else {
-            return .insertAt(schemes.endIndex)
+            return .insertAt(self.endIndex)
         }
 
         if let (index, _) = allDeviceSpecificSchemes
