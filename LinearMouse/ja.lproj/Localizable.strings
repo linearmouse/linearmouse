@@ -36,7 +36,7 @@
 "Modifier Keys" = "修飾キー";
 "Default action" = "デフォルトの動作";
 "Ignore modifier" = "修飾キーを無視";
-"No action" = "何もしない";  
+"No action" = "何もしない";
 "Alter orientation" = "方向を変更する";
 "Change speed" = "速度変更";
 "Zoom" = "拡大";
@@ -166,3 +166,5 @@
 "Configured" = "設定済みのアプリ";
 "Running" = "実行中のアプリ";
 "Installed" = "設置されているアプリ";
+
+"All Displays" = "All Displays";
