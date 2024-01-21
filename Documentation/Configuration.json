@@ -729,6 +729,11 @@
           "description": "Match one or more devices. If not provided, the scheme is activated on all devices.",
           "title": "Device"
         },
+        "display": {
+          "description": "Match displays by providing the display name. For example, `DELL P2415Q`.",
+          "title": "Display name",
+          "type": "string"
+        },
         "groupApp": {
           "description": "Match apps by providing the bundle ID of the process group. For example, `org.polymc.PolyMC`.",
           "title": "Group app",
