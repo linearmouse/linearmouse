@@ -196,6 +196,31 @@ Or, to match the whole process group:
 }
 ```
 
+## Display Matching
+
+Display name can be provided to match a specific display.
+
+For example, to modify the pointer acceleration on DELL P2415Q:
+
+```json
+{
+  "schemes": [
+    {
+      "if": {
+        "device": {
+          "vendorID": "0x046d",
+          "productID": "0xc52b"
+        },
+        "display": "DELL P2415Q"
+      },
+      "pointer": {
+        "acceleration": 0.5
+      }
+    }
+  ]
+}
+```
+
 ## Schemes merging and multiple `if`s
 
 If multiple schemes are activated at the same time, they will be merged in the order of their

@@ -126,6 +126,28 @@ extension [Scheme] {
             return .at(index)
         }
 
-        return .insertAt(app == nil && display == nil ? first.offset : last.offset + 1)
+        if app == nil, display == nil {
+            return .insertAt(first.offset)
+        }
+
+        if app != nil, display != nil {
+            return .insertAt(last.offset + 1)
+        }
+
+        if app != nil {
+            if let (index, _) = allDeviceSpecificSchemes
+                .first(where: { _, scheme in scheme.if?.first?.app == app }) {
+                return .insertAt(index)
+            }
+        }
+
+        if display != nil {
+            if let (index, _) = allDeviceSpecificSchemes
+                .first(where: { _, scheme in scheme.if?.first?.display == display }) {
+                return .insertAt(index)
+            }
+        }
+
+        return .insertAt(last.offset + 1)
     }
 }

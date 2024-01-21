@@ -91,6 +91,10 @@ extension SchemeState {
             return Scheme()
         }
 
-        return configurationState.configuration.matchScheme(withDevice: device, withApp: currentApp)
+        return configurationState.configuration.matchScheme(
+            withDevice: device,
+            withApp: currentApp,
+            withDisplay: currentDisplay
+        )
     }
 }
