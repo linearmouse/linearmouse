@@ -72,7 +72,7 @@
 "Click to record" = "Klicke zum Aufzeichnen";
 "Recording" = "Aufzeichnen";
 "Left click" = "Linksklick";
-"Left double-click" = "Left double-click";
+"Left double-click" = "Linker Doppelklick";
 "Right click" = "Rechtsklick";
 "Middle click" = "Mittlere Maustaste";
 "Button #%lld click" = "Taste #%lld drücken";
@@ -166,3 +166,5 @@
 "Configured" = "Konfiguriert";
 "Running" = "Aktiv";
 "Installed" = "Installiert";
+
+"All Displays" = "All Displays";
