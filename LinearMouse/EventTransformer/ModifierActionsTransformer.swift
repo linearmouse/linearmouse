@@ -100,7 +100,7 @@ class ModifierActionsTransformer: EventTransformer {
             pinchZoomBegan = false
             GestureEvent(zoomSource: nil, phase: .ended, magnification: 0)?.post(tap: .cgSessionEventTap)
             os_log("pinch zoom ended", log: Self.log, type: .info)
-            return nil
+            return event
         }
 
         if !pinchZoomBegan {
