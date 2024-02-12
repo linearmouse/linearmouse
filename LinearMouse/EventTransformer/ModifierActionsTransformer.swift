@@ -6,7 +6,7 @@ import GestureKit
 import KeyKit
 import os.log
 
-class ModifierActionsTransformer: EventTransformer {
+class ModifierActionsTransformer {
     private static let log = OSLog(
         subsystem: Bundle.main.bundleIdentifier!,
         category: "ModifierActionsTransformer"
@@ -22,7 +22,9 @@ class ModifierActionsTransformer: EventTransformer {
     init(modifiers: Modifiers) {
         self.modifiers = modifiers
     }
+}
 
+extension ModifierActionsTransformer: EventTransformer {
     func transform(_ event: CGEvent) -> CGEvent? {
         if pinchZoomBegan {
             return handlePinchZoom(event)
@@ -115,5 +117,15 @@ class ModifierActionsTransformer: EventTransformer {
         os_log("pinch zoom changed: magnification=%f", log: Self.log, type: .info, magnification)
 
         return nil
+    }
+}
+
+extension ModifierActionsTransformer: Deactivatable {
+    func deactivate() {
+        if pinchZoomBegan {
+            pinchZoomBegan = false
+            GestureEvent(zoomSource: nil, phase: .ended, magnification: 0)?.post(tap: .cgSessionEventTap)
+            os_log("ModifierActionsTransformer is inactive, pinch zoom ended", log: Self.log, type: .info)
+        }
     }
 }
