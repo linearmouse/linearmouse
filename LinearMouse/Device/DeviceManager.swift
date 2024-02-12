@@ -166,6 +166,11 @@ class DeviceManager: ObservableObject {
     }
 
     func deviceFromCGEvent(_ cgEvent: CGEvent) -> Device? {
+        // Issue: https://github.com/linearmouse/linearmouse/issues/677#issuecomment-1938208542
+        guard ![.flagsChanged, .keyDown, .keyUp].contains(cgEvent.type) else {
+            return lastActiveDeviceRef?.value
+        }
+
         guard let ioHIDEvent = CGEventCopyIOHIDEvent(cgEvent) else {
             return lastActiveDeviceRef?.value
         }
