@@ -98,12 +98,6 @@ declare namespace Scheme {
      * @description Match apps by providing the bundle ID of the process group. For example, `org.polymc.PolyMC`.
      */
     groupApp?: string;
-
-    /**
-     * @title Display name
-     * @description Match displays by providing the display name. For example, `DELL P2415Q`.
-     */
-    display?: string;
   };
 
   namespace If {

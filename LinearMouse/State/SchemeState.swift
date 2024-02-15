@@ -13,7 +13,6 @@ class SchemeState: ObservableObject {
     private var subscriptions = Set<AnyCancellable>()
 
     @Published var currentApp: String?
-    @Published var currentDisplay: String?
 
     init() {
         configurationState.$configuration
@@ -55,29 +54,55 @@ extension SchemeState {
         return try? readInstalledApp(bundleIdentifier: currentApp)?.bundleName ?? currentApp
     }
 
+    func allDeviceSpecficSchemes(of device: Device) -> [EnumeratedSequence<[Scheme]>.Element] {
+        schemes.enumerated().filter { _, scheme in
+            guard scheme.isDeviceSpecific else { return false }
+            guard scheme.if?.count == 1, let `if` = scheme.if?.first else { return false }
+            guard `if`.device?.match(with: device) == true else { return false }
+            return true
+        }
+    }
+
+    enum SchemeIndex {
+        case at(Int)
+        case insertAt(Int)
+    }
+
+    func schemeIndex(ofDevice device: Device, ofApp app: String?) -> SchemeIndex {
+        let allDeviceSpecificSchemes = allDeviceSpecficSchemes(of: device)
+
+        guard let first = allDeviceSpecificSchemes.first,
+              let last = allDeviceSpecificSchemes.last else {
+            return .insertAt(schemes.endIndex)
+        }
+
+        if let (index, _) = allDeviceSpecificSchemes
+            .first(where: { _, scheme in scheme.if?.first?.app == app }) {
+            return .at(index)
+        }
+
+        return .insertAt(app == nil ? first.offset : last.offset + 1)
+    }
+
     var scheme: Scheme {
         get {
             guard let device = device else {
                 return Scheme()
             }
 
-            if case let .at(index) = schemes.schemeIndex(
-                ofDevice: device,
-                ofApp: currentApp,
-                ofDisplay: currentDisplay
-            ) {
+            if case let .at(index) = schemeIndex(ofDevice: device, ofApp: currentApp) {
                 return schemes[index]
             }
 
             return Scheme(if: [
-                .init(device: .init(of: device), app: currentApp, display: currentDisplay)
+                .init(device: .init(of: device), app: currentApp)
             ])
         }
 
         set {
             guard let device = device else { return }
 
-            switch schemes.schemeIndex(ofDevice: device, ofApp: currentApp, ofDisplay: currentDisplay) {
+            switch schemeIndex(ofDevice: device, ofApp: currentApp) {
             case let .at(index):
                 schemes[index] = newValue
             case let .insertAt(index):
@@ -91,10 +116,6 @@ extension SchemeState {
             return Scheme()
         }
 
-        return configurationState.configuration.matchScheme(
-            withDevice: device,
-            withApp: currentApp,
-            withDisplay: currentDisplay
-        )
+        return configurationState.configuration.matchScheme(withDevice: device, withApp: currentApp)
     }
 }

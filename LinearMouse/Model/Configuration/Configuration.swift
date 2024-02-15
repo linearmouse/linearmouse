@@ -95,8 +95,7 @@ extension Configuration {
     func matchScheme(withDevice device: Device? = nil,
                      withApp app: String? = nil,
                      withParentApp parentApp: String? = nil,
-                     withGroupApp groupApp: String? = nil,
-                     withDisplay display: String? = nil) -> Scheme {
+                     withGroupApp groupApp: String? = nil) -> Scheme {
         // TODO: Backtrace the merge path
         // TODO: Optimize the algorithm
 
@@ -105,16 +104,14 @@ extension Configuration {
         let `if` = Scheme.If(device: device.map { DeviceMatcher(of: $0) },
                              app: app,
                              parentApp: parentApp,
-                             groupApp: groupApp,
-                             display: display)
+                             groupApp: groupApp)
 
         mergedScheme.if = [`if`]
 
         for scheme in schemes where scheme.isActive(withDevice: device,
                                                     withApp: app,
                                                     withParentApp: parentApp,
-                                                    withGroupApp: groupApp,
-                                                    withDisplay: display) {
+                                                    withGroupApp: groupApp) {
             scheme.merge(into: &mergedScheme)
         }
 
@@ -122,12 +119,10 @@ extension Configuration {
     }
 
     func matchScheme(withDevice device: Device? = nil,
-                     withPid pid: pid_t? = nil,
-                     withDisplay display: String? = nil) -> Scheme {
+                     withPid pid: pid_t? = nil) -> Scheme {
         matchScheme(withDevice: device,
                     withApp: pid?.bundleIdentifier,
                     withParentApp: pid?.parent?.bundleIdentifier,
-                    withGroupApp: pid?.group?.bundleIdentifier,
-                    withDisplay: display)
+                    withGroupApp: pid?.group?.bundleIdentifier)
     }
 }

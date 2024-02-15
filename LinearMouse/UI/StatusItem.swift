@@ -139,7 +139,6 @@ class StatusItem {
 
     @objc private func openSettings() {
         SchemeState.shared.currentApp = nil
-        SchemeState.shared.currentDisplay = nil
         SettingsWindow.shared.bringToFront()
     }
 

@@ -20,11 +20,6 @@
 		972327B12992912F0041538A /* ReverseScrollingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972327B02992912F0041538A /* ReverseScrollingSection.swift */; };
 		972327B3299291860041538A /* ScrollingModeSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972327B2299291860041538A /* ScrollingModeSection.swift */; };
 		972327B5299291F40041538A /* ModifierKeysSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972327B4299291F40041538A /* ModifierKeysSection.swift */; };
-		9724A9D12ACAF1B400EA5DE3 /* ScreenManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9724A9D02ACAF1B400EA5DE3 /* ScreenManager.swift */; };
-		9724A9D42ACB286A00EA5DE3 /* DisplayIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9724A9D32ACB286A00EA5DE3 /* DisplayIndicator.swift */; };
-		9724A9D72ACBD0CB00EA5DE3 /* DisplayPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9724A9D62ACBD0CB00EA5DE3 /* DisplayPickerSheet.swift */; };
-		9724A9D92ACBD0EF00EA5DE3 /* DisplayPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9724A9D82ACBD0EF00EA5DE3 /* DisplayPicker.swift */; };
-		9724A9DB2ACBD12A00EA5DE3 /* DisplayPickerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9724A9DA2ACBD12A00EA5DE3 /* DisplayPickerState.swift */; };
 		9724FACA2A3E04DE00622F5A /* KeyKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9724FAC92A3E04DE00622F5A /* KeyKit */; };
 		972A5E1F285CA43D00CB6440 /* DevicePickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E1E285CA43D00CB6440 /* DevicePickerSheet.swift */; };
 		972A5E22285CA49800CB6440 /* DevicePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972A5E21285CA49800CB6440 /* DevicePicker.swift */; };
@@ -175,11 +170,6 @@
 		972327B02992912F0041538A /* ReverseScrollingSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReverseScrollingSection.swift; sourceTree = "<group>"; };
 		972327B2299291860041538A /* ScrollingModeSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingModeSection.swift; sourceTree = "<group>"; };
 		972327B4299291F40041538A /* ModifierKeysSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierKeysSection.swift; sourceTree = "<group>"; };
-		9724A9D02ACAF1B400EA5DE3 /* ScreenManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenManager.swift; sourceTree = "<group>"; };
-		9724A9D32ACB286A00EA5DE3 /* DisplayIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayIndicator.swift; sourceTree = "<group>"; };
-		9724A9D62ACBD0CB00EA5DE3 /* DisplayPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayPickerSheet.swift; sourceTree = "<group>"; };
-		9724A9D82ACBD0EF00EA5DE3 /* DisplayPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayPicker.swift; sourceTree = "<group>"; };
-		9724A9DA2ACBD12A00EA5DE3 /* DisplayPickerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayPickerState.swift; sourceTree = "<group>"; };
 		972A5E1E285CA43D00CB6440 /* DevicePickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerSheet.swift; sourceTree = "<group>"; };
 		972A5E21285CA49800CB6440 /* DevicePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePicker.swift; sourceTree = "<group>"; };
 		972A5E23285CA4AA00CB6440 /* DevicePickerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerState.swift; sourceTree = "<group>"; };
@@ -442,42 +432,6 @@
 			path = ModifierKeysSection;
 			sourceTree = "<group>";
 		};
-		9724A9CE2ACAF18000EA5DE3 /* EventTap */ = {
-			isa = PBXGroup;
-			children = (
-				975979CF2A6B7A3800016EDF /* EventTap.swift */,
-				B7BD51802672FEB5001FE742 /* GlobalEventTap.swift */,
-			);
-			path = EventTap;
-			sourceTree = "<group>";
-		};
-		9724A9CF2ACAF1A000EA5DE3 /* ScreenManager */ = {
-			isa = PBXGroup;
-			children = (
-				9724A9D02ACAF1B400EA5DE3 /* ScreenManager.swift */,
-			);
-			path = ScreenManager;
-			sourceTree = "<group>";
-		};
-		9724A9D22ACB285500EA5DE3 /* DisplayIndicator */ = {
-			isa = PBXGroup;
-			children = (
-				9724A9D32ACB286A00EA5DE3 /* DisplayIndicator.swift */,
-				9724A9D52ACBD0BA00EA5DE3 /* DisplayPickerSheet */,
-			);
-			path = DisplayIndicator;
-			sourceTree = "<group>";
-		};
-		9724A9D52ACBD0BA00EA5DE3 /* DisplayPickerSheet */ = {
-			isa = PBXGroup;
-			children = (
-				9724A9D62ACBD0CB00EA5DE3 /* DisplayPickerSheet.swift */,
-				9724A9D82ACBD0EF00EA5DE3 /* DisplayPicker.swift */,
-				9724A9DA2ACBD12A00EA5DE3 /* DisplayPickerState.swift */,
-			);
-			path = DisplayPickerSheet;
-			sourceTree = "<group>";
-		};
 		972A5E1D285CA42500CB6440 /* DevicePickerSheet */ = {
 			isa = PBXGroup;
 			children = (
@@ -542,7 +496,6 @@
 			children = (
 				972DF647285A26E800B83932 /* DeviceIndicator */,
 				9766C4B5299E03C000FA3A9C /* AppIndicator */,
-				9724A9D22ACB285500EA5DE3 /* DisplayIndicator */,
 				972DF645285A269500B83932 /* SchemeIndicator.swift */,
 			);
 			path = Header;
@@ -832,7 +785,6 @@
 			isa = PBXGroup;
 			children = (
 				972DF62F2859754D00B83932 /* Utilities */,
-				9724A9CE2ACAF18000EA5DE3 /* EventTap */,
 				B7ADF9902748EAB80005B02D /* EventView */,
 				B77BA0F027480A9700E3BC5C /* EventTransformer */,
 				B7ADF9892748B65D0005B02D /* UI */,
@@ -840,7 +792,6 @@
 				97F77FAD285F09FA007C9C2B /* Model */,
 				B77D7C1327BA58DB00825F54 /* Device */,
 				970AA57D2B346AE10050B5A2 /* EventTap */,
-				9724A9CF2ACAF1A000EA5DE3 /* ScreenManager */,
 				B794BFE126BC0B2F003B11EF /* LinearMouse-Bridging-Header.h */,
 				B75A061B2671E9D800BEAF77 /* AppDelegate.swift */,
 				B75A061F2671E9DA00BEAF77 /* Assets.xcassets */,
@@ -934,20 +885,20 @@
 			isa = PBXGroup;
 			children = (
 				972327A629914BFA0041538A /* Utilities */,
-				B7ADF9A02749187A0005B02D /* EventTransformer */,
+				B7ADF9A02749187A0005B02D /* Event */,
 				97F77FB2285F453F007C9C2B /* Model */,
 			);
 			path = LinearMouseUnitTests;
 			sourceTree = "<group>";
 		};
-		B7ADF9A02749187A0005B02D /* EventTransformer */ = {
+		B7ADF9A02749187A0005B02D /* Event */ = {
 			isa = PBXGroup;
 			children = (
 				B7ADF99E274918540005B02D /* ReverseScrollingTransformerTests.swift */,
 				B754147D274E3AB0003CDAD0 /* LinearScrollingTransformerTests.swift */,
 				B754147F274E3CEF003CDAD0 /* ModifierActionsTransformerTests.swift */,
 			);
-			path = EventTransformer;
+			path = Event;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1170,7 +1121,6 @@
 				970AA57F2B346B2D0050B5A2 /* GlobalEventTapWatchdog.swift in Sources */,
 				972A5E2D285D882500CB6440 /* DeviceState.swift in Sources */,
 				972DF6312859756700B83932 /* ProcessEnvironment.swift in Sources */,
-				9724A9D72ACBD0CB00EA5DE3 /* DisplayPickerSheet.swift in Sources */,
 				97C5DBC028689F7E006FA6B4 /* Buttons.swift in Sources */,
 				97A13AD2287094FB002F6193 /* Distance.swift in Sources */,
 				97B83CDD2860B3FD00ECF109 /* Scrolling.swift in Sources */,
@@ -1189,7 +1139,6 @@
 				97E1B7B52A571D3200655EEC /* ButtonMappingActionRun.swift in Sources */,
 				9757BB9629935445002333AA /* Bidirectional.swift in Sources */,
 				972DF64F285A2D7C00B83932 /* SecondaryButtonStyle.swift in Sources */,
-				9724A9D92ACBD0EF00EA5DE3 /* DisplayPicker.swift in Sources */,
 				97B913FE28869F0500DC920A /* ButtonActionsTransformer.swift in Sources */,
 				972DF646285A269500B83932 /* SchemeIndicator.swift in Sources */,
 				97FD8CEA29BE0F9D00D93212 /* ButtonMapping.swift in Sources */,
@@ -1235,7 +1184,6 @@
 				972DF654285ADE9600B83932 /* GeneralSettings.swift in Sources */,
 				97F77FA4285DC467007C9C2B /* DevicePickerSectionState.swift in Sources */,
 				972AFD472851E6B0009B0CBF /* AccessibilityPermission.swift in Sources */,
-				9724A9D42ACB286A00EA5DE3 /* DisplayIndicator.swift in Sources */,
 				B7ADF9832748B12B0005B02D /* LinearScrollingVerticalTransformer.swift in Sources */,
 				B77A16122674C21600E99A5D /* Settings.swift in Sources */,
 				972DF64C285A298600B83932 /* DetailView.swift in Sources */,
@@ -1243,10 +1191,8 @@
 				978DBC9C29A60D92002259B3 /* UniversalBackForwardSection.swift in Sources */,
 				97F77FAA285E178B007C9C2B /* DevicePickerSectionItem.swift in Sources */,
 				36EBC3223E2CEE09F84076D8 /* Process.m in Sources */,
-				9724A9D12ACAF1B400EA5DE3 /* ScreenManager.swift in Sources */,
 				97353386297ED84600C1B5D0 /* ScrollingAccelerationSpeedAdjustmentTransformer.swift in Sources */,
 				97E1B7B92A57BD9100655EEC /* ButtonMappingActionPicker.swift in Sources */,
-				9724A9DB2ACBD12A00EA5DE3 /* DisplayPickerState.swift in Sources */,
 				973ADFCE29E2F18C00443649 /* LoggingSection.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
