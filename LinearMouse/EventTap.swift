@@ -96,7 +96,6 @@ extension EventTap {
             withExtendedLifetime(contextHolder) {
                 CGEvent.tapEnable(tap: tap, enable: false)
                 CFRunLoopRemoveSource(cfRunLoop, runLoopSource, .commonModes)
-                CFMachPortInvalidate(tap)
             }
         }
     }
