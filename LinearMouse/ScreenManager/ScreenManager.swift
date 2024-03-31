@@ -14,6 +14,7 @@ class ScreenManager: ObservableObject {
     @Published private(set) var screens: [NSScreen] = []
 
     @Published private(set) var currentScreen: NSScreen?
+    @Published private(set) var currentScreenName: String?
 
     private var timer: Timer?
 
@@ -51,10 +52,11 @@ class ScreenManager: ObservableObject {
         let screen = screens.first { $0.frame.contains(NSEvent.mouseLocation) }
         if currentScreen != screen {
             currentScreen = screen
+            currentScreenName = screen?.nameOrLocalizedName
             os_log(
                 "Current display changed: %{public}@: %{public}@",
                 String(describing: screen),
-                String(describing: screen?.name)
+                String(describing: currentScreenName)
             )
         }
 
@@ -68,7 +70,9 @@ class ScreenManager: ObservableObject {
                 return
             }
 
-            self.update()
+            DispatchQueue.main.async {
+                self.update()
+            }
         }
     }
 }
