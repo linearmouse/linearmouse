@@ -85,7 +85,23 @@ class DeviceManager: ObservableObject {
         ConfigurationState.shared.$configuration
             .debounce(for: 0.1, scheduler: RunLoop.main)
             .sink { [weak self] _ in
-                self?.updatePointerSpeed()
+                guard let self = self else {
+                    return
+                }
+                DispatchQueue.main.async {
+                    self.updatePointerSpeed()
+                }
+            }
+            .store(in: &subscriptions)
+
+        ScreenManager.shared.$currentScreenName
+            .sink { [weak self] _ in
+                guard let self = self else {
+                    return
+                }
+                DispatchQueue.main.async {
+                    self.updatePointerSpeed()
+                }
             }
             .store(in: &subscriptions)
 
@@ -191,7 +207,9 @@ class DeviceManager: ObservableObject {
     func updatePointerSpeed(for device: Device) {
         let frontmostApp = NSWorkspace.shared.frontmostApplication
         let scheme = ConfigurationState.shared.configuration.matchScheme(withDevice: device,
-                                                                         withPid: frontmostApp?.processIdentifier)
+                                                                         withPid: frontmostApp?.processIdentifier,
+                                                                         withDisplay: ScreenManager.shared
+                                                                             .currentScreenName)
 
         if let pointerDisableAcceleration = scheme.pointer.disableAcceleration, pointerDisableAcceleration {
             // If the pointer acceleration is turned off, it is preferable to utilize

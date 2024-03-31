@@ -71,6 +71,10 @@ extension Scheme {
         return true
     }
 
+    var isDisplaySpecific: Bool {
+        `if`?.contains { $0.display != nil } ?? false
+    }
+
     var matchedDevices: [Device] {
         DeviceManager.shared.devices.filter { isActive(withDevice: $0) }
     }
