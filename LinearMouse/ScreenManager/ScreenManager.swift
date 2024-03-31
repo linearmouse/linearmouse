@@ -16,6 +16,7 @@ class ScreenManager: ObservableObject {
     @Published private(set) var currentScreen: NSScreen?
     @Published private(set) var currentScreenName: String?
 
+    private var hasDisplaySpecificSchemes = false
     private var timer: Timer?
 
     private var subscriptions: Set<AnyCancellable> = []
@@ -29,6 +30,18 @@ class ScreenManager: ObservableObject {
                 }
 
                 self.updateScreens()
+                self.update()
+            }
+            .store(in: &subscriptions)
+
+        ConfigurationState.shared.$configuration
+            .debounce(for: 0.1, scheduler: RunLoop.main)
+            .sink { [weak self] configuration in
+                guard let self = self else {
+                    return
+                }
+
+                self.hasDisplaySpecificSchemes = configuration.schemes.contains { $0.isDisplaySpecific }
                 self.update()
             }
             .store(in: &subscriptions)
@@ -65,7 +78,17 @@ class ScreenManager: ObservableObject {
             self.timer = nil
         }
 
-        timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { [weak self] _ in
+        guard screens.count > 1 else {
+            os_log("Display switching disabled due to single display")
+            return
+        }
+
+        guard hasDisplaySpecificSchemes else {
+            os_log("Display switching disabled due to no display-specific schemes")
+            return
+        }
+
+        timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
             guard let self = self else {
                 return
             }
