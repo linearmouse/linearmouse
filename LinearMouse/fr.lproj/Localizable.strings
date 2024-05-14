@@ -1,10 +1,10 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse a besoin de la permission d'Accessibilité";
+"LinearMouse needs Accessibility permission" = "LinearMouse a besoin d'une autorisation d'accessibilité";
 "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "Vous devez accorder l’autorisation d’accessibilité dans Paramètres système > Sécurité et confidentialité > Accessibilité.";
-"Get more help" = "Obtenir de l'aide";
+"Get more help" = "Obtenir plus d'aide";
 "Open Accessibility" = "Ouvrir Accessibilité";
 
-"%@ Settings…" = "Paramètres %@…";
-"Start at login" = "Lancer au démarrage";
+"%@ Settings…" = "%@ Paramètres…";
+"Start at login" = "Démarrer à l''ouverture de session";
 "Config" = "Configuration";
 "Reload" = "Rafraichir";
 "Reveal in Finder" = "Afficher dans Finder";
@@ -40,7 +40,7 @@
 "Alter orientation" = "Altérer l'orientation";
 "Change speed" = "Changer la vitesse";
 "Zoom" = "Zoom";
-"Pinch zoom" = "Pinch zoom";
+"Pinch zoom" = "Zoom par pincement";
 
 "Disable pointer acceleration" = "Désactiver l'accélération du pointeur";
 "Pointer acceleration" = "Accélération du pointeur";
@@ -50,7 +50,7 @@
 
 "Enable universal back and forward" = "Activer l'option universelle pour revenir et avancer de pages";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convertir les boutons latéraux arrière et avant en swipant pour permettre la fonctionnalité universelle de retour et d'avant.";
-"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
+"Switch primary and secondary buttons" = "Inverser le bouton principal et secondaire";
 "Debounce button clicks" = "Anti-rebond des clics de la souris";
 "Ignore rapid clicks within a certain time period." = "Ignorer les clics rapides dans une certaine période.";
 "ms" = "ms";
@@ -72,7 +72,7 @@
 "Click to record" = "Cliquez pour enregistrer";
 "Recording" = "Enregistrement";
 "Left click" = "Clic gauche";
-"Left double-click" = "Left double-click";
+"Left double-click" = "Double-clic gauche";
 "Right click" = "Clic droit";
 "Middle click" = "Clic du milieu";
 "Button #%lld click" = "Clic du bouton #%lld";
@@ -167,4 +167,4 @@
 "Running" = "Applications lancées";
 "Installed" = "Installé";
 
-"All Displays" = "All Displays";
+"All Displays" = "Tous les écrans";
