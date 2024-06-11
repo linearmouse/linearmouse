@@ -40,7 +40,7 @@
 "Alter orientation" = "Mudar orientação";
 "Change speed" = "Alterar velocidade";
 "Zoom" = "Zoom";
-"Pinch zoom" = "Pinch zoom";
+"Pinch zoom" = "Zoom com 2 dedos";
 
 "Disable pointer acceleration" = "Desabilitar aceleração de ponteiro";
 "Pointer acceleration" = "Aceleração de ponteiro";
@@ -72,7 +72,7 @@
 "Click to record" = "Clique para gravar";
 "Recording" = "Gravando";
 "Left click" = "Clique esquerdo";
-"Left double-click" = "Left double-click";
+"Left double-click" = "Clique duplo esquerdo";
 "Right click" = "Clique direito";
 "Middle click" = "Clique central";
 "Button #%lld click" = "Clique do botão #%lld";
@@ -167,4 +167,4 @@
 "Running" = "Executando";
 "Installed" = "Instalado";
 
-"All Displays" = "All Displays";
+"All Displays" = "Todas as telas";
