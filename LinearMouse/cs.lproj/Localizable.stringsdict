@@ -13,13 +13,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>%d line</string>
+        <string>%d řádek</string>
         <key>few</key>
-        <string>%d lines</string>
+        <string>%d řádky</string>
         <key>many</key>
-        <string>%d lines</string>
+        <string>%d řádků</string>
         <key>other</key>
-        <string>%d lines</string>
+        <string>%d řádků</string>
       </dict>
     </dict>
     <key>%.1f pixel(s)</key>
@@ -35,11 +35,11 @@
         <key>one</key>
         <string>%.1f pixel</string>
         <key>few</key>
-        <string>%.1f pixels</string>
+        <string>%.1f pixely</string>
         <key>many</key>
-        <string>%.1f pixels</string>
+        <string>%.1f pixelů</string>
         <key>other</key>
-        <string>%.1f pixels</string>
+        <string>%.1f pixelů</string>
       </dict>
     </dict>
   </dict>
