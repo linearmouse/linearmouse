@@ -1,9 +1,9 @@
 "LinearMouse needs Accessibility permission" = "LinearMouse vyžaduje oprávnění k použití funkce Zpřístupnění";
-"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "Musíte povolit práva Zpřístupnění v Nastavení systému > Soukromí & Zabezpečení > Zpřístupnění.";
 "Get more help" = "Více informací";
 "Open Accessibility" = "Přejít na obrazovku Zpřístupnění";
 
-"%@ Settings…" = "%@ Settings…";
+"%@ Settings…" = "%@ Nastavení…";
 "Start at login" = "Spustit při startu systému";
 "Config" = "Konfigurační soubory";
 "Reload" = "Načíst znovu";
