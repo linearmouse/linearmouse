@@ -29,22 +29,22 @@
 "Scrolling speed" = "Скорость прокрутки";
 "Slow" = "Медленно";
 "Fast" = "Быстро";
-"Distance" = "Количество";
+"Distance" = "Расстояние";
 "Scrolling is disabled based on the current settings." = "Прокрутка отключена на основе текущих настроек.";
-"Revert to system defaults" = "Вернуться к настройкам по умолчанию";
+"Revert to system defaults" = "Восстановить настройки по умолчанию";
 "Copy settings from vertical" = "Скопировать настройки из вертикальной";
-"Modifier Keys" = "Клавиши модификации";
+"Modifier Keys" = "Клавиши модификаторы";
 "Default action" = "Действие по умолчанию";
-"Ignore modifier" = "Игнорировать модификации";
+"Ignore modifier" = "Игнорировать модификатор";
 "No action" = "Не задано";
 "Alter orientation" = "Изменить направление прокрутки";
 "Change speed" = "Изменить скорость";
 "Zoom" = "Масштабирование";
-"Pinch zoom" = "Увеличение щипком";
+"Pinch zoom" = "Масштабирование щипком";
 
 "Disable pointer acceleration" = "Отключить ускорение курсора";
-"Pointer acceleration" = "Ускорение указателя";
-"Pointer speed" = "Скорость указателя";
+"Pointer acceleration" = "Ускорение курсора";
+"Pointer speed" = "Скорость курсора";
 "Tracking speed" = "Скорость перемещения";
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "Вы также можете нажать ⌃⇧⌘Z, чтобы вернуться к настройкам по умолчанию.";
 
