@@ -3,7 +3,7 @@
 "Get more help" = "Obtenir plus d'aide";
 "Open Accessibility" = "Ouvrir Accessibilité";
 
-"%@ Settings…" = "%@ Paramètres…";
+"%@ Settings…" = "Paramètres %@…";
 "Start at login" = "Démarrer à l''ouverture de session";
 "Config" = "Configuration";
 "Reload" = "Rafraichir";
