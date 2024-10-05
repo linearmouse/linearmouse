@@ -8,6 +8,24 @@ Read our [Code of Conduct](CODE_OF_CONDUCT.md) to keep our community approachabl
 
 Instructions for building LinearMouse on macOS.
 
+### Dependencies
+
+- [Xcode](https://apps.apple.com/app/xcode/id497799835), obviously
+- [Swiftlint](https://github.com/realm/SwiftLint), used to lint' swift files
+- `npm` & [ts-json-schema-generator](https://www.npmjs.com/package/ts-json-schema-generator)), used to generate and document the custom configuration JSON scheme
+
+Install tools using brew:
+
+```bash
+$ brew install npm swiftlint
+```
+
+Install npm dependencies from the [package.json](./package.json)
+
+```bash
+$ npm install
+```
+
 ### Setup the repository
 
 ```sh
