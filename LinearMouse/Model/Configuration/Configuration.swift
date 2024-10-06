@@ -79,7 +79,7 @@ extension Configuration {
     func dump() throws -> Data {
         let encoder = JSONEncoder()
 
-        encoder.outputFormatting = .prettyPrinted
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
 
         return try encoder.encode(self)
     }
