@@ -13,6 +13,7 @@ class BidirectionalTests: XCTestCase {
 
     func testEncodeLiteral() throws {
         let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
 
         var foos = Bidirectional<Bool>()
         XCTAssertEqual(try String(data: encoder.encode(foos), encoding: .utf8),
@@ -29,6 +30,7 @@ class BidirectionalTests: XCTestCase {
 
     func testEncodeStruct() throws {
         let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
 
         var foos = Bidirectional<Foo>()
         XCTAssertEqual(try String(data: encoder.encode(foos), encoding: .utf8),
