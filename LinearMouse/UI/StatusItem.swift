@@ -140,12 +140,12 @@ class StatusItem {
     @objc private func openSettings() {
         SchemeState.shared.currentApp = nil
         SchemeState.shared.currentDisplay = nil
-        SettingsWindow.shared.bringToFront()
+        SettingsWindowController.shared.bringToFront()
     }
 
     @objc private func openSettingsForFrontmostApplication() {
         SchemeState.shared.currentApp = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
-        SettingsWindow.shared.bringToFront()
+        SettingsWindowController.shared.bringToFront()
     }
 
     @objc private func reloadConfiguration() {

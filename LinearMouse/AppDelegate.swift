@@ -15,10 +15,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private let statusItem = StatusItem.shared
     private var subscriptions = Set<AnyCancellable>()
 
-    override init() {
-        LaunchAtLogin.migrateIfNeeded()
-    }
-
     func applicationDidFinishLaunching(_: Notification) {
         guard ProcessEnvironment.isRunningApp else { return }
 
@@ -36,7 +32,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setup()
 
         if CommandLine.arguments.contains("--show") {
-            SettingsWindow.shared.bringToFront()
+            SettingsWindowController.shared.bringToFront()
         }
     }
 
@@ -47,7 +43,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return true
         }
 
-        SettingsWindow.shared.bringToFront()
+        SettingsWindowController.shared.bringToFront()
 
         return false
     }
