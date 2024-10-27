@@ -11,12 +11,15 @@ on:
 
 jobs:
   build:
-    runs-on: macos-12
+    runs-on: macos-15
     env:
       APPLE_ID: ${{ secrets.APPLE_ID }}
       CODE_SIGN_IDENTITY: ${{ secrets.CODE_SIGN_IDENTITY }}
       DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
     steps:
+      - name: Install dependencies
+        run: |
+          brew install swiftlint
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Install the Apple certificate
