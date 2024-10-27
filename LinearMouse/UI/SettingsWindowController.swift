@@ -4,10 +4,9 @@
 import Foundation
 import SwiftUI
 
-class SettingsWindow: NSObject {
-    static let shared = SettingsWindow()
+class SettingsWindowController: NSWindowController {
+    static let shared = SettingsWindowController()
 
-    private var controller: NSWindowController?
     private var released = true
 
     private func initWindowIfNeeded() {
@@ -23,34 +22,38 @@ class SettingsWindow: NSObject {
         )
 
         window.delegate = self
-
-        // This is the default value, just to make it explicit.
-        // See https://github.com/linearmouse/linearmouse/issues/548
-        window.isReleasedWhenClosed = true
+        window.contentView = NSHostingView(rootView: Settings())
 
         window.title = LinearMouse.appName
-        window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
-
-        window.contentView = NSHostingView(rootView: Settings())
+        window.titleVisibility = .hidden
 
         window.center()
 
-        controller = .init(window: window)
+        self.window = window
         released = false
     }
 
     func bringToFront() {
         initWindowIfNeeded()
-        controller?.window?.bringToFront()
+
+        guard let window else {
+            return
+        }
+
+        window.bringToFront()
     }
 }
 
-extension SettingsWindow: NSWindowDelegate {
+extension SettingsWindowController: NSWindowDelegate {
     func windowWillClose(_: Notification) {
+        guard let window else {
+            return
+        }
+
         // It seems that if contentView is not manually unassigned,
         // Settings will not be recycled.
-        controller?.window?.contentView = nil
+        window.contentView = nil
 
         // Mark self as released.
         released = true
