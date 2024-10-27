@@ -52,7 +52,7 @@
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality.";
 "Switch primary and secondary buttons" = "Switch primary and secondary buttons";
 "Debounce button clicks" = "Debounce button clicks";
-"Ignore rapid clicks within a certain time period." = "Ignore rapid clicks within a certain time period.";
+"Ignore rapid clicks within a certain time period." = "အချိန်တစ်ခုအတွင်း ခဏခဏ နှိပ်ခြင်းကို ကန့်သန့်ရန်။";
 "ms" = "ms";
 "Reset timer on mouse up" = "Reset timer on mouse up";
 "Left button" = "Left button";
@@ -168,4 +168,4 @@
 "Installed" = "Installed";
 "Other…" = "Other…";
 
-"All Displays" = "All Displays";
+"All Displays" = "Screens များအားလုံး";
