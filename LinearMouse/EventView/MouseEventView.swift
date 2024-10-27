@@ -47,4 +47,11 @@ class MouseEventView: EventView {
         }
         return pid
     }
+
+    var mouseLocationWindowID: CGWindowID {
+        CGWindowID(NSWindow.windowNumber(
+            at: NSPointFromCGPoint(event.unflippedLocation),
+            belowWindowWithWindowNumber: 0
+        ))
+    }
 }

@@ -18,10 +18,13 @@ class GlobalEventTap {
 
     private func callback(event: CGEvent) -> CGEvent? {
         let mouseEventView = MouseEventView(event)
-        let eventTransformer = EventTransformerManager.shared.get(withCGEvent: event,
-                                                                  withSourcePid: mouseEventView.sourcePid,
-                                                                  withTargetPid: mouseEventView.targetPid,
-                                                                  withDisplay: ScreenManager.shared.currentScreenName)
+        let eventTransformer = EventTransformerManager.shared.get(
+            withCGEvent: event,
+            withSourcePid: mouseEventView.sourcePid,
+            withTargetPid: mouseEventView.targetPid,
+            withMouseLocationPid: mouseEventView.mouseLocationWindowID.ownerPid,
+            withDisplay: ScreenManager.shared.currentScreenName
+        )
         return eventTransformer.transform(event)
     }
 
