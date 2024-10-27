@@ -234,6 +234,7 @@
 				nl,
 				"zh-HK",
 				sk,
+				my,
 			);
 			mainGroup = B75A060F2671E9D800BEAF77;
 			packageReferences = (
