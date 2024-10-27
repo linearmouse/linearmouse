@@ -39,7 +39,8 @@ class EventTransformerManager {
 
     func get(withCGEvent cgEvent: CGEvent,
              withSourcePid sourcePid: pid_t?,
-             withTargetPid pid: pid_t?,
+             withTargetPid targetPid: pid_t?,
+             withMouseLocationPid mouseLocationPid: pid_t?,
              withDisplay display: String?) -> EventTransformer {
         let prevActiveCacheKey = activeCacheKey
         defer {
@@ -73,18 +74,24 @@ class EventTransformerManager {
             return []
         }
 
+        let pid = mouseLocationPid ?? targetPid
+
         let device = DeviceManager.shared.deviceFromCGEvent(cgEvent)
-        let cacheKey = CacheKey(deviceMatcher: device.map { DeviceMatcher(of: $0) },
-                                pid: pid,
-                                screen: display)
+        let cacheKey = CacheKey(
+            deviceMatcher: device.map { DeviceMatcher(of: $0) },
+            pid: pid,
+            screen: display
+        )
         activeCacheKey = cacheKey
         if let eventTransformer = eventTransformerCache.value(forKey: cacheKey) {
             return eventTransformer
         }
 
-        let scheme = ConfigurationState.shared.configuration.matchScheme(withDevice: device,
-                                                                         withPid: pid,
-                                                                         withDisplay: display)
+        let scheme = ConfigurationState.shared.configuration.matchScheme(
+            withDevice: device,
+            withPid: pid,
+            withDisplay: display
+        )
 
         // TODO: Patch EventTransformer instead of rebuilding it
 
