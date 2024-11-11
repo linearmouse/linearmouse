@@ -63,6 +63,42 @@ public enum Key: String, Codable {
     case x
     case y
     case z
+    // Extended Latin keyboards (used for multiple languages):
+    case ê
+    case é
+    case î
+    case ô
+    case û
+    case ó
+    case ö
+    case ä
+    // German keyboards:
+    case ü
+    case ß
+    // Spanish keyboards:
+    case á
+    case í
+    case ú
+    case ñ
+    // French keyboards:
+    case ç
+    case à
+    case è
+    case ù
+    // Norwegian/Danish keyboards:
+    case ã
+    case õ
+    // Swedish/Finnish keyboards:
+    case å
+    // Polish keyboards:
+    case ą
+    case ć  
+    case ę
+    case ł
+    case ń
+    case ś
+    case ź
+    case ż
     case zero = "0"
     case one = "1"
     case two = "2"
