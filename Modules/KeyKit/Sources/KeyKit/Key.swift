@@ -92,7 +92,7 @@ public enum Key: String, Codable {
     case å
     // Polish keyboards:
     case ą
-    case ć  
+    case ć
     case ę
     case ł
     case ń
