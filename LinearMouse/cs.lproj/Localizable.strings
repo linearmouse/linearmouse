@@ -58,6 +58,8 @@
 "Left button" = "Levé tlačítko";
 "Right button" = "Pravé tlačítko";
 "Middle button" = "Prostřední tlačítko";
+"Back button" = "Back button";
+"Forward button" = "Forward button";
 
 "Assign actions to mouse buttons" = "Přidělit akce tlačítkům myši";
 "Edit" = "Upravit";
