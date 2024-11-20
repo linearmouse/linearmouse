@@ -58,6 +58,8 @@
 "Left button" = "左鍵";
 "Right button" = "右鍵";
 "Middle button" = "中鍵";
+"Back button" = "Back button";
+"Forward button" = "Forward button";
 
 "Assign actions to mouse buttons" = "分配滑鼠按鈕的動作";
 "Edit" = "編輯";
