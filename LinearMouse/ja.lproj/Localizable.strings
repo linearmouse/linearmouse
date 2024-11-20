@@ -58,6 +58,8 @@
 "Left button" = "左ボタン";
 "Right button" = "右ボタン";
 "Middle button" = "中ボタン";
+"Back button" = "Back button";
+"Forward button" = "Forward button";
 
 "Assign actions to mouse buttons" = "マウスボタンに操作を割り当てる";
 "Edit" = "編集";
