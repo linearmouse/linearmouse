@@ -58,6 +58,8 @@
 "Left button" = "Lewy przycisk";
 "Right button" = "Prawy przycisk";
 "Middle button" = "Środkowy przycisk";
+"Back button" = "Back button";
+"Forward button" = "Forward button";
 
 "Assign actions to mouse buttons" = "Przypisz akcje do przycisków myszy";
 "Edit" = "Edytuj";
