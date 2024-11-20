@@ -36,15 +36,25 @@ struct ClickDebouncingSection: View {
                     Text("Reset timer on mouse up")
                 }
 
-                HStack(spacing: 8) {
-                    Toggle("Left button", isOn: state.clickDebouncingButtonEnabledBinding(for: .left))
-                        .fixedSize()
-                    Toggle("Right button", isOn: state.clickDebouncingButtonEnabledBinding(for: .right))
-                        .fixedSize()
-                    Toggle("Middle button", isOn: state.clickDebouncingButtonEnabledBinding(for: .center))
-                        .fixedSize()
+                VStack(alignment: .leading) {
+                    HStack(spacing: 16) {
+                        Toggle("Left button", isOn: state.clickDebouncingButtonEnabledBinding(for: .left))
+                            .fixedSize()
+                        Toggle("Right button", isOn: state.clickDebouncingButtonEnabledBinding(for: .right))
+                            .fixedSize()
+                        Toggle("Middle button", isOn: state.clickDebouncingButtonEnabledBinding(for: .center))
+                            .fixedSize()
+                    }
+                    .toggleStyle(.checkbox)
+
+                    HStack(spacing: 16) {
+                        Toggle("Back button", isOn: state.clickDebouncingButtonEnabledBinding(for: .back))
+                            .fixedSize()
+                        Toggle("Forward button", isOn: state.clickDebouncingButtonEnabledBinding(for: .forward))
+                            .fixedSize()
+                    }
+                    .toggleStyle(.checkbox)
                 }
-                .toggleStyle(.checkbox)
             }
         }
         .modifier(SectionViewModifier())
