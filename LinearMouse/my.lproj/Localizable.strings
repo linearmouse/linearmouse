@@ -58,6 +58,8 @@
 "Left button" = "ဘယ်ဘက်ခလုတ်";
 "Right button" = "ညာဘက်ခလုတ်";
 "Middle button" = "အလယ်ခလုတ်";
+"Back button" = "Back button";
+"Forward button" = "Forward button";
 
 "Assign actions to mouse buttons" = "Mouse ခလုတ်များကို လုပ်ဆောင်ချက်များ သတ်မှတ်ရန်";
 "Edit" = "ပြင်ဆင်ရန်";
