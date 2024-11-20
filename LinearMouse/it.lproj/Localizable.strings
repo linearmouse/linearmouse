@@ -58,6 +58,8 @@
 "Left button" = "Pulsante sinistro";
 "Right button" = "Pulsante destro";
 "Middle button" = "Pulsante centrale";
+"Back button" = "Back button";
+"Forward button" = "Forward button";
 
 "Assign actions to mouse buttons" = "Assegna azioni ai pulsanti del mouse";
 "Edit" = "Modifica";
