@@ -58,6 +58,8 @@
 "Left button" = "Ліва кнопка";
 "Right button" = "Права кнопка";
 "Middle button" = "Середня кнопка";
+"Back button" = "Back button";
+"Forward button" = "Forward button";
 
 "Assign actions to mouse buttons" = "Призначити дії для клавіш миші";
 "Edit" = "Редагувати";
