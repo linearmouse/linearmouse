@@ -58,6 +58,8 @@
 "Left button" = "כפתור שמאלי";
 "Right button" = "כפתור ימני";
 "Middle button" = "כפתור אמצעי";
+"Back button" = "Back button";
+"Forward button" = "Forward button";
 
 "Assign actions to mouse buttons" = "שייך פעולות ללחצני העכבר";
 "Edit" = "ערוך";
