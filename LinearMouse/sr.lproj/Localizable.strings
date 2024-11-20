@@ -58,6 +58,8 @@
 "Left button" = "Left button";
 "Right button" = "Right button";
 "Middle button" = "Middle button";
+"Back button" = "Back button";
+"Forward button" = "Forward button";
 
 "Assign actions to mouse buttons" = "Assign actions to mouse buttons";
 "Edit" = "Edit";

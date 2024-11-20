@@ -58,6 +58,8 @@
 "Left button" = "Αριστερό κουμπί";
 "Right button" = "Δεξί κουμπί";
 "Middle button" = "Μεσαίο κουμπί";
+"Back button" = "Back button";
+"Forward button" = "Forward button";
 
 "Assign actions to mouse buttons" = "Ανάθεση ενεργειών σε κουμπιά του ποντικιού";
 "Edit" = "Επεξεργασία";

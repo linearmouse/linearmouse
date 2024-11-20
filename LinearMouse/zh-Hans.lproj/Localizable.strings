@@ -58,6 +58,8 @@
 "Left button" = "左键";
 "Right button" = "右键";
 "Middle button" = "中键";
+"Back button" = "返回键";
+"Forward button" = "前进键";
 
 "Assign actions to mouse buttons" = "分配鼠标按钮的动作";
 "Edit" = "编辑";

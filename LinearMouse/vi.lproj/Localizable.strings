@@ -58,6 +58,8 @@
 "Left button" = "Nút bên trái";
 "Right button" = "Nút bên phải";
 "Middle button" = "Nút ở giữa";
+"Back button" = "Back button";
+"Forward button" = "Forward button";
 
 "Assign actions to mouse buttons" = "Gán hành động cho các nút chuột";
 "Edit" = "Sửa";

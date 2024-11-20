@@ -58,6 +58,8 @@
 "Left button" = "Linke Maustaste";
 "Right button" = "Rechte Maustaste";
 "Middle button" = "Mittlere Maustaste";
+"Back button" = "Back button";
+"Forward button" = "Forward button";
 
 "Assign actions to mouse buttons" = "Maustasten Aktionen zuweisen";
 "Edit" = "Bearbeiten";

@@ -58,6 +58,8 @@
 "Left button" = "Sol düğme";
 "Right button" = "Sağ düğme";
 "Middle button" = "Orta düğme";
+"Back button" = "Back button";
+"Forward button" = "Forward button";
 
 "Assign actions to mouse buttons" = "Fare düğmelerine eylem ata";
 "Edit" = "Düzenle";

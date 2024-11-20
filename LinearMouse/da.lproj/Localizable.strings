@@ -58,6 +58,8 @@
 "Left button" = "Venstre knap";
 "Right button" = "Højre knap";
 "Middle button" = "Midterste knap";
+"Back button" = "Back button";
+"Forward button" = "Forward button";
 
 "Assign actions to mouse buttons" = "Tildel handlinger til museknapper";
 "Edit" = "Rediger";

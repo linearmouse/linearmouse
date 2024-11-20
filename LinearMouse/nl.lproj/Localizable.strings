@@ -58,6 +58,8 @@
 "Left button" = "Linkerknop";
 "Right button" = "Rechterknop";
 "Middle button" = "Middelste knop";
+"Back button" = "Back button";
+"Forward button" = "Forward button";
 
 "Assign actions to mouse buttons" = "Acties toewijzen aan de muisknoppen";
 "Edit" = "Bewerken";

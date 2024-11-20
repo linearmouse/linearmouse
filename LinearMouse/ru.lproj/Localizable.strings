@@ -58,6 +58,8 @@
 "Left button" = "Левая кнопка мыши";
 "Right button" = "Правая кнопка мыши";
 "Middle button" = "Средняя кнопка мыши";
+"Back button" = "Back button";
+"Forward button" = "Forward button";
 
 "Assign actions to mouse buttons" = "Назначить действия на кнопки мыши";
 "Edit" = "Редактировать";
