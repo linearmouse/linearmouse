@@ -4,7 +4,7 @@
 "Open Accessibility" = "Otwórz Dostępność";
 
 "%@ Settings…" = "Ustawienia %@…";
-"Start at login" = "Otwieraj podczas logowania";
+"Start at login" = "Uruchom przy zalogowaniu";
 "Config" = "Konfiguracja";
 "Reload" = "Odśwież";
 "Reveal in Finder" = "Pokaż w Finderze";
@@ -16,14 +16,14 @@
 "Buttons" = "Przyciski";
 "General" = "Ogólne";
 
-"Vertical" = "W pionie";
-"Horizontal" = "W poziomie";
+"Vertical" = "Pionowo";
+"Horizontal" = "Poziomo";
 "Reverse scrolling" = "Odwróć przewijanie";
-"Some gestures, such as swiping back and forward, may stop working." = "Niektóre gesty, takie jak przesuwanie w przód i w tył mogą przestać działać.";
+"Some gestures, such as swiping back and forward, may stop working." = "Niektóre gesty, takie jak przesuwanie wstecz i do przodu, mogą przestać działać.";
 "Scrolling mode" = "Tryb przewijania";
-"Accelerated" = "Przyspieszenie";
-"By Lines" = "Według wierszy";
-"By Pixels" = "Według pikseli";
+"Accelerated" = "Przyspieszone";
+"By Lines" = "Po liniach";
+"By Pixels" = "Po pikselach";
 "Scrolling acceleration" = "Przyspieszenie przewijania";
 "Linear" = "Liniowe";
 "Scrolling speed" = "Prędkość przewijania";
@@ -32,34 +32,34 @@
 "Distance" = "Dystans";
 "Scrolling is disabled based on the current settings." = "Przewijanie jest wyłączone zgodnie z obecnymi ustawieniami.";
 "Revert to system defaults" = "Przywróć ustawienia systemowe";
-"Copy settings from vertical" = "Skopiuj ustawienia z pionu";
+"Copy settings from vertical" = "Skopiuj ustawienia z pionowego";
 "Modifier Keys" = "Klawisze modyfikujące";
 "Default action" = "Domyślna akcja";
-"Ignore modifier" = "Ignore modifier";
+"Ignore modifier" = "Ignoruj modyfikator";
 "No action" = "Brak akcji";
 "Alter orientation" = "Zmień orientację";
 "Change speed" = "Zmień szybkość";
 "Zoom" = "Powiększanie";
-"Pinch zoom" = "Pinch zoom";
+"Pinch zoom" = "Powiększanie przez ściskanie";
 
 "Disable pointer acceleration" = "Wyłącz przyspieszenie wskaźnika";
 "Pointer acceleration" = "Przyspieszenie wskaźnika";
 "Pointer speed" = "Prędkość wskaźnika";
-"Tracking speed" = "Tracking speed";
-"You may also press ⌃⇧⌘Z to revert to system defaults." = "Możesz także nacisnąć na ⌃⇧⌘Z, aby przywrócić ustawienia systemowe.";
+"Tracking speed" = "Prędkość wskaźnika";
+"You may also press ⌃⇧⌘Z to revert to system defaults." = "Możesz także nacisnąć ⌃⇧⌘Z, aby przywrócić ustawienia systemowe.";
 
-"Enable universal back and forward" = "Włącz uniwersalne przejścia w przód i w tył";
-"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Zamienia działanie przycisków bocznych myszy na gesty przesuwania, tak aby umożliwić uniwersalne przechodzenie w przód i w tył.";
-"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
-"Debounce button clicks" = "Debounce button clicks";
+"Enable universal back and forward" = "Włącz uniwersalne przejścia wstecz i do przodu";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Zamienia działanie przycisków bocznych myszy na gesty przesuwania, tak aby umożliwić uniwersalne przechodzenie wstecz i do przodu.";
+"Switch primary and secondary buttons" = "Zamień przyciski główny i pomocniczy";
+"Debounce button clicks" = "Odfiltruj kliknięcia przycisków";
 "Ignore rapid clicks within a certain time period." = "Ignoruj szybkie kliknięcia w określonym czasie.";
 "ms" = "ms";
-"Reset timer on mouse up" = "Reset timer on mouse up";
+"Reset timer on mouse up" = "Zresetuj licznik po puszczeniu myszy";
 "Left button" = "Lewy przycisk";
 "Right button" = "Prawy przycisk";
 "Middle button" = "Środkowy przycisk";
-"Back button" = "Back button";
-"Forward button" = "Forward button";
+"Back button" = "Przycisk wstecz";
+"Forward button" = "Przycisk do przodu";
 
 "Assign actions to mouse buttons" = "Przypisz akcje do przycisków myszy";
 "Edit" = "Edytuj";
@@ -74,7 +74,7 @@
 "Click to record" = "Kliknij, aby zarejestrować";
 "Recording" = "Rejestrowanie";
 "Left click" = "Lewy przycisk";
-"Left double-click" = "Left double-click";
+"Left double-click" = "Podwójne kliknięcie lewym przyciskiem";
 "Right click" = "Prawy przycisk";
 "Middle click" = "Środkowy przycisk";
 "Button #%lld click" = "Kliknięcie przycisku #%lld";
@@ -89,7 +89,7 @@
 "Application windows" = "Okna aplikacji";
 "Launchpad" = "Launchpad";
 "Show desktop" = "Pokaż pulpit";
-"Look up & data detectors" = "Look up & data detectors";
+"Look up & data detectors" = "Wyszukaj i wykrywaj dane";
 "Smart zoom" = "Inteligentne powiększanie";
 "Display" = "Wyświetlacz";
 "Increase display brightness" = "Zwiększ jasność wyświetlacza";
@@ -109,7 +109,7 @@
 "Mouse Wheel" = "Kółko myszy";
 "Mouse Button" = "Przycisk Myszy";
 "Back" = "Wstecz";
-"Forward" = "Dalej";
+"Forward" = "Do przodu";
 "Execute" = "Wykonaj";
 "Run shell command…" = "Uruchom polecenie…";
 "Scroll up…" = "Przewiń w górę…";
@@ -128,7 +128,7 @@
 "Create" = "Utwórz";
 
 "Settings" = "Ustawienia";
-"Show in menu bar" = "Pokaż na pasku menu";
+"Show in menu bar" = "Pokaż w pasku menu";
 "To show the settings, launch %@ again." = "Aby wyświetlić ustawienia, uruchom %@ ponownie.";
 "Bypass events from other applications" = "Pomiń zdarzenia z innych aplikacji";
 "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." = "Jeżeli włączone, %@ nie będzie modyfikował zdarzeń wysłanych przez inne aplikacje, takich jak Logi Options+.";
@@ -155,7 +155,7 @@
 "Homepage" = "Strona WWW";
 "Bug report" = "Zgłaszanie błędów";
 "Feature request" = "Sugestie funkcji";
-"Donate" = "Darowizna";
+"Donate" = "Wesprzyj";
 
 "Auto switch to the active device" = "Automatycznie przełącz na aktywne urządzenie";
 
@@ -164,7 +164,7 @@
 "(active)" = "(aktywne)";
 
 "Configure for" = "Skonfiguruj dla";
-"All Apps" = "Wszystkich aplikacji";
+"All Apps" = "Wszystkie aplikacje";
 "Configured" = "Skonfigurowane";
 "Running" = "Uruchomione";
 "Installed" = "Zainstalowane";
