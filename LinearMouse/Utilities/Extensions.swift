@@ -123,7 +123,7 @@ extension CGWindowID {
             return ownerPid
         }
 
-        func getOwnerPid(of windowID: CGWindowID) -> pid_t? {
+        func getOwnerPid(of _: CGWindowID) -> pid_t? {
             let options = CGWindowListOption(arrayLiteral: [.excludeDesktopElements, .optionOnScreenOnly])
             guard let windowListInfo = CGWindowListCopyWindowInfo(options,
                                                                   kCGNullWindowID) as NSArray? as? [[String: Any]]
