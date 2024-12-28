@@ -271,14 +271,6 @@ extension Device {
                 let buttonStates = report[4]
                 let toggled = lastButtonStates ^ buttonStates
                 
-                // Debug log to see all report data
-                os_log("Slimblade report data - full report: %{public}@, byte4: %{public}02X, lastStates: %{public}02X, toggled: %{public}02X",
-                       log: Self.log, type: .debug,
-                       report.map { String(format: "%02X", $0) }.joined(separator: " "),
-                       buttonStates,
-                       lastButtonStates,
-                       toggled)
-                       
                 guard toggled != 0 else {
                     return
                 }
