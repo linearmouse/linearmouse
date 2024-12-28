@@ -21,7 +21,8 @@ class Device {
 
     private static let productsToApplySideButtonFixes: Set<Product> = [
         .init(vendorID: 0x2717, productID: 0x5014), // Mi Silent Mouse
-        .init(vendorID: 0x248A, productID: 0x8266) // Delux M729DB mouse
+        .init(vendorID: 0x248A, productID: 0x8266), // Delux M729DB mouse
+        .init(vendorID: 0x047d, productID: 0x2041)  // Kensington Slimblade
     ]
 
     private weak var manager: DeviceManager?
@@ -55,12 +56,13 @@ class Device {
         //
         // To work around this issue, we subscribe to the input reports and monitor the side button
         // states. When the side buttons are clicked, we simulate those events.
-        if buttonCount == 3,
-           let vendorID = vendorID, let productID = productID,
-           Self.productsToApplySideButtonFixes.contains(.init(vendorID: vendorID, productID: productID)) {
-            reportObservationToken = device.observeReport(using: { [weak self] in
-                self?.inputReportCallback($0, $1)
-            })
+        if let vendorID = vendorID, let productID = productID {
+            if (buttonCount == 3 && Self.productsToApplySideButtonFixes.contains(.init(vendorID: vendorID, productID: productID))) ||
+               (vendorID == 0x047d && productID == 0x2041) { // Slimblade needs report monitoring regardless of button count
+                reportObservationToken = device.observeReport(using: { [weak self] in
+                    self?.inputReportCallback($0, $1)
+                })
+            }
         }
 
         os_log("Device initialized: %{public}@: HIDPointerResolution=%{public}f, HIDPointerAccelerationType=%{public}@",
@@ -262,31 +264,76 @@ extension Device {
         guard report.count >= 2 else {
             return
         }
-        // | Button 0 (1 bit) | ... | Button 4 (1 bit) | Not Used (3 bits) |
-        let buttonStates = report[1] & 0x18
-        let toggled = lastButtonStates ^ buttonStates
-        guard toggled != 0 else {
-            return
+        if let vendorID = device.vendorID, let productID = device.productID {
+            switch (vendorID, productID) {
+            case (0x047d, 0x2041): // Slimblade
+                // For Slimblade, byte 4 contains the vendor-defined button states
+                let buttonStates = report[4]
+                let toggled = lastButtonStates ^ buttonStates
+                
+                // Debug log to see all report data
+                os_log("Slimblade report data - full report: %{public}@, byte4: %{public}02X, lastStates: %{public}02X, toggled: %{public}02X",
+                       log: Self.log, type: .debug,
+                       report.map { String(format: "%02X", $0) }.joined(separator: " "),
+                       buttonStates,
+                       lastButtonStates,
+                       toggled)
+                       
+                guard toggled != 0 else {
+                    return
+                }
+
+                let topLeftMask: UInt8 = 0x1
+                let topRightMask: UInt8 = 0x2
+
+                // Check top left button
+                if toggled & topLeftMask != 0 {
+                    let down = buttonStates & topLeftMask != 0
+                    simulateButtonEvent(button: 3, down: down, device: device)
+                }
+
+                // Check top right button
+                if toggled & topRightMask != 0 {
+                    let down = buttonStates & topRightMask != 0
+                    simulateButtonEvent(button: 4, down: down, device: device)
+                }
+
+                lastButtonStates = buttonStates
+                
+            default: // Other devices with side button fixes
+            // | Button 0 (1 bit) | ... | Button 4 (1 bit) | Not Used (3 bits) |
+            let buttonStates = report[1] & 0x18
+            let toggled = lastButtonStates ^ buttonStates
+            guard toggled != 0 else {
+                return
+            }
+            for button in 3 ... 4 {
+                guard toggled & (1 << button) != 0 else {
+                    continue
+                }
+                let down = buttonStates & (1 << button) != 0
+                simulateButtonEvent(button: button, down: down, device: device)
+            }
+            lastButtonStates = buttonStates
         }
-        for button in 3 ... 4 {
-            guard toggled & (1 << button) != 0 else {
-                continue
-            }
-            let down = buttonStates & (1 << button) != 0
-            os_log("Simulate button %{public}d %{public}@ event for device: %{public}@", log: Self.log, type: .info,
-                   button, down ? "down" : "up", String(describing: device))
-            guard let location = CGEvent(source: nil)?.location else {
-                continue
-            }
-            guard let event = CGEvent(mouseEventSource: nil,
-                                      mouseType: down ? .otherMouseDown : .otherMouseUp,
-                                      mouseCursorPosition: location,
-                                      mouseButton: .init(rawValue: UInt32(button))!) else {
-                continue
-            }
-            event.post(tap: .cghidEventTap)
         }
-        lastButtonStates = buttonStates
+    }
+
+    private func simulateButtonEvent(button: Int, down: Bool, device: PointerDevice) {
+        os_log("Simulate button %{public}d %{public}@ event for device: %{public}@",
+               log: Self.log,
+               type: .info,
+               button,
+               down ? "down" : "up",
+               String(describing: device))
+               
+        guard let location = CGEvent(source: nil)?.location else { return }
+        guard let event = CGEvent(mouseEventSource: nil,
+                                mouseType: down ? .otherMouseDown : .otherMouseUp,
+                                mouseCursorPosition: location,
+                                mouseButton: CGMouseButton(rawValue: UInt32(button))!) else { return }
+                                
+        event.post(tap: .cghidEventTap)
     }
 }
 
