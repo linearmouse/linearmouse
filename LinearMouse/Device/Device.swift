@@ -4,15 +4,17 @@
 import Defaults
 import Foundation
 import ObservationToken
-import os.log
 import PointerKit
+import os.log
 
 class Device {
-    private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Device")
+    private static let log = OSLog(
+        subsystem: Bundle.main.bundleIdentifier!, category: "Device")
 
     static let fallbackPointerAcceleration = 0.6875
     static let fallbackPointerResolution = 400.0
-    static let fallbackPointerSpeed = pointerSpeed(fromPointerResolution: fallbackPointerResolution)
+    static let fallbackPointerSpeed = pointerSpeed(
+        fromPointerResolution: fallbackPointerResolution)
 
     private struct Product: Hashable {
         let vendorID: Int
@@ -20,9 +22,9 @@ class Device {
     }
 
     private static let productsToApplySideButtonFixes: Set<Product> = [
-        .init(vendorID: 0x2717, productID: 0x5014), // Mi Silent Mouse
-        .init(vendorID: 0x248A, productID: 0x8266), // Delux M729DB mouse
-        .init(vendorID: 0x047d, productID: 0x2041)  // Kensington Slimblade
+        .init(vendorID: 0x2717, productID: 0x5014),  // Mi Silent Mouse
+        .init(vendorID: 0x248A, productID: 0x8266),  // Delux M729DB mouse
+        .init(vendorID: 0x047d, productID: 0x2041),  // Kensington Slimblade
     ]
 
     private weak var manager: DeviceManager?
@@ -43,7 +45,8 @@ class Device {
         self.manager = manager
         self.device = device
 
-        initialPointerResolution = device.pointerResolution ?? Self.fallbackPointerResolution
+        initialPointerResolution =
+            device.pointerResolution ?? Self.fallbackPointerResolution
 
         // TODO: More elegant way?
         inputObservationToken = device.observeInput(using: { [weak self] in
@@ -57,19 +60,24 @@ class Device {
         // To work around this issue, we subscribe to the input reports and monitor the side button
         // states. When the side buttons are clicked, we simulate those events.
         if let vendorID = vendorID, let productID = productID {
-            if (buttonCount == 3 && Self.productsToApplySideButtonFixes.contains(.init(vendorID: vendorID, productID: productID))) ||
-               (vendorID == 0x047d && productID == 0x2041) { // Slimblade needs report monitoring regardless of button count
-                reportObservationToken = device.observeReport(using: { [weak self] in
+            if (buttonCount == 3
+                && Self.productsToApplySideButtonFixes.contains(
+                    .init(vendorID: vendorID, productID: productID)))
+                || (vendorID == 0x047d && productID == 0x2041)
+            {  // Slimblade needs report monitoring regardless of button count
+                reportObservationToken = device.observeReport(using: {
+                    [weak self] in
                     self?.inputReportCallback($0, $1)
                 })
             }
         }
 
-        os_log("Device initialized: %{public}@: HIDPointerResolution=%{public}f, HIDPointerAccelerationType=%{public}@",
-               log: Self.log, type: .info,
-               String(describing: device),
-               initialPointerResolution,
-               device.pointerAccelerationType ?? "(unknown)")
+        os_log(
+            "Device initialized: %{public}@: HIDPointerResolution=%{public}f, HIDPointerAccelerationType=%{public}@",
+            log: Self.log, type: .info,
+            String(describing: device),
+            initialPointerResolution,
+            device.pointerAccelerationType ?? "(unknown)")
     }
 
     func markRemoved() {
@@ -110,12 +118,14 @@ extension Device {
     }
 
     private func isAppleMagicMouse(vendorID: Int, productID: Int) -> Bool {
-        [0x004C, 0x05AC].contains(vendorID) && [0x0269, 0x030D].contains(productID)
+        [0x004C, 0x05AC].contains(vendorID)
+            && [0x0269, 0x030D].contains(productID)
     }
 
     var category: Category {
         if let vendorID: Int = device.vendorID,
-           let productID: Int = device.productID {
+            let productID: Int = device.productID
+        {
             if isAppleMagicMouse(vendorID: vendorID, productID: productID) {
                 return .mouse
             }
@@ -135,7 +145,9 @@ extension Device {
             device.useLinearScalingMouseAcceleration.map { $0 != 0 }
         }
         set {
-            guard device.useLinearScalingMouseAcceleration != nil, let newValue = newValue else {
+            guard device.useLinearScalingMouseAcceleration != nil,
+                let newValue = newValue
+            else {
                 return
             }
             device.useLinearScalingMouseAcceleration = newValue ? 1 : 0
@@ -147,54 +159,69 @@ extension Device {
             device.pointerAcceleration ?? Self.fallbackPointerAcceleration
         }
         set {
-            os_log("Update pointer acceleration for device: %{public}@: %{public}f",
-                   log: Self.log, type: .info,
-                   String(describing: self), newValue)
+            os_log(
+                "Update pointer acceleration for device: %{public}@: %{public}f",
+                log: Self.log, type: .info,
+                String(describing: self), newValue)
             device.pointerAcceleration = newValue
         }
     }
 
-    private static let pointerSpeedRange = 1.0 / 1200 ... 1.0 / 40
+    private static let pointerSpeedRange = 1.0 / 1200...1.0 / 40
 
-    static func pointerSpeed(fromPointerResolution pointerResolution: Double) -> Double {
+    static func pointerSpeed(fromPointerResolution pointerResolution: Double)
+        -> Double
+    {
         (1 / pointerResolution).normalized(from: pointerSpeedRange)
     }
 
-    static func pointerResolution(fromPointerSpeed pointerSpeed: Double) -> Double {
+    static func pointerResolution(fromPointerSpeed pointerSpeed: Double)
+        -> Double
+    {
         1 / (pointerSpeed.normalized(to: pointerSpeedRange))
     }
 
     var pointerSpeed: Double {
         get {
-            device.pointerResolution.map { Self.pointerSpeed(fromPointerResolution: $0) } ?? Self
+            device.pointerResolution.map {
+                Self.pointerSpeed(fromPointerResolution: $0)
+            }
+                ?? Self
                 .fallbackPointerSpeed
         }
         set {
-            os_log("Update pointer speed for device: %{public}@: %{public}f",
-                   log: Self.log, type: .info,
-                   String(describing: self), newValue)
-            device.pointerResolution = Self.pointerResolution(fromPointerSpeed: newValue)
+            os_log(
+                "Update pointer speed for device: %{public}@: %{public}f",
+                log: Self.log, type: .info,
+                String(describing: self), newValue)
+            device.pointerResolution = Self.pointerResolution(
+                fromPointerSpeed: newValue)
         }
     }
 
     func restorePointerAcceleration() {
-        let systemPointerAcceleration = (DeviceManager.shared
-            .getSystemProperty(forKey: device.pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey) as IOFixed?)
+        let systemPointerAcceleration =
+            (DeviceManager.shared
+            .getSystemProperty(
+                forKey: device.pointerAccelerationType
+                    ?? kIOHIDMouseAccelerationTypeKey) as IOFixed?)
             .map { Double($0) / 65536 } ?? Self.fallbackPointerAcceleration
 
-        os_log("Restore pointer acceleration for device: %{public}@: %{public}f",
-               log: Self.log, type: .info,
-               String(describing: device),
-               systemPointerAcceleration)
+        os_log(
+            "Restore pointer acceleration for device: %{public}@: %{public}f",
+            log: Self.log, type: .info,
+            String(describing: device),
+            systemPointerAcceleration)
 
         pointerAcceleration = systemPointerAcceleration
     }
 
     func restorePointerSpeed() {
-        os_log("Restore pointer speed for device: %{public}@: %{public}f",
-               log: Self.log, type: .info,
-               String(describing: device),
-               Self.pointerSpeed(fromPointerResolution: initialPointerResolution))
+        os_log(
+            "Restore pointer speed for device: %{public}@: %{public}f",
+            log: Self.log, type: .info,
+            String(describing: device),
+            Self.pointerSpeed(fromPointerResolution: initialPointerResolution))
 
         device.pointerResolution = initialPointerResolution
     }
@@ -204,10 +231,14 @@ extension Device {
         restorePointerAcceleration()
     }
 
-    private func inputValueCallback(_ device: PointerDevice, _ value: IOHIDValue) {
+    private func inputValueCallback(
+        _ device: PointerDevice, _ value: IOHIDValue
+    ) {
         if verbosedLoggingOn {
-            os_log("Received input value from: %{public}@: %{public}@", log: Self.log, type: .info,
-                   String(describing: device), String(describing: value))
+            os_log(
+                "Received input value from: %{public}@: %{public}@",
+                log: Self.log, type: .info,
+                String(describing: device), String(describing: value))
         }
 
         guard let manager = manager else {
@@ -242,22 +273,26 @@ extension Device {
 
         manager.lastActiveDeviceRef = .init(self)
 
-        os_log("""
-               Last active device changed: %{public}@, category=%{public}@ \
-               (Reason: Received input value: usagePage=0x%{public}02X, usage=0x%{public}02X)
-               """,
-               log: Self.log, type: .info,
-               String(describing: device),
-               String(describing: category),
-               usagePage,
-               usage)
+        os_log(
+            """
+            Last active device changed: %{public}@, category=%{public}@ \
+            (Reason: Received input value: usagePage=0x%{public}02X, usage=0x%{public}02X)
+            """,
+            log: Self.log, type: .info,
+            String(describing: device),
+            String(describing: category),
+            usagePage,
+            usage)
     }
 
     private func inputReportCallback(_ device: PointerDevice, _ report: Data) {
         if verbosedLoggingOn {
-            let reportHex = report.map { String(format: "%02X", $0) }.joined(separator: " ")
-            os_log("Received input report from: %{public}@: %{public}@", log: Self.log, type: .info,
-                   String(describing: device), String(describing: reportHex))
+            let reportHex = report.map { String(format: "%02X", $0) }.joined(
+                separator: " ")
+            os_log(
+                "Received input report from: %{public}@: %{public}@",
+                log: Self.log, type: .info,
+                String(describing: device), String(describing: reportHex))
         }
 
         // FIXME: Correct HID Report parsing?
@@ -266,11 +301,11 @@ extension Device {
         }
         if let vendorID = device.vendorID, let productID = device.productID {
             switch (vendorID, productID) {
-            case (0x047d, 0x2041): // Slimblade
+            case (0x047d, 0x2041):  // Slimblade
                 // For Slimblade, byte 4 contains the vendor-defined button states
                 let buttonStates = report[4]
                 let toggled = lastButtonStates ^ buttonStates
-                
+
                 guard toggled != 0 else {
                     return
                 }
@@ -291,40 +326,47 @@ extension Device {
                 }
 
                 lastButtonStates = buttonStates
-                
-            default: // Other devices with side button fixes
-            // | Button 0 (1 bit) | ... | Button 4 (1 bit) | Not Used (3 bits) |
-            let buttonStates = report[1] & 0x18
-            let toggled = lastButtonStates ^ buttonStates
-            guard toggled != 0 else {
-                return
-            }
-            for button in 3 ... 4 {
-                guard toggled & (1 << button) != 0 else {
-                    continue
+
+            default:  // Other devices with side button fixes
+                // | Button 0 (1 bit) | ... | Button 4 (1 bit) | Not Used (3 bits) |
+                let buttonStates = report[1] & 0x18
+                let toggled = lastButtonStates ^ buttonStates
+                guard toggled != 0 else {
+                    return
                 }
-                let down = buttonStates & (1 << button) != 0
-                simulateButtonEvent(button: button, down: down, device: device)
+                for button in 3...4 {
+                    guard toggled & (1 << button) != 0 else {
+                        continue
+                    }
+                    let down = buttonStates & (1 << button) != 0
+                    simulateButtonEvent(
+                        button: button, down: down, device: device)
+                }
+                lastButtonStates = buttonStates
             }
-            lastButtonStates = buttonStates
-        }
         }
     }
 
-    private func simulateButtonEvent(button: Int, down: Bool, device: PointerDevice) {
-        os_log("Simulate button %{public}d %{public}@ event for device: %{public}@",
-               log: Self.log,
-               type: .info,
-               button,
-               down ? "down" : "up",
-               String(describing: device))
-               
+    private func simulateButtonEvent(
+        button: Int, down: Bool, device: PointerDevice
+    ) {
+        os_log(
+            "Simulate button %{public}d %{public}@ event for device: %{public}@",
+            log: Self.log,
+            type: .info,
+            button,
+            down ? "down" : "up",
+            String(describing: device))
+
         guard let location = CGEvent(source: nil)?.location else { return }
-        guard let event = CGEvent(mouseEventSource: nil,
-                                mouseType: down ? .otherMouseDown : .otherMouseUp,
-                                mouseCursorPosition: location,
-                                mouseButton: CGMouseButton(rawValue: UInt32(button))!) else { return }
-                                
+        guard
+            let event = CGEvent(
+                mouseEventSource: nil,
+                mouseType: down ? .otherMouseDown : .otherMouseUp,
+                mouseCursorPosition: location,
+                mouseButton: CGMouseButton(rawValue: UInt32(button))!)
+        else { return }
+
         event.post(tap: .cghidEventTap)
     }
 }
