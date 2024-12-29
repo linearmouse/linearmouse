@@ -16,6 +16,11 @@ struct DevicePicker: View {
                 title: "Trackpad",
                 devices: state.devices.filter(\.isTrackpad)
             )
+            DevicePickerSection(
+                isPresented: $isPresented,
+                title: "Trackball",
+                devices: state.devices.filter(\.isTrackball)
+            )
         }
         .frame(minWidth: 350)
     }
