@@ -11,7 +11,7 @@ struct DeviceMatcher: Codable, Equatable, Hashable, Defaults.Serializable {
     @SingleValueOrArray var category: [Category]?
 
     enum Category: String, Codable, Hashable {
-        case mouse, trackpad
+        case mouse, trackpad, trackball
     }
 }
 
@@ -59,6 +59,8 @@ extension DeviceMatcher.Category {
             self = .mouse
         case .trackpad:
             self = .trackpad
+        case .trackball:
+            self = .trackball
         }
     }
 
@@ -68,6 +70,8 @@ extension DeviceMatcher.Category {
             return .mouse
         case .trackpad:
             return .trackpad
+        case .trackball:
+            return .trackball
         }
     }
 }
