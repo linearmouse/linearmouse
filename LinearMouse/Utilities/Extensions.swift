@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import AppKit
 import Foundation
@@ -123,7 +123,7 @@ extension CGWindowID {
             return ownerPid
         }
 
-        func getOwnerPid(of windowID: CGWindowID) -> pid_t? {
+        func getOwnerPid() -> pid_t? {
             let options = CGWindowListOption(arrayLiteral: [.excludeDesktopElements, .optionOnScreenOnly])
             guard let windowListInfo = CGWindowListCopyWindowInfo(options,
                                                                   kCGNullWindowID) as NSArray? as? [[String: Any]]
@@ -139,7 +139,7 @@ extension CGWindowID {
             return nil
         }
 
-        let ownerPid = getOwnerPid(of: self)
+        let ownerPid = getOwnerPid()
         cgWindowIDOwnerPidCache.setValue(ownerPid, forKey: self)
 
         return ownerPid
