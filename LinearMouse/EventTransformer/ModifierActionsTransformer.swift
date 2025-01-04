@@ -98,23 +98,38 @@ extension ModifierActionsTransformer: EventTransformer {
             return event
         }
 
-        if event.type == .flagsChanged {
-            pinchZoomBegan = false
-            GestureEvent(zoomSource: nil, phase: .ended, magnification: 0)?.post(tap: .cgSessionEventTap)
-            os_log("pinch zoom ended", log: Self.log, type: .info)
-            return event
+        // For certain apps, such as Firefox, pinch zooming with modifier keys can cause issues.
+        // To address this, we need to clear all modifier keys before initiating a pinch zoom action.
+        if let event = CGEvent(source: nil) {
+            event.type = .flagsChanged
+            event.flags = []
+            event.post(tap: .cgSessionEventTap)
         }
 
-        if !pinchZoomBegan {
-            GestureEvent(zoomSource: nil, phase: .began, magnification: 0)?.post(tap: .cgSessionEventTap)
-            pinchZoomBegan = true
-            os_log("pinch zoom began", log: Self.log, type: .info)
-        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) { [weak self] in
+            guard let self else {
+                return
+            }
 
-        let scrollWheelEventView = ScrollWheelEventView(event)
-        let magnification = Double(scrollWheelEventView.deltaYPt) * 0.005
-        GestureEvent(zoomSource: nil, phase: .changed, magnification: magnification)?.post(tap: .cgSessionEventTap)
-        os_log("pinch zoom changed: magnification=%f", log: Self.log, type: .info, magnification)
+            if event.type == .flagsChanged {
+                pinchZoomBegan = false
+                GestureEvent(zoomSource: nil, phase: .ended, magnification: 0)?.post(tap: .cgSessionEventTap)
+                os_log("pinch zoom ended", log: Self.log, type: .info)
+
+                return
+            }
+
+            if !pinchZoomBegan {
+                GestureEvent(zoomSource: nil, phase: .began, magnification: 0)?.post(tap: .cgSessionEventTap)
+                pinchZoomBegan = true
+                os_log("pinch zoom began", log: Self.log, type: .info)
+            }
+
+            let scrollWheelEventView = ScrollWheelEventView(event)
+            let magnification = Double(scrollWheelEventView.deltaYPt) * 0.005
+            GestureEvent(zoomSource: nil, phase: .changed, magnification: magnification)?.post(tap: .cgSessionEventTap)
+            os_log("pinch zoom changed: magnification=%f", log: Self.log, type: .info, magnification)
+        }
 
         return nil
     }
