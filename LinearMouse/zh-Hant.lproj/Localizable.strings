@@ -49,12 +49,12 @@
 "You may also press ⌃⇧⌘Z to revert to system defaults." = "你也可以按下 ⌃⇧⌘Z 來回退到系統預設值。";
 
 "Enable universal back and forward" = "啟用全局後退、前進";
-"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "將後退、前進側鍵轉換為滑動手勢，以全局啟用後退、前進支持。";
+"Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "將後退、前進側鍵轉換為滑動手勢，以啟用全局的後退、前進功能。";
 "Switch primary and secondary buttons" = "切換主要和次要按鍵";
 "Debounce button clicks" = "按鈕點擊去抖動";
 "Ignore rapid clicks within a certain time period." = "忽略在特定時間段內的快速點擊。";
 "ms" = "毫秒";
-"Reset timer on mouse up" = "滑鼠松開時重置計時器";
+"Reset timer on mouse up" = "滑鼠鬆開時重置計時器";
 "Left button" = "左鍵";
 "Right button" = "右鍵";
 "Middle button" = "中鍵";
@@ -69,7 +69,7 @@
 "Scroll down %@" = "向下捲動 %@";
 "Scroll left %@" = "向左捲動 %@";
 "Scroll right %@" = "向右捲動 %@";
-"Keyboard shortcut: %@" = "鍵盤捷徑鍵：%@";
+"Keyboard shortcut: %@" = "鍵盤快速鍵：%@";
 
 "Click to record" = "點擊錄製";
 "Recording" = "正在錄製";
@@ -121,7 +121,7 @@
 "Mouse button" = "滑鼠按鍵";
 "Action" = "動作";
 "The mouse button is already assigned." = "該滑鼠按鍵已被分配。";
-"Assigning an action to the left button without any modifier keys is not allowed." = "不能將動作分配給左鍵且不加變更鍵。";
+"Assigning an action to the left button without any modifier keys is not allowed." = "將動作分配給左鍵必須加變更鍵。";
 "Repeat on hold" = "按住時重複";
 "Cancel" = "取消";
 "OK" = "確認";
@@ -137,7 +137,7 @@
 "Reveal Config in Finder…" = "在 Finder 中揭示設定…";
 
 "Version: %@" = "版本：%@";
-"Check for updates automatically" = "自動偵測更新檔";
+"Check for updates automatically" = "自動檢查更新";
 "Update check interval" = "檢查更新間隔";
 "Daily" = "每天";
 "Weekly" = "每週";
@@ -149,7 +149,7 @@
 "Enable verbose logging" = "啟用詳細日誌記錄";
 "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting." = "啟用此選項將記錄所有輸入事件，這可能增加使用 %@ 時的 CPU 使用率，但有助於排除故障。";
 "Export the logs for the last 5 minutes." = "匯出最近 5 分鐘的記錄。";
-"If you are reporting a bug, it would be helpful to attach the logs." = "如果你要報告 bug，附上記錄會很有幫助。";
+"If you are reporting a bug, it would be helpful to attach the logs." = "如果你要回報 bug，附上記錄會很有幫助。";
 "Export logs" = "匯出記錄";
 
 "Homepage" = "首頁";
@@ -157,16 +157,16 @@
 "Feature request" = "功能建議";
 "Donate" = "捐贈";
 
-"Auto switch to the active device" = "自動切換到活躍設備";
+"Auto switch to the active device" = "自動切換到正在使用的設備";
 
 "Mouse" = "滑鼠";
 "Trackpad" = "觸控式軌跡板";
-"(active)" = "(活躍)";
+"(active)" = "（使用中）";
 
 "Configure for" = "應用於";
 "All Apps" = "所有程式";
 "Configured" = "已配置";
-"Running" = "运行中";
+"Running" = "運行中";
 "Installed" = "已安裝";
 "Other…" = "其他…";
 
