@@ -19,7 +19,7 @@
 "Vertical" = "縱向";
 "Horizontal" = "橫向";
 "Reverse scrolling" = "反向捲動";
-"Some gestures, such as swiping back and forward, may stop working." = "某些手勢可能無法正常工作，如滑動後退和前進。";
+"Some gestures, such as swiping back and forward, may stop working." = "某些手勢可能無法正常運作，如滑動後退和前進。";
 "Scrolling mode" = "捲動模式";
 "Accelerated" = "帶加速度";
 "By Lines" = "按行";
