@@ -68,8 +68,11 @@ extension ButtonActionsTransformer: EventTransformer {
             event.flags = newFlags
         }
 
-        repeatTimer?.invalidate()
-        repeatTimer = nil
+        // FIXME: Temporary fix for "repeat on hold"
+        if !mouseDraggedEventTypes.contains(event.type) {
+            repeatTimer?.invalidate()
+            repeatTimer = nil
+        }
 
         guard let mapping = findMapping(of: event) else {
             return event
