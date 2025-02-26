@@ -1,0 +1,144 @@
+name: Add Co-Author to PR
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  add-coauthor:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.issue.pull_request && startsWith(github.event.comment.body, '/add-author') }}
+
+    permissions:
+      pull-requests: write
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Add co-author to commit
+        uses: actions/github-script@v6
+        with:
+          script: |
+            try {
+              // Parse the comment to extract the GitHub username
+              const commentBody = context.payload.comment.body;
+              const match = commentBody.match(/\/add-author\s+(\S+)/);
+
+              if (!match || !match[1]) {
+                return;
+              }
+              
+              const username = match[1];
+              
+              // Get user information from GitHub API
+              let userInfo;
+              try {
+                const { data } = await github.rest.users.getByUsername({
+                  username: username
+                });
+                userInfo = data;
+              } catch (error) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.payload.issue.number,
+                  body: `Error: Could not find GitHub user "${username}"`
+                });
+                return;
+              }
+              
+              // Construct the co-author line
+              // GitHub noreply email format: ID+username@users.noreply.github.com
+              const githubEmail = `${userInfo.id}+${username}@users.noreply.github.com`;
+              const coAuthorLine = `Co-authored-by: ${userInfo.name || username} <${githubEmail}>`;
+              
+              // Get the PR details to find the head branch and latest commit
+              const { data: pullRequest } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.issue.number
+              });
+              
+              const headRef = pullRequest.head.ref;
+              const headSha = pullRequest.head.sha;
+              
+              // Get the latest commit message
+              const { data: commit } = await github.rest.git.getCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: headSha
+              });
+              
+              let commitMessage = commit.message;
+              
+              // Check if the co-author is already in the commit message
+              if (commitMessage.includes(coAuthorLine)) {
+                // Add a "eyes" reaction to indicate the co-author is already there
+                await github.rest.reactions.createForIssueComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: context.payload.comment.id,
+                  content: 'eyes'
+                });
+                return;
+              }
+              
+              // Add the co-author line to the commit message
+              if (!commitMessage.includes('\n\n')) {
+                commitMessage = `${commitMessage}\n\n${coAuthorLine}`;
+              } else if (!commitMessage.endsWith('\n')) {
+                commitMessage = `${commitMessage}\n${coAuthorLine}`;
+              } else {
+                commitMessage = `${commitMessage}${coAuthorLine}`;
+              }
+              
+              // Create a new commit with the updated message (amend)
+              const { data: latestCommit } = await github.rest.git.getCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: headSha
+              });
+              
+              const { data: tree } = await github.rest.git.getTree({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tree_sha: latestCommit.tree.sha
+              });
+              
+              const newCommit = await github.rest.git.createCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                message: commitMessage,
+                tree: latestCommit.tree.sha,
+                parents: [headSha]
+              });
+              
+              // Update the reference
+              await github.rest.git.updateRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `heads/${headRef}`,
+                sha: newCommit.data.sha,
+                force: true
+              });
+              
+              // Add a "rocket" reaction to indicate success
+              await github.rest.reactions.createForIssueComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: context.payload.comment.id,
+                content: 'rocket'
+              });
+            } catch (error) {
+              console.error('Error:', error);
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                body: `Error adding co-author: ${error.message}`
+              });
+            }
