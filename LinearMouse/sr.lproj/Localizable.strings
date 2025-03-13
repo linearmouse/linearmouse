@@ -1,25 +1,25 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
-"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
-"Get more help" = "Get more help";
-"Open Accessibility" = "Open Accessibility";
+"LinearMouse needs Accessibility permission" = "LinearMouse захтева дозволу за Приступачност";
+"You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "Морате да доделите дозволу за Приступачност у Поставкама система > Безбедност и приватност > Приступачност.";
+"Get more help" = "Додатна помоћ";
+"Open Accessibility" = "Отвори Приступачност";
 
-"%@ Settings…" = "%@ Settings…";
-"Start at login" = "Start at login";
-"Config" = "Config";
-"Reload" = "Reload";
-"Reveal in Finder" = "Reveal in Finder";
-"Configure for %@…" = "Configure for %@…";
-"Quit %@" = "Quit %@";
+"%@ Settings…" = "%@ Поставке…";
+"Start at login" = "Покрени при пријављивању";
+"Config" = "Конфигурација";
+"Reload" = "Учитај поново";
+"Reveal in Finder" = "Прикажи у Finder-у";
+"Configure for %@…" = "Конфигуриши за %@…";
+"Quit %@" = "Напусти %@";
 
-"Scrolling" = "Scrolling";
-"Pointer" = "Pointer";
-"Buttons" = "Buttons";
-"General" = "General";
+"Scrolling" = "Померање";
+"Pointer" = "Показивач";
+"Buttons" = "Дугмад";
+"General" = "Опште";
 
-"Vertical" = "Vertical";
-"Horizontal" = "Horizontal";
-"Reverse scrolling" = "Reverse scrolling";
-"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
+"Vertical" = "Вертикално";
+"Horizontal" = "Хоризонтално";
+"Reverse scrolling" = "Обрнуто померање";
+"Some gestures, such as swiping back and forward, may stop working." = "Неки гестови, као што су превлачење уназад и унапред, можда више неће функционисати.";
 "Scrolling mode" = "Scrolling mode";
 "Accelerated" = "Accelerated";
 "By Lines" = "By Lines";
