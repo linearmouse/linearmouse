@@ -11,15 +11,15 @@
 "Configure for %@…" = "Конфигуриши за %@…";
 "Quit %@" = "Напусти %@";
 
-"Scrolling" = "Scrolling";
-"Pointer" = "Pointer";
-"Buttons" = "Buttons";
-"General" = "General";
+"Scrolling" = "Померање";
+"Pointer" = "Показивач";
+"Buttons" = "Дугмад";
+"General" = "Опште";
 
-"Vertical" = "Vertical";
-"Horizontal" = "Horizontal";
-"Reverse scrolling" = "Reverse scrolling";
-"Some gestures, such as swiping back and forward, may stop working." = "Some gestures, such as swiping back and forward, may stop working.";
+"Vertical" = "Вертикално";
+"Horizontal" = "Хоризонтално";
+"Reverse scrolling" = "Обрнуто померање";
+"Some gestures, such as swiping back and forward, may stop working." = "Неки гестови, као што су превлачење уназад и унапред, можда више неће функционисати.";
 "Scrolling mode" = "Scrolling mode";
 "Accelerated" = "Accelerated";
 "By Lines" = "By Lines";
