@@ -11,38 +11,44 @@ struct DeviceMatcher: Codable, Equatable, Hashable, Defaults.Serializable {
     @SingleValueOrArray var category: [Category]?
 
     enum Category: String, Codable, Hashable {
-        case mouse, trackpad
+        case mouse, trackpad, trackball
     }
 }
 
 extension DeviceMatcher {
     init(of device: Device) {
-        self.init(vendorID: device.vendorID,
-                  productID: device.productID,
-                  productName: device.productName,
-                  serialNumber: device.serialNumber,
-                  category: [Category(from: device.category)])
+        self.init(
+            vendorID: device.vendorID,
+            productID: device.productID,
+            productName: device.productName,
+            serialNumber: device.serialNumber,
+            category: [Category(from: device.category)])
     }
 
     func match(with device: Device) -> Bool {
-        func matchValue<T>(_ destination: T?, _ source: T) -> Bool where T: Equatable {
+        func matchValue<T>(_ destination: T?, _ source: T) -> Bool
+        where T: Equatable {
             destination == nil || source == destination
         }
 
-        func matchValue<T>(_ destination: T?, _ source: T?) -> Bool where T: Equatable {
+        func matchValue<T>(_ destination: T?, _ source: T?) -> Bool
+        where T: Equatable {
             destination == nil || source == destination
         }
 
         guard matchValue(vendorID, device.vendorID),
-              matchValue(productID, device.productID),
-              matchValue(productName, device.productName),
-              matchValue(serialNumber, device.serialNumber)
+            matchValue(productID, device.productID),
+            matchValue(productName, device.productName),
+            matchValue(serialNumber, device.serialNumber)
         else {
             return false
         }
 
         if let category = category {
-            guard category.contains(where: { $0.deviceCategory == device.category })
+            guard
+                category.contains(where: {
+                    $0.deviceCategory == device.category
+                })
             else {
                 return false
             }
@@ -59,6 +65,8 @@ extension DeviceMatcher.Category {
             self = .mouse
         case .trackpad:
             self = .trackpad
+        case .trackball:
+            self = .trackball
         }
     }
 
@@ -68,6 +76,8 @@ extension DeviceMatcher.Category {
             return .mouse
         case .trackpad:
             return .trackpad
+        case .trackball:
+            return .trackball
         }
     }
 }

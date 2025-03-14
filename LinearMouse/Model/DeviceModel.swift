@@ -45,4 +45,5 @@ class DeviceModel: ObservableObject, Identifiable {
 extension DeviceModel {
     var isMouse: Bool { category == .mouse }
     var isTrackpad: Bool { category == .trackpad }
+    var isTrackball: Bool { category == .trackball }
 }
