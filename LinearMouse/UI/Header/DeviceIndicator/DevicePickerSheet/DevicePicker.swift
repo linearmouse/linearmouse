@@ -10,11 +10,18 @@ struct DevicePicker: View {
 
     var body: some View {
         List {
-            DevicePickerSection(isPresented: $isPresented, title: "Mouse", devices: state.devices.filter(\.isMouse))
+            DevicePickerSection(
+                isPresented: $isPresented, title: "Mouse",
+                devices: state.devices.filter(\.isMouse))
             DevicePickerSection(
                 isPresented: $isPresented,
                 title: "Trackpad",
                 devices: state.devices.filter(\.isTrackpad)
+            )
+            DevicePickerSection(
+                isPresented: $isPresented,
+                title: "Trackball",
+                devices: state.devices.filter(\.isTrackball)
             )
         }
         .frame(minWidth: 350)
