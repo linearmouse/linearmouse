@@ -44,7 +44,7 @@ class GlobalEventTap {
         }
 
         do {
-            observationToken = try EventTap.observe([.scrollWheel,
+            observationToken = try EventTap.observe([.mouseMoved, .scrollWheel,
                                                      .leftMouseDown, .leftMouseUp, .leftMouseDragged,
                                                      .rightMouseDown, .rightMouseUp, .rightMouseDragged,
                                                      .otherMouseDown, .otherMouseUp, .otherMouseDragged,

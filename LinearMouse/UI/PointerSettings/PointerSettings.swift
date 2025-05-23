@@ -21,6 +21,15 @@ struct PointerSettings: View {
                         }
                     }
 
+                    HStack(spacing: 15) {
+                        Toggle(isOn: $state.pointerRedirectsToScroll.animation()) {
+                            Text("Convert pointer movement to scroll events")
+                            Text("Scrolling settings are applied to converted events.")
+                                .controlSize(.small)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
                     if !state.pointerDisableAcceleration {
                         HStack(alignment: .firstTextBaseline) {
                             Slider(value: $state.pointerAcceleration,

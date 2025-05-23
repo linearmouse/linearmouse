@@ -27,6 +27,15 @@ extension PointerSettingsState {
         }
     }
 
+    var pointerRedirectsToScroll: Bool {
+        get {
+            mergedScheme.pointer.redirectsToScroll ?? false
+        }
+        set {
+            scheme.pointer.redirectsToScroll = newValue
+        }
+    }
+
     var pointerAcceleration: Double {
         get {
             mergedScheme.pointer.acceleration?.asTruncatedDouble
@@ -84,7 +93,8 @@ extension PointerSettingsState {
             pointer: Scheme.Pointer(
                 acceleration: Decimal(device?.pointerAcceleration ?? Device.fallbackPointerAcceleration),
                 speed: Decimal(device?.pointerSpeed ?? Device.fallbackPointerSpeed),
-                disableAcceleration: false
+                disableAcceleration: false,
+                redirectsToScroll: false
             )
         )
         .merge(into: &scheme)

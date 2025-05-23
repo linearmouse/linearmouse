@@ -22,6 +22,7 @@ extension Scheme {
         @Clamp<Speed> var speed: Decimal?
 
         var disableAcceleration: Bool?
+        var redirectsToScroll: Bool?
     }
 }
 
@@ -37,6 +38,10 @@ extension Scheme.Pointer {
 
         if let disableAcceleration = disableAcceleration {
             pointer.disableAcceleration = disableAcceleration
+        }
+
+        if let redirectsToScroll = redirectsToScroll {
+            pointer.redirectsToScroll = redirectsToScroll
         }
     }
 

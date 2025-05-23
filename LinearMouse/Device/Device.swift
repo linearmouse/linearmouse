@@ -152,6 +152,18 @@ extension Device {
         }
     }
 
+    var pointerRedirectsToScroll: Bool? {
+        get {
+            device.pointerRedirectsToScroll.map { $0 != 0 }
+        }
+        set {
+            guard device.pointerRedirectsToScroll != nil, let newValue = newValue else {
+                return
+            }
+            device.pointerRedirectsToScroll = newValue ? 1 : 0
+        }
+    }
+
     private static let pointerSpeedRange = 1.0 / 1200 ... 1.0 / 40
 
     static func pointerSpeed(fromPointerResolution pointerResolution: Double) -> Double {

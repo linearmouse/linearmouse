@@ -158,6 +158,10 @@ class EventTransformerManager {
             eventTransformer.append(UniversalBackForwardTransformer(universalBackForward: universalBackForward))
         }
 
+        if let redirectsToScroll = scheme.pointer.redirectsToScroll, redirectsToScroll {
+            eventTransformer.append(PointerRedirectsToScrollTransformer())
+        }
+
         eventTransformerCache.setValue(eventTransformer, forKey: cacheKey)
 
         return eventTransformer
