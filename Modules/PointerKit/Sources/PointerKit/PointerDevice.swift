@@ -190,18 +190,6 @@ public extension PointerDevice {
                                       forKey: pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey)
         }
     }
-
-    /**
-     Indicates whether pointer X/Y events should be redirected to scroll X/Y events.
-     */
-    var pointerRedirectsToScroll: Int? {
-        get {
-            client.getProperty("HIDRedirectsPointerToScroll")
-        }
-        set {
-            client.setProperty(newValue, forKey: "HIDRedirectsPointerToScroll")
-        }
-    }
 }
 
 // MARK: Observe input events
