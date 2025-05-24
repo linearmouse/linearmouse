@@ -33,6 +33,8 @@ extension PointerSettingsState {
         }
         set {
             scheme.pointer.redirectsToScroll = newValue
+            GlobalEventTap.shared.stop()
+            GlobalEventTap.shared.start()
         }
     }
 
