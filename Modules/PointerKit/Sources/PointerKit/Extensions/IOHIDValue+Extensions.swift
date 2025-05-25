@@ -27,6 +27,6 @@ public extension IOHIDValue {
 
 extension IOHIDValue: CustomStringConvertible {
     public var description: String {
-        "timestamp: \(timestamp) length: \(length) data: \(data.map { $0 }) integerValue: \(integerValue) element=(\(element))"
+        "timestamp: \(timestamp) length: \(length) data: \(data.map(\.self)) integerValue: \(integerValue) element=(\(element))"
     }
 }

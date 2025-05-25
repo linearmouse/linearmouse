@@ -27,13 +27,15 @@ final class UpdaterViewModel: ObservableObject {
     private var subscriptions = Set<AnyCancellable>()
 
     init() {
-        controller.updater.publisher(for: \.canCheckForUpdates)
+        controller.updater
+            .publisher(for: \.canCheckForUpdates)
             .sink { value in
                 self.canCheckForUpdates = value
             }
             .store(in: &subscriptions)
 
-        controller.updater.publisher(for: \.automaticallyChecksForUpdates)
+        controller.updater
+            .publisher(for: \.automaticallyChecksForUpdates)
             .sink { value in
                 guard value != self.automaticallyChecksForUpdates else {
                     return
@@ -42,7 +44,8 @@ final class UpdaterViewModel: ObservableObject {
             }
             .store(in: &subscriptions)
 
-        controller.updater.publisher(for: \.updateCheckInterval)
+        controller.updater
+            .publisher(for: \.updateCheckInterval)
             .sink { value in
                 guard value != self.updateCheckInterval else {
                     return
@@ -71,7 +74,7 @@ struct CheckForUpdatesView: View {
 
         if updaterViewModel.automaticallyChecksForUpdates {
             Picker("Update check interval", selection: $updaterViewModel.updateCheckInterval) {
-                Text("Daily").tag(TimeInterval(86400))
+                Text("Daily").tag(TimeInterval(86_400))
                 Text("Weekly").tag(TimeInterval(604_800))
                 Text("Monthly").tag(TimeInterval(2_629_800))
             }

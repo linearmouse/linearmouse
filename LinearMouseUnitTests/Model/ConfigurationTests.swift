@@ -4,7 +4,7 @@
 @testable import LinearMouse
 import XCTest
 
-class ConfigurationTests: XCTestCase {
+final class ConfigurationTests: XCTestCase {
     func testDump() throws {
         try print(Configuration(schemes: []).dump())
     }

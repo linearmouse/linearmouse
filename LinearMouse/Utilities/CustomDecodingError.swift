@@ -33,8 +33,10 @@ extension CustomDecodingError: CustomStringConvertible {
 
 extension CustomDecodingError: LocalizedError {
     var errorDescription: String? {
-        String(format: NSLocalizedString("%1$@ (%2$@)", comment: ""),
-               error.localizedDescription,
-               codingPath.map(\.stringValue).joined(separator: "."))
+        String(
+            format: NSLocalizedString("%1$@ (%2$@)", comment: ""),
+            error.localizedDescription,
+            codingPath.map(\.stringValue).joined(separator: ".")
+        )
     }
 }

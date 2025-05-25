@@ -19,16 +19,20 @@ struct ClickDebouncingSection: View {
 
             if state.clickDebouncingEnabled {
                 HStack(spacing: 5) {
-                    Slider(value: $state.clickDebouncingTimeoutInDouble,
-                           in: 5 ... 500)
-                        .labelsHidden()
-                    TextField("",
-                              value: $state.clickDebouncingTimeout,
-                              formatter: state.clickDebouncingTimeoutFormatter)
-                        .labelsHidden()
-                        .textFieldStyle(.roundedBorder)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 60)
+                    Slider(
+                        value: $state.clickDebouncingTimeoutInDouble,
+                        in: 5 ... 500
+                    )
+                    .labelsHidden()
+                    TextField(
+                        "",
+                        value: $state.clickDebouncingTimeout,
+                        formatter: state.clickDebouncingTimeoutFormatter
+                    )
+                    .labelsHidden()
+                    .textFieldStyle(.roundedBorder)
+                    .multilineTextAlignment(.trailing)
+                    .frame(width: 60)
                     Text("ms")
                 }
 

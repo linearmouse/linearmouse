@@ -32,9 +32,12 @@ extension SwitchPrimaryAndSecondaryButtonsTransformer: EventTransformer {
 
         mouseEventView.mouseButton = mouseButton
         event.type = mouseButton.fixedCGEventType(of: event.type)
-        os_log("Switched primary and secondary button: %{public}s",
-               log: Self.log, type: .info,
-               String(describing: mouseButton))
+        os_log(
+            "Switched primary and secondary button: %{public}s",
+            log: Self.log,
+            type: .info,
+            String(describing: mouseButton)
+        )
 
         return event
     }

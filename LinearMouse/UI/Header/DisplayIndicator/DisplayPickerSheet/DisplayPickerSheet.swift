@@ -5,7 +5,7 @@ import SwiftUI
 
 struct DisplayPickerSheet: View {
     @Binding var isPresented: Bool
-    @State var selectedDisplay = ""
+    @State private var selectedDisplay = ""
 
     private let schemeState: SchemeState = .shared
 

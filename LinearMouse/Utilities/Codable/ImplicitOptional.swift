@@ -42,8 +42,10 @@ extension ImplicitOptional: Decodable where WrappedValue: Decodable {
 }
 
 extension KeyedEncodingContainer {
-    mutating func encode<WrappedValue: Encodable & ImplicitInitable>(_ value: ImplicitOptional<WrappedValue>,
-                                                                     forKey key: Self.Key) throws {
+    mutating func encode<WrappedValue: Encodable & ImplicitInitable>(
+        _ value: ImplicitOptional<WrappedValue>,
+        forKey key: Self.Key
+    ) throws {
         guard value.projectedValue != nil else {
             return
         }
@@ -59,6 +61,6 @@ extension KeyedDecodingContainer {
         _ type: ImplicitOptional<WrappedValue>.Type,
         forKey key: Self.Key
     ) throws -> ImplicitOptional<WrappedValue> {
-        try decodeIfPresent(type, forKey: key) ?? nil
+        try decodeIfPresent(type, forKey: key)
     }
 }

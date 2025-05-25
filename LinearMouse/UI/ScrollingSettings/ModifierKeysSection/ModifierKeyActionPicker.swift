@@ -22,9 +22,11 @@ extension ScrollingSettings.ModifierKeysSection {
 
             if case .some(.changeSpeed) = action {
                 HStack(spacing: 5) {
-                    Slider(value: speedFactor,
-                           in: 0.05 ... 10.00)
-                        .labelsHidden()
+                    Slider(
+                        value: speedFactor,
+                        in: 0.05 ... 10.00
+                    )
+                    .labelsHidden()
                     Text(String(format: "%0.2f ×", speedFactor.wrappedValue))
                         .frame(width: 60, alignment: .trailing)
                 }
@@ -53,7 +55,7 @@ extension ScrollingSettings.ModifierKeysSection.ModifierKeyActionPicker {
     var actionType: Binding<ActionType> {
         Binding<ActionType>(
             get: {
-                guard let action = action else {
+                guard let action else {
                     return .noAction
                 }
 

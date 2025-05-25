@@ -9,7 +9,7 @@ struct ButtonMappingEditSheet: View {
     @ObservedObject private var state: ButtonsSettingsState = .shared
 
     @Binding var mapping: Scheme.Buttons.Mapping
-    @State var mode: Mode = .edit
+    @State private var mode: Mode = .edit
     let completion: ((Scheme.Buttons.Mapping) -> Void)?
 
     var body: some View {

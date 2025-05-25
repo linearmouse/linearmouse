@@ -12,7 +12,8 @@ class DevicePickerState: ObservableObject {
     @Published var devices: [DeviceModel] = []
 
     init() {
-        DeviceManager.shared.$devices
+        DeviceManager.shared
+            .$devices
             .debounce(for: 0.1, scheduler: RunLoop.main)
             .map {
                 $0

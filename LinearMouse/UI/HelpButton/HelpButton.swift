@@ -22,11 +22,11 @@ struct HelpButton: NSViewRepresentable {
         Delegate(action)
     }
 
-    func makeNSView(context: NSViewRepresentableContext<HelpButton>) -> NSButton {
+    func makeNSView(context: NSViewRepresentableContext<Self>) -> NSButton {
         let button = NSButton(title: "", target: context.coordinator, action: #selector(Delegate.action))
         button.bezelStyle = .helpButton
         return button
     }
 
-    func updateNSView(_: NSButton, context _: NSViewRepresentableContext<HelpButton>) {}
+    func updateNSView(_: NSButton, context _: NSViewRepresentableContext<Self>) {}
 }
