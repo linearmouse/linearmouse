@@ -17,6 +17,7 @@ class DeviceManager: ObservableObject {
     private var pointerDeviceToDevice = [PointerDevice: Device]()
     @Published var devices: [Device] = []
 
+    var lastActiveDeviceId: Int32?
     @Published var lastActiveDeviceRef: WeakRef<Device>?
 
     init() {
@@ -151,7 +152,8 @@ class DeviceManager: ObservableObject {
 
         objectWillChange.send()
 
-        if lastActiveDeviceRef?.value == device {
+        if lastActiveDeviceId == device.id {
+            lastActiveDeviceId = nil
             lastActiveDeviceRef = nil
         }
 
@@ -185,7 +187,8 @@ class DeviceManager: ObservableObject {
             return
         }
 
-        if lastActiveDeviceRef?.value != device {
+        if lastActiveDeviceId != device.id {
+            lastActiveDeviceId = device.id
             lastActiveDeviceRef = .init(device)
             os_log(
                 """
