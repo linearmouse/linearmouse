@@ -14,6 +14,31 @@ class Device {
     static let fallbackPointerResolution = 400.0
     static let fallbackPointerSpeed = pointerSpeed(fromPointerResolution: fallbackPointerResolution)
 
+    private static var nextID: Int32 = 0
+
+    private(set) lazy var id: Int32 = OSAtomicIncrement32(&Self.nextID)
+
+    private(set) lazy var name: String = device.name
+    private(set) lazy var productName: String? = device.product
+    private(set) lazy var vendorID: Int? = device.vendorID
+    private(set) lazy var productID: Int? = device.productID
+    private(set) lazy var serialNumber: String? = device.serialNumber
+    private(set) lazy var buttonCount: Int? = device.buttonCount
+    private(set) lazy var category: Category = {
+        if let vendorID: Int = device.vendorID,
+           let productID: Int = device.productID {
+            if isAppleMagicMouse(vendorID: vendorID, productID: productID) {
+                return .mouse
+            }
+        }
+
+        if device.confirmsTo(kHIDPage_Digitizer, kHIDUsage_Dig_TouchPad) {
+            return .trackpad
+        }
+
+        return .mouse
+    }()
+
     private struct Product: Hashable {
         let vendorID: Int
         let productID: Int
@@ -29,7 +54,7 @@ class Device {
 
     private var removed = false
 
-    @Default(.verbosedLoggingOn) private var verbosedLoggingOn
+    private var verbosedLoggingOn = Defaults[.verbosedLoggingOn]
 
     private let initialPointerResolution: Double
 
@@ -71,6 +96,15 @@ class Device {
             initialPointerResolution,
             device.pointerAccelerationType ?? "(unknown)"
         )
+
+        Defaults.observe(.verbosedLoggingOn) { [weak self] change in
+            guard let self else {
+                return
+            }
+
+            verbosedLoggingOn = change.newValue
+        }
+        .tieToLifetime(of: self)
     }
 
     func markRemoved() {
@@ -82,49 +116,12 @@ class Device {
 }
 
 extension Device {
-    var name: String {
-        device.name
-    }
-
-    var productName: String? {
-        device.product
-    }
-
-    var vendorID: Int? {
-        device.vendorID
-    }
-
-    var productID: Int? {
-        device.productID
-    }
-
-    var serialNumber: String? {
-        device.serialNumber
-    }
-
-    var buttonCount: Int? {
-        device.buttonCount
-    }
-
     enum Category {
         case mouse, trackpad
     }
 
     private func isAppleMagicMouse(vendorID: Int, productID: Int) -> Bool {
         [0x004C, 0x05AC].contains(vendorID) && [0x0269, 0x030D].contains(productID)
-    }
-
-    var category: Category {
-        if let vendorID: Int = device.vendorID,
-           let productID: Int = device.productID {
-            if isAppleMagicMouse(vendorID: vendorID, productID: productID) {
-                return .mouse
-            }
-        }
-        if device.confirmsTo(kHIDPage_Digitizer, kHIDUsage_Dig_TouchPad) {
-            return .trackpad
-        }
-        return .mouse
     }
 
     /**
@@ -236,7 +233,7 @@ extension Device {
             return
         }
 
-        guard manager.lastActiveDeviceRef?.value != self else {
+        guard manager.lastActiveDeviceId != id else {
             return
         }
 
@@ -261,6 +258,7 @@ extension Device {
             return
         }
 
+        manager.lastActiveDeviceId = id
         manager.lastActiveDeviceRef = .init(self)
 
         os_log(
