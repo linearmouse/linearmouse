@@ -9,8 +9,21 @@ struct ButtonMappingEditSheet: View {
     @ObservedObject private var state: ButtonsSettingsState = .shared
 
     @Binding var mapping: Scheme.Buttons.Mapping
-    @State private var mode: Mode = .edit
     let completion: ((Scheme.Buttons.Mapping) -> Void)?
+
+    @State private var mode: Mode
+
+    init(
+        isPresented: Binding<Bool>,
+        mapping: Binding<Scheme.Buttons.Mapping>,
+        mode: Mode = .edit,
+        completion: ((Scheme.Buttons.Mapping) -> Void)?
+    ) {
+        _isPresented = isPresented
+        _mapping = mapping
+        self.completion = completion
+        self.mode = mode
+    }
 
     var body: some View {
         VStack(spacing: 20) {

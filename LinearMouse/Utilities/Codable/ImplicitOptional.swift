@@ -61,6 +61,6 @@ extension KeyedDecodingContainer {
         _ type: ImplicitOptional<WrappedValue>.Type,
         forKey key: Self.Key
     ) throws -> ImplicitOptional<WrappedValue> {
-        try decodeIfPresent(type, forKey: key)
+        try decodeIfPresent(type, forKey: key) ?? ImplicitOptional()
     }
 }
