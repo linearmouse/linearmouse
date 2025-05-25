@@ -44,8 +44,10 @@ extension SingleValueOrArray: Codable {
 }
 
 extension KeyedDecodingContainer {
-    func decode<Value: Codable>(_ type: SingleValueOrArray<Value>.Type,
-                                forKey key: Self.Key) throws -> SingleValueOrArray<Value> {
+    func decode<Value: Codable>(
+        _ type: SingleValueOrArray<Value>.Type,
+        forKey key: Self.Key
+    ) throws -> SingleValueOrArray<Value> {
         try decodeIfPresent(type, forKey: key) ?? SingleValueOrArray(wrappedValue: nil)
     }
 }

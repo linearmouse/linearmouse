@@ -20,17 +20,20 @@ class DeviceManager: ObservableObject {
     @Published var lastActiveDeviceRef: WeakRef<Device>?
 
     init() {
-        manager.observeDeviceAdded(using: { [weak self] in
+        manager.observeDeviceAdded { [weak self] in
             self?.deviceAdded($0, $1)
-        }).tieToLifetime(of: self)
+        }
+        .tieToLifetime(of: self)
 
-        manager.observeDeviceRemoved(using: { [weak self] in
+        manager.observeDeviceRemoved { [weak self] in
             self?.deviceRemoved($0, $1)
-        }).tieToLifetime(of: self)
+        }
+        .tieToLifetime(of: self)
 
-        manager.observeEventReceived(using: { [weak self] in
+        manager.observeEventReceived { [weak self] in
             self?.eventReceived($0, $1, $2)
-        }).tieToLifetime(of: self)
+        }
+        .tieToLifetime(of: self)
 
         for property in [
             kIOHIDMouseAccelerationType,
@@ -69,7 +72,7 @@ class DeviceManager: ObservableObject {
         manager.stopObservation()
         subscriptions.removeAll()
 
-        if let activateApplicationObserver = activateApplicationObserver {
+        if let activateApplicationObserver {
             NSWorkspace.shared.notificationCenter.removeObserver(activateApplicationObserver)
         }
     }
@@ -82,10 +85,11 @@ class DeviceManager: ObservableObject {
 
         manager.startObservation()
 
-        ConfigurationState.shared.$configuration
+        ConfigurationState.shared
+            .$configuration
             .debounce(for: 0.1, scheduler: RunLoop.main)
             .sink { [weak self] _ in
-                guard let self = self else {
+                guard let self else {
                     return
                 }
                 DispatchQueue.main.async {
@@ -94,9 +98,10 @@ class DeviceManager: ObservableObject {
             }
             .store(in: &subscriptions)
 
-        ScreenManager.shared.$currentScreenName
+        ScreenManager.shared
+            .$currentScreenName
             .sink { [weak self] _ in
-                guard let self = self else {
+                guard let self else {
                     return
                 }
                 DispatchQueue.main.async {
@@ -108,13 +113,16 @@ class DeviceManager: ObservableObject {
         activateApplicationObserver = NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didActivateApplicationNotification,
             object: nil,
-            queue: .main,
-            using: { [weak self] _ in
-                os_log("Frontmost app changed: %{public}@", log: Self.log, type: .info,
-                       NSWorkspace.shared.frontmostApplication?.bundleIdentifier ?? "(nil)")
-                self?.updatePointerSpeed()
-            }
-        )
+            queue: .main
+        ) { [weak self] _ in
+            os_log(
+                "Frontmost app changed: %{public}@",
+                log: Self.log,
+                type: .info,
+                NSWorkspace.shared.frontmostApplication?.bundleIdentifier ?? "(nil)"
+            )
+            self?.updatePointerSpeed()
+        }
     }
 
     private func deviceAdded(_: PointerDeviceManager, _ pointerDevice: PointerDevice) {
@@ -125,15 +133,20 @@ class DeviceManager: ObservableObject {
         pointerDeviceToDevice[pointerDevice] = device
         devices.append(device)
 
-        os_log("Device added: %{public}@",
-               log: Self.log, type: .info,
-               String(describing: device))
+        os_log(
+            "Device added: %{public}@",
+            log: Self.log,
+            type: .info,
+            String(describing: device)
+        )
 
         updatePointerSpeed(for: device)
     }
 
     private func deviceRemoved(_: PointerDeviceManager, _ pointerDevice: PointerDevice) {
-        guard let device = pointerDeviceToDevice[pointerDevice] else { return }
+        guard let device = pointerDeviceToDevice[pointerDevice] else {
+            return
+        }
         device.markRemoved()
 
         objectWillChange.send()
@@ -145,9 +158,12 @@ class DeviceManager: ObservableObject {
         pointerDeviceToDevice.removeValue(forKey: pointerDevice)
         devices.removeAll { $0 == device }
 
-        os_log("Device removed: %{public}@",
-               log: Self.log, type: .info,
-               String(describing: device))
+        os_log(
+            "Device removed: %{public}@",
+            log: Self.log,
+            type: .info,
+            String(describing: device)
+        )
     }
 
     /// Observes events from `DeviceManager`.
@@ -171,13 +187,16 @@ class DeviceManager: ObservableObject {
 
         if lastActiveDeviceRef?.value != device {
             lastActiveDeviceRef = .init(device)
-            os_log("""
-                   Last active device changed: %{public}@, category=%{public}@ \
-                   (Reason: Received event from DeviceManager)
-                   """,
-                   log: Self.log, type: .info,
-                   String(describing: device),
-                   String(describing: device.category))
+            os_log(
+                """
+                Last active device changed: %{public}@, category=%{public}@ \
+                (Reason: Received event from DeviceManager)
+                """,
+                log: Self.log,
+                type: .info,
+                String(describing: device),
+                String(describing: device.category)
+            )
         }
     }
 
@@ -206,10 +225,12 @@ class DeviceManager: ObservableObject {
 
     func updatePointerSpeed(for device: Device) {
         let frontmostApp = NSWorkspace.shared.frontmostApplication
-        let scheme = ConfigurationState.shared.configuration.matchScheme(withDevice: device,
-                                                                         withPid: frontmostApp?.processIdentifier,
-                                                                         withDisplay: ScreenManager.shared
-                                                                             .currentScreenName)
+        let scheme = ConfigurationState.shared.configuration.matchScheme(
+            withDevice: device,
+            withPid: frontmostApp?.processIdentifier,
+            withDisplay: ScreenManager.shared
+                .currentScreenName
+        )
 
         if let pointerDisableAcceleration = scheme.pointer.disableAcceleration, pointerDisableAcceleration {
             // If the pointer acceleration is turned off, it is preferable to utilize

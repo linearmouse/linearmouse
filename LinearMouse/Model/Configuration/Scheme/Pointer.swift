@@ -28,19 +28,19 @@ extension Scheme {
 
 extension Scheme.Pointer {
     func merge(into pointer: inout Self) {
-        if let acceleration = acceleration {
+        if let acceleration {
             pointer.acceleration = acceleration
         }
 
-        if let speed = speed {
+        if let speed {
             pointer.speed = speed
         }
 
-        if let disableAcceleration = disableAcceleration {
+        if let disableAcceleration {
             pointer.disableAcceleration = disableAcceleration
         }
 
-        if let redirectsToScroll = redirectsToScroll {
+        if let redirectsToScroll {
             pointer.redirectsToScroll = redirectsToScroll
         }
     }

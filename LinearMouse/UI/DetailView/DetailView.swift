@@ -17,8 +17,10 @@ struct DetailView<T>: View where T: View {
 
             if schemeSpecific, !schemeState.isSchemeValid {
                 Text("No device selected.")
-                    .frame(maxWidth: .infinity,
-                           maxHeight: .infinity)
+                    .frame(
+                        maxWidth: .infinity,
+                        maxHeight: .infinity
+                    )
             } else {
                 // FIXME: Workaround for Catalina
                 if #unavailable(macOS 11) {

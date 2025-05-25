@@ -13,11 +13,13 @@ extension Scheme {
 
         init() {}
 
-        init(reverse: Bidirectional<Bool>? = nil,
-             distance: Bidirectional<Distance>? = nil,
-             acceleration: Bidirectional<Decimal>? = nil,
-             speed: Bidirectional<Decimal>? = nil,
-             modifiers: Bidirectional<Modifiers>? = nil) {
+        init(
+            reverse: Bidirectional<Bool>? = nil,
+            distance: Bidirectional<Distance>? = nil,
+            acceleration: Bidirectional<Decimal>? = nil,
+            speed: Bidirectional<Decimal>? = nil,
+            modifiers: Bidirectional<Modifiers>? = nil
+        ) {
             $reverse = reverse
             $distance = distance
             $acceleration = acceleration

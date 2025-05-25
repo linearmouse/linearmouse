@@ -17,7 +17,7 @@ class GlobalEventTapWatchdog {
 
     func start() {
         timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
-            guard let self = self else {
+            guard let self else {
                 return
             }
 

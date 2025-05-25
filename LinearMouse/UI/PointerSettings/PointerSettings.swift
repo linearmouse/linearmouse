@@ -32,37 +32,45 @@ struct PointerSettings: View {
 
                     if !state.pointerDisableAcceleration {
                         HStack(alignment: .firstTextBaseline) {
-                            Slider(value: $state.pointerAcceleration,
-                                   in: 0.0 ... 20.0) {
+                            Slider(
+                                value: $state.pointerAcceleration,
+                                in: 0.0 ... 20.0
+                            ) {
                                 labelWithDescription {
                                     Text("Pointer acceleration")
                                     Text("(0–20)")
                                 }
                             }
-                            TextField("",
-                                      value: $state.pointerAcceleration,
-                                      formatter: state.pointerAccelerationFormatter)
-                                .labelsHidden()
-                                .textFieldStyle(.roundedBorder)
-                                .multilineTextAlignment(.trailing)
-                                .frame(width: 80)
+                            TextField(
+                                "",
+                                value: $state.pointerAcceleration,
+                                formatter: state.pointerAccelerationFormatter
+                            )
+                            .labelsHidden()
+                            .textFieldStyle(.roundedBorder)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 80)
                         }
 
                         HStack(alignment: .firstTextBaseline) {
-                            Slider(value: $state.pointerSpeed,
-                                   in: 0.0 ... 1.0) {
+                            Slider(
+                                value: $state.pointerSpeed,
+                                in: 0.0 ... 1.0
+                            ) {
                                 labelWithDescription {
                                     Text("Pointer speed")
                                     Text("(0–1)")
                                 }
                             }
-                            TextField("",
-                                      value: $state.pointerSpeed,
-                                      formatter: state.pointerSpeedFormatter)
-                                .labelsHidden()
-                                .textFieldStyle(.roundedBorder)
-                                .multilineTextAlignment(.trailing)
-                                .frame(width: 80)
+                            TextField(
+                                "",
+                                value: $state.pointerSpeed,
+                                formatter: state.pointerSpeedFormatter
+                            )
+                            .labelsHidden()
+                            .textFieldStyle(.roundedBorder)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 80)
                         }
 
                         if #available(macOS 11.0, *) {
@@ -81,20 +89,24 @@ struct PointerSettings: View {
                         }
                     } else if #available(macOS 14, *) {
                         HStack(alignment: .firstTextBaseline) {
-                            Slider(value: $state.pointerAcceleration,
-                                   in: 0.0 ... 20.0) {
+                            Slider(
+                                value: $state.pointerAcceleration,
+                                in: 0.0 ... 20.0
+                            ) {
                                 labelWithDescription {
                                     Text("Tracking speed")
                                     Text("(0–20)")
                                 }
                             }
-                            TextField("",
-                                      value: $state.pointerAcceleration,
-                                      formatter: state.pointerAccelerationFormatter)
-                                .labelsHidden()
-                                .textFieldStyle(.roundedBorder)
-                                .multilineTextAlignment(.trailing)
-                                .frame(width: 80)
+                            TextField(
+                                "",
+                                value: $state.pointerAcceleration,
+                                formatter: state.pointerAccelerationFormatter
+                            )
+                            .labelsHidden()
+                            .textFieldStyle(.roundedBorder)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 80)
                         }
 
                         Button("Revert to system defaults") {

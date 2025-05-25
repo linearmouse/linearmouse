@@ -21,7 +21,7 @@ public class PointerDevice {
     )
 
     private static let inputValueCallback: IOHIDValueCallback = { context, _, _, value in
-        guard let context = context else {
+        guard let context else {
             return
         }
         let this = Unmanaged<PointerDevice>.fromOpaque(context).takeUnretainedValue()
@@ -30,7 +30,7 @@ public class PointerDevice {
     }
 
     private static let inputReportCallback: IOHIDReportCallback = { context, _, _, _, _, report, reportLength in
-        guard let context = context else {
+        guard let context else {
             return
         }
         let this = Unmanaged<PointerDevice>.fromOpaque(context).takeUnretainedValue()
@@ -42,7 +42,7 @@ public class PointerDevice {
         self.client = client
         device = client.device
 
-        if let device = device {
+        if let device {
             IOHIDDeviceOpen(device, IOOptionBits(kIOHIDOptionsTypeNone))
             IOHIDDeviceSetInputValueMatching(device, nil)
             let this = Unmanaged.passUnretained(self).toOpaque()
@@ -52,7 +52,7 @@ public class PointerDevice {
     }
 
     deinit {
-        if let device = device {
+        if let device {
             IOHIDDeviceClose(device, IOOptionBits(kIOHIDOptionsTypeNone))
             IOHIDDeviceUnscheduleFromRunLoop(device, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
         }
@@ -91,7 +91,7 @@ public extension PointerDevice {
     }
 
     var vendorIDString: String {
-        guard let vendorID = vendorID else {
+        guard let vendorID else {
             return "(nil)"
         }
 
@@ -99,7 +99,7 @@ public extension PointerDevice {
     }
 
     var productIDString: String {
-        guard let productID = productID else {
+        guard let productID else {
             return "(nil)"
         }
 
@@ -186,8 +186,10 @@ public extension PointerDevice {
         }
 
         set {
-            client.setPropertyIOFixed(newValue.map { $0 == -1 ? $0 : $0.clamp(0, 20) },
-                                      forKey: pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey)
+            client.setPropertyIOFixed(
+                newValue.map { $0 == -1 ? $0 : $0.clamp(0, 20) },
+                forKey: pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey
+            )
         }
     }
 }
@@ -221,7 +223,7 @@ extension PointerDevice {
 
     public func observeReport(using closure: @escaping InputReportClosure) -> ObservationToken {
         if !inputReportCallbackRegistered {
-            if let device = device {
+            if let device {
                 let reportLength = 8
                 let report = UnsafeMutablePointer<UInt8>.allocate(capacity: reportLength)
                 let this = Unmanaged.passUnretained(self).toOpaque()

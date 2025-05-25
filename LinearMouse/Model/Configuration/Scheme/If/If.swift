@@ -17,13 +17,15 @@ extension Scheme {
 }
 
 extension Scheme.If {
-    func isSatisfied(withDevice targetDevice: Device? = nil,
-                     withApp targetApp: String? = nil,
-                     withParentApp targetParentApp: String?,
-                     withGroupApp targetGroupApp: String?,
-                     withDisplay targetDisplay: String? = nil) -> Bool {
-        if let device = device {
-            guard let targetDevice = targetDevice else {
+    func isSatisfied(
+        withDevice targetDevice: Device? = nil,
+        withApp targetApp: String? = nil,
+        withParentApp targetParentApp: String?,
+        withGroupApp targetGroupApp: String?,
+        withDisplay targetDisplay: String? = nil
+    ) -> Bool {
+        if let device {
+            guard let targetDevice else {
                 return false
             }
 
@@ -32,26 +34,26 @@ extension Scheme.If {
             }
         }
 
-        if let app = app {
+        if let app {
             guard app == targetApp else {
                 return false
             }
         }
 
-        if let parentApp = parentApp {
+        if let parentApp {
             guard parentApp == targetParentApp else {
                 return false
             }
         }
 
-        if let groupApp = groupApp {
+        if let groupApp {
             guard groupApp == targetGroupApp else {
                 return false
             }
         }
 
-        if let display = display {
-            guard let targetDisplay = targetDisplay else {
+        if let display {
+            guard let targetDisplay else {
                 return false
             }
 

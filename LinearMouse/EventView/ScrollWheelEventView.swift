@@ -65,13 +65,13 @@ class ScrollWheelEventView: MouseEventView {
 
     var ioHidScrollX: Double {
         get {
-            guard let ioHidEvent = ioHidEvent else {
+            guard let ioHidEvent else {
                 return 0
             }
             return IOHIDEventGetFloatValue(ioHidEvent, kIOHIDEventFieldScrollX)
         }
         set {
-            guard let ioHidEvent = ioHidEvent else {
+            guard let ioHidEvent else {
                 return
             }
             return IOHIDEventSetFloatValue(ioHidEvent, kIOHIDEventFieldScrollX, newValue)
@@ -80,13 +80,13 @@ class ScrollWheelEventView: MouseEventView {
 
     var ioHidScrollY: Double {
         get {
-            guard let ioHidEvent = ioHidEvent else {
+            guard let ioHidEvent else {
                 return 0
             }
             return IOHIDEventGetFloatValue(ioHidEvent, kIOHIDEventFieldScrollY)
         }
         set {
-            guard let ioHidEvent = ioHidEvent else {
+            guard let ioHidEvent else {
                 return
             }
             return IOHIDEventSetFloatValue(ioHidEvent, kIOHIDEventFieldScrollY, newValue)
@@ -94,8 +94,10 @@ class ScrollWheelEventView: MouseEventView {
     }
 
     var matrixValue: double2x4 {
-        double2x4([Double(deltaX), deltaXFixedPt, deltaXPt, ioHidScrollX],
-                  [Double(deltaY), deltaYFixedPt, deltaYPt, ioHidScrollY])
+        double2x4(
+            [Double(deltaX), deltaXFixedPt, deltaXPt, ioHidScrollX],
+            [Double(deltaY), deltaYFixedPt, deltaYPt, ioHidScrollY]
+        )
     }
 
     func transform(matrix: double2x2) {
@@ -116,10 +118,14 @@ class ScrollWheelEventView: MouseEventView {
             newValue[1][2],
             newValue[1][3]
         )
-        os_log("transform: oldValue=%{public}@, matrix=%{public}@, newValue=%{public}@", log: Self.log, type: .info,
-               String(describing: oldValue),
-               String(describing: matrix),
-               String(describing: newValue))
+        os_log(
+            "transform: oldValue=%{public}@, matrix=%{public}@, newValue=%{public}@",
+            log: Self.log,
+            type: .info,
+            String(describing: oldValue),
+            String(describing: matrix),
+            String(describing: newValue)
+        )
     }
 
     func swapXY() {

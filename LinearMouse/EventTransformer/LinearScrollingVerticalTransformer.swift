@@ -52,10 +52,14 @@ class LinearScrollingVerticalTransformer: EventTransformer {
             view.deltaXFixedPt = 0
         }
 
-        os_log("continuous=%{public}@, oldValue=%{public}@, newValue=%{public}@", log: Self.log, type: .info,
-               String(describing: continuous),
-               String(describing: oldValue),
-               String(describing: view.matrixValue))
+        os_log(
+            "continuous=%{public}@, oldValue=%{public}@, newValue=%{public}@",
+            log: Self.log,
+            type: .info,
+            String(describing: continuous),
+            String(describing: oldValue),
+            String(describing: view.matrixValue)
+        )
 
         return event
     }

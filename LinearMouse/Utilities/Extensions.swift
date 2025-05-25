@@ -13,28 +13,44 @@ extension Comparable {
 }
 
 extension BinaryInteger {
-    func normalized(fromLowerBound: Self = 0, fromUpperBound: Self = 1, toLowerBound: Self = 0,
-                    toUpperBound: Self = 1) -> Self {
+    func normalized(
+        fromLowerBound: Self = 0,
+        fromUpperBound: Self = 1,
+        toLowerBound: Self = 0,
+        toUpperBound: Self = 1
+    ) -> Self {
         let k = (toUpperBound - toLowerBound) / (fromUpperBound - fromLowerBound)
         return (self - fromLowerBound) * k + toLowerBound
     }
 
     func normalized(from: ClosedRange<Self> = 0 ... 1, to: ClosedRange<Self> = 0 ... 1) -> Self {
-        normalized(fromLowerBound: from.lowerBound, fromUpperBound: from.upperBound,
-                   toLowerBound: to.lowerBound, toUpperBound: to.upperBound)
+        normalized(
+            fromLowerBound: from.lowerBound,
+            fromUpperBound: from.upperBound,
+            toLowerBound: to.lowerBound,
+            toUpperBound: to.upperBound
+        )
     }
 }
 
 extension BinaryFloatingPoint {
-    func normalized(fromLowerBound: Self = 0, fromUpperBound: Self = 1, toLowerBound: Self = 0,
-                    toUpperBound: Self = 1) -> Self {
+    func normalized(
+        fromLowerBound: Self = 0,
+        fromUpperBound: Self = 1,
+        toLowerBound: Self = 0,
+        toUpperBound: Self = 1
+    ) -> Self {
         let k = (toUpperBound - toLowerBound) / (fromUpperBound - fromLowerBound)
         return (self - fromLowerBound) * k + toLowerBound
     }
 
     func normalized(from: ClosedRange<Self> = 0 ... 1, to: ClosedRange<Self> = 0 ... 1) -> Self {
-        normalized(fromLowerBound: from.lowerBound, fromUpperBound: from.upperBound,
-                   toLowerBound: to.lowerBound, toUpperBound: to.upperBound)
+        normalized(
+            fromLowerBound: from.lowerBound,
+            fromUpperBound: from.upperBound,
+            toLowerBound: to.lowerBound,
+            toUpperBound: to.upperBound
+        )
     }
 }
 
@@ -125,8 +141,10 @@ extension CGWindowID {
 
         func getOwnerPid() -> pid_t? {
             let options = CGWindowListOption(arrayLiteral: [.excludeDesktopElements, .optionOnScreenOnly])
-            guard let windowListInfo = CGWindowListCopyWindowInfo(options,
-                                                                  kCGNullWindowID) as NSArray? as? [[String: Any]]
+            guard let windowListInfo = CGWindowListCopyWindowInfo(
+                options,
+                kCGNullWindowID
+            ) as NSArray? as? [[String: Any]]
             else {
                 return nil
             }

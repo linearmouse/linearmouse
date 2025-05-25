@@ -16,9 +16,9 @@ public final class ObservationToken {
 
     @discardableResult
     public func tieToLifetime(of weaklyHeldObject: AnyObject) -> Self {
-        lifetimeAssociation = LifetimeAssociation(of: self, with: weaklyHeldObject, deinitHandler: { [weak self] in
+        lifetimeAssociation = LifetimeAssociation(of: self, with: weaklyHeldObject) { [weak self] in
             self?.cancellationClosure()
-        })
+        }
 
         return self
     }

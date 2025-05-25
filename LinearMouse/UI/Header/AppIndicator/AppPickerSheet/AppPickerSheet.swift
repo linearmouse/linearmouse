@@ -5,7 +5,7 @@ import SwiftUI
 
 struct AppPickerSheet: View {
     @Binding var isPresented: Bool
-    @State var selectedApp = ""
+    @State private var selectedApp = ""
 
     private let schemeState: SchemeState = .shared
 

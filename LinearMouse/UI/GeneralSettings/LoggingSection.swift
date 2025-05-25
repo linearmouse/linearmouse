@@ -67,15 +67,17 @@ extension LoggingSection {
                 let logStore = try OSLogStore.local()
                 let position = logStore.position(timeIntervalSinceEnd: -5 * 60)
                 let predicate = NSPredicate(format: "subsystem == '\(LinearMouse.appBundleIdentifier)'")
-                let entries = try logStore.getEntries(with: [],
-                                                      at: position,
-                                                      matching: predicate)
+                let entries = try logStore.getEntries(
+                    with: [],
+                    at: position,
+                    matching: predicate
+                )
                 let logs = entries
                     .compactMap { $0 as? OSLogEntryLog }
                     .filter { $0.subsystem == LinearMouse.appBundleIdentifier }
                     .suffix(100_000)
                     .map { "\($0.date)\t\(level($0.level))\t\($0.category)\t\($0.composedMessage)\n" }
-                    .joined(separator: "")
+                    .joined()
 
                 let directory = FileManager.default.temporaryDirectory.appendingPathComponent(
                     UUID().uuidString,

@@ -36,7 +36,9 @@ class PointerRedirectsToScrollTransformer: EventTransformer {
 
     private func topLeftScreenCoordinates() -> CGPoint {
         let mouseLocation = NSEvent.mouseLocation
-        guard let screen = NSScreen.main else { return mouseLocation }
+        guard let screen = NSScreen.main else {
+            return mouseLocation
+        }
         return CGPoint(x: mouseLocation.x, y: screen.frame.height - mouseLocation.y)
     }
 }
