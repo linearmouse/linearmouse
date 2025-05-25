@@ -46,7 +46,6 @@ extension EventTap {
             return Unmanaged.passUnretained(event)
 
         default:
-
             // If the callback returns nil, ignore the event.
             guard let event = callback(proxy, event) else {
                 return nil

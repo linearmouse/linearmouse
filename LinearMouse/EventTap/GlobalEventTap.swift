@@ -16,7 +16,7 @@ class GlobalEventTap {
 
     init() {}
 
-    private func callback(event: CGEvent) -> CGEvent? {
+    private func callback(_ event: CGEvent) -> CGEvent? {
         let mouseEventView = MouseEventView(event)
         let eventTransformer = EventTransformerManager.shared.get(
             withCGEvent: event,
@@ -43,14 +43,13 @@ class GlobalEventTap {
             return
         }
 
+        var eventTypes: [CGEventType] = EventType.all
+        if SchemeState.shared.schemes.contains(where: { $0.pointer.redirectsToScroll ?? false }) {
+            eventTypes.append(EventType.mouseMoved)
+        }
+
         do {
-            observationToken = try EventTap.observe([.scrollWheel,
-                                                     .leftMouseDown, .leftMouseUp, .leftMouseDragged,
-                                                     .rightMouseDown, .rightMouseUp, .rightMouseDragged,
-                                                     .otherMouseDown, .otherMouseUp, .otherMouseDragged,
-                                                     .keyDown, .keyUp, .flagsChanged]) { [weak self] _, event in
-                self?.callback(event: event)
-            }
+            observationToken = try EventTap.observe(eventTypes) { [weak self] in self?.callback($1) }
         } catch {
             NSAlert(error: error).runModal()
         }
