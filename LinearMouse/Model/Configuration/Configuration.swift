@@ -95,7 +95,7 @@ extension Configuration {
         if !FileManager.default.fileExists(atPath: parentDirectory.path) {
             try FileManager.default.createDirectory(at: parentDirectory, withIntermediateDirectories: true)
         }
-        try dump().write(to: url, options: .atomic)
+        try dump().write(to: url.resolvingSymlinksInPath(), options: .atomic)
     }
 
     func matchScheme(
