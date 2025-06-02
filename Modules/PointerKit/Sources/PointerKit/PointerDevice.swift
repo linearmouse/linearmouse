@@ -106,6 +106,10 @@ public extension PointerDevice {
         return String(format: "0x%04X", productID)
     }
 
+    var locationID: Int? {
+        client.getProperty(kIOHIDLocationIDKey)
+    }
+
     var serialNumber: String? {
         client.getProperty(kIOHIDSerialNumberKey)
     }

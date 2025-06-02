@@ -20,11 +20,10 @@ class Device {
     private(set) lazy var id: Int32 = OSAtomicIncrement32(&Self.nextID)
 
     private(set) lazy var name: String = device.name
-    private(set) lazy var productName: String? = device.product == nil || duplicateIdentifier == 0 ?
-        device.product :
-        device.product! + " #\(duplicateIdentifier)"
+    private(set) lazy var productName: String? = device.product
     private(set) lazy var vendorID: Int? = device.vendorID
     private(set) lazy var productID: Int? = device.productID
+    private(set) lazy var locationID: Int? = device.locationID
     private(set) lazy var serialNumber: String? = device.serialNumber
     private(set) lazy var buttonCount: Int? = device.buttonCount
     private(set) lazy var category: Category = {
