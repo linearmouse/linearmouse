@@ -136,7 +136,6 @@ class DeviceManager: ObservableObject {
         devices.append(device)
         let currentCount = (countMapping[device.name] ?? 0) + 1
         countMapping[device.name] = currentCount
-        device.duplicateIdentifier = currentCount
 
         os_log(
             "Device added: %{public}@",

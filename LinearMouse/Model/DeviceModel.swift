@@ -22,7 +22,7 @@ class DeviceModel: ObservableObject, Identifiable {
         self.deviceRef = deviceRef
 
         if let device = deviceRef.value {
-            name = device.nameWithDuplicateIdentifier
+            name = device.nameWithDuplicateHandling
         } else {
             name = "(removed)"
         }

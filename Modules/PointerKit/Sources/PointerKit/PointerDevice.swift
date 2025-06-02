@@ -90,6 +90,10 @@ public extension PointerDevice {
         client.getProperty(kIOHIDProductIDKey)
     }
 
+    var locationID: Int? {
+        client.getProperty(kIOHIDLocationIDKey)
+    }
+
     var vendorIDString: String {
         guard let vendorID else {
             return "(nil)"
@@ -106,8 +110,12 @@ public extension PointerDevice {
         return String(format: "0x%04X", productID)
     }
 
-    var locationID: Int? {
-        client.getProperty(kIOHIDLocationIDKey)
+    var locationIDString: String {
+        guard let locationID else {
+            return "(nil)"
+        }
+
+        return String(format: "0x%08X", locationID)
     }
 
     var serialNumber: String? {

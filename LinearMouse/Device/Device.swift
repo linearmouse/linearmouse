@@ -14,7 +14,6 @@ class Device {
     static let fallbackPointerResolution = 400.0
     static let fallbackPointerSpeed = pointerSpeed(fromPointerResolution: fallbackPointerResolution)
 
-    var duplicateIdentifier: Int32 = 0
     private static var nextID: Int32 = 0
 
     private(set) lazy var id: Int32 = OSAtomicIncrement32(&Self.nextID)
@@ -24,6 +23,7 @@ class Device {
     private(set) lazy var vendorID: Int? = device.vendorID
     private(set) lazy var productID: Int? = device.productID
     private(set) lazy var locationID: Int? = device.locationID
+    private(set) lazy var locationIDString: String? = device.locationIDString
     private(set) lazy var serialNumber: String? = device.serialNumber
     private(set) lazy var buttonCount: Int? = device.buttonCount
     private(set) lazy var category: Category = {
@@ -168,9 +168,13 @@ extension Device {
         1 / (pointerSpeed.normalized(to: pointerSpeedRange))
     }
 
-    var nameWithDuplicateIdentifier: String {
+    var nameWithDuplicateHandling: String {
         let count = DeviceManager.shared.countMapping[name] ?? 0
-        return count > 1 ? "\(name) #\(duplicateIdentifier)" : name
+        if count > 1 {
+            return "\(name) [\(serialNumber ?? locationIDString ?? "unknown")]"
+        } else {
+            return name
+        }
     }
 
     var pointerSpeed: Double {

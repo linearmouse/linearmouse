@@ -17,7 +17,7 @@ class DeviceIndicatorState: ObservableObject {
             .debounce(for: 0.1, scheduler: RunLoop.main)
             .removeDuplicates()
             .sink { [weak self] deviceRef in
-                self?.activeDeviceName = deviceRef?.value?.nameWithDuplicateIdentifier
+                self?.activeDeviceName = deviceRef?.value?.nameWithDuplicateHandling
             }
             .store(in: &subscriptions)
     }
