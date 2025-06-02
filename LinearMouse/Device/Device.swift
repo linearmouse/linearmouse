@@ -14,12 +14,15 @@ class Device {
     static let fallbackPointerResolution = 400.0
     static let fallbackPointerSpeed = pointerSpeed(fromPointerResolution: fallbackPointerResolution)
 
+    var duplicateIdentifier: Int32 = 0
     private static var nextID: Int32 = 0
 
     private(set) lazy var id: Int32 = OSAtomicIncrement32(&Self.nextID)
 
     private(set) lazy var name: String = device.name
-    private(set) lazy var productName: String? = device.product
+    private(set) lazy var productName: String? = device.product == nil || duplicateIdentifier == 0 ?
+        device.product :
+        device.product! + " #\(duplicateIdentifier)"
     private(set) lazy var vendorID: Int? = device.vendorID
     private(set) lazy var productID: Int? = device.productID
     private(set) lazy var serialNumber: String? = device.serialNumber
@@ -164,6 +167,11 @@ extension Device {
 
     static func pointerResolution(fromPointerSpeed pointerSpeed: Double) -> Double {
         1 / (pointerSpeed.normalized(to: pointerSpeedRange))
+    }
+
+    var nameWithDuplicateIdentifier: String {
+        let count = DeviceManager.shared.countMapping[name] ?? 0
+        return count > 1 ? "\(name) #\(duplicateIdentifier)" : name
     }
 
     var pointerSpeed: Double {

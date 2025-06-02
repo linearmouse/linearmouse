@@ -21,7 +21,12 @@ class DeviceModel: ObservableObject, Identifiable {
     init(deviceRef: WeakRef<Device>) {
         self.deviceRef = deviceRef
 
-        name = deviceRef.value?.name ?? "(removed)"
+        if let device = deviceRef.value {
+            name = device.nameWithDuplicateIdentifier
+        } else {
+            name = "(removed)"
+        }
+
         category = deviceRef.value?.category ?? .mouse
 
         DeviceManager.shared

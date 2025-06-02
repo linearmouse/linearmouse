@@ -17,6 +17,7 @@ class DeviceManager: ObservableObject {
     private var pointerDeviceToDevice = [PointerDevice: Device]()
     @Published var devices: [Device] = []
 
+    var countMapping = [String: Int32]()
     var lastActiveDeviceId: Int32?
     @Published var lastActiveDeviceRef: WeakRef<Device>?
 
@@ -133,6 +134,9 @@ class DeviceManager: ObservableObject {
 
         pointerDeviceToDevice[pointerDevice] = device
         devices.append(device)
+        let currentCount = (countMapping[device.name] ?? 0) + 1
+        countMapping[device.name] = currentCount
+        device.duplicateIdentifier = currentCount
 
         os_log(
             "Device added: %{public}@",
