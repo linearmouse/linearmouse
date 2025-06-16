@@ -50,7 +50,7 @@
 
 "Enable universal back and forward" = "Universeel achter en vooruit inschakelen";
 "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality." = "Verander de functie van de heen- en terugknoppen naar veeggebaren om de universele heen- en terug functie in te schakelen.";
-"Switch primary and secondary buttons" = "Switch primary and secondary buttons";
+"Switch primary and secondary buttons" = "Wissel primaire en secundaire knoppen";
 "Debounce button clicks" = "Onbedoelde dubbelklik negeren";
 "Ignore rapid clicks within a certain time period." = "Negeer snelle klikken binnen een bepaalde periode.";
 "ms" = "ms";
@@ -58,8 +58,8 @@
 "Left button" = "Linkerknop";
 "Right button" = "Rechterknop";
 "Middle button" = "Middelste knop";
-"Back button" = "Back button";
-"Forward button" = "Forward button";
+"Back button" = "Terug knop";
+"Forward button" = "Vooruit-knop";
 
 "Assign actions to mouse buttons" = "Acties toewijzen aan de muisknoppen";
 "Edit" = "Bewerken";
@@ -74,7 +74,7 @@
 "Click to record" = "Klik om op te nemen";
 "Recording" = "Opnemen";
 "Left click" = "Linker klik";
-"Left double-click" = "Left double-click";
+"Left double-click" = "Dubbelklik links";
 "Right click" = "Rechter klik";
 "Middle click" = "Middelste klik";
 "Button #%lld click" = "Knop #%lld klik";
@@ -168,6 +168,6 @@
 "Configured" = "Geconfigureerd";
 "Running" = "Actief";
 "Installed" = "Geïnstalleerd";
-"Other…" = "Other…";
+"Other…" = "Overige…";
 
-"All Displays" = "All Displays";
+"All Displays" = "Alle schermen";
