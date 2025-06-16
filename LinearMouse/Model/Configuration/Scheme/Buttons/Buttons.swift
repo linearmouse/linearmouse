@@ -24,15 +24,15 @@ extension Scheme {
 
 extension Scheme.Buttons {
     func merge(into buttons: inout Self) {
-        if let mappings = mappings, mappings.count > 0 {
+        if let mappings, !mappings.isEmpty {
             buttons.mappings = (buttons.mappings ?? []) + mappings
         }
 
-        if let universalBackForward = universalBackForward {
+        if let universalBackForward {
             buttons.universalBackForward = universalBackForward
         }
 
-        if let switchPrimaryButtonAndSecondaryButtons = switchPrimaryButtonAndSecondaryButtons {
+        if let switchPrimaryButtonAndSecondaryButtons {
             buttons.switchPrimaryButtonAndSecondaryButtons = switchPrimaryButtonAndSecondaryButtons
         }
 

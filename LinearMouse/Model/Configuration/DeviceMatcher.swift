@@ -17,11 +17,13 @@ struct DeviceMatcher: Codable, Equatable, Hashable, Defaults.Serializable {
 
 extension DeviceMatcher {
     init(of device: Device) {
-        self.init(vendorID: device.vendorID,
-                  productID: device.productID,
-                  productName: device.productName,
-                  serialNumber: device.serialNumber,
-                  category: [Category(from: device.category)])
+        self.init(
+            vendorID: device.vendorID,
+            productID: device.productID,
+            productName: device.productName,
+            serialNumber: device.serialNumber,
+            category: [Category(from: device.category)]
+        )
     }
 
     func match(with device: Device) -> Bool {
@@ -41,7 +43,7 @@ extension DeviceMatcher {
             return false
         }
 
-        if let category = category {
+        if let category {
             guard category.contains(where: { $0.deviceCategory == device.category })
             else {
                 return false

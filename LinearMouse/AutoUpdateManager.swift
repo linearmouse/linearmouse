@@ -44,7 +44,8 @@ class SemanticVersioningComparator: SUVersionComparison {
         }
         if a < b {
             return .orderedAscending
-        } else if a > b {
+        }
+        if a > b {
             return .orderedDescending
         }
         return .orderedSame

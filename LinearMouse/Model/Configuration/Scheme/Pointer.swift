@@ -22,21 +22,26 @@ extension Scheme {
         @Clamp<Speed> var speed: Decimal?
 
         var disableAcceleration: Bool?
+        var redirectsToScroll: Bool?
     }
 }
 
 extension Scheme.Pointer {
     func merge(into pointer: inout Self) {
-        if let acceleration = acceleration {
+        if let acceleration {
             pointer.acceleration = acceleration
         }
 
-        if let speed = speed {
+        if let speed {
             pointer.speed = speed
         }
 
-        if let disableAcceleration = disableAcceleration {
+        if let disableAcceleration {
             pointer.disableAcceleration = disableAcceleration
+        }
+
+        if let redirectsToScroll {
+            pointer.redirectsToScroll = redirectsToScroll
         }
     }
 

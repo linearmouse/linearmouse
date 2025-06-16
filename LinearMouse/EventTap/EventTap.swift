@@ -23,7 +23,7 @@ extension EventTap {
 
     private static let callbackInvoker: CGEventTapCallBack = { proxy, type, event, refcon -> Unmanaged<CGEvent>? in
         // If no refcon (aka userInfo) is passed in, just bypass the event.
-        guard let refcon = refcon else {
+        guard let refcon else {
             return Unmanaged.passUnretained(event)
         }
 
@@ -38,7 +38,7 @@ extension EventTap {
 
         case .tapDisabledByTimeout:
             os_log("EventTap disabled by timeout, re-enable it", log: log, type: .error, String(describing: type))
-            guard let tap = tap else {
+            guard let tap else {
                 os_log("Cannot find the tap", log: log, type: .error, String(describing: type))
                 return Unmanaged.passUnretained(event)
             }
@@ -46,7 +46,6 @@ extension EventTap {
             return Unmanaged.passUnretained(event)
 
         default:
-
             // If the callback returns nil, ignore the event.
             guard let event = callback(proxy, event) else {
                 return nil
@@ -65,21 +64,25 @@ extension EventTap {
         - runLoop: The target `RunLoop` to run the event tap.
         - callback: The callback of the event tap.
      */
-    static func observe(_ events: [CGEventType],
-                        place: CGEventTapPlacement = .headInsertEventTap,
-                        at runLoop: RunLoop = .current,
-                        callback: @escaping Callback) throws -> ObservationToken {
+    static func observe(
+        _ events: [CGEventType],
+        place: CGEventTapPlacement = .headInsertEventTap,
+        at runLoop: RunLoop = .current,
+        callback: @escaping Callback
+    ) throws -> ObservationToken {
         // Create a context holder. The lifetime of contextHolder should be the same as ObservationToken's.
         let contextHolder = ContextHolder(callback)
 
         // Create event tap.
         let eventsOfInterest = events.reduce(CGEventMask(0)) { $0 | (1 << $1.rawValue) }
-        guard let tap = CGEvent.tapCreate(tap: .cghidEventTap,
-                                          place: place,
-                                          options: .defaultTap,
-                                          eventsOfInterest: eventsOfInterest,
-                                          callback: callbackInvoker,
-                                          userInfo: Unmanaged.passUnretained(contextHolder).toOpaque()) else {
+        guard let tap = CGEvent.tapCreate(
+            tap: .cghidEventTap,
+            place: place,
+            options: .defaultTap,
+            eventsOfInterest: eventsOfInterest,
+            callback: callbackInvoker,
+            userInfo: Unmanaged.passUnretained(contextHolder).toOpaque()
+        ) else {
             throw EventTapError.failedToCreate
         }
 

@@ -21,7 +21,7 @@ struct SidebarItem: View {
             }
         } label: {
             HStack {
-                if let imageName = imageName {
+                if let imageName {
                     Image(imageName)
                         .resizable()
                         .aspectRatio(contentMode: .fit)

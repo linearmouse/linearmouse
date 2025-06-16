@@ -51,13 +51,15 @@ extension SchemeState {
     }
 
     var currentAppName: String? {
-        guard let currentApp = currentApp else { return nil }
+        guard let currentApp else {
+            return nil
+        }
         return try? readInstalledApp(bundleIdentifier: currentApp)?.bundleName ?? currentApp
     }
 
     var scheme: Scheme {
         get {
-            guard let device = device else {
+            guard let device else {
                 return Scheme()
             }
 
@@ -75,7 +77,9 @@ extension SchemeState {
         }
 
         set {
-            guard let device = device else { return }
+            guard let device else {
+                return
+            }
 
             switch schemes.schemeIndex(ofDevice: device, ofApp: currentApp, ofDisplay: currentDisplay) {
             case let .at(index):
@@ -87,7 +91,7 @@ extension SchemeState {
     }
 
     var mergedScheme: Scheme {
-        guard let device = device else {
+        guard let device else {
             return Scheme()
         }
 

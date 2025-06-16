@@ -20,7 +20,6 @@ import Foundation
 final class AssociatedObject<T: Any> {
     subscript(index: Any) -> T? {
         get {
-            // swiftlint:disable force_cast
             objc_getAssociatedObject(index, Unmanaged.passUnretained(self).toOpaque()) as! T?
         } set {
             objc_setAssociatedObject(
@@ -79,8 +78,8 @@ final class LifetimeAssociation {
     init(of target: AnyObject, with owner: AnyObject, deinitHandler: @escaping () -> Void = {}) {
         let wrappedObject = ObjectLifetimeTracker(for: target, deinitHandler: deinitHandler)
 
-        let associatedObjects = LifetimeAssociation.associatedObjects[owner] ?? []
-        LifetimeAssociation.associatedObjects[owner] = associatedObjects + [wrappedObject]
+        let associatedObjects = Self.associatedObjects[owner] ?? []
+        Self.associatedObjects[owner] = associatedObjects + [wrappedObject]
 
         self.wrappedObject = wrappedObject
         self.owner = owner
@@ -100,16 +99,16 @@ final class LifetimeAssociation {
 
     private func invalidate() {
         guard
-            let owner = owner,
-            let wrappedObject = wrappedObject,
-            var associatedObjects = LifetimeAssociation.associatedObjects[owner],
+            let owner,
+            let wrappedObject,
+            var associatedObjects = Self.associatedObjects[owner],
             let wrappedObjectAssociationIndex = associatedObjects.firstIndex(where: { $0 === wrappedObject })
         else {
             return
         }
 
         associatedObjects.remove(at: wrappedObjectAssociationIndex)
-        LifetimeAssociation.associatedObjects[owner] = associatedObjects
+        Self.associatedObjects[owner] = associatedObjects
         self.owner = nil
     }
 }

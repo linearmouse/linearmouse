@@ -19,10 +19,10 @@ extension IOHIDServiceClient {
     }
 
     func getPropertyIOFixed(_ key: String) -> Double? {
-        (getProperty(key) as IOFixed?).map { Double($0) / 65536 }
+        (getProperty(key) as IOFixed?).map { Double($0) / 65_536 }
     }
 
     func setPropertyIOFixed(_ value: Double?, forKey: String) {
-        setProperty(value.map { IOFixed($0 * 65536) }, forKey: forKey)
+        setProperty(value.map { IOFixed($0 * 65_536) }, forKey: forKey)
     }
 }

@@ -40,8 +40,11 @@ struct ButtonMappingsSection: View {
                 }
                 .buttonStyle(.plain)
                 .sheet(isPresented: $showAddSheet) {
-                    ButtonMappingEditSheet(isPresented: $showAddSheet, mapping: $mappingToAdd,
-                                           mode: .create) { mapping in
+                    ButtonMappingEditSheet(
+                        isPresented: $showAddSheet,
+                        mapping: $mappingToAdd,
+                        mode: .create
+                    ) { mapping in
                         state.appendMapping(mapping)
                     }
                 }
@@ -56,7 +59,7 @@ struct ButtonMappingsSection: View {
                     .frame(width: 16, height: 16)
                 }
                 .buttonStyle(.plain)
-                .disabled(selection.count == 0)
+                .disabled(selection.isEmpty)
             }
         }
         .modifier(SectionViewModifier())

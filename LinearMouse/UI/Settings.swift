@@ -13,7 +13,8 @@ struct Settings: View {
                 .padding(5)
                 .frame(minWidth: 200, maxWidth: 200, maxHeight: .infinity, alignment: .top)
                 .background(VisualEffectView(material: .sidebar, blendingMode: .behindWindow)
-                    .edgesIgnoringSafeArea(.top))
+                    .edgesIgnoringSafeArea(.top)
+                )
 
             if let navigation = state.navigation {
                 switch navigation {
