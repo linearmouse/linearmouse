@@ -58,8 +58,8 @@
 "Left button" = "왼쪽 버튼";
 "Right button" = "오른쪽 버튼";
 "Middle button" = "휠 버튼";
-"Back button" = "Back button";
-"Forward button" = "Forward button";
+"Back button" = "뒤로 가기 버튼";
+"Forward button" = "앞으로 가기 버튼";
 
 "Assign actions to mouse buttons" = "마우스 버튼에 동작 할당";
 "Edit" = "편집";
