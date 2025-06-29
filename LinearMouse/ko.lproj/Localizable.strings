@@ -108,7 +108,7 @@
 "Decrease keyboard brightness" = "키보드 밝기 낮추기";
 "Mouse Wheel" = "마우스 휠";
 "Mouse Button" = "마우스 버튼";
-"Back" = "뒤로가기";
+"Back" = "뒤로 가기";
 "Forward" = "앞으로 가기";
 "Execute" = "실행";
 "Run shell command…" = "셸 스크립트 실행…";
@@ -168,6 +168,6 @@
 "Configured" = "설정됨";
 "Running" = "실행 중";
 "Installed" = "설치됨";
-"Other…" = "Other…";
+"Other…" = "기타…";
 
 "All Displays" = "모든 디스플레이";
