@@ -1,13 +1,13 @@
-"LinearMouse needs Accessibility permission" = "LinearMouse needs Accessibility permission";
+"LinearMouse needs Accessibility permission" = "LinearMouse precisa de permissão de Acessibilidade";
 "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility." = "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility.";
-"Get more help" = "Get more help";
+"Get more help" = "Obter mais ajuda";
 "Open Accessibility" = "Open Accessibility";
 
 "%@ Settings…" = "%@ Settings…";
-"Start at login" = "Start at login";
+"Start at login" = "Abrir ao iniciar sessão";
 "Config" = "Config";
-"Reload" = "Reload";
-"Reveal in Finder" = "Reveal in Finder";
+"Reload" = "Recarregar";
+"Reveal in Finder" = "Mostrar no Finder";
 "Configure for %@…" = "Configure for %@…";
 "Quit %@" = "Quit %@";
 
@@ -30,7 +30,7 @@
 "Slow" = "Slow";
 "Fast" = "Fast";
 "Distance" = "Distance";
-"Scrolling is disabled based on the current settings." = "Scrolling is disabled based on the current settings.";
+"Scrolling is disabled based on the current settings." = "A deslocação está desativada com base nas configurações atuais.";
 "Revert to system defaults" = "Revert to system defaults";
 "Copy settings from vertical" = "Copy settings from vertical";
 "Modifier Keys" = "Modifier Keys";
