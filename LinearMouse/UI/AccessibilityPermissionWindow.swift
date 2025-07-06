@@ -44,7 +44,7 @@ class AccessibilityPermissionWindow: NSWindow {
 extension AccessibilityPermissionWindow: NSWindowDelegate {
     func windowWillClose(_: Notification) {
         guard AccessibilityPermission.enabled else {
-            NSApp.terminate(nil)
+            NSApplication.shared.terminate(nil)
             exit(0)
         }
 

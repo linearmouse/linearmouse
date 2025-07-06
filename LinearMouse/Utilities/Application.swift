@@ -19,6 +19,6 @@ enum Application {
         } catch {
             NSAlert(error: error).runModal()
         }
-        NSApp.terminate(nil)
+        NSApplication.shared.terminate(nil)
     }
 }
