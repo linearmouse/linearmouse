@@ -7,6 +7,7 @@ import SwiftUI
 
 struct GeneralSettings: View {
     @Default(.showInMenuBar) var showInMenuBar
+    @Default(.showInDock) var showInDock
     @Default(.bypassEventsFromOtherApplications) var bypassEventsFromOtherApplications
 
     var body: some View {
@@ -24,6 +25,10 @@ struct GeneralSettings: View {
 
                     LaunchAtLogin.Toggle {
                         Text("Start at login")
+                    }
+
+                    Toggle(isOn: $showInDock) {
+                        Text("Show in Dock")
                     }
 
                     Toggle(isOn: $bypassEventsFromOtherApplications) {
