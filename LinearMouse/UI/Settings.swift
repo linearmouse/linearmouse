@@ -35,7 +35,7 @@ struct Settings: View {
         .frame(minWidth: 600, minHeight: 600, alignment: .top)
         .onAppear {
             showInDockTask = Task {
-                for await value in Defaults.updates(.showInDock) {
+                for await value in Defaults.updates(.showInDock, initial: true) {
                     if value {
                         NSApplication.shared.setActivationPolicy(.regular)
                     } else {
