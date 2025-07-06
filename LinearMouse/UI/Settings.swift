@@ -40,7 +40,7 @@ struct Settings: View {
                         NSApplication.shared.setActivationPolicy(.regular)
                     } else {
                         NSApplication.shared.setActivationPolicy(.accessory)
-                        NSApp.activate(ignoringOtherApps: true)
+                        NSApplication.shared.activate(ignoringOtherApps: true)
                     }
                 }
 

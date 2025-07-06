@@ -172,6 +172,6 @@ class StatusItem {
     }
 
     @objc private func quit() {
-        NSApp.terminate(nil)
+        NSApplication.shared.terminate(nil)
     }
 }

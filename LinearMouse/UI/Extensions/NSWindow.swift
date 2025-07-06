@@ -5,7 +5,7 @@ import SwiftUI
 
 extension NSWindow {
     func bringToFront() {
-        NSApp.activate(ignoringOtherApps: true)
+        NSApplication.shared.activate(ignoringOtherApps: true)
         makeKeyAndOrderFront(nil)
     }
 }
