@@ -22,6 +22,8 @@ class Device {
     private(set) lazy var productName: String? = device.product
     private(set) lazy var vendorID: Int? = device.vendorID
     private(set) lazy var productID: Int? = device.productID
+    private(set) lazy var locationID: Int? = device.locationID
+    private(set) lazy var locationIDString: String? = device.locationIDString
     private(set) lazy var serialNumber: String? = device.serialNumber
     private(set) lazy var buttonCount: Int? = device.buttonCount
     private(set) lazy var category: Category = {
@@ -164,6 +166,15 @@ extension Device {
 
     static func pointerResolution(fromPointerSpeed pointerSpeed: Double) -> Double {
         1 / (pointerSpeed.normalized(to: pointerSpeedRange))
+    }
+
+    var nameWithDuplicateHandling: String {
+        let count = DeviceManager.shared.countMapping[name] ?? 0
+        if count > 1 {
+            return "\(name) [\(serialNumber ?? locationIDString ?? "unknown")]"
+        } else {
+            return name
+        }
     }
 
     var pointerSpeed: Double {
