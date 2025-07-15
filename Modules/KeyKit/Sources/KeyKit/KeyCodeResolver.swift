@@ -94,6 +94,22 @@ public class KeyCodeResolver {
         newMapping[Key.f12.rawValue] = 0x6F
         newMapping[Key.numpadPlus.rawValue] = 0x45
         newMapping[Key.numpadMinus.rawValue] = 0x4E
+        newMapping[Key.numpadMultiply.rawValue] = 0x43
+        newMapping[Key.numpadDivide.rawValue] = 0x4B
+        newMapping[Key.numpadEnter.rawValue] = 0x4C
+        newMapping[Key.numpadEquals.rawValue] = 0x51
+        newMapping[Key.numpadDecimal.rawValue] = 0x41
+        newMapping[Key.numpadClear.rawValue] = 0x47
+        newMapping[Key.numpad0.rawValue] = 0x52
+        newMapping[Key.numpad1.rawValue] = 0x53
+        newMapping[Key.numpad2.rawValue] = 0x54
+        newMapping[Key.numpad3.rawValue] = 0x55
+        newMapping[Key.numpad4.rawValue] = 0x56
+        newMapping[Key.numpad5.rawValue] = 0x57
+        newMapping[Key.numpad6.rawValue] = 0x58
+        newMapping[Key.numpad7.rawValue] = 0x59
+        newMapping[Key.numpad8.rawValue] = 0x5B
+        newMapping[Key.numpad9.rawValue] = 0x5C
         for (keyString, keyCode) in newMapping {
             guard let key = Key(rawValue: keyString) else {
                 continue
