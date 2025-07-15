@@ -642,4 +642,46 @@ The `<command>` will be executed with bash.
 }
 ```
 
-To see the full list of keys, please refer to [Configuration.d.ts#L609](Configuration.d.ts#L609).
+To see the full list of keys, please refer to [Configuration.d.ts#L652](Configuration.d.ts#L652).
+
+#### Numpad keys support
+
+LinearMouse supports all numpad keys for keyboard shortcuts:
+
+- Number keys: `numpad0`, `numpad1`, `numpad2`, `numpad3`, `numpad4`, `numpad5`, `numpad6`, `numpad7`, `numpad8`, `numpad9`
+- Operator keys: `numpadPlus`, `numpadMinus`, `numpadMultiply`, `numpadDivide`, `numpadEquals`
+- Function keys: `numpadEnter`, `numpadDecimal`, `numpadClear`
+
+Example usage:
+```json
+{
+  "action": {
+    "keyPress": ["numpad5"]
+  }
+}
+```
+
+## Pointer settings
+
+### Redirects to scroll
+
+The `redirectsToScroll` property allows you to redirect pointer movements to scroll events. This is useful for scenarios where you want mouse movements to control scrolling instead of cursor positioning.
+
+```json
+{
+  "schemes": [
+    {
+      "if": {
+        "device": {
+          "category": "mouse"
+        }
+      },
+      "pointer": {
+        "redirectsToScroll": true
+      }
+    }
+  ]
+}
+```
+
+When `redirectsToScroll` is set to `true`, horizontal mouse movements will generate horizontal scroll events, and vertical mouse movements will generate vertical scroll events.

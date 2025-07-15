@@ -319,6 +319,13 @@ declare namespace Scheme {
      * @default false
      */
     disableAcceleration?: boolean;
+
+    /**
+     * @title Redirects to scroll
+     * @description If the value is true, pointer movements will be redirected to scroll events.
+     * @default false
+     */
+    redirectsToScroll?: boolean;
   };
 
   type Buttons = {
@@ -724,7 +731,25 @@ declare namespace Scheme {
         | "\\"
         | "`"
         | "["
-        | "]";
+        | "]"
+        | "numpadPlus"
+        | "numpadMinus"
+        | "numpadMultiply"
+        | "numpadDivide"
+        | "numpadEnter"
+        | "numpadEquals"
+        | "numpadDecimal"
+        | "numpadClear"
+        | "numpad0"
+        | "numpad1"
+        | "numpad2"
+        | "numpad3"
+        | "numpad4"
+        | "numpad5"
+        | "numpad6"
+        | "numpad7"
+        | "numpad8"
+        | "numpad9";
     }
 
     type UniversalBackForward =

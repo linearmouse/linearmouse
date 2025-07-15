@@ -122,6 +122,22 @@ public enum Key: String, Codable {
     case backetRight = "]"
     case numpadPlus
     case numpadMinus
+    case numpadMultiply
+    case numpadDivide
+    case numpadEnter
+    case numpadEquals
+    case numpadDecimal
+    case numpadClear
+    case numpad0
+    case numpad1
+    case numpad2
+    case numpad3
+    case numpad4
+    case numpad5
+    case numpad6
+    case numpad7
+    case numpad8
+    case numpad9
 }
 
 extension Key {
@@ -146,6 +162,42 @@ extension Key: CustomStringConvertible {
             return "⌥"
         case .control, .controlRight:
             return "⌃"
+        case .numpadPlus:
+            return "Numpad +"
+        case .numpadMinus:
+            return "Numpad -"
+        case .numpadMultiply:
+            return "Numpad *"
+        case .numpadDivide:
+            return "Numpad /"
+        case .numpadEnter:
+            return "Numpad Enter"
+        case .numpadEquals:
+            return "Numpad ="
+        case .numpadDecimal:
+            return "Numpad ."
+        case .numpadClear:
+            return "Numpad Clear"
+        case .numpad0:
+            return "Numpad 0"
+        case .numpad1:
+            return "Numpad 1"
+        case .numpad2:
+            return "Numpad 2"
+        case .numpad3:
+            return "Numpad 3"
+        case .numpad4:
+            return "Numpad 4"
+        case .numpad5:
+            return "Numpad 5"
+        case .numpad6:
+            return "Numpad 6"
+        case .numpad7:
+            return "Numpad 7"
+        case .numpad8:
+            return "Numpad 8"
+        case .numpad9:
+            return "Numpad 9"
         default:
             return rawValue.prefix(1).capitalized + rawValue.dropFirst()
         }
