@@ -9,7 +9,7 @@ extension ScrollingSettings {
 
         var body: some View {
             Section {
-                Picker("Scrolling mode", selection: $state.scrollingMode) {
+                Picker("Scrolling mode", selection: scrollingModeBinding) {
                     ForEach(ScrollingSettingsState.ScrollingMode.allCases) { scrollingMode in
                         Text(NSLocalizedString(scrollingMode.rawValue, comment: "")).tag(scrollingMode)
                     }
@@ -20,7 +20,7 @@ extension ScrollingSettings {
                 case .accelerated:
                     HStack(alignment: .firstTextBaseline) {
                         Slider(
-                            value: $state.scrollingAcceleration,
+                            value: scrollingAccelerationBinding,
                             in: 0.0 ... 10.0
                         ) {
                             labelWithDescription {
@@ -34,7 +34,7 @@ extension ScrollingSettings {
                         }
                         TextField(
                             "",
-                            value: $state.scrollingAcceleration,
+                            value: scrollingAccelerationBinding,
                             formatter: state.scrollingAccelerationFormatter
                         )
                         .labelsHidden()
@@ -45,7 +45,7 @@ extension ScrollingSettings {
 
                     HStack(alignment: .firstTextBaseline) {
                         Slider(
-                            value: $state.scrollingSpeed,
+                            value: scrollingSpeedBinding,
                             in: 0.0 ... 128.0
                         ) {
                             labelWithDescription {
@@ -59,7 +59,7 @@ extension ScrollingSettings {
                         }
                         TextField(
                             "",
-                            value: $state.scrollingSpeed,
+                            value: scrollingSpeedBinding,
                             formatter: state.scrollingSpeedFormatter
                         )
                         .labelsHidden()
@@ -77,26 +77,31 @@ extension ScrollingSettings {
 
                     HStack(spacing: 10) {
                         Button("Revert to system defaults") {
-                            state.scrollingMode = .accelerated
-                            state.scrollingAcceleration = 1
-                            state.scrollingSpeed = 0
+                            DispatchQueue.main.async {
+                                state.scrollingMode = .accelerated
+                                state.scrollingAcceleration = 1
+                                state.scrollingSpeed = 0
+                            }
                         }
 
                         if state.direction == .horizontal {
                             Button("Copy settings from vertical") {
-                                state.scheme.scrolling.distance.horizontal = state.mergedScheme.scrolling.distance
-                                    .vertical
-                                state.scheme.scrolling.acceleration.horizontal = state.mergedScheme.scrolling
-                                    .acceleration
-                                    .vertical
-                                state.scheme.scrolling.speed.horizontal = state.mergedScheme.scrolling.speed.vertical
+                                DispatchQueue.main.async {
+                                    state.scheme.scrolling.distance.horizontal = state.mergedScheme.scrolling.distance
+                                        .vertical
+                                    state.scheme.scrolling.acceleration.horizontal = state.mergedScheme.scrolling
+                                        .acceleration
+                                        .vertical
+                                    state.scheme.scrolling.speed.horizontal = state.mergedScheme.scrolling.speed
+                                        .vertical
+                                }
                             }
                         }
                     }
 
                 case .byLines:
                     Slider(
-                        value: $state.scrollingDistanceInLines,
+                        value: scrollingDistanceInLinesBinding,
                         in: 0 ... 10,
                         step: 1
                     ) {
@@ -109,7 +114,7 @@ extension ScrollingSettings {
 
                 case .byPixels:
                     Slider(
-                        value: $state.scrollingDistanceInPixels,
+                        value: scrollingDistanceInPixelsBinding,
                         in: 0 ... 128
                     ) {
                         Text("Distance")
@@ -121,6 +126,63 @@ extension ScrollingSettings {
                 }
             }
             .modifier(SectionViewModifier())
+        }
+
+        // MARK: - Bindings
+
+        private var scrollingModeBinding: Binding<ScrollingSettingsState.ScrollingMode> {
+            Binding(
+                get: { state.scrollingMode },
+                set: { newValue in
+                    DispatchQueue.main.async {
+                        state.scrollingMode = newValue
+                    }
+                }
+            )
+        }
+
+        private var scrollingAccelerationBinding: Binding<Double> {
+            Binding(
+                get: { state.scrollingAcceleration },
+                set: { newValue in
+                    DispatchQueue.main.async {
+                        state.scrollingAcceleration = newValue
+                    }
+                }
+            )
+        }
+
+        private var scrollingSpeedBinding: Binding<Double> {
+            Binding(
+                get: { state.scrollingSpeed },
+                set: { newValue in
+                    DispatchQueue.main.async {
+                        state.scrollingSpeed = newValue
+                    }
+                }
+            )
+        }
+
+        private var scrollingDistanceInLinesBinding: Binding<Double> {
+            Binding(
+                get: { state.scrollingDistanceInLines },
+                set: { newValue in
+                    DispatchQueue.main.async {
+                        state.scrollingDistanceInLines = newValue
+                    }
+                }
+            )
+        }
+
+        private var scrollingDistanceInPixelsBinding: Binding<Double> {
+            Binding(
+                get: { state.scrollingDistanceInPixels },
+                set: { newValue in
+                    DispatchQueue.main.async {
+                        state.scrollingDistanceInPixels = newValue
+                    }
+                }
+            )
         }
     }
 }

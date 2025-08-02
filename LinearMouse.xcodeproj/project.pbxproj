@@ -15,6 +15,7 @@
 		97A7A39C28587E8C00EE4833 /* PointerKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97A7A39B28587E8C00EE4833 /* PointerKit */; };
 		97C5D8FF2856E3CB00CBED2D /* GestureKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C5D8FE2856E3CB00CBED2D /* GestureKit */; };
 		97C97728288FC49F009094BA /* DockKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C97727288FC49F009094BA /* DockKit */; };
+		97F3F1AD2E3E0D9F00725095 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97F3F1AC2E3E0D9F00725095 /* SnapKit */; };
 		97FC692F29F44D0100859859 /* AppMover in Frameworks */ = {isa = PBXBuildFile; productRef = 97FC692E29F44D0100859859 /* AppMover */; };
 		97FD5B552CCDF2A600125BFE /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 97FD5B542CCDF2A600125BFE /* Sparkle */; };
 		B70A58F6284F987900E5C86E /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = B70A58F5284F987900E5C86E /* LaunchAtLogin */; };
@@ -64,6 +65,7 @@
 				977638F9286BE9EE00A698B6 /* PublishedObject in Frameworks */,
 				978DBCA629AB1732002259B3 /* JSONPatcher in Frameworks */,
 				B70A58F6284F987900E5C86E /* LaunchAtLogin in Frameworks */,
+				97F3F1AD2E3E0D9F00725095 /* SnapKit in Frameworks */,
 				9724FACA2A3E04DE00622F5A /* KeyKit in Frameworks */,
 				97C97728288FC49F009094BA /* DockKit in Frameworks */,
 				97FD5B552CCDF2A600125BFE /* Sparkle in Frameworks */,
@@ -153,6 +155,7 @@
 				9724FAC92A3E04DE00622F5A /* KeyKit */,
 				975979DA2A6BA1A700016EDF /* ObservationToken */,
 				97FD5B542CCDF2A600125BFE /* Sparkle */,
+				97F3F1AC2E3E0D9F00725095 /* SnapKit */,
 			);
 			productName = LinearMouse;
 			productReference = B75A06182671E9D800BEAF77 /* LinearMouse.app */;
@@ -248,6 +251,7 @@
 				977638F7286BE9EE00A698B6 /* XCRemoteSwiftPackageReference "PublishedObject" */,
 				978DBCA429AB1732002259B3 /* XCRemoteSwiftPackageReference "JSONPatcher" */,
 				97FC692B29F44CE000859859 /* XCRemoteSwiftPackageReference "AppMover" */,
+				97F3F1AB2E3E0D9F00725095 /* XCRemoteSwiftPackageReference "SnapKit" */,
 			);
 			productRefGroup = B75A06192671E9D800BEAF77 /* Products */;
 			projectDirPath = "";
@@ -594,6 +598,14 @@
 				kind = branch;
 			};
 		};
+		97F3F1AB2E3E0D9F00725095 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.7.1;
+			};
+		};
 		97FC692B29F44CE000859859 /* XCRemoteSwiftPackageReference "AppMover" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/linearmouse/AppMover";
@@ -671,6 +683,11 @@
 		97C97727288FC49F009094BA /* DockKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DockKit;
+		};
+		97F3F1AC2E3E0D9F00725095 /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 97F3F1AB2E3E0D9F00725095 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
 		};
 		97FC692E29F44D0100859859 /* AppMover */ = {
 			isa = XCSwiftPackageProductDependency;

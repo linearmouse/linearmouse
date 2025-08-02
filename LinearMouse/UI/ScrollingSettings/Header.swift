@@ -19,13 +19,24 @@ extension ScrollingSettings {
         @ObservedObject var state = ScrollingSettingsState.shared
 
         var body: some View {
-            Picker("", selection: $state.direction) {
+            Picker("", selection: directionBinding) {
                 ForEach(Scheme.Scrolling.BidirectionalDirection.allCases) { direction in
                     Text(NSLocalizedString(direction.rawValue, comment: "")).tag(direction)
                 }
             }
             .pickerStyle(.segmented)
             .fixedSize()
+        }
+
+        private var directionBinding: Binding<Scheme.Scrolling.BidirectionalDirection> {
+            Binding(
+                get: { state.direction },
+                set: { newValue in
+                    DispatchQueue.main.async {
+                        state.direction = newValue
+                    }
+                }
+            )
         }
     }
 }
