@@ -7,8 +7,36 @@ import SwiftUI
 class ToolbarManager: NSObject, NSToolbarDelegate {
     static let shared = ToolbarManager()
 
+    private weak var toolbar: NSToolbar?
+
     override private init() {
         super.init()
+    }
+
+    func updateToolbarForNavigation(_ navigation: SettingsState.Navigation) {
+        guard let toolbar else {
+            return
+        }
+
+        // Remove all existing items
+        let currentItems = toolbar.items
+        for item in currentItems {
+            toolbar.removeItem(at: toolbar.items.firstIndex(of: item) ?? 0)
+        }
+
+        // For General section, keep toolbar empty (no items)
+        // For other sections, add the normal items
+        if navigation != .general {
+            let defaultItems = getDefaultItemIdentifiers()
+            for itemIdentifier in defaultItems {
+                toolbar.insertItem(withItemIdentifier: itemIdentifier, at: toolbar.items.count)
+            }
+        }
+    }
+
+    private func getDefaultItemIdentifiers() -> [NSToolbarItem.Identifier] {
+        // Right-aligned layout for all macOS versions (reversed order)
+        [flexibleSpaceID, displayIndicatorID, appIndicatorID, deviceIndicatorID]
     }
 
     // Toolbar item identifiers
@@ -20,6 +48,7 @@ class ToolbarManager: NSObject, NSToolbarDelegate {
     func createToolbar() -> NSToolbar {
         let toolbar = NSToolbar(identifier: "SettingsToolbar")
         toolbar.delegate = self
+        self.toolbar = toolbar
 
         // Modern macOS 26 styling - fixed display mode
         if #available(macOS 13.0, *) {
@@ -61,8 +90,13 @@ class ToolbarManager: NSObject, NSToolbarDelegate {
     }
 
     func toolbarDefaultItemIdentifiers(_: NSToolbar) -> [NSToolbarItem.Identifier] {
+        // For General section, return empty array to avoid showing items initially
+        if SettingsState.shared.navigation == .general {
+            return []
+        }
+
         // Right-aligned layout for all macOS versions (reversed order)
-        [flexibleSpaceID, displayIndicatorID, appIndicatorID, deviceIndicatorID]
+        return getDefaultItemIdentifiers()
     }
 
     func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {

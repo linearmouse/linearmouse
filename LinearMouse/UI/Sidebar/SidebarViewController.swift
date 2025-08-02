@@ -152,6 +152,8 @@ extension SidebarViewController: NSOutlineViewDelegate {
         let item = navigationItems[selectedRow]
         if let settingsItem = item as? SettingsNavigationItem {
             SettingsState.shared.navigation = settingsItem.navigation
+            // Immediately update toolbar items based on new navigation
+            ToolbarManager.shared.updateToolbarForNavigation(settingsItem.navigation)
         }
     }
 }
