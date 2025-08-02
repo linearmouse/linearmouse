@@ -16,6 +16,7 @@ jobs:
       APPLE_ID: ${{ secrets.APPLE_ID }}
       CODE_SIGN_IDENTITY: ${{ secrets.CODE_SIGN_IDENTITY }}
       DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
+      DEVELOPER_DIR: /Applications/Xcode_26_beta.app/Contents/Developer
     steps:
       - name: Install dependencies
         run: |
@@ -24,6 +25,10 @@ jobs:
           brew install swiftlint
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Select Xcode 26 beta
+        run: |
+          sudo xcode-select --switch /Applications/Xcode_26_beta.app
+          xcodebuild -version
       - name: Install the Apple certificate
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
