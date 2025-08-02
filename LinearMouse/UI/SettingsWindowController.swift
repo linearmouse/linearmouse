@@ -1,61 +1,59 @@
 // MIT License
 // Copyright (c) 2021-2025 LinearMouse
 
+import Combine
 import Foundation
 import SwiftUI
 
 class SettingsWindowController: NSWindowController {
     static let shared = SettingsWindowController()
 
-    private var released = true
+    private var windowCoordinator: WindowCoordinator?
+    private var cancellables = Set<AnyCancellable>()
+
+    private init() {
+        super.init(window: nil)
+        setupAppStateManager()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setupAppStateManager()
+    }
+
+    private func setupAppStateManager() {
+        // Initialize app state manager to handle dock behavior
+        _ = AppStateManager.shared
+    }
 
     private func initWindowIfNeeded() {
-        guard released else {
+        guard window == nil else {
             return
         }
 
-        let window = NSWindow(
-            contentRect: .init(x: 0, y: 0, width: 850, height: 600),
-            styleMask: [.titled, .closable, .fullSizeContentView],
-            backing: .buffered,
-            defer: false
-        )
+        windowCoordinator = WindowCoordinator()
+        windowCoordinator?.delegate = self
 
-        window.delegate = self
-        window.contentView = NSHostingView(rootView: Settings())
-
-        window.title = LinearMouse.appName
-        window.titlebarAppearsTransparent = true
-        window.titleVisibility = .hidden
-
-        window.center()
-
-        self.window = window
-        released = false
+        let newWindow = windowCoordinator!.createWindow()
+        window = newWindow
     }
 
     func bringToFront() {
         initWindowIfNeeded()
-
-        guard let window else {
-            return
-        }
-
-        window.bringToFront()
+        window?.bringToFront()
     }
 }
 
-extension SettingsWindowController: NSWindowDelegate {
-    func windowWillClose(_: Notification) {
-        guard let window else {
-            return
-        }
+// MARK: - WindowCoordinatorDelegate
 
-        // It seems that if contentView is not manually unassigned,
-        // Settings will not be recycled.
-        window.contentView = nil
+extension SettingsWindowController: WindowCoordinatorDelegate {
+    func windowCoordinatorDidRequestClose(_: WindowCoordinator) {
+        // Handle dock behavior when window closes
+        AppStateManager.shared.handleWindowClosed()
 
-        // Mark self as released.
-        released = true
+        // Reset the window reference so it can be recreated
+        window = nil
+        windowCoordinator = nil
+        cancellables.removeAll()
     }
 }
