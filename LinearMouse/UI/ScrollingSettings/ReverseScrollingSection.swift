@@ -9,7 +9,7 @@ extension ScrollingSettings {
 
         var body: some View {
             Section {
-                Toggle(isOn: $state.reverseScrolling) {
+                Toggle(isOn: reverseScrollingBinding) {
                     withDescription {
                         Text("Reverse scrolling")
                         if state.direction == .horizontal {
@@ -19,6 +19,17 @@ extension ScrollingSettings {
                 }
             }
             .modifier(SectionViewModifier())
+        }
+
+        private var reverseScrollingBinding: Binding<Bool> {
+            Binding(
+                get: { state.reverseScrolling },
+                set: { newValue in
+                    DispatchQueue.main.async {
+                        state.reverseScrolling = newValue
+                    }
+                }
+            )
         }
     }
 }

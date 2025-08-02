@@ -61,11 +61,13 @@ class WindowCoordinator: NSObject {
         window.titlebarAppearsTransparent = true
         window.titleVisibility = .hidden
 
-        if #available(macOS 15, *) {
-            window.toolbar = NSToolbar()
-            window.toolbar?.displayMode = .iconOnly
-            window.toolbar?.allowsDisplayModeCustomization = false
+        // Configure titlebar to allow content interaction
+        if #available(macOS 11.0, *) {
+            window.titlebarSeparatorStyle = .none
         }
+
+        // Set up modern toolbar with scheme indicators
+        window.toolbar = ToolbarManager.shared.createToolbar()
     }
 
     private func setupSplitView(for window: NSWindow) {
