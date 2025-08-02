@@ -79,6 +79,11 @@ class ToolbarManager: NSObject, NSToolbarDelegate {
 
         let button = DeviceIndicatorButton()
 
+        // Use textured rounded style for native toolbar appearance
+        button.bezelStyle = .texturedRounded
+        button.setButtonType(.momentaryPushIn)
+        button.showsBorderOnlyWhileMouseInside = true
+
         // Modern sizing for macOS 26
         if #available(macOS 26.0, *) {
             button.frame = NSRect(x: 0, y: 0, width: 140, height: 32)
@@ -87,6 +92,7 @@ class ToolbarManager: NSObject, NSToolbarDelegate {
         }
 
         item.view = button
+
         return item
     }
 
@@ -98,6 +104,11 @@ class ToolbarManager: NSObject, NSToolbarDelegate {
 
         let button = AppIndicatorButton()
 
+        // Use textured rounded style for native toolbar appearance
+        button.bezelStyle = .texturedRounded
+        button.setButtonType(.momentaryPushIn)
+        button.showsBorderOnlyWhileMouseInside = true
+
         // Modern sizing for macOS 26
         if #available(macOS 26.0, *) {
             button.frame = NSRect(x: 0, y: 0, width: 140, height: 32)
@@ -106,6 +117,7 @@ class ToolbarManager: NSObject, NSToolbarDelegate {
         }
 
         item.view = button
+
         return item
     }
 
@@ -117,6 +129,11 @@ class ToolbarManager: NSObject, NSToolbarDelegate {
 
         let button = DisplayIndicatorButton()
 
+        // Use textured rounded style for native toolbar appearance
+        button.bezelStyle = .texturedRounded
+        button.setButtonType(.momentaryPushIn)
+        button.showsBorderOnlyWhileMouseInside = true
+
         // Modern sizing for macOS 26
         if #available(macOS 26.0, *) {
             button.frame = NSRect(x: 0, y: 0, width: 140, height: 32)
@@ -125,6 +142,7 @@ class ToolbarManager: NSObject, NSToolbarDelegate {
         }
 
         item.view = button
+
         return item
     }
 }

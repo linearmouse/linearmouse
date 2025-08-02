@@ -25,8 +25,7 @@ class DeviceIndicatorButton: NSButton {
     }
 
     private func setupButton() {
-        // Modern macOS button styling
-        bezelStyle = .rounded
+        // Styling is handled in ToolbarManager
         controlSize = .regular
 
         // Set initial title
@@ -34,10 +33,22 @@ class DeviceIndicatorButton: NSButton {
 
         // Configure appearance
         font = NSFont.systemFont(ofSize: NSFont.systemFontSize(for: controlSize))
+        contentTintColor = .labelColor
+
+        // Ensure text is visible with proper color
+        updateTextColor()
 
         // Add action
         target = self
         action = #selector(buttonClicked)
+    }
+
+    private func updateTextColor() {
+        let attributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: NSColor.controlTextColor,
+            .font: font ?? NSFont.systemFont(ofSize: NSFont.systemFontSize(for: controlSize))
+        ]
+        attributedTitle = NSAttributedString(string: title, attributes: attributes)
     }
 
     private func setupObservers() {
@@ -46,6 +57,7 @@ class DeviceIndicatorButton: NSButton {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in
                 self?.title = self?.deviceState.activeDeviceName ?? "Unknown"
+                self?.updateTextColor()
             }
             .store(in: &cancellables)
     }
@@ -103,8 +115,7 @@ class AppIndicatorButton: NSButton {
     }
 
     private func setupButton() {
-        // Modern macOS button styling
-        bezelStyle = .rounded
+        // Styling is handled in ToolbarManager
         controlSize = .regular
 
         // Set initial title
@@ -112,10 +123,22 @@ class AppIndicatorButton: NSButton {
 
         // Configure appearance
         font = NSFont.systemFont(ofSize: NSFont.systemFontSize(for: controlSize))
+        contentTintColor = .labelColor
+
+        // Ensure text is visible with proper color
+        updateTextColor()
 
         // Add action
         target = self
         action = #selector(buttonClicked)
+    }
+
+    private func updateTextColor() {
+        let attributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: NSColor.controlTextColor,
+            .font: font ?? NSFont.systemFont(ofSize: NSFont.systemFontSize(for: controlSize))
+        ]
+        attributedTitle = NSAttributedString(string: title, attributes: attributes)
     }
 
     private func setupObservers() {
@@ -124,6 +147,7 @@ class AppIndicatorButton: NSButton {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in
                 self?.title = self?.schemeState.currentAppName ?? NSLocalizedString("All Apps", comment: "")
+                self?.updateTextColor()
             }
             .store(in: &cancellables)
     }
@@ -181,8 +205,7 @@ class DisplayIndicatorButton: NSButton {
     }
 
     private func setupButton() {
-        // Modern macOS button styling
-        bezelStyle = .rounded
+        // Styling is handled in ToolbarManager
         controlSize = .regular
 
         // Set initial title
@@ -190,10 +213,22 @@ class DisplayIndicatorButton: NSButton {
 
         // Configure appearance
         font = NSFont.systemFont(ofSize: NSFont.systemFontSize(for: controlSize))
+        contentTintColor = .labelColor
+
+        // Ensure text is visible with proper color
+        updateTextColor()
 
         // Add action
         target = self
         action = #selector(buttonClicked)
+    }
+
+    private func updateTextColor() {
+        let attributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: NSColor.controlTextColor,
+            .font: font ?? NSFont.systemFont(ofSize: NSFont.systemFontSize(for: controlSize))
+        ]
+        attributedTitle = NSAttributedString(string: title, attributes: attributes)
     }
 
     private func setupObservers() {
@@ -202,6 +237,7 @@ class DisplayIndicatorButton: NSButton {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in
                 self?.title = self?.schemeState.currentDisplay ?? NSLocalizedString("All Displays", comment: "")
+                self?.updateTextColor()
             }
             .store(in: &cancellables)
     }

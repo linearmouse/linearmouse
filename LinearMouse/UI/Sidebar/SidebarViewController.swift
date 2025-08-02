@@ -3,6 +3,7 @@
 
 import AppKit
 import Combine
+import SnapKit
 
 class SidebarViewController: NSViewController {
     private var outlineView: NSOutlineView!
@@ -57,6 +58,7 @@ class SidebarViewController: NSViewController {
         outlineView.allowsEmptySelection = false
         outlineView.allowsMultipleSelection = false
         outlineView.usesAutomaticRowHeights = true
+        outlineView.backgroundColor = .clear
 
         // Add column
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("SidebarColumn"))
@@ -72,18 +74,16 @@ class SidebarViewController: NSViewController {
         scrollView.hasHorizontalScroller = false
         scrollView.autohidesScrollers = true
         scrollView.borderType = .noBorder
+        scrollView.drawsBackground = false
 
         view.addSubview(scrollView)
     }
 
     private func setupLayout() {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
+        scrollView.snp.makeConstraints { make in
+            make.edges.equalTo(view)
+        }
     }
 
     private func setupObservers() {
@@ -161,6 +161,7 @@ extension SidebarViewController: NSOutlineViewDelegate {
 // SidebarNavigationItem moved to NavigationProtocols.swift
 
 class SidebarCellView: NSTableCellView {
+    private var stackView: NSStackView!
     private var iconImageView: NSImageView!
     private var titleLabel: NSTextField!
 
@@ -175,53 +176,36 @@ class SidebarCellView: NSTableCellView {
     }
 
     private func setupView() {
+        stackView = NSStackView()
+        stackView.spacing = 8
+
         // Icon
         iconImageView = NSImageView()
         iconImageView.imageScaling = .scaleProportionallyDown
-        iconImageView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(iconImageView)
+        iconImageView.contentTintColor = .controlAccentColor
+        iconImageView.snp.makeConstraints { make in
+            make.width.equalTo(20)
+        }
+        stackView.addArrangedSubview(iconImageView)
 
         // Title
         titleLabel = NSTextField(labelWithString: "")
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(titleLabel)
+        stackView.addArrangedSubview(titleLabel)
 
-        // Layout with native sidebar spacing
-        let leadingPadding: CGFloat = 12
-        let iconSpacing: CGFloat = 8
-        let iconSize: CGFloat = 16
+        addSubview(stackView)
 
-        NSLayoutConstraint.activate([
-            iconImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: leadingPadding),
-            iconImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            iconImageView.widthAnchor.constraint(equalToConstant: iconSize),
-            iconImageView.heightAnchor.constraint(equalToConstant: iconSize),
-
-            titleLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: iconSpacing),
-            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
-            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -12)
-        ])
+        stackView.snp.makeConstraints { make in
+            make.edges.equalTo(self).inset(NSEdgeInsets(top: 6, left: 4, bottom: 6, right: 8))
+        }
     }
 
     func configure(with item: NavigationItem) {
-        // Try system symbol first, fall back to custom image
-        if #available(macOS 11.0, *),
-           let systemImage = NSImage(systemSymbolName: item.systemImage, accessibilityDescription: item.title) {
-            iconImageView.image = systemImage
-        } else {
-            // Fall back to custom images
-            if let settingsItem = item as? SettingsNavigationItem {
-                let imageName = mapToCustomImageName(settingsItem.navigation)
-                iconImageView.image = NSImage(named: imageName)
-            }
+        if let settingsItem = item as? SettingsNavigationItem {
+            let imageName = mapToCustomImageName(settingsItem.navigation)
+            iconImageView.image = NSImage(named: imageName)
         }
 
         titleLabel.stringValue = item.title
-
-        // Use native label colors
-        if #available(macOS 14.0, *) {
-            titleLabel.textColor = .labelColor
-        }
     }
 
     private func mapToCustomImageName(_ navigation: SettingsState.Navigation) -> String {

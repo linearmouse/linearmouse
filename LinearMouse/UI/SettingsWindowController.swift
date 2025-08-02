@@ -11,21 +11,6 @@ class SettingsWindowController: NSWindowController {
     private var windowCoordinator: WindowCoordinator?
     private var cancellables = Set<AnyCancellable>()
 
-    private init() {
-        super.init(window: nil)
-        setupAppStateManager()
-    }
-
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupAppStateManager()
-    }
-
-    private func setupAppStateManager() {
-        // Initialize app state manager to handle dock behavior
-        _ = AppStateManager.shared
-    }
-
     private func initWindowIfNeeded() {
         guard window == nil else {
             return
@@ -36,6 +21,8 @@ class SettingsWindowController: NSWindowController {
 
         let newWindow = windowCoordinator!.createWindow()
         window = newWindow
+
+        AppStateManager.shared.setupDockBehavior()
     }
 
     func bringToFront() {

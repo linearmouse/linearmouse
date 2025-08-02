@@ -12,15 +12,13 @@ class AppStateManager: ObservableObject {
     private var showInDockTask: Task<Void, Never>?
     private var cancellables = Set<AnyCancellable>()
 
-    private init() {
-        setupDockBehavior()
-    }
-
     deinit {
         showInDockTask?.cancel()
     }
 
-    private func setupDockBehavior() {
+    func setupDockBehavior() {
+        showInDockTask?.cancel()
+
         showInDockTask = Task {
             for await value in Defaults.updates(.showInDock, initial: true) {
                 await MainActor.run {
