@@ -58,8 +58,8 @@
 "Left button" = "Linke Maustaste";
 "Right button" = "Rechte Maustaste";
 "Middle button" = "Mittlere Maustaste";
-"Back button" = "Back button";
-"Forward button" = "Forward button";
+"Back button" = "Zurück-Taste";
+"Forward button" = "Vor-Taste";
 
 "Assign actions to mouse buttons" = "Maustasten Aktionen zuweisen";
 "Edit" = "Bearbeiten";
@@ -168,6 +168,6 @@
 "Configured" = "Konfiguriert";
 "Running" = "Aktiv";
 "Installed" = "Installiert";
-"Other…" = "Other…";
+"Other…" = "Andere…";
 
 "All Displays" = "Alle Bildschirme";
