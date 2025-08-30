@@ -21,6 +21,7 @@ public extension GestureEvent {
         }
 
         event.type = .init(nsEventType: .gesture)!
+        event.flags = []
         event.setIntegerValueField(.gestureHIDType, value: Int64(IOHIDEventType.zoom.rawValue))
         event.setIntegerValueField(.gesturePhase, value: Int64(phase.rawValue))
         event.setDoubleValueField(.gestureZoomValue, value: magnification)
