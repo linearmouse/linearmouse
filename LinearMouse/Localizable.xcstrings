@@ -3960,7 +3960,7 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "0"
           }
         },
@@ -4156,8 +4156,8 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "0px"
+            "state" : "translated",
+            "value" : "0 像素"
           }
         },
         "zh-Hant" : {
@@ -4352,7 +4352,7 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "10"
           }
         },
@@ -4548,8 +4548,8 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "128px"
+            "state" : "translated",
+            "value" : "128 像素"
           }
         },
         "zh-Hant" : {
