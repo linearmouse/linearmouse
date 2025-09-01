@@ -21,7 +21,7 @@ struct ButtonMappingActionRun: View {
     }
 
     var body: some View {
-        TextField("", text: command)
+        TextField(String(""), text: command)
             .labelsHidden()
     }
 }

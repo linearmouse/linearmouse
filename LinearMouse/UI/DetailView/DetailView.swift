@@ -24,7 +24,7 @@ struct DetailView<T>: View where T: View {
             } else {
                 // FIXME: Workaround for Catalina
                 if #unavailable(macOS 11) {
-                    Text("")
+                    Text(verbatim: "")
                         .padding(.top)
                 }
 

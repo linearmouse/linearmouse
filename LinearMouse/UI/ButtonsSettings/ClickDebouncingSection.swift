@@ -25,7 +25,7 @@ struct ClickDebouncingSection: View {
                     )
                     .labelsHidden()
                     TextField(
-                        "",
+                        String(""),
                         value: $state.clickDebouncingTimeout,
                         formatter: state.clickDebouncingTimeoutFormatter
                     )

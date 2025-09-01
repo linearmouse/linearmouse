@@ -110,7 +110,7 @@ extension ButtonMappingActionScroll {
 
         var body: some View {
             HStack {
-                Picker("", selection: mode) {
+                Picker(String(""), selection: mode) {
                     ForEach(Mode.allCases) {
                         Text($0.rawValue).tag($0)
                     }
