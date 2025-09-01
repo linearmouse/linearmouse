@@ -154,14 +154,22 @@ extension Key: CustomStringConvertible {
         switch self {
         case .enter:
             return "↩"
-        case .command, .commandRight:
+        case .command:
             return "⌘"
-        case .shift, .shiftRight:
+        case .commandRight:
+            return "Right ⌘"
+        case .shift:
             return "⇧"
-        case .option, .optionRight:
+        case .shiftRight:
+            return "Right ⇧"
+        case .option:
             return "⌥"
-        case .control, .controlRight:
+        case .optionRight:
+            return "Right ⌥"
+        case .control:
             return "⌃"
+        case .controlRight:
+            return "Right ⌃"
         case .numpadPlus:
             return "Numpad +"
         case .numpadMinus:

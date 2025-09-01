@@ -63,6 +63,7 @@ public class KeyCodeResolver {
         newMapping[Key.space.rawValue] = 0x31
         newMapping[Key.delete.rawValue] = 0x33
         newMapping[Key.escape.rawValue] = 0x35
+        newMapping[Key.commandRight.rawValue] = 0x36
         newMapping[Key.command.rawValue] = 0x37
         newMapping[Key.shift.rawValue] = 0x38
         newMapping[Key.capsLock.rawValue] = 0x39
@@ -116,10 +117,6 @@ public class KeyCodeResolver {
             }
             newReversedMapping[keyCode] = key
         }
-        // As the keyCode of command and the keyCode of commandRight
-        // are the same, avoid inserting commandRight into the reversed
-        // mapping.
-        newMapping[Key.commandRight.rawValue] = 0x37
 
         mapping = newMapping
         reversedMapping = newReversedMapping
