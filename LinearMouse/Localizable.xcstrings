@@ -14362,8 +14362,8 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Failed to create GlobalEventTap: Accessibility permission not granted"
+            "state" : "translated",
+            "value" : "创建 GlobalEventTap 失败：未授予辅助权限"
           }
         },
         "zh-Hant" : {
@@ -14558,8 +14558,8 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Failed to load the configuration: %@"
+            "state" : "translated",
+            "value" : "加载配置失败： %@"
           }
         },
         "zh-Hant" : {
@@ -14754,8 +14754,8 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Failed to save the configuration: %@"
+            "state" : "translated",
+            "value" : "保存配置失败： %@"
           }
         },
         "zh-Hant" : {
@@ -18296,8 +18296,8 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Invalid JSON: %@"
+            "state" : "translated",
+            "value" : "无效的 JSON：%@"
           }
         },
         "zh-Hant" : {
@@ -18492,8 +18492,8 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Invalid value"
+            "state" : "translated",
+            "value" : "无效的值"
           }
         },
         "zh-Hant" : {
@@ -21236,8 +21236,8 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Missing key %1$@ at %2$@"
+            "state" : "translated",
+            "value" : "缺少键 %1$@ 在 %2$@"
           }
         },
         "zh-Hant" : {
@@ -23980,8 +23980,8 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No device selected."
+            "state" : "translated",
+            "value" : "未选择设备。"
           }
         },
         "zh-Hant" : {
@@ -24176,8 +24176,8 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Not specified"
+            "state" : "translated",
+            "value" : "未指定"
           }
         },
         "zh-Hant" : {
@@ -32611,8 +32611,8 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scrolling settings are applied to converted events."
+            "state" : "translated",
+            "value" : "滚动设置应用于转换后的事件。"
           }
         },
         "zh-Hant" : {
@@ -33402,8 +33402,8 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Show in Dock"
+            "state" : "translated",
+            "value" : "在程序坞中显示"
           }
         },
         "zh-Hant" : {
@@ -35754,8 +35754,8 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Type mismatch: expected %1$@ at %2$@"
+            "state" : "translated",
+            "value" : "输入不匹配：预期 %1$@ 在 %2$@"
           }
         },
         "zh-Hant" : {
@@ -35950,8 +35950,8 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unit must be empty or \"px\""
+            "state" : "translated",
+            "value" : "单位必须为空或 \"px\""
           }
         },
         "zh-Hant" : {
@@ -36146,8 +36146,8 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "UniversalBackForward must be true, false, \"backOnly\" or \"forwardOnly\""
+            "state" : "translated",
+            "value" : "UniversalBackforward 必须为 true、false、\"backOnly\" 或 \"forwardOnly\""
           }
         },
         "zh-Hant" : {
@@ -36342,8 +36342,8 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unsupported encoding, expected UTF-8"
+            "state" : "translated",
+            "value" : "不支持的编码，预期为 UTF-8"
           }
         },
         "zh-Hant" : {
