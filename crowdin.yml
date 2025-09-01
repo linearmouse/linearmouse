@@ -2,5 +2,6 @@ pull_request_title: Update translations
 commit_message: Update translations (%language%)
 append_commit_message: 
 files:
-  - source: /LinearMouse/en.lproj/Localizable.*
-    translation: /LinearMouse/%osx_code%/%original_file_name%
+  - source: /LinearMouse/Localizable.xcstrings
+    translation: /LinearMouse/Localizable.xcstrings
+    multilingual: 1
