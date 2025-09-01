@@ -33,7 +33,7 @@ extension ScrollingSettings {
                             Text("Accelerated")
                         }
                         TextField(
-                            "",
+                            String(""),
                             value: $state.scrollingAcceleration,
                             formatter: state.scrollingAccelerationFormatter
                         )
@@ -58,7 +58,7 @@ extension ScrollingSettings {
                             Text("Fast")
                         }
                         TextField(
-                            "",
+                            String(""),
                             value: $state.scrollingSpeed,
                             formatter: state.scrollingSpeedFormatter
                         )

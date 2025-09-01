@@ -42,7 +42,7 @@ struct PointerSettings: View {
                                 }
                             }
                             TextField(
-                                "",
+                                String(""),
                                 value: $state.pointerAcceleration,
                                 formatter: state.pointerAccelerationFormatter
                             )
@@ -63,7 +63,7 @@ struct PointerSettings: View {
                                 }
                             }
                             TextField(
-                                "",
+                                String(""),
                                 value: $state.pointerSpeed,
                                 formatter: state.pointerSpeedFormatter
                             )
@@ -99,7 +99,7 @@ struct PointerSettings: View {
                                 }
                             }
                             TextField(
-                                "",
+                                String(""),
                                 value: $state.pointerAcceleration,
                                 formatter: state.pointerAccelerationFormatter
                             )

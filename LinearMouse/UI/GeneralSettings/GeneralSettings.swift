@@ -54,25 +54,25 @@ struct GeneralSettings: View {
                 Section {
                     HyperLink(URLs.homepage) {
                         HStack(alignment: .firstTextBaseline, spacing: 5) {
-                            Text("🏡")
+                            Text(verbatim: "🏡")
                             Text("Homepage")
                         }
                     }
                     HyperLink(URLs.bugReport) {
                         HStack(alignment: .firstTextBaseline, spacing: 5) {
-                            Text("🐛")
+                            Text(verbatim: "🐛")
                             Text("Bug report")
                         }
                     }
                     HyperLink(URLs.featureRequest) {
                         HStack(alignment: .firstTextBaseline, spacing: 5) {
-                            Text("✍🏻")
+                            Text(verbatim: "✍🏻")
                             Text("Feature request")
                         }
                     }
                     HyperLink(URLs.donate) {
                         HStack(alignment: .firstTextBaseline, spacing: 5) {
-                            Text("❤️")
+                            Text(verbatim: "❤️")
                             Text("Donate")
                         }
                     }
