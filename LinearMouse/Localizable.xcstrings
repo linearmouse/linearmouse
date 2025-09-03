@@ -155,7 +155,7 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–1)"
           }
         },
@@ -351,7 +351,7 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–10)"
           }
         },
@@ -547,7 +547,7 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–20)"
           }
         },
@@ -743,7 +743,7 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–128)"
           }
         },
@@ -939,8 +939,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "(active)"
+            "state" : "translated",
+            "value" : "(aktiv)"
           }
         },
         "tr" : {
@@ -1765,7 +1765,7 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -1775,14 +1775,14 @@
                 "plural" : {
                   "one" : {
                     "stringUnit" : {
-                      "state" : "new",
+                      "state" : "translated",
                       "value" : "%.1f pixel"
                     }
                   },
                   "other" : {
                     "stringUnit" : {
-                      "state" : "new",
-                      "value" : "%.1f pixels"
+                      "state" : "translated",
+                      "value" : "%.1f pixlar"
                     }
                   }
                 }
@@ -2292,7 +2292,7 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "%1$@ (%2$@)"
           }
         },
@@ -2887,14 +2887,14 @@
             "plural" : {
               "one" : {
                 "stringUnit" : {
-                  "state" : "new",
-                  "value" : "%d line"
+                  "state" : "translated",
+                  "value" : "%d rad"
                 }
               },
               "other" : {
                 "stringUnit" : {
-                  "state" : "new",
-                  "value" : "%d lines"
+                  "state" : "translated",
+                  "value" : "%d rader"
                 }
               }
             }
@@ -3152,8 +3152,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "⇧ (Shift)"
+            "state" : "translated",
+            "value" : "⇧ (Skift)"
           }
         },
         "tr" : {
@@ -3936,7 +3936,7 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "0"
           }
         },
@@ -4132,7 +4132,7 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "0px"
           }
         },
@@ -4328,7 +4328,7 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "10"
           }
         },
@@ -4524,7 +4524,7 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "128px"
           }
         },
@@ -4916,8 +4916,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Action"
+            "state" : "translated",
+            "value" : "Åtgärd"
           }
         },
         "tr" : {
@@ -5112,8 +5112,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "All Apps"
+            "state" : "translated",
+            "value" : "Alla appar"
           }
         },
         "tr" : {
@@ -6295,7 +6295,7 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "auto"
           }
         },
@@ -6687,8 +6687,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Back"
+            "state" : "translated",
+            "value" : "Tillbaka"
           }
         },
         "tr" : {
@@ -6883,8 +6883,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Back button"
+            "state" : "translated",
+            "value" : "Bakåtknapp"
           }
         },
         "tr" : {
@@ -8255,8 +8255,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Cancel"
+            "state" : "translated",
+            "value" : "Avbryt"
           }
         },
         "tr" : {
@@ -8458,8 +8458,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Change speed"
+            "state" : "translated",
+            "value" : "Ändra hastighet"
           }
         },
         "tr" : {
@@ -8654,8 +8654,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Check for updates automatically"
+            "state" : "translated",
+            "value" : "Sök efter uppdateringar automatiskt"
           }
         },
         "tr" : {
@@ -8850,8 +8850,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Check for Updates…"
+            "state" : "translated",
+            "value" : "Sök efter uppdateringar…"
           }
         },
         "tr" : {
@@ -9046,8 +9046,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Click to record"
+            "state" : "translated",
+            "value" : "Klicka för att spela in"
           }
         },
         "tr" : {
@@ -10614,8 +10614,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Create"
+            "state" : "translated",
+            "value" : "Skapa"
           }
         },
         "tr" : {
@@ -11594,8 +11594,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Decrease volume"
+            "state" : "translated",
+            "value" : "Sänk volym"
           }
         },
         "tr" : {
@@ -11790,8 +11790,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Default action"
+            "state" : "translated",
+            "value" : "Standardåtgärd"
           }
         },
         "tr" : {
@@ -12966,8 +12966,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Edit"
+            "state" : "translated",
+            "value" : "Redigera"
           }
         },
         "tr" : {
@@ -13946,8 +13946,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Export logs"
+            "state" : "translated",
+            "value" : "Exportera loggar"
           }
         },
         "tr" : {
@@ -15710,8 +15710,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Forward button"
+            "state" : "translated",
+            "value" : "Framåtknapp"
           }
         },
         "tr" : {
@@ -16298,8 +16298,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Homepage"
+            "state" : "translated",
+            "value" : "Hemsida"
           }
         },
         "tr" : {
@@ -17880,8 +17880,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Increase volume"
+            "state" : "translated",
+            "value" : "Öka volym"
           }
         },
         "tr" : {
@@ -18468,8 +18468,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Invalid value"
+            "state" : "translated",
+            "value" : "Ogiltigt värde"
           }
         },
         "tr" : {
@@ -18664,8 +18664,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Keyboard"
+            "state" : "translated",
+            "value" : "Tangentbord"
           }
         },
         "tr" : {
@@ -19448,8 +19448,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Left button"
+            "state" : "translated",
+            "value" : "Vänster knapp"
           }
         },
         "tr" : {
@@ -19644,8 +19644,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Left click"
+            "state" : "translated",
+            "value" : "Vänsterklick"
           }
         },
         "tr" : {
@@ -21996,8 +21996,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Mouse"
+            "state" : "translated",
+            "value" : "Mus"
           }
         },
         "tr" : {
@@ -23172,7 +23172,7 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "ms"
           }
         },
@@ -23564,8 +23564,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Next"
+            "state" : "translated",
+            "value" : "Nästa"
           }
         },
         "tr" : {
@@ -23760,8 +23760,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No action"
+            "state" : "translated",
+            "value" : "Ingen åtgärd"
           }
         },
         "tr" : {
@@ -23956,8 +23956,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No device selected."
+            "state" : "translated",
+            "value" : "Ingen enhet vald."
           }
         },
         "tr" : {
@@ -24348,7 +24348,7 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "OK"
           }
         },
@@ -25139,8 +25139,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Play / pause"
+            "state" : "translated",
+            "value" : "Spela / pausa"
           }
         },
         "tr" : {
@@ -25923,8 +25923,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Previous"
+            "state" : "translated",
+            "value" : "Föregående"
           }
         },
         "tr" : {
@@ -26315,8 +26315,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Receive beta updates"
+            "state" : "translated",
+            "value" : "Ta emot beta-uppdateringar"
           }
         },
         "tr" : {
@@ -28471,8 +28471,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Right button"
+            "state" : "translated",
+            "value" : "Högerknapp"
           }
         },
         "tr" : {
@@ -28667,8 +28667,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Right click"
+            "state" : "translated",
+            "value" : "Höger klick"
           }
         },
         "tr" : {
@@ -28863,8 +28863,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Run shell command…"
+            "state" : "translated",
+            "value" : "Kör shell-kommando…"
           }
         },
         "tr" : {
@@ -32986,8 +32986,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Settings"
+            "state" : "translated",
+            "value" : "Inställningar"
           }
         },
         "tr" : {
@@ -33182,8 +33182,8 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Show desktop"
+            "state" : "translated",
+            "value" : "Visa skrivbord"
           }
         },
         "tr" : {
@@ -36710,7 +36710,7 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Version: %@"
           }
         },
