@@ -185,7 +185,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–1)"
           }
         },
@@ -381,7 +381,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–10)"
           }
         },
@@ -577,7 +577,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–20)"
           }
         },
@@ -773,7 +773,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–128)"
           }
         },
@@ -1900,7 +1900,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2322,7 +2322,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "%1$@ (%2$@)"
           }
         },
@@ -3182,7 +3182,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "⇧ (Shift)"
           }
         },
@@ -3378,7 +3378,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "⌃ (Control)"
           }
         },
@@ -3574,7 +3574,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "⌘ (Command)"
           }
         },
@@ -3770,7 +3770,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "⌥ (Option)"
           }
         },
@@ -3966,7 +3966,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "0"
           }
         },
@@ -4162,8 +4162,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "0px"
+            "state" : "translated",
+            "value" : "0 畫素"
           }
         },
         "zh-Hant-HK" : {
@@ -4358,7 +4358,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "10"
           }
         },
@@ -4554,8 +4554,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "128px"
+            "state" : "translated",
+            "value" : "128 畫素"
           }
         },
         "zh-Hant-HK" : {
@@ -6325,8 +6325,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "auto"
+            "state" : "translated",
+            "value" : "自動"
           }
         },
         "zh-Hant-HK" : {
@@ -9285,7 +9285,200 @@
       }
     },
     "Configuration Reloaded" : {
-
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配置已重新加载"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定已重新載入"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        }
+      }
     },
     "Configure for" : {
       "localizations" : {
@@ -14580,7 +14773,200 @@
       }
     },
     "Failed to reload configuration" : {
-
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "加载配置失败"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        }
+      }
     },
     "Failed to save the configuration: %@" : {
       "localizations" : {
@@ -37550,7 +37936,200 @@
       }
     },
     "Your configuration changes are now active." : {
-
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你的配置更改现已生效。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        }
+      }
     },
     "Zoom" : {
       "extractionState" : "manual",
