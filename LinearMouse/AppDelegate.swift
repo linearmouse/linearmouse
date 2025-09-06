@@ -70,9 +70,13 @@ extension AppDelegate {
 
     func setupConfiguration() {
         ConfigurationState.shared.load()
+        // Start watching the configuration file for hot reload
+        ConfigurationState.shared.startHotReload()
     }
 
     func setupNotifications() {
+        // Prepare user notifications for error popups
+        Notifier.shared.setup()
         NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.sessionDidResignActiveNotification,
             object: nil,

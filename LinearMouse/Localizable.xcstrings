@@ -9284,6 +9284,9 @@
         }
       }
     },
+    "Configuration Reloaded" : {
+
+    },
     "Configure for" : {
       "localizations" : {
         "af" : {
@@ -14575,6 +14578,9 @@
           }
         }
       }
+    },
+    "Failed to reload configuration" : {
+
     },
     "Failed to save the configuration: %@" : {
       "localizations" : {
@@ -37542,6 +37548,9 @@
           }
         }
       }
+    },
+    "Your configuration changes are now active." : {
+
     },
     "Zoom" : {
       "extractionState" : "manual",

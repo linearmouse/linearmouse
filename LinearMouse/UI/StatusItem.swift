@@ -160,7 +160,7 @@ class StatusItem {
     }
 
     @objc private func reloadConfiguration() {
-        ConfigurationState.shared.load()
+        ConfigurationState.shared.reloadFromDisk()
     }
 
     @objc private func revealConfigurationInFinder() {
