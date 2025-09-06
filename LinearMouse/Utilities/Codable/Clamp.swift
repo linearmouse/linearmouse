@@ -2,9 +2,19 @@
 // Copyright (c) 2021-2025 LinearMouse
 
 protocol ClampRange {
-    associatedtype Value: Codable, Comparable
+    associatedtype Value: Codable
+    associatedtype RangeValue: Comparable
 
-    static var range: ClosedRange<Value> { get }
+    static var range: ClosedRange<RangeValue> { get }
+
+    // Clamp a possibly-optional value to range; default provided below
+    static func clamp(_ value: Value?) -> Value?
+}
+
+extension ClampRange where Value: Comparable, Value == RangeValue {
+    static func clamp(_ value: Value?) -> Value? {
+        value.map { $0.clamped(to: range) }
+    }
 }
 
 @propertyWrapper
@@ -14,7 +24,7 @@ struct Clamp<T: ClampRange> {
     var wrappedValue: T.Value? {
         get { value }
         set {
-            value = newValue.map { $0.clamped(to: T.range) }
+            value = T.clamp(newValue)
         }
     }
 
@@ -35,7 +45,7 @@ extension Clamp: Codable {
     }
 }
 
-extension Clamp: Equatable where T: Equatable {}
+extension Clamp: Equatable where T.Value: Equatable {}
 
 extension KeyedDecodingContainer {
     func decode<T: ClampRange>(

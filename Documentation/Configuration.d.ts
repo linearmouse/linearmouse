@@ -12,6 +12,12 @@ type HexString = string;
 type Button = Primary | Secondary | Auxiliary | Back | Forward | number;
 
 /**
+ * @title Unset
+ * @description A special value that explicitly restores a setting to the system or device default. Currently supported in pointer settings; may be supported more broadly in the future.
+ */
+export type Unset = "unset";
+
+/**
  * @description Primary button, usually the left button.
  */
 type Primary = 0;
@@ -299,19 +305,19 @@ declare namespace Scheme {
   type Pointer = {
     /**
      * @title Pointer acceleration
-     * @description If the value is not specified, system default value will be used.
+     * @description A number to set acceleration, or "unset" to restore system default. If omitted, the previous/merged value applies.
      * @minimum 0
      * @maximum 20
      */
-    acceleration?: number;
+    acceleration?: number | Unset;
 
     /**
      * @title Pointer speed
-     * @description If the value is not specified, device default value will be used.
+     * @description A number to set speed, or "unset" to restore device default. If omitted, the previous/merged value applies.
      * @minimal 0
      * @maximum 1
      */
-    speed?: number;
+    speed?: number | Unset;
 
     /**
      * @title Disable pointer acceleration

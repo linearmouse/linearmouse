@@ -118,6 +118,26 @@ I would create two schemes and specify the vendor ID and product ID:
 Then, the pointer speed of my Logitech mouse and Microsoft mouse will be set to 0.36 and 0.4
 respectively.
 
+### Unsetting values
+
+LinearMouse supports a special "unset" value to explicitly restore settings back to their system or
+device defaults. This differs from omitting a field, which keeps the previously merged value.
+
+Currently, "unset" is supported for pointer acceleration and speed.
+
+```json
+{
+  "schemes": [
+    {
+      "if": {
+        "device": { "category": "mouse" }
+      },
+      "pointer": { "acceleration": "unset", "speed": "unset" }
+    }
+  ]
+}
+```
+
 ## App matching
 
 App bundle ID can be provided to match a specific app.

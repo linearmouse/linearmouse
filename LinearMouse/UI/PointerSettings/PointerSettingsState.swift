@@ -40,7 +40,7 @@ extension PointerSettingsState {
 
     var pointerAcceleration: Double {
         get {
-            mergedScheme.pointer.acceleration?.asTruncatedDouble
+            mergedScheme.pointer.acceleration?.unwrapped?.asTruncatedDouble
                 ?? mergedScheme.firstMatchedDevice?.pointerAcceleration
                 ?? Device.fallbackPointerAcceleration
         }
@@ -49,13 +49,13 @@ extension PointerSettingsState {
                 return
             }
 
-            scheme.pointer.acceleration = Decimal(newValue).rounded(4)
+            scheme.pointer.acceleration = .value(Decimal(newValue).rounded(4))
         }
     }
 
     var pointerSpeed: Double {
         get {
-            mergedScheme.pointer.speed?.asTruncatedDouble
+            mergedScheme.pointer.speed?.unwrapped?.asTruncatedDouble
                 ?? mergedScheme.firstMatchedDevice?.pointerSpeed
                 ?? Device.fallbackPointerSpeed
         }
@@ -64,7 +64,7 @@ extension PointerSettingsState {
                 return
             }
 
-            scheme.pointer.speed = Decimal(newValue).rounded(4)
+            scheme.pointer.speed = .value(Decimal(newValue).rounded(4))
         }
     }
 
@@ -93,8 +93,8 @@ extension PointerSettingsState {
 
         Scheme(
             pointer: Scheme.Pointer(
-                acceleration: Decimal(device?.pointerAcceleration ?? Device.fallbackPointerAcceleration),
-                speed: Decimal(device?.pointerSpeed ?? Device.fallbackPointerSpeed),
+                acceleration: .unset,
+                speed: .unset,
                 disableAcceleration: false,
                 redirectsToScroll: false
             )
