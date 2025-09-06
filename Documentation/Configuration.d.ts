@@ -291,6 +291,13 @@ declare namespace Scheme {
         type: "zoom";
       };
 
+      /**
+       * @description Zoom in and out using pinch gestures.
+       */
+      type PinchZoom = {
+        type: "pinchZoom";
+      };
+
       type Action =
         | None
         | Auto
@@ -298,7 +305,8 @@ declare namespace Scheme {
         | PreventDefault
         | AlterOrientation
         | ChangeSpeed
-        | Zoom;
+        | Zoom
+        | PinchZoom;
     }
   }
 
