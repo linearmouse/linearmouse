@@ -1070,6 +1070,9 @@
         },
         {
           "$ref": "#/definitions/Scheme.Scrolling.Modifiers.Zoom"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.PinchZoom"
         }
       ]
     },
@@ -1141,6 +1144,20 @@
       "properties": {
         "type": {
           "const": "none",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "Scheme.Scrolling.Modifiers.PinchZoom": {
+      "additionalProperties": false,
+      "description": "Zoom in and out using pinch gestures.",
+      "properties": {
+        "type": {
+          "const": "pinchZoom",
           "type": "string"
         }
       },
