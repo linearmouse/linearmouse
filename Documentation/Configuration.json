@@ -842,11 +842,18 @@
       "additionalProperties": false,
       "properties": {
         "acceleration": {
-          "description": "If the value is not specified, system default value will be used.",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/Unset"
+            }
+          ],
+          "description": "A number to set acceleration, or \"unset\" to restore system default. If omitted, the previous/merged value applies.",
           "maximum": 20,
           "minimum": 0,
-          "title": "Pointer acceleration",
-          "type": "number"
+          "title": "Pointer acceleration"
         },
         "disableAcceleration": {
           "default": false,
@@ -861,10 +868,17 @@
           "type": "boolean"
         },
         "speed": {
-          "description": "If the value is not specified, device default value will be used.",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/Unset"
+            }
+          ],
+          "description": "A number to set speed, or \"unset\" to restore device default. If omitted, the previous/merged value applies.",
           "maximum": 1,
-          "title": "Pointer speed",
-          "type": "number"
+          "title": "Pointer speed"
         }
       },
       "type": "object"
@@ -1193,6 +1207,12 @@
           "type": "array"
         }
       ]
+    },
+    "Unset": {
+      "const": "unset",
+      "description": "A special value that explicitly restores a setting to the system or device default. Currently supported in pointer settings; may be supported more broadly in the future.",
+      "title": "Unset",
+      "type": "string"
     }
   }
 }

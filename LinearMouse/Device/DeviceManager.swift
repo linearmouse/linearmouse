@@ -246,7 +246,12 @@ class DeviceManager: ObservableObject {
                 // convention, but here, the pointerAcceleration actually refers to
                 // the tracking speed.
                 if let pointerAcceleration = scheme.pointer.acceleration {
-                    device.pointerAcceleration = pointerAcceleration.asTruncatedDouble
+                    switch pointerAcceleration {
+                    case let .value(v):
+                        device.pointerAcceleration = v.asTruncatedDouble
+                    case .unset:
+                        device.restorePointerAcceleration()
+                    }
                 } else {
                     device.restorePointerAcceleration()
                 }
@@ -262,13 +267,23 @@ class DeviceManager: ObservableObject {
         }
 
         if let pointerSpeed = scheme.pointer.speed {
-            device.pointerSpeed = pointerSpeed.asTruncatedDouble
+            switch pointerSpeed {
+            case let .value(v):
+                device.pointerSpeed = v.asTruncatedDouble
+            case .unset:
+                device.restorePointerSpeed()
+            }
         } else {
             device.restorePointerSpeed()
         }
 
         if let pointerAcceleration = scheme.pointer.acceleration {
-            device.pointerAcceleration = pointerAcceleration.asTruncatedDouble
+            switch pointerAcceleration {
+            case let .value(v):
+                device.pointerAcceleration = v.asTruncatedDouble
+            case .unset:
+                device.restorePointerAcceleration()
+            }
         } else {
             device.restorePointerAcceleration()
         }
