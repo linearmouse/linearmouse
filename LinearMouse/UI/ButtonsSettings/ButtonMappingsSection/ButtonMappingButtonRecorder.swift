@@ -50,7 +50,10 @@ struct ButtonMappingButtonRecorder: View {
     }
 
     private func recordingUpdated() {
-        recordingObservationToken = nil
+        if let recordingObservationToken {
+            recordingObservationToken.cancel()
+            self.recordingObservationToken = nil
+        }
 
         if recording {
             mapping.modifierFlags = []

@@ -3,13 +3,14 @@
 
 public final class ObservationToken {
     private let cancellationClosure: () -> Void
+    private var cancelled = false
 
     public init(cancellationClosure: @escaping () -> Void) {
         self.cancellationClosure = cancellationClosure
     }
 
     deinit {
-        cancellationClosure()
+        cancel()
     }
 
     private var lifetimeAssociation: LifetimeAssociation?
@@ -25,5 +26,14 @@ public final class ObservationToken {
 
     public func removeLifetime() {
         lifetimeAssociation?.cancel()
+    }
+
+    public func cancel() {
+        guard !cancelled else {
+            return
+        }
+
+        cancelled = true
+        cancellationClosure()
     }
 }
