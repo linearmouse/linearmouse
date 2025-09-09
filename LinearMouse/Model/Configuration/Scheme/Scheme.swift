@@ -40,7 +40,9 @@ extension Scheme {
         withApp app: String? = nil,
         withParentApp parentApp: String? = nil,
         withGroupApp groupApp: String? = nil,
-        withDisplay display: String? = nil
+        withDisplay display: String? = nil,
+        withProcessName processName: String? = nil,
+        withProcessPath processPath: String? = nil
     ) -> Bool {
         guard let `if` else {
             return true
@@ -52,7 +54,9 @@ extension Scheme {
                 withApp: app,
                 withParentApp: parentApp,
                 withGroupApp: groupApp,
-                withDisplay: display
+                withDisplay: display,
+                withProcessName: processName,
+                withProcessPath: processPath
             )
         }
     }

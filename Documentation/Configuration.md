@@ -216,6 +216,45 @@ Or, to match the whole process group:
 }
 ```
 
+### Process (binary) matching
+
+Some programs do not have a stable or any bundle identifier. You can match by the frontmost process's executable instead.
+
+- processName: Match by executable name (case-sensitive). Example:
+
+```json
+{
+  "schemes": [
+    {
+      "if": {
+        "processName": "wezterm"
+      },
+      "scrolling": { "reverse": false }
+    }
+  ]
+}
+```
+
+- processPath: Match by absolute executable path (case-sensitive). Example:
+
+```json
+{
+  "schemes": [
+    {
+      "if": {
+        "processPath": "/Applications/WezTerm.app/Contents/MacOS/WezTerm"
+      },
+      "pointer": { "acceleration": 0.4 }
+    }
+  ]
+}
+```
+
+Notes
+- processName/processPath compare exactly; no wildcard or regex.
+- Matching is against the frontmost application process (NSRunningApplication); child processes inside a terminal are not detected as the frontmost process.
+- You can still combine with device and display conditions.
+
 ## Display Matching
 
 Display name can be provided to match a specific display.
