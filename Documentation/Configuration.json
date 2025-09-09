@@ -761,6 +761,16 @@
           "description": "Match apps by providing the bundle ID of the parent process. For example, `org.polymc.PolyMC`.",
           "title": "Parent app",
           "type": "string"
+        },
+        "processName": {
+          "description": "Match by the executable file name of the frontmost process (from NSRunningApplication.executableURL.lastPathComponent). Case-sensitive.",
+          "title": "Process name",
+          "type": "string"
+        },
+        "processPath": {
+          "description": "Match by the absolute executable path of the frontmost process (from NSRunningApplication.executableURL.path). Case-sensitive.",
+          "title": "Process path",
+          "type": "string"
         }
       },
       "type": "object"

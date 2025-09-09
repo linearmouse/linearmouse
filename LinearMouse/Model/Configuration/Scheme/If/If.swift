@@ -12,6 +12,10 @@ extension Scheme {
         var parentApp: String?
         var groupApp: String?
 
+        // Match by executable instead of app bundle
+        var processName: String?
+        var processPath: String?
+
         var display: String?
     }
 }
@@ -22,7 +26,9 @@ extension Scheme.If {
         withApp targetApp: String? = nil,
         withParentApp targetParentApp: String?,
         withGroupApp targetGroupApp: String?,
-        withDisplay targetDisplay: String? = nil
+        withDisplay targetDisplay: String? = nil,
+        withProcessName targetProcessName: String? = nil,
+        withProcessPath targetProcessPath: String? = nil
     ) -> Bool {
         if let device {
             guard let targetDevice else {
@@ -48,6 +54,18 @@ extension Scheme.If {
 
         if let groupApp {
             guard groupApp == targetGroupApp else {
+                return false
+            }
+        }
+
+        if let processName {
+            guard processName == targetProcessName else {
+                return false
+            }
+        }
+
+        if let processPath {
+            guard processPath == targetProcessPath else {
                 return false
             }
         }

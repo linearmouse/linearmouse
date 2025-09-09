@@ -69,6 +69,8 @@ extension Decimal {
 
 extension pid_t {
     private static var bundleIdentifierCache = LRUCache<Self, String>(countLimit: 16)
+    private static var processPathCache = LRUCache<Self, String>(countLimit: 16)
+    private static var processNameCache = LRUCache<Self, String>(countLimit: 16)
 
     var bundleIdentifier: String? {
         guard let bundleIdentifier = Self.bundleIdentifierCache.value(forKey: self)
@@ -80,6 +82,28 @@ extension pid_t {
         Self.bundleIdentifierCache.setValue(bundleIdentifier, forKey: self)
 
         return bundleIdentifier
+    }
+
+    var processPath: String? {
+        if let cached = Self.processPathCache.value(forKey: self) {
+            return cached
+        }
+        guard let path = NSRunningApplication(processIdentifier: self)?.executableURL?.path else {
+            return nil
+        }
+        Self.processPathCache.setValue(path, forKey: self)
+        return path
+    }
+
+    var processName: String? {
+        if let cached = Self.processNameCache.value(forKey: self) {
+            return cached
+        }
+        guard let name = NSRunningApplication(processIdentifier: self)?.executableURL?.lastPathComponent else {
+            return nil
+        }
+        Self.processNameCache.setValue(name, forKey: self)
+        return name
     }
 
     var parent: pid_t? {
