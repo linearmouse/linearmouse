@@ -15,6 +15,12 @@
             "value" : "(0–1)"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "(0–1)"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -89,7 +95,7 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–1)"
           }
         },
@@ -211,6 +217,12 @@
             "value" : "(0–10)"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "(0–10)"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -285,7 +297,7 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–10)"
           }
         },
@@ -407,6 +419,12 @@
             "value" : "(0–20)"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "(0–20)"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -481,7 +499,7 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–20)"
           }
         },
@@ -603,6 +621,12 @@
             "value" : "(0–128)"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "(0–128)"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -677,7 +701,7 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–128)"
           }
         },
@@ -794,6 +818,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "(active)"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "(active)"
@@ -1051,6 +1081,39 @@
                     }
                   },
                   "zero" : {
+                    "stringUnit" : {
+                      "state" : "new",
+                      "value" : "%.1f pixels"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%#@value@"
+          },
+          "substitutions" : {
+            "value" : {
+              "formatSpecifier" : "f",
+              "variations" : {
+                "plural" : {
+                  "few" : {
+                    "stringUnit" : {
+                      "state" : "new",
+                      "value" : "%.1f pixels"
+                    }
+                  },
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "new",
+                      "value" : "%.1f pixel"
+                    }
+                  },
+                  "other" : {
                     "stringUnit" : {
                       "state" : "new",
                       "value" : "%.1f pixels"
@@ -1432,7 +1495,7 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -1443,7 +1506,7 @@
                   "other" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%.1f픽셀"
+                      "value" : "%.1f 픽셀"
                     }
                   }
                 }
@@ -1956,6 +2019,12 @@
             "value" : "%@ الإعدادات…"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%@ Settings…"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -2152,6 +2221,12 @@
             "value" : "%1$@ (%2$@)"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ (%2$@)"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -2226,7 +2301,7 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "%1$@ (%2$@)"
           }
         },
@@ -2388,6 +2463,30 @@
                 }
               },
               "zero" : {
+                "stringUnit" : {
+                  "state" : "new",
+                  "value" : "%d lines"
+                }
+              }
+            }
+          }
+        },
+        "bs" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "new",
+                  "value" : "%d lines"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "new",
+                  "value" : "%d line"
+                }
+              },
+              "other" : {
                 "stringUnit" : {
                   "state" : "new",
                   "value" : "%d lines"
@@ -3012,6 +3111,12 @@
             "value" : "⇧ (Shift)"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "⇧ (Shift)"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -3086,7 +3191,7 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "⇧ (Shift)"
           }
         },
@@ -3208,6 +3313,12 @@
             "value" : "⌃ (Control)"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "⌃ (Control)"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -3282,7 +3393,7 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "⌃ (Control)"
           }
         },
@@ -3404,6 +3515,12 @@
             "value" : "⌘ (Command)"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "⌘ (Command)"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -3478,7 +3595,7 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "⌘ (Command)"
           }
         },
@@ -3600,6 +3717,12 @@
             "value" : "⌥ (Option)"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "⌥ (Option)"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -3674,7 +3797,7 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "⌥ (Option)"
           }
         },
@@ -3796,6 +3919,12 @@
             "value" : "0"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "0"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -3870,7 +3999,7 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "0"
           }
         },
@@ -3992,6 +4121,12 @@
             "value" : "0px"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "0px"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -4066,7 +4201,7 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "0px"
           }
         },
@@ -4188,6 +4323,12 @@
             "value" : "10"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "10"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -4262,7 +4403,7 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "10"
           }
         },
@@ -4384,6 +4525,12 @@
             "value" : "128px"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "128px"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -4458,7 +4605,7 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "128px"
           }
         },
@@ -4575,6 +4722,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Accelerated"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Accelerated"
@@ -4776,6 +4929,12 @@
             "value" : "Action"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Action"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -4967,6 +5126,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "All Apps"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "All Apps"
@@ -5168,6 +5333,12 @@
             "value" : "All Displays"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "All Displays"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -5360,6 +5531,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Alter orientation"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Alter orientation"
@@ -5567,6 +5744,12 @@
             "value" : "Application windows"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Application windows"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -5642,7 +5825,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "앱 윈도우"
+            "value" : "응용 프로그램 윈도우"
           }
         },
         "my" : {
@@ -5758,6 +5941,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Assign actions to mouse buttons"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Assign actions to mouse buttons"
@@ -5959,6 +6148,12 @@
             "value" : "Assigning an action to the left button without any modifier keys is not allowed."
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Assigning an action to the left button without any modifier keys is not allowed."
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -6155,6 +6350,12 @@
             "value" : "auto"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "auto"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -6229,8 +6430,8 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "auto"
+            "state" : "translated",
+            "value" : "자동"
           }
         },
         "my" : {
@@ -6346,6 +6547,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Auto switch to the active device"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Auto switch to the active device"
@@ -6547,6 +6754,12 @@
             "value" : "Back"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Back"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -6743,6 +6956,12 @@
             "value" : "Back button"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Back button"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -6811,8 +7030,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Back button"
+            "state" : "translated",
+            "value" : "戻るボタン"
           }
         },
         "ko" : {
@@ -6934,6 +7153,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Bug report"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Bug report"
@@ -7135,6 +7360,12 @@
             "value" : "Button #%lld click"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Button #%lld click"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -7331,6 +7562,12 @@
             "value" : "الأزرار"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Buttons"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -7522,6 +7759,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "By Lines"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "By Lines"
@@ -7723,6 +7966,12 @@
             "value" : "By Pixels"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "By Pixels"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -7914,6 +8163,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Bypass events from other applications"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Bypass events from other applications"
@@ -8115,6 +8370,12 @@
             "value" : "Cancel"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Cancel"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -8310,6 +8571,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "تغيير السرعة"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Change speed"
           }
         },
         "ca" : {
@@ -8514,6 +8781,12 @@
             "value" : "Check for updates automatically"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Check for updates automatically"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -8710,6 +8983,12 @@
             "value" : "جاري التحقق من وجود تحديثات…"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Check for Updates…"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -8901,6 +9180,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Click to record"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Click to record"
@@ -9102,6 +9387,12 @@
             "value" : "Config"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Config"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -9298,6 +9589,12 @@
             "value" : "Configuration Reloaded"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configuration Reloaded"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -9366,14 +9663,14 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Configuration Reloaded"
+            "state" : "translated",
+            "value" : "設定を再読み込みしました"
           }
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Configuration Reloaded"
+            "state" : "translated",
+            "value" : "설정 새로고침 완료"
           }
         },
         "my" : {
@@ -9489,6 +9786,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configure for"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Configure for"
@@ -9690,6 +9993,12 @@
             "value" : "Configure for %@…"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configure for %@…"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -9759,7 +10068,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@… の設定"
+            "value" : "%@の設定…"
           }
         },
         "ko" : {
@@ -9881,6 +10190,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Configured"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Configured"
@@ -10082,6 +10397,12 @@
             "value" : "Convert pointer movement to scroll events"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Convert pointer movement to scroll events"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -10156,8 +10477,8 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Convert pointer movement to scroll events"
+            "state" : "translated",
+            "value" : "포인터 움직임을 스크롤 이벤트로 변환"
           }
         },
         "my" : {
@@ -10273,6 +10594,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality."
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Convert the back and forward side buttons to swiping gestures to allow universal back and forward functionality."
@@ -10474,6 +10801,12 @@
             "value" : "Copy settings from vertical"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Copy settings from vertical"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -10665,6 +10998,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Create"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Create"
@@ -10866,6 +11205,12 @@
             "value" : "يومي"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Daily"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -11057,6 +11402,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Debounce button clicks"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Debounce button clicks"
@@ -11258,6 +11609,12 @@
             "value" : "Decrease display brightness"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Decrease display brightness"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -11449,6 +11806,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Decrease keyboard brightness"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Decrease keyboard brightness"
@@ -11650,6 +12013,12 @@
             "value" : "Decrease volume"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Decrease volume"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -11841,6 +12210,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Default action"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Default action"
@@ -12042,6 +12417,12 @@
             "value" : "Disable pointer acceleration"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Disable pointer acceleration"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -12233,6 +12614,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Display"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Display"
@@ -12434,6 +12821,12 @@
             "value" : "المسافة"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Distance"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -12630,6 +13023,12 @@
             "value" : "Distance must be \"auto\" or a number or a string representing value and unit"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Distance must be \"auto\" or a number or a string representing value and unit"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -12704,8 +13103,8 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Distance must be \"auto\" or a number or a string representing value and unit"
+            "state" : "translated",
+            "value" : "간격은 \"자동\"이거나 값과 단위를 나타내는 숫자 또는 문자열이어야 합니다"
           }
         },
         "my" : {
@@ -12824,6 +13223,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "تبرع"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Donate"
           }
         },
         "ca" : {
@@ -13017,6 +13422,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Edit"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Edit"
@@ -13218,6 +13629,12 @@
             "value" : "Enable universal back and forward"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Enable universal back and forward"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -13409,6 +13826,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Enable verbose logging"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Enable verbose logging"
@@ -13610,6 +14033,12 @@
             "value" : "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting."
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Enabling this option will log all input events, which may increase CPU usage while using %@, but can be useful for troubleshooting."
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -13801,6 +14230,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Execute"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Execute"
@@ -14002,6 +14437,12 @@
             "value" : "Export logs"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Export logs"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -14193,6 +14634,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Export the logs for the last 5 minutes."
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Export the logs for the last 5 minutes."
@@ -14394,6 +14841,12 @@
             "value" : "Failed to create GlobalEventTap: Accessibility permission not granted"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to create GlobalEventTap: Accessibility permission not granted"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -14468,8 +14921,8 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Failed to create GlobalEventTap: Accessibility permission not granted"
+            "state" : "translated",
+            "value" : "GlobalEventTap 생성 실패: 손쉬운 사용 권한 없음"
           }
         },
         "my" : {
@@ -14590,6 +15043,12 @@
             "value" : "Failed to load the configuration: %@"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to load the configuration: %@"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -14664,8 +15123,8 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Failed to load the configuration: %@"
+            "state" : "translated",
+            "value" : "설정 불러오기 실패: %@"
           }
         },
         "my" : {
@@ -14786,6 +15245,12 @@
             "value" : "Failed to reload configuration"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to reload configuration"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -14860,8 +15325,8 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Failed to reload configuration"
+            "state" : "translated",
+            "value" : "설정 새로고침 실패"
           }
         },
         "my" : {
@@ -14982,6 +15447,12 @@
             "value" : "Failed to save the configuration: %@"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Failed to save the configuration: %@"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -15056,8 +15527,8 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Failed to save the configuration: %@"
+            "state" : "translated",
+            "value" : "설정 저장 실패: %@"
           }
         },
         "my" : {
@@ -15173,6 +15644,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Fast"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Fast"
@@ -15374,6 +15851,12 @@
             "value" : "Fast forward"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Fast forward"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -15570,6 +16053,12 @@
             "value" : "طلب مِيزة غير موجودة"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Feature request"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -15761,6 +16250,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Forward"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Forward"
@@ -15962,6 +16457,12 @@
             "value" : "Forward button"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Forward button"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -16156,6 +16657,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "عام"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "General"
           }
         },
         "ca" : {
@@ -16354,6 +16861,12 @@
             "value" : "المزيد من المساعدة"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Get more help"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -16548,6 +17061,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "الصفحة الرئيسية"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Homepage"
           }
         },
         "ca" : {
@@ -16745,6 +17264,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "أُفقي"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Horizontal"
           }
         },
         "ca" : {
@@ -16949,6 +17474,12 @@
             "value" : "If enabled, %@ will not modify events sent by other applications, such as Logi Options+."
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "If enabled, %@ will not modify events sent by other applications, such as Logi Options+."
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -17140,6 +17671,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "If you are reporting a bug, it would be helpful to attach the logs."
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "If you are reporting a bug, it would be helpful to attach the logs."
@@ -17337,6 +17874,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Ignore modifier"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Ignore modifier"
@@ -17544,6 +18087,12 @@
             "value" : "Ignore rapid clicks within a certain time period."
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Ignore rapid clicks within a certain time period."
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -17735,6 +18284,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Increase display brightness"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Increase display brightness"
@@ -17936,6 +18491,12 @@
             "value" : "Increase keyboard brightness"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Increase keyboard brightness"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -18127,6 +18688,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Increase volume"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Increase volume"
@@ -18328,6 +18895,12 @@
             "value" : "Installed"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Installed"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -18524,6 +19097,12 @@
             "value" : "Invalid JSON: %@"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Invalid JSON: %@"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -18592,14 +19171,14 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Invalid JSON: %@"
+            "state" : "translated",
+            "value" : "無効なJSON: %@"
           }
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Invalid JSON: %@"
+            "state" : "translated",
+            "value" : "유효하지 않은 JSON: %@"
           }
         },
         "my" : {
@@ -18720,6 +19299,12 @@
             "value" : "Invalid value"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Invalid value"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -18794,8 +19379,8 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Invalid value"
+            "state" : "translated",
+            "value" : "유효하지 않은 값"
           }
         },
         "my" : {
@@ -18911,6 +19496,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Keyboard"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Keyboard"
@@ -19112,6 +19703,12 @@
             "value" : "Keyboard shortcut: %@"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Keyboard shortcut: %@"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -19303,6 +19900,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Keyboard shortcut…"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Keyboard shortcut…"
@@ -19504,6 +20107,12 @@
             "value" : "Launchpad"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Launchpad"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -19695,6 +20304,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Left button"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Left button"
@@ -19896,6 +20511,12 @@
             "value" : "Left click"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Left click"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -20087,6 +20708,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Left double-click"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Left double-click"
@@ -20288,6 +20915,12 @@
             "value" : "Linear"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Linear"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -20479,6 +21112,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "LinearMouse needs Accessibility permission"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "LinearMouse needs Accessibility permission"
@@ -20680,6 +21319,12 @@
             "value" : "Look up & data detectors"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Look up & data detectors"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -20871,6 +21516,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Media"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Media"
@@ -21072,6 +21723,12 @@
             "value" : "Middle button"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Middle button"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -21263,6 +21920,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Middle click"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Middle click"
@@ -21464,6 +22127,12 @@
             "value" : "Missing key %1$@ at %2$@"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Missing key %1$@ at %2$@"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -21538,8 +22207,8 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Missing key %1$@ at %2$@"
+            "state" : "translated",
+            "value" : "%2$@에 키 %1$@ 없음"
           }
         },
         "my" : {
@@ -21655,6 +22324,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Mission Control"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Mission Control"
@@ -21856,6 +22531,12 @@
             "value" : "مفاتيح التعديل"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Modifier Keys"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -22052,6 +22733,12 @@
             "value" : "شهري"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Monthly"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -22243,6 +22930,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Mouse"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Mouse"
@@ -22444,6 +23137,12 @@
             "value" : "Mouse button"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Mouse button"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -22635,6 +23334,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Mouse Button"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Mouse Button"
@@ -22836,6 +23541,12 @@
             "value" : "Mouse Wheel"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Mouse Wheel"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -23027,6 +23738,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Move left a space"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Move left a space"
@@ -23228,6 +23945,12 @@
             "value" : "Move right a space"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Move right a space"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -23419,6 +24142,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "ms"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "ms"
@@ -23620,6 +24349,12 @@
             "value" : "Mute / unmute"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Mute / unmute"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -23811,6 +24546,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Next"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Next"
@@ -24012,6 +24753,12 @@
             "value" : "No action"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "No action"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -24208,6 +24955,12 @@
             "value" : "No device selected."
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "No device selected."
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -24276,14 +25029,14 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No device selected."
+            "state" : "translated",
+            "value" : "デバイスが選択されていません。"
           }
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No device selected."
+            "state" : "translated",
+            "value" : "선택된 장치가 없습니다."
           }
         },
         "my" : {
@@ -24404,6 +25157,12 @@
             "value" : "Not specified"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Not specified"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -24478,8 +25237,8 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Not specified"
+            "state" : "translated",
+            "value" : "지정되지 않음"
           }
         },
         "my" : {
@@ -24598,6 +25357,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "حسنا"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "OK"
           }
         },
         "ca" : {
@@ -24791,6 +25556,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Open Accessibility"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Open Accessibility"
@@ -24992,6 +25763,12 @@
             "value" : "Other…"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Other…"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -25184,6 +25961,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Pinch zoom"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Pinch zoom"
@@ -25391,6 +26174,12 @@
             "value" : "Play / pause"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Play / pause"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -25587,6 +26376,12 @@
             "value" : "المؤشر"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Pointer"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -25778,6 +26573,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Pointer acceleration"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Pointer acceleration"
@@ -25979,6 +26780,12 @@
             "value" : "Pointer speed"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Pointer speed"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -26170,6 +26977,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Previous"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Previous"
@@ -26371,6 +27184,12 @@
             "value" : "إغلاق %@"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Quit %@"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -26562,6 +27381,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Receive beta updates"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Receive beta updates"
@@ -26763,6 +27588,12 @@
             "value" : "Recording"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recording"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -26959,6 +27790,12 @@
             "value" : "إعادة التحميل"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Reload"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -27150,6 +27987,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Reload Config"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Reload Config"
@@ -27351,6 +28194,12 @@
             "value" : "Repeat on hold"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Repeat on hold"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -27542,6 +28391,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Reset timer on mouse up"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Reset timer on mouse up"
@@ -27743,6 +28598,12 @@
             "value" : "Reveal Config in Finder…"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Reveal Config in Finder…"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -27812,7 +28673,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Finder…の設定を表示"
+            "value" : "Finderの設定を表示…"
           }
         },
         "ko" : {
@@ -27934,6 +28795,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Reveal in Finder"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Reveal in Finder"
@@ -28135,6 +29002,12 @@
             "value" : "التمرير العكسي"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Reverse scrolling"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -28326,6 +29199,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Revert to system defaults"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Revert to system defaults"
@@ -28527,6 +29406,12 @@
             "value" : "Rewind"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Rewind"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -28718,6 +29603,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Right button"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Right button"
@@ -28919,6 +29810,12 @@
             "value" : "Right click"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Right click"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -29110,6 +30007,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Run shell command…"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Run shell command…"
@@ -29311,6 +30214,12 @@
             "value" : "Run: %@"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Run: %@"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -29502,6 +30411,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Running"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Running"
@@ -29703,6 +30618,12 @@
             "value" : "Scroll down"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scroll down"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -29894,6 +30815,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scroll down %@"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Scroll down %@"
@@ -30095,6 +31022,12 @@
             "value" : "Scroll down…"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scroll down…"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -30286,6 +31219,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scroll left"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Scroll left"
@@ -30487,6 +31426,12 @@
             "value" : "Scroll left %@"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scroll left %@"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -30678,6 +31623,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scroll left…"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Scroll left…"
@@ -30879,6 +31830,12 @@
             "value" : "Scroll right"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scroll right"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -31070,6 +32027,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scroll right %@"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Scroll right %@"
@@ -31271,6 +32234,12 @@
             "value" : "Scroll right…"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scroll right…"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -31462,6 +32431,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scroll up"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Scroll up"
@@ -31663,6 +32638,12 @@
             "value" : "Scroll up %@"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scroll up %@"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -31854,6 +32835,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scroll up…"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Scroll up…"
@@ -32055,6 +33042,12 @@
             "value" : "التمرير"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scrolling"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -32246,6 +33239,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scrolling acceleration"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Scrolling acceleration"
@@ -32447,6 +33446,12 @@
             "value" : "Scrolling is disabled based on the current settings."
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scrolling is disabled based on the current settings."
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -32638,6 +33643,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scrolling mode"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Scrolling mode"
@@ -32839,6 +33850,12 @@
             "value" : "Scrolling settings are applied to converted events."
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scrolling settings are applied to converted events."
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -32913,8 +33930,8 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scrolling settings are applied to converted events."
+            "state" : "translated",
+            "value" : "변환된 이벤트에 스크롤 설정이 적용됩니다."
           }
         },
         "my" : {
@@ -33030,6 +34047,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scrolling speed"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Scrolling speed"
@@ -33230,6 +34253,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "الإعدادات"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Settings"
           }
         },
         "ca" : {
@@ -33434,6 +34463,12 @@
             "value" : "Show desktop"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Show desktop"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -33630,6 +34665,12 @@
             "value" : "Show in Dock"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Show in Dock"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -33698,14 +34739,14 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Show in Dock"
+            "state" : "translated",
+            "value" : "Dock に表示"
           }
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Show in Dock"
+            "state" : "translated",
+            "value" : "Dock에 보이기"
           }
         },
         "my" : {
@@ -33824,6 +34865,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "عرض في شريط القوائم"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Show in menu bar"
           }
         },
         "ca" : {
@@ -34017,6 +35064,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Slow"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Slow"
@@ -34218,6 +35271,12 @@
             "value" : "Smart zoom"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Smart zoom"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -34409,6 +35468,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Some gestures, such as swiping back and forward, may stop working."
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Some gestures, such as swiping back and forward, may stop working."
@@ -34610,6 +35675,12 @@
             "value" : "البَدْء عند تسجيل الدخول"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Start at login"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -34801,6 +35872,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Switch primary and secondary buttons"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Switch primary and secondary buttons"
@@ -35002,6 +36079,12 @@
             "value" : "شكرا لك على المشاركة في الاختبار التجريبي."
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Thank you for participating in the beta test."
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -35193,6 +36276,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "The mouse button is already assigned."
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "The mouse button is already assigned."
@@ -35394,6 +36483,12 @@
             "value" : "To show the settings, launch %@ again."
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "To show the settings, launch %@ again."
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -35585,6 +36680,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Tracking speed"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Tracking speed"
@@ -35786,6 +36887,12 @@
             "value" : "Trackpad"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Trackpad"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -35982,6 +37089,12 @@
             "value" : "Type mismatch: expected %1$@ at %2$@"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Type mismatch: expected %1$@ at %2$@"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -36056,8 +37169,8 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Type mismatch: expected %1$@ at %2$@"
+            "state" : "translated",
+            "value" : "타입 불일치: %2$@에 %1$@ 필요"
           }
         },
         "my" : {
@@ -36178,6 +37291,12 @@
             "value" : "Unit must be empty or \"px\""
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Unit must be empty or \"px\""
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -36252,8 +37371,8 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unit must be empty or \"px\""
+            "state" : "translated",
+            "value" : "단위는 공백이거나 \"px\"이어야 합니다"
           }
         },
         "my" : {
@@ -36374,6 +37493,12 @@
             "value" : "UniversalBackForward must be true, false, \"backOnly\" or \"forwardOnly\""
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "UniversalBackForward must be true, false, \"backOnly\" or \"forwardOnly\""
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -36448,8 +37573,8 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "UniversalBackForward must be true, false, \"backOnly\" or \"forwardOnly\""
+            "state" : "translated",
+            "value" : "UniversalBackForward는 true, false, \"backOnly\", \"forwardOnly\" 중 하나여야 합니다"
           }
         },
         "my" : {
@@ -36570,6 +37695,12 @@
             "value" : "Unsupported encoding, expected UTF-8"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Unsupported encoding, expected UTF-8"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -36644,8 +37775,8 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unsupported encoding, expected UTF-8"
+            "state" : "translated",
+            "value" : "지원하지 않는 인코딩, UTF-8 필요"
           }
         },
         "my" : {
@@ -36761,6 +37892,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Update check interval"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Update check interval"
@@ -36962,6 +38099,12 @@
             "value" : "الإصدار: %@"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Version: %@"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -37157,6 +38300,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "عمودي"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Vertical"
           }
         },
         "ca" : {
@@ -37361,6 +38510,12 @@
             "value" : "أسبوعي"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Weekly"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -37552,6 +38707,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You may also press ⌃⇧⌘Z to revert to system defaults."
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "You may also press ⌃⇧⌘Z to revert to system defaults."
@@ -37753,6 +38914,12 @@
             "value" : "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility."
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You need to grant Accessibility permission in System Settings > Security & Privacy > Accessibility."
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -37949,6 +39116,12 @@
             "value" : "Your configuration changes are now active."
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Your configuration changes are now active."
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "new",
@@ -38023,8 +39196,8 @@
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Your configuration changes are now active."
+            "state" : "translated",
+            "value" : "설정 변경 사항이 활성화되었습니다."
           }
         },
         "my" : {
@@ -38141,6 +39314,12 @@
           }
         },
         "ar" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Zoom"
+          }
+        },
+        "bs" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Zoom"
