@@ -106,6 +106,18 @@ declare namespace Scheme {
     groupApp?: string;
 
     /**
+     * @title Process name
+     * @description Match by the executable file name of the frontmost process (from NSRunningApplication.executableURL.lastPathComponent). Case-sensitive.
+     */
+    processName?: string;
+
+    /**
+     * @title Process path
+     * @description Match by the absolute executable path of the frontmost process (from NSRunningApplication.executableURL.path). Case-sensitive.
+     */
+    processPath?: string;
+
+    /**
      * @title Display name
      * @description Match displays by providing the display name. For example, `DELL P2415Q`.
      */
