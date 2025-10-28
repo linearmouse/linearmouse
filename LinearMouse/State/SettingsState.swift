@@ -10,7 +10,7 @@ class SettingsState: ObservableObject {
         case scrolling, pointer, buttons, general
     }
 
-    @Published var navigation: Navigation? = .scrolling
+    @Published var navigation: Navigation? = .pointer
 
     /// When `recording` is true, `ButtonActionsTransformer` should be temporarily disabled.
     @Published var recording = false
