@@ -7,15 +7,15 @@ struct Sidebar: View {
     var body: some View {
         VStack(spacing: 0) {
             SidebarItem(
-                id: .scrolling,
-                imageName: "Scrolling",
-                text: "Scrolling"
-            )
-
-            SidebarItem(
                 id: .pointer,
                 imageName: "Pointer",
                 text: "Pointer"
+            )
+
+            SidebarItem(
+                id: .scrolling,
+                imageName: "Scrolling",
+                text: "Scrolling"
             )
 
             SidebarItem(

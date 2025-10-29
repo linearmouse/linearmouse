@@ -7,10 +7,10 @@ class SettingsState: ObservableObject {
     static let shared = SettingsState()
 
     enum Navigation {
-        case scrolling, pointer, buttons, general
+        case pointer, scrolling, buttons, general
     }
 
-    @Published var navigation: Navigation? = .scrolling
+    @Published var navigation: Navigation? = .pointer
 
     /// When `recording` is true, `ButtonActionsTransformer` should be temporarily disabled.
     @Published var recording = false
