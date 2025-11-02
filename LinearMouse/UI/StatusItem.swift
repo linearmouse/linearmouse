@@ -155,7 +155,11 @@ class StatusItem {
     }
 
     @objc private func openSettingsForFrontmostApplication() {
-        SchemeState.shared.currentApp = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+        if let bundleIdentifier = NSWorkspace.shared.frontmostApplication?.bundleIdentifier {
+            SchemeState.shared.currentApp = .bundle(bundleIdentifier)
+        } else {
+            SchemeState.shared.currentApp = nil
+        }
         SettingsWindowController.shared.bringToFront()
     }
 

@@ -30,6 +30,19 @@ class AppPickerState: ObservableObject {
         })
     }
 
+    private var configuredExecutableSet: Set<String> {
+        guard let device = deviceState.currentDeviceRef?.value else {
+            return []
+        }
+
+        return Set(schemeState.schemes.allDeviceSpecficSchemes(of: device).reduce([String]()) { acc, element in
+            guard let processPath = element.element.if?.first?.processPath else {
+                return acc
+            }
+            return acc + [processPath]
+        })
+    }
+
     var configuredApps: [InstalledApp] {
         configuredAppSet
             .map {
@@ -41,6 +54,10 @@ class AppPickerState: ObservableObject {
                     )
             }
             .compactMap(\.self)
+    }
+
+    var configuredExecutables: [String] {
+        Array(configuredExecutableSet).sorted()
     }
 
     var runningApps: [InstalledApp] {

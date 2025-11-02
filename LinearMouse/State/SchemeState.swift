@@ -12,7 +12,7 @@ class SchemeState: ObservableObject {
 
     private var subscriptions = Set<AnyCancellable>()
 
-    @Published var currentApp: String?
+    @Published var currentApp: AppTarget?
     @Published var currentDisplay: String?
 
     init() {
@@ -51,10 +51,14 @@ extension SchemeState {
     }
 
     var currentAppName: String? {
-        guard let currentApp else {
+        switch currentApp {
+        case .none:
             return nil
+        case let .bundle(bundleIdentifier):
+            return try? readInstalledApp(bundleIdentifier: bundleIdentifier)?.bundleName ?? bundleIdentifier
+        case let .executable(path):
+            return URL(fileURLWithPath: path).lastPathComponent
         }
-        return try? readInstalledApp(bundleIdentifier: currentApp)?.bundleName ?? currentApp
     }
 
     var scheme: Scheme {
@@ -63,17 +67,23 @@ extension SchemeState {
                 return Scheme()
             }
 
+            let (app, processPath) = extractAppComponents(from: currentApp)
+
             if case let .at(index) = schemes.schemeIndex(
                 ofDevice: device,
-                ofApp: currentApp,
+                ofApp: app,
+                ofProcessPath: processPath,
                 ofDisplay: currentDisplay
             ) {
                 return schemes[index]
             }
 
-            return Scheme(if: [
-                .init(device: .init(of: device), app: currentApp, display: currentDisplay)
-            ])
+            var ifCondition = Scheme.If(device: .init(of: device))
+            ifCondition.app = app
+            ifCondition.processPath = processPath
+            ifCondition.display = currentDisplay
+
+            return Scheme(if: [ifCondition])
         }
 
         set {
@@ -81,7 +91,14 @@ extension SchemeState {
                 return
             }
 
-            switch schemes.schemeIndex(ofDevice: device, ofApp: currentApp, ofDisplay: currentDisplay) {
+            let (app, processPath) = extractAppComponents(from: currentApp)
+
+            switch schemes.schemeIndex(
+                ofDevice: device,
+                ofApp: app,
+                ofProcessPath: processPath,
+                ofDisplay: currentDisplay
+            ) {
             case let .at(index):
                 schemes[index] = newValue
             case let .insertAt(index):
@@ -90,15 +107,29 @@ extension SchemeState {
         }
     }
 
+    private func extractAppComponents(from target: AppTarget?) -> (app: String?, processPath: String?) {
+        switch target {
+        case .none:
+            return (nil, nil)
+        case let .bundle(bundleIdentifier):
+            return (bundleIdentifier, nil)
+        case let .executable(path):
+            return (nil, path)
+        }
+    }
+
     var mergedScheme: Scheme {
         guard let device else {
             return Scheme()
         }
 
+        let (app, processPath) = extractAppComponents(from: currentApp)
+
         return configurationState.configuration.matchScheme(
             withDevice: device,
-            withApp: currentApp,
-            withDisplay: currentDisplay
+            withApp: app,
+            withDisplay: currentDisplay,
+            withProcessPath: processPath
         )
     }
 }

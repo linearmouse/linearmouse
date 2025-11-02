@@ -40,7 +40,9 @@ extension Scheme {
         withApp app: String? = nil,
         withParentApp parentApp: String? = nil,
         withGroupApp groupApp: String? = nil,
-        withDisplay display: String? = nil
+        withDisplay display: String? = nil,
+        withProcessName processName: String? = nil,
+        withProcessPath processPath: String? = nil
     ) -> Bool {
         guard let `if` else {
             return true
@@ -52,7 +54,9 @@ extension Scheme {
                 withApp: app,
                 withParentApp: parentApp,
                 withGroupApp: groupApp,
-                withDisplay: display
+                withDisplay: display,
+                withProcessName: processName,
+                withProcessPath: processPath
             )
         }
     }
@@ -130,6 +134,7 @@ extension [Scheme] {
     func schemeIndex(
         ofDevice device: Device,
         ofApp app: String?,
+        ofProcessPath processPath: String?,
         ofDisplay display: String?
     ) -> SchemeIndex {
         let allDeviceSpecificSchemes = allDeviceSpecficSchemes(of: device)
@@ -140,21 +145,32 @@ extension [Scheme] {
         }
 
         if let (index, _) = allDeviceSpecificSchemes
-            .first(where: { _, scheme in scheme.if?.first?.app == app && scheme.if?.first?.display == display }) {
+            .first(where: { _, scheme in
+                scheme.if?.first?.app == app &&
+                    scheme.if?.first?.processPath == processPath &&
+                    scheme.if?.first?.display == display
+            }) {
             return .at(index)
         }
 
-        if app == nil, display == nil {
+        if app == nil, processPath == nil, display == nil {
             return .insertAt(first.offset)
         }
 
-        if app != nil, display != nil {
+        if app != nil || processPath != nil, display != nil {
             return .insertAt(last.offset + 1)
         }
 
         if app != nil {
             if let (index, _) = allDeviceSpecificSchemes
                 .first(where: { _, scheme in scheme.if?.first?.app == app }) {
+                return .insertAt(index)
+            }
+        }
+
+        if processPath != nil {
+            if let (index, _) = allDeviceSpecificSchemes
+                .first(where: { _, scheme in scheme.if?.first?.processPath == processPath }) {
                 return .insertAt(index)
             }
         }

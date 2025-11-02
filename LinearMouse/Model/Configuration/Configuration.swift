@@ -103,7 +103,9 @@ extension Configuration {
         withApp app: String? = nil,
         withParentApp parentApp: String? = nil,
         withGroupApp groupApp: String? = nil,
-        withDisplay display: String? = nil
+        withDisplay display: String? = nil,
+        withProcessName processName: String? = nil,
+        withProcessPath processPath: String? = nil
     ) -> Scheme {
         // TODO: Backtrace the merge path
         // TODO: Optimize the algorithm
@@ -115,6 +117,8 @@ extension Configuration {
             app: app,
             parentApp: parentApp,
             groupApp: groupApp,
+            processName: processName,
+            processPath: processPath,
             display: display
         )
 
@@ -125,7 +129,9 @@ extension Configuration {
             withApp: app,
             withParentApp: parentApp,
             withGroupApp: groupApp,
-            withDisplay: display
+            withDisplay: display,
+            withProcessName: processName,
+            withProcessPath: processPath
         ) {
             scheme.merge(into: &mergedScheme)
         }
@@ -143,7 +149,9 @@ extension Configuration {
             withApp: pid?.bundleIdentifier,
             withParentApp: pid?.parent?.bundleIdentifier,
             withGroupApp: pid?.group?.bundleIdentifier,
-            withDisplay: display
+            withDisplay: display,
+            withProcessName: pid?.processName,
+            withProcessPath: pid?.processPath
         )
     }
 }

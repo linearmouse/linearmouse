@@ -38,17 +38,36 @@ struct AppPicker: View {
                 }
 
                 selectedApp = installedApp.bundleIdentifier
+            case .otherExecutable:
+                selectedApp = ""
+
+                let panel = NSOpenPanel()
+                panel.allowsMultipleSelection = false
+                panel.canChooseDirectories = false
+                panel.allowsOtherFileTypes = true
+                panel.message = "Select an executable file"
+                guard panel.runModal() == .OK else {
+                    return
+                }
+
+                guard let url = panel.url else {
+                    return
+                }
+
+                selectedApp = "executable:\(url.path)"
             }
         }
     }
 
     private var isSelectedAppInList: Bool {
-        (
-            [""] +
-                (state.configuredApps + state.installedApps)
-                .map(\.bundleIdentifier)
-        )
-        .contains(selectedApp)
+        let appIdentifiers = [""] +
+            (state.configuredApps + state.installedApps)
+            .map(\.bundleIdentifier)
+
+        let executableIdentifiers = state.configuredExecutables
+            .map { "executable:\($0)" }
+
+        return (appIdentifiers + executableIdentifiers).contains(selectedApp)
     }
 
     var body: some View {
@@ -59,6 +78,15 @@ struct AppPicker: View {
                 ForEach(state.configuredApps) { installedApp in
                     AppPickerItem(installedApp: installedApp)
                         .tag(PickerSelection.value(installedApp.bundleIdentifier))
+                }
+                ForEach(state.configuredExecutables, id: \.self) { path in
+                    HStack(spacing: 8) {
+                        if #available(macOS 11.0, *) {
+                            Image(systemName: "terminal")
+                        }
+                        Text(URL(fileURLWithPath: path).lastPathComponent)
+                    }
+                    .tag(PickerSelection.value("executable:\(path)"))
                 }
             }
 
@@ -77,7 +105,16 @@ struct AppPicker: View {
             }
 
             if !isSelectedAppInList {
-                if let installedApp = try? readInstalledApp(bundleIdentifier: selectedApp) {
+                if selectedApp.hasPrefix("executable:") {
+                    let path = String(selectedApp.dropFirst("executable:".count))
+                    HStack(spacing: 8) {
+                        if #available(macOS 11.0, *) {
+                            Image(systemName: "terminal")
+                        }
+                        Text(URL(fileURLWithPath: path).lastPathComponent)
+                    }
+                    .tag(PickerSelection.value(selectedApp))
+                } else if let installedApp = try? readInstalledApp(bundleIdentifier: selectedApp) {
                     AppPickerItem(installedApp: installedApp)
                         .tag(PickerSelection.value(selectedApp))
                 } else {
@@ -86,7 +123,8 @@ struct AppPicker: View {
                 }
             }
 
-            Text("Other…").tag(PickerSelection.other)
+            Text("Other App…").tag(PickerSelection.other)
+            Text("Other Executable…").tag(PickerSelection.otherExecutable)
         }
         .onAppear {
             DispatchQueue.main.async {
@@ -99,6 +137,7 @@ struct AppPicker: View {
 enum PickerSelection: Hashable {
     case value(String)
     case other
+    case otherExecutable
 }
 
 struct AppPickerItem: View {
