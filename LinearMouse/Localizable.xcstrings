@@ -25749,7 +25749,14 @@
         }
       }
     },
+    "Other App…" : {
+
+    },
+    "Other Executable…" : {
+
+    },
     "Other…" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {

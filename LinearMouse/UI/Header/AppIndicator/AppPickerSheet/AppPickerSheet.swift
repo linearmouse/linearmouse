@@ -24,14 +24,28 @@ struct AppPickerSheet: View {
         }
         .frame(minWidth: 300)
         .onAppear {
-            selectedApp = schemeState.currentApp ?? ""
+            switch schemeState.currentApp {
+            case .none:
+                selectedApp = ""
+            case let .bundle(bundleIdentifier):
+                selectedApp = bundleIdentifier
+            case let .executable(path):
+                selectedApp = "executable:\(path)"
+            }
         }
     }
 
     private func onOK() {
         isPresented = false
         DispatchQueue.main.async {
-            schemeState.currentApp = selectedApp == "" ? nil : selectedApp
+            if selectedApp.hasPrefix("executable:") {
+                let path = String(selectedApp.dropFirst("executable:".count))
+                schemeState.currentApp = .executable(path)
+            } else if selectedApp.isEmpty {
+                schemeState.currentApp = nil
+            } else {
+                schemeState.currentApp = .bundle(selectedApp)
+            }
         }
     }
 }
