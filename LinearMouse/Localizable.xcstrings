@@ -12403,6 +12403,15 @@
         }
       }
     },
+    "Delete" : {
+
+    },
+    "Delete Configuration?" : {
+
+    },
+    "Delete…" : {
+
+    },
     "Disable pointer acceleration" : {
       "localizations" : {
         "af" : {
@@ -34044,6 +34053,9 @@
         }
       }
     },
+    "Select an executable file" : {
+
+    },
     "Settings" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -36272,6 +36284,12 @@
           }
         }
       }
+    },
+    "This will delete all settings for \"%@\"." : {
+
+    },
+    "This will delete all settings for the current device." : {
+
     },
     "To show the settings, launch %@ again." : {
       "localizations" : {

@@ -3,7 +3,7 @@
 
 import Foundation
 
-enum AppTarget: Equatable {
+enum AppTarget: Hashable {
     case bundle(String)
     case executable(String)
 }
