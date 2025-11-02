@@ -22,7 +22,12 @@ class DeviceState: ObservableObject {
                 return
             }
 
-            Defaults[.selectedDevice] = currentDeviceRef?.value.map { DeviceMatcher(of: $0) }
+            let currentDeviceMatcher = currentDeviceRef?.value.map { DeviceMatcher(of: $0) }
+            guard Defaults[.selectedDevice] != currentDeviceMatcher else {
+                return
+            }
+
+            Defaults[.selectedDevice] = currentDeviceMatcher
         }
     }
 
