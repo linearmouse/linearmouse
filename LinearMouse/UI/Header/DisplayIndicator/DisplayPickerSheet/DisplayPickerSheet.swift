@@ -41,7 +41,7 @@ struct DisplayPickerSheet: View {
             selectedDisplay = schemeState.currentDisplay ?? ""
         }
         .alert(isPresented: $showDeleteAlert) {
-            let displayName = selectedDisplay.isEmpty ? "All Displays" : selectedDisplay
+            let displayName = selectedDisplay.isEmpty ? NSLocalizedString("All Displays", comment: "") : selectedDisplay
 
             return Alert(
                 title: Text("Delete Configuration?"),
