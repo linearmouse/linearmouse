@@ -7,6 +7,14 @@ import SwiftUI
 struct DevicePickerSheet: View {
     @Binding var isPresented: Bool
     @Default(.autoSwitchToActiveDevice) var autoSwitchToActiveDevice
+    @State private var showDeleteAlert = false
+
+    @ObservedObject private var schemeState: SchemeState = .shared
+
+    private var shouldShowDeleteButton: Bool {
+        // Only show if there are matching schemes
+        schemeState.hasMatchingSchemes
+    }
 
     var body: some View {
         VStack(spacing: 10) {
@@ -18,18 +26,41 @@ struct DevicePickerSheet: View {
             Toggle("Auto switch to the active device", isOn: $autoSwitchToActiveDevice.animation())
                 .padding()
 
-            if autoSwitchToActiveDevice {
-                HStack {
-                    Spacer()
-
-                    Button("OK") {
-                        isPresented = false
-                    }
-                    .padding([.bottom, .horizontal])
-                    .controlSize(.regular)
-                    .asDefaultAction()
+            HStack {
+                if shouldShowDeleteButton {
+                    Button("Delete…", action: onDelete)
+                        .foregroundColor(.red)
+                        .padding([.bottom, .leading])
                 }
+
+                Spacer()
+
+                Button("OK") {
+                    isPresented = false
+                }
+                .padding([.bottom, .horizontal])
+                .controlSize(.regular)
+                .asDefaultAction()
             }
         }
+        .alert(isPresented: $showDeleteAlert) {
+            Alert(
+                title: Text("Delete Configuration?"),
+                message: Text("This will delete all settings for the current device."),
+                primaryButton: .destructive(Text("Delete")) {
+                    confirmDelete()
+                },
+                secondaryButton: .cancel()
+            )
+        }
+    }
+
+    private func onDelete() {
+        showDeleteAlert = true
+    }
+
+    private func confirmDelete() {
+        schemeState.deleteMatchingSchemes()
+        isPresented = false
     }
 }
