@@ -41,7 +41,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–1)"
           }
         },
@@ -445,7 +445,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–20)"
           }
         },
@@ -10423,8 +10423,8 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Convert pointer movement to scroll events"
+            "state" : "translated",
+            "value" : "Zeigerbewegung in Scrollereignisse umwandeln"
           }
         },
         "el" : {
@@ -14666,7 +14666,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wenn diese Option aktiviert ist, werden alle Eingabeereignisse protokolliert, was die CPU-Auslastung während der Verwendung von %@ erhöhen kann, jedoch bei der Fehlersuche nützlich sein kann."
+            "value" : "Wenn diese Option aktiviert ist, werden alle Eingabeereignisse protokolliert, was die CPU-Auslastung während der Verwendung von %@ erhöhen, jedoch bei der Fehlersuche nützlich sein kann."
           }
         },
         "el" : {
@@ -30039,7 +30039,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Auf Systemstandards zurücksetzen"
+            "value" : "Auf Systemstandardwerte zurücksetzen"
           }
         },
         "el" : {
@@ -34684,8 +34684,8 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scrolling settings are applied to converted events."
+            "state" : "translated",
+            "value" : "Die Scroll-Einstellungen werden auf umgewandelte Ereignisse angewendet."
           }
         },
         "el" : {
@@ -35701,8 +35701,8 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Show in Dock"
+            "state" : "translated",
+            "value" : "Im Dock anzeigen"
           }
         },
         "el" : {
