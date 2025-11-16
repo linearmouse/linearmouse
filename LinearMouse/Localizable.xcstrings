@@ -243,7 +243,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–10)"
           }
         },
@@ -647,7 +647,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–128)"
           }
         },
@@ -3101,7 +3101,7 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "⇧ (Shift)"
           }
         },
@@ -3339,7 +3339,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "⌃ (Control)"
           }
         },
@@ -3541,7 +3541,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "⌘ (Command)"
           }
         },
@@ -3743,7 +3743,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "⌥ (Option)"
           }
         },
@@ -3945,7 +3945,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "0"
           }
         },
@@ -4147,7 +4147,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "0px"
           }
         },
@@ -4349,7 +4349,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "10"
           }
         },
@@ -4551,7 +4551,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "128px"
           }
         },
@@ -6376,7 +6376,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "auto"
           }
         },
@@ -9414,7 +9414,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Konfigurationsdatei"
+            "value" : "Konfiguration"
           }
         },
         "el" : {
@@ -9615,8 +9615,8 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Configuration Reloaded"
+            "state" : "translated",
+            "value" : "Konfiguration neu geladen"
           }
         },
         "el" : {
@@ -12443,8 +12443,8 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Delete"
+            "state" : "translated",
+            "value" : "Löschen"
           }
         },
         "el" : {
@@ -12645,8 +12645,8 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Delete Configuration?"
+            "state" : "translated",
+            "value" : "Konfiguration löschen?"
           }
         },
         "el" : {
@@ -12847,8 +12847,8 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Delete…"
+            "state" : "translated",
+            "value" : "Löschen…"
           }
         },
         "el" : {
@@ -15473,8 +15473,8 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Failed to create GlobalEventTap: Accessibility permission not granted"
+            "state" : "translated",
+            "value" : "GlobalEventTap konnte nicht erstellt werden: Bedienungshilfen-Berechtigung nicht erteilt"
           }
         },
         "el" : {
@@ -15675,8 +15675,8 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Failed to load the configuration: %@"
+            "state" : "translated",
+            "value" : "Konfiguration konnte nicht geladen werden: %@"
           }
         },
         "el" : {
@@ -15871,8 +15871,8 @@
         },
         "da" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Failed to reload configuration"
+            "state" : "translated",
+            "value" : "Konfiguration konnte nicht geladen werden"
           }
         },
         "de" : {
@@ -16080,7 +16080,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Failed to save the configuration: %@"
+            "value" : "Konfiguration konnte nicht gespeichert werden: %@"
           }
         },
         "el" : {
@@ -19729,8 +19729,8 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Invalid JSON: %@"
+            "state" : "translated",
+            "value" : "Ungültiges JSON: %@"
           }
         },
         "el" : {
@@ -19925,8 +19925,8 @@
         },
         "da" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Invalid value"
+            "state" : "translated",
+            "value" : "Ungültiger Wert"
           }
         },
         "de" : {
@@ -22759,8 +22759,8 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Missing key %1$@ at %2$@"
+            "state" : "translated",
+            "value" : "Fehlender Schlüssel %1$@ auf %2$@"
           }
         },
         "el" : {
@@ -25587,8 +25587,8 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No device selected."
+            "state" : "translated",
+            "value" : "Kein Gerät ausgewählt."
           }
         },
         "el" : {
@@ -25789,7 +25789,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Not specified"
           }
         },
@@ -35088,8 +35088,8 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Select an executable file"
+            "state" : "translated",
+            "value" : "Wähle Sie ein ausführbare Datei aus"
           }
         },
         "el" : {
@@ -37513,14 +37513,14 @@
         },
         "da" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "This will delete all settings for \"%@\"."
+            "state" : "translated",
+            "value" : "Dies wird alle Einstellungen für \"%@\" löschen."
           }
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "This will delete all settings for \"%@\"."
+            "state" : "translated",
+            "value" : "Dies wird alle Einstellungen für \"%@\" löschen."
           }
         },
         "el" : {
@@ -38529,8 +38529,8 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Type mismatch: expected %1$@ at %2$@"
+            "state" : "translated",
+            "value" : "Typenkonflikt: %1$@ erwartet bei %2$@"
           }
         },
         "el" : {
@@ -38731,8 +38731,8 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unit must be empty or \"px\""
+            "state" : "translated",
+            "value" : "Einheit muss leer oder \"px\" sein"
           }
         },
         "el" : {
@@ -38933,8 +38933,8 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "UniversalBackForward must be true, false, \"backOnly\" or \"forwardOnly\""
+            "state" : "translated",
+            "value" : "UniversalBackForward muss true, false, \"backOnly\" or \"forwardOnly\" sein"
           }
         },
         "el" : {
@@ -39135,8 +39135,8 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unsupported encoding, expected UTF-8"
+            "state" : "translated",
+            "value" : "Nicht unterstützte Kodierung, UTF-8 erwartet"
           }
         },
         "el" : {
