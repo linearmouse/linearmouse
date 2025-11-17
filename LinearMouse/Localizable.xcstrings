@@ -41,7 +41,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
@@ -243,7 +243,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
@@ -445,7 +445,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
@@ -647,7 +647,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
@@ -3101,7 +3101,7 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
@@ -3339,7 +3339,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
@@ -3541,7 +3541,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
@@ -3743,7 +3743,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
@@ -3945,7 +3945,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
@@ -4147,7 +4147,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
@@ -4349,7 +4349,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
@@ -4551,7 +4551,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
@@ -6376,7 +6376,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "auto"
           }
         },
