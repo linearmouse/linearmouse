@@ -38934,7 +38934,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "UniversalBackForward muss true, false, \"backOnly\" or \"forwardOnly\" sein"
+            "value" : "UniversalBackForward muss true, false, \"backOnly\" oder \"forwardOnly\" sein"
           }
         },
         "el" : {
