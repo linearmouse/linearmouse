@@ -16079,7 +16079,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Konfiguration konnte nicht gespeichert werden: %@"
           }
         },
