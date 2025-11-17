@@ -15871,14 +15871,14 @@
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Konfiguration konnte nicht geladen werden"
+            "state" : "new",
+            "value" : "Failed to reload configuration"
           }
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Failed to reload configuration"
+            "state" : "translated",
+            "value" : "Konfiguration konnte nicht neu geladen werden"
           }
         },
         "el" : {
@@ -19925,14 +19925,14 @@
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ungültiger Wert"
+            "state" : "new",
+            "value" : "Invalid value"
           }
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Invalid value"
+            "state" : "translated",
+            "value" : "Ungültiger Wert"
           }
         },
         "el" : {
@@ -37513,8 +37513,8 @@
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dies wird alle Einstellungen für \"%@\" löschen."
+            "state" : "new",
+            "value" : "This will delete all settings for \"%@\"."
           }
         },
         "de" : {
