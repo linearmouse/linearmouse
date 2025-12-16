@@ -40,13 +40,13 @@ class GestureButtonTransformer {
         self.cooldownMs = cooldownMs
         self.actions = actions
 
-        os_log(
-            "GestureButtonTransformer initialized - button: %d, threshold: %.1f",
-            log: Self.log,
-            type: .info,
-            button.rawValue,
-            threshold
-        )
+//        os_log(
+//            "GestureButtonTransformer initialized - button: %d, threshold: %.1f",
+//            log: Self.log,
+//            type: .info,
+//            button.rawValue,
+//            threshold
+//        )
     }
 }
 
@@ -57,7 +57,7 @@ extension GestureButtonTransformer: EventTransformer {
             if DispatchTime.now().uptimeNanoseconds < until {
                 // Still in cooldown - consume our button events
                 if isOurButtonEvent(event) {
-                    os_log("Event consumed during cooldown", log: Self.log, type: .debug)
+//                    os_log("Event consumed during cooldown", log: Self.log, type: .debug)
                     return nil
                 }
                 return event
@@ -107,7 +107,7 @@ extension GestureButtonTransformer: EventTransformer {
 
         // Start tracking
         state = .tracking(startTime: DispatchTime.now().uptimeNanoseconds, deltaX: 0, deltaY: 0)
-        os_log("Started tracking gesture", log: Self.log, type: .info)
+//        os_log("Started tracking gesture", log: Self.log, type: .info)
 
         // Pass through the button down event
         return event
@@ -128,12 +128,12 @@ extension GestureButtonTransformer: EventTransformer {
         deltaX += eventDeltaX
         deltaY += eventDeltaY
 
-        os_log("Accumulated delta: (%.2f, %.2f)", log: Self.log, type: .debug, deltaX, deltaY)
+//        os_log("Accumulated delta: (%.2f, %.2f)", log: Self.log, type: .debug, deltaX, deltaY)
 
         // Check for timeout (3 seconds)
         let elapsed = DispatchTime.now().uptimeNanoseconds - startTime
         if elapsed > 3_000_000_000 {
-            os_log("Gesture timeout, resetting", log: Self.log, type: .info)
+//            os_log("Gesture timeout, resetting", log: Self.log, type: .info)
             state = .idle
             return event
         }
@@ -175,7 +175,7 @@ extension GestureButtonTransformer: EventTransformer {
 
         // If we were tracking but didn't trigger, reset to idle
         if case .tracking = state {
-            os_log("Button released before threshold, resetting", log: Self.log, type: .info)
+//            os_log("Button released before threshold, resetting", log: Self.log, type: .info)
             state = .idle
             // Pass through the button up event so it can be used as a normal click
             return event
@@ -191,7 +191,7 @@ extension GestureButtonTransformer: EventTransformer {
         return event
     }
 
-    private func detectGesture(deltaX: Double, deltaY: Double) -> Scheme.Buttons.Gesture.GestureAction? {
+    private func detectGesture(deltaX: Double, deltaY: Double) -> Scheme.Buttons.Mapping.Action.Arg0? {
         let absDeltaX = abs(deltaX)
         let absDeltaY = abs(deltaY)
 
@@ -201,41 +201,41 @@ extension GestureButtonTransformer: EventTransformer {
             return nil
         }
 
-        os_log(
-            "Gesture check: deltaX=%.1f, deltaY=%.1f, magnitude=%.1f, deadZone=%.1f",
-            log: Self.log,
-            type: .info,
-            deltaX,
-            deltaY,
-            magnitude,
-            deadZone
-        )
+//        os_log(
+//            "Gesture check: deltaX=%.1f, deltaY=%.1f, magnitude=%.1f, deadZone=%.1f",
+//            log: Self.log,
+//            type: .info,
+//            deltaX,
+//            deltaY,
+//            magnitude,
+//            deadZone
+//        )
 
         // Determine dominant axis
         if absDeltaX > absDeltaY {
             // Horizontal gesture
             guard absDeltaY < deadZone else {
-                os_log(
-                    "Horizontal gesture rejected: absDeltaY=%.1f >= deadZone=%.1f",
-                    log: Self.log,
-                    type: .info,
-                    absDeltaY,
-                    deadZone
-                )
+//                os_log(
+//                    "Horizontal gesture rejected: absDeltaY=%.1f >= deadZone=%.1f",
+//                    log: Self.log,
+//                    type: .info,
+//                    absDeltaY,
+//                    deadZone
+//                )
                 return nil
             }
             // Use defaults if actions not configured
-            return deltaX > 0 ? (actions.right ?? .spaceRight) : (actions.left ?? .spaceLeft)
+            return deltaX > 0 ? (actions.right ?? .missionControlSpaceRight) : (actions.left ?? .missionControlSpaceLeft)
         } else {
             // Vertical gesture
             guard absDeltaX < deadZone else {
-                os_log(
-                    "Vertical gesture rejected: absDeltaX=%.1f >= deadZone=%.1f",
-                    log: Self.log,
-                    type: .info,
-                    absDeltaX,
-                    deadZone
-                )
+//                os_log(
+//                    "Vertical gesture rejected: absDeltaX=%.1f >= deadZone=%.1f",
+//                    log: Self.log,
+//                    type: .info,
+//                    absDeltaX,
+//                    deadZone
+//                )
                 return nil
             }
             // Use defaults if actions not configured
@@ -243,15 +243,15 @@ extension GestureButtonTransformer: EventTransformer {
         }
     }
 
-    private func executeGesture(_ action: Scheme.Buttons.Gesture.GestureAction) throws {
+    private func executeGesture(_ action: Scheme.Buttons.Mapping.Action.Arg0) throws {
         switch action {
         case .none:
             break
 
-        case .spaceLeft:
+        case .missionControlSpaceLeft:
             try postSymbolicHotKey(.spaceLeft)
 
-        case .spaceRight:
+        case .missionControlSpaceRight:
             try postSymbolicHotKey(.spaceRight)
 
         case .missionControl:
@@ -265,13 +265,17 @@ extension GestureButtonTransformer: EventTransformer {
 
         case .launchpad:
             launchpad()
+
+        default:
+            // Ignore other actions not supported by gestures
+            break
         }
     }
 }
 
 extension GestureButtonTransformer: Deactivatable {
     func deactivate() {
-        os_log("Deactivating gesture transformer", log: Self.log, type: .info)
+//        os_log("Deactivating gesture transformer", log: Self.log, type: .info)
         state = .idle
     }
 }

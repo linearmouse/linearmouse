@@ -20,8 +20,8 @@ struct GestureButtonSection: View {
             if state.gestureEnabled {
                 Picker("Button", selection: $state.gestureButton) {
                     Text("Middle Button").tag(2)
-                    Text("Back Button").tag(3)
-                    Text("Forward Button").tag(4)
+//                    Text("Back Button").tag(3)
+//                    Text("Forward Button").tag(4)
                 }
                 .modifier(PickerViewModifier())
 

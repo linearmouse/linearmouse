@@ -7150,9 +7150,6 @@
         }
       }
     },
-    "Back Button" : {
-
-    },
     "Bug report" : {
       "localizations" : {
         "af" : {
@@ -17265,9 +17262,6 @@
           }
         }
       }
-    },
-    "Forward Button" : {
-
     },
     "General" : {
       "localizations" : {

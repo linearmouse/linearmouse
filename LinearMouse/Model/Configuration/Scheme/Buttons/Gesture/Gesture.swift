@@ -14,10 +14,10 @@ extension Scheme.Buttons {
         @ImplicitOptional var actions: Actions
 
         struct Actions: Codable, Equatable, ImplicitInitable {
-            var left: GestureAction?
-            var right: GestureAction?
-            var up: GestureAction?
-            var down: GestureAction?
+            var left: Mapping.Action.Arg0?
+            var right: Mapping.Action.Arg0?
+            var up: Mapping.Action.Arg0?
+            var down: Mapping.Action.Arg0?
         }
     }
 }

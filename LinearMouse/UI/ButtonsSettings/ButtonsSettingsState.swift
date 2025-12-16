@@ -114,7 +114,17 @@ extension ButtonsSettingsState {
             mergedScheme.buttons.gesture.enabled ?? false
         }
         set {
-            scheme.buttons.gesture.enabled = newValue
+            if newValue {
+                scheme.buttons.gesture.enabled = true
+                scheme.buttons.gesture.button = 2
+                scheme.buttons.gesture.threshold = 50
+                scheme.buttons.gesture.actions.left = .missionControlSpaceLeft
+                scheme.buttons.gesture.actions.right = .missionControlSpaceRight
+                scheme.buttons.gesture.actions.up = .missionControl
+                scheme.buttons.gesture.actions.down = .appExpose
+            } else {
+                scheme.buttons.$gesture = nil
+            }
         }
     }
 
@@ -145,25 +155,25 @@ extension ButtonsSettingsState {
         }
     }
 
-    var gestureActionLeft: Scheme.Buttons.Gesture.GestureAction? {
+    var gestureActionLeft: Scheme.Buttons.Mapping.Action.Arg0? {
         get {
-            mergedScheme.buttons.gesture.actions.left ?? .spaceLeft
+            mergedScheme.buttons.gesture.actions.left ?? .missionControlSpaceLeft
         }
         set {
             scheme.buttons.gesture.actions.left = newValue
         }
     }
 
-    var gestureActionRight: Scheme.Buttons.Gesture.GestureAction? {
+    var gestureActionRight: Scheme.Buttons.Mapping.Action.Arg0? {
         get {
-            mergedScheme.buttons.gesture.actions.right ?? .spaceRight
+            mergedScheme.buttons.gesture.actions.right ?? .missionControlSpaceRight
         }
         set {
             scheme.buttons.gesture.actions.right = newValue
         }
     }
 
-    var gestureActionUp: Scheme.Buttons.Gesture.GestureAction? {
+    var gestureActionUp: Scheme.Buttons.Mapping.Action.Arg0? {
         get {
             mergedScheme.buttons.gesture.actions.up ?? .missionControl
         }
@@ -172,7 +182,7 @@ extension ButtonsSettingsState {
         }
     }
 
-    var gestureActionDown: Scheme.Buttons.Gesture.GestureAction? {
+    var gestureActionDown: Scheme.Buttons.Mapping.Action.Arg0? {
         get {
             mergedScheme.buttons.gesture.actions.down ?? .appExpose
         }
