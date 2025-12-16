@@ -191,7 +191,7 @@ extension GestureButtonTransformer: EventTransformer {
         return event
     }
 
-    private func detectGesture(deltaX: Double, deltaY: Double) -> Scheme.Buttons.Mapping.Action.Arg0? {
+    private func detectGesture(deltaX: Double, deltaY: Double) -> Scheme.Buttons.Gesture.GestureAction? {
         let absDeltaX = abs(deltaX)
         let absDeltaY = abs(deltaY)
 
@@ -225,7 +225,7 @@ extension GestureButtonTransformer: EventTransformer {
                 return nil
             }
             // Use defaults if actions not configured
-            return deltaX > 0 ? (actions.right ?? .missionControlSpaceRight) : (actions.left ?? .missionControlSpaceLeft)
+            return deltaX > 0 ? (actions.right ?? .spaceRight) : (actions.left ?? .spaceLeft)
         } else {
             // Vertical gesture
             guard absDeltaX < deadZone else {
@@ -243,15 +243,15 @@ extension GestureButtonTransformer: EventTransformer {
         }
     }
 
-    private func executeGesture(_ action: Scheme.Buttons.Mapping.Action.Arg0) throws {
+    private func executeGesture(_ action: Scheme.Buttons.Gesture.GestureAction) throws {
         switch action {
         case .none:
             break
 
-        case .missionControlSpaceLeft:
+        case .spaceLeft:
             try postSymbolicHotKey(.spaceLeft)
 
-        case .missionControlSpaceRight:
+        case .spaceRight:
             try postSymbolicHotKey(.spaceRight)
 
         case .missionControl:
@@ -265,10 +265,6 @@ extension GestureButtonTransformer: EventTransformer {
 
         case .launchpad:
             launchpad()
-
-        default:
-            // Ignore other actions not supported by gestures
-            break
         }
     }
 }

@@ -14,10 +14,22 @@ extension Scheme.Buttons {
         @ImplicitOptional var actions: Actions
 
         struct Actions: Codable, Equatable, ImplicitInitable {
-            var left: Mapping.Action.Arg0?
-            var right: Mapping.Action.Arg0?
-            var up: Mapping.Action.Arg0?
-            var down: Mapping.Action.Arg0?
+            var left: GestureAction?
+            var right: GestureAction?
+            var up: GestureAction?
+            var down: GestureAction?
+        }
+
+        enum GestureAction: String, Codable, Equatable, Hashable, Identifiable, CaseIterable {
+            var id: Self { self }
+
+            case none
+            case spaceLeft = "missionControl.spaceLeft"
+            case spaceRight = "missionControl.spaceRight"
+            case missionControl
+            case appExpose
+            case showDesktop
+            case launchpad
         }
     }
 }

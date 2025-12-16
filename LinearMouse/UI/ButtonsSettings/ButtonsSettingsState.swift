@@ -118,8 +118,8 @@ extension ButtonsSettingsState {
                 scheme.buttons.gesture.enabled = true
                 scheme.buttons.gesture.button = 2
                 scheme.buttons.gesture.threshold = 50
-                scheme.buttons.gesture.actions.left = .missionControlSpaceLeft
-                scheme.buttons.gesture.actions.right = .missionControlSpaceRight
+                scheme.buttons.gesture.actions.left = .spaceLeft
+                scheme.buttons.gesture.actions.right = .spaceRight
                 scheme.buttons.gesture.actions.up = .missionControl
                 scheme.buttons.gesture.actions.down = .appExpose
             } else {
@@ -155,25 +155,25 @@ extension ButtonsSettingsState {
         }
     }
 
-    var gestureActionLeft: Scheme.Buttons.Mapping.Action.Arg0? {
+    var gestureActionLeft: Scheme.Buttons.Gesture.GestureAction {
         get {
-            mergedScheme.buttons.gesture.actions.left ?? .missionControlSpaceLeft
+            mergedScheme.buttons.gesture.actions.left ?? .spaceLeft
         }
         set {
             scheme.buttons.gesture.actions.left = newValue
         }
     }
 
-    var gestureActionRight: Scheme.Buttons.Mapping.Action.Arg0? {
+    var gestureActionRight: Scheme.Buttons.Gesture.GestureAction {
         get {
-            mergedScheme.buttons.gesture.actions.right ?? .missionControlSpaceRight
+            mergedScheme.buttons.gesture.actions.right ?? .spaceRight
         }
         set {
             scheme.buttons.gesture.actions.right = newValue
         }
     }
 
-    var gestureActionUp: Scheme.Buttons.Mapping.Action.Arg0? {
+    var gestureActionUp: Scheme.Buttons.Gesture.GestureAction {
         get {
             mergedScheme.buttons.gesture.actions.up ?? .missionControl
         }
@@ -182,7 +182,7 @@ extension ButtonsSettingsState {
         }
     }
 
-    var gestureActionDown: Scheme.Buttons.Mapping.Action.Arg0? {
+    var gestureActionDown: Scheme.Buttons.Gesture.GestureAction {
         get {
             mergedScheme.buttons.gesture.actions.down ?? .appExpose
         }
