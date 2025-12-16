@@ -5,9 +5,14 @@ import SwiftUI
 
 struct GestureButtonSection: View {
     @ObservedObject var state: ButtonsSettingsState = .shared
+    
+    var isMouseDevice: Bool {
+        DeviceState.shared.currentDeviceRef?.value?.category == .mouse
+    }
 
     var body: some View {
-        Section {
+        if isMouseDevice {
+            Section {
             Toggle(isOn: $state.gestureEnabled.animation()) {
                 withDescription {
                     Text("Enable gesture button")
@@ -69,5 +74,6 @@ struct GestureButtonSection: View {
             }
         }
         .modifier(SectionViewModifier())
+        }
     }
 }
