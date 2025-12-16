@@ -380,6 +380,12 @@ declare namespace Scheme {
      * @description Ignore rapid clicks with a certain time period.
      */
     clickDebouncing?: Buttons.ClickDebouncing;
+
+    /**
+     * @title Gesture button
+     * @description Press and hold a button while dragging to trigger gestures like switching desktop spaces or opening Mission Control.
+     */
+    gesture?: Buttons.Gesture;
   };
 
   namespace Buttons {
@@ -811,5 +817,95 @@ declare namespace Scheme {
        */
       buttons?: Button[];
     };
+
+    type Gesture = {
+      /**
+       * @title Enable gesture button
+       * @description If the value is true, the gesture button feature is enabled.
+       * @default false
+       */
+      enabled?: boolean;
+
+      /**
+       * @title Button
+       * @description The button number to use for gestures. Default is 2 (middle button/scroll wheel).
+       * @default 2
+       */
+      button?: Button;
+
+      /**
+       * @title Threshold
+       * @description The distance in pixels that must be dragged before triggering a gesture.
+       * @default 50
+       * @minimum 20
+       * @maximum 200
+       */
+      threshold?: Int;
+
+      /**
+       * @title Dead zone
+       * @description The tolerance in pixels for the non-dominant axis to prevent accidental gestures.
+       * @default 40
+       * @minimum 0
+       * @maximum 100
+       */
+      deadZone?: Int;
+
+      /**
+       * @title Cooldown
+       * @description The cooldown period in milliseconds between gestures to prevent double-triggering.
+       * @default 500
+       * @minimum 0
+       * @maximum 2000
+       */
+      cooldownMs?: Int;
+
+      /**
+       * @title Gesture actions
+       * @description Actions to trigger for each gesture direction.
+       */
+      actions?: Gesture.Actions;
+    };
+
+    namespace Gesture {
+      type Actions = {
+        /**
+         * @title Swipe left action
+         * @description Action to trigger when dragging left.
+         * @default "missionControl.spaceLeft"
+         */
+        left?: GestureAction;
+
+        /**
+         * @title Swipe right action
+         * @description Action to trigger when dragging right.
+         * @default "missionControl.spaceRight"
+         */
+        right?: GestureAction;
+
+        /**
+         * @title Swipe up action
+         * @description Action to trigger when dragging up.
+         * @default "missionControl"
+         */
+        up?: GestureAction;
+
+        /**
+         * @title Swipe down action
+         * @description Action to trigger when dragging down.
+         * @default "appExpose"
+         */
+        down?: GestureAction;
+      };
+
+      type GestureAction =
+        | "none"
+        | "missionControl.spaceLeft"
+        | "missionControl.spaceRight"
+        | "missionControl"
+        | "appExpose"
+        | "showDesktop"
+        | "launchpad";
+    }
   }
 }

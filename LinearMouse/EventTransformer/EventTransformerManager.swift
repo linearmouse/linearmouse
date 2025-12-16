@@ -160,6 +160,19 @@ class EventTransformerManager {
             eventTransformer.append(SwitchPrimaryAndSecondaryButtonsTransformer())
         }
 
+        if let gesture = scheme.buttons.$gesture,
+           gesture.enabled ?? false,
+           let button = gesture.button,
+           let mouseButton = CGMouseButton(rawValue: UInt32(button)) {
+            eventTransformer.append(GestureButtonTransformer(
+                button: mouseButton,
+                threshold: Double(gesture.threshold ?? 50),
+                deadZone: Double(gesture.deadZone ?? 40),
+                cooldownMs: gesture.cooldownMs ?? 500,
+                actions: gesture.actions
+            ))
+        }
+
         if let mappings = scheme.buttons.mappings {
             eventTransformer.append(ButtonActionsTransformer(mappings: mappings))
         }

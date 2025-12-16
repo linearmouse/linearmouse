@@ -19,6 +19,8 @@ extension Scheme {
         var switchPrimaryButtonAndSecondaryButtons: Bool?
 
         @ImplicitOptional var clickDebouncing: ClickDebouncing
+
+        @ImplicitOptional var gesture: Gesture
     }
 }
 
@@ -42,6 +44,14 @@ extension Scheme.Buttons {
 
         if let clickDebouncing = $clickDebouncing {
             buttons.$clickDebouncing = clickDebouncing
+        }
+
+        if let gesture = $gesture {
+            buttons.gesture = gesture
+        }
+
+        if let gesture = $gesture {
+            buttons.$gesture = gesture
         }
     }
 

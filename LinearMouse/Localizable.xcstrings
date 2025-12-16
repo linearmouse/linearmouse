@@ -3097,6 +3097,9 @@
         }
       }
     },
+    "%lld pixels" : {
+
+    },
     "⇧ (Shift)" : {
       "localizations" : {
         "af" : {
@@ -5730,6 +5733,9 @@
         }
       }
     },
+    "App Expose" : {
+
+    },
     "Application windows" : {
       "localizations" : {
         "af" : {
@@ -7144,6 +7150,9 @@
         }
       }
     },
+    "Back Button" : {
+
+    },
     "Bug report" : {
       "localizations" : {
         "af" : {
@@ -7345,6 +7354,9 @@
           }
         }
       }
+    },
+    "Button" : {
+
     },
     "Button #%lld click" : {
       "localizations" : {
@@ -14221,6 +14233,9 @@
         }
       }
     },
+    "Enable gesture button" : {
+
+    },
     "Enable universal back and forward" : {
       "localizations" : {
         "af" : {
@@ -17251,6 +17266,9 @@
         }
       }
     },
+    "Forward Button" : {
+
+    },
     "General" : {
       "localizations" : {
         "af" : {
@@ -17453,6 +17471,9 @@
         }
       }
     },
+    "Gesture Actions" : {
+
+    },
     "Get more help" : {
       "localizations" : {
         "af" : {
@@ -17654,6 +17675,9 @@
           }
         }
       }
+    },
+    "Hold the button and drag to trigger gestures. Drag at least %lld pixels in one direction." : {
+
     },
     "Homepage" : {
       "localizations" : {
@@ -22517,6 +22541,9 @@
         }
       }
     },
+    "Middle Button" : {
+
+    },
     "Middle click" : {
       "localizations" : {
         "af" : {
@@ -25345,6 +25372,9 @@
         }
       }
     },
+    "Next Space" : {
+
+    },
     "No action" : {
       "localizations" : {
         "af" : {
@@ -25748,6 +25778,9 @@
           }
         }
       }
+    },
+    "None" : {
+
     },
     "Not specified" : {
       "localizations" : {
@@ -27776,6 +27809,9 @@
         }
       }
     },
+    "Press and hold a button while dragging to trigger gestures like switching desktop spaces or opening Mission Control." : {
+
+    },
     "Previous" : {
       "localizations" : {
         "af" : {
@@ -27977,6 +28013,9 @@
           }
         }
       }
+    },
+    "Previous Space" : {
+
     },
     "Quit %@" : {
       "localizations" : {
@@ -35661,6 +35700,9 @@
         }
       }
     },
+    "Show Desktop" : {
+
+    },
     "Show in Dock" : {
       "localizations" : {
         "af" : {
@@ -36873,6 +36915,18 @@
         }
       }
     },
+    "Swipe down" : {
+
+    },
+    "Swipe left" : {
+
+    },
+    "Swipe right" : {
+
+    },
+    "Swipe up" : {
+
+    },
     "Switch primary and secondary buttons" : {
       "localizations" : {
         "af" : {
@@ -37882,6 +37936,9 @@
           }
         }
       }
+    },
+    "Threshold" : {
+
     },
     "To show the settings, launch %@ again." : {
       "localizations" : {
