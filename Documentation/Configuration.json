@@ -118,6 +118,11 @@
           "description": "Ignore rapid clicks with a certain time period.",
           "title": "Debounce button clicks"
         },
+        "gesture": {
+          "$ref": "#/definitions/Scheme.Buttons.Gesture",
+          "description": "Press and hold a button while dragging to trigger gestures like switching desktop spaces or opening Mission Control.",
+          "title": "Gesture button"
+        },
         "mappings": {
           "description": "Assign actions to buttons.",
           "items": {
@@ -161,6 +166,95 @@
         }
       },
       "type": "object"
+    },
+    "Scheme.Buttons.Gesture": {
+      "additionalProperties": false,
+      "properties": {
+        "actions": {
+          "$ref": "#/definitions/Scheme.Buttons.Gesture.Actions",
+          "description": "Actions to trigger for each gesture direction.",
+          "title": "Gesture actions"
+        },
+        "button": {
+          "$ref": "#/definitions/Button",
+          "default": 2,
+          "description": "The button number to use for gestures. Default is 2 (middle button/scroll wheel).",
+          "title": "Button"
+        },
+        "cooldownMs": {
+          "$ref": "#/definitions/Int",
+          "default": 500,
+          "description": "The cooldown period in milliseconds between gestures to prevent double-triggering.",
+          "maximum": 2000,
+          "minimum": 0,
+          "title": "Cooldown"
+        },
+        "deadZone": {
+          "$ref": "#/definitions/Int",
+          "default": 40,
+          "description": "The tolerance in pixels for the non-dominant axis to prevent accidental gestures.",
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Dead zone"
+        },
+        "enabled": {
+          "default": false,
+          "description": "If the value is true, the gesture button feature is enabled.",
+          "title": "Enable gesture button",
+          "type": "boolean"
+        },
+        "threshold": {
+          "$ref": "#/definitions/Int",
+          "default": 50,
+          "description": "The distance in pixels that must be dragged before triggering a gesture.",
+          "maximum": 200,
+          "minimum": 20,
+          "title": "Threshold"
+        }
+      },
+      "type": "object"
+    },
+    "Scheme.Buttons.Gesture.Actions": {
+      "additionalProperties": false,
+      "properties": {
+        "down": {
+          "$ref": "#/definitions/Scheme.Buttons.Gesture.GestureAction",
+          "default": "appExpose",
+          "description": "Action to trigger when dragging down.",
+          "title": "Swipe down action"
+        },
+        "left": {
+          "$ref": "#/definitions/Scheme.Buttons.Gesture.GestureAction",
+          "default": "missionControl.spaceLeft",
+          "description": "Action to trigger when dragging left.",
+          "title": "Swipe left action"
+        },
+        "right": {
+          "$ref": "#/definitions/Scheme.Buttons.Gesture.GestureAction",
+          "default": "missionControl.spaceRight",
+          "description": "Action to trigger when dragging right.",
+          "title": "Swipe right action"
+        },
+        "up": {
+          "$ref": "#/definitions/Scheme.Buttons.Gesture.GestureAction",
+          "default": "missionControl",
+          "description": "Action to trigger when dragging up.",
+          "title": "Swipe up action"
+        }
+      },
+      "type": "object"
+    },
+    "Scheme.Buttons.Gesture.GestureAction": {
+      "enum": [
+        "none",
+        "missionControl.spaceLeft",
+        "missionControl.spaceRight",
+        "missionControl",
+        "appExpose",
+        "showDesktop",
+        "launchpad"
+      ],
+      "type": "string"
     },
     "Scheme.Buttons.Mapping": {
       "anyOf": [
