@@ -37502,6 +37502,9 @@
         }
       }
     },
+    "Select an item from the sidebar" : {
+
+    },
     "Settings" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -42570,6 +42573,9 @@
           }
         }
       }
+    },
+    "Unknown" : {
+
     },
     "Unsupported encoding, expected UTF-8" : {
       "localizations" : {
