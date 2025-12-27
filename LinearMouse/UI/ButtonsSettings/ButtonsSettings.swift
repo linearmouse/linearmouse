@@ -13,6 +13,8 @@ struct ButtonsSettings: View {
 
                 ClickDebouncingSection()
 
+                GestureButtonSection()
+
                 ButtonMappingsSection()
             }
             .modifier(FormViewModifier())

@@ -108,4 +108,86 @@ extension ButtonsSettingsState {
     func appendMapping(_ mapping: Scheme.Buttons.Mapping) {
         mappings = (mappings + [mapping]).sorted()
     }
+
+    var gestureEnabled: Bool {
+        get {
+            mergedScheme.buttons.gesture.enabled ?? false
+        }
+        set {
+            if newValue {
+                scheme.buttons.gesture.enabled = true
+                scheme.buttons.gesture.button = 2
+                scheme.buttons.gesture.threshold = 50
+                scheme.buttons.gesture.actions.left = .spaceLeft
+                scheme.buttons.gesture.actions.right = .spaceRight
+                scheme.buttons.gesture.actions.up = .missionControl
+                scheme.buttons.gesture.actions.down = .appExpose
+            } else {
+                scheme.buttons.$gesture = nil
+            }
+        }
+    }
+
+    var gestureButton: Int {
+        get {
+            mergedScheme.buttons.gesture.button ?? 2
+        }
+        set {
+            scheme.buttons.gesture.button = newValue
+        }
+    }
+
+    var gestureThreshold: Int {
+        get {
+            mergedScheme.buttons.gesture.threshold ?? 50
+        }
+        set {
+            scheme.buttons.gesture.threshold = newValue
+        }
+    }
+
+    var gestureThresholdDouble: Double {
+        get {
+            Double(gestureThreshold)
+        }
+        set {
+            gestureThreshold = Int(round(newValue / 5)) * 5
+        }
+    }
+
+    var gestureActionLeft: Scheme.Buttons.Gesture.GestureAction {
+        get {
+            mergedScheme.buttons.gesture.actions.left ?? .spaceLeft
+        }
+        set {
+            scheme.buttons.gesture.actions.left = newValue
+        }
+    }
+
+    var gestureActionRight: Scheme.Buttons.Gesture.GestureAction {
+        get {
+            mergedScheme.buttons.gesture.actions.right ?? .spaceRight
+        }
+        set {
+            scheme.buttons.gesture.actions.right = newValue
+        }
+    }
+
+    var gestureActionUp: Scheme.Buttons.Gesture.GestureAction {
+        get {
+            mergedScheme.buttons.gesture.actions.up ?? .missionControl
+        }
+        set {
+            scheme.buttons.gesture.actions.up = newValue
+        }
+    }
+
+    var gestureActionDown: Scheme.Buttons.Gesture.GestureAction {
+        get {
+            mergedScheme.buttons.gesture.actions.down ?? .appExpose
+        }
+        set {
+            scheme.buttons.gesture.actions.down = newValue
+        }
+    }
 }
