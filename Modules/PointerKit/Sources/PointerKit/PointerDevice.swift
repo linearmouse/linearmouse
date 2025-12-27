@@ -38,7 +38,7 @@ public class PointerDevice {
         this.inputReportCallback(Data(bytes: report, count: reportLength))
     }
 
-    // Some devices like Magic Mouse does not return an HIDUseLinearScalingMouseAcceleration on macOS 26.
+    // Some devices like Magic Mouse do not return an HIDUseLinearScalingMouseAcceleration on macOS 26.
     // So we have to store it manually.
     // TODO: Use system global value as the initial value.
     private var _useLinearScalingMouseAcceleration = 0
