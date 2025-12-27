@@ -14,7 +14,8 @@ extension IOHIDServiceClient {
         return value
     }
 
-    func setProperty<T>(_ value: T, forKey: String) {
+    @discardableResult
+    func setProperty<T>(_ value: T, forKey: String) -> Bool {
         IOHIDServiceClientSetProperty(self, forKey as CFString, value as AnyObject)
     }
 
@@ -22,7 +23,8 @@ extension IOHIDServiceClient {
         (getProperty(key) as IOFixed?).map { Double($0) / 65_536 }
     }
 
-    func setPropertyIOFixed(_ value: Double?, forKey: String) {
+    @discardableResult
+    func setPropertyIOFixed(_ value: Double?, forKey: String) -> Bool {
         setProperty(value.map { IOFixed($0 * 65_536) }, forKey: forKey)
     }
 }
