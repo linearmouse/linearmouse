@@ -42,15 +42,9 @@ extension Scheme.Buttons {
             buttons.clickDebouncing = clickDebouncing
         }
 
-        if let clickDebouncing = $clickDebouncing {
-            buttons.$clickDebouncing = clickDebouncing
-        }
 
         if let gesture = $gesture {
-            buttons.gesture = gesture
-        }
 
-        if let gesture = $gesture {
             buttons.$gesture = gesture
         }
     }
