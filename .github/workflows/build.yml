@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-15
+    runs-on: macos-26
     env:
       APPLE_ID: ${{ secrets.APPLE_ID }}
       CODE_SIGN_IDENTITY: ${{ secrets.CODE_SIGN_IDENTITY }}
