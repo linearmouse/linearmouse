@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Defaults
 
@@ -11,7 +11,7 @@ struct DeviceMatcher: Codable, Equatable, Hashable, Defaults.Serializable {
     @SingleValueOrArray var category: [Category]?
 
     enum Category: String, Codable, Hashable {
-        case mouse, trackpad, trackball
+        case mouse, trackpad
     }
 }
 
@@ -22,24 +22,25 @@ extension DeviceMatcher {
             productID: device.productID,
             productName: device.productName,
             serialNumber: device.serialNumber,
-            category: [Category(from: device.category)])
+            category: [Category(from: device.category)]
+        )
     }
 
     func match(with device: Device) -> Bool {
         func matchValue<T>(_ destination: T?, _ source: T) -> Bool
-        where T: Equatable {
+            where T: Equatable {
             destination == nil || source == destination
         }
 
         func matchValue<T>(_ destination: T?, _ source: T?) -> Bool
-        where T: Equatable {
+            where T: Equatable {
             destination == nil || source == destination
         }
 
         guard matchValue(vendorID, device.vendorID),
-            matchValue(productID, device.productID),
-            matchValue(productName, device.productName),
-            matchValue(serialNumber, device.serialNumber)
+              matchValue(productID, device.productID),
+              matchValue(productName, device.productName),
+              matchValue(serialNumber, device.serialNumber)
         else {
             return false
         }
@@ -65,8 +66,6 @@ extension DeviceMatcher.Category {
             self = .mouse
         case .trackpad:
             self = .trackpad
-        case .trackball:
-            self = .trackball
         }
     }
 
@@ -76,8 +75,6 @@ extension DeviceMatcher.Category {
             return .mouse
         case .trackpad:
             return .trackpad
-        case .trackball:
-            return .trackball
         }
     }
 }

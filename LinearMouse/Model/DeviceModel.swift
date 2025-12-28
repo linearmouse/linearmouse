@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Combine
 import Foundation
@@ -45,5 +45,4 @@ class DeviceModel: ObservableObject, Identifiable {
 extension DeviceModel {
     var isMouse: Bool { category == .mouse }
     var isTrackpad: Bool { category == .trackpad }
-    var isTrackball: Bool { category == .trackball }
 }

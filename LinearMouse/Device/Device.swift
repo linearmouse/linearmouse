@@ -1,15 +1,16 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Defaults
 import Foundation
 import ObservationToken
-import PointerKit
 import os.log
+import PointerKit
 
 class Device {
     private static let log = OSLog(
-        subsystem: Bundle.main.bundleIdentifier!, category: "Device")
+        subsystem: Bundle.main.bundleIdentifier!, category: "Device"
+    )
 
     static let fallbackPointerAcceleration = 0.6875
     static let fallbackPointerResolution = 400.0
@@ -21,37 +22,10 @@ class Device {
         let productID: Int
     }
 
-    private struct ButtonConfig {
-        let reportByte: Int
-        let buttonMasks: [Int: UInt8]
-    }
-
-    // So far only tested on Kensington Slimblade Trackball
-    private static let trackballButtonConfig = ButtonConfig(
-        reportByte: 4,
-        buttonMasks: [
-            3: 0x1,  // Top left button
-            4: 0x2,  // Top right button
-        ]
-    )
-
-    // Other devices with side button fixes
-    private static let sideButtonConfig = ButtonConfig(
-        // | Button 0 (1 bit) | ... | Button 4 (1 bit) | Not Used (3 bits) |
-        reportByte: 1,
-        buttonMasks: [
-            3: 0x08,  // Button 3 mask
-            4: 0x10,  // Button 4 mask
-        ]
-    )
-
     private static let productsToApplySideButtonFixes: Set<Product> = [
-        .init(vendorID: 0x2717, productID: 0x5014),  // Mi Silent Mouse
-        .init(vendorID: 0x248A, productID: 0x8266),  // Delux M729DB mouse
-    ]
-
-    private static let trackballsRequiringReportMonitoring: Set<Product> = [
-        .init(vendorID: 0x047d, productID: 0x2041)  // Kensington Slimblade
+        .init(vendorID: 0x2717, productID: 0x5014), // Mi Silent Mouse
+        .init(vendorID: 0x248A, productID: 0x8266), // Delux M729DB mouse
+        .init(vendorID: 0x047D, productID: 0x2041) // Kensington Slimblade
     ]
 
     private weak var manager: DeviceManager?
@@ -87,11 +61,11 @@ class Device {
         // To work around this issue, we subscribe to the input reports and monitor the side button
         // states. When the side buttons are clicked, we simulate those events.
         if let vendorID = vendorID, let productID = productID {
-            let product = Product(vendorID: vendorID, productID: productID)
             if (buttonCount == 3
-                && Self.productsToApplySideButtonFixes.contains(product))
-                || Self.trackballsRequiringReportMonitoring.contains(product)
-            {
+                && Self.productsToApplySideButtonFixes.contains(
+                    .init(vendorID: vendorID, productID: productID)))
+                || (vendorID == 0x047D && productID == 0x2041)
+            { // Slimblade needs report monitoring regardless of button count
                 reportObservationToken = device.observeReport(using: {
                     [weak self] in
                     self?.inputReportCallback($0, $1)
@@ -104,7 +78,8 @@ class Device {
             log: Self.log, type: .info,
             String(describing: device),
             initialPointerResolution,
-            device.pointerAccelerationType ?? "(unknown)")
+            device.pointerAccelerationType ?? "(unknown)"
+        )
     }
 
     func markRemoved() {
@@ -141,7 +116,7 @@ extension Device {
     }
 
     enum Category {
-        case mouse, trackpad, trackball
+        case mouse, trackpad
     }
 
     private func isAppleMagicMouse(vendorID: Int, productID: Int) -> Bool {
@@ -151,21 +126,13 @@ extension Device {
 
     var category: Category {
         if let vendorID: Int = device.vendorID,
-            let productID: Int = device.productID
-        {
+           let productID: Int = device.productID {
             if isAppleMagicMouse(vendorID: vendorID, productID: productID) {
                 return .mouse
             }
         }
         if device.confirmsTo(kHIDPage_Digitizer, kHIDUsage_Dig_TouchPad) {
             return .trackpad
-        }
-        if let vendorID = device.vendorID,
-            let productID = device.productID,
-            Self.trackballsRequiringReportMonitoring.contains(
-                .init(vendorID: vendorID, productID: productID))
-        {
-            return .trackball
         }
         return .mouse
     }
@@ -180,7 +147,7 @@ extension Device {
         }
         set {
             guard device.useLinearScalingMouseAcceleration != nil,
-                let newValue = newValue
+                  let newValue = newValue
             else {
                 return
             }
@@ -196,22 +163,21 @@ extension Device {
             os_log(
                 "Update pointer acceleration for device: %{public}@: %{public}f",
                 log: Self.log, type: .info,
-                String(describing: self), newValue)
+                String(describing: self), newValue
+            )
             device.pointerAcceleration = newValue
         }
     }
 
-    private static let pointerSpeedRange = 1.0 / 1200...1.0 / 40
+    private static let pointerSpeedRange = 1.0 / 1200 ... 1.0 / 40
 
     static func pointerSpeed(fromPointerResolution pointerResolution: Double)
-        -> Double
-    {
+        -> Double {
         (1 / pointerResolution).normalized(from: pointerSpeedRange)
     }
 
     static func pointerResolution(fromPointerSpeed pointerSpeed: Double)
-        -> Double
-    {
+        -> Double {
         1 / (pointerSpeed.normalized(to: pointerSpeedRange))
     }
 
@@ -227,7 +193,8 @@ extension Device {
             os_log(
                 "Update pointer speed for device: %{public}@: %{public}f",
                 log: Self.log, type: .info,
-                String(describing: self), newValue)
+                String(describing: self), newValue
+            )
             device.pointerResolution = Self.pointerResolution(
                 fromPointerSpeed: newValue)
         }
@@ -236,16 +203,17 @@ extension Device {
     func restorePointerAcceleration() {
         let systemPointerAcceleration =
             (DeviceManager.shared
-            .getSystemProperty(
-                forKey: device.pointerAccelerationType
-                    ?? kIOHIDMouseAccelerationTypeKey) as IOFixed?)
+                .getSystemProperty(
+                    forKey: device.pointerAccelerationType
+                        ?? kIOHIDMouseAccelerationTypeKey) as IOFixed?)
             .map { Double($0) / 65536 } ?? Self.fallbackPointerAcceleration
 
         os_log(
             "Restore pointer acceleration for device: %{public}@: %{public}f",
             log: Self.log, type: .info,
             String(describing: device),
-            systemPointerAcceleration)
+            systemPointerAcceleration
+        )
 
         pointerAcceleration = systemPointerAcceleration
     }
@@ -255,7 +223,8 @@ extension Device {
             "Restore pointer speed for device: %{public}@: %{public}f",
             log: Self.log, type: .info,
             String(describing: device),
-            Self.pointerSpeed(fromPointerResolution: initialPointerResolution))
+            Self.pointerSpeed(fromPointerResolution: initialPointerResolution)
+        )
 
         device.pointerResolution = initialPointerResolution
     }
@@ -272,7 +241,8 @@ extension Device {
             os_log(
                 "Received input value from: %{public}@: %{public}@",
                 log: Self.log, type: .info,
-                String(describing: device), String(describing: value))
+                String(describing: device), String(describing: value)
+            )
         }
 
         guard let manager = manager else {
@@ -316,7 +286,8 @@ extension Device {
             String(describing: device),
             String(describing: category),
             usagePage,
-            usage)
+            usage
+        )
     }
 
     private func inputReportCallback(_ device: PointerDevice, _ report: Data) {
@@ -326,41 +297,61 @@ extension Device {
             os_log(
                 "Received input report from: %{public}@: %{public}@",
                 log: Self.log, type: .info,
-                String(describing: device), String(describing: reportHex))
+                String(describing: device), String(describing: reportHex)
+            )
         }
 
         // FIXME: Correct HID Report parsing?
         guard report.count >= 2 else {
             return
         }
-        guard let vendorID = device.vendorID,
-            let productID = device.productID
-        else { return }
+        if let vendorID = device.vendorID, let productID = device.productID {
+            switch (vendorID, productID) {
+            case (0x047D, 0x2041): // Slimblade
+                // For Slimblade, byte 4 contains the vendor-defined button states
+                let buttonStates = report[4]
+                let toggled = lastButtonStates ^ buttonStates
 
-        let product = Product(vendorID: vendorID, productID: productID)
-        let config: ButtonConfig
+                guard toggled != 0 else {
+                    return
+                }
 
-        if Self.trackballsRequiringReportMonitoring.contains(product) {
-            config = Self.trackballButtonConfig
-        } else if Self.productsToApplySideButtonFixes.contains(product) {
-            config = Self.sideButtonConfig
-        } else {
-            return
-        }
+                let topLeftMask: UInt8 = 0x1
+                let topRightMask: UInt8 = 0x2
 
-        let buttonStates = report[config.reportByte]
-        let toggled = lastButtonStates ^ buttonStates
+                // Check top left button
+                if toggled & topLeftMask != 0 {
+                    let down = buttonStates & topLeftMask != 0
+                    simulateButtonEvent(button: 3, down: down, device: device)
+                }
 
-        guard toggled != 0 else { return }
+                // Check top right button
+                if toggled & topRightMask != 0 {
+                    let down = buttonStates & topRightMask != 0
+                    simulateButtonEvent(button: 4, down: down, device: device)
+                }
 
-        for (button, mask) in config.buttonMasks {
-            if toggled & mask != 0 {
-                let down = buttonStates & mask != 0
-                simulateButtonEvent(button: button, down: down, device: device)
+                lastButtonStates = buttonStates
+
+            default: // Other devices with side button fixes
+                // | Button 0 (1 bit) | ... | Button 4 (1 bit) | Not Used (3 bits) |
+                let buttonStates = report[1] & 0x18
+                let toggled = lastButtonStates ^ buttonStates
+                guard toggled != 0 else {
+                    return
+                }
+                for button in 3 ... 4 {
+                    guard toggled & (1 << button) != 0 else {
+                        continue
+                    }
+                    let down = buttonStates & (1 << button) != 0
+                    simulateButtonEvent(
+                        button: button, down: down, device: device
+                    )
+                }
+                lastButtonStates = buttonStates
             }
         }
-
-        lastButtonStates = buttonStates
     }
 
     private func simulateButtonEvent(
@@ -372,7 +363,8 @@ extension Device {
             type: .info,
             button,
             down ? "down" : "up",
-            String(describing: device))
+            String(describing: device)
+        )
 
         guard let location = CGEvent(source: nil)?.location else { return }
         guard
@@ -380,7 +372,8 @@ extension Device {
                 mouseEventSource: nil,
                 mouseType: down ? .otherMouseDown : .otherMouseUp,
                 mouseCursorPosition: location,
-                mouseButton: CGMouseButton(rawValue: UInt32(button))!)
+                mouseButton: CGMouseButton(rawValue: UInt32(button))!
+            )
         else { return }
 
         event.post(tap: .cghidEventTap)
