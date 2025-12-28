@@ -1,10 +1,10 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 @testable import LinearMouse
 import XCTest
 
-class LinearScrollingTransformerTests: XCTestCase {
+final class LinearScrollingTransformerTests: XCTestCase {
     func testLinearScrollingByLines() throws {
         let transformer = LinearScrollingVerticalTransformer(distance: .line(3))
         var event = CGEvent(

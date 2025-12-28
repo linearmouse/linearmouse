@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Defaults
 import Foundation
@@ -44,7 +44,8 @@ class SemanticVersioningComparator: SUVersionComparison {
         }
         if a < b {
             return .orderedAscending
-        } else if a > b {
+        }
+        if a > b {
             return .orderedDescending
         }
         return .orderedSame

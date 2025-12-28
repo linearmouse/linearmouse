@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Foundation
 
@@ -19,20 +19,22 @@ extension Scheme {
         var switchPrimaryButtonAndSecondaryButtons: Bool?
 
         @ImplicitOptional var clickDebouncing: ClickDebouncing
+
+        @ImplicitOptional var gesture: Gesture
     }
 }
 
 extension Scheme.Buttons {
     func merge(into buttons: inout Self) {
-        if let mappings = mappings, mappings.count > 0 {
+        if let mappings, !mappings.isEmpty {
             buttons.mappings = (buttons.mappings ?? []) + mappings
         }
 
-        if let universalBackForward = universalBackForward {
+        if let universalBackForward {
             buttons.universalBackForward = universalBackForward
         }
 
-        if let switchPrimaryButtonAndSecondaryButtons = switchPrimaryButtonAndSecondaryButtons {
+        if let switchPrimaryButtonAndSecondaryButtons {
             buttons.switchPrimaryButtonAndSecondaryButtons = switchPrimaryButtonAndSecondaryButtons
         }
 
@@ -40,8 +42,8 @@ extension Scheme.Buttons {
             buttons.clickDebouncing = clickDebouncing
         }
 
-        if let clickDebouncing = $clickDebouncing {
-            buttons.$clickDebouncing = clickDebouncing
+        if let gesture = $gesture {
+            buttons.$gesture = gesture
         }
     }
 

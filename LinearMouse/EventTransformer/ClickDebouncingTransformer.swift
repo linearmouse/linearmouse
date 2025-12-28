@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Foundation
 import os.log
@@ -43,22 +43,26 @@ class ClickDebouncingTransformer: EventTransformer {
             touchLastClickedAt()
             if intervalSinceLastClick <= timeout {
                 state = .waitForDown
-                os_log("Mouse down ignored because interval since last click %{public}f <= %{public}f",
-                       log: Self.log,
-                       type: .info,
-                       intervalSinceLastClick,
-                       timeout)
+                os_log(
+                    "Mouse down ignored because interval since last click %{public}f <= %{public}f",
+                    log: Self.log,
+                    type: .info,
+                    intervalSinceLastClick,
+                    timeout
+                )
                 return nil
             }
             state = .waitForUp
             return event
         case mouseUpEventType:
             if state == .waitForDown {
-                os_log("Mouse up ignored because last mouse down ignored",
-                       log: Self.log,
-                       type: .info,
-                       intervalSinceLastClick,
-                       timeout)
+                os_log(
+                    "Mouse up ignored because last mouse down ignored",
+                    log: Self.log,
+                    type: .info,
+                    intervalSinceLastClick,
+                    timeout
+                )
                 return nil
             }
             if resetTimerOnMouseUp {

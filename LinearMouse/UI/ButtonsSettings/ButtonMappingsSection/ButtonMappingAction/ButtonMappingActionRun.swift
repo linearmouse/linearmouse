@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import SwiftUI
 
@@ -21,7 +21,7 @@ struct ButtonMappingActionRun: View {
     }
 
     var body: some View {
-        TextField("", text: command)
+        TextField(String(""), text: command)
             .labelsHidden()
     }
 }

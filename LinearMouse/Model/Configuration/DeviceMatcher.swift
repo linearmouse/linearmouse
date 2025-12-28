@@ -45,12 +45,8 @@ extension DeviceMatcher {
             return false
         }
 
-        if let category = category {
-            guard
-                category.contains(where: {
-                    $0.deviceCategory == device.category
-                })
-            else {
+        if let category {
+            guard category.contains(where: { $0.deviceCategory == device.category }) else {
                 return false
             }
         }

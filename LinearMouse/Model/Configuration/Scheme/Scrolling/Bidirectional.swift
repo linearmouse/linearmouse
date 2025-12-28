@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 extension Scheme.Scrolling {
     struct Bidirectional<T: Codable & Equatable>: Equatable, ImplicitInitable {
@@ -7,11 +7,11 @@ extension Scheme.Scrolling {
         var horizontal: T?
 
         func merge(into: inout Self) {
-            if let vertical = vertical {
+            if let vertical {
                 into.vertical = vertical
             }
 
-            if let horizontal = horizontal {
+            if let horizontal {
                 into.horizontal = horizontal
             }
         }
@@ -67,8 +67,10 @@ extension Scheme.Scrolling.Bidirectional: Codable {
             guard container.contains(.vertical) || container.contains(.horizontal) else {
                 throw DecodingError.typeMismatch(
                     Self.self,
-                    .init(codingPath: container.codingPath,
-                          debugDescription: "Neither vertical or horizontal key found")
+                    .init(
+                        codingPath: container.codingPath,
+                        debugDescription: "Neither vertical or horizontal key found"
+                    )
                 )
             }
             vertical = try container.decodeIfPresent(T.self, forKey: .vertical)
@@ -92,10 +94,10 @@ extension Scheme.Scrolling.Bidirectional: Codable {
         }
 
         var container = encoder.container(keyedBy: CodingKeys.self)
-        if let vertical = vertical {
+        if let vertical {
             try container.encode(vertical, forKey: .vertical)
         }
-        if let horizontal = horizontal {
+        if let horizontal {
             try container.encode(horizontal, forKey: .horizontal)
         }
     }

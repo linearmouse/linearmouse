@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import CoreFoundation
 import KeyKitC
@@ -119,7 +119,7 @@ public func postSymbolicHotKey(_ hotkey: SymbolicHotKey) throws {
 
 private func waitUntilCGEventsBeingHandled() {
     enum Consts {
-        static let magic: Int64 = 10086
+        static let magic: Int64 = 10_086
     }
 
     var seenMark = false
@@ -132,12 +132,14 @@ private func waitUntilCGEventsBeingHandled() {
         return Unmanaged.passUnretained(event)
     }
 
-    let eventTap = CGEvent.tapCreate(tap: .cgSessionEventTap,
-                                     place: .tailAppendEventTap,
-                                     options: .listenOnly,
-                                     eventsOfInterest: 1 << CGEventType.null.rawValue,
-                                     callback: callback,
-                                     userInfo: &seenMark)!
+    let eventTap = CGEvent.tapCreate(
+        tap: .cgSessionEventTap,
+        place: .tailAppendEventTap,
+        options: .listenOnly,
+        eventsOfInterest: 1 << CGEventType.null.rawValue,
+        callback: callback,
+        userInfo: &seenMark
+    )!
 
     let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
 

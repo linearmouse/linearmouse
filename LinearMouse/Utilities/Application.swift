@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import AppKit
 
@@ -19,6 +19,6 @@ enum Application {
         } catch {
             NSAlert(error: error).runModal()
         }
-        NSApp.terminate(nil)
+        NSApplication.shared.terminate(nil)
     }
 }

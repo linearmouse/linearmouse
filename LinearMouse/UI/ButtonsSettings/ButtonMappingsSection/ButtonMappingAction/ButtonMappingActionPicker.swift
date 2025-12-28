@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import SwiftUI
 
@@ -30,7 +30,7 @@ extension ButtonMappingActionPicker {
         var id: UUID { UUID() }
 
         case actionType(ActionType)
-        case section(LocalizedStringKey, () -> [ActionTypeTreeNode])
+        case section(LocalizedStringKey, () -> [Self])
     }
 
     struct ActionTypeTreeView: View {
@@ -43,7 +43,7 @@ extension ButtonMappingActionPicker {
                     Text(actionType.description.capitalized).tag(actionType)
                 case let .section(header, getNodes):
                     Section(header: Text(header)) {
-                        ActionTypeTreeView(nodes: getNodes())
+                        Self(nodes: getNodes())
                     }
                 }
             }
@@ -57,7 +57,8 @@ extension ButtonMappingActionPicker {
             .actionType(.arg0(.missionControl)),
             .actionType(.arg0(.missionControlSpaceLeft)),
             .actionType(.arg0(.missionControlSpaceRight))
-        ] },
+        ]
+        },
         .actionType(.arg0(.appExpose)),
         .actionType(.arg0(.launchpad)),
         .actionType(.arg0(.showDesktop)),
@@ -66,7 +67,8 @@ extension ButtonMappingActionPicker {
         .section("Display") { [
             .actionType(.arg0(.displayBrightnessUp)),
             .actionType(.arg0(.displayBrightnessDown))
-        ] },
+        ]
+        },
         .section("Media") { [
             .actionType(.arg0(.mediaVolumeUp)),
             .actionType(.arg0(.mediaVolumeDown)),
@@ -76,12 +78,14 @@ extension ButtonMappingActionPicker {
             .actionType(.arg0(.mediaNext)),
             .actionType(.arg0(.mediaFastForward)),
             .actionType(.arg0(.mediaRewind))
-        ] },
+        ]
+        },
         .section("Keyboard") { [
             .actionType(.arg0(.keyboardBrightnessUp)),
             .actionType(.arg0(.keyboardBrightnessDown)),
             .actionType(.keyPress)
-        ] },
+        ]
+        },
         .section("Mouse Wheel") { [
             .actionType(.arg0(.mouseWheelScrollUp)),
             .actionType(.mouseWheelScrollUp),
@@ -91,7 +95,8 @@ extension ButtonMappingActionPicker {
             .actionType(.mouseWheelScrollLeft),
             .actionType(.arg0(.mouseWheelScrollRight)),
             .actionType(.mouseWheelScrollRight)
-        ] },
+        ]
+        },
         .section("Mouse Button") { [
             .actionType(.arg0(.mouseButtonLeft)),
             .actionType(.arg0(.mouseButtonLeftDouble)),
@@ -99,10 +104,12 @@ extension ButtonMappingActionPicker {
             .actionType(.arg0(.mouseButtonRight)),
             .actionType(.arg0(.mouseButtonBack)),
             .actionType(.arg0(.mouseButtonForward))
-        ] },
+        ]
+        },
         .section("Execute") { [
             .actionType(.run)
-        ] }
+        ]
+        }
     ]
 }
 

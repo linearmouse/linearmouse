@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import SwiftUI
 
@@ -53,7 +53,8 @@ func withDescription<View1: View, View2: View>(@ViewBuilder content: () -> Tuple
     } else {
         return VStack(alignment: .leading) {
             c.value.0
-            c.value.1
+            c.value
+                .1
                 .controlSize(.small)
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -61,8 +62,10 @@ func withDescription<View1: View, View2: View>(@ViewBuilder content: () -> Tuple
     }
 }
 
-func labelWithDescription<View1: View,
-    View2: View>(@ViewBuilder content: () -> TupleView<(View1, View2)>) -> some View {
+func labelWithDescription<
+    View1: View,
+    View2: View
+>(@ViewBuilder content: () -> TupleView<(View1, View2)>) -> some View {
     let c = content()
 
     if #available(macOS 13.0, *) {
@@ -73,7 +76,8 @@ func labelWithDescription<View1: View,
     } else {
         return VStack(alignment: .trailing) {
             c.value.0
-            c.value.1
+            c.value
+                .1
                 .controlSize(.small)
                 .foregroundColor(.secondary)
         }

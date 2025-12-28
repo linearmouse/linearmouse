@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import KeyKit
 import ObservationToken
@@ -88,7 +88,8 @@ struct KeyboardShortcutRecorder: View {
         if modifierFlags.contains(.maskControl) {
             keys
                 .append(modifierFlags
-                    .contains(.init(rawValue: UInt64(NX_DEVICERCTLKEYMASK))) ? .controlRight : .control)
+                    .contains(.init(rawValue: UInt64(NX_DEVICERCTLKEYMASK))) ? .controlRight : .control
+                )
         }
 
         if modifierFlags.contains(.maskShift) {
@@ -102,7 +103,8 @@ struct KeyboardShortcutRecorder: View {
         if modifierFlags.contains(.maskCommand) {
             keys
                 .append(modifierFlags
-                    .contains(.init(rawValue: UInt64(NX_DEVICERCMDKEYMASK))) ? .commandRight : .command)
+                    .contains(.init(rawValue: UInt64(NX_DEVICERCMDKEYMASK))) ? .commandRight : .command
+                )
         }
 
         return keys
@@ -115,7 +117,7 @@ struct KeyboardShortcutRecorder: View {
 
             // If all modifier keys are released without and other key pressed,
             // just record the modifier keys.
-            if event.flags.intersection([.maskControl, .maskShift, .maskAlternate, .maskCommand]).isEmpty {
+            if event.flags.isDisjoint(with: [.maskControl, .maskShift, .maskAlternate, .maskCommand]) {
                 keys = buildKeysFromModifierFlags(recordingModifiers)
                 recording = false
             }

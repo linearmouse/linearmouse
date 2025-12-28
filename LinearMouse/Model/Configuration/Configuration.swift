@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import AppKit
 import Defaults
@@ -31,21 +31,27 @@ extension Configuration.ConfigurationError: LocalizedError {
             if let decodingError = underlyingError as? DecodingError {
                 switch decodingError {
                 case let .typeMismatch(type, context):
-                    return String(format: NSLocalizedString("Type mismatch: expected %1$@ at %2$@", comment: ""),
-                                  String(describing: type),
-                                  String(describing: context.codingPath.map(\.stringValue).joined(separator: ".")))
+                    return String(
+                        format: NSLocalizedString("Type mismatch: expected %1$@ at %2$@", comment: ""),
+                        String(describing: type),
+                        String(describing: context.codingPath.map(\.stringValue).joined(separator: "."))
+                    )
                 case let .keyNotFound(codingKey, context):
-                    return String(format: NSLocalizedString("Missing key %1$@ at %2$@", comment: ""),
-                                  String(describing: codingKey.stringValue),
-                                  String(describing: context.codingPath.map(\.stringValue).joined(separator: ".")))
+                    return String(
+                        format: NSLocalizedString("Missing key %1$@ at %2$@", comment: ""),
+                        String(describing: codingKey.stringValue),
+                        String(describing: context.codingPath.map(\.stringValue).joined(separator: "."))
+                    )
                 default:
                     break
                 }
                 return String(describing: underlyingError)
             }
             // TODO: More detailed description in underlyingError.
-            return String(format: NSLocalizedString("Invalid JSON: %@", comment: ""),
-                          underlyingError.localizedDescription)
+            return String(
+                format: NSLocalizedString("Invalid JSON: %@", comment: ""),
+                underlyingError.localizedDescription
+            )
         }
     }
 }
@@ -89,45 +95,63 @@ extension Configuration {
         if !FileManager.default.fileExists(atPath: parentDirectory.path) {
             try FileManager.default.createDirectory(at: parentDirectory, withIntermediateDirectories: true)
         }
-        try dump().write(to: url, options: .atomic)
+        try dump().write(to: url.resolvingSymlinksInPath(), options: .atomic)
     }
 
-    func matchScheme(withDevice device: Device? = nil,
-                     withApp app: String? = nil,
-                     withParentApp parentApp: String? = nil,
-                     withGroupApp groupApp: String? = nil,
-                     withDisplay display: String? = nil) -> Scheme {
+    func matchScheme(
+        withDevice device: Device? = nil,
+        withApp app: String? = nil,
+        withParentApp parentApp: String? = nil,
+        withGroupApp groupApp: String? = nil,
+        withDisplay display: String? = nil,
+        withProcessName processName: String? = nil,
+        withProcessPath processPath: String? = nil
+    ) -> Scheme {
         // TODO: Backtrace the merge path
         // TODO: Optimize the algorithm
 
         var mergedScheme = Scheme()
 
-        let `if` = Scheme.If(device: device.map { DeviceMatcher(of: $0) },
-                             app: app,
-                             parentApp: parentApp,
-                             groupApp: groupApp,
-                             display: display)
+        let `if` = Scheme.If(
+            device: device.map { DeviceMatcher(of: $0) },
+            app: app,
+            parentApp: parentApp,
+            groupApp: groupApp,
+            processName: processName,
+            processPath: processPath,
+            display: display
+        )
 
         mergedScheme.if = [`if`]
 
-        for scheme in schemes where scheme.isActive(withDevice: device,
-                                                    withApp: app,
-                                                    withParentApp: parentApp,
-                                                    withGroupApp: groupApp,
-                                                    withDisplay: display) {
+        for scheme in schemes where scheme.isActive(
+            withDevice: device,
+            withApp: app,
+            withParentApp: parentApp,
+            withGroupApp: groupApp,
+            withDisplay: display,
+            withProcessName: processName,
+            withProcessPath: processPath
+        ) {
             scheme.merge(into: &mergedScheme)
         }
 
         return mergedScheme
     }
 
-    func matchScheme(withDevice device: Device? = nil,
-                     withPid pid: pid_t? = nil,
-                     withDisplay display: String? = nil) -> Scheme {
-        matchScheme(withDevice: device,
-                    withApp: pid?.bundleIdentifier,
-                    withParentApp: pid?.parent?.bundleIdentifier,
-                    withGroupApp: pid?.group?.bundleIdentifier,
-                    withDisplay: display)
+    func matchScheme(
+        withDevice device: Device? = nil,
+        withPid pid: pid_t? = nil,
+        withDisplay display: String? = nil
+    ) -> Scheme {
+        matchScheme(
+            withDevice: device,
+            withApp: pid?.bundleIdentifier,
+            withParentApp: pid?.parent?.bundleIdentifier,
+            withGroupApp: pid?.group?.bundleIdentifier,
+            withDisplay: display,
+            withProcessName: pid?.processName,
+            withProcessPath: pid?.processPath
+        )
     }
 }

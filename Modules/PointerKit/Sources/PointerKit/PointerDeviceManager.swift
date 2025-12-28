@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Foundation
 import ObservationToken
@@ -48,8 +48,10 @@ public extension PointerDeviceManager {
         }
     }
 
-    func observePropertyChanged(property: String,
-                                using closure: @escaping PropertyChangedClosure) -> ObservationToken {
+    func observePropertyChanged(
+        property: String,
+        using closure: @escaping PropertyChangedClosure
+    ) -> ObservationToken {
         let id = observations.propertyChanged.insert((property: property, closure: closure))
 
         return ObservationToken { [weak self] in
@@ -87,8 +89,12 @@ extension PointerDeviceManager {
 
     private static let propertyChangedCallback: IOHIDEventSystemClientPropertyChangedCallback =
         { target, _, property, value in
-            guard let target = target else { return }
-            guard let property = property else { return }
+            guard let target else {
+                return
+            }
+            guard let property else {
+                return
+            }
 
             let this = Unmanaged<PointerDeviceManager>.fromOpaque(target).takeUnretainedValue()
             this.propertyChangedCallback(property as String, value)
@@ -100,7 +106,9 @@ extension PointerDeviceManager {
      Registered `DeviceAddedClosure`s will be notified immediately with all the current devices.
      */
     public func startObservation() {
-        guard eventSystemClient == nil else { return }
+        guard eventSystemClient == nil else {
+            return
+        }
 
         guard let eventSystemClient = IOHIDEventSystemClientCreate(kCFAllocatorDefault) else {
             return
@@ -108,16 +116,22 @@ extension PointerDeviceManager {
 
         self.eventSystemClient = eventSystemClient
 
-        IOHIDEventSystemClientSetMatchingMultiple(eventSystemClient,
-                                                  ObservationMatches.mouseOrPointer)
-        IOHIDEventSystemClientRegisterDeviceMatchingBlock(eventSystemClient,
-                                                          serviceMatchingCallback,
-                                                          nil,
-                                                          nil)
-        IOHIDEventSystemClientRegisterEventBlock(eventSystemClient,
-                                                 eventReceivedCallback,
-                                                 nil,
-                                                 nil)
+        IOHIDEventSystemClientSetMatchingMultiple(
+            eventSystemClient,
+            ObservationMatches.mouseOrPointer
+        )
+        IOHIDEventSystemClientRegisterDeviceMatchingBlock(
+            eventSystemClient,
+            serviceMatchingCallback,
+            nil,
+            nil
+        )
+        IOHIDEventSystemClientRegisterEventBlock(
+            eventSystemClient,
+            eventReceivedCallback,
+            nil,
+            nil
+        )
         IOHIDEventSystemClientScheduleWithDispatchQueue(eventSystemClient, DispatchQueue.main)
 
         if let clients = IOHIDEventSystemClientCopyServices(eventSystemClient) as? [IOHIDServiceClient] {
@@ -143,7 +157,9 @@ extension PointerDeviceManager {
      Registered `DeviceRemovedClosure`s will be notified immediately with all the current devices.
      */
     public func stopObservation() {
-        guard let eventSystemClient = eventSystemClient else { return }
+        guard let eventSystemClient else {
+            return
+        }
 
         IOHIDEventSystemClientUnregisterDeviceMatchingBlock(eventSystemClient)
         IOHIDEventSystemClientUnscheduleFromDispatchQueue(eventSystemClient, DispatchQueue.main)
@@ -155,30 +171,46 @@ extension PointerDeviceManager {
         self.eventSystemClient = nil
     }
 
-    private func serviceMatchingCallback(_: UnsafeMutableRawPointer?,
-                                         _: UnsafeMutableRawPointer?,
-                                         _ client: IOHIDServiceClient?) {
-        guard let client = client else { return }
+    private func serviceMatchingCallback(
+        _: UnsafeMutableRawPointer?,
+        _: UnsafeMutableRawPointer?,
+        _ client: IOHIDServiceClient?
+    ) {
+        guard let client else {
+            return
+        }
 
         addDevice(forClient: client)
     }
 
-    private func clientRemovalCallback(_: UnsafeMutableRawPointer?,
-                                       _: UnsafeMutableRawPointer?,
-                                       _ client: IOHIDServiceClient?) {
-        guard let client = client else { return }
+    private func clientRemovalCallback(
+        _: UnsafeMutableRawPointer?,
+        _: UnsafeMutableRawPointer?,
+        _ client: IOHIDServiceClient?
+    ) {
+        guard let client else {
+            return
+        }
 
         removeDevice(forClient: client)
     }
 
-    private func eventReceivedCallback(_: UnsafeMutableRawPointer?,
-                                       _: UnsafeMutableRawPointer?,
-                                       _ client: IOHIDServiceClient?,
-                                       event: IOHIDEvent?) {
-        guard let client = client else { return }
-        guard let event = event else { return }
+    private func eventReceivedCallback(
+        _: UnsafeMutableRawPointer?,
+        _: UnsafeMutableRawPointer?,
+        _ client: IOHIDServiceClient?,
+        event: IOHIDEvent?
+    ) {
+        guard let client else {
+            return
+        }
+        guard let event else {
+            return
+        }
 
-        guard let device = serviceClientToPointerDevice[client] else { return }
+        guard let device = serviceClientToPointerDevice[client] else {
+            return
+        }
 
         for (_, callback) in observations.eventReceived {
             callback(self, device, event)
@@ -192,7 +224,9 @@ extension PointerDeviceManager {
     }
 
     private func addDevice(forClient client: IOHIDServiceClient) {
-        guard serviceClientToPointerDevice[client] == nil else { return }
+        guard serviceClientToPointerDevice[client] == nil else {
+            return
+        }
 
         let device = PointerDevice(client)
 
@@ -206,7 +240,9 @@ extension PointerDeviceManager {
     }
 
     private func removeDevice(forClient client: IOHIDServiceClient) {
-        guard let device = serviceClientToPointerDevice[client] else { return }
+        guard let device = serviceClientToPointerDevice[client] else {
+            return
+        }
 
         removeDevice(device)
     }
@@ -220,7 +256,7 @@ extension PointerDeviceManager {
     }
 
     public func pointerDeviceFromIOHIDEvent(_ ioHidEvent: IOHIDEvent) -> PointerDevice? {
-        guard let eventSystemClient = eventSystemClient else {
+        guard let eventSystemClient else {
             return nil
         }
 

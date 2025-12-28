@@ -1,11 +1,11 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 @testable import LinearMouse
 import XCTest
 
-class ImplicitOptionalTests: XCTestCase {
-    struct Foo: Codable, Equatable {
+final class ImplicitOptionalTests: XCTestCase {
+    fileprivate struct Foo: Codable, Equatable {
         @ImplicitOptional var bar: Bar
 
         init() {}
@@ -15,7 +15,7 @@ class ImplicitOptionalTests: XCTestCase {
         }
     }
 
-    struct Bar: Codable, Equatable {
+    fileprivate struct Bar: Codable, Equatable {
         @ImplicitOptional var baz: Baz
 
         init() {}
@@ -25,20 +25,24 @@ class ImplicitOptionalTests: XCTestCase {
         }
     }
 
-    struct Baz: Codable, Equatable {
+    fileprivate struct Baz: Codable, Equatable {
         var qux: Int
     }
 
     func testEncodingNil() throws {
         let encoder = JSONEncoder()
-        XCTAssertEqual(try String(decoding: encoder.encode(Foo()), as: UTF8.self),
-                       "{}")
+        XCTAssertEqual(
+            try String(bytes: encoder.encode(Foo()), encoding: .utf8),
+            "{}"
+        )
     }
 
     func testEncodingNestedNil() throws {
         let encoder = JSONEncoder()
-        XCTAssertEqual(try String(decoding: encoder.encode(Foo(bar: Bar())), as: UTF8.self),
-                       "{\"bar\":{}}")
+        XCTAssertEqual(
+            try String(bytes: encoder.encode(Foo(bar: Bar())), encoding: .utf8),
+            "{\"bar\":{}}"
+        )
     }
 
     func testNestedAssignment() throws {
@@ -49,8 +53,8 @@ class ImplicitOptionalTests: XCTestCase {
 
     func testDecodeNil() throws {
         let decoder = JSONDecoder()
-        let foo = try decoder.decode(Foo.self, from: "{\"bar\":{}}".data(using: .utf8)!)
-        XCTAssertEqual(foo.bar.$baz, nil)
+        let foo = try decoder.decode(Foo.self, from: Data("{\"bar\":{}}".utf8))
+        XCTAssertNil(foo.bar.$baz)
     }
 }
 

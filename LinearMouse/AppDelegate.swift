@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import AppMover
 import Combine
@@ -16,7 +16,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var subscriptions = Set<AnyCancellable>()
 
     func applicationDidFinishLaunching(_: Notification) {
-        guard ProcessEnvironment.isRunningApp else { return }
+        guard ProcessEnvironment.isRunningApp else {
+            return
+        }
 
         #if !DEBUG
             if AppMover.moveIfNecessary() {
@@ -37,7 +39,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        guard ProcessEnvironment.isRunningApp else { return true }
+        guard ProcessEnvironment.isRunningApp else {
+            return true
+        }
 
         if flag {
             return true
@@ -49,7 +53,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_: Notification) {
-        guard ProcessEnvironment.isRunningApp else { return }
+        guard ProcessEnvironment.isRunningApp else {
+            return
+        }
 
         stop()
     }
@@ -64,28 +70,30 @@ extension AppDelegate {
 
     func setupConfiguration() {
         ConfigurationState.shared.load()
+        // Start watching the configuration file for hot reload
+        ConfigurationState.shared.startHotReload()
     }
 
     func setupNotifications() {
+        // Prepare user notifications for error popups
+        Notifier.shared.setup()
         NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.sessionDidResignActiveNotification,
             object: nil,
-            queue: .main,
-            using: { [weak self] _ in
-                os_log("Session inactive", log: Self.log, type: .info)
-                self?.stop()
-            }
-        )
+            queue: .main
+        ) { [weak self] _ in
+            os_log("Session inactive", log: Self.log, type: .info)
+            self?.stop()
+        }
 
         NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.sessionDidBecomeActiveNotification,
             object: nil,
-            queue: .main,
-            using: { [weak self] _ in
-                os_log("Session active", log: Self.log, type: .info)
-                self?.start()
-            }
-        )
+            queue: .main
+        ) { [weak self] _ in
+            os_log("Session active", log: Self.log, type: .info)
+            self?.start()
+        }
     }
 
     func start() {

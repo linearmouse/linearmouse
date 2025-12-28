@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Combine
 import Defaults
@@ -22,9 +22,11 @@ class StatusItem {
             keyEquivalent: ","
         )
 
-        let configurationItem = NSMenuItem(title: NSLocalizedString("Config", comment: ""),
-                                           action: nil,
-                                           keyEquivalent: "")
+        let configurationItem = NSMenuItem(
+            title: NSLocalizedString("Config", comment: ""),
+            action: nil,
+            keyEquivalent: ""
+        )
 
         configurationItem.submenu = configurationMenu
 
@@ -61,15 +63,16 @@ class StatusItem {
         NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didActivateApplicationNotification,
             object: nil,
-            queue: .main,
-            using: { _ in
-                updateOpenSettingsForFrontmostApplicationItem()
-            }
-        )
+            queue: .main
+        ) { _ in
+            updateOpenSettingsForFrontmostApplicationItem()
+        }
 
-        let quitItem = NSMenuItem(title: String(format: NSLocalizedString("Quit %@", comment: ""), LinearMouse.appName),
-                                  action: #selector(quit),
-                                  keyEquivalent: "q")
+        let quitItem = NSMenuItem(
+            title: String(format: NSLocalizedString("Quit %@", comment: ""), LinearMouse.appName),
+            action: #selector(quit),
+            keyEquivalent: "q"
+        )
 
         menu.items = [
             openSettingsItem,
@@ -89,12 +92,17 @@ class StatusItem {
     private lazy var configurationMenu: NSMenu = {
         let configurationMenu = NSMenu()
 
-        let reloadItem = NSMenuItem(title: NSLocalizedString("Reload", comment: ""),
-                                    action: #selector(reloadConfiguration), keyEquivalent: "r")
+        let reloadItem = NSMenuItem(
+            title: NSLocalizedString("Reload", comment: ""),
+            action: #selector(reloadConfiguration),
+            keyEquivalent: "r"
+        )
 
-        let revealInFinderItem = NSMenuItem(title: NSLocalizedString("Reveal in Finder", comment: ""),
-                                            action: #selector(revealConfigurationInFinder),
-                                            keyEquivalent: "r")
+        let revealInFinderItem = NSMenuItem(
+            title: NSLocalizedString("Reveal in Finder", comment: ""),
+            action: #selector(revealConfigurationInFinder),
+            keyEquivalent: "r"
+        )
         revealInFinderItem.keyEquivalentModifierMask = [.option, .command]
 
         configurationMenu.items = [
@@ -123,10 +131,13 @@ class StatusItem {
         statusItem.menu = menu
 
         Defaults.observe(.showInMenuBar) { [weak self] change in
-            guard let self = self else { return }
+            guard let self else {
+                return
+            }
 
             self.statusItem.isVisible = change.newValue
-        }.tieToLifetime(of: self)
+        }
+        .tieToLifetime(of: self)
     }
 
     @objc private func statusItemAction(sender _: NSStatusBarButton) {
@@ -144,12 +155,16 @@ class StatusItem {
     }
 
     @objc private func openSettingsForFrontmostApplication() {
-        SchemeState.shared.currentApp = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+        if let bundleIdentifier = NSWorkspace.shared.frontmostApplication?.bundleIdentifier {
+            SchemeState.shared.currentApp = .bundle(bundleIdentifier)
+        } else {
+            SchemeState.shared.currentApp = nil
+        }
         SettingsWindowController.shared.bringToFront()
     }
 
     @objc private func reloadConfiguration() {
-        ConfigurationState.shared.load()
+        ConfigurationState.shared.reloadFromDisk()
     }
 
     @objc private func revealConfigurationInFinder() {
@@ -161,6 +176,6 @@ class StatusItem {
     }
 
     @objc private func quit() {
-        NSApp.terminate(nil)
+        NSApplication.shared.terminate(nil)
     }
 }

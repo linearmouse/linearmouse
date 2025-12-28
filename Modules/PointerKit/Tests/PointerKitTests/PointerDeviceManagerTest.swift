@@ -1,14 +1,14 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import ObservationToken
 @testable import PointerKit
 import XCTest
 
-class PointerDeviceManagerTest: XCTestCase {
-    class Scope {}
+final class PointerDeviceManagerTest: XCTestCase {
+    private class Scope {}
 
-    struct WeakRef<T: AnyObject> {
+    private struct WeakRef<T: AnyObject> {
         weak var value: T?
     }
 
@@ -24,11 +24,13 @@ class PointerDeviceManagerTest: XCTestCase {
             DispatchQueue.main.async {
                 tokenRef.value = manager.observeDeviceAdded { manager, device in
                     debugPrint("device added", manager, device)
-                }.tieToLifetime(of: scope)
+                }
+                .tieToLifetime(of: scope)
 
                 manager.observeDeviceRemoved { manager, device in
                     debugPrint("device removed", manager, device)
-                }.tieToLifetime(of: scope)
+                }
+                .tieToLifetime(of: scope)
 
                 manager.startObservation()
             }

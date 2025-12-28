@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import AppKit
 import Combine
@@ -14,11 +14,13 @@ class AppPickerState: ObservableObject {
     @Published var installedApps: [InstalledApp] = []
 
     private var runningAppSet: Set<String> {
-        Set(NSWorkspace.shared.runningApplications.map(\.bundleIdentifier).compactMap { $0 })
+        Set(NSWorkspace.shared.runningApplications.map(\.bundleIdentifier).compactMap(\.self))
     }
 
     private var configuredAppSet: Set<String> {
-        guard let device = deviceState.currentDeviceRef?.value else { return [] }
+        guard let device = deviceState.currentDeviceRef?.value else {
+            return []
+        }
 
         return Set(schemeState.schemes.allDeviceSpecficSchemes(of: device).reduce([String]()) { acc, element in
             guard let app = element.element.if?.first?.app else {
@@ -28,15 +30,34 @@ class AppPickerState: ObservableObject {
         })
     }
 
+    private var configuredExecutableSet: Set<String> {
+        guard let device = deviceState.currentDeviceRef?.value else {
+            return []
+        }
+
+        return Set(schemeState.schemes.allDeviceSpecficSchemes(of: device).reduce([String]()) { acc, element in
+            guard let processPath = element.element.if?.first?.processPath else {
+                return acc
+            }
+            return acc + [processPath]
+        })
+    }
+
     var configuredApps: [InstalledApp] {
         configuredAppSet
             .map {
                 try? readInstalledApp(bundleIdentifier: $0) ??
-                    .init(bundleName: $0,
-                          bundleIdentifier: $0,
-                          bundleIcon: NSWorkspace.shared.icon(forFile: ""))
+                    .init(
+                        bundleName: $0,
+                        bundleIdentifier: $0,
+                        bundleIcon: NSWorkspace.shared.icon(forFile: "")
+                    )
             }
-            .compactMap { $0 }
+            .compactMap(\.self)
+    }
+
+    var configuredExecutables: [String] {
+        Array(configuredExecutableSet).sorted()
     }
 
     var runningApps: [InstalledApp] {
@@ -63,7 +84,8 @@ extension AppPickerState {
         let fileManager = FileManager.default
         for appDirURL in fileManager.urls(for: .applicationDirectory, in: .allDomainsMask) {
             let appURLs = (try? fileManager
-                .contentsOfDirectory(at: appDirURL, includingPropertiesForKeys: nil)) ?? []
+                .contentsOfDirectory(at: appDirURL, includingPropertiesForKeys: nil)
+            ) ?? []
             for appURL in appURLs {
                 guard let installedApp = try? readInstalledApp(at: appURL) else {
                     continue

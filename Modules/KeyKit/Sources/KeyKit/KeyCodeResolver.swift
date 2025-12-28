@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import AppKit
 import Carbon
@@ -63,6 +63,7 @@ public class KeyCodeResolver {
         newMapping[Key.space.rawValue] = 0x31
         newMapping[Key.delete.rawValue] = 0x33
         newMapping[Key.escape.rawValue] = 0x35
+        newMapping[Key.commandRight.rawValue] = 0x36
         newMapping[Key.command.rawValue] = 0x37
         newMapping[Key.shift.rawValue] = 0x38
         newMapping[Key.capsLock.rawValue] = 0x39
@@ -94,16 +95,28 @@ public class KeyCodeResolver {
         newMapping[Key.f12.rawValue] = 0x6F
         newMapping[Key.numpadPlus.rawValue] = 0x45
         newMapping[Key.numpadMinus.rawValue] = 0x4E
+        newMapping[Key.numpadMultiply.rawValue] = 0x43
+        newMapping[Key.numpadDivide.rawValue] = 0x4B
+        newMapping[Key.numpadEnter.rawValue] = 0x4C
+        newMapping[Key.numpadEquals.rawValue] = 0x51
+        newMapping[Key.numpadDecimal.rawValue] = 0x41
+        newMapping[Key.numpadClear.rawValue] = 0x47
+        newMapping[Key.numpad0.rawValue] = 0x52
+        newMapping[Key.numpad1.rawValue] = 0x53
+        newMapping[Key.numpad2.rawValue] = 0x54
+        newMapping[Key.numpad3.rawValue] = 0x55
+        newMapping[Key.numpad4.rawValue] = 0x56
+        newMapping[Key.numpad5.rawValue] = 0x57
+        newMapping[Key.numpad6.rawValue] = 0x58
+        newMapping[Key.numpad7.rawValue] = 0x59
+        newMapping[Key.numpad8.rawValue] = 0x5B
+        newMapping[Key.numpad9.rawValue] = 0x5C
         for (keyString, keyCode) in newMapping {
             guard let key = Key(rawValue: keyString) else {
                 continue
             }
             newReversedMapping[keyCode] = key
         }
-        // As the keyCode of command and the keyCode of commandRight
-        // are the same, avoid inserting commandRight into the reversed
-        // mapping.
-        newMapping[Key.commandRight.rawValue] = 0x37
 
         mapping = newMapping
         reversedMapping = newReversedMapping

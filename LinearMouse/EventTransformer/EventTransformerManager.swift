@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Combine
 import Defaults
@@ -25,7 +25,8 @@ class EventTransformerManager {
     private var subscriptions = Set<AnyCancellable>()
 
     init() {
-        ConfigurationState.shared.$configuration
+        ConfigurationState.shared
+            .$configuration
             .removeDuplicates()
             .sink { [weak self] _ in
                 self?.eventTransformerCache.removeAllValues()
@@ -37,19 +38,21 @@ class EventTransformerManager {
         "cc.ffitch.shottr"
     ]
 
-    func get(withCGEvent cgEvent: CGEvent,
-             withSourcePid sourcePid: pid_t?,
-             withTargetPid targetPid: pid_t?,
-             withMouseLocationPid mouseLocationPid: pid_t?,
-             withDisplay display: String?) -> EventTransformer {
+    func get(
+        withCGEvent cgEvent: CGEvent,
+        withSourcePid sourcePid: pid_t?,
+        withTargetPid targetPid: pid_t?,
+        withMouseLocationPid mouseLocationPid: pid_t?,
+        withDisplay display: String?
+    ) -> EventTransformer {
         let prevActiveCacheKey = activeCacheKey
         defer {
-            if let prevActiveCacheKey = prevActiveCacheKey,
+            if let prevActiveCacheKey,
                prevActiveCacheKey != activeCacheKey {
                 if let eventTransformer = eventTransformerCache.value(forKey: prevActiveCacheKey) as? Deactivatable {
                     eventTransformer.deactivate()
                 }
-                if let activeCacheKey = activeCacheKey,
+                if let activeCacheKey,
                    let eventTransformer = eventTransformerCache.value(forKey: activeCacheKey) as? Deactivatable {
                     eventTransformer.reactivate()
                 }
@@ -59,18 +62,22 @@ class EventTransformerManager {
         activeCacheKey = nil
 
         if sourcePid != nil, bypassEventsFromOtherApplications {
-            os_log("Return noop transformer because this event is sent by %{public}s",
-                   log: Self.log,
-                   type: .info,
-                   sourcePid?.bundleIdentifier ?? "(unknown)")
+            os_log(
+                "Return noop transformer because this event is sent by %{public}s",
+                log: Self.log,
+                type: .info,
+                sourcePid?.bundleIdentifier ?? "(unknown)"
+            )
             return []
         }
         if let sourceBundleIdentifier = sourcePid?.bundleIdentifier,
            sourceBundleIdentifierBypassSet.contains(sourceBundleIdentifier) {
-            os_log("Return noop transformer because the source application %{public}s is in the bypass set",
-                   log: Self.log,
-                   type: .info,
-                   sourceBundleIdentifier)
+            os_log(
+                "Return noop transformer because the source application %{public}s is in the bypass set",
+                log: Self.log,
+                type: .info,
+                sourceBundleIdentifier
+            )
             return []
         }
 
@@ -127,17 +134,21 @@ class EventTransformerManager {
         if scheme.scrolling.acceleration.vertical ?? 1 != 1 || scheme.scrolling.acceleration.horizontal ?? 1 != 1 ||
             scheme.scrolling.speed.vertical ?? 0 != 0 || scheme.scrolling.speed.horizontal ?? 0 != 0 {
             eventTransformer
-                .append(ScrollingAccelerationSpeedAdjustmentTransformer(acceleration: scheme.scrolling.acceleration,
-                                                                        speed: scheme.scrolling.speed))
+                .append(ScrollingAccelerationSpeedAdjustmentTransformer(
+                    acceleration: scheme.scrolling.acceleration,
+                    speed: scheme.scrolling.speed
+                ))
         }
 
         if let timeout = scheme.buttons.clickDebouncing.timeout, timeout > 0,
            let buttons = scheme.buttons.clickDebouncing.buttons {
             let resetTimerOnMouseUp = scheme.buttons.clickDebouncing.resetTimerOnMouseUp ?? false
             for button in buttons {
-                eventTransformer.append(ClickDebouncingTransformer(for: button,
-                                                                   timeout: TimeInterval(timeout) / 1000,
-                                                                   resetTimerOnMouseUp: resetTimerOnMouseUp))
+                eventTransformer.append(ClickDebouncingTransformer(
+                    for: button,
+                    timeout: TimeInterval(timeout) / 1000,
+                    resetTimerOnMouseUp: resetTimerOnMouseUp
+                ))
             }
         }
 
@@ -149,6 +160,19 @@ class EventTransformerManager {
             eventTransformer.append(SwitchPrimaryAndSecondaryButtonsTransformer())
         }
 
+        if let gesture = scheme.buttons.$gesture,
+           gesture.enabled ?? false,
+           let button = gesture.button,
+           let mouseButton = CGMouseButton(rawValue: UInt32(button)) {
+            eventTransformer.append(GestureButtonTransformer(
+                button: mouseButton,
+                threshold: Double(gesture.threshold ?? 50),
+                deadZone: Double(gesture.deadZone ?? 40),
+                cooldownMs: gesture.cooldownMs ?? 500,
+                actions: gesture.actions
+            ))
+        }
+
         if let mappings = scheme.buttons.mappings {
             eventTransformer.append(ButtonActionsTransformer(mappings: mappings))
         }
@@ -156,6 +180,10 @@ class EventTransformerManager {
         if let universalBackForward = scheme.buttons.universalBackForward,
            universalBackForward != .none {
             eventTransformer.append(UniversalBackForwardTransformer(universalBackForward: universalBackForward))
+        }
+
+        if let redirectsToScroll = scheme.pointer.redirectsToScroll, redirectsToScroll {
+            eventTransformer.append(PointerRedirectsToScrollTransformer())
         }
 
         eventTransformerCache.setValue(eventTransformer, forKey: cacheKey)

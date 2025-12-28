@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import AppKit
 import Foundation
@@ -56,8 +56,15 @@ public func postSystemDefinedKey(_ key: SystemDefinedKey, keyDown: Bool) {
     var event = NXEventData()
     event.compound.subType = Int16(NX_SUBTYPE_AUX_CONTROL_BUTTONS)
     event.compound.misc.L.0 = Int32(key.rawValue) << 16 | (keyDown ? NX_KEYDOWN : NX_KEYUP) << 8
-    IOHIDPostEvent(handle, UInt32(NX_SYSDEFINED), .init(x: 0, y: 0), &event,
-                   UInt32(kNXEventDataVersion), IOOptionBits(0), IOOptionBits(kIOHIDSetGlobalEventFlags))
+    IOHIDPostEvent(
+        handle,
+        UInt32(NX_SYSDEFINED),
+        .init(x: 0, y: 0),
+        &event,
+        UInt32(kNXEventDataVersion),
+        IOOptionBits(0),
+        IOOptionBits(kIOHIDSetGlobalEventFlags)
+    )
 }
 
 public func postSystemDefinedKey(_ key: SystemDefinedKey) {

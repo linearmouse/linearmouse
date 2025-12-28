@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Foundation
 
@@ -26,19 +26,19 @@ extension Scheme.Scrolling.Modifiers {
 
 extension Scheme.Scrolling.Modifiers {
     func merge(into modifiers: inout Self) {
-        if let command = command {
+        if let command {
             modifiers.command = command
         }
 
-        if let shift = shift {
+        if let shift {
             modifiers.shift = shift
         }
 
-        if let option = option {
+        if let option {
             modifiers.option = option
         }
 
-        if let control = control {
+        if let control {
             modifiers.control = control
         }
     }

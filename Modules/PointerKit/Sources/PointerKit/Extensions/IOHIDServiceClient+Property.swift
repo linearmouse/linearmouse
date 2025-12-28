@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import PointerKitC
 
@@ -14,15 +14,17 @@ extension IOHIDServiceClient {
         return value
     }
 
-    func setProperty<T>(_ value: T, forKey: String) {
+    @discardableResult
+    func setProperty<T>(_ value: T, forKey: String) -> Bool {
         IOHIDServiceClientSetProperty(self, forKey as CFString, value as AnyObject)
     }
 
     func getPropertyIOFixed(_ key: String) -> Double? {
-        (getProperty(key) as IOFixed?).map { Double($0) / 65536 }
+        (getProperty(key) as IOFixed?).map { Double($0) / 65_536 }
     }
 
-    func setPropertyIOFixed(_ value: Double?, forKey: String) {
-        setProperty(value.map { IOFixed($0 * 65536) }, forKey: forKey)
+    @discardableResult
+    func setPropertyIOFixed(_ value: Double?, forKey: String) -> Bool {
+        setProperty(value.map { IOFixed($0 * 65_536) }, forKey: forKey)
     }
 }

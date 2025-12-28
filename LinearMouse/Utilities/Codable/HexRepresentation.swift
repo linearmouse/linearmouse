@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Foundation
 
@@ -42,7 +42,7 @@ extension HexRepresentation: Codable {
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
 
-        guard let wrappedValue = wrappedValue else {
+        guard let wrappedValue else {
             try container.encodeNil()
             return
         }
@@ -61,15 +61,19 @@ extension HexRepresentation.ValueError: LocalizedError {
 }
 
 extension KeyedDecodingContainer {
-    func decode<Value: BinaryInteger & Codable>(_ type: HexRepresentation<Value>.Type,
-                                                forKey key: Self.Key) throws -> HexRepresentation<Value> {
+    func decode<Value: BinaryInteger & Codable>(
+        _ type: HexRepresentation<Value>.Type,
+        forKey key: Self.Key
+    ) throws -> HexRepresentation<Value> {
         try decodeIfPresent(type, forKey: key) ?? HexRepresentation(wrappedValue: nil)
     }
 }
 
 extension KeyedEncodingContainer {
-    mutating func encode<Value: BinaryInteger & Codable>(_ value: HexRepresentation<Value>,
-                                                         forKey key: Self.Key) throws {
+    mutating func encode<Value: BinaryInteger & Codable>(
+        _ value: HexRepresentation<Value>,
+        forKey key: Self.Key
+    ) throws {
         guard value.wrappedValue != nil else {
             return
         }

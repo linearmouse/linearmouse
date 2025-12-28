@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Foundation
 import GestureKit
@@ -49,7 +49,7 @@ extension ModifierActionsTransformer: EventTransformer {
         ]
         var event = event
         for case let (flag, action) in actions where event.flags.contains(flag) {
-            if let action = action, action != .auto {
+            if let action, action != .auto {
                 guard let handledEvent = handleModifierKeyAction(for: event, action: action) else {
                     return nil
                 }

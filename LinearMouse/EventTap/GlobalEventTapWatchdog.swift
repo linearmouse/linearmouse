@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import AppKit
 import os.log
@@ -17,7 +17,7 @@ class GlobalEventTapWatchdog {
 
     func start() {
         timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
-            guard let self = self else {
+            guard let self else {
                 return
             }
 

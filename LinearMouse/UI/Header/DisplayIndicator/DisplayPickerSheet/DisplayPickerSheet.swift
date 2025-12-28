@@ -1,13 +1,23 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import SwiftUI
 
 struct DisplayPickerSheet: View {
     @Binding var isPresented: Bool
-    @State var selectedDisplay = ""
+    @State private var selectedDisplay = ""
+    @State private var showDeleteAlert = false
 
-    private let schemeState: SchemeState = .shared
+    @ObservedObject private var schemeState: SchemeState = .shared
+
+    private var shouldShowDeleteButton: Bool {
+        // Only show if a display is selected and there are matching schemes
+        let display = selectedDisplay.isEmpty ? nil : selectedDisplay
+        return !selectedDisplay.isEmpty && schemeState.hasMatchingSchemes(
+            forApp: schemeState.currentApp,
+            forDisplay: display
+        )
+    }
 
     var body: some View {
         VStack(spacing: 8) {
@@ -17,6 +27,10 @@ struct DisplayPickerSheet: View {
             .modifier(FormViewModifier())
 
             HStack {
+                if shouldShowDeleteButton {
+                    Button("Delete…", action: onDelete)
+                        .foregroundColor(.red)
+                }
                 Spacer()
                 Button("OK", action: onOK)
             }
@@ -26,6 +40,18 @@ struct DisplayPickerSheet: View {
         .onAppear {
             selectedDisplay = schemeState.currentDisplay ?? ""
         }
+        .alert(isPresented: $showDeleteAlert) {
+            let displayName = selectedDisplay.isEmpty ? NSLocalizedString("All Displays", comment: "") : selectedDisplay
+
+            return Alert(
+                title: Text("Delete Configuration?"),
+                message: Text("This will delete all settings for \"\(displayName)\"."),
+                primaryButton: .destructive(Text("Delete")) {
+                    confirmDelete()
+                },
+                secondaryButton: .cancel()
+            )
+        }
     }
 
     private func onOK() {
@@ -33,5 +59,15 @@ struct DisplayPickerSheet: View {
         DispatchQueue.main.async {
             schemeState.currentDisplay = selectedDisplay == "" ? nil : selectedDisplay
         }
+    }
+
+    private func onDelete() {
+        showDeleteAlert = true
+    }
+
+    private func confirmDelete() {
+        let display = selectedDisplay.isEmpty ? nil : selectedDisplay
+        schemeState.deleteMatchingSchemes(forApp: schemeState.currentApp, forDisplay: display)
+        isPresented = false
     }
 }

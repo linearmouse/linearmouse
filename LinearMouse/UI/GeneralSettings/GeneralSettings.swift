@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Defaults
 import LaunchAtLogin
@@ -7,6 +7,7 @@ import SwiftUI
 
 struct GeneralSettings: View {
     @Default(.showInMenuBar) var showInMenuBar
+    @Default(.showInDock) var showInDock
     @Default(.bypassEventsFromOtherApplications) var bypassEventsFromOtherApplications
 
     var body: some View {
@@ -24,6 +25,10 @@ struct GeneralSettings: View {
 
                     LaunchAtLogin.Toggle {
                         Text("Start at login")
+                    }
+
+                    Toggle(isOn: $showInDock) {
+                        Text("Show in Dock")
                     }
 
                     Toggle(isOn: $bypassEventsFromOtherApplications) {
@@ -49,25 +54,25 @@ struct GeneralSettings: View {
                 Section {
                     HyperLink(URLs.homepage) {
                         HStack(alignment: .firstTextBaseline, spacing: 5) {
-                            Text("🏡")
+                            Text(verbatim: "🏡")
                             Text("Homepage")
                         }
                     }
                     HyperLink(URLs.bugReport) {
                         HStack(alignment: .firstTextBaseline, spacing: 5) {
-                            Text("🐛")
+                            Text(verbatim: "🐛")
                             Text("Bug report")
                         }
                     }
                     HyperLink(URLs.featureRequest) {
                         HStack(alignment: .firstTextBaseline, spacing: 5) {
-                            Text("✍🏻")
+                            Text(verbatim: "✍🏻")
                             Text("Feature request")
                         }
                     }
                     HyperLink(URLs.donate) {
                         HStack(alignment: .firstTextBaseline, spacing: 5) {
-                            Text("❤️")
+                            Text(verbatim: "❤️")
                             Text("Donate")
                         }
                     }

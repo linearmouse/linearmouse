@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Combine
 import Defaults
@@ -22,7 +22,12 @@ class DeviceState: ObservableObject {
                 return
             }
 
-            Defaults[.selectedDevice] = currentDeviceRef?.value.map { DeviceMatcher(of: $0) }
+            let currentDeviceMatcher = currentDeviceRef?.value.map { DeviceMatcher(of: $0) }
+            guard Defaults[.selectedDevice] != currentDeviceMatcher else {
+                return
+            }
+
+            Defaults[.selectedDevice] = currentDeviceMatcher
         }
     }
 

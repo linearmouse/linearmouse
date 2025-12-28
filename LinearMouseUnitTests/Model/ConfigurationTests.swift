@@ -1,10 +1,10 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 @testable import LinearMouse
 import XCTest
 
-class ConfigurationTests: XCTestCase {
+final class ConfigurationTests: XCTestCase {
     func testDump() throws {
         try print(Configuration(schemes: []).dump())
     }

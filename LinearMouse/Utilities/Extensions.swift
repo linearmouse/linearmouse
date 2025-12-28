@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import AppKit
 import Foundation
@@ -13,28 +13,44 @@ extension Comparable {
 }
 
 extension BinaryInteger {
-    func normalized(fromLowerBound: Self = 0, fromUpperBound: Self = 1, toLowerBound: Self = 0,
-                    toUpperBound: Self = 1) -> Self {
+    func normalized(
+        fromLowerBound: Self = 0,
+        fromUpperBound: Self = 1,
+        toLowerBound: Self = 0,
+        toUpperBound: Self = 1
+    ) -> Self {
         let k = (toUpperBound - toLowerBound) / (fromUpperBound - fromLowerBound)
         return (self - fromLowerBound) * k + toLowerBound
     }
 
     func normalized(from: ClosedRange<Self> = 0 ... 1, to: ClosedRange<Self> = 0 ... 1) -> Self {
-        normalized(fromLowerBound: from.lowerBound, fromUpperBound: from.upperBound,
-                   toLowerBound: to.lowerBound, toUpperBound: to.upperBound)
+        normalized(
+            fromLowerBound: from.lowerBound,
+            fromUpperBound: from.upperBound,
+            toLowerBound: to.lowerBound,
+            toUpperBound: to.upperBound
+        )
     }
 }
 
 extension BinaryFloatingPoint {
-    func normalized(fromLowerBound: Self = 0, fromUpperBound: Self = 1, toLowerBound: Self = 0,
-                    toUpperBound: Self = 1) -> Self {
+    func normalized(
+        fromLowerBound: Self = 0,
+        fromUpperBound: Self = 1,
+        toLowerBound: Self = 0,
+        toUpperBound: Self = 1
+    ) -> Self {
         let k = (toUpperBound - toLowerBound) / (fromUpperBound - fromLowerBound)
         return (self - fromLowerBound) * k + toLowerBound
     }
 
     func normalized(from: ClosedRange<Self> = 0 ... 1, to: ClosedRange<Self> = 0 ... 1) -> Self {
-        normalized(fromLowerBound: from.lowerBound, fromUpperBound: from.upperBound,
-                   toLowerBound: to.lowerBound, toUpperBound: to.upperBound)
+        normalized(
+            fromLowerBound: from.lowerBound,
+            fromUpperBound: from.upperBound,
+            toLowerBound: to.lowerBound,
+            toUpperBound: to.upperBound
+        )
     }
 }
 
@@ -53,6 +69,8 @@ extension Decimal {
 
 extension pid_t {
     private static var bundleIdentifierCache = LRUCache<Self, String>(countLimit: 16)
+    private static var processPathCache = LRUCache<Self, String>(countLimit: 16)
+    private static var processNameCache = LRUCache<Self, String>(countLimit: 16)
 
     var bundleIdentifier: String? {
         guard let bundleIdentifier = Self.bundleIdentifierCache.value(forKey: self)
@@ -64,6 +82,28 @@ extension pid_t {
         Self.bundleIdentifierCache.setValue(bundleIdentifier, forKey: self)
 
         return bundleIdentifier
+    }
+
+    var processPath: String? {
+        if let cached = Self.processPathCache.value(forKey: self) {
+            return cached
+        }
+        guard let path = NSRunningApplication(processIdentifier: self)?.executableURL?.path else {
+            return nil
+        }
+        Self.processPathCache.setValue(path, forKey: self)
+        return path
+    }
+
+    var processName: String? {
+        if let cached = Self.processNameCache.value(forKey: self) {
+            return cached
+        }
+        guard let name = NSRunningApplication(processIdentifier: self)?.executableURL?.lastPathComponent else {
+            return nil
+        }
+        Self.processNameCache.setValue(name, forKey: self)
+        return name
     }
 
     var parent: pid_t? {
@@ -123,10 +163,12 @@ extension CGWindowID {
             return ownerPid
         }
 
-        func getOwnerPid(of windowID: CGWindowID) -> pid_t? {
+        func getOwnerPid() -> pid_t? {
             let options = CGWindowListOption(arrayLiteral: [.excludeDesktopElements, .optionOnScreenOnly])
-            guard let windowListInfo = CGWindowListCopyWindowInfo(options,
-                                                                  kCGNullWindowID) as NSArray? as? [[String: Any]]
+            guard let windowListInfo = CGWindowListCopyWindowInfo(
+                options,
+                kCGNullWindowID
+            ) as NSArray? as? [[String: Any]]
             else {
                 return nil
             }
@@ -139,7 +181,7 @@ extension CGWindowID {
             return nil
         }
 
-        let ownerPid = getOwnerPid(of: self)
+        let ownerPid = getOwnerPid()
         cgWindowIDOwnerPidCache.setValue(ownerPid, forKey: self)
 
         return ownerPid

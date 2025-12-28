@@ -19,9 +19,11 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
+          brew update
+          brew upgrade swiftformat
           brew install swiftlint
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install the Apple certificate
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
@@ -55,13 +57,13 @@ jobs:
           NOTARIZATION_PASSWORD: ${{ secrets.NOTARIZATION_PASSWORD }}
         run: make prepublish
       - name: Upload dmg
-        uses: "actions/upload-artifact@v3"
+        uses: actions/upload-artifact@v4
         with:
           name: LinearMouse.dmg
           path: build/LinearMouse.dmg
           retention-days: 7
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           draft: true

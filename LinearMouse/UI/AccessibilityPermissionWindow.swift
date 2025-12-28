@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Foundation
 import SwiftUI
@@ -44,7 +44,7 @@ class AccessibilityPermissionWindow: NSWindow {
 extension AccessibilityPermissionWindow: NSWindowDelegate {
     func windowWillClose(_: Notification) {
         guard AccessibilityPermission.enabled else {
-            NSApp.terminate(nil)
+            NSApplication.shared.terminate(nil)
             exit(0)
         }
 

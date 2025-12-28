@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import CoreGraphics
 
@@ -21,6 +21,7 @@ public extension GestureEvent {
         }
 
         event.type = .init(nsEventType: .gesture)!
+        event.flags = []
         event.setIntegerValueField(.gestureHIDType, value: Int64(IOHIDEventType.zoom.rawValue))
         event.setIntegerValueField(.gesturePhase, value: Int64(phase.rawValue))
         event.setDoubleValueField(.gestureZoomValue, value: magnification)

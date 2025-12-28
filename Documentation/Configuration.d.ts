@@ -12,6 +12,12 @@ type HexString = string;
 type Button = Primary | Secondary | Auxiliary | Back | Forward | number;
 
 /**
+ * @title Unset
+ * @description A special value that explicitly restores a setting to the system or device default. Currently supported in pointer settings; may be supported more broadly in the future.
+ */
+export type Unset = "unset";
+
+/**
  * @description Primary button, usually the left button.
  */
 type Primary = 0;
@@ -98,6 +104,18 @@ declare namespace Scheme {
      * @description Match apps by providing the bundle ID of the process group. For example, `org.polymc.PolyMC`.
      */
     groupApp?: string;
+
+    /**
+     * @title Process name
+     * @description Match by the executable file name of the frontmost process (from NSRunningApplication.executableURL.lastPathComponent). Case-sensitive.
+     */
+    processName?: string;
+
+    /**
+     * @title Process path
+     * @description Match by the absolute executable path of the frontmost process (from NSRunningApplication.executableURL.path). Case-sensitive.
+     */
+    processPath?: string;
 
     /**
      * @title Display name
@@ -285,6 +303,13 @@ declare namespace Scheme {
         type: "zoom";
       };
 
+      /**
+       * @description Zoom in and out using pinch gestures.
+       */
+      type PinchZoom = {
+        type: "pinchZoom";
+      };
+
       type Action =
         | None
         | Auto
@@ -292,26 +317,27 @@ declare namespace Scheme {
         | PreventDefault
         | AlterOrientation
         | ChangeSpeed
-        | Zoom;
+        | Zoom
+        | PinchZoom;
     }
   }
 
   type Pointer = {
     /**
      * @title Pointer acceleration
-     * @description If the value is not specified, system default value will be used.
+     * @description A number to set acceleration, or "unset" to restore system default. If omitted, the previous/merged value applies.
      * @minimum 0
      * @maximum 20
      */
-    acceleration?: number;
+    acceleration?: number | Unset;
 
     /**
      * @title Pointer speed
-     * @description If the value is not specified, device default value will be used.
+     * @description A number to set speed, or "unset" to restore device default. If omitted, the previous/merged value applies.
      * @minimal 0
      * @maximum 1
      */
-    speed?: number;
+    speed?: number | Unset;
 
     /**
      * @title Disable pointer acceleration
@@ -319,6 +345,13 @@ declare namespace Scheme {
      * @default false
      */
     disableAcceleration?: boolean;
+
+    /**
+     * @title Redirects to scroll
+     * @description If the value is true, pointer movements will be redirected to scroll events.
+     * @default false
+     */
+    redirectsToScroll?: boolean;
   };
 
   type Buttons = {
@@ -347,6 +380,12 @@ declare namespace Scheme {
      * @description Ignore rapid clicks with a certain time period.
      */
     clickDebouncing?: Buttons.ClickDebouncing;
+
+    /**
+     * @title Gesture button
+     * @description Press and hold a button while dragging to trigger gestures like switching desktop spaces or opening Mission Control.
+     */
+    gesture?: Buttons.Gesture;
   };
 
   namespace Buttons {
@@ -724,7 +763,25 @@ declare namespace Scheme {
         | "\\"
         | "`"
         | "["
-        | "]";
+        | "]"
+        | "numpadPlus"
+        | "numpadMinus"
+        | "numpadMultiply"
+        | "numpadDivide"
+        | "numpadEnter"
+        | "numpadEquals"
+        | "numpadDecimal"
+        | "numpadClear"
+        | "numpad0"
+        | "numpad1"
+        | "numpad2"
+        | "numpad3"
+        | "numpad4"
+        | "numpad5"
+        | "numpad6"
+        | "numpad7"
+        | "numpad8"
+        | "numpad9";
     }
 
     type UniversalBackForward =
@@ -760,5 +817,95 @@ declare namespace Scheme {
        */
       buttons?: Button[];
     };
+
+    type Gesture = {
+      /**
+       * @title Enable gesture button
+       * @description If the value is true, the gesture button feature is enabled.
+       * @default false
+       */
+      enabled?: boolean;
+
+      /**
+       * @title Button
+       * @description The button number to use for gestures. Default is 2 (middle button/scroll wheel).
+       * @default 2
+       */
+      button?: Button;
+
+      /**
+       * @title Threshold
+       * @description The distance in pixels that must be dragged before triggering a gesture.
+       * @default 50
+       * @minimum 20
+       * @maximum 200
+       */
+      threshold?: Int;
+
+      /**
+       * @title Dead zone
+       * @description The tolerance in pixels for the non-dominant axis to prevent accidental gestures.
+       * @default 40
+       * @minimum 0
+       * @maximum 100
+       */
+      deadZone?: Int;
+
+      /**
+       * @title Cooldown
+       * @description The cooldown period in milliseconds between gestures to prevent double-triggering.
+       * @default 500
+       * @minimum 0
+       * @maximum 2000
+       */
+      cooldownMs?: Int;
+
+      /**
+       * @title Gesture actions
+       * @description Actions to trigger for each gesture direction.
+       */
+      actions?: Gesture.Actions;
+    };
+
+    namespace Gesture {
+      type Actions = {
+        /**
+         * @title Swipe left action
+         * @description Action to trigger when dragging left.
+         * @default "missionControl.spaceLeft"
+         */
+        left?: GestureAction;
+
+        /**
+         * @title Swipe right action
+         * @description Action to trigger when dragging right.
+         * @default "missionControl.spaceRight"
+         */
+        right?: GestureAction;
+
+        /**
+         * @title Swipe up action
+         * @description Action to trigger when dragging up.
+         * @default "missionControl"
+         */
+        up?: GestureAction;
+
+        /**
+         * @title Swipe down action
+         * @description Action to trigger when dragging down.
+         * @default "appExpose"
+         */
+        down?: GestureAction;
+      };
+
+      type GestureAction =
+        | "none"
+        | "missionControl.spaceLeft"
+        | "missionControl.spaceRight"
+        | "missionControl"
+        | "appExpose"
+        | "showDesktop"
+        | "launchpad";
+    }
   }
 }

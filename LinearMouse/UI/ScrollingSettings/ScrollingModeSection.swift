@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import SwiftUI
 
@@ -19,8 +19,10 @@ extension ScrollingSettings {
                 switch state.scrollingMode {
                 case .accelerated:
                     HStack(alignment: .firstTextBaseline) {
-                        Slider(value: $state.scrollingAcceleration,
-                               in: 0.0 ... 10.0) {
+                        Slider(
+                            value: $state.scrollingAcceleration,
+                            in: 0.0 ... 10.0
+                        ) {
                             labelWithDescription {
                                 Text("Scrolling acceleration")
                                 Text("(0–10)")
@@ -30,18 +32,22 @@ extension ScrollingSettings {
                         } maximumValueLabel: {
                             Text("Accelerated")
                         }
-                        TextField("",
-                                  value: $state.scrollingAcceleration,
-                                  formatter: state.scrollingAccelerationFormatter)
-                            .labelsHidden()
-                            .textFieldStyle(.roundedBorder)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 60)
+                        TextField(
+                            String(""),
+                            value: $state.scrollingAcceleration,
+                            formatter: state.scrollingAccelerationFormatter
+                        )
+                        .labelsHidden()
+                        .textFieldStyle(.roundedBorder)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 60)
                     }
 
                     HStack(alignment: .firstTextBaseline) {
-                        Slider(value: $state.scrollingSpeed,
-                               in: 0.0 ... 128.0) {
+                        Slider(
+                            value: $state.scrollingSpeed,
+                            in: 0.0 ... 128.0
+                        ) {
                             labelWithDescription {
                                 Text("Scrolling speed")
                                 Text("(0–128)")
@@ -51,13 +57,15 @@ extension ScrollingSettings {
                         } maximumValueLabel: {
                             Text("Fast")
                         }
-                        TextField("",
-                                  value: $state.scrollingSpeed,
-                                  formatter: state.scrollingSpeedFormatter)
-                            .labelsHidden()
-                            .textFieldStyle(.roundedBorder)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 60)
+                        TextField(
+                            String(""),
+                            value: $state.scrollingSpeed,
+                            formatter: state.scrollingSpeedFormatter
+                        )
+                        .labelsHidden()
+                        .textFieldStyle(.roundedBorder)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 60)
                     }
 
                     if state.scrollingDisabled {

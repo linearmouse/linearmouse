@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Foundation
 import GestureKit
@@ -46,13 +46,11 @@ class UniversalBackForwardTransformer: EventTransformer {
         return Self.includes.contains {
             if $0.hasSuffix("*") {
                 return bundleIdentifier.hasPrefix($0.dropLast())
-            } else {
-                return bundleIdentifier == $0
             }
+            return bundleIdentifier == $0
         }
     }
 
-    // swiftlint:disable cyclomatic_complexity
     func transform(_ event: CGEvent) -> CGEvent? {
         let view = MouseEventView(event)
 

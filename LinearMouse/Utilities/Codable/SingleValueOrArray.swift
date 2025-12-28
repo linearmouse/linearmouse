@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 // SwiftFormat will eat the empty lines between the file header and @propertyWrapper.
 // These comments should be removed when SwiftFormat fixes this bug.
@@ -44,8 +44,10 @@ extension SingleValueOrArray: Codable {
 }
 
 extension KeyedDecodingContainer {
-    func decode<Value: Codable>(_ type: SingleValueOrArray<Value>.Type,
-                                forKey key: Self.Key) throws -> SingleValueOrArray<Value> {
+    func decode<Value: Codable>(
+        _ type: SingleValueOrArray<Value>.Type,
+        forKey key: Self.Key
+    ) throws -> SingleValueOrArray<Value> {
         try decodeIfPresent(type, forKey: key) ?? SingleValueOrArray(wrappedValue: nil)
     }
 }

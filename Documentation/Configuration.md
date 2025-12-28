@@ -118,6 +118,26 @@ I would create two schemes and specify the vendor ID and product ID:
 Then, the pointer speed of my Logitech mouse and Microsoft mouse will be set to 0.36 and 0.4
 respectively.
 
+### Unsetting values
+
+LinearMouse supports a special "unset" value to explicitly restore settings back to their system or
+device defaults. This differs from omitting a field, which keeps the previously merged value.
+
+Currently, "unset" is supported for pointer acceleration and speed.
+
+```json
+{
+  "schemes": [
+    {
+      "if": {
+        "device": { "category": "mouse" }
+      },
+      "pointer": { "acceleration": "unset", "speed": "unset" }
+    }
+  ]
+}
+```
+
 ## App matching
 
 App bundle ID can be provided to match a specific app.
@@ -195,6 +215,45 @@ Or, to match the whole process group:
   ]
 }
 ```
+
+### Process (binary) matching
+
+Some programs do not have a stable or any bundle identifier. You can match by the frontmost process's executable instead.
+
+- processName: Match by executable name (case-sensitive). Example:
+
+```json
+{
+  "schemes": [
+    {
+      "if": {
+        "processName": "wezterm"
+      },
+      "scrolling": { "reverse": false }
+    }
+  ]
+}
+```
+
+- processPath: Match by absolute executable path (case-sensitive). Example:
+
+```json
+{
+  "schemes": [
+    {
+      "if": {
+        "processPath": "/Applications/WezTerm.app/Contents/MacOS/WezTerm"
+      },
+      "pointer": { "acceleration": 0.4 }
+    }
+  ]
+}
+```
+
+Notes
+- processName/processPath compare exactly; no wildcard or regex.
+- Matching is against the frontmost application process (NSRunningApplication); child processes inside a terminal are not detected as the frontmost process.
+- You can still combine with device and display conditions.
 
 ## Display Matching
 
@@ -642,4 +701,46 @@ The `<command>` will be executed with bash.
 }
 ```
 
-To see the full list of keys, please refer to [Configuration.d.ts#L609](Configuration.d.ts#L609).
+To see the full list of keys, please refer to [Configuration.d.ts#L652](Configuration.d.ts#L652).
+
+#### Numpad keys support
+
+LinearMouse supports all numpad keys for keyboard shortcuts:
+
+- Number keys: `numpad0`, `numpad1`, `numpad2`, `numpad3`, `numpad4`, `numpad5`, `numpad6`, `numpad7`, `numpad8`, `numpad9`
+- Operator keys: `numpadPlus`, `numpadMinus`, `numpadMultiply`, `numpadDivide`, `numpadEquals`
+- Function keys: `numpadEnter`, `numpadDecimal`, `numpadClear`
+
+Example usage:
+```json
+{
+  "action": {
+    "keyPress": ["numpad5"]
+  }
+}
+```
+
+## Pointer settings
+
+### Redirects to scroll
+
+The `redirectsToScroll` property allows you to redirect pointer movements to scroll events. This is useful for scenarios where you want mouse movements to control scrolling instead of cursor positioning.
+
+```json
+{
+  "schemes": [
+    {
+      "if": {
+        "device": {
+          "category": "mouse"
+        }
+      },
+      "pointer": {
+        "redirectsToScroll": true
+      }
+    }
+  ]
+}
+```
+
+When `redirectsToScroll` is set to `true`, horizontal mouse movements will generate horizontal scroll events, and vertical mouse movements will generate vertical scroll events.

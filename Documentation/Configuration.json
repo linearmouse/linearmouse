@@ -118,6 +118,11 @@
           "description": "Ignore rapid clicks with a certain time period.",
           "title": "Debounce button clicks"
         },
+        "gesture": {
+          "$ref": "#/definitions/Scheme.Buttons.Gesture",
+          "description": "Press and hold a button while dragging to trigger gestures like switching desktop spaces or opening Mission Control.",
+          "title": "Gesture button"
+        },
         "mappings": {
           "description": "Assign actions to buttons.",
           "items": {
@@ -161,6 +166,95 @@
         }
       },
       "type": "object"
+    },
+    "Scheme.Buttons.Gesture": {
+      "additionalProperties": false,
+      "properties": {
+        "actions": {
+          "$ref": "#/definitions/Scheme.Buttons.Gesture.Actions",
+          "description": "Actions to trigger for each gesture direction.",
+          "title": "Gesture actions"
+        },
+        "button": {
+          "$ref": "#/definitions/Button",
+          "default": 2,
+          "description": "The button number to use for gestures. Default is 2 (middle button/scroll wheel).",
+          "title": "Button"
+        },
+        "cooldownMs": {
+          "$ref": "#/definitions/Int",
+          "default": 500,
+          "description": "The cooldown period in milliseconds between gestures to prevent double-triggering.",
+          "maximum": 2000,
+          "minimum": 0,
+          "title": "Cooldown"
+        },
+        "deadZone": {
+          "$ref": "#/definitions/Int",
+          "default": 40,
+          "description": "The tolerance in pixels for the non-dominant axis to prevent accidental gestures.",
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Dead zone"
+        },
+        "enabled": {
+          "default": false,
+          "description": "If the value is true, the gesture button feature is enabled.",
+          "title": "Enable gesture button",
+          "type": "boolean"
+        },
+        "threshold": {
+          "$ref": "#/definitions/Int",
+          "default": 50,
+          "description": "The distance in pixels that must be dragged before triggering a gesture.",
+          "maximum": 200,
+          "minimum": 20,
+          "title": "Threshold"
+        }
+      },
+      "type": "object"
+    },
+    "Scheme.Buttons.Gesture.Actions": {
+      "additionalProperties": false,
+      "properties": {
+        "down": {
+          "$ref": "#/definitions/Scheme.Buttons.Gesture.GestureAction",
+          "default": "appExpose",
+          "description": "Action to trigger when dragging down.",
+          "title": "Swipe down action"
+        },
+        "left": {
+          "$ref": "#/definitions/Scheme.Buttons.Gesture.GestureAction",
+          "default": "missionControl.spaceLeft",
+          "description": "Action to trigger when dragging left.",
+          "title": "Swipe left action"
+        },
+        "right": {
+          "$ref": "#/definitions/Scheme.Buttons.Gesture.GestureAction",
+          "default": "missionControl.spaceRight",
+          "description": "Action to trigger when dragging right.",
+          "title": "Swipe right action"
+        },
+        "up": {
+          "$ref": "#/definitions/Scheme.Buttons.Gesture.GestureAction",
+          "default": "missionControl",
+          "description": "Action to trigger when dragging up.",
+          "title": "Swipe up action"
+        }
+      },
+      "type": "object"
+    },
+    "Scheme.Buttons.Gesture.GestureAction": {
+      "enum": [
+        "none",
+        "missionControl.spaceLeft",
+        "missionControl.spaceRight",
+        "missionControl",
+        "appExpose",
+        "showDesktop",
+        "launchpad"
+      ],
+      "type": "string"
     },
     "Scheme.Buttons.Mapping": {
       "anyOf": [
@@ -366,7 +460,25 @@
         "\\",
         "`",
         "[",
-        "]"
+        "]",
+        "numpadPlus",
+        "numpadMinus",
+        "numpadMultiply",
+        "numpadDivide",
+        "numpadEnter",
+        "numpadEquals",
+        "numpadDecimal",
+        "numpadClear",
+        "numpad0",
+        "numpad1",
+        "numpad2",
+        "numpad3",
+        "numpad4",
+        "numpad5",
+        "numpad6",
+        "numpad7",
+        "numpad8",
+        "numpad9"
       ],
       "type": "string"
     },
@@ -743,6 +855,16 @@
           "description": "Match apps by providing the bundle ID of the parent process. For example, `org.polymc.PolyMC`.",
           "title": "Parent app",
           "type": "string"
+        },
+        "processName": {
+          "description": "Match by the executable file name of the frontmost process (from NSRunningApplication.executableURL.lastPathComponent). Case-sensitive.",
+          "title": "Process name",
+          "type": "string"
+        },
+        "processPath": {
+          "description": "Match by the absolute executable path of the frontmost process (from NSRunningApplication.executableURL.path). Case-sensitive.",
+          "title": "Process path",
+          "type": "string"
         }
       },
       "type": "object"
@@ -824,11 +946,18 @@
       "additionalProperties": false,
       "properties": {
         "acceleration": {
-          "description": "If the value is not specified, system default value will be used.",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/Unset"
+            }
+          ],
+          "description": "A number to set acceleration, or \"unset\" to restore system default. If omitted, the previous/merged value applies.",
           "maximum": 20,
           "minimum": 0,
-          "title": "Pointer acceleration",
-          "type": "number"
+          "title": "Pointer acceleration"
         },
         "disableAcceleration": {
           "default": false,
@@ -836,11 +965,24 @@
           "title": "Disable pointer acceleration",
           "type": "boolean"
         },
+        "redirectsToScroll": {
+          "default": false,
+          "description": "If the value is true, pointer movements will be redirected to scroll events.",
+          "title": "Redirects to scroll",
+          "type": "boolean"
+        },
         "speed": {
-          "description": "If the value is not specified, device default value will be used.",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/Unset"
+            }
+          ],
+          "description": "A number to set speed, or \"unset\" to restore device default. If omitted, the previous/merged value applies.",
           "maximum": 1,
-          "title": "Pointer speed",
-          "type": "number"
+          "title": "Pointer speed"
         }
       },
       "type": "object"
@@ -1032,6 +1174,9 @@
         },
         {
           "$ref": "#/definitions/Scheme.Scrolling.Modifiers.Zoom"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.PinchZoom"
         }
       ]
     },
@@ -1111,6 +1256,20 @@
       ],
       "type": "object"
     },
+    "Scheme.Scrolling.Modifiers.PinchZoom": {
+      "additionalProperties": false,
+      "description": "Zoom in and out using pinch gestures.",
+      "properties": {
+        "type": {
+          "const": "pinchZoom",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
     "Scheme.Scrolling.Modifiers.PreventDefault": {
       "additionalProperties": false,
       "description": "No action.",
@@ -1169,6 +1328,12 @@
           "type": "array"
         }
       ]
+    },
+    "Unset": {
+      "const": "unset",
+      "description": "A special value that explicitly restores a setting to the system or device default. Currently supported in pointer settings; may be supported more broadly in the future.",
+      "title": "Unset",
+      "type": "string"
     }
   }
 }

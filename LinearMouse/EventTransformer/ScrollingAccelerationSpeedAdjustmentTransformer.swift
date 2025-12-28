@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Foundation
 import os.log
@@ -13,8 +13,10 @@ class ScrollingAccelerationSpeedAdjustmentTransformer: EventTransformer {
     private let acceleration: Scheme.Scrolling.Bidirectional<Decimal>
     private let speed: Scheme.Scrolling.Bidirectional<Decimal>
 
-    init(acceleration: Scheme.Scrolling.Bidirectional<Decimal>,
-         speed: Scheme.Scrolling.Bidirectional<Decimal>) {
+    init(
+        acceleration: Scheme.Scrolling.Bidirectional<Decimal>,
+        speed: Scheme.Scrolling.Bidirectional<Decimal>
+    ) {
         self.acceleration = acceleration
         self.speed = speed
     }

@@ -1,16 +1,18 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 @testable import LinearMouse
 import XCTest
 
-class ModifierActionsTransformerTests: XCTestCase {
+final class ModifierActionsTransformerTests: XCTestCase {
     func testModifierActions() throws {
         var event = CGEvent(scrollWheelEvent2Source: nil, units: .line, wheelCount: 2, wheel1: 1, wheel2: 2, wheel3: 0)!
-        let modifiers = Scheme.Scrolling.Modifiers(command: .auto,
-                                                   shift: .alterOrientation,
-                                                   option: .changeSpeed(scale: 2),
-                                                   control: .changeSpeed(scale: 3))
+        let modifiers = Scheme.Scrolling.Modifiers(
+            command: .auto,
+            shift: .alterOrientation,
+            option: .changeSpeed(scale: 2),
+            control: .changeSpeed(scale: 3)
+        )
         let transformer = ModifierActionsTransformer(modifiers: .init(vertical: modifiers, horizontal: modifiers))
         event.flags.insert(.maskCommand)
         event.flags.insert(.maskShift)

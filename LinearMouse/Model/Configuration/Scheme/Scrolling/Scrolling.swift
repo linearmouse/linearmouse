@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Foundation
 
@@ -13,11 +13,13 @@ extension Scheme {
 
         init() {}
 
-        init(reverse: Bidirectional<Bool>? = nil,
-             distance: Bidirectional<Distance>? = nil,
-             acceleration: Bidirectional<Decimal>? = nil,
-             speed: Bidirectional<Decimal>? = nil,
-             modifiers: Bidirectional<Modifiers>? = nil) {
+        init(
+            reverse: Bidirectional<Bool>? = nil,
+            distance: Bidirectional<Distance>? = nil,
+            acceleration: Bidirectional<Decimal>? = nil,
+            speed: Bidirectional<Decimal>? = nil,
+            modifiers: Bidirectional<Modifiers>? = nil
+        ) {
             $reverse = reverse
             $distance = distance
             $acceleration = acceleration

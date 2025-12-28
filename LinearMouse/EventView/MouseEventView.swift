@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import AppKit
 import Foundation
@@ -15,7 +15,7 @@ class MouseEventView: EventView {
         }
 
         set {
-            guard let newValue = newValue else {
+            guard let newValue else {
                 return
             }
 
@@ -25,7 +25,7 @@ class MouseEventView: EventView {
     }
 
     var mouseButtonDescription: String {
-        guard let mouseButton = mouseButton else {
+        guard let mouseButton else {
             return "(nil)"
         }
 

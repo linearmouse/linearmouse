@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import SwiftUI
 
@@ -110,7 +110,7 @@ extension ButtonMappingActionScroll {
 
         var body: some View {
             HStack {
-                Picker("", selection: mode) {
+                Picker(String(""), selection: mode) {
                     ForEach(Mode.allCases) {
                         Text($0.rawValue).tag($0)
                     }

@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Foundation
 import os.log
@@ -52,10 +52,14 @@ class LinearScrollingHorizontalTransformer: EventTransformer {
             view.deltaYFixedPt = 0
         }
 
-        os_log("continuous=%{public}@, oldValue=%{public}@, newValue=%{public}@", log: Self.log, type: .info,
-               String(describing: continuous),
-               String(describing: oldValue),
-               String(describing: view.matrixValue))
+        os_log(
+            "continuous=%{public}@, oldValue=%{public}@, newValue=%{public}@",
+            log: Self.log,
+            type: .info,
+            String(describing: continuous),
+            String(describing: oldValue),
+            String(describing: view.matrixValue)
+        )
 
         return event
     }

@@ -1,10 +1,10 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 @testable import LinearMouse
 import XCTest
 
-class ReverseScrollingTransformerTests: XCTestCase {
+final class ReverseScrollingTransformerTests: XCTestCase {
     func testReverseScrollingVertically() throws {
         let transformer = ReverseScrollingTransformer(vertically: true)
         var event = CGEvent(scrollWheelEvent2Source: nil, units: .line, wheelCount: 2, wheel1: 1, wheel2: 2, wheel3: 0)!

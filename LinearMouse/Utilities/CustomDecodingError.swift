@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import Foundation
 
@@ -33,8 +33,10 @@ extension CustomDecodingError: CustomStringConvertible {
 
 extension CustomDecodingError: LocalizedError {
     var errorDescription: String? {
-        String(format: NSLocalizedString("%1$@ (%2$@)", comment: ""),
-               error.localizedDescription,
-               codingPath.map(\.stringValue).joined(separator: "."))
+        String(
+            format: NSLocalizedString("%1$@ (%2$@)", comment: ""),
+            error.localizedDescription,
+            codingPath.map(\.stringValue).joined(separator: ".")
+        )
     }
 }

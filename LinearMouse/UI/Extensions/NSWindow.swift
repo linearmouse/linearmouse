@@ -1,11 +1,11 @@
 // MIT License
-// Copyright (c) 2021-2024 LinearMouse
+// Copyright (c) 2021-2025 LinearMouse
 
 import SwiftUI
 
 extension NSWindow {
     func bringToFront() {
-        NSApp.activate(ignoringOtherApps: true)
+        NSApplication.shared.activate(ignoringOtherApps: true)
         makeKeyAndOrderFront(nil)
     }
 }
