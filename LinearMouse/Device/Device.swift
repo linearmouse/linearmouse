@@ -42,18 +42,8 @@ class Device {
         return .mouse
     }()
 
-    private struct Product: Hashable {
-        let vendorID: Int
-        let productID: Int
-    }
-
-    private static let productsToApplySideButtonFixes: Set<Product> = [
-        .init(vendorID: 0x2717, productID: 0x5014), // Mi Silent Mouse
-        .init(vendorID: 0x248A, productID: 0x8266), // Delux M729DB mouse
-        .init(vendorID: 0x047D, productID: 0x2041) // Kensington Slimblade
-    ]
-
     private weak var manager: DeviceManager?
+    private var inputReportHandlers: [InputReportHandler] = []
     private let device: PointerDevice
 
     private var removed = false
@@ -86,12 +76,10 @@ class Device {
         // To work around this issue, we subscribe to the input reports and monitor the side button
         // states. When the side buttons are clicked, we simulate those events.
         if let vendorID, let productID {
-            if (buttonCount == 3
-                && Self.productsToApplySideButtonFixes.contains(.init(vendorID: vendorID, productID: productID)))
-                ||
-                (vendorID == 0x047D && productID ==
-                    0x2041) // Slimblade needs report monitoring regardless of button count
-            {
+            let handlers = InputReportHandlerRegistry.handlers(for: vendorID, productID: productID)
+            let needsObservation = handlers.contains { $0.alwaysNeedsReportObservation() } || buttonCount == 3
+            if needsObservation, !handlers.isEmpty {
+                inputReportHandlers = handlers
                 reportObservationToken = device.observeReport { [weak self] in
                     self?.inputReportCallback($0, $1)
                 }
@@ -305,84 +293,12 @@ extension Device {
             )
         }
 
-        // FIXME: Correct HID Report parsing?
-        guard report.count >= 2 else {
-            return
+        let context = InputReportContext(report: report, lastButtonStates: lastButtonStates)
+        let chain = inputReportHandlers.reversed().reduce({ (_: InputReportContext) in }) { next, handler in
+            { context in handler.handleReport(context, next: next) }
         }
-        if let vendorID = device.vendorID, let productID = device.productID {
-            switch (vendorID, productID) {
-            case (0x047D, 0x2041): // Slimblade
-                // For Slimblade, byte 4 contains the vendor-defined button states
-                let buttonStates = report[4]
-                let toggled = lastButtonStates ^ buttonStates
-
-                guard toggled != 0 else {
-                    return
-                }
-
-                let topLeftMask: UInt8 = 0x1
-                let topRightMask: UInt8 = 0x2
-
-                // Check top left button
-                if toggled & topLeftMask != 0 {
-                    let down = buttonStates & topLeftMask != 0
-                    simulateButtonEvent(button: 3, down: down, device: device)
-                }
-
-                // Check top right button
-                if toggled & topRightMask != 0 {
-                    let down = buttonStates & topRightMask != 0
-                    simulateButtonEvent(button: 4, down: down, device: device)
-                }
-
-                lastButtonStates = buttonStates
-
-            default: // Other devices with side button fixes
-                // | Button 0 (1 bit) | ... | Button 4 (1 bit) | Not Used (3 bits) |
-                let buttonStates = report[1] & 0x18
-                let toggled = lastButtonStates ^ buttonStates
-                guard toggled != 0 else {
-                    return
-                }
-                for button in 3 ... 4 {
-                    guard toggled & (1 << button) != 0 else {
-                        continue
-                    }
-                    let down = buttonStates & (1 << button) != 0
-                    simulateButtonEvent(
-                        button: button, down: down, device: device
-                    )
-                }
-                lastButtonStates = buttonStates
-            }
-        }
-    }
-
-    private func simulateButtonEvent(
-        button: Int, down: Bool, device: PointerDevice
-    ) {
-        os_log(
-            "Simulate button %{public}d %{public}@ event for device: %{public}@",
-            log: Self.log,
-            type: .info,
-            button,
-            down ? "down" : "up",
-            String(describing: device)
-        )
-
-        guard let location = CGEvent(source: nil)?.location else {
-            return
-        }
-        guard let event = CGEvent(
-            mouseEventSource: nil,
-            mouseType: down ? .otherMouseDown : .otherMouseUp,
-            mouseCursorPosition: location,
-            mouseButton: .init(rawValue: UInt32(button))!
-        ) else {
-            return
-        }
-
-        event.post(tap: .cghidEventTap)
+        chain(context)
+        lastButtonStates = context.lastButtonStates
     }
 }
 
