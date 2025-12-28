@@ -27,11 +27,13 @@ extension DeviceMatcher {
     }
 
     func match(with device: Device) -> Bool {
-        func matchValue<T>(_ destination: T?, _ source: T) -> Bool where T: Equatable {
+        func matchValue<T>(_ destination: T?, _ source: T) -> Bool
+            where T: Equatable {
             destination == nil || source == destination
         }
 
-        func matchValue<T>(_ destination: T?, _ source: T?) -> Bool where T: Equatable {
+        func matchValue<T>(_ destination: T?, _ source: T?) -> Bool
+            where T: Equatable {
             destination == nil || source == destination
         }
 
@@ -44,8 +46,7 @@ extension DeviceMatcher {
         }
 
         if let category {
-            guard category.contains(where: { $0.deviceCategory == device.category })
-            else {
+            guard category.contains(where: { $0.deviceCategory == device.category }) else {
                 return false
             }
         }

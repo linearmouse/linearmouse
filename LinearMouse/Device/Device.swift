@@ -8,11 +8,14 @@ import os.log
 import PointerKit
 
 class Device {
-    private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "Device")
+    private static let log = OSLog(
+        subsystem: Bundle.main.bundleIdentifier!, category: "Device"
+    )
 
     static let fallbackPointerAcceleration = 0.6875
     static let fallbackPointerResolution = 400.0
-    static let fallbackPointerSpeed = pointerSpeed(fromPointerResolution: fallbackPointerResolution)
+    static let fallbackPointerSpeed = pointerSpeed(
+        fromPointerResolution: fallbackPointerResolution)
 
     private static var nextID: Int32 = 0
 
@@ -39,17 +42,8 @@ class Device {
         return .mouse
     }()
 
-    private struct Product: Hashable {
-        let vendorID: Int
-        let productID: Int
-    }
-
-    private static let productsToApplySideButtonFixes: Set<Product> = [
-        .init(vendorID: 0x2717, productID: 0x5014), // Mi Silent Mouse
-        .init(vendorID: 0x248A, productID: 0x8266) // Delux M729DB mouse
-    ]
-
     private weak var manager: DeviceManager?
+    private var inputReportHandlers: [InputReportHandler] = []
     private let device: PointerDevice
 
     private var removed = false
@@ -67,7 +61,8 @@ class Device {
         self.manager = manager
         self.device = device
 
-        initialPointerResolution = device.pointerResolution ?? Self.fallbackPointerResolution
+        initialPointerResolution =
+            device.pointerResolution ?? Self.fallbackPointerResolution
 
         // TODO: More elegant way?
         inputObservationToken = device.observeInput { [weak self] in
@@ -80,11 +75,14 @@ class Device {
         //
         // To work around this issue, we subscribe to the input reports and monitor the side button
         // states. When the side buttons are clicked, we simulate those events.
-        if buttonCount == 3,
-           let vendorID, let productID,
-           Self.productsToApplySideButtonFixes.contains(.init(vendorID: vendorID, productID: productID)) {
-            reportObservationToken = device.observeReport { [weak self] in
-                self?.inputReportCallback($0, $1)
+        if let vendorID, let productID {
+            let handlers = InputReportHandlerRegistry.handlers(for: vendorID, productID: productID)
+            let needsObservation = handlers.contains { $0.alwaysNeedsReportObservation() } || buttonCount == 3
+            if needsObservation, !handlers.isEmpty {
+                inputReportHandlers = handlers
+                reportObservationToken = device.observeReport { [weak self] in
+                    self?.inputReportCallback($0, $1)
+                }
             }
         }
 
@@ -121,7 +119,8 @@ extension Device {
     }
 
     private func isAppleMagicMouse(vendorID: Int, productID: Int) -> Bool {
-        [0x004C, 0x05AC].contains(vendorID) && [0x0269, 0x030D].contains(productID)
+        [0x004C, 0x05AC].contains(vendorID)
+            && [0x0269, 0x030D].contains(productID)
     }
 
     /**
@@ -158,17 +157,22 @@ extension Device {
 
     private static let pointerSpeedRange = 1.0 / 1200 ... 1.0 / 40
 
-    static func pointerSpeed(fromPointerResolution pointerResolution: Double) -> Double {
+    static func pointerSpeed(fromPointerResolution pointerResolution: Double)
+        -> Double {
         (1 / pointerResolution).normalized(from: pointerSpeedRange)
     }
 
-    static func pointerResolution(fromPointerSpeed pointerSpeed: Double) -> Double {
+    static func pointerResolution(fromPointerSpeed pointerSpeed: Double)
+        -> Double {
         1 / (pointerSpeed.normalized(to: pointerSpeedRange))
     }
 
     var pointerSpeed: Double {
         get {
-            device.pointerResolution.map { Self.pointerSpeed(fromPointerResolution: $0) } ?? Self
+            device.pointerResolution.map {
+                Self.pointerSpeed(fromPointerResolution: $0)
+            }
+                ?? Self
                 .fallbackPointerSpeed
         }
         set {
@@ -217,7 +221,9 @@ extension Device {
         restorePointerAcceleration()
     }
 
-    private func inputValueCallback(_ device: PointerDevice, _ value: IOHIDValue) {
+    private func inputValueCallback(
+        _ device: PointerDevice, _ value: IOHIDValue
+    ) {
         if verbosedLoggingOn {
             os_log(
                 "Received input value from: %{public}@: %{public}@",
@@ -287,43 +293,12 @@ extension Device {
             )
         }
 
-        // FIXME: Correct HID Report parsing?
-        guard report.count >= 2 else {
-            return
+        let context = InputReportContext(report: report, lastButtonStates: lastButtonStates)
+        let chain = inputReportHandlers.reversed().reduce({ (_: InputReportContext) in }) { next, handler in
+            { context in handler.handleReport(context, next: next) }
         }
-        // | Button 0 (1 bit) | ... | Button 4 (1 bit) | Not Used (3 bits) |
-        let buttonStates = report[1] & 0x18
-        let toggled = lastButtonStates ^ buttonStates
-        guard toggled != 0 else {
-            return
-        }
-        for button in 3 ... 4 {
-            guard toggled & (1 << button) != 0 else {
-                continue
-            }
-            let down = buttonStates & (1 << button) != 0
-            os_log(
-                "Simulate button %{public}d %{public}@ event for device: %{public}@",
-                log: Self.log,
-                type: .info,
-                button,
-                down ? "down" : "up",
-                String(describing: device)
-            )
-            guard let location = CGEvent(source: nil)?.location else {
-                continue
-            }
-            guard let event = CGEvent(
-                mouseEventSource: nil,
-                mouseType: down ? .otherMouseDown : .otherMouseUp,
-                mouseCursorPosition: location,
-                mouseButton: .init(rawValue: UInt32(button))!
-            ) else {
-                continue
-            }
-            event.post(tap: .cghidEventTap)
-        }
-        lastButtonStates = buttonStates
+        chain(context)
+        lastButtonStates = context.lastButtonStates
     }
 }
 

@@ -61,10 +61,9 @@ extension GestureButtonTransformer: EventTransformer {
                     return nil
                 }
                 return event
-            } else {
-                // Cooldown expired, return to idle
-                state = .idle
             }
+            // Cooldown expired, return to idle
+            state = .idle
         }
 
         // Route based on event type
@@ -226,9 +225,9 @@ extension GestureButtonTransformer: EventTransformer {
             }
             // Use defaults if actions not configured
             return deltaX > 0 ? (actions.right ?? .spaceRight) : (actions.left ?? .spaceLeft)
-        } else {
-            // Vertical gesture
-            guard absDeltaX < deadZone else {
+        }
+        // Vertical gesture
+        guard absDeltaX < deadZone else {
 //                os_log(
 //                    "Vertical gesture rejected: absDeltaX=%.1f >= deadZone=%.1f",
 //                    log: Self.log,
@@ -236,11 +235,10 @@ extension GestureButtonTransformer: EventTransformer {
 //                    absDeltaX,
 //                    deadZone
 //                )
-                return nil
-            }
-            // Use defaults if actions not configured
-            return deltaY > 0 ? (actions.down ?? .appExpose) : (actions.up ?? .missionControl)
+            return nil
         }
+        // Use defaults if actions not configured
+        return deltaY > 0 ? (actions.down ?? .appExpose) : (actions.up ?? .missionControl)
     }
 
     private func executeGesture(_ action: Scheme.Buttons.Gesture.GestureAction) throws {
