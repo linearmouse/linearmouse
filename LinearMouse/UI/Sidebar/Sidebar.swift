@@ -4,31 +4,38 @@
 import SwiftUI
 
 struct Sidebar: View {
+    @ObservedObject var state = SettingsState.shared
+
     var body: some View {
-        VStack(spacing: 0) {
-            SidebarItem(
-                id: .pointer,
-                imageName: "Pointer",
-                text: "Pointer"
-            )
+        List(SettingsState.Navigation.allCases, id: \.self, selection: $state.navigation) { item in
+            SidebarRow(item: item)
+                .tag(item)
+        }
+        .listStyle(SidebarListStyle())
+    }
+}
 
-            SidebarItem(
-                id: .scrolling,
-                imageName: "Scrolling",
-                text: "Scrolling"
-            )
+private struct SidebarRow: View {
+    let item: SettingsState.Navigation
 
-            SidebarItem(
-                id: .buttons,
-                imageName: "Buttons",
-                text: "Buttons"
-            )
-
-            SidebarItem(
-                id: .general,
-                imageName: "General",
-                text: "General"
-            )
+    var body: some View {
+        if #available(macOS 11.0, *) {
+            Label {
+                Text(item.title)
+            } icon: {
+                Image(item.imageName)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 16, height: 16)
+            }
+        } else {
+            HStack {
+                Image(item.imageName)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 16, height: 16)
+                Text(item.title)
+            }
         }
     }
 }
