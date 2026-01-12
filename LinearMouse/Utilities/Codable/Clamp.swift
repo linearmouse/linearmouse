@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2025 LinearMouse
+// Copyright (c) 2021-2026 LinearMouse
 
 protocol ClampRange {
     associatedtype Value: Codable

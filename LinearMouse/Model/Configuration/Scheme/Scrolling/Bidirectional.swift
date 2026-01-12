@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2025 LinearMouse
+// Copyright (c) 2021-2026 LinearMouse
 
 extension Scheme.Scrolling {
     struct Bidirectional<T: Codable & Equatable>: Equatable, ImplicitInitable {

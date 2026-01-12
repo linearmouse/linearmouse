@@ -1,5 +1,5 @@
 // MIT License
-// Copyright (c) 2021-2025 LinearMouse
+// Copyright (c) 2021-2026 LinearMouse
 
 // SwiftFormat will eat the empty lines between the file header and @propertyWrapper.
 // These comments should be removed when SwiftFormat fixes this bug.
