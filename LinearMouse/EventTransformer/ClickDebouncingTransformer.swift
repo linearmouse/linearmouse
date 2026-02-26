@@ -55,16 +55,6 @@ class ClickDebouncingTransformer: EventTransformer {
             state = .waitForUp
             return event
         case mouseUpEventType:
-            if state == .waitForDown {
-                os_log(
-                    "Mouse up ignored because last mouse down ignored",
-                    log: Self.log,
-                    type: .info,
-                    intervalSinceLastClick,
-                    timeout
-                )
-                return nil
-            }
             if resetTimerOnMouseUp {
                 touchLastClickedAt()
             }
