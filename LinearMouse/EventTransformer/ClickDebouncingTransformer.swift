@@ -21,11 +21,6 @@ class ClickDebouncingTransformer: EventTransformer {
 
     private var mouseUpEventType: CGEventType { button.fixedCGEventType(of: .leftMouseUp) }
 
-    enum State {
-        case unknown, waitForDown, waitForUp
-    }
-
-    private var state: State = .unknown
     private var lastClickedAtInNanoseconds: UInt64 = 0
 
     func transform(_ event: CGEvent) -> CGEvent? {
@@ -42,7 +37,6 @@ class ClickDebouncingTransformer: EventTransformer {
             let intervalSinceLastClick = intervalSinceLastClick
             touchLastClickedAt()
             if intervalSinceLastClick <= timeout {
-                state = .waitForDown
                 os_log(
                     "Mouse down ignored because interval since last click %{public}f <= %{public}f",
                     log: Self.log,
@@ -52,13 +46,11 @@ class ClickDebouncingTransformer: EventTransformer {
                 )
                 return nil
             }
-            state = .waitForUp
             return event
         case mouseUpEventType:
             if resetTimerOnMouseUp {
                 touchLastClickedAt()
             }
-            state = .waitForDown
             return event
         default:
             break
