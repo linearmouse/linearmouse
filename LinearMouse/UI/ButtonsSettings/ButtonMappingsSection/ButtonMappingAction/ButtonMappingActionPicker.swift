@@ -12,6 +12,11 @@ struct ButtonMappingActionPicker: View, Equatable {
         }
         .modifier(PickerViewModifier())
     }
+
+    // swiftformat:disable:next redundantEquatable
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.actionType == rhs.actionType
+    }
 }
 
 extension ButtonMappingActionPicker {
