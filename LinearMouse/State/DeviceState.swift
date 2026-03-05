@@ -55,7 +55,9 @@ class DeviceState: ObservableObject {
 }
 
 extension DeviceState {
-    private var deviceManager: DeviceManager { DeviceManager.shared }
+    private var deviceManager: DeviceManager {
+        DeviceManager.shared
+    }
 
     private func updateCurrentDeviceRef(lastActiveDeviceRef: WeakRef<Device>?) {
         guard !Defaults[.autoSwitchToActiveDevice] else {

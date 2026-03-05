@@ -13,6 +13,7 @@ struct ButtonMappingActionPicker: View, Equatable {
         .modifier(PickerViewModifier())
     }
 
+    // swiftformat:disable:next redundantEquatable
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.actionType == rhs.actionType
     }
@@ -27,7 +28,9 @@ extension ButtonMappingActionPicker {
     }
 
     indirect enum ActionTypeTreeNode: Identifiable {
-        var id: UUID { UUID() }
+        var id: UUID {
+            UUID()
+        }
 
         case actionType(ActionType)
         case section(LocalizedStringKey, () -> [Self])

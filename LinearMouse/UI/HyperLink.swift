@@ -3,7 +3,7 @@
 
 import SwiftUI
 
-struct HyperLink<Content>: View where Content: View {
+struct HyperLink<Content: View>: View {
     var url: URL
     let content: () -> Content
 

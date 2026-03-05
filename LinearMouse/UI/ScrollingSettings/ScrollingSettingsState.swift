@@ -14,7 +14,9 @@ class ScrollingSettingsState: ObservableObject {
         set { schemeState.scheme = newValue }
     }
 
-    var mergedScheme: Scheme { schemeState.mergedScheme }
+    var mergedScheme: Scheme {
+        schemeState.mergedScheme
+    }
 
     @Published var direction: Scheme.Scrolling.BidirectionalDirection = .vertical
 }
@@ -26,7 +28,9 @@ extension ScrollingSettingsState {
     }
 
     enum ScrollingMode: String, Identifiable, CaseIterable {
-        var id: Self { self }
+        var id: Self {
+            self
+        }
 
         case accelerated = "Accelerated"
         case byLines = "By Lines"

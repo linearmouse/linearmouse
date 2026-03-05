@@ -17,9 +17,13 @@ class ClickDebouncingTransformer: EventTransformer {
         self.resetTimerOnMouseUp = resetTimerOnMouseUp
     }
 
-    private var mouseDownEventType: CGEventType { button.fixedCGEventType(of: .leftMouseDown) }
+    private var mouseDownEventType: CGEventType {
+        button.fixedCGEventType(of: .leftMouseDown)
+    }
 
-    private var mouseUpEventType: CGEventType { button.fixedCGEventType(of: .leftMouseUp) }
+    private var mouseUpEventType: CGEventType {
+        button.fixedCGEventType(of: .leftMouseUp)
+    }
 
     private var lastClickedAtInNanoseconds: UInt64 = 0
 

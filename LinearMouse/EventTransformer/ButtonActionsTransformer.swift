@@ -16,7 +16,9 @@ class ButtonActionsTransformer {
     var repeatTimer: Timer?
 
     static let keySimulator = KeySimulator()
-    var keySimulator: KeySimulator { Self.keySimulator }
+    var keySimulator: KeySimulator {
+        Self.keySimulator
+    }
 
     init(mappings: [Scheme.Buttons.Mapping]) {
         self.mappings = mappings

@@ -45,7 +45,7 @@ final class ImplicitOptionalTests: XCTestCase {
         )
     }
 
-    func testNestedAssignment() throws {
+    func testNestedAssignment() {
         var foo = Foo()
         foo.bar.baz.qux += 1
         XCTAssertEqual(foo.bar.baz.qux, 43)

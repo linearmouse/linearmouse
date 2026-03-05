@@ -5,7 +5,7 @@
 import XCTest
 
 final class ObservationTokenTests: XCTestCase {
-    func testCancel() throws {
+    func testCancel() {
         var cancelled = false
 
         do {
@@ -17,7 +17,7 @@ final class ObservationTokenTests: XCTestCase {
         XCTAssertTrue(cancelled)
     }
 
-    func testTieToLifetime() throws {
+    func testTieToLifetime() {
         var cancelled = false
 
         class A {}

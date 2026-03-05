@@ -28,7 +28,9 @@ extension Scheme.Scrolling {
 
 extension Scheme.Scrolling {
     enum BidirectionalDirection: String, Identifiable, CaseIterable {
-        var id: Self { self }
+        var id: Self {
+            self
+        }
 
         case vertical = "Vertical"
         case horizontal = "Horizontal"

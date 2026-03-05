@@ -7,7 +7,7 @@ protocol ClampRange {
 
     static var range: ClosedRange<RangeValue> { get }
 
-    // Clamp a possibly-optional value to range; default provided below
+    /// Clamp a possibly-optional value to range; default provided below
     static func clamp(_ value: Value?) -> Value?
 }
 

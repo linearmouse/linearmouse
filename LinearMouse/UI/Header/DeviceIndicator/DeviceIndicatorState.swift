@@ -24,5 +24,7 @@ class DeviceIndicatorState: ObservableObject {
 }
 
 extension DeviceIndicatorState {
-    private var deviceState: DeviceState { DeviceState.shared }
+    private var deviceState: DeviceState {
+        DeviceState.shared
+    }
 }
