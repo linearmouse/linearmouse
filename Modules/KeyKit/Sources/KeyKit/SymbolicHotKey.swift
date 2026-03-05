@@ -5,7 +5,7 @@ import CoreFoundation
 import KeyKitC
 
 public enum SymbolicHotKey: UInt32 {
-    // full keyboard access hotkeys
+    /// full keyboard access hotkeys
     case toggleFullKeyboardAccess = 12,
          focusMenubar = 7,
          focusDock = 8,

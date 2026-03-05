@@ -3,7 +3,7 @@
 
 import SwiftUI
 
-struct DetailView<T>: View where T: View {
+struct DetailView<T: View>: View {
     var schemeSpecific = true
     var content: () -> T
 

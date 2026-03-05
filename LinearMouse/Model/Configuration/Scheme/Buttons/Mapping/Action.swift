@@ -14,7 +14,9 @@ extension Scheme.Buttons.Mapping {
 
 extension Scheme.Buttons.Mapping.Action {
     enum Arg0: String, Codable, Identifiable, CaseIterable {
-        var id: Self { self }
+        var id: Self {
+            self
+        }
 
         case auto
         case none

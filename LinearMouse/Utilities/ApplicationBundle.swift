@@ -5,7 +5,9 @@ import AppKit
 import Foundation
 
 struct InstalledApp: Identifiable {
-    var id: String { bundleIdentifier }
+    var id: String {
+        bundleIdentifier
+    }
 
     var bundleName: String
     var bundleIdentifier: String

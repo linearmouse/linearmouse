@@ -14,7 +14,7 @@ final class KeyKitTests: XCTestCase {
         try postSymbolicHotKey(.spaceLeft)
     }
 
-    func testPostSystemDefinedKey() throws {
+    func testPostSystemDefinedKey() {
         postSystemDefinedKey(.soundDown)
     }
 }

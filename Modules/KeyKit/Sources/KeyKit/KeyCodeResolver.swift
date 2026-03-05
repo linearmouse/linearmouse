@@ -122,7 +122,11 @@ public class KeyCodeResolver {
         reversedMapping = newReversedMapping
     }
 
-    public func keyCode(for key: Key) -> CGKeyCode? { mapping[key.rawValue] }
+    public func keyCode(for key: Key) -> CGKeyCode? {
+        mapping[key.rawValue]
+    }
 
-    public func key(from keyCode: CGKeyCode) -> Key? { reversedMapping[keyCode] }
+    public func key(from keyCode: CGKeyCode) -> Key? {
+        reversedMapping[keyCode]
+    }
 }

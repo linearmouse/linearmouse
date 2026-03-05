@@ -21,7 +21,9 @@ extension Scheme.Buttons {
         }
 
         enum GestureAction: String, Codable, Equatable, Hashable, Identifiable, CaseIterable {
-            var id: Self { self }
+            var id: Self {
+                self
+            }
 
             case none
             case spaceLeft = "missionControl.spaceLeft"

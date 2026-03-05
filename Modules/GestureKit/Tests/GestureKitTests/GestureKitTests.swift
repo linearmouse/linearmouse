@@ -15,7 +15,7 @@ final class GestureKitTests: XCTestCase {
         XCTAssertEqual(cgEvents.count, 2)
 
         for (index, cgEvent) in cgEvents.enumerated() {
-            let nsEvent = NSEvent(cgEvent: cgEvent)!
+            let nsEvent = try XCTUnwrap(NSEvent(cgEvent: cgEvent))
             XCTAssertEqual(nsEvent.type, .swipe)
             switch index {
             case 0:

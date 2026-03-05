@@ -15,7 +15,8 @@ class Device {
     static let fallbackPointerAcceleration = 0.6875
     static let fallbackPointerResolution = 400.0
     static let fallbackPointerSpeed = pointerSpeed(
-        fromPointerResolution: fallbackPointerResolution)
+        fromPointerResolution: fallbackPointerResolution
+    )
 
     private static var nextID: Int32 = 0
 

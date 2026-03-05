@@ -37,7 +37,9 @@ extension ScrollingSettings.ModifierKeysSection {
 
 extension ScrollingSettings.ModifierKeysSection.ModifierKeyActionPicker {
     enum ActionType: String, CaseIterable, Identifiable, CustomStringConvertible {
-        var id: Self { self }
+        var id: Self {
+            self
+        }
 
         case defaultAction = "Default action"
         case ignore = "Ignore modifier"

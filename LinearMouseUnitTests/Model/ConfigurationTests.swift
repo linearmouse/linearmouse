@@ -9,7 +9,7 @@ final class ConfigurationTests: XCTestCase {
         try print(Configuration(schemes: []).dump())
     }
 
-    func testMergeScheme() throws {
+    func testMergeScheme() {
         var scheme = Scheme()
 
         XCTAssertNil(scheme.$scrolling)
