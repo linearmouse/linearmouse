@@ -15,10 +15,15 @@ class DeviceState: ObservableObject {
     static let shared = DeviceState()
 
     private var subscriptions = Set<AnyCancellable>()
+    private var isSettingSelectedDevice = false
 
     @Published var currentDeviceRef: WeakRef<Device>? {
         didSet {
             guard !Defaults[.autoSwitchToActiveDevice] else {
+                return
+            }
+
+            guard !isSettingSelectedDevice else {
                 return
             }
 
@@ -27,6 +32,8 @@ class DeviceState: ObservableObject {
                 return
             }
 
+            isSettingSelectedDevice = true
+            defer { isSettingSelectedDevice = false }
             Defaults[.selectedDevice] = currentDeviceMatcher
         }
     }
