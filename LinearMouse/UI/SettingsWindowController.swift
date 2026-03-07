@@ -592,7 +592,7 @@ private class SheetController<Content: SheetContentView>: NSViewController {
         }
     }
 
-    // Handle ESC key to dismiss
+    /// Handle ESC key to dismiss
     @objc func cancel(_: Any?) {
         isPresented = false
     }
