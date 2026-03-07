@@ -88,7 +88,7 @@ public enum Key: String, Codable {
     // Norwegian/Danish keyboards:
     case ã
     case õ
-    // Swedish/Finnish keyboards:
+    /// Swedish/Finnish keyboards:
     case å
     // Polish keyboards:
     case ą

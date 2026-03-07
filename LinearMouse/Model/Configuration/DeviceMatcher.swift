@@ -27,13 +27,11 @@ extension DeviceMatcher {
     }
 
     func match(with device: Device) -> Bool {
-        func matchValue<T>(_ destination: T?, _ source: T) -> Bool
-            where T: Equatable {
+        func matchValue<T: Equatable>(_ destination: T?, _ source: T) -> Bool {
             destination == nil || source == destination
         }
 
-        func matchValue<T>(_ destination: T?, _ source: T?) -> Bool
-            where T: Equatable {
+        func matchValue<T: Equatable>(_ destination: T?, _ source: T?) -> Bool {
             destination == nil || source == destination
         }
 

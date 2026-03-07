@@ -4,7 +4,7 @@
 import AppKit
 import Foundation
 
-// See NX_KEYTYPE_SOUND_UP
+/// See NX_KEYTYPE_SOUND_UP
 public enum SystemDefinedKey: Int {
     case soundUp = 0,
          soundDown,

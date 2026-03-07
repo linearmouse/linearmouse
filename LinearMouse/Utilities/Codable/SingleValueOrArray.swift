@@ -5,7 +5,7 @@
 // These comments should be removed when SwiftFormat fixes this bug.
 
 @propertyWrapper
-struct SingleValueOrArray<Value> where Value: Codable {
+struct SingleValueOrArray<Value: Codable> {
     var wrappedValue: [Value]?
 
     init(wrappedValue value: [Value]?) {

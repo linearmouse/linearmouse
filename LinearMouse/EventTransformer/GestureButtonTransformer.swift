@@ -17,7 +17,7 @@ class GestureButtonTransformer {
     private let cooldownMs: Int
     private let actions: Scheme.Buttons.Gesture.Actions
 
-    // State machine
+    /// State machine
     private enum State {
         case idle
         case tracking(startTime: UInt64, deltaX: Double, deltaY: Double)

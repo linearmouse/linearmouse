@@ -49,7 +49,9 @@ extension ButtonMappingActionScroll {
         @Binding var distance: Scheme.Scrolling.Distance
 
         enum Mode: LocalizedStringKey, CaseIterable, Identifiable {
-            var id: Self { self }
+            var id: Self {
+                self
+            }
 
             case byLines = "By Lines"
             case byPixels = "By Pixels"

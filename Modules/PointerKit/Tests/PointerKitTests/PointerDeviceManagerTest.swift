@@ -12,7 +12,7 @@ final class PointerDeviceManagerTest: XCTestCase {
         weak var value: T?
     }
 
-    func testStartStop() throws {
+    func testStartStop() {
         var tokenRef = WeakRef<ObservationToken>()
 
         do {

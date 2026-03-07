@@ -15,7 +15,9 @@ class ButtonsSettingsState: ObservableObject {
         set { schemeState.scheme = newValue }
     }
 
-    var mergedScheme: Scheme { schemeState.mergedScheme }
+    var mergedScheme: Scheme {
+        schemeState.mergedScheme
+    }
 }
 
 extension ButtonsSettingsState {

@@ -5,19 +5,19 @@
 import XCTest
 
 final class DockKitTests: XCTestCase {
-    func testLaunchpad() throws {
+    func testLaunchpad() {
         launchpad()
     }
 
-    func testMissionControl() throws {
+    func testMissionControl() {
         missionControl()
     }
 
-    func testShowDesktop() throws {
+    func testShowDesktop() {
         showDesktop()
     }
 
-    func testAppExpose() throws {
+    func testAppExpose() {
         appExpose()
     }
 }
