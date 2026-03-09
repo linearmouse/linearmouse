@@ -38,11 +38,6 @@ public class PointerDevice {
         this.inputReportCallback(Data(bytes: report, count: reportLength))
     }
 
-    // Some devices like Magic Mouse do not return an HIDUseLinearScalingMouseAcceleration on macOS 26.
-    // So we have to store it manually.
-    // TODO: Use system global value as the initial value.
-    private var _useLinearScalingMouseAcceleration = 0
-
     init(_ client: IOHIDServiceClient) {
         self.client = client
         device = client.device
@@ -168,20 +163,12 @@ public extension PointerDevice {
 
     var useLinearScalingMouseAcceleration: Int? {
         get {
-            guard #available(macOS 14, *) else {
-                return 0
-            }
-
-            return client.getProperty(kIOHIDUseLinearScalingMouseAccelerationKey) ?? _useLinearScalingMouseAcceleration
+            // TODO: Use `kIOHIDUseLinearScalingMouseAccelerationKey`.
+            client.getProperty("HIDUseLinearScalingMouseAcceleration")
         }
         set {
-            guard #available(macOS 14, *) else {
-                return
-            }
-
-            if let newValue, client.setProperty(newValue, forKey: kIOHIDUseLinearScalingMouseAccelerationKey) {
-                _useLinearScalingMouseAcceleration = newValue
-            }
+            // TODO: Use `kIOHIDUseLinearScalingMouseAccelerationKey`.
+            client.setProperty(newValue, forKey: "HIDUseLinearScalingMouseAcceleration")
         }
     }
 
