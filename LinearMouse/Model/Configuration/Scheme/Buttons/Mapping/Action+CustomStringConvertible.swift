@@ -70,13 +70,13 @@ extension Scheme.Buttons.Mapping.Action.Arg0: CustomStringConvertible {
         case .mouseWheelScrollRight:
             return NSLocalizedString("Scroll right", comment: "")
         case .mouseButtonLeft:
-            return NSLocalizedString("Left click", comment: "")
+            return NSLocalizedString("Primary click", comment: "")
         case .mouseButtonLeftDouble:
-            return NSLocalizedString("Left double-click", comment: "")
+            return NSLocalizedString("Primary double-click", comment: "")
         case .mouseButtonMiddle:
             return NSLocalizedString("Middle click", comment: "")
         case .mouseButtonRight:
-            return NSLocalizedString("Right click", comment: "")
+            return NSLocalizedString("Secondary click", comment: "")
         case .mouseButtonBack:
             return NSLocalizedString("Back", comment: "")
         case .mouseButtonForward:

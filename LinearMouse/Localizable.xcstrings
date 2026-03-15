@@ -22315,18 +22315,18 @@
         }
       }
     },
-    "Left click" : {
+    "Primary click" : {
       "localizations" : {
         "af" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left click"
+            "value" : "Primary click"
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left click"
+            "value" : "Primary click"
           }
         },
         "bs" : {
@@ -22338,7 +22338,7 @@
         "ca" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left click"
+            "value" : "Primary click"
           }
         },
         "cs" : {
@@ -22374,7 +22374,7 @@
         "fi" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left click"
+            "value" : "Primary click"
           }
         },
         "fr" : {
@@ -22392,7 +22392,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left click"
+            "value" : "Primary click"
           }
         },
         "it" : {
@@ -22422,7 +22422,7 @@
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left click"
+            "value" : "Primary click"
           }
         },
         "nl" : {
@@ -22452,7 +22452,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left click"
+            "value" : "Primary click"
           }
         },
         "ru" : {
@@ -22470,7 +22470,7 @@
         "sr" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left click"
+            "value" : "Primary click"
           }
         },
         "sv" : {
@@ -22517,18 +22517,18 @@
         }
       }
     },
-    "Left double-click" : {
+    "Primary double-click" : {
       "localizations" : {
         "af" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left double-click"
+            "value" : "Primary double-click"
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left double-click"
+            "value" : "Primary double-click"
           }
         },
         "bs" : {
@@ -22540,7 +22540,7 @@
         "ca" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left double-click"
+            "value" : "Primary double-click"
           }
         },
         "cs" : {
@@ -22552,7 +22552,7 @@
         "da" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left double-click"
+            "value" : "Primary double-click"
           }
         },
         "de" : {
@@ -22564,7 +22564,7 @@
         "el" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left double-click"
+            "value" : "Primary double-click"
           }
         },
         "es" : {
@@ -22576,7 +22576,7 @@
         "fi" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left double-click"
+            "value" : "Primary double-click"
           }
         },
         "fr" : {
@@ -22588,13 +22588,13 @@
         "he" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left double-click"
+            "value" : "Primary double-click"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left double-click"
+            "value" : "Primary double-click"
           }
         },
         "it" : {
@@ -22624,7 +22624,7 @@
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left double-click"
+            "value" : "Primary double-click"
           }
         },
         "nl" : {
@@ -22654,7 +22654,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left double-click"
+            "value" : "Primary double-click"
           }
         },
         "ru" : {
@@ -22672,13 +22672,13 @@
         "sr" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left double-click"
+            "value" : "Primary double-click"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left double-click"
+            "value" : "Primary double-click"
           }
         },
         "tr" : {
@@ -22696,7 +22696,7 @@
         "vi" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Left double-click"
+            "value" : "Primary double-click"
           }
         },
         "zh-Hans" : {
@@ -32826,18 +32826,18 @@
         }
       }
     },
-    "Right click" : {
+    "Secondary click" : {
       "localizations" : {
         "af" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Right click"
+            "value" : "Secondary click"
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Right click"
+            "value" : "Secondary click"
           }
         },
         "bs" : {
@@ -32849,7 +32849,7 @@
         "ca" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Right click"
+            "value" : "Secondary click"
           }
         },
         "cs" : {
@@ -32885,7 +32885,7 @@
         "fi" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Right click"
+            "value" : "Secondary click"
           }
         },
         "fr" : {
@@ -32903,7 +32903,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Right click"
+            "value" : "Secondary click"
           }
         },
         "it" : {
@@ -32933,7 +32933,7 @@
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Right click"
+            "value" : "Secondary click"
           }
         },
         "nl" : {
@@ -32963,7 +32963,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Right click"
+            "value" : "Secondary click"
           }
         },
         "ru" : {
@@ -32981,7 +32981,7 @@
         "sr" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Right click"
+            "value" : "Secondary click"
           }
         },
         "sv" : {
