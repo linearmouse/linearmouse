@@ -12,7 +12,7 @@ final class AutoScrollTransformer {
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "AutoScroll")
 
     private static let deadZone: Double = 10
-    private static let maxScrollStep: Double = 40
+    private static let maxScrollStep: Double = 160
     private static let timerInterval: TimeInterval = 1.0 / 60.0
     private static let excludedAccessibilityRoles: Set<String> = [
         "AXMenuBar",
