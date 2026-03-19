@@ -386,9 +386,89 @@ declare namespace Scheme {
      * @description Press and hold a button while dragging to trigger gestures like switching desktop spaces or opening Mission Control.
      */
     gesture?: Buttons.Gesture;
+
+    /**
+     * @title Auto scroll
+     * @description Click or hold a mouse button, then move the pointer to continuously scroll like the Windows middle-button autoscroll behavior.
+     */
+    autoScroll?: Buttons.AutoScroll;
   };
 
   namespace Buttons {
+    type AutoScroll = {
+      /**
+       * @description Indicates if auto scroll is enabled.
+       * @default false
+       */
+      enabled?: boolean;
+
+      /**
+       * @title Activation mode
+       * @description Use \"toggle\" to click once and move until clicking again, \"hold\" to scroll only while the trigger stays pressed, or provide both to support both behaviors.
+       */
+      mode?: SingleValueOrArray<AutoScroll.Mode>;
+
+      /**
+       * @description Adjust the auto scroll speed multiplier.
+       * @default 1
+       */
+      speed?: number;
+
+      /**
+       * @description If true, a plain middle click on a pressable element such as a link will keep its native behavior when possible.
+       * @default false
+       */
+      preserveNativeMiddleClick?: boolean;
+
+      /**
+       * @title Trigger
+       * @description Choose the mouse button and modifier keys used to activate auto scroll.
+       */
+      trigger?: AutoScroll.Trigger;
+    };
+
+    namespace AutoScroll {
+      /**
+       * @description Click once to enter auto scroll and click again to exit.
+       */
+      type Toggle = "toggle";
+
+      /**
+       * @description Auto scroll is active only while the trigger button remains pressed.
+       */
+      type Hold = "hold";
+
+      type Mode = Toggle | Hold;
+
+      type Trigger = {
+        /**
+         * @title Button number
+         * @description The button number. See https://developer.apple.com/documentation/coregraphics/cgmousebutton
+         */
+        button: Button;
+
+        /**
+         * @description Indicates if the command modifier key should be pressed.
+         */
+        command?: boolean;
+
+        /**
+         * @description Indicates if the shift modifier key should be pressed.
+         */
+        shift?: boolean;
+
+        /**
+         * @description Indicates if the option modifier key should be pressed.
+         */
+        option?: boolean;
+
+        /**
+         * @description Indicates if the control modifier key should be pressed.
+         */
+        control?: boolean;
+      };
+    }
+
     type Mapping = (
       | {
           /**
