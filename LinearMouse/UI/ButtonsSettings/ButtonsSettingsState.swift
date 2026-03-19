@@ -21,6 +21,16 @@ class ButtonsSettingsState: ObservableObject {
 }
 
 extension ButtonsSettingsState {
+    private var defaultAutoScrollModes: [Scheme.Buttons.AutoScroll.Mode] {
+        [.toggle]
+    }
+
+    private var defaultAutoScrollTrigger: Scheme.Buttons.Mapping {
+        var mapping = Scheme.Buttons.Mapping()
+        mapping.button = Int(CGMouseButton.center.rawValue)
+        return mapping
+    }
+
     var universalBackForward: Bool {
         get {
             mergedScheme.buttons.universalBackForward ?? .none != .none
@@ -100,6 +110,137 @@ extension ButtonsSettingsState {
                 }
             }
         )
+    }
+
+    var autoScrollEnabled: Bool {
+        get {
+            mergedScheme.buttons.autoScroll.enabled ?? false
+        }
+        set {
+            guard newValue != autoScrollEnabled else {
+                return
+            }
+
+            if newValue {
+                scheme.buttons.autoScroll.enabled = true
+                if scheme.buttons.autoScroll.trigger == nil {
+                    scheme.buttons.autoScroll.trigger = defaultAutoScrollTrigger
+                }
+                if scheme.buttons.autoScroll.modes == nil {
+                    scheme.buttons.autoScroll.modes = defaultAutoScrollModes
+                }
+                if scheme.buttons.autoScroll.speed == nil {
+                    scheme.buttons.autoScroll.speed = 1
+                }
+                if scheme.buttons.autoScroll.preserveNativeMiddleClick == nil {
+                    scheme.buttons.autoScroll.preserveNativeMiddleClick = true
+                }
+            } else {
+                scheme.buttons.$autoScroll = nil
+            }
+
+            GlobalEventTap.shared.stop()
+            GlobalEventTap.shared.start()
+        }
+    }
+
+    var autoScrollModes: [Scheme.Buttons.AutoScroll.Mode] {
+        get {
+            mergedScheme.buttons.autoScroll.normalizedModes
+        }
+        set {
+            let orderedModes = Scheme.Buttons.AutoScroll.Mode.allCases.filter { newValue.contains($0) }
+            scheme.buttons.autoScroll.modes = orderedModes.isEmpty ? defaultAutoScrollModes : orderedModes
+        }
+    }
+
+    var autoScrollToggleModeEnabled: Bool {
+        get {
+            autoScrollModes.contains(.toggle)
+        }
+        set {
+            var modes = Set(autoScrollModes)
+            if newValue {
+                modes.insert(.toggle)
+            } else {
+                modes.remove(.toggle)
+            }
+            autoScrollModes = Array(modes)
+        }
+    }
+
+    var autoScrollHoldModeEnabled: Bool {
+        get {
+            autoScrollModes.contains(.hold)
+        }
+        set {
+            var modes = Set(autoScrollModes)
+            if newValue {
+                modes.insert(.hold)
+            } else {
+                modes.remove(.hold)
+            }
+            autoScrollModes = Array(modes)
+        }
+    }
+
+    var autoScrollSpeed: Double {
+        get {
+            mergedScheme.buttons.autoScroll.speed?.asTruncatedDouble ?? 1
+        }
+        set {
+            scheme.buttons.autoScroll.speed = Decimal(newValue).rounded(1)
+        }
+    }
+
+    var autoScrollSpeedText: String {
+        String(format: "%.1fx", autoScrollSpeed)
+    }
+
+    var autoScrollPreserveNativeMiddleClick: Bool {
+        get {
+            mergedScheme.buttons.autoScroll.preserveNativeMiddleClick ?? true
+        }
+        set {
+            scheme.buttons.autoScroll.preserveNativeMiddleClick = newValue
+        }
+    }
+
+    var autoScrollTrigger: Scheme.Buttons.Mapping {
+        get {
+            mergedScheme.buttons.autoScroll.trigger ?? defaultAutoScrollTrigger
+        }
+        set {
+            var trigger = newValue
+            trigger.action = nil
+            trigger.repeat = nil
+            trigger.scroll = nil
+            scheme.buttons.autoScroll.trigger = trigger
+        }
+    }
+
+    var autoScrollTriggerBinding: Binding<Scheme.Buttons.Mapping> {
+        Binding(
+            get: { [self] in
+                autoScrollTrigger
+            },
+            set: { [self] in
+                autoScrollTrigger = $0
+            }
+        )
+    }
+
+    var autoScrollTriggerValid: Bool {
+        autoScrollTrigger.valid
+    }
+
+    var autoScrollUsesPlainMiddleClick: Bool {
+        let trigger = autoScrollTrigger
+        return trigger.button == Int(CGMouseButton.center.rawValue) && trigger.modifierFlags.isEmpty
+    }
+
+    var autoScrollPreserveNativeMiddleClickAvailable: Bool {
+        autoScrollUsesPlainMiddleClick && autoScrollToggleModeEnabled
     }
 
     var mappings: [Scheme.Buttons.Mapping] {
