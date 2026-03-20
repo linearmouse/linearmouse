@@ -1,13 +1,13 @@
 name: Build
 on:
   push:
-    branches-ignore:
-      - l10n_main
+    branches:
+      - main
     tags:
       - v*
   pull_request:
-    branches-ignore:
-      - l10n_main
+    branches:
+      - main
 
 jobs:
   build:
