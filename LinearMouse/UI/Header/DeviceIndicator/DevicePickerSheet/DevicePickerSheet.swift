@@ -6,42 +6,76 @@ import SwiftUI
 
 struct DevicePickerSheet: View {
     @Binding var isPresented: Bool
-    @Default(.autoSwitchToActiveDevice) var autoSwitchToActiveDevice
+    @State private var autoSwitchToActiveDevice = Defaults[.autoSwitchToActiveDevice]
+    @State private var selectedDeviceRef: WeakRef<Device>?
     @State private var showDeleteAlert = false
 
     @ObservedObject private var schemeState: SchemeState = .shared
+    @ObservedObject private var deviceState: DeviceState = .shared
 
     private var shouldShowDeleteButton: Bool {
         // Only show if there are matching schemes
         schemeState.hasMatchingSchemes
     }
 
+    private var canConfirm: Bool {
+        autoSwitchToActiveDevice || selectedDeviceRef?.value != nil
+    }
+
     var body: some View {
-        VStack(spacing: 10) {
-            if !autoSwitchToActiveDevice {
-                DevicePicker(isPresented: $isPresented)
-                    .frame(minHeight: 300)
+        VStack(spacing: 18) {
+            HStack(alignment: .top, spacing: 16) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Auto switch to the active device")
+                    Text("Automatically follow the device that is currently active.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                Toggle("", isOn: $autoSwitchToActiveDevice.animation())
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                    .modifier(SheetToggleSizeModifier())
             }
+            .padding(.horizontal, 18)
+            .padding(.top, 18)
 
-            Toggle("Auto switch to the active device", isOn: $autoSwitchToActiveDevice.animation())
-                .padding()
+            DevicePicker(selectedDeviceRef: $selectedDeviceRef)
+                .frame(minHeight: 248, maxHeight: 320)
+                .disabled(autoSwitchToActiveDevice)
+                .opacity(autoSwitchToActiveDevice ? 0.55 : 1)
 
-            HStack {
+            HStack(spacing: 8) {
                 if shouldShowDeleteButton {
                     Button("Delete…", action: onDelete)
-                        .foregroundColor(.red)
-                        .padding([.bottom, .leading])
+                        .sheetDestructiveActionStyle()
                 }
 
                 Spacer()
 
-                Button("OK") {
+                Button("Cancel") {
                     isPresented = false
                 }
-                .padding([.bottom, .horizontal])
-                .controlSize(.regular)
-                .asDefaultAction()
+                .sheetSecondaryActionStyle()
+                .asCancelAction()
+
+                Button("OK", action: onOK)
+                    .sheetPrimaryActionStyle()
+                    .asDefaultAction()
+                    .disabled(!canConfirm)
             }
+            .padding(.horizontal, 18)
+            .padding(.bottom, 18)
+        }
+        .frame(minWidth: 372)
+        .onExitCommand {
+            isPresented = false
+        }
+        .onAppear {
+            autoSwitchToActiveDevice = Defaults[.autoSwitchToActiveDevice]
+            selectedDeviceRef = deviceState.currentDeviceRef
         }
         .alert(isPresented: $showDeleteAlert) {
             Alert(
@@ -59,8 +93,24 @@ struct DevicePickerSheet: View {
         showDeleteAlert = true
     }
 
+    private func onOK() {
+        Defaults[.autoSwitchToActiveDevice] = autoSwitchToActiveDevice
+
+        if !autoSwitchToActiveDevice {
+            deviceState.currentDeviceRef = selectedDeviceRef
+        }
+
+        isPresented = false
+    }
+
     private func confirmDelete() {
         schemeState.deleteMatchingSchemes()
         isPresented = false
+    }
+}
+
+private struct SheetToggleSizeModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content.controlSize(.small)
     }
 }

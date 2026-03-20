@@ -6,20 +6,20 @@ import Foundation
 import SwiftUI
 
 class DeviceModel: ObservableObject, Identifiable {
-    var id = UUID()
+    let id: Int32
 
     let deviceRef: WeakRef<Device>
 
     private var subscriptions = Set<AnyCancellable>()
 
     @Published var isActive = false
-    @Published var isSelected = false
 
     let name: String
     let category: Device.Category
 
     init(deviceRef: WeakRef<Device>) {
         self.deviceRef = deviceRef
+        id = deviceRef.value?.id ?? 0
 
         name = deviceRef.value?.name ?? "(removed)"
         category = deviceRef.value?.category ?? .mouse
@@ -30,16 +30,8 @@ class DeviceModel: ObservableObject, Identifiable {
             .removeDuplicates()
             .map { deviceRef.value != nil && $0?.value == deviceRef.value }
             .sink { [weak self] value in
-                withAnimation {
-                    self?.isActive = value
-                }
+                self?.isActive = value
             }
-            .store(in: &subscriptions)
-
-        DeviceState.shared
-            .$currentDeviceRef
-            .map { deviceRef.value != nil && $0?.value == deviceRef.value }
-            .assign(to: \.isSelected, on: self)
             .store(in: &subscriptions)
     }
 }

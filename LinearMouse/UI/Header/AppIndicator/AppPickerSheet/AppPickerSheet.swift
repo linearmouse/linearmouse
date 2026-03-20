@@ -18,23 +18,35 @@ struct AppPickerSheet: View {
     }
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 18) {
             Form {
                 AppPicker(selectedApp: $selectedApp)
             }
             .modifier(FormViewModifier())
+            .frame(minHeight: 96)
 
-            HStack {
+            HStack(spacing: 8) {
                 if shouldShowDeleteButton {
                     Button("Delete…", action: onDelete)
-                        .foregroundColor(.red)
+                        .sheetDestructiveActionStyle()
                 }
                 Spacer()
+                Button("Cancel") {
+                    isPresented = false
+                }
+                .sheetSecondaryActionStyle()
+                .asCancelAction()
                 Button("OK", action: onOK)
+                    .sheetPrimaryActionStyle()
+                    .asDefaultAction()
             }
-            .padding()
+            .padding(.horizontal, 18)
+            .padding(.bottom, 18)
         }
-        .frame(minWidth: 300)
+        .frame(minWidth: 372)
+        .onExitCommand {
+            isPresented = false
+        }
         .onAppear {
             selectedApp = schemeState.currentApp
         }

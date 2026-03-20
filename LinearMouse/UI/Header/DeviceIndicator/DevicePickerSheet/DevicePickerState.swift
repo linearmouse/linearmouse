@@ -8,6 +8,7 @@ class DevicePickerState: ObservableObject {
     static let shared = DevicePickerState()
 
     var subscriptions = Set<AnyCancellable>()
+    private var cachedModels: [Device: DeviceModel] = [:]
 
     @Published var devices: [DeviceModel] = []
 
@@ -15,15 +16,34 @@ class DevicePickerState: ObservableObject {
         DeviceManager.shared
             .$devices
             .debounce(for: 0.1, scheduler: RunLoop.main)
-            .map {
-                $0
-                    .map { DeviceModel(deviceRef: WeakRef($0)) }
-            }
             .sink { [weak self] value in
-                withAnimation {
-                    self?.devices = value
-                }
+                self?.updateDevices(with: value)
             }
             .store(in: &subscriptions)
+    }
+
+    private func updateDevices(with devices: [Device]) {
+        let previousIDs = self.devices.map(\.id)
+        let nextDevices = devices.map { device in
+            if let existingModel = cachedModels[device] {
+                return existingModel
+            }
+
+            let model = DeviceModel(deviceRef: WeakRef(device))
+            cachedModels[device] = model
+            return model
+        }
+
+        cachedModels = cachedModels.filter { devices.contains($0.key) }
+        let nextIDs = nextDevices.map(\.id)
+
+        guard previousIDs != nextIDs else {
+            self.devices = nextDevices
+            return
+        }
+
+        withAnimation(.spring(response: 0.24, dampingFraction: 0.9)) {
+            self.devices = nextDevices
+        }
     }
 }
