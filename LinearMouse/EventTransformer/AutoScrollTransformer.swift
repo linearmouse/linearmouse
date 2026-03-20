@@ -14,6 +14,8 @@ final class AutoScrollTransformer {
     private static let deadZone: Double = 10
     private static let maxScrollStep: Double = 160
     private static let timerInterval: TimeInterval = 1.0 / 60.0
+    private static let maxAccessibilityParentDepth = 20
+    private static let accessibilityProbeRadius: CGFloat = 4
     private static let excludedAccessibilityRoles: Set<String> = [
         "AXMenuBar",
         "AXMenuBarItem",
@@ -28,6 +30,10 @@ final class AutoScrollTransformer {
         "AXTabButton",
         "AXMenuItem",
         "AXSortButton"
+    ]
+    private static let webContentAccessibilityRoles: Set<String> = [
+        "AXWebArea",
+        "AXScrollArea"
     ]
 
     private let trigger: Scheme.Buttons.Mapping
@@ -131,20 +137,26 @@ extension AutoScrollTransformer: EventTransformer {
             return event
         }
 
-        if shouldDeferPreservedNativeMiddleClick(for: event) {
-            let point = pointerLocation(for: event)
-            let downEvent = event.copy() ?? event
-            state = .pendingPreservedClick(anchor: point, current: point, downEvent: downEvent)
-            suppressTriggerUp = true
-            return nil
-        }
-
-        if shouldPreserveNativeMiddleClick(for: event) {
+        let activationHit = activationHit(for: event)
+        switch activationHit {
+        case .excludedChrome:
             return event
-        }
+        case .pressable:
+            guard shouldPreserveNativeMiddleClick else {
+                break
+            }
 
-        if shouldExcludeActivation(for: event) {
+            if hasHoldMode {
+                let point = pointerLocation(for: event)
+                let downEvent = event.copy() ?? event
+                state = .pendingPreservedClick(anchor: point, current: point, downEvent: downEvent)
+                suppressTriggerUp = true
+                return nil
+            }
+
             return event
+        case .nonPressable, .unknown, nil:
+            break
         }
 
         activate(at: pointerLocation(for: event), session: activationSession)
@@ -383,7 +395,7 @@ extension AutoScrollTransformer: EventTransformer {
         abs(point.x - anchor.x) > Self.deadZone || abs(point.y - anchor.y) > Self.deadZone
     }
 
-    private func shouldPreserveNativeMiddleClick(for event: CGEvent) -> Bool {
+    private var shouldPreserveNativeMiddleClick: Bool {
         guard preserveNativeMiddleClick,
               hasToggleMode,
               triggerMouseButton == .center,
@@ -391,70 +403,147 @@ extension AutoScrollTransformer: EventTransformer {
             return false
         }
 
-        guard AccessibilityPermission.enabled else {
-            return false
-        }
-
-        return hitAccessibilityElement(at: hitTestPoint(for: event)).containsPressableElement
-    }
-
-    private func shouldDeferPreservedNativeMiddleClick(for event: CGEvent) -> Bool {
-        hasHoldMode && shouldPreserveNativeMiddleClick(for: event)
-    }
-
-    private func shouldExcludeActivation(for event: CGEvent) -> Bool {
-        guard AccessibilityPermission.enabled else {
-            return false
-        }
-
-        return hitAccessibilityElement(at: hitTestPoint(for: event)).containsExcludedChrome
+        return true
     }
 
     private func hitTestPoint(for event: CGEvent) -> CGPoint {
-        CGEvent(source: nil)?.location ?? event.location
+        event.location
     }
 
-    private func hitAccessibilityElement(at point: CGPoint) -> HitAccessibilityElement {
+    private func activationHit(for event: CGEvent) -> ActivationHit? {
+        guard AccessibilityPermission.enabled else {
+            return nil
+        }
+
+        // Use the event snapshot position instead of re-sampling the current cursor location.
+        // This keeps the AX hit-test anchored to the original click we are classifying.
+        let point = hitTestPoint(for: event)
+        let initialProbe = ActivationProbe(point: point, hit: hitAccessibilityElement(at: point))
+        let resolvedProbe = refineActivationProbe(from: initialProbe)
+        logAccessibilityHit(initial: initialProbe, resolved: resolvedProbe)
+        return resolvedProbe.hit
+    }
+
+    private func refineActivationProbe(from initialProbe: ActivationProbe) -> ActivationProbe {
+        guard initialProbe.hit.requiresAdditionalSampling else {
+            return initialProbe
+        }
+
+        // Browser accessibility trees can return a generic container chain for a point that
+        // is visually still inside a link. Probe a few nearby points and trust any result
+        // that clearly says "do not start autoscroll".
+        var bestProbe = initialProbe
+        for point in accessibilityProbePoints(around: initialProbe.point) {
+            let sampledProbe = ActivationProbe(point: point, hit: hitAccessibilityElement(at: point))
+            if sampledProbe.hit.suppressesAutoscroll {
+                return sampledProbe
+            }
+
+            if sampledProbe.hit.priority > bestProbe.hit.priority {
+                bestProbe = sampledProbe
+            }
+        }
+
+        return bestProbe
+    }
+
+    private func accessibilityProbePoints(around point: CGPoint) -> [CGPoint] {
+        let offsets = [
+            CGPoint.zero,
+            CGPoint(x: -Self.accessibilityProbeRadius, y: 0),
+            CGPoint(x: Self.accessibilityProbeRadius, y: 0),
+            CGPoint(x: 0, y: -Self.accessibilityProbeRadius),
+            CGPoint(x: 0, y: Self.accessibilityProbeRadius),
+            CGPoint(x: -Self.accessibilityProbeRadius, y: -Self.accessibilityProbeRadius),
+            CGPoint(x: -Self.accessibilityProbeRadius, y: Self.accessibilityProbeRadius),
+            CGPoint(x: Self.accessibilityProbeRadius, y: -Self.accessibilityProbeRadius),
+            CGPoint(x: Self.accessibilityProbeRadius, y: Self.accessibilityProbeRadius)
+        ]
+
+        return offsets.map { offset in
+            CGPoint(x: point.x + offset.x, y: point.y + offset.y)
+        }
+    }
+
+    private func hitAccessibilityElement(at point: CGPoint) -> ActivationHit {
         let systemWideElement = AXUIElementCreateSystemWide()
         var hitElement: AXUIElement?
-        guard AXUIElementCopyElementAtPosition(systemWideElement, Float(point.x), Float(point.y), &hitElement) ==
-            .success,
-            let hitElement else {
-            return .none
+        let hitError = AXUIElementCopyElementAtPosition(systemWideElement, Float(point.x), Float(point.y), &hitElement)
+        guard hitError == .success else {
+            return .unknown(reason: "hitTest.\(describe(error: hitError))", path: [])
+        }
+
+        guard let hitElement else {
+            return .nonPressable(path: [])
         }
 
         var currentElement: AXUIElement? = hitElement
-        for _ in 0 ..< 6 {
+        var path: [String] = []
+        var isInsideWebContent = false
+        for _ in 0 ..< Self.maxAccessibilityParentDepth {
             guard let element = currentElement else {
-                break
+                return .nonPressable(path: path)
             }
 
-            if isExcludedActivationElement(element) {
-                return .excludedChrome(element)
+            let role: String?
+            switch requiredStringValue(of: kAXRoleAttribute as CFString, on: element) {
+            case let .success(value):
+                role = value
+            case let .failure(error):
+                return .unknown(reason: "role.\(describe(error: error))", path: path)
             }
 
-            if let role = stringValue(of: kAXRoleAttribute as CFString, on: element),
-               role == "AXLink" {
-                return .pressable(element)
+            let subrole: String?
+            switch optionalStringValue(of: kAXSubroleAttribute as CFString, on: element) {
+            case let .success(value):
+                subrole = value
+            case let .failure(error):
+                return .unknown(reason: "subrole.\(describe(error: error))", path: path)
             }
 
-            if actionNames(of: element).contains(kAXPressAction as String) {
-                return .pressable(element)
+            let actions: [String]
+            switch optionalActionNames(of: element) {
+            case let .success(value):
+                actions = value
+            case let .failure(error):
+                return .unknown(reason: "actions.\(describe(error: error))", path: path)
             }
 
-            currentElement = elementValue(of: kAXParentAttribute as CFString, on: element)
+            path.append(accessibilityPathEntry(role: role, subrole: subrole, actions: actions))
+
+            if let role, Self.webContentAccessibilityRoles.contains(role) {
+                isInsideWebContent = true
+            }
+
+            // Once we have entered web content, ignore higher-level browser chrome ancestors
+            // like tab groups or toolbars. Safari and Chromium often expose those above the
+            // page content, and treating them as excluded chrome would block autoscroll on
+            // normal page clicks.
+            if !isInsideWebContent,
+               isExcludedActivationElement(role: role, subrole: subrole) {
+                return .excludedChrome(path: path)
+            }
+
+            if role == "AXLink" || actions.contains(kAXPressAction as String) {
+                return .pressable(path: path)
+            }
+
+            switch optionalElementValue(of: kAXParentAttribute as CFString, on: element) {
+            case let .success(value):
+                currentElement = value
+            case let .failure(error):
+                return .unknown(reason: "parent.\(describe(error: error))", path: path)
+            }
         }
 
-        return .none
+        return .unknown(reason: "depthLimit", path: path)
     }
 
-    private func isExcludedActivationElement(_ element: AXUIElement) -> Bool {
-        let role = stringValue(of: kAXRoleAttribute as CFString, on: element)
+    private func isExcludedActivationElement(role: String?, subrole: String?) -> Bool {
         if let role, Self.excludedAccessibilityRoles.contains(role) {
             return true
         }
 
-        let subrole = stringValue(of: kAXSubroleAttribute as CFString, on: element)
         if let subrole, Self.excludedAccessibilitySubroles.contains(subrole) {
             return true
         }
@@ -462,31 +551,141 @@ extension AutoScrollTransformer: EventTransformer {
         return false
     }
 
-    private func stringValue(of attribute: CFString, on element: AXUIElement) -> String? {
+    private func requiredStringValue(
+        of attribute: CFString,
+        on element: AXUIElement
+    ) -> AccessibilityQueryResult<String?> {
         var value: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(element, attribute, &value) == .success else {
-            return nil
+        let error = AXUIElementCopyAttributeValue(element, attribute, &value)
+        guard error == .success else {
+            return .failure(error)
         }
 
-        return value as? String
+        return .success(value as? String)
     }
 
-    private func elementValue(of attribute: CFString, on element: AXUIElement) -> AXUIElement? {
+    private func optionalStringValue(
+        of attribute: CFString,
+        on element: AXUIElement
+    ) -> AccessibilityQueryResult<String?> {
         var value: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(element, attribute, &value) == .success else {
-            return nil
+        let error = AXUIElementCopyAttributeValue(element, attribute, &value)
+        switch error {
+        case .success:
+            return .success(value as? String)
+        case .noValue, .attributeUnsupported:
+            return .success(nil)
+        default:
+            return .failure(error)
         }
-
-        return value as! AXUIElement?
     }
 
-    private func actionNames(of element: AXUIElement) -> [String] {
+    private func optionalElementValue(
+        of attribute: CFString,
+        on element: AXUIElement
+    ) -> AccessibilityQueryResult<AXUIElement?> {
+        var value: CFTypeRef?
+        let error = AXUIElementCopyAttributeValue(element, attribute, &value)
+        switch error {
+        case .success:
+            return .success(value as! AXUIElement?)
+        case .noValue, .attributeUnsupported:
+            return .success(nil)
+        default:
+            return .failure(error)
+        }
+    }
+
+    private func optionalActionNames(of element: AXUIElement) -> AccessibilityQueryResult<[String]> {
         var actions: CFArray?
-        guard AXUIElementCopyActionNames(element, &actions) == .success else {
-            return []
+        let error = AXUIElementCopyActionNames(element, &actions)
+        switch error {
+        case .success:
+            return .success(actions as? [String] ?? [])
+        case .noValue, .actionUnsupported, .attributeUnsupported:
+            return .success([])
+        default:
+            return .failure(error)
+        }
+    }
+
+    private func accessibilityPathEntry(role: String?, subrole: String?, actions: [String]) -> String {
+        let roleDescription = role ?? "?"
+        let subroleDescription = subrole.map { "/\($0)" } ?? ""
+        let pressDescription = actions.contains(kAXPressAction as String) ? "[press]" : ""
+        return "\(roleDescription)\(subroleDescription)\(pressDescription)"
+    }
+
+    private func describe(error: AXError) -> String {
+        switch error {
+        case .success:
+            "success"
+        case .failure:
+            "failure"
+        case .illegalArgument:
+            "illegalArgument"
+        case .invalidUIElement:
+            "invalidUIElement"
+        case .invalidUIElementObserver:
+            "invalidUIElementObserver"
+        case .cannotComplete:
+            "cannotComplete"
+        case .attributeUnsupported:
+            "attributeUnsupported"
+        case .actionUnsupported:
+            "actionUnsupported"
+        case .notificationUnsupported:
+            "notificationUnsupported"
+        case .notImplemented:
+            "notImplemented"
+        case .notificationAlreadyRegistered:
+            "notificationAlreadyRegistered"
+        case .notificationNotRegistered:
+            "notificationNotRegistered"
+        case .apiDisabled:
+            "apiDisabled"
+        case .noValue:
+            "noValue"
+        case .parameterizedAttributeUnsupported:
+            "parameterizedAttributeUnsupported"
+        case .notEnoughPrecision:
+            "notEnoughPrecision"
+        @unknown default:
+            "unknown(\(error.rawValue))"
+        }
+    }
+
+    private func logAccessibilityHit(initial: ActivationProbe, resolved: ActivationProbe) {
+        let initialPointDescription = String(format: "(%.1f, %.1f)", initial.point.x, initial.point.y)
+        let resolvedPointDescription = String(format: "(%.1f, %.1f)", resolved.point.x, resolved.point.y)
+        let initialPathDescription = initial.hit.path.isEmpty ? "-" : initial.hit.path.joined(separator: " -> ")
+        let resolvedPathDescription = resolved.hit.path.isEmpty ? "-" : resolved.hit.path.joined(separator: " -> ")
+
+        if initial.hit.summary == resolved.hit.summary,
+           initial.hit.path == resolved.hit.path,
+           initial.point == resolved.point {
+            os_log(
+                "Auto scroll AX hit result=%{public}@ point=%{public}@ path=%{public}@",
+                log: Self.log,
+                type: .info,
+                resolved.hit.summary,
+                resolvedPointDescription,
+                resolvedPathDescription
+            )
+            return
         }
 
-        return actions as? [String] ?? []
+        os_log(
+            "Auto scroll AX hit initial=%{public}@ initialPoint=%{public}@ initialPath=%{public}@ resolved=%{public}@ resolvedPoint=%{public}@ resolvedPath=%{public}@",
+            log: Self.log,
+            type: .info,
+            initial.hit.summary,
+            initialPointDescription,
+            initialPathDescription,
+            resolved.hit.summary,
+            resolvedPointDescription,
+            resolvedPathDescription
+        )
     }
 
     private func postDeferredNativeClick(from downEvent: CGEvent) {
@@ -522,24 +721,76 @@ extension AutoScrollTransformer: EventTransformer {
     }
 }
 
-private enum HitAccessibilityElement {
-    case none
-    case pressable(AXUIElement)
-    case excludedChrome(AXUIElement)
+private enum ActivationHit {
+    case pressable(path: [String])
+    case excludedChrome(path: [String])
+    case nonPressable(path: [String])
+    case unknown(reason: String, path: [String])
 
-    var containsPressableElement: Bool {
-        if case .pressable = self {
-            return true
+    var path: [String] {
+        switch self {
+        case let .pressable(path):
+            path
+        case let .excludedChrome(path):
+            path
+        case let .nonPressable(path):
+            path
+        case let .unknown(_, path):
+            path
         }
-        return false
     }
 
-    var containsExcludedChrome: Bool {
-        if case .excludedChrome = self {
-            return true
+    var summary: String {
+        switch self {
+        case .pressable:
+            "pressable"
+        case .excludedChrome:
+            "excludedChrome"
+        case .nonPressable:
+            "nonPressable"
+        case let .unknown(reason, _):
+            "unknown.\(reason)"
         }
-        return false
     }
+
+    var suppressesAutoscroll: Bool {
+        switch self {
+        case .pressable, .excludedChrome:
+            true
+        case .nonPressable, .unknown:
+            false
+        }
+    }
+
+    var requiresAdditionalSampling: Bool {
+        switch self {
+        case .nonPressable, .unknown:
+            true
+        case .pressable, .excludedChrome:
+            false
+        }
+    }
+
+    var priority: Int {
+        switch self {
+        case .pressable, .excludedChrome:
+            3
+        case .nonPressable:
+            2
+        case .unknown:
+            1
+        }
+    }
+}
+
+private enum AccessibilityQueryResult<Value> {
+    case success(Value)
+    case failure(AXError)
+}
+
+private struct ActivationProbe {
+    let point: CGPoint
+    let hit: ActivationHit
 }
 
 extension AutoScrollTransformer: Deactivatable {
