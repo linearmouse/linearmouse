@@ -51,7 +51,15 @@ jobs:
           make configure-release
       - name: Build pull request
         if: github.event_name == 'pull_request'
-        run: make configure clean lint test
+        run: |
+          make configure clean lint
+          xcodebuild test \
+            -project LinearMouse.xcodeproj \
+            -scheme LinearMouse \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM=""
       - name: Build
         if: github.event_name != 'pull_request'
         run: make
