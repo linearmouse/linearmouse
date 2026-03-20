@@ -29,7 +29,7 @@ jobs:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-        if: env.BUILD_CERTIFICATE_BASE64 != null
+        if: github.event_name != 'pull_request' && env.BUILD_CERTIFICATE_BASE64 != null
         run: |
           # create variables
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
@@ -49,7 +49,11 @@ jobs:
 
           # Configure code signing
           make configure-release
+      - name: Build pull request
+        if: github.event_name == 'pull_request'
+        run: make configure clean lint test
       - name: Build
+        if: github.event_name != 'pull_request'
         run: make
       - name: Prepublish
         if: startsWith(github.ref, 'refs/tags/')
@@ -57,6 +61,7 @@ jobs:
           NOTARIZATION_PASSWORD: ${{ secrets.NOTARIZATION_PASSWORD }}
         run: make prepublish
       - name: Upload dmg
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: LinearMouse.dmg
