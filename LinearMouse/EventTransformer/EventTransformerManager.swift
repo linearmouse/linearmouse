@@ -15,6 +15,7 @@ class EventTransformerManager {
 
     private var eventTransformerCache = LRUCache<CacheKey, EventTransformer>(countLimit: 16)
     private var activeCacheKey: CacheKey?
+    private var sharedAutoScrollTransformer: AutoScrollTransformer?
 
     struct CacheKey: Hashable {
         var deviceMatcher: DeviceMatcher?
@@ -29,6 +30,9 @@ class EventTransformerManager {
             .$configuration
             .removeDuplicates()
             .sink { [weak self] _ in
+                self?.sharedAutoScrollTransformer?.deactivate()
+                self?.sharedAutoScrollTransformer = nil
+                self?.activeCacheKey = nil
                 self?.eventTransformerCache.removeAllValues()
             }
             .store(in: &subscriptions)
@@ -49,13 +53,10 @@ class EventTransformerManager {
         defer {
             if let prevActiveCacheKey,
                prevActiveCacheKey != activeCacheKey {
-                if let eventTransformer = eventTransformerCache.value(forKey: prevActiveCacheKey) as? Deactivatable {
-                    eventTransformer.deactivate()
-                }
-                if let activeCacheKey,
-                   let eventTransformer = eventTransformerCache.value(forKey: activeCacheKey) as? Deactivatable {
-                    eventTransformer.reactivate()
-                }
+                transition(
+                    from: eventTransformerCache.value(forKey: prevActiveCacheKey),
+                    to: activeCacheKey.flatMap { eventTransformerCache.value(forKey: $0) }
+                )
             }
         }
 
@@ -160,6 +161,10 @@ class EventTransformerManager {
             eventTransformer.append(SwitchPrimaryAndSecondaryButtonsTransformer())
         }
 
+        if let autoScrollTransformer = autoScrollTransformer(for: scheme.buttons.$autoScroll) {
+            eventTransformer.append(autoScrollTransformer)
+        }
+
         if let gesture = scheme.buttons.$gesture,
            gesture.enabled ?? false,
            let button = gesture.button,
@@ -189,5 +194,113 @@ class EventTransformerManager {
         eventTransformerCache.setValue(eventTransformer, forKey: cacheKey)
 
         return eventTransformer
+    }
+
+    private func autoScrollTransformer(for autoScroll: Scheme.Buttons.AutoScroll?) -> AutoScrollTransformer? {
+        if let sharedAutoScrollTransformer, sharedAutoScrollTransformer.isAutoscrollActive {
+            return sharedAutoScrollTransformer
+        }
+
+        guard let autoScroll,
+              autoScroll.enabled ?? false,
+              let trigger = autoScroll.trigger,
+              trigger.valid else {
+            sharedAutoScrollTransformer?.deactivate()
+            sharedAutoScrollTransformer = nil
+            return nil
+        }
+
+        let modes = autoScroll.normalizedModes
+        let speed = autoScroll.speed?.asTruncatedDouble ?? 1
+        let preserveNativeMiddleClick = autoScroll.preserveNativeMiddleClick ?? true
+
+        if let sharedAutoScrollTransformer,
+           sharedAutoScrollTransformer.matchesConfiguration(
+               trigger: trigger,
+               modes: modes,
+               speed: speed,
+               preserveNativeMiddleClick: preserveNativeMiddleClick
+           ) {
+            return sharedAutoScrollTransformer
+        }
+
+        sharedAutoScrollTransformer?.deactivate()
+        let transformer = AutoScrollTransformer(
+            trigger: trigger,
+            modes: modes,
+            speed: speed,
+            preserveNativeMiddleClick: preserveNativeMiddleClick
+        )
+        sharedAutoScrollTransformer = transformer
+        return transformer
+    }
+
+    private func transition(from previous: EventTransformer?, to current: EventTransformer?) {
+        let preservedAutoScrollTransformer = sharedAutoScrollTransformer?.isAutoscrollActive == true
+            ? sharedAutoScrollTransformer
+            : nil
+
+        deactivate(previous, excluding: preservedAutoScrollTransformer)
+        reactivate(current, excluding: preservedAutoScrollTransformer)
+    }
+
+    private func deactivate(
+        _ transformer: EventTransformer?,
+        excluding preservedAutoScrollTransformer: AutoScrollTransformer?
+    ) {
+        guard let transformer else {
+            return
+        }
+
+        if let transformers = transformer as? [EventTransformer] {
+            for transformer in transformers {
+                if let preservedAutoScrollTransformer,
+                   let autoScrollTransformer = transformer as? AutoScrollTransformer,
+                   autoScrollTransformer === preservedAutoScrollTransformer {
+                    continue
+                }
+
+                (transformer as? Deactivatable)?.deactivate()
+            }
+            return
+        }
+
+        if let preservedAutoScrollTransformer,
+           let autoScrollTransformer = transformer as? AutoScrollTransformer,
+           autoScrollTransformer === preservedAutoScrollTransformer {
+            return
+        }
+
+        (transformer as? Deactivatable)?.deactivate()
+    }
+
+    private func reactivate(
+        _ transformer: EventTransformer?,
+        excluding preservedAutoScrollTransformer: AutoScrollTransformer?
+    ) {
+        guard let transformer else {
+            return
+        }
+
+        if let transformers = transformer as? [EventTransformer] {
+            for transformer in transformers {
+                if let preservedAutoScrollTransformer,
+                   let autoScrollTransformer = transformer as? AutoScrollTransformer,
+                   autoScrollTransformer === preservedAutoScrollTransformer {
+                    continue
+                }
+
+                (transformer as? Deactivatable)?.reactivate()
+            }
+            return
+        }
+
+        if let preservedAutoScrollTransformer,
+           let autoScrollTransformer = transformer as? AutoScrollTransformer,
+           autoScrollTransformer === preservedAutoScrollTransformer {
+            return
+        }
+
+        (transformer as? Deactivatable)?.reactivate()
     }
 }

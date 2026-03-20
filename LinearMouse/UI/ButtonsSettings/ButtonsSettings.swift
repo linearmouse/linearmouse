@@ -13,6 +13,8 @@ struct ButtonsSettings: View {
 
                 ClickDebouncingSection()
 
+                AutoScrollSection()
+
                 GestureButtonSection()
 
                 ButtonMappingsSection()

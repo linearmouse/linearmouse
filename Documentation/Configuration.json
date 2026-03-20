@@ -113,6 +113,11 @@
     "Scheme.Buttons": {
       "additionalProperties": false,
       "properties": {
+        "autoScroll": {
+          "$ref": "#/definitions/Scheme.Buttons.AutoScroll",
+          "description": "Click or hold a mouse button, then move the pointer to continuously scroll like the Windows middle-button autoscroll behavior.",
+          "title": "Auto scroll"
+        },
         "clickDebouncing": {
           "$ref": "#/definitions/Scheme.Buttons.ClickDebouncing",
           "description": "Ignore rapid clicks with a certain time period.",
@@ -144,6 +149,87 @@
           "title": "Universal back and forward"
         }
       },
+      "type": "object"
+    },
+    "Scheme.Buttons.AutoScroll": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": false,
+          "description": "Indicates if auto scroll is enabled.",
+          "type": "boolean"
+        },
+        "mode": {
+          "$ref": "#/definitions/SingleValueOrArray%3CScheme.Buttons.AutoScroll.Mode%3E",
+          "description": "Use \\\"toggle\\\" to click once and move until clicking again, \\\"hold\\\" to scroll only while the trigger stays pressed, or provide both to support both behaviors.",
+          "title": "Activation mode"
+        },
+        "preserveNativeMiddleClick": {
+          "default": false,
+          "description": "If true, a plain middle click on a pressable element such as a link will keep its native behavior when possible.",
+          "type": "boolean"
+        },
+        "speed": {
+          "default": 1,
+          "description": "Adjust the auto scroll speed multiplier.",
+          "type": "number"
+        },
+        "trigger": {
+          "$ref": "#/definitions/Scheme.Buttons.AutoScroll.Trigger",
+          "description": "Choose the mouse button and modifier keys used to activate auto scroll.",
+          "title": "Trigger"
+        }
+      },
+      "type": "object"
+    },
+    "Scheme.Buttons.AutoScroll.Hold": {
+      "const": "hold",
+      "description": "Auto scroll is active only while the trigger button remains pressed.",
+      "type": "string"
+    },
+    "Scheme.Buttons.AutoScroll.Mode": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Scheme.Buttons.AutoScroll.Toggle"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.AutoScroll.Hold"
+        }
+      ]
+    },
+    "Scheme.Buttons.AutoScroll.Toggle": {
+      "const": "toggle",
+      "description": "Click once to enter auto scroll and click again to exit.",
+      "type": "string"
+    },
+    "Scheme.Buttons.AutoScroll.Trigger": {
+      "additionalProperties": false,
+      "properties": {
+        "button": {
+          "$ref": "#/definitions/Button",
+          "description": "The button number. See https://developer.apple.com/documentation/coregraphics/cgmousebutton",
+          "title": "Button number"
+        },
+        "command": {
+          "description": "Indicates if the command modifier key should be pressed.",
+          "type": "boolean"
+        },
+        "control": {
+          "description": "Indicates if the control modifier key should be pressed.",
+          "type": "boolean"
+        },
+        "option": {
+          "description": "Indicates if the option modifier key should be pressed.",
+          "type": "boolean"
+        },
+        "shift": {
+          "description": "Indicates if the shift modifier key should be pressed.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "button"
+      ],
       "type": "object"
     },
     "Scheme.Buttons.ClickDebouncing": {
@@ -1302,6 +1388,19 @@
       "const": 1,
       "description": "Secondary button, usually the right button.",
       "type": "number"
+    },
+    "SingleValueOrArray<Scheme.Buttons.AutoScroll.Mode>": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Scheme.Buttons.AutoScroll.Mode"
+        },
+        {
+          "items": {
+            "$ref": "#/definitions/Scheme.Buttons.AutoScroll.Mode"
+          },
+          "type": "array"
+        }
+      ]
     },
     "SingleValueOrArray<Scheme.If.Category>": {
       "anyOf": [

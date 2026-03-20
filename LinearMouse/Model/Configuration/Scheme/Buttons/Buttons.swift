@@ -20,6 +20,8 @@ extension Scheme {
 
         @ImplicitOptional var clickDebouncing: ClickDebouncing
 
+        @ImplicitOptional var autoScroll: AutoScroll
+
         @ImplicitOptional var gesture: Gesture
     }
 }
@@ -40,6 +42,10 @@ extension Scheme.Buttons {
 
         if let clickDebouncing = $clickDebouncing {
             buttons.clickDebouncing = clickDebouncing
+        }
+
+        if let autoScroll = $autoScroll {
+            autoScroll.merge(into: &buttons.$autoScroll)
         }
 
         if let gesture = $gesture {

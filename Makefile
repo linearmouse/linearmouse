@@ -2,6 +2,7 @@ BUILD_DIR = $(CURDIR)/build
 ARCHIVE_PATH = $(CURDIR)/build/LinearMouse.xcarchive
 TARGET_DIR = $(CURDIR)/build/target
 TARGET_DMG = $(CURDIR)/build/LinearMouse.dmg
+XCODEBUILD_ARGS ?=
 
 all: configure clean lint test package
 
@@ -29,12 +30,12 @@ lint:
 	swiftlint .
 
 test:
-	xcodebuild test -project LinearMouse.xcodeproj -scheme LinearMouse
+	xcodebuild test -project LinearMouse.xcodeproj -scheme LinearMouse $(XCODEBUILD_ARGS)
 
 package: $(TARGET_DMG)
 
 $(BUILD_DIR)/Release/LinearMouse.app:
-	xcodebuild archive -project LinearMouse.xcodeproj -scheme LinearMouse -archivePath '$(ARCHIVE_PATH)'
+	xcodebuild archive -project LinearMouse.xcodeproj -scheme LinearMouse -archivePath '$(ARCHIVE_PATH)' $(XCODEBUILD_ARGS)
 	xcodebuild -exportArchive -archivePath '$(ARCHIVE_PATH)' -exportOptionsPlist ExportOptions.plist -exportPath '$(BUILD_DIR)/Release'
 
 $(TARGET_DMG): $(BUILD_DIR)/Release/LinearMouse.app

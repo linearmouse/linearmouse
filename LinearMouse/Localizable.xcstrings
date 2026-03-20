@@ -9777,6 +9777,18 @@
         }
       }
     },
+    "Choose a mouse button trigger. Left click without modifier keys is not allowed." : {
+
+    },
+    "Click and release to keep autoscroll active, or hold and drag to scroll only until you let go." : {
+
+    },
+    "Click once to toggle" : {
+
+    },
+    "Click the trigger once to enter autoscroll, move in any direction to scroll, then click again to exit." : {
+
+    },
     "Click to record" : {
       "localizations" : {
         "af" : {
@@ -14827,6 +14839,9 @@
         }
       }
     },
+    "Enable autoscroll" : {
+
+    },
     "Enable gesture button" : {
       "localizations" : {
         "af" : {
@@ -18866,6 +18881,12 @@
           }
         }
       }
+    },
+    "Hold the trigger while moving to scroll, then release it to stop." : {
+
+    },
+    "Hold to scroll" : {
+
     },
     "Homepage" : {
       "localizations" : {
@@ -24537,6 +24558,9 @@
         }
       }
     },
+    "Modes" : {
+
+    },
     "Modifier Keys" : {
       "localizations" : {
         "af" : {
@@ -29594,6 +29618,9 @@
         }
       }
     },
+    "Preserve native middle-click on links and buttons" : {
+
+    },
     "Press and hold a button while dragging to trigger gestures like switching desktop spaces or opening Mission Control." : {
       "localizations" : {
         "af" : {
@@ -33633,6 +33660,9 @@
           }
         }
       }
+    },
+    "Scroll by moving away from an anchor point, similar to Windows middle-click autoscroll." : {
+
     },
     "Scroll down" : {
       "localizations" : {
@@ -39095,6 +39125,9 @@
         }
       }
     },
+    "Speed" : {
+
+    },
     "Start at login" : {
       "localizations" : {
         "af" : {
@@ -40711,6 +40744,12 @@
         }
       }
     },
+    "The native middle-click check only applies when click once to toggle is enabled." : {
+
+    },
+    "The native middle-click check only applies when the trigger is middle click without modifier keys." : {
+
+    },
     "This will delete all settings for \"%@\"." : {
       "localizations" : {
         "af" : {
@@ -41922,6 +41961,9 @@
           }
         }
       }
+    },
+    "Trigger" : {
+
     },
     "Type mismatch: expected %1$@ at %2$@" : {
       "localizations" : {
@@ -43545,6 +43587,9 @@
           }
         }
       }
+    },
+    "When using plain middle click, keep browser-style middle-click behavior on pressable elements instead of entering autoscroll." : {
+
     },
     "You may also press ⌃⇧⌘Z to revert to system defaults." : {
       "localizations" : {
