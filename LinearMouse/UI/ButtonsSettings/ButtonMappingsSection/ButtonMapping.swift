@@ -79,9 +79,9 @@ struct ButtonMappingButtonDescription<FallbackView: View>: View {
     private func buttonDescription(of button: Int) -> LocalizedStringKey {
         switch button {
         case 0:
-            return "Left click"
+            return "Primary click"
         case 1:
-            return "Right click"
+            return "Secondary click"
         case 2:
             return "Middle click"
         default:
