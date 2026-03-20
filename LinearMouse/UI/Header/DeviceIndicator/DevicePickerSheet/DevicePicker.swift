@@ -6,19 +6,23 @@ import SwiftUI
 struct DevicePicker: View {
     @ObservedObject var state = DevicePickerState.shared
 
-    @Binding var isPresented: Bool
+    @Binding var selectedDeviceRef: WeakRef<Device>?
 
     var body: some View {
-        List {
-            DevicePickerSection(
-                isPresented: $isPresented, title: "Mouse",
-                devices: state.devices.filter(\.isMouse)
-            )
-            DevicePickerSection(
-                isPresented: $isPresented,
-                title: "Trackpad",
-                devices: state.devices.filter(\.isTrackpad)
-            )
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                DevicePickerSection(
+                    selectedDeviceRef: $selectedDeviceRef, title: "Mouse",
+                    devices: state.devices.filter(\.isMouse)
+                )
+                DevicePickerSection(
+                    selectedDeviceRef: $selectedDeviceRef,
+                    title: "Trackpad",
+                    devices: state.devices.filter(\.isTrackpad)
+                )
+            }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 6)
         }
         .frame(minWidth: 350)
     }

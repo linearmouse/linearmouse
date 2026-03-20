@@ -20,12 +20,12 @@ struct DeviceButtonStyle: ButtonStyle {
 
     func makeBody(configuration: ButtonStyle.Configuration) -> some View {
         configuration.label
-            .padding(.vertical, 3)
-            .padding(.horizontal, 6)
+            .padding(.vertical, 6)
+            .padding(.horizontal, 12)
             .foregroundColor(.white)
             .colorMultiply(textColor)
             .background(configuration.isPressed ? backgroundColorPressed : backgroundColor)
-            .cornerRadius(5)
-            .frame(maxWidth: .infinity, minHeight: 25)
+            .cornerRadius(12)
+            .frame(maxWidth: .infinity, minHeight: 36)
     }
 }

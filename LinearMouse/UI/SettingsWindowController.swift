@@ -19,7 +19,7 @@ class SettingsWindowController: NSWindowController {
         }
 
         let window = NSWindow(
-            contentRect: .init(x: 0, y: 0, width: 900, height: 600),
+            contentRect: .init(x: 0, y: 0, width: 850, height: 600),
             styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
             backing: .buffered,
             defer: false
@@ -27,8 +27,7 @@ class SettingsWindowController: NSWindowController {
 
         window.delegate = self
         window.title = LinearMouse.appName
-        window.setFrameAutosaveName("SettingsWindow")
-        window.minSize = NSSize(width: 700, height: 500)
+        window.minSize = NSSize(width: 850, height: 600)
         window.titlebarAppearsTransparent = true
 
         // Setup split view controller
@@ -421,6 +420,7 @@ class DeviceIndicatorButton: NSButton {
     }
 
     private func bindState() {
+        title = DeviceIndicatorState.shared.activeDeviceName ?? NSLocalizedString("Unknown", comment: "")
         DeviceIndicatorState.shared
             .$activeDeviceName
             .receive(on: DispatchQueue.main)
@@ -462,6 +462,7 @@ class AppIndicatorButton: NSButton {
     }
 
     private func bindState() {
+        title = SchemeState.shared.currentAppName ?? NSLocalizedString("All Apps", comment: "")
         SchemeState.shared
             .$currentApp
             .receive(on: DispatchQueue.main)
@@ -504,6 +505,7 @@ class DisplayIndicatorButton: NSButton {
     }
 
     private func bindState() {
+        title = SchemeState.shared.currentDisplay ?? NSLocalizedString("All Displays", comment: "")
         SchemeState.shared
             .$currentDisplay
             .receive(on: DispatchQueue.main)
@@ -526,6 +528,7 @@ class DisplayIndicatorButton: NSButton {
 
 private protocol SheetContentView: View {
     init(isPresented: Binding<Bool>)
+    static var preferredContentSize: NSSize? { get }
 }
 
 extension DevicePickerSheetContent: SheetContentView {}
@@ -582,18 +585,21 @@ private class SheetController<Content: SheetContentView>: NSViewController {
 
         hostingController = hosting
 
-        // Set preferred content size based on hosting view's fitting size
-        DispatchQueue.main.async { [weak self] in
-            guard let self, let hosting = self.hostingController else {
-                return
+        if let preferredContentSize = Content.preferredContentSize {
+            self.preferredContentSize = preferredContentSize
+        } else {
+            // Set preferred content size based on hosting view's fitting size
+            DispatchQueue.main.async { [weak self] in
+                guard let self, let hosting = self.hostingController else {
+                    return
+                }
+                let fittingSize = hosting.view.fittingSize
+                self.preferredContentSize = fittingSize
             }
-            let fittingSize = hosting.view.fittingSize
-            self.preferredContentSize = fittingSize
         }
     }
 
-    /// Handle ESC key to dismiss
-    @objc func cancel(_: Any?) {
+    override func cancelOperation(_: Any?) {
         isPresented = false
     }
 }
@@ -603,29 +609,32 @@ private class SheetController<Content: SheetContentView>: NSViewController {
 private struct DevicePickerSheetContent: View {
     @Binding var isPresented: Bool
 
+    static let preferredContentSize: NSSize? = NSSize(width: 400, height: 410)
+
     var body: some View {
         DevicePickerSheet(isPresented: $isPresented)
-            .frame(width: 400)
-            .fixedSize(horizontal: false, vertical: true)
+            .frame(width: 400, height: 410)
     }
 }
 
 private struct AppPickerSheetContent: View {
     @Binding var isPresented: Bool
 
+    static let preferredContentSize: NSSize? = nil
+
     var body: some View {
         AppPickerSheet(isPresented: $isPresented)
             .frame(width: 400)
-            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
 private struct DisplayPickerSheetContent: View {
     @Binding var isPresented: Bool
 
+    static let preferredContentSize: NSSize? = nil
+
     var body: some View {
         DisplayPickerSheet(isPresented: $isPresented)
             .frame(width: 400)
-            .fixedSize(horizontal: false, vertical: true)
     }
 }

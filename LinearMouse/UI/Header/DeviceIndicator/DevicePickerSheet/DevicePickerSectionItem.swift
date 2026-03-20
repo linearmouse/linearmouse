@@ -5,22 +5,39 @@ import SwiftUI
 
 struct DevicePickerSectionItem: View {
     @ObservedObject var deviceModel: DeviceModel
+    var isSelected: Bool
     var action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            HStack(alignment: .firstTextBaseline, spacing: 5) {
-                Text(deviceModel.name)
+            HStack(spacing: 12) {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(deviceModel.name)
+                        .font(.body)
 
-                if deviceModel.isActive {
-                    Text("(active)")
-                        .controlSize(.small)
-                        .foregroundColor(.secondary)
+                    if deviceModel.isActive {
+                        Text("(active)")
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                if isSelected, #available(macOS 11.0, *) {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.accentColor)
+                        .accessibilityHidden(true)
                 }
             }
-            .transition(.move(edge: .leading))
-            .frame(maxWidth: .infinity, minHeight: 30)
+            .transition(
+                .asymmetric(
+                    insertion: .opacity.combined(with: .scale(scale: 0.97, anchor: .top)),
+                    removal: .opacity
+                )
+            )
+            .frame(maxWidth: .infinity, minHeight: 40)
         }
-        .buttonStyle(DeviceButtonStyle(isSelected: deviceModel.isSelected))
+        .buttonStyle(DeviceButtonStyle(isSelected: isSelected))
     }
 }

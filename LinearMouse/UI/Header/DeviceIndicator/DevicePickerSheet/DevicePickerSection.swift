@@ -4,21 +4,36 @@
 import SwiftUI
 
 struct DevicePickerSection: View {
-    @Binding var isPresented: Bool
+    @Binding var selectedDeviceRef: WeakRef<Device>?
 
     var title: LocalizedStringKey
     var devices: [DeviceModel]
 
-    @ObservedObject var state = DevicePickerSectionState.shared
-
     var body: some View {
-        Section(header: Text(title)) {
-            ForEach(devices) { deviceModel in
-                DevicePickerSectionItem(deviceModel: deviceModel) {
-                    state.setDevice(deviceModel)
-                    isPresented = false
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.body)
+                .foregroundColor(.secondary)
+
+            VStack(spacing: 8) {
+                ForEach(devices) { deviceModel in
+                    DevicePickerSectionItem(
+                        deviceModel: deviceModel,
+                        isSelected: isSelected(deviceModel)
+                    ) {
+                        selectedDeviceRef = deviceModel.deviceRef
+                    }
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func isSelected(_ deviceModel: DeviceModel) -> Bool {
+        guard let selectedDevice = selectedDeviceRef?.value else {
+            return false
+        }
+
+        return deviceModel.deviceRef.value === selectedDevice
     }
 }

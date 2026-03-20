@@ -45,4 +45,74 @@ extension View {
         }
         return self
     }
+
+    func sheetPrimaryActionStyle() -> some View {
+        modifier(SheetActionButtonModifier(kind: .primary))
+    }
+
+    func sheetSecondaryActionStyle() -> some View {
+        modifier(SheetActionButtonModifier(kind: .secondary))
+    }
+
+    func sheetDestructiveActionStyle() -> some View {
+        modifier(SheetActionButtonModifier(kind: .destructive))
+    }
+}
+
+private enum SheetActionButtonKind {
+    case primary
+    case secondary
+    case destructive
+}
+
+private struct SheetActionButtonModifier: ViewModifier {
+    let kind: SheetActionButtonKind
+
+    func body(content: Content) -> some View {
+        if #available(macOS 12.0, *) {
+            if kind == .primary {
+                shapedContent(styledContent(content))
+                    .buttonStyle(.borderedProminent)
+            } else {
+                shapedContent(styledContent(content))
+                    .buttonStyle(.bordered)
+            }
+        } else {
+            legacyStyledContent(content)
+        }
+    }
+
+    private func styledContent(_ content: Content) -> some View {
+        let base = sizeAdjustedContent(content)
+
+        if #available(macOS 12.0, *), kind == .destructive {
+            return AnyView(base.tint(.red))
+        }
+        return AnyView(base)
+    }
+
+    private func shapedContent(_ content: some View) -> some View {
+        if #available(macOS 14.0, *) {
+            return AnyView(content.buttonBorderShape(.capsule))
+        } else {
+            return AnyView(content)
+        }
+    }
+
+    private func legacyStyledContent(_ content: Content) -> some View {
+        let base = sizeAdjustedContent(content)
+
+        if kind == .destructive {
+            return AnyView(base.foregroundColor(.red))
+        }
+        return AnyView(base)
+    }
+
+    private func sizeAdjustedContent(_ content: Content) -> some View {
+        if #available(macOS 11.0, *) {
+            return AnyView(content.controlSize(.large))
+        } else {
+            return AnyView(content.controlSize(.regular))
+        }
+    }
 }
