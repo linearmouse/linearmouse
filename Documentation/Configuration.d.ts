@@ -199,6 +199,12 @@ declare namespace Scheme {
     speed?: Scrolling.Bidirectional<number>;
 
     /**
+     * @title Smoothed scrolling
+     * @description Use a preset curve or fine-tune response, speed, acceleration, and inertia.
+     */
+    smoothed?: Scrolling.Bidirectional<Scrolling.Smoothed>;
+
+    /**
      * @title Modifier keys settings
      */
     modifiers?: Scrolling.Bidirectional<Scrolling.Modifiers>;
@@ -231,6 +237,69 @@ declare namespace Scheme {
        * @pattern ^\d[1-9]*(\.\d+)?px
        */
       type Pixel = string;
+    }
+
+    type Smoothed = {
+      /**
+       * @description Set to `false` to explicitly disable inherited smoothed scrolling for this direction.
+       * @default true
+       */
+      enabled?: boolean;
+
+      /**
+       * @description The preset curve to use.
+       * @default "natural"
+       */
+      preset?: Smoothed.Preset;
+
+      /**
+       * @description How quickly the scrolling responds to input.
+       */
+      response?: number;
+
+      /**
+       * @description The scrolling speed.
+       */
+      speed?: number;
+
+      /**
+       * @description The scrolling acceleration.
+       */
+      acceleration?: number;
+
+      /**
+       * @description The scrolling inertia.
+       */
+      inertia?: number;
+    };
+
+    namespace Smoothed {
+      type Preset =
+        | "custom"
+        | "linear"
+        | "easeIn"
+        | "easeOut"
+        | "easeInOut"
+        | "easeOutIn"
+        | "quadratic"
+        | "cubic"
+        | "quartic"
+        | "easeOutCubic"
+        | "easeInOutCubic"
+        | "easeOutQuartic"
+        | "easeInOutQuartic"
+        | "quintic"
+        | "sine"
+        | "exponential"
+        | "circular"
+        | "back"
+        | "bounce"
+        | "elastic"
+        | "spring"
+        | "natural"
+        | "smooth"
+        | "snappy"
+        | "gentle";
     }
 
     type Modifiers = {

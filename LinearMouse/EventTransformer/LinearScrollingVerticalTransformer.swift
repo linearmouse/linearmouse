@@ -18,6 +18,10 @@ class LinearScrollingVerticalTransformer: EventTransformer {
             return event
         }
 
+        if event.isLinearMouseSyntheticEvent {
+            return event
+        }
+
         if case .auto = distance {
             return event
         }

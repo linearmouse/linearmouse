@@ -206,6 +206,9 @@
         }
       }
     },
+    "(0–3)" : {
+
+    },
     "(0–10)" : {
       "localizations" : {
         "af" : {
@@ -4110,6 +4113,9 @@
         }
       }
     },
+    "▾" : {
+
+    },
     "0" : {
       "localizations" : {
         "af" : {
@@ -5321,6 +5327,9 @@
           }
         }
       }
+    },
+    "Adaptive" : {
+
     },
     "All Apps" : {
       "localizations" : {
@@ -9782,6 +9791,9 @@
           }
         }
       }
+    },
+    "Choose a feel preset." : {
+
     },
     "Choose a mouse button trigger. Left click without modifier keys is not allowed." : {
 
@@ -14845,6 +14857,9 @@
         }
       }
     },
+    "Editable" : {
+
+    },
     "Enable autoscroll" : {
 
     },
@@ -17676,6 +17691,9 @@
         }
       }
     },
+    "Flat" : {
+
+    },
     "Forward" : {
       "localizations" : {
         "af" : {
@@ -20119,6 +20137,9 @@
           }
         }
       }
+    },
+    "Immediate" : {
+
     },
     "Increase display brightness" : {
       "localizations" : {
@@ -22746,6 +22767,9 @@
         }
       }
     },
+    "Long" : {
+
+    },
     "Look up & data detectors" : {
       "localizations" : {
         "af" : {
@@ -22947,6 +22971,9 @@
           }
         }
       }
+    },
+    "Loose" : {
+
     },
     "Media" : {
       "localizations" : {
@@ -31647,6 +31674,20 @@
         }
       }
     },
+    "Restore default preset" : {
+
+    },
+    "Restore natural preset" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore natural preset"
+          }
+        }
+      }
+    },
     "Reveal Config in Finder…" : {
       "localizations" : {
         "af" : {
@@ -33465,6 +33506,9 @@
         }
       }
     },
+    "Scroll acceleration" : {
+
+    },
     "Scroll by moving away from an anchor point, similar to Windows middle-click autoscroll." : {
 
     },
@@ -34074,6 +34118,9 @@
         }
       }
     },
+    "Scroll inertia" : {
+
+    },
     "Scroll left" : {
       "localizations" : {
         "af" : {
@@ -34676,6 +34723,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "向左捲動…"
+          }
+        }
+      }
+    },
+    "Scroll response" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scroll response"
           }
         }
       }
@@ -35285,6 +35342,9 @@
           }
         }
       }
+    },
+    "Scroll speed" : {
+
     },
     "Scroll up" : {
       "localizations" : {
@@ -36292,6 +36352,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "捲動加速度"
+          }
+        }
+      }
+    },
+    "Scrolling curve" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scrolling curve"
           }
         }
       }
@@ -37511,6 +37581,9 @@
     "Select an item from the sidebar" : {
 
     },
+    "Selected" : {
+
+    },
     "Settings" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -37719,6 +37792,9 @@
           }
         }
       }
+    },
+    "Short" : {
+
     },
     "Show desktop" : {
       "localizations" : {
@@ -40345,6 +40421,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "切換主要和次要按鍵"
+          }
+        }
+      }
+    },
+    "Synthetic momentum" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synthetic momentum"
           }
         }
       }

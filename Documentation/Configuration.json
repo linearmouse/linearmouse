@@ -1158,6 +1158,27 @@
           ],
           "title": "Reverse scrolling"
         },
+        "smoothed": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Scheme.Scrolling.Smoothed"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "horizontal": {
+                  "$ref": "#/definitions/Scheme.Scrolling.Smoothed"
+                },
+                "vertical": {
+                  "$ref": "#/definitions/Scheme.Scrolling.Smoothed"
+                }
+              },
+              "type": "object"
+            }
+          ],
+          "description": "Use a preset curve or fine-tune response, speed, acceleration, and inertia.",
+          "title": "Smoothed scrolling"
+        },
         "speed": {
           "anyOf": [
             {
@@ -1383,6 +1404,68 @@
         "type"
       ],
       "type": "object"
+    },
+    "Scheme.Scrolling.Smoothed": {
+      "additionalProperties": false,
+      "properties": {
+        "acceleration": {
+          "description": "The scrolling acceleration.",
+          "type": "number"
+        },
+        "enabled": {
+          "default": true,
+          "description": "Set to `false` to explicitly disable inherited smoothed scrolling for this direction.",
+          "type": "boolean"
+        },
+        "inertia": {
+          "description": "The scrolling inertia.",
+          "type": "number"
+        },
+        "preset": {
+          "$ref": "#/definitions/Scheme.Scrolling.Smoothed.Preset",
+          "default": "natural",
+          "description": "The preset curve to use."
+        },
+        "response": {
+          "description": "How quickly the scrolling responds to input.",
+          "type": "number"
+        },
+        "speed": {
+          "description": "The scrolling speed.",
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "Scheme.Scrolling.Smoothed.Preset": {
+      "enum": [
+        "custom",
+        "linear",
+        "easeIn",
+        "easeOut",
+        "easeInOut",
+        "easeOutIn",
+        "quadratic",
+        "cubic",
+        "quartic",
+        "easeOutCubic",
+        "easeInOutCubic",
+        "easeOutQuartic",
+        "easeInOutQuartic",
+        "quintic",
+        "sine",
+        "exponential",
+        "circular",
+        "back",
+        "bounce",
+        "elastic",
+        "spring",
+        "natural",
+        "smooth",
+        "snappy",
+        "gentle"
+      ],
+      "type": "string"
     },
     "Secondary": {
       "const": 1,

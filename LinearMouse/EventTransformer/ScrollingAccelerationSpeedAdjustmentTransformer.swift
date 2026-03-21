@@ -26,6 +26,10 @@ class ScrollingAccelerationSpeedAdjustmentTransformer: EventTransformer {
             return event
         }
 
+        if event.isLinearMouseSyntheticEvent {
+            return event
+        }
+
         let scrollWheelEventView = ScrollWheelEventView(event)
         let deltaYSignum = scrollWheelEventView.deltaYSignum
         let deltaXSignum = scrollWheelEventView.deltaXSignum

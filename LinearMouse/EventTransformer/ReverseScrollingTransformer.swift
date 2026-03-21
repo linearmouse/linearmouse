@@ -17,6 +17,10 @@ class ReverseScrollingTransformer: EventTransformer {
             return event
         }
 
+        if event.isLinearMouseSyntheticEvent {
+            return event
+        }
+
         let view = ScrollWheelEventView(event)
         view.negate(vertically: vertically, horizontally: horizontally)
         return event
