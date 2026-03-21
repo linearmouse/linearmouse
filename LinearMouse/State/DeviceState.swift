@@ -51,6 +51,13 @@ class DeviceState: ObservableObject {
                 self?.updateCurrentDeviceRef(lastActiveDeviceRef: lastActiveDeviceRef)
             }
             .store(in: &subscriptions)
+
+        deviceManager.$devices
+            .debounce(for: 0.1, scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.updateCurrentDevice()
+            }
+            .store(in: &subscriptions)
     }
 }
 

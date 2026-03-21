@@ -22,27 +22,14 @@ class Device {
 
     private(set) lazy var id: Int32 = OSAtomicIncrement32(&Self.nextID)
 
-    private(set) var name: String
-    private(set) var productName: String?
-    private(set) var vendorID: Int?
-    private(set) var productID: Int?
-    private(set) var serialNumber: String?
-    private(set) var buttonCount: Int?
-    private(set) var batteryLevel: Int?
-    private(set) lazy var category: Category = {
-        if let vendorID,
-           let productID {
-            if isAppleMagicMouse(vendorID: vendorID, productID: productID) {
-                return .mouse
-            }
-        }
-
-        if device.confirmsTo(kHIDPage_Digitizer, kHIDUsage_Dig_TouchPad) {
-            return .trackpad
-        }
-
-        return .mouse
-    }()
+    var name: String
+    var productName: String?
+    var vendorID: Int?
+    var productID: Int?
+    var serialNumber: String?
+    var buttonCount: Int?
+    var batteryLevel: Int?
+    private let categoryValue: Category
 
     private weak var manager: DeviceManager?
     private var inputReportHandlers: [InputReportHandler] = []
@@ -62,8 +49,21 @@ class Device {
     private var reportObservationToken: ObservationToken?
 
     private var lastButtonStates: UInt8 = 0
+    var participatesInActiveTracking = true
 
-    init(_ manager: DeviceManager, _ device: PointerDevice) {
+    var isLogicalDevice: Bool {
+        false
+    }
+
+    var identityHashValue: AnyHashable {
+        AnyHashable(ObjectIdentifier(self))
+    }
+
+    var category: Category {
+        categoryValue
+    }
+
+    init(_ manager: DeviceManager, _ device: PointerDevice, observeInputs: Bool = true) {
         self.manager = manager
         self.device = device
 
@@ -77,13 +77,16 @@ class Device {
         name = rawName
         productName = rawProductName
         batteryLevel = nil
+        categoryValue = Self.detectCategory(for: device)
 
         initialPointerResolution =
             device.pointerResolution ?? Self.fallbackPointerResolution
 
-        // TODO: More elegant way?
-        inputObservationToken = device.observeInput { [weak self] in
-            self?.inputValueCallback($0, $1)
+        if observeInputs {
+            // TODO: More elegant way?
+            inputObservationToken = device.observeInput { [weak self] in
+                self?.inputValueCallback($0, $1)
+            }
         }
 
         // Some bluetooth devices, such as Mi Dual Mode Wireless Mouse Silent Edition, report only
@@ -92,7 +95,7 @@ class Device {
         //
         // To work around this issue, we subscribe to the input reports and monitor the side button
         // states. When the side buttons are clicked, we simulate those events.
-        if let vendorID, let productID {
+        if observeInputs, let vendorID, let productID {
             let handlers = InputReportHandlerRegistry.handlers(for: vendorID, productID: productID)
             let needsObservation = handlers.contains { $0.alwaysNeedsReportObservation() } || buttonCount == 3
             if needsObservation, !handlers.isEmpty {
@@ -136,9 +139,27 @@ extension Device {
         case mouse, trackpad
     }
 
-    private func isAppleMagicMouse(vendorID: Int, productID: Int) -> Bool {
+    private static func detectCategory(for device: PointerDevice) -> Category {
+        if let vendorID = device.vendorID,
+           let productID = device.productID,
+           isAppleMagicMouse(vendorID: vendorID, productID: productID) {
+            return .mouse
+        }
+
+        if device.confirmsTo(kHIDPage_Digitizer, kHIDUsage_Dig_TouchPad) {
+            return .trackpad
+        }
+
+        return .mouse
+    }
+
+    private static func isAppleMagicMouse(vendorID: Int, productID: Int) -> Bool {
         [0x004C, 0x05AC].contains(vendorID)
             && [0x0269, 0x030D].contains(productID)
+    }
+
+    func matchesPhysicalDevice(_ pointerDevice: PointerDevice) -> Bool {
+        device == pointerDevice
     }
 
     /**
@@ -257,7 +278,9 @@ extension Device {
             return
         }
 
-        guard manager.lastActiveDeviceId != id else {
+        let activeDevice = manager.deviceForActivity(fromPhysicalDevice: self)
+
+        guard manager.lastActiveDeviceId != activeDevice.id else {
             return
         }
 
@@ -282,20 +305,9 @@ extension Device {
             return
         }
 
-        manager.lastActiveDeviceId = id
-        manager.lastActiveDeviceRef = .init(self)
-
-        os_log(
-            """
-            Last active device changed: %{public}@, category=%{public}@ \
-            (Reason: Received input value: usagePage=0x%{public}02X, usage=0x%{public}02X)
-            """,
-            log: Self.log,
-            type: .info,
-            String(describing: device),
-            String(describing: category),
-            usagePage,
-            usage
+        manager.markDeviceActive(
+            activeDevice,
+            reason: "Received input value: usagePage=0x\(String(format: "%02X", usagePage)), usage=0x\(String(format: "%02X", usage))"
         )
     }
 
@@ -322,11 +334,11 @@ extension Device {
 
 extension Device: Hashable {
     static func == (lhs: Device, rhs: Device) -> Bool {
-        lhs.device == rhs.device
+        lhs === rhs
     }
 
     func hash(into hasher: inout Hasher) {
-        hasher.combine(device)
+        hasher.combine(identityHashValue)
     }
 }
 

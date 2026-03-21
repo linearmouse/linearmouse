@@ -8,6 +8,7 @@ struct DevicePickerSection: View {
 
     var title: LocalizedStringKey
     var devices: [DeviceModel]
+    var onSelectDevice: (WeakRef<Device>) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -22,6 +23,7 @@ struct DevicePickerSection: View {
                         isSelected: isSelected(deviceModel)
                     ) {
                         selectedDeviceRef = deviceModel.deviceRef
+                        onSelectDevice(deviceModel.deviceRef)
                     }
                 }
             }

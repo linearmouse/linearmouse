@@ -42,10 +42,10 @@ struct DevicePickerSheet: View {
             .padding(.horizontal, 18)
             .padding(.top, 18)
 
-            DevicePicker(selectedDeviceRef: $selectedDeviceRef)
-                .frame(minHeight: 248, maxHeight: 320)
-                .disabled(autoSwitchToActiveDevice)
-                .opacity(autoSwitchToActiveDevice ? 0.55 : 1)
+            DevicePicker(selectedDeviceRef: $selectedDeviceRef) { deviceRef in
+                handleDeviceSelection(deviceRef)
+            }
+            .frame(minHeight: 248, maxHeight: 320)
 
             HStack(spacing: 8) {
                 if shouldShowDeleteButton {
@@ -91,6 +91,17 @@ struct DevicePickerSheet: View {
 
     private func onDelete() {
         showDeleteAlert = true
+    }
+
+    private func handleDeviceSelection(_ deviceRef: WeakRef<Device>) {
+        selectedDeviceRef = deviceRef
+
+        let isSelectingActiveDevice = deviceRef.value === DeviceManager.shared.lastActiveDeviceRef?.value
+        if isSelectingActiveDevice {
+            autoSwitchToActiveDevice = true
+        } else if autoSwitchToActiveDevice {
+            autoSwitchToActiveDevice = false
+        }
     }
 
     private func onOK() {

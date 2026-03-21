@@ -15,14 +15,18 @@ class DeviceModel: ObservableObject, Identifiable {
     @Published var isActive = false
 
     @Published var name: String
+    @Published var displayName: String
     @Published var batteryLevel: Int?
+    @Published var pairedReceiverDevices: [ReceiverLogicalDeviceIdentity] = []
     let category: Device.Category
 
     init(deviceRef: WeakRef<Device>) {
         self.deviceRef = deviceRef
         id = deviceRef.value?.id ?? 0
 
-        name = deviceRef.value?.name ?? "(removed)"
+        let initialName = deviceRef.value?.name ?? "(removed)"
+        name = initialName
+        displayName = initialName
         batteryLevel = deviceRef.value?.batteryLevel
         category = deviceRef.value?.category ?? .mouse
 
@@ -35,6 +39,16 @@ class DeviceModel: ObservableObject, Identifiable {
                 self?.isActive = value
             }
             .store(in: &subscriptions)
+
+        DeviceManager.shared
+            .$receiverPairedDeviceIdentities
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.refreshReceiverPresentation()
+            }
+            .store(in: &subscriptions)
+
+        refreshReceiverPresentation()
     }
 
     func applyVendorSpecificMetadata(_ metadata: VendorSpecificDeviceMetadata?) {
@@ -43,12 +57,28 @@ class DeviceModel: ObservableObject, Identifiable {
         }
 
         batteryLevel = metadata?.batteryLevel
+        refreshReceiverPresentation()
+    }
+
+    private func refreshReceiverPresentation() {
+        guard let device = deviceRef.value else {
+            displayName = "(removed)"
+            pairedReceiverDevices = []
+            return
+        }
+
+        displayName = DeviceManager.shared.displayName(for: device)
+        pairedReceiverDevices = DeviceManager.shared.pairedReceiverDevices(for: device)
     }
 }
 
 extension DeviceModel {
     var batteryDescription: String? {
-        batteryLevel.map { "\($0)%" }
+        guard pairedReceiverDevices.isEmpty else {
+            return nil
+        }
+
+        return batteryLevel.map { "\($0)%" }
     }
 
     var isMouse: Bool {

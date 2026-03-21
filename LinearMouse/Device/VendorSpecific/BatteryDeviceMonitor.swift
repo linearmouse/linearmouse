@@ -35,6 +35,15 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
                 self?.refreshIfNeeded()
             }
             .store(in: &subscriptions)
+
+        DeviceManager.shared
+            .$receiverPairedDeviceIdentities
+            .receive(on: RunLoop.main)
+            .debounce(for: .milliseconds(250), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.refreshIfNeeded()
+            }
+            .store(in: &subscriptions)
     }
 
     func start() {
@@ -83,18 +92,39 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
                 return
             }
 
+            let receiverPairedBatteries = DeviceManager.shared.devices.flatMap { device in
+                DeviceManager.shared
+                    .pairedReceiverDevices(for: device)
+                    .compactMap { identity -> ConnectedBatteryDeviceInfo? in
+                        guard let batteryLevel = identity.batteryLevel else {
+                            return nil
+                        }
+
+                        return ConnectedBatteryDeviceInfo(name: identity.name, batteryLevel: batteryLevel)
+                    }
+            }
+            let visibleDeviceBatteries = DeviceManager.shared
+                .devices
+                .compactMap { device -> ConnectedBatteryDeviceInfo? in
+                    guard DeviceManager.shared.pairedReceiverDevices(for: device).isEmpty,
+                          let batteryLevel = device.batteryLevel
+                    else {
+                        return nil
+                    }
+
+                    return ConnectedBatteryDeviceInfo(name: device.name, batteryLevel: batteryLevel)
+                }
             let propertyBackedDevices = ConnectedBatteryDeviceInventory.devices()
+            let directlyAddressableLogitechDevices = DeviceManager.shared.devices.filter {
+                DeviceManager.shared.pairedReceiverDevices(for: $0).isEmpty
+            }
             let logitechDevices = ConnectedLogitechDeviceInventory
-                .devices(from: DeviceManager.shared.devices.map(\.pointerDevice))
-            let devices = merge(logitechDevices: logitechDevices, propertyBackedDevices: propertyBackedDevices)
-            print(
-                "Battery monitor refresh:",
-                "pointerDevices=\(DeviceManager.shared.devices.count)",
-                "logitechDevices=\(logitechDevices.map { "\($0.name):\($0.batteryLevel)" })",
-                "propertyDevices=\(propertyBackedDevices.map { "\($0.name):\($0.batteryLevel)" })"
-            )
+                .devices(from: directlyAddressableLogitechDevices.map(\.pointerDevice))
             DispatchQueue.main.async {
-                self.devices = devices
+                self.devices = self.merge(
+                    logitechDevices: receiverPairedBatteries + visibleDeviceBatteries + logitechDevices,
+                    propertyBackedDevices: propertyBackedDevices
+                )
             }
 
             self.stateLock.lock()

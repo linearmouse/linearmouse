@@ -16,8 +16,12 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         static let softwareID: UInt8 = 0x08
         static let shortReportID: UInt8 = 0x10
         static let longReportID: UInt8 = 0x11
+        static let djShortReportID: UInt8 = 0x20
+        static let djLongReportID: UInt8 = 0x21
         static let shortReportLength = 7
         static let longReportLength = 20
+        static let djShortReportLength = 15
+        static let djLongReportLength = 32
         static let timeout: TimeInterval = 2.0
 
         static let receiverIndex: UInt8 = 0xFF
@@ -27,6 +31,8 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         static let receiverInfoRegister: UInt8 = 0xB5
         static let receiverWirelessNotifications: UInt32 = 0x000100
         static let receiverSoftwarePresentNotifications: UInt32 = 0x000800
+        static let djSwitchCommand: UInt8 = 0x80
+        static let djSwitchDeviceBitfield: UInt8 = 0x3F
     }
 
     enum FeatureID: UInt16 {
@@ -54,6 +60,9 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         let slot: UInt8
         let kind: UInt8
         let name: String?
+        let productID: Int?
+        let serialNumber: String?
+        let batteryLevel: Int?
     }
 
     struct ReceiverSlotMetadata {
@@ -113,9 +122,41 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         return nil
     }
 
+    func receiverPointingDeviceIdentities(for device: VendorSpecificDeviceContext) -> [ReceiverLogicalDeviceIdentity] {
+        guard device.transport == "USB",
+              let locationID = device.locationID,
+              let receiverChannel = LogitechReceiverChannel.open(locationID: locationID),
+              let slots = receiverChannel.discoverSlots()
+        else {
+            return []
+        }
+
+        return slots.compactMap { slot -> ReceiverLogicalDeviceIdentity? in
+            guard let kind = ReceiverLogicalDeviceKind(rawValue: slot.kind), kind.isPointingDevice else {
+                return nil
+            }
+
+            let name = slot.name ?? device.product ?? device.name
+            return ReceiverLogicalDeviceIdentity(
+                receiverLocationID: locationID,
+                slot: slot.slot,
+                kind: kind,
+                name: name,
+                serialNumber: slot.serialNumber,
+                productID: slot.productID,
+                batteryLevel: slot.batteryLevel
+            )
+        }
+    }
+
+    func receiverActivityChannel(for locationID: Int) -> LogitechReceiverChannel? {
+        LogitechReceiverChannel.open(locationID: locationID)
+    }
+
     private func metadata(using transport: LogitechHIDPPTransport) -> VendorSpecificDeviceMetadata? {
         let name = readFriendlyName(using: transport) ?? readName(using: transport)
-        let batteryLevel = readBatteryLevel(using: transport)
+        let batteryLevel = transport
+            .isReceiverRoutedDevice ? readReceiverBatteryLevel(using: transport) : readBatteryLevel(using: transport)
 
         if name == nil, batteryLevel == nil {
             return nil
@@ -210,7 +251,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             }
 
             let name = readFriendlyName(using: transport) ?? readName(using: transport)
-            let batteryLevel = readBatteryLevel(using: transport)
+            let batteryLevel = readReceiverBatteryLevel(using: transport)
             guard name != nil || batteryLevel != nil else {
                 continue
             }
@@ -303,26 +344,27 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         return String(bytes: trimmed.isEmpty ? Array(bytes.prefix(length)) : trimmed, encoding: .utf8)
     }
 
-    private func readBatteryLevel(using transport: LogitechHIDPPTransport) -> Int? {
+    fileprivate func readBatteryLevel(using transport: LogitechHIDPPTransport) -> Int? {
+        if let featureIndex = transport.featureIndex(for: .batteryStatus),
+           let response = transport.request(featureIndex: featureIndex, function: 0x00, parameters: []),
+           response.payload.count >= 3,
+           let level = response.payload.first,
+           (1 ... 100).contains(level) {
+            return Int(level)
+        }
+
         if let featureIndex = transport.featureIndex(for: .unifiedBattery),
            let response = transport.request(featureIndex: featureIndex, function: 0x00, parameters: []),
            response.payload.count >= 2,
            let status = transport.request(featureIndex: featureIndex, function: 0x01, parameters: []),
-           status.payload.count >= 2 {
+           status.payload.count >= 4 {
             let exactPercent = status.payload[0]
-            let supportsStateOfCharge = (response.payload[1] & 0x01) != 0
+            let supportsStateOfCharge = (response.payload[1] & 0x02) != 0
             if supportsStateOfCharge, (1 ... 100).contains(exactPercent) {
                 return Int(exactPercent)
             }
 
             return ApproximateBatteryLevel(rawValue: status.payload[1])?.percent
-        }
-
-        if let featureIndex = transport.featureIndex(for: .batteryStatus),
-           let response = transport.request(featureIndex: featureIndex, function: 0x00, parameters: []),
-           let level = response.payload.first,
-           (1 ... 100).contains(level) {
-            return Int(level)
         }
 
         if let featureIndex = transport.featureIndex(for: .batteryVoltage),
@@ -338,6 +380,10 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         }
 
         return nil
+    }
+
+    fileprivate func readReceiverBatteryLevel(using transport: LogitechHIDPPTransport) -> Int? {
+        readBatteryLevel(using: transport)
     }
 
     private func estimateBatteryPercent(fromMillivolts millivolts: Int) -> Int {
@@ -364,6 +410,7 @@ private struct LogitechHIDPPTransport {
     private let reportLength: Int
     private let deviceIndex: UInt8
     private let acceptedReplyIndices: Set<UInt8>
+    let isReceiverRoutedDevice: Bool
 
     init?(device: VendorSpecificDeviceContext, deviceIndex: UInt8?) {
         let maxOutputReportSize = device.maxOutputReportSize ?? 0
@@ -379,6 +426,7 @@ private struct LogitechHIDPPTransport {
 
         self.device = device
         self.deviceIndex = deviceIndex ?? LogitechHIDPPDeviceMetadataProvider.Constants.receiverIndex
+        isReceiverRoutedDevice = deviceIndex != nil
         acceptedReplyIndices = deviceIndex.map { Set([$0]) } ?? LogitechHIDPPDeviceMetadataProvider.Constants
             .directReplyIndices
     }
@@ -438,7 +486,7 @@ private struct LogitechHIDPPTransport {
     }
 }
 
-private final class LogitechReceiverChannel: VendorSpecificDeviceContext {
+final class LogitechReceiverChannel: VendorSpecificDeviceContext {
     private enum RequestStrategy: CaseIterable {
         case outputCallback
         case featureCallback
@@ -541,9 +589,8 @@ private final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         maxOutputReportSize = Self.getProperty("MaxOutputReportSize", from: device)
         maxFeatureReportSize = Self.getProperty("MaxFeatureReportSize", from: device)
 
-        let openStatus = IOHIDDeviceOpen(device, IOOptionBits(kIOHIDOptionsTypeSeizeDevice))
-        guard openStatus == kIOReturnSuccess || IOHIDDeviceOpen(device, IOOptionBits(kIOHIDOptionsTypeNone)) ==
-            kIOReturnSuccess else {
+        let openStatus = IOHIDDeviceOpen(device, IOOptionBits(kIOHIDOptionsTypeNone))
+        guard openStatus == kIOReturnSuccess else {
             IOHIDManagerUnscheduleFromRunLoop(manager, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
             IOHIDManagerClose(manager, IOOptionBits(kIOHIDOptionsTypeNone))
             return nil
@@ -605,6 +652,10 @@ private final class LogitechReceiverChannel: VendorSpecificDeviceContext {
                 register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverInfoRegister,
                 subregister: UInt8(0x20 + Int(slot) - 1)
             )
+            let extendedPairingResponse = hidpp10LongRequest(
+                register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverInfoRegister,
+                subregister: UInt8(0x30 + Int(slot) - 1)
+            )
             let nameResponse = hidpp10LongRequest(
                 register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverInfoRegister,
                 subregister: UInt8(0x40 + Int(slot) - 1)
@@ -618,7 +669,21 @@ private final class LogitechReceiverChannel: VendorSpecificDeviceContext {
                 ?? pairingResponse.flatMap(Self.parseReceiverKind)
                 ?? 0
             let name = nameResponse.flatMap(Self.parseReceiverName)
-            slots.append(.init(slot: slot, kind: kind, name: name))
+            let productID = pairingResponse.flatMap(Self.parseReceiverProductID)
+            let serialNumber = extendedPairingResponse.flatMap(Self.parseReceiverSerialNumber)
+            let batteryLevel = LogitechHIDPPTransport(device: self, deviceIndex: slot).flatMap {
+                LogitechHIDPPDeviceMetadataProvider().readReceiverBatteryLevel(using: $0)
+            }
+            slots.append(
+                .init(
+                    slot: slot,
+                    kind: kind,
+                    name: name,
+                    productID: productID,
+                    serialNumber: serialNumber,
+                    batteryLevel: batteryLevel
+                )
+            )
         }
 
         return slots.isEmpty ? nil : slots
@@ -1007,12 +1072,145 @@ private final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         return nil
     }
 
+    private static func parseReceiverProductID(_ response: [UInt8]) -> Int? {
+        guard response.count >= 9 else {
+            return nil
+        }
+
+        return Int(response[7]) << 8 | Int(response[8])
+    }
+
+    private static func parseReceiverSerialNumber(_ response: [UInt8]) -> String? {
+        guard response.count >= 10 else {
+            return nil
+        }
+
+        return response[6 ... 9].map { String(format: "%02X", $0) }.joined()
+    }
+
     private static func getProperty<T>(_ key: String, from device: IOHIDDevice) -> T? {
         guard let value = IOHIDDeviceGetProperty(device, key as CFString) else {
             return nil
         }
 
         return value as? T
+    }
+}
+
+extension LogitechReceiverChannel: ReceiverActivityChannel {
+    func enableWirelessNotifications() {
+        let currentFlags = readNotificationFlags() ?? 0
+        let desiredFlags = currentFlags | LogitechHIDPPDeviceMetadataProvider.Constants
+            .receiverWirelessNotifications | LogitechHIDPPDeviceMetadataProvider.Constants
+            .receiverSoftwarePresentNotifications
+        if desiredFlags != currentFlags {
+            _ = writeNotificationFlags(desiredFlags)
+        }
+    }
+
+    func switchToDJMode() {
+        var bytes = [UInt8](repeating: 0, count: LogitechHIDPPDeviceMetadataProvider.Constants.djShortReportLength)
+        bytes[0] = LogitechHIDPPDeviceMetadataProvider.Constants.djShortReportID
+        bytes[1] = LogitechHIDPPDeviceMetadataProvider.Constants.receiverIndex
+        bytes[2] = LogitechHIDPPDeviceMetadataProvider.Constants.djSwitchCommand
+        bytes[3] = LogitechHIDPPDeviceMetadataProvider.Constants.djSwitchDeviceBitfield
+        bytes[4] = 0x00
+
+        let strategies: [IOHIDReportType] = {
+            if let strategy = currentRequestStrategy() {
+                return [strategy.requestType]
+            }
+            return [kIOHIDReportTypeOutput, kIOHIDReportTypeFeature]
+        }()
+
+        for reportType in strategies {
+            let status = bytes.withUnsafeBytes { rawBuffer -> IOReturn in
+                guard let baseAddress = rawBuffer.baseAddress?.assumingMemoryBound(to: UInt8.self) else {
+                    return kIOReturnBadArgument
+                }
+
+                return IOHIDDeviceSetReport(device, reportType, CFIndex(bytes[0]), baseAddress, bytes.count)
+            }
+
+            if status == kIOReturnSuccess {
+                os_log(
+                    "Receiver DJ mode switch sent: locationID=%{public}u reportType=%{public}d",
+                    log: LogitechHIDPPDeviceMetadataProvider.log,
+                    type: .info,
+                    UInt32(locationID ?? 0),
+                    Int(reportType.rawValue)
+                )
+                Thread.sleep(forTimeInterval: 0.05)
+                return
+            }
+        }
+
+        os_log(
+            "Receiver DJ mode switch failed: locationID=%{public}u",
+            log: LogitechHIDPPDeviceMetadataProvider.log,
+            type: .info,
+            UInt32(locationID ?? 0)
+        )
+    }
+
+    func discoverPointingDeviceIdentities() -> [ReceiverLogicalDeviceIdentity] {
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+        guard let locationID,
+              let slots = discoverSlots()
+        else {
+            return []
+        }
+
+        return slots.compactMap { slot in
+            guard let kind = ReceiverLogicalDeviceKind(rawValue: slot.kind), kind.isPointingDevice else {
+                return nil
+            }
+
+            return ReceiverLogicalDeviceIdentity(
+                receiverLocationID: locationID,
+                slot: slot.slot,
+                kind: kind,
+                name: slot.name ?? name,
+                serialNumber: slot.serialNumber,
+                productID: slot.productID,
+                batteryLevel: slot.batteryLevel ?? LogitechHIDPPTransport(device: self, deviceIndex: slot.slot)
+                    .flatMap { provider.readReceiverBatteryLevel(using: $0) }
+            )
+        }
+    }
+
+    func waitForActivePointingSlot(timeout: TimeInterval) -> UInt8? {
+        let report = waitForInputReport(timeout: timeout) { response in
+            let bytes = [UInt8](response)
+            if let slot = ReceiverPacketParser.activePointingSlot(from: response) {
+                os_log(
+                    "Receiver raw activity packet: reportID=%{public}u slot=%{public}u type=%{public}u bytes=%{public}@",
+                    log: LogitechHIDPPDeviceMetadataProvider.log,
+                    type: .info,
+                    UInt32(bytes[0]),
+                    UInt32(slot),
+                    UInt32(bytes[2]),
+                    bytes.map { String(format: "%02X", $0) }.joined(separator: " ")
+                )
+                return true
+            }
+
+            if bytes.count >= 3,
+               [LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
+                LogitechHIDPPDeviceMetadataProvider.Constants.longReportID,
+                LogitechHIDPPDeviceMetadataProvider.Constants.djShortReportID,
+                LogitechHIDPPDeviceMetadataProvider.Constants.djLongReportID].contains(bytes[0]) {
+                os_log(
+                    "Receiver raw packet: bytes=%{public}@",
+                    log: LogitechHIDPPDeviceMetadataProvider.log,
+                    type: .debug,
+                    bytes.map { String(format: "%02X", $0) }.joined(separator: " ")
+                )
+            }
+
+            return false
+        }
+        return report.flatMap(ReceiverPacketParser.activePointingSlot)
     }
 }
 

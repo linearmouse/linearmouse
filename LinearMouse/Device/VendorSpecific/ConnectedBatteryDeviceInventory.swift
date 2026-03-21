@@ -75,7 +75,22 @@ enum ConnectedBatteryDeviceInventory {
         }
 
         let name: String = getProperty(kIOHIDProductKey, from: hidDevice) ?? "(unknown)"
+
+        if isGenericLogitechReceiver(name: name, hidDevice: hidDevice) {
+            return nil
+        }
+
         return ConnectedBatteryDeviceInfo(name: name, batteryLevel: batteryLevel)
+    }
+
+    private static func isGenericLogitechReceiver(name: String, hidDevice: IOHIDDevice) -> Bool {
+        guard let vendorID: NSNumber = getProperty(kIOHIDVendorIDKey, from: hidDevice),
+              vendorID.intValue == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID
+        else {
+            return false
+        }
+
+        return name.localizedCaseInsensitiveContains("receiver")
     }
 
     private static func getProperty<T>(_ key: String, from device: IOHIDDevice) -> T? {

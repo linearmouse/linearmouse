@@ -10,13 +10,18 @@ enum ConnectedLogitechDeviceInventory {
         var seen = Set<String>()
 
         for device in pointerDevices where device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID {
+            let productName = device.product ?? device.name
+            if device.transport == "USB", productName.localizedCaseInsensitiveContains("receiver") {
+                continue
+            }
+
             guard let metadata = VendorSpecificDeviceMetadataRegistry.metadata(for: device),
                   let batteryLevel = metadata.batteryLevel
             else {
                 continue
             }
 
-            let name = metadata.name ?? device.product ?? device.name
+            let name = metadata.name ?? productName
             let key = "\(name)|\(batteryLevel)"
             guard seen.insert(key).inserted else {
                 continue

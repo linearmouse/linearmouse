@@ -13,7 +13,9 @@ final class DevicePickerBatteryCoordinator {
 
     func refresh(_ deviceModel: DeviceModel) {
         guard let device = deviceModel.deviceRef.value,
-              device.pointerDevice.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID else {
+              !device.isLogicalDevice,
+              device.pointerDevice.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID,
+              device.pointerDevice.transport == "Bluetooth Low Energy" else {
             return
         }
 

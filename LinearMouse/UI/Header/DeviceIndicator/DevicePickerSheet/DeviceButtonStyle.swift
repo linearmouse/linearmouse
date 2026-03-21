@@ -20,7 +20,7 @@ struct DeviceButtonStyle: ButtonStyle {
 
     func makeBody(configuration: ButtonStyle.Configuration) -> some View {
         configuration.label
-            .padding(.vertical, 6)
+            .padding(.vertical, 2)
             .padding(.horizontal, 12)
             .foregroundColor(.white)
             .colorMultiply(textColor)
