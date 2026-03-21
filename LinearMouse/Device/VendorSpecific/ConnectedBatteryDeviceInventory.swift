@@ -4,6 +4,8 @@
 import Foundation
 import IOKit.hid
 
+private typealias AppleBatterySnapshot = (id: String, level: Int)
+
 struct ConnectedBatteryDeviceInfo: Hashable {
     let id: String
     let name: String
@@ -48,6 +50,10 @@ struct ConnectedBatteryDeviceInfo: Hashable {
 
         return inventory.first { $0.id == directDeviceIdentity }?.batteryLevel
     }
+
+    static func isAppleBluetoothDevice(vendorID: Int?, transport: String?) -> Bool {
+        vendorID == 0x004C && transport == "Bluetooth"
+    }
 }
 
 enum ConnectedBatteryDeviceInventory {
@@ -69,9 +75,10 @@ enum ConnectedBatteryDeviceInventory {
 
         var results = [ConnectedBatteryDeviceInfo]()
         var seen = Set<String>()
+        let appleBatterySnapshots = appleBluetoothBatterySnapshots()
 
         for hidDevice in hidDevices {
-            guard let result = batteryDeviceInfo(for: hidDevice) else {
+            guard let result = batteryDeviceInfo(for: hidDevice, appleBatterySnapshots: appleBatterySnapshots) else {
                 continue
             }
 
@@ -92,7 +99,16 @@ enum ConnectedBatteryDeviceInventory {
         }
     }
 
-    private static func batteryDeviceInfo(for hidDevice: IOHIDDevice) -> ConnectedBatteryDeviceInfo? {
+    private static func batteryDeviceInfo(
+        for hidDevice: IOHIDDevice,
+        appleBatterySnapshots: [AppleBatterySnapshot]
+    ) -> ConnectedBatteryDeviceInfo? {
+        let vendorID: NSNumber? = getProperty(kIOHIDVendorIDKey, from: hidDevice)
+        let productID: NSNumber? = getProperty(kIOHIDProductIDKey, from: hidDevice)
+        let serialNumber: String? = getProperty(kIOHIDSerialNumberKey, from: hidDevice)
+        let locationID: NSNumber? = getProperty("LocationID", from: hidDevice)
+        let transport: String? = getProperty("Transport", from: hidDevice)
+
         let candidateKeys = [
             "BatteryPercent",
             "BatteryLevel",
@@ -100,7 +116,7 @@ enum ConnectedBatteryDeviceInventory {
             "BatteryPercentSingle"
         ]
 
-        let batteryLevel = candidateKeys.lazy
+        let directBatteryLevel = candidateKeys.lazy
             .compactMap { key -> Int? in
                 if let value: NSNumber = getProperty(key, from: hidDevice) {
                     return value.intValue
@@ -109,6 +125,16 @@ enum ConnectedBatteryDeviceInventory {
                 return nil
             }
             .first
+
+        let batteryLevel = directBatteryLevel
+            ?? fallbackAppleBluetoothBatteryLevel(
+                vendorID: vendorID?.intValue,
+                productID: productID?.intValue,
+                serialNumber: serialNumber,
+                locationID: locationID?.intValue,
+                transport: transport,
+                appleBatterySnapshots: appleBatterySnapshots
+            )
 
         guard let batteryLevel else {
             return nil
@@ -119,12 +145,6 @@ enum ConnectedBatteryDeviceInventory {
         if isGenericLogitechReceiver(name: name, hidDevice: hidDevice) {
             return nil
         }
-
-        let vendorID: NSNumber? = getProperty(kIOHIDVendorIDKey, from: hidDevice)
-        let productID: NSNumber? = getProperty(kIOHIDProductIDKey, from: hidDevice)
-        let serialNumber: String? = getProperty(kIOHIDSerialNumberKey, from: hidDevice)
-        let locationID: NSNumber? = getProperty("LocationID", from: hidDevice)
-        let transport: String? = getProperty("Transport", from: hidDevice)
 
         return ConnectedBatteryDeviceInfo(
             id: ConnectedBatteryDeviceInfo.directIdentity(
@@ -156,5 +176,109 @@ enum ConnectedBatteryDeviceInventory {
         }
 
         return value as? T
+    }
+
+    private static func fallbackAppleBluetoothBatteryLevel(
+        vendorID: Int?,
+        productID: Int?,
+        serialNumber: String?,
+        locationID: Int?,
+        transport: String?,
+        appleBatterySnapshots: [AppleBatterySnapshot]
+    ) -> Int? {
+        guard ConnectedBatteryDeviceInfo.isAppleBluetoothDevice(vendorID: vendorID, transport: transport) else {
+            return nil
+        }
+
+        let directID = ConnectedBatteryDeviceInfo.directIdentity(
+            vendorID: vendorID,
+            productID: productID,
+            serialNumber: serialNumber,
+            locationID: locationID,
+            transport: transport,
+            fallbackName: ""
+        )
+
+        return appleBatterySnapshots.first { $0.id == directID }?.level
+    }
+
+    private static func appleBluetoothBatterySnapshots() -> [AppleBatterySnapshot] {
+        var snapshots = [AppleBatterySnapshot]()
+        var iterator = io_iterator_t()
+
+        guard IOServiceGetMatchingServices(
+            kIOMasterPortDefault,
+            IOServiceMatching("AppleDeviceManagementHIDEventService"),
+            &iterator
+        ) == KERN_SUCCESS else {
+            return []
+        }
+
+        defer { IOObjectRelease(iterator) }
+
+        var service = IOIteratorNext(iterator)
+        while service != MACH_PORT_NULL {
+            defer {
+                IOObjectRelease(service)
+                service = IOIteratorNext(iterator)
+            }
+
+            guard let vendorIDNumber = IORegistryEntryCreateCFProperty(
+                service,
+                kIOHIDVendorIDKey as CFString,
+                kCFAllocatorDefault,
+                0
+            )?.takeRetainedValue() as? NSNumber,
+                let transport = IORegistryEntryCreateCFProperty(
+                    service,
+                    "Transport" as CFString,
+                    kCFAllocatorDefault,
+                    0
+                )?.takeRetainedValue() as? String,
+                let batteryLevel = IORegistryEntryCreateCFProperty(
+                    service,
+                    "BatteryPercent" as CFString,
+                    kCFAllocatorDefault,
+                    0
+                )?.takeRetainedValue() as? NSNumber,
+                ConnectedBatteryDeviceInfo.isAppleBluetoothDevice(
+                    vendorID: vendorIDNumber.intValue,
+                    transport: transport
+                )
+            else {
+                continue
+            }
+
+            let productID = (IORegistryEntryCreateCFProperty(
+                service,
+                kIOHIDProductIDKey as CFString,
+                kCFAllocatorDefault,
+                0
+            )?.takeRetainedValue() as? NSNumber)?.intValue
+            let serialNumber = IORegistryEntryCreateCFProperty(
+                service,
+                kIOHIDSerialNumberKey as CFString,
+                kCFAllocatorDefault,
+                0
+            )?.takeRetainedValue() as? String
+            let locationID = (IORegistryEntryCreateCFProperty(
+                service,
+                "LocationID" as CFString,
+                kCFAllocatorDefault,
+                0
+            )?.takeRetainedValue() as? NSNumber)?.intValue
+
+            let id = ConnectedBatteryDeviceInfo.directIdentity(
+                vendorID: vendorIDNumber.intValue,
+                productID: productID,
+                serialNumber: serialNumber,
+                locationID: locationID,
+                transport: transport,
+                fallbackName: ""
+            )
+            snapshots.append((id: id, level: batteryLevel.intValue))
+        }
+
+        return snapshots
     }
 }
