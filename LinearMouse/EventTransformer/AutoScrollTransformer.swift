@@ -35,6 +35,17 @@ final class AutoScrollTransformer {
         "AXWebArea",
         "AXScrollArea"
     ]
+    private static let pressableAccessibilityRoles: Set<String> = [
+        "AXLink",
+        "AXButton",
+        "AXCheckBox",
+        "AXRadioButton",
+        "AXPopUpButton",
+        "AXMenuButton",
+        "AXComboBox",
+        "AXDisclosureTriangle",
+        "AXSwitch"
+    ]
 
     private let trigger: Scheme.Buttons.Mapping
     private let modes: [Scheme.Buttons.AutoScroll.Mode]
@@ -524,7 +535,7 @@ extension AutoScrollTransformer: EventTransformer {
                 return .excludedChrome(path: path)
             }
 
-            if role == "AXLink" || actions.contains(kAXPressAction as String) {
+            if Self.isPressableActivationElement(role: role, actions: actions) {
                 return .pressable(path: path)
             }
 
@@ -549,6 +560,19 @@ extension AutoScrollTransformer: EventTransformer {
         }
 
         return false
+    }
+
+    static func isPressableActivationElement(role: String?, actions: [String]) -> Bool {
+        guard let role,
+              pressableAccessibilityRoles.contains(role) else {
+            return false
+        }
+
+        if role == "AXLink" {
+            return true
+        }
+
+        return actions.contains(kAXPressAction as String)
     }
 
     private func requiredStringValue(
