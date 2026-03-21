@@ -13,6 +13,14 @@ public class PointerDevice {
     public typealias InputReportClosure = (PointerDevice, Data) -> Void
 
     private var inputReportCallbackRegistered = false
+    private var inputReportBuffer: UnsafeMutablePointer<UInt8>?
+    private var inputReportBufferLength = 0
+
+    private let synchronousReportRequestLock = NSLock()
+    private let pendingReportRequestLock = NSLock()
+    private var pendingReportMatcher: ((Data) -> Bool)?
+    private var pendingReportResponse: Data?
+    private var pendingReportSemaphore: DispatchSemaphore?
 
     private var observations = (
         inputValue: [UUID: InputValueClosure](),
@@ -52,6 +60,8 @@ public class PointerDevice {
     }
 
     deinit {
+        inputReportBuffer?.deallocate()
+
         if let device {
             IOHIDDeviceClose(device, IOOptionBits(kIOHIDOptionsTypeNone))
             IOHIDDeviceUnscheduleFromRunLoop(device, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
@@ -112,6 +122,34 @@ public extension PointerDevice {
 
     var buttonCount: Int? {
         client.getProperty(kIOHIDPointerButtonCountKey)
+    }
+
+    var locationID: Int? {
+        client.getProperty("LocationID")
+    }
+
+    var primaryUsagePage: Int? {
+        client.getProperty("PrimaryUsagePage")
+    }
+
+    var primaryUsage: Int? {
+        client.getProperty("PrimaryUsage")
+    }
+
+    var maxInputReportSize: Int? {
+        client.getProperty("MaxInputReportSize")
+    }
+
+    var maxOutputReportSize: Int? {
+        client.getProperty("MaxOutputReportSize")
+    }
+
+    var maxFeatureReportSize: Int? {
+        client.getProperty("MaxFeatureReportSize")
+    }
+
+    var transport: String? {
+        client.getProperty("Transport")
     }
 }
 
@@ -216,21 +254,129 @@ extension PointerDevice {
 
 extension PointerDevice {
     private func inputReportCallback(_ report: Data) {
+        completePendingReportRequest(with: report)
+
         for (_, callback) in observations.inputReport {
             callback(self, report)
         }
     }
 
-    public func observeReport(using closure: @escaping InputReportClosure) -> ObservationToken {
-        if !inputReportCallbackRegistered {
-            if let device {
-                let reportLength = 8
-                let report = UnsafeMutablePointer<UInt8>.allocate(capacity: reportLength)
-                let this = Unmanaged.passUnretained(self).toOpaque()
-                IOHIDDeviceRegisterInputReportCallback(device, report, reportLength, Self.inputReportCallback, this)
-            }
-            inputReportCallbackRegistered = true
+    private func completePendingReportRequest(with report: Data) {
+        pendingReportRequestLock.lock()
+        defer { pendingReportRequestLock.unlock() }
+
+        guard let reportMatcher = pendingReportMatcher, reportMatcher(report) else {
+            return
         }
+
+        pendingReportResponse = report
+        pendingReportMatcher = nil
+        pendingReportSemaphore?.signal()
+    }
+
+    private func clearPendingReportRequest() {
+        pendingReportMatcher = nil
+        pendingReportResponse = nil
+        pendingReportSemaphore = nil
+    }
+
+    func ensureInputReportCallbackRegistered(minimumReportLength: Int = 0) {
+        guard let device else {
+            return
+        }
+
+        let desiredReportLength = max(maxInputReportSize ?? 8, minimumReportLength, 8)
+        if inputReportBufferLength < desiredReportLength {
+            let newBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: desiredReportLength)
+            inputReportBuffer?.deallocate()
+            inputReportBuffer = newBuffer
+            inputReportBufferLength = desiredReportLength
+            inputReportCallbackRegistered = false
+        }
+
+        guard !inputReportCallbackRegistered, let inputReportBuffer else {
+            return
+        }
+
+        let this = Unmanaged.passUnretained(self).toOpaque()
+        IOHIDDeviceRegisterInputReportCallback(
+            device,
+            inputReportBuffer,
+            inputReportBufferLength,
+            Self.inputReportCallback,
+            this
+        )
+        inputReportCallbackRegistered = true
+    }
+
+    public func performSynchronousOutputReportRequest(
+        _ report: Data,
+        timeout: TimeInterval,
+        matching: @escaping (Data) -> Bool
+    ) -> Data? {
+        guard let device, !report.isEmpty else {
+            return nil
+        }
+
+        synchronousReportRequestLock.lock()
+        defer { synchronousReportRequestLock.unlock() }
+
+        ensureInputReportCallbackRegistered(minimumReportLength: max(report.count, maxInputReportSize ?? 0))
+
+        let semaphore = DispatchSemaphore(value: 0)
+        pendingReportRequestLock.lock()
+        clearPendingReportRequest()
+        pendingReportMatcher = matching
+        pendingReportSemaphore = semaphore
+        pendingReportRequestLock.unlock()
+
+        let result = report.withUnsafeBytes { rawBuffer -> IOReturn in
+            guard let baseAddress = rawBuffer.baseAddress?.assumingMemoryBound(to: UInt8.self) else {
+                return kIOReturnBadArgument
+            }
+
+            return IOHIDDeviceSetReport(
+                device,
+                kIOHIDReportTypeOutput,
+                CFIndex(report[0]),
+                baseAddress,
+                report.count
+            )
+        }
+
+        guard result == kIOReturnSuccess else {
+            pendingReportRequestLock.lock()
+            clearPendingReportRequest()
+            pendingReportRequestLock.unlock()
+            return nil
+        }
+
+        if Thread.isMainThread {
+            let deadline = Date().addingTimeInterval(timeout)
+            while Date() < deadline {
+                pendingReportRequestLock.lock()
+                let response = pendingReportResponse
+                pendingReportRequestLock.unlock()
+
+                if response != nil {
+                    break
+                }
+
+                CFRunLoopRunInMode(.defaultMode, 0.01, true)
+            }
+        } else {
+            _ = semaphore.wait(timeout: .now() + timeout)
+        }
+
+        pendingReportRequestLock.lock()
+        let response = pendingReportResponse
+        clearPendingReportRequest()
+        pendingReportRequestLock.unlock()
+        return response
+    }
+
+    public func observeReport(using closure: @escaping InputReportClosure) -> ObservationToken {
+        ensureInputReportCallbackRegistered()
 
         let id = observations.inputReport.insert(closure)
 

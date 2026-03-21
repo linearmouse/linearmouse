@@ -14,7 +14,8 @@ class DeviceModel: ObservableObject, Identifiable {
 
     @Published var isActive = false
 
-    let name: String
+    @Published var name: String
+    @Published var batteryLevel: Int?
     let category: Device.Category
 
     init(deviceRef: WeakRef<Device>) {
@@ -22,6 +23,7 @@ class DeviceModel: ObservableObject, Identifiable {
         id = deviceRef.value?.id ?? 0
 
         name = deviceRef.value?.name ?? "(removed)"
+        batteryLevel = deviceRef.value?.batteryLevel
         category = deviceRef.value?.category ?? .mouse
 
         DeviceManager.shared
@@ -34,9 +36,21 @@ class DeviceModel: ObservableObject, Identifiable {
             }
             .store(in: &subscriptions)
     }
+
+    func applyVendorSpecificMetadata(_ metadata: VendorSpecificDeviceMetadata?) {
+        if let name = metadata?.name {
+            self.name = name
+        }
+
+        batteryLevel = metadata?.batteryLevel
+    }
 }
 
 extension DeviceModel {
+    var batteryDescription: String? {
+        batteryLevel.map { "\($0)%" }
+    }
+
     var isMouse: Bool {
         category == .mouse
     }

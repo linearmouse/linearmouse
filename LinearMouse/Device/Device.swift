@@ -22,15 +22,16 @@ class Device {
 
     private(set) lazy var id: Int32 = OSAtomicIncrement32(&Self.nextID)
 
-    private(set) lazy var name: String = device.name
-    private(set) lazy var productName: String? = device.product
-    private(set) lazy var vendorID: Int? = device.vendorID
-    private(set) lazy var productID: Int? = device.productID
-    private(set) lazy var serialNumber: String? = device.serialNumber
-    private(set) lazy var buttonCount: Int? = device.buttonCount
+    private(set) var name: String
+    private(set) var productName: String?
+    private(set) var vendorID: Int?
+    private(set) var productID: Int?
+    private(set) var serialNumber: String?
+    private(set) var buttonCount: Int?
+    private(set) var batteryLevel: Int?
     private(set) lazy var category: Category = {
-        if let vendorID: Int = device.vendorID,
-           let productID: Int = device.productID {
+        if let vendorID,
+           let productID {
             if isAppleMagicMouse(vendorID: vendorID, productID: productID) {
                 return .mouse
             }
@@ -47,6 +48,10 @@ class Device {
     private var inputReportHandlers: [InputReportHandler] = []
     private let device: PointerDevice
 
+    var pointerDevice: PointerDevice {
+        device
+    }
+
     private var removed = false
 
     private var verbosedLoggingOn = Defaults[.verbosedLoggingOn]
@@ -61,6 +66,17 @@ class Device {
     init(_ manager: DeviceManager, _ device: PointerDevice) {
         self.manager = manager
         self.device = device
+
+        vendorID = device.vendorID
+        productID = device.productID
+        serialNumber = device.serialNumber
+        buttonCount = device.buttonCount
+
+        let rawProductName = device.product
+        let rawName = rawProductName ?? device.name
+        name = rawName
+        productName = rawProductName
+        batteryLevel = nil
 
         initialPointerResolution =
             device.pointerResolution ?? Self.fallbackPointerResolution
@@ -88,12 +104,13 @@ class Device {
         }
 
         os_log(
-            "Device initialized: %{public}@: HIDPointerResolution=%{public}f, HIDPointerAccelerationType=%{public}@",
+            "Device initialized: %{public}@: HIDPointerResolution=%{public}f, HIDPointerAccelerationType=%{public}@, battery=%{public}@",
             log: Self.log,
             type: .info,
             String(describing: device),
             initialPointerResolution,
-            device.pointerAccelerationType ?? "(unknown)"
+            device.pointerAccelerationType ?? "(unknown)",
+            batteryLevel.map { "\($0)%" } ?? "(unknown)"
         )
 
         Defaults.observe(.verbosedLoggingOn) { [weak self] change in
@@ -315,6 +332,8 @@ extension Device: Hashable {
 
 extension Device: CustomStringConvertible {
     var description: String {
-        device.description
+        let vendorIDString = vendorID.map { String(format: "0x%04X", $0) } ?? "(nil)"
+        let productIDString = productID.map { String(format: "0x%04X", $0) } ?? "(nil)"
+        return String(format: "%@ (VID=%@, PID=%@)", name, vendorIDString, productIDString)
     }
 }

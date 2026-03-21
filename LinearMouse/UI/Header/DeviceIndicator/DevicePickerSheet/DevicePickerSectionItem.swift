@@ -15,6 +15,12 @@ struct DevicePickerSectionItem: View {
                     Text(deviceModel.name)
                         .font(.body)
 
+                    if let batteryDescription = deviceModel.batteryDescription {
+                        Text(batteryDescription)
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                    }
+
                     if deviceModel.isActive {
                         Text("(active)")
                             .font(.body)
