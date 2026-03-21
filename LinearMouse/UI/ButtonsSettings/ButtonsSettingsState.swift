@@ -136,7 +136,7 @@ extension ButtonsSettingsState {
                     scheme.buttons.autoScroll.preserveNativeMiddleClick = true
                 }
             } else {
-                scheme.buttons.$autoScroll = nil
+                scheme.buttons.autoScroll.enabled = false
             }
 
             GlobalEventTap.shared.stop()
