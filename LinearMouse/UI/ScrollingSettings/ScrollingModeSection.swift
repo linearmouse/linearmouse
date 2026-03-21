@@ -94,6 +94,9 @@ extension ScrollingSettings {
                         }
                     }
 
+                case .smoothed:
+                    ScrollingSettings.SmoothedScrollingSection()
+
                 case .byLines:
                     Slider(
                         value: $state.scrollingDistanceInLines,

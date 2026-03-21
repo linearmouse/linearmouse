@@ -9,6 +9,8 @@ class ScrollingSettingsState: ObservableObject {
     static let shared: ScrollingSettingsState = .init()
 
     @PublishedObject private var schemeState = SchemeState.shared
+    private var smoothedCache = Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Smoothed>()
+
     var scheme: Scheme {
         get { schemeState.scheme }
         set { schemeState.scheme = newValue }
@@ -33,12 +35,17 @@ extension ScrollingSettingsState {
         }
 
         case accelerated = "Accelerated"
+        case smoothed = "Smoothed"
         case byLines = "By Lines"
         case byPixels = "By Pixels"
     }
 
     var scrollingMode: ScrollingMode {
         get {
+            if currentSmoothedConfiguration != nil {
+                return .smoothed
+            }
+
             switch mergedScheme.scrolling.distance[direction] ?? .auto {
             case .auto:
                 return .accelerated
@@ -49,20 +56,29 @@ extension ScrollingSettingsState {
             }
         }
         set {
-            var distance: Scheme.Scrolling.Distance
-
             switch newValue {
             case .accelerated:
-                distance = .auto
+                clearSmoothedConfiguration()
+                scheme.scrolling.distance[direction] = .auto
+                scheme.scrolling.acceleration[direction] = 1
+                scheme.scrolling.speed[direction] = 0
+            case .smoothed:
+                let smoothed = currentSmoothedConfiguration ?? makeDefaultSmoothedConfiguration()
+                setSmoothedConfiguration(smoothed)
+                scheme.scrolling.distance[direction] = .auto
+                scheme.scrolling.acceleration[direction] = 1
+                scheme.scrolling.speed[direction] = 0
             case .byLines:
-                distance = .line(3)
+                clearSmoothedConfiguration()
+                scheme.scrolling.distance[direction] = .line(3)
+                scheme.scrolling.acceleration[direction] = 1
+                scheme.scrolling.speed[direction] = 0
             case .byPixels:
-                distance = .pixel(36)
+                clearSmoothedConfiguration()
+                scheme.scrolling.distance[direction] = .pixel(36)
+                scheme.scrolling.acceleration[direction] = 1
+                scheme.scrolling.speed[direction] = 0
             }
-
-            scheme.scrolling.distance[direction] = distance
-            scheme.scrolling.acceleration[direction] = 1
-            scheme.scrolling.speed[direction] = 0
         }
     }
 
@@ -72,12 +88,7 @@ extension ScrollingSettingsState {
     }
 
     var scrollingAccelerationFormatter: NumberFormatter {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = NumberFormatter.Style.decimal
-        formatter.roundingMode = NumberFormatter.RoundingMode.halfUp
-        formatter.maximumFractionDigits = 2
-        formatter.thousandSeparator = ""
-        return formatter
+        decimalFormatter(maxFractionDigits: 2)
     }
 
     var scrollingSpeed: Double {
@@ -86,12 +97,7 @@ extension ScrollingSettingsState {
     }
 
     var scrollingSpeedFormatter: NumberFormatter {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = NumberFormatter.Style.decimal
-        formatter.roundingMode = NumberFormatter.RoundingMode.halfUp
-        formatter.maximumFractionDigits = 2
-        formatter.thousandSeparator = ""
-        return formatter
+        decimalFormatter(maxFractionDigits: 2)
     }
 
     var scrollingDistanceInLines: Double {
@@ -118,10 +124,71 @@ extension ScrollingSettingsState {
         }
     }
 
+    var smoothedPreset: Scheme.Scrolling.Smoothed.Preset {
+        get { currentSmoothedConfiguration?.preset ?? .defaultPreset }
+        set {
+            selectSmoothedPreset(newValue)
+        }
+    }
+
+    var smoothedResponse: Double {
+        get { currentSmoothedConfiguration?.response?.asTruncatedDouble ?? 0.68 }
+        set {
+            updateSmoothedConfigurationAsCustom {
+                $0.response = Decimal(newValue).rounded(2)
+            }
+        }
+    }
+
+    var smoothedResponseFormatter: NumberFormatter {
+        decimalFormatter(maxFractionDigits: 2)
+    }
+
+    var smoothedSpeed: Double {
+        get { currentSmoothedConfiguration?.speed?.asTruncatedDouble ?? 1.02 }
+        set {
+            updateSmoothedConfigurationAsCustom {
+                $0.speed = Decimal(newValue).rounded(2)
+            }
+        }
+    }
+
+    var smoothedSpeedFormatter: NumberFormatter {
+        decimalFormatter(maxFractionDigits: 2)
+    }
+
+    var smoothedAcceleration: Double {
+        get { currentSmoothedConfiguration?.acceleration?.asTruncatedDouble ?? 1.10 }
+        set {
+            updateSmoothedConfigurationAsCustom {
+                $0.acceleration = Decimal(newValue).rounded(2)
+            }
+        }
+    }
+
+    var smoothedAccelerationFormatter: NumberFormatter {
+        decimalFormatter(maxFractionDigits: 2)
+    }
+
+    var smoothedInertia: Double {
+        get { currentSmoothedConfiguration?.inertia?.asTruncatedDouble ?? 0.74 }
+        set {
+            updateSmoothedConfigurationAsCustom {
+                $0.inertia = Decimal(newValue).rounded(2)
+            }
+        }
+    }
+
+    var smoothedInertiaFormatter: NumberFormatter {
+        decimalFormatter(maxFractionDigits: 2)
+    }
+
     var scrollingDisabled: Bool {
         switch scrollingMode {
         case .accelerated:
             return scrollingAcceleration == 0 && scrollingSpeed == 0
+        case .smoothed:
+            return smoothedResponse == 0 && smoothedSpeed == 0 && smoothedAcceleration == 0 && smoothedInertia == 0
         case .byLines:
             return scrollingDistanceInLines == 0
         case .byPixels:
@@ -136,5 +203,85 @@ extension ScrollingSettingsState {
         set {
             scheme.scrolling.modifiers[direction] = newValue
         }
+    }
+
+    private var currentSmoothedConfiguration: Scheme.Scrolling.Smoothed? {
+        let configuration = scheme.scrolling.smoothed[direction]
+            ?? mergedScheme.scrolling.smoothed[direction]
+            ?? smoothedCache[direction]
+        guard configuration?.isEnabled == true else {
+            return nil
+        }
+        return configuration
+    }
+
+    func smoothedPreviewConfiguration(for preset: Scheme.Scrolling.Smoothed.Preset) -> Scheme.Scrolling.Smoothed {
+        if preset == .custom {
+            var configuration = scheme.scrolling.smoothed[direction]
+                ?? smoothedCache[direction]
+                ?? currentSmoothedConfiguration
+                ?? makeDefaultSmoothedConfiguration()
+            configuration.enabled = true
+            configuration.preset = .custom
+            return configuration
+        }
+
+        return preset.defaultConfiguration
+    }
+
+    func restoreDefaultSmoothedPreset() {
+        selectSmoothedPreset(.defaultPreset)
+    }
+
+    private func setSmoothedConfiguration(_ configuration: Scheme.Scrolling.Smoothed) {
+        var configuration = configuration
+        configuration.enabled = true
+        scheme.scrolling.smoothed[direction] = configuration
+        smoothedCache[direction] = configuration
+    }
+
+    private func clearSmoothedConfiguration() {
+        if let currentSmoothedConfiguration {
+            smoothedCache[direction] = currentSmoothedConfiguration
+        }
+
+        scheme.scrolling.smoothed[direction] = .init(enabled: false)
+    }
+
+    private func makeDefaultSmoothedConfiguration() -> Scheme.Scrolling.Smoothed {
+        Scheme.Scrolling.Smoothed.Preset.defaultPreset.defaultConfiguration
+    }
+
+    private func selectSmoothedPreset(_ preset: Scheme.Scrolling.Smoothed.Preset) {
+        if preset == .custom {
+            setSmoothedConfiguration(makeCustomSmoothedConfiguration())
+        } else {
+            setSmoothedConfiguration(preset.defaultConfiguration)
+        }
+    }
+
+    private func makeCustomSmoothedConfiguration() -> Scheme.Scrolling.Smoothed {
+        var configuration = currentSmoothedConfiguration
+            ?? scheme.scrolling.smoothed[direction]
+            ?? smoothedCache[direction]
+            ?? makeDefaultSmoothedConfiguration()
+        configuration.enabled = true
+        configuration.preset = .custom
+        return configuration
+    }
+
+    private func updateSmoothedConfigurationAsCustom(_ update: (inout Scheme.Scrolling.Smoothed) -> Void) {
+        var configuration = makeCustomSmoothedConfiguration()
+        update(&configuration)
+        setSmoothedConfiguration(configuration)
+    }
+
+    private func decimalFormatter(maxFractionDigits: Int) -> NumberFormatter {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.roundingMode = .halfUp
+        formatter.maximumFractionDigits = maxFractionDigits
+        formatter.thousandSeparator = ""
+        return formatter
     }
 }

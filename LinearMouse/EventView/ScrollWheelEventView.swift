@@ -21,8 +21,31 @@ class ScrollWheelEventView: MouseEventView {
         set { event.setIntegerValueField(.scrollWheelEventIsContinuous, value: newValue ? 1 : 0) }
     }
 
+    var scrollPhase: CGScrollPhase? {
+        get {
+            let rawValue = UInt32(event.getIntegerValueField(.scrollWheelEventScrollPhase))
+            guard rawValue != 0 else {
+                return nil
+            }
+            return .init(rawValue: rawValue)
+        }
+        set {
+            event.setIntegerValueField(.scrollWheelEventScrollPhase, value: Int64(newValue?.rawValue ?? 0))
+        }
+    }
+
     var momentumPhase: CGMomentumScrollPhase {
-        .init(rawValue: UInt32(event.getIntegerValueField(.scrollWheelEventMomentumPhase))) ?? .none
+        get {
+            .init(rawValue: UInt32(event.getIntegerValueField(.scrollWheelEventMomentumPhase))) ?? .none
+        }
+        set {
+            event.setIntegerValueField(.scrollWheelEventMomentumPhase, value: Int64(newValue.rawValue))
+        }
+    }
+
+    var syntheticMarker: Int64 {
+        get { event.getIntegerValueField(.eventSourceUserData) }
+        set { event.setIntegerValueField(.eventSourceUserData, value: newValue) }
     }
 
     var deltaX: Int64 {

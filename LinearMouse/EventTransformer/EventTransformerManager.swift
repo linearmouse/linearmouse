@@ -62,7 +62,7 @@ class EventTransformerManager {
 
         activeCacheKey = nil
 
-        if sourcePid != nil, bypassEventsFromOtherApplications {
+        if sourcePid != nil, bypassEventsFromOtherApplications, !cgEvent.isLinearMouseSyntheticEvent {
             os_log(
                 "Return noop transformer because this event is sent by %{public}s",
                 log: Self.log,
@@ -124,20 +124,43 @@ class EventTransformerManager {
             }
         }
 
+        let smoothed = Scheme.Scrolling.Bidirectional(
+            vertical: scheme.scrolling.smoothed.vertical?.isEnabled == true ? scheme.scrolling.smoothed.vertical : nil,
+            horizontal: scheme.scrolling.smoothed.horizontal?.isEnabled == true ? scheme.scrolling.smoothed
+                .horizontal : nil
+        )
+
+        if smoothed.vertical != nil || smoothed.horizontal != nil {
+            eventTransformer.append(SmoothedScrollingTransformer(smoothed: smoothed))
+        }
+
         if let distance = scheme.scrolling.distance.horizontal {
-            eventTransformer.append(LinearScrollingHorizontalTransformer(distance: distance))
+            if smoothed.horizontal == nil {
+                eventTransformer.append(LinearScrollingHorizontalTransformer(distance: distance))
+            }
         }
 
         if let distance = scheme.scrolling.distance.vertical {
-            eventTransformer.append(LinearScrollingVerticalTransformer(distance: distance))
+            if smoothed.vertical == nil {
+                eventTransformer.append(LinearScrollingVerticalTransformer(distance: distance))
+            }
         }
 
-        if scheme.scrolling.acceleration.vertical ?? 1 != 1 || scheme.scrolling.acceleration.horizontal ?? 1 != 1 ||
-            scheme.scrolling.speed.vertical ?? 0 != 0 || scheme.scrolling.speed.horizontal ?? 0 != 0 {
+        let acceleration = Scheme.Scrolling.Bidirectional<Decimal>(
+            vertical: smoothed.vertical == nil ? scheme.scrolling.acceleration.vertical : nil,
+            horizontal: smoothed.horizontal == nil ? scheme.scrolling.acceleration.horizontal : nil
+        )
+        let speed = Scheme.Scrolling.Bidirectional<Decimal>(
+            vertical: smoothed.vertical == nil ? scheme.scrolling.speed.vertical : nil,
+            horizontal: smoothed.horizontal == nil ? scheme.scrolling.speed.horizontal : nil
+        )
+
+        if acceleration.vertical ?? 1 != 1 || acceleration.horizontal ?? 1 != 1 ||
+            speed.vertical ?? 0 != 0 || speed.horizontal ?? 0 != 0 {
             eventTransformer
                 .append(ScrollingAccelerationSpeedAdjustmentTransformer(
-                    acceleration: scheme.scrolling.acceleration,
-                    speed: scheme.scrolling.speed
+                    acceleration: acceleration,
+                    speed: speed
                 ))
         }
 

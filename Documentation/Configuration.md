@@ -75,6 +75,46 @@ And the `scrolling` field in this scheme defines the scrolling behaviors, with
 }
 ```
 
+## Smoothed scrolling
+
+`scrolling.smoothed` enables a phase-aware scrolling curve that can be tuned separately for
+vertical and horizontal scrolling. You can choose a preset such as `easeIn`, `easeOut`,
+`easeInOut`, `quadratic`, `cubic`, `easeOutCubic`, `easeInOutCubic`, `quartic`,
+`easeOutQuartic`, `easeInOutQuartic`, `smooth`, or `custom`, then fine-tune `response`,
+`speed`, `acceleration`, and `inertia` as needed.
+
+Set `enabled` to `false` to explicitly disable an inherited smoothed scrolling configuration for a
+direction.
+
+For example, to use a smoother scrolling profile for a mouse:
+
+```json
+{
+  "schemes": [
+    {
+      "if": {
+        "device": {
+          "category": "mouse"
+        }
+      },
+      "scrolling": {
+        "smoothed": {
+          "enabled": true,
+          "preset": "easeInOut",
+          "response": 0.45,
+          "speed": 1,
+          "acceleration": 1.2,
+          "inertia": 0.65
+        }
+      }
+    }
+  ]
+}
+```
+
+If you want different tuning for each direction, provide `vertical` and `horizontal` values under
+`smoothed`.
+
 ## Device matching
 
 Vendor ID and product ID can be provided to match a specific device.

@@ -90,4 +90,37 @@ final class ConfigurationTests: XCTestCase {
         XCTAssertEqual(autoScroll.modes, [.toggle, .hold])
         XCTAssertEqual(autoScroll.normalizedModes, [.toggle, .hold])
     }
+
+    func testMergeSmoothedScrollingPreservesInheritedFields() {
+        var scheme = Scheme(
+            scrolling: .init(
+                smoothed: .init(
+                    vertical: .init(
+                        preset: .natural,
+                        response: Decimal(string: "0.45"),
+                        speed: 1,
+                        acceleration: Decimal(string: "1.2"),
+                        inertia: Decimal(string: "0.65")
+                    )
+                )
+            )
+        )
+
+        Scheme(
+            scrolling: .init(
+                smoothed: .init(
+                    vertical: .init(
+                        preset: .snappy,
+                        inertia: 8
+                    )
+                )
+            )
+        ).merge(into: &scheme)
+
+        XCTAssertEqual(scheme.scrolling.smoothed.vertical?.preset, .snappy)
+        XCTAssertEqual(scheme.scrolling.smoothed.vertical?.response, Decimal(string: "0.45"))
+        XCTAssertEqual(scheme.scrolling.smoothed.vertical?.speed, 1)
+        XCTAssertEqual(scheme.scrolling.smoothed.vertical?.acceleration, Decimal(string: "1.2"))
+        XCTAssertEqual(scheme.scrolling.smoothed.vertical?.inertia, 8)
+    }
 }
