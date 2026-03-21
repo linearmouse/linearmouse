@@ -72,4 +72,13 @@ final class StatusItemBatteryIndicatorTests: XCTestCase {
             18
         )
     }
+
+    func testAppleBluetoothDeviceDetection() {
+        XCTAssertTrue(ConnectedBatteryDeviceInfo.isAppleBluetoothDevice(vendorID: 0x004C, transport: "Bluetooth"))
+        XCTAssertFalse(ConnectedBatteryDeviceInfo.isAppleBluetoothDevice(
+            vendorID: 0x004C,
+            transport: "Bluetooth Low Energy"
+        ))
+        XCTAssertFalse(ConnectedBatteryDeviceInfo.isAppleBluetoothDevice(vendorID: 0x046D, transport: "Bluetooth"))
+    }
 }

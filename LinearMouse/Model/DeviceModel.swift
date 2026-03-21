@@ -50,7 +50,16 @@ class DeviceModel: ObservableObject, Identifiable {
             }
             .store(in: &subscriptions)
 
+        BatteryDeviceMonitor.shared
+            .$devices
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.refreshBatteryLevel()
+            }
+            .store(in: &subscriptions)
+
         refreshReceiverPresentation()
+        refreshBatteryLevel()
 
         DevicePickerBatteryCoordinator.shared.refresh(self)
     }
@@ -62,6 +71,7 @@ class DeviceModel: ObservableObject, Identifiable {
 
         batteryLevel = metadata?.batteryLevel
         refreshReceiverPresentation()
+        refreshBatteryLevel()
     }
 
     private func refreshReceiverPresentation() {
@@ -80,10 +90,19 @@ class DeviceModel: ObservableObject, Identifiable {
         displayName = DeviceManager.displayName(baseName: preferredName, pairedDevices: pairedDevices)
     }
 
+    private func refreshBatteryLevel() {
+        guard let device = deviceRef.value else {
+            batteryLevel = nil
+            return
+        }
+
+        batteryLevel = BatteryDeviceMonitor.shared.currentDeviceBatteryLevel(for: device) ?? device.batteryLevel
+    }
+
     func resetVendorSpecificMetadata() {
         name = baseName
-        batteryLevel = deviceRef.value?.batteryLevel
         refreshReceiverPresentation()
+        refreshBatteryLevel()
     }
 }
 
