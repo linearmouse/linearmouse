@@ -42,7 +42,7 @@ struct DevicePickerSectionItem: View {
                     VStack(alignment: .leading, spacing: 4) {
                         ForEach(deviceModel.pairedReceiverDevices, id: \.slot) { device in
                             HStack(spacing: 6) {
-                                Text("- \(device.name)")
+                                Text(String(format: NSLocalizedString("- %@", comment: ""), device.name))
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
 

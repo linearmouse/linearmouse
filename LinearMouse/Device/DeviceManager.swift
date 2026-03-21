@@ -170,13 +170,14 @@ class DeviceManager: ObservableObject {
         if let locationID = pointerDevice.locationID {
             receiverMonitor.stopMonitoring(device: device)
 
-            if let lastActiveLocationID = lastActiveDeviceRef?.value?.pointerDevice.locationID,
-               lastActiveLocationID == locationID {
-                lastActiveDeviceId = nil
-                lastActiveDeviceRef = nil
+            let hasRemainingReceiverAtLocation = pointerDeviceToDevice
+                .filter { $0.key != pointerDevice }
+                .contains { _, existingDevice in
+                    existingDevice.pointerDevice.locationID == locationID && shouldMonitorReceiver(existingDevice)
+                }
+            if !hasRemainingReceiverAtLocation {
+                receiverPairedDeviceIdentities.removeValue(forKey: locationID)
             }
-
-            receiverPairedDeviceIdentities.removeValue(forKey: locationID)
         }
 
         pointerDeviceToDevice.removeValue(forKey: pointerDevice)
@@ -355,24 +356,24 @@ class DeviceManager: ObservableObject {
     }
 
     func pairedReceiverDevices(for device: Device) -> [ReceiverLogicalDeviceIdentity] {
-        guard let locationID = device.pointerDevice.locationID else {
+        guard shouldMonitorReceiver(device),
+              let locationID = device.pointerDevice.locationID
+        else {
             return []
         }
 
         return receiverPairedDeviceIdentities[locationID] ?? []
     }
 
-    func displayName(for device: Device) -> String {
-        let pairedDevices = pairedReceiverDevices(for: device)
-        guard !pairedDevices.isEmpty else {
-            return device.name
-        }
+    func preferredName(for device: Device, fallback: String? = nil) -> String {
+        fallback ?? device.name
+    }
 
-        if pairedDevices.count == 1, let pairedName = pairedDevices.first?.name {
-            return "\(device.name) (\(pairedName))"
-        }
-
-        return "\(device.name) (Multiple devices)"
+    func displayName(for device: Device, fallbackBaseName: String? = nil) -> String {
+        Self.displayName(
+            baseName: preferredName(for: device, fallback: fallbackBaseName),
+            pairedDevices: pairedReceiverDevices(for: device)
+        )
     }
 
     private func shouldMonitorReceiver(_ device: Device) -> Bool {
@@ -383,7 +384,8 @@ class DeviceManager: ObservableObject {
             return false
         }
 
-        return true
+        let productName = device.productName ?? device.name
+        return productName.localizedCaseInsensitiveContains("receiver")
     }
 
     private func receiverPointingDevicesChanged(locationID: Int, identities: [ReceiverLogicalDeviceIdentity]) {
@@ -410,5 +412,21 @@ class DeviceManager: ObservableObject {
 
     private func refreshVisibleDevices() {
         devices = pointerDeviceToDevice.values.sorted { $0.id < $1.id }
+    }
+
+    static func displayName(baseName: String, pairedDevices: [ReceiverLogicalDeviceIdentity]) -> String {
+        guard !pairedDevices.isEmpty else {
+            return baseName
+        }
+
+        if pairedDevices.count == 1, let pairedName = pairedDevices.first?.name {
+            return "\(baseName) (\(pairedName))"
+        }
+
+        return String(
+            format: NSLocalizedString("%@ (%lld devices)", comment: ""),
+            baseName,
+            Int64(pairedDevices.count)
+        )
     }
 }

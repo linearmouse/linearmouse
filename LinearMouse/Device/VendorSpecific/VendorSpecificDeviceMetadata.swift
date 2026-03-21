@@ -8,6 +8,7 @@ protocol VendorSpecificDeviceContext {
     var productID: Int? { get }
     var product: String? { get }
     var name: String { get }
+    var serialNumber: String? { get }
     var transport: String? { get }
     var locationID: Int? { get }
     var primaryUsagePage: Int? { get }
@@ -51,7 +52,7 @@ struct VendorSpecificDeviceMatcher {
     }
 }
 
-struct VendorSpecificDeviceMetadata {
+struct VendorSpecificDeviceMetadata: Equatable {
     let name: String?
     let batteryLevel: Int?
 }

@@ -19,12 +19,14 @@ class DeviceModel: ObservableObject, Identifiable {
     @Published var batteryLevel: Int?
     @Published var pairedReceiverDevices: [ReceiverLogicalDeviceIdentity] = []
     let category: Device.Category
+    private let baseName: String
 
     init(deviceRef: WeakRef<Device>) {
         self.deviceRef = deviceRef
         id = deviceRef.value?.id ?? 0
 
         let initialName = deviceRef.value?.name ?? "(removed)"
+        baseName = initialName
         name = initialName
         displayName = initialName
         batteryLevel = deviceRef.value?.batteryLevel
@@ -49,6 +51,8 @@ class DeviceModel: ObservableObject, Identifiable {
             .store(in: &subscriptions)
 
         refreshReceiverPresentation()
+
+        DevicePickerBatteryCoordinator.shared.refresh(self)
     }
 
     func applyVendorSpecificMetadata(_ metadata: VendorSpecificDeviceMetadata?) {
@@ -62,13 +66,24 @@ class DeviceModel: ObservableObject, Identifiable {
 
     private func refreshReceiverPresentation() {
         guard let device = deviceRef.value else {
+            name = "(removed)"
             displayName = "(removed)"
             pairedReceiverDevices = []
             return
         }
 
-        displayName = DeviceManager.shared.displayName(for: device)
-        pairedReceiverDevices = DeviceManager.shared.pairedReceiverDevices(for: device)
+        let preferredName = DeviceManager.shared.preferredName(for: device, fallback: name)
+        let pairedDevices = DeviceManager.shared.pairedReceiverDevices(for: device)
+
+        name = preferredName
+        pairedReceiverDevices = pairedDevices
+        displayName = DeviceManager.displayName(baseName: preferredName, pairedDevices: pairedDevices)
+    }
+
+    func resetVendorSpecificMetadata() {
+        name = baseName
+        batteryLevel = deviceRef.value?.batteryLevel
+        refreshReceiverPresentation()
     }
 }
 

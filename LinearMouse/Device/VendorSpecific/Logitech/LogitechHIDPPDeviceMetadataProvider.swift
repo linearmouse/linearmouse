@@ -65,6 +65,15 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         let batteryLevel: Int?
     }
 
+    struct ReceiverSlotMatchCandidate {
+        let slot: UInt8
+        let kind: UInt8
+        let name: String?
+        let serialNumber: String?
+        let productID: Int?
+        let batteryLevel: Int?
+    }
+
     private enum ApproximateBatteryLevel: UInt8 {
         case full = 8
         case good = 4
@@ -162,7 +171,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         guard device.transport == "USB",
               let locationID = device.locationID,
               let receiverChannel = LogitechReceiverChannel.open(locationID: locationID),
-              let slot = discoverReceiverSlot(for: device, using: receiverChannel)
+              let slot = discoverReceiverSlot(for: device, using: receiverChannel)?.slot
         else {
             return nil
         }
@@ -173,19 +182,30 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
     private func discoverReceiverSlot(
         for device: VendorSpecificDeviceContext,
         using receiver: LogitechReceiverChannel
-    ) -> UInt8? {
-        let currentFlags = receiver.readNotificationFlags() ?? 0
-        let desiredFlags = currentFlags | Constants.receiverWirelessNotifications | Constants
-            .receiverSoftwarePresentNotifications
-        if desiredFlags != currentFlags {
-            _ = receiver.writeNotificationFlags(desiredFlags)
-        }
-
-        guard let slots = receiver.discoverSlots() else {
+    ) -> ReceiverSlotMatchCandidate? {
+        guard let slots = receiver.discoverMatchCandidates(baseName: device.product ?? device.name) else {
             return nil
         }
 
         let normalizedProduct = normalizeName(device.product ?? device.name)
+        let normalizedSerial = normalizeSerial(device.serialNumber)
+        let desiredProductID = device.productID
+
+        if let serialMatch = slots.first(where: {
+            normalizeSerial($0.serialNumber) == normalizedSerial && normalizedSerial != nil
+        }) {
+            return serialMatch
+        }
+
+        if let productIDMatch = slots.first(where: { candidate in
+            guard let desiredProductID, let productID = candidate.productID else {
+                return false
+            }
+
+            return productID == desiredProductID
+        }) {
+            return productIDMatch
+        }
 
         if let exactNameMatch = slots.first(where: {
             guard let name = $0.name else {
@@ -193,35 +213,16 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             }
             return normalizeName(name) == normalizedProduct
         }) {
-            return exactNameMatch.slot
+            return exactNameMatch
         }
 
         let desiredKinds = preferredReceiverDeviceKinds(for: device)
         if let kindMatch = slots.first(where: { desiredKinds.contains($0.kind) }) {
-            return kindMatch.slot
+            return kindMatch
         }
 
         if slots.count == 1 {
-            return slots[0].slot
-        }
-
-        let routedSlots = discoverRoutedSlots(using: receiver)
-
-        if let exactRoutedNameMatch = routedSlots.first(where: {
-            guard let name = $0.name else {
-                return false
-            }
-            return normalizeName(name) == normalizedProduct
-        }) {
-            return exactRoutedNameMatch.slot
-        }
-
-        if routedSlots.count == 1 {
-            return routedSlots[0].slot
-        }
-
-        if let batteryBackedSlot = routedSlots.first(where: { $0.batteryLevel != nil }) {
-            return batteryBackedSlot.slot
+            return slots[0]
         }
 
         return nil
@@ -387,6 +388,14 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
     private func normalizeName(_ name: String) -> String {
         name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
     }
+
+    private func normalizeSerial(_ serialNumber: String?) -> String? {
+        guard let serialNumber, !serialNumber.isEmpty else {
+            return nil
+        }
+
+        return serialNumber.uppercased().replacingOccurrences(of: ":", with: "")
+    }
 }
 
 private struct LogitechHIDPPTransport {
@@ -505,6 +514,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
     let productID: Int?
     let product: String?
     let name: String
+    let serialNumber: String?
     let transport: String?
     let locationID: Int?
     let primaryUsagePage: Int?
@@ -566,6 +576,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         productID = Self.getProperty(kIOHIDProductIDKey, from: device)
         product = Self.getProperty(kIOHIDProductKey, from: device)
         name = product ?? "(unknown)"
+        serialNumber = Self.getProperty(kIOHIDSerialNumberKey, from: device)
         transport = Self.getProperty("Transport", from: device)
         locationID = Self.getProperty("LocationID", from: device)
         primaryUsagePage = Self.getProperty(kIOHIDPrimaryUsagePageKey, from: device)
@@ -674,6 +685,30 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         return slots.isEmpty ? nil : slots
     }
 
+    func discoverMatchCandidates(baseName: String)
+        -> [LogitechHIDPPDeviceMetadataProvider.ReceiverSlotMatchCandidate]? {
+        enableWirelessNotifications()
+
+        guard let slots = discoverSlots() else {
+            return nil
+        }
+
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+        let candidates = slots.map { slot in
+            LogitechHIDPPDeviceMetadataProvider.ReceiverSlotMatchCandidate(
+                slot: slot.slot,
+                kind: slot.kind,
+                name: slot.name ?? baseName,
+                serialNumber: slot.serialNumber,
+                productID: slot.productID,
+                batteryLevel: slot.batteryLevel ?? LogitechHIDPPTransport(device: self, deviceIndex: slot.slot)
+                    .flatMap { provider.readReceiverBatteryLevel(using: $0) }
+            )
+        }
+
+        return candidates.isEmpty ? nil : candidates
+    }
+
     func enableWirelessNotifications() {
         let currentFlags = readNotificationFlags() ?? 0
         let desiredFlags = currentFlags | LogitechHIDPPDeviceMetadataProvider.Constants.receiverWirelessNotifications
@@ -684,15 +719,12 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
     }
 
     func discoverPointingDeviceIdentities(baseName: String) -> [ReceiverLogicalDeviceIdentity]? {
-        enableWirelessNotifications()
-
         guard let locationID,
-              let slots = discoverSlots()
+              let slots = discoverMatchCandidates(baseName: baseName)
         else {
             return nil
         }
 
-        let provider = LogitechHIDPPDeviceMetadataProvider()
         let identities = slots.compactMap { slot -> ReceiverLogicalDeviceIdentity? in
             guard let kind = ReceiverLogicalDeviceKind(rawValue: slot.kind), kind.isPointingDevice else {
                 return nil
@@ -705,8 +737,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
                 name: slot.name ?? baseName,
                 serialNumber: slot.serialNumber,
                 productID: slot.productID,
-                batteryLevel: slot.batteryLevel ?? LogitechHIDPPTransport(device: self, deviceIndex: slot.slot)
-                    .flatMap { provider.readReceiverBatteryLevel(using: $0) }
+                batteryLevel: slot.batteryLevel
             )
         }
 

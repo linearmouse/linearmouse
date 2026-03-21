@@ -22,12 +22,19 @@ enum ConnectedLogitechDeviceInventory {
             }
 
             let name = metadata.name ?? productName
-            let key = "\(name)|\(batteryLevel)"
-            guard seen.insert(key).inserted else {
+            let identity = ConnectedBatteryDeviceInfo.directIdentity(
+                vendorID: device.vendorID,
+                productID: device.productID,
+                serialNumber: device.serialNumber,
+                locationID: device.locationID,
+                transport: device.transport,
+                fallbackName: name
+            )
+            guard seen.insert(identity).inserted else {
                 continue
             }
 
-            results.append(.init(name: name, batteryLevel: batteryLevel))
+            results.append(.init(id: identity, name: name, batteryLevel: batteryLevel))
         }
 
         return results.sorted {

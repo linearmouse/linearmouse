@@ -12,7 +12,7 @@ struct DeviceIndicator: View {
             showDevicePickerSheet.toggle()
         } label: {
             Text(state.activeDeviceName ?? "Unknown")
-                .frame(maxWidth: 150)
+                .frame(maxWidth: 190)
                 .fixedSize()
                 .lineLimit(1)
         }

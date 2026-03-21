@@ -7,6 +7,7 @@ import SwiftUI
 
 struct GeneralSettings: View {
     @Default(.showInMenuBar) var showInMenuBar
+    @Default(.menuBarBatteryDisplayMode) var menuBarBatteryDisplayMode
     @Default(.showInDock) var showInDock
     @Default(.bypassEventsFromOtherApplications) var bypassEventsFromOtherApplications
 
@@ -23,14 +24,33 @@ struct GeneralSettings: View {
                         }
                     }
 
-                    LaunchAtLogin.Toggle {
-                        Text("Start at login")
+                    if showInMenuBar {
+                        Picker("Show current battery", selection: $menuBarBatteryDisplayMode.animation()) {
+                            Text("Off").tag(MenuBarBatteryDisplayMode.off)
+                            Text("5% or below").tag(MenuBarBatteryDisplayMode.below5)
+                            Text("10% or below").tag(MenuBarBatteryDisplayMode.below10)
+                            Text("15% or below").tag(MenuBarBatteryDisplayMode.below15)
+                            Text("20% or below").tag(MenuBarBatteryDisplayMode.below20)
+                            Text("Always show").tag(MenuBarBatteryDisplayMode.always)
+                        }
+                        .padding(.leading, 20)
+                        .modifier(PickerViewModifier())
                     }
 
                     Toggle(isOn: $showInDock) {
                         Text("Show in Dock")
                     }
+                }
+                .modifier(SectionViewModifier())
 
+                Section {
+                    LaunchAtLogin.Toggle {
+                        Text("Start at login")
+                    }
+                }
+                .modifier(SectionViewModifier())
+
+                Section {
                     Toggle(isOn: $bypassEventsFromOtherApplications) {
                         withDescription {
                             Text("Bypass events from other applications")

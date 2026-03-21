@@ -9,6 +9,7 @@ class DevicePickerState: ObservableObject {
 
     var subscriptions = Set<AnyCancellable>()
     private var cachedModels: [Device: DeviceModel] = [:]
+    private var modelSubscriptions: [Int32: AnyCancellable] = [:]
 
     @Published var devices: [DeviceModel] = []
 
@@ -32,11 +33,15 @@ class DevicePickerState: ObservableObject {
 
             let model = DeviceModel(deviceRef: WeakRef(device))
             cachedModels[device] = model
-            DevicePickerBatteryCoordinator.shared.refresh(model)
+            modelSubscriptions[model.id] = model.objectWillChange.sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
             return model
         }
 
         cachedModels = cachedModels.filter { devices.contains($0.key) }
+        let validIDs = Set(nextDevices.map(\.id))
+        modelSubscriptions = modelSubscriptions.filter { validIDs.contains($0.key) }
         let nextIDs = nextDevices.map(\.id)
 
         guard previousIDs != nextIDs else {

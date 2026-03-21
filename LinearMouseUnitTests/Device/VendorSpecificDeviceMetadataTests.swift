@@ -1,9 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
-import Combine
 @testable import LinearMouse
-import PointerKit
 import XCTest
 
 final class VendorSpecificDeviceMetadataTests: XCTestCase {
@@ -52,145 +50,119 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertTrue(provider.matches(device: device))
     }
 
-    func testReadConnectedLogitechDeviceMetadata() throws {
-        let manager = PointerDeviceManager()
-        manager.startObservation()
-        defer { manager.stopObservation() }
+    func testReceiverLogicalDeviceIdentityEqualityUsesReceiverLocationAndSlot() {
+        let lhs = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 0x1234,
+            slot: 1,
+            kind: .mouse,
+            name: "Mouse A",
+            serialNumber: "AAAA",
+            productID: 0x1234,
+            batteryLevel: 50
+        )
+        let rhs = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 0x1234,
+            slot: 1,
+            kind: .trackball,
+            name: "Mouse B",
+            serialNumber: "BBBB",
+            productID: 0x5678,
+            batteryLevel: 80
+        )
 
-        let deadline = Date().addingTimeInterval(5)
-        while Date() < deadline, manager.devices.isEmpty {
-            CFRunLoopRunInMode(.defaultMode, 0.1, true)
-        }
-
-        let logitechDevices = manager.devices.filter { $0.vendorID == 0x046D }
-        guard let device = logitechDevices.first else {
-            throw XCTSkip("No connected Logitech pointer device found")
-        }
-
-        let metadata = VendorSpecificDeviceMetadataRegistry.metadata(for: device)
-
-        XCTAssertNotNil(metadata?.name, "Expected Logitech HID++ device name")
-        XCTAssertNotNil(metadata?.batteryLevel, "Expected Logitech HID++ battery level")
-
-        if let metadata {
-            print(
-                "Logitech metadata name=\(metadata.name ?? "(nil)") battery=\(metadata.batteryLevel.map(String.init) ?? "(nil)")"
-            )
-        }
+        XCTAssertEqual(lhs, rhs)
+        XCTAssertEqual(lhs.hashValue, rhs.hashValue)
     }
 
-    func testInspectConnectedLogitechPointerDevices() throws {
-        let manager = PointerDeviceManager()
-        manager.startObservation()
-        defer { manager.stopObservation() }
+    func testConnectedBatteryDeviceDirectIdentityPrefersSerialNumber() {
+        let identity = ConnectedBatteryDeviceInfo.directIdentity(
+            vendorID: 0x046D,
+            productID: 0x405E,
+            serialNumber: "ABC123",
+            locationID: 0x1000,
+            transport: "USB",
+            fallbackName: "Mouse"
+        )
 
-        let deadline = Date().addingTimeInterval(5)
-        while Date() < deadline, manager.devices.isEmpty {
-            CFRunLoopRunInMode(.defaultMode, 0.1, true)
-        }
-
-        let logitechDevices = manager.devices.filter { $0.vendorID == 0x046D }
-        guard !logitechDevices.isEmpty else {
-            throw XCTSkip("No connected Logitech pointer device found")
-        }
-
-        for device in logitechDevices {
-            let metadata = VendorSpecificDeviceMetadataRegistry.metadata(for: device)
-            print(
-                "PointerDevice product=\(device.product ?? "(nil)") name=\(device.name) transport=\(device.transport ?? "(nil)") vid=\(device.vendorIDString) pid=\(device.productIDString) metadataName=\(metadata?.name ?? "(nil)") metadataBattery=\(metadata?.batteryLevel.map(String.init) ?? "(nil)")"
-            )
-
-            if device.transport == "USB" {
-                let provider = LogitechHIDPPDeviceMetadataProvider()
-                let identities = provider.receiverPointingDeviceIdentities(for: device)
-                print(
-                    "Receiver identities=\(identities.map { "slot=\($0.slot) name=\($0.name) battery=\($0.batteryLevel.map(String.init) ?? "(nil)")" })"
-                )
-            }
-        }
+        XCTAssertEqual(identity, "serial|1133|16478|ABC123")
     }
 
-    func testReceiverMonitorDiscoversLogicalPointingDevices() throws {
-        let pointerManager = PointerDeviceManager()
-        pointerManager.startObservation()
-        defer { pointerManager.stopObservation() }
+    func testConnectedBatteryDeviceDirectIdentityFallsBackToLocation() {
+        let identity = ConnectedBatteryDeviceInfo.directIdentity(
+            vendorID: 0x046D,
+            productID: 0x405E,
+            serialNumber: nil,
+            locationID: 0x2000,
+            transport: "USB",
+            fallbackName: "Mouse"
+        )
 
-        let deadline = Date().addingTimeInterval(5)
-        while Date() < deadline, pointerManager.devices.isEmpty {
-            CFRunLoopRunInMode(.defaultMode, 0.1, true)
-        }
-
-        let receiverPointerDevices = pointerManager.devices.filter {
-            $0.vendorID == 0x046D && $0.transport == "USB" && ($0.product ?? $0.name).contains("Receiver")
-        }
-        guard let receiverPointerDevice = receiverPointerDevices.first else {
-            throw XCTSkip("No connected Logitech receiver pointer device found")
-        }
-
-        let deviceManager = DeviceManager()
-        let device = Device(deviceManager, receiverPointerDevice)
-        let monitor = ReceiverMonitor()
-        let expectation = expectation(description: "discover receiver logical devices")
-
-        monitor.onPointingDevicesChanged = { _, identities in
-            guard !identities.isEmpty else {
-                return
-            }
-
-            print(
-                "Receiver monitor identities=\(identities.map { "slot=\($0.slot) name=\($0.name) battery=\($0.batteryLevel.map(String.init) ?? "(nil)")" })"
-            )
-            expectation.fulfill()
-        }
-
-        monitor.startMonitoring(device: device)
-        wait(for: [expectation], timeout: 5)
-        monitor.stopMonitoring(device: device)
+        XCTAssertEqual(identity, "location|1133|16478|8192")
     }
 
-    func testDeviceManagerPublishesReceiverPairedDeviceIdentities() {
-        let deviceManager = DeviceManager.shared
-        deviceManager.start()
-        defer { deviceManager.stop() }
-
-        let expectation = expectation(description: "receiver paired device identities published")
-        var cancellable: AnyCancellable?
-
-        cancellable = deviceManager.$receiverPairedDeviceIdentities.sink { identitiesByLocation in
-            guard let identities = identitiesByLocation.values.first(where: { !$0.isEmpty }) else {
-                return
-            }
-
-            let summary = identities.map {
-                "slot=\($0.slot) name=\($0.name) battery=\($0.batteryLevel.map(String.init) ?? "(nil)")"
-            }
-            print("Published paired identities=\(summary)")
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 5)
-        _ = cancellable
-
-        let devices = deviceManager.devices
-        XCTAssertTrue(devices.contains { ($0.productName ?? $0.name).contains("Receiver") && ($0.vendorID == 0x046D) })
-        XCTAssertTrue(deviceManager.receiverPairedDeviceIdentities.values.contains { !$0.isEmpty })
+    func testConnectedBatteryDeviceReceiverIdentityUsesReceiverAndSlot() {
+        XCTAssertEqual(
+            ConnectedBatteryDeviceInfo.receiverIdentity(receiverLocationID: 0x1234, slot: 2),
+            "receiver|4660|2"
+        )
     }
 
-    func testInspectPublishedDevices() {
-        let deviceManager = DeviceManager.shared
-        deviceManager.start()
-        defer { deviceManager.stop() }
+    func testVendorSpecificDeviceMetadataSupportsEquality() {
+        XCTAssertEqual(
+            VendorSpecificDeviceMetadata(name: "MX Master 3", batteryLevel: 50),
+            VendorSpecificDeviceMetadata(name: "MX Master 3", batteryLevel: 50)
+        )
+        XCTAssertNotEqual(
+            VendorSpecificDeviceMetadata(name: "MX Master 3", batteryLevel: 50),
+            VendorSpecificDeviceMetadata(name: "MX Master 3", batteryLevel: 80)
+        )
+    }
 
-        let deadline = Date().addingTimeInterval(5)
-        while Date() < deadline, deviceManager.devices.isEmpty {
-            CFRunLoopRunInMode(.defaultMode, 0.1, true)
-        }
-
-        for device in deviceManager.devices {
-            print(
-                "Published device name=\(device.name) productName=\(device.productName ?? "(nil)") battery=\(device.batteryLevel.map(String.init) ?? "(nil)") transport=\(device.pointerDevice.transport ?? "(nil)")"
+    func testDeviceManagerDisplayNameUsesSinglePairedDeviceName() {
+        let identities = [
+            ReceiverLogicalDeviceIdentity(
+                receiverLocationID: 1,
+                slot: 1,
+                kind: .mouse,
+                name: "M720 Triathlon",
+                serialNumber: nil,
+                productID: nil,
+                batteryLevel: 50
             )
-        }
+        ]
+
+        XCTAssertEqual(
+            DeviceManager.displayName(baseName: "USB Receiver", pairedDevices: identities),
+            "USB Receiver (M720 Triathlon)"
+        )
+    }
+
+    func testDeviceManagerDisplayNameUsesDeviceCountForMultiplePairedDevices() {
+        let identities = [
+            ReceiverLogicalDeviceIdentity(
+                receiverLocationID: 1,
+                slot: 1,
+                kind: .mouse,
+                name: "Mouse A",
+                serialNumber: nil,
+                productID: nil,
+                batteryLevel: 50
+            ),
+            ReceiverLogicalDeviceIdentity(
+                receiverLocationID: 1,
+                slot: 2,
+                kind: .trackball,
+                name: "Mouse B",
+                serialNumber: nil,
+                productID: nil,
+                batteryLevel: 80
+            )
+        ]
+
+        XCTAssertEqual(
+            DeviceManager.displayName(baseName: "USB Receiver", pairedDevices: identities),
+            "USB Receiver (2 devices)"
+        )
     }
 }
 
@@ -199,6 +171,7 @@ private struct MockVendorSpecificDeviceContext: VendorSpecificDeviceContext {
     var productID: Int?
     var product: String?
     var name: String
+    var serialNumber: String?
     var transport: String?
     var locationID: Int?
     var primaryUsagePage: Int?
@@ -212,6 +185,7 @@ private struct MockVendorSpecificDeviceContext: VendorSpecificDeviceContext {
         productID: Int?,
         product: String? = nil,
         name: String = "Mock Device",
+        serialNumber: String? = nil,
         transport: String?,
         locationID: Int? = nil,
         primaryUsagePage: Int? = nil,
@@ -224,6 +198,7 @@ private struct MockVendorSpecificDeviceContext: VendorSpecificDeviceContext {
         self.productID = productID
         self.product = product
         self.name = name
+        self.serialNumber = serialNumber
         self.transport = transport
         self.locationID = locationID
         self.primaryUsagePage = primaryUsagePage

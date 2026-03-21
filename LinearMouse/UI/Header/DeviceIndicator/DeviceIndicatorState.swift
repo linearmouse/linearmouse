@@ -27,6 +27,14 @@ class DeviceIndicatorState: ObservableObject {
                 self?.refreshActiveDeviceName()
             }
             .store(in: &subscriptions)
+
+        DevicePickerState.shared
+            .objectWillChange
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.refreshActiveDeviceName()
+            }
+            .store(in: &subscriptions)
     }
 }
 
@@ -38,6 +46,11 @@ extension DeviceIndicatorState {
     private func refreshActiveDeviceName() {
         guard let device = deviceState.currentDeviceRef?.value else {
             activeDeviceName = nil
+            return
+        }
+
+        if let deviceModel = DevicePickerState.shared.devices.first(where: { $0.deviceRef.value === device }) {
+            activeDeviceName = deviceModel.displayName
             return
         }
 

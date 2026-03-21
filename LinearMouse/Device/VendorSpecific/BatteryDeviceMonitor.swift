@@ -17,6 +17,7 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
     private var timer: DispatchSourceTimer?
     private var isRunning = false
     private var isRefreshing = false
+    private var needsRefresh = false
     private let stateLock = NSLock()
     private var subscriptions = Set<AnyCancellable>()
 
@@ -27,11 +28,7 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
             .$devices
             .receive(on: RunLoop.main)
             .debounce(for: .milliseconds(250), scheduler: RunLoop.main)
-            .sink { [weak self] devices in
-                guard !devices.isEmpty else {
-                    return
-                }
-
+            .sink { [weak self] _ in
                 self?.refreshIfNeeded()
             }
             .store(in: &subscriptions)
@@ -78,13 +75,35 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
         timer = nil
     }
 
+    func currentDeviceBatteryLevel(for device: Device) -> Int? {
+        let pairedDevices = DeviceManager.shared.pairedReceiverDevices(for: device)
+        let directDeviceIdentity = ConnectedBatteryDeviceInfo.directIdentity(
+            vendorID: device.vendorID,
+            productID: device.productID,
+            serialNumber: device.serialNumber,
+            locationID: device.pointerDevice.locationID,
+            transport: device.pointerDevice.transport,
+            fallbackName: device.productName ?? device.name
+        )
+
+        return ConnectedBatteryDeviceInfo.currentDeviceBatteryLevel(
+            pairedDevices: pairedDevices,
+            directDeviceIdentity: directDeviceIdentity,
+            inventory: devices
+        )
+    }
+
     private func refreshIfNeeded() {
         stateLock.lock()
         guard isRunning, !isRefreshing else {
+            if isRunning {
+                needsRefresh = true
+            }
             stateLock.unlock()
             return
         }
         isRefreshing = true
+        needsRefresh = false
         stateLock.unlock()
 
         queue.async { [weak self] in
@@ -100,7 +119,14 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
                             return nil
                         }
 
-                        return ConnectedBatteryDeviceInfo(name: identity.name, batteryLevel: batteryLevel)
+                        return ConnectedBatteryDeviceInfo(
+                            id: ConnectedBatteryDeviceInfo.receiverIdentity(
+                                receiverLocationID: identity.receiverLocationID,
+                                slot: identity.slot
+                            ),
+                            name: identity.name,
+                            batteryLevel: batteryLevel
+                        )
                     }
             }
             let visibleDeviceBatteries = DeviceManager.shared
@@ -112,7 +138,18 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
                         return nil
                     }
 
-                    return ConnectedBatteryDeviceInfo(name: device.name, batteryLevel: batteryLevel)
+                    return ConnectedBatteryDeviceInfo(
+                        id: ConnectedBatteryDeviceInfo.directIdentity(
+                            vendorID: device.vendorID,
+                            productID: device.productID,
+                            serialNumber: device.serialNumber,
+                            locationID: device.pointerDevice.locationID,
+                            transport: device.pointerDevice.transport,
+                            fallbackName: device.productName ?? device.name
+                        ),
+                        name: device.name,
+                        batteryLevel: batteryLevel
+                    )
                 }
             let propertyBackedDevices = ConnectedBatteryDeviceInventory.devices()
             let directlyAddressableLogitechDevices = DeviceManager.shared.devices.filter {
@@ -127,9 +164,19 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
                 )
             }
 
-            self.stateLock.lock()
-            self.isRefreshing = false
-            self.stateLock.unlock()
+            self.finishRefreshCycle()
+        }
+    }
+
+    private func finishRefreshCycle() {
+        stateLock.lock()
+        isRefreshing = false
+        let shouldRefreshAgain = needsRefresh
+        needsRefresh = false
+        stateLock.unlock()
+
+        if shouldRefreshAgain {
+            refreshIfNeeded()
         }
     }
 
@@ -141,8 +188,7 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
         var seen = Set<String>()
 
         for device in logitechDevices + propertyBackedDevices {
-            let key = "\(device.name)|\(device.batteryLevel)"
-            guard seen.insert(key).inserted else {
+            guard seen.insert(device.id).inserted else {
                 continue
             }
 

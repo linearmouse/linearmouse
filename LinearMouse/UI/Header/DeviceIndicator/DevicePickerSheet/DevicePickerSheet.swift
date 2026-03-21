@@ -13,13 +13,32 @@ struct DevicePickerSheet: View {
     @ObservedObject private var schemeState: SchemeState = .shared
     @ObservedObject private var deviceState: DeviceState = .shared
 
+    private var selectedDevice: Device? {
+        selectedDeviceRef?.value
+    }
+
     private var shouldShowDeleteButton: Bool {
-        // Only show if there are matching schemes
-        schemeState.hasMatchingSchemes
+        schemeState.hasMatchingSchemes(
+            for: selectedDevice,
+            forApp: schemeState.currentApp,
+            forDisplay: schemeState.currentDisplay
+        )
     }
 
     private var canConfirm: Bool {
         autoSwitchToActiveDevice || selectedDeviceRef?.value != nil
+    }
+
+    private var autoSwitchBinding: Binding<Bool> {
+        Binding(
+            get: { autoSwitchToActiveDevice },
+            set: { newValue in
+                autoSwitchToActiveDevice = newValue
+                if newValue {
+                    syncSelectionWithCurrentDevice()
+                }
+            }
+        )
     }
 
     var body: some View {
@@ -34,7 +53,7 @@ struct DevicePickerSheet: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                Toggle("", isOn: $autoSwitchToActiveDevice.animation())
+                Toggle("", isOn: autoSwitchBinding.animation())
                     .labelsHidden()
                     .toggleStyle(.switch)
                     .modifier(SheetToggleSizeModifier())
@@ -75,12 +94,17 @@ struct DevicePickerSheet: View {
         }
         .onAppear {
             autoSwitchToActiveDevice = Defaults[.autoSwitchToActiveDevice]
-            selectedDeviceRef = deviceState.currentDeviceRef
+            syncSelectionWithCurrentDevice()
+        }
+        .onReceive(deviceState.$currentDeviceRef.receive(on: RunLoop.main)) { currentDeviceRef in
+            if autoSwitchToActiveDevice {
+                selectedDeviceRef = currentDeviceRef
+            }
         }
         .alert(isPresented: $showDeleteAlert) {
             Alert(
                 title: Text("Delete Configuration?"),
-                message: Text("This will delete all settings for the current device."),
+                message: Text("This will delete all settings for the selected device."),
                 primaryButton: .destructive(Text("Delete")) {
                     confirmDelete()
                 },
@@ -99,9 +123,14 @@ struct DevicePickerSheet: View {
         let isSelectingActiveDevice = deviceRef.value === DeviceManager.shared.lastActiveDeviceRef?.value
         if isSelectingActiveDevice {
             autoSwitchToActiveDevice = true
+            syncSelectionWithCurrentDevice()
         } else if autoSwitchToActiveDevice {
             autoSwitchToActiveDevice = false
         }
+    }
+
+    private func syncSelectionWithCurrentDevice() {
+        selectedDeviceRef = deviceState.currentDeviceRef
     }
 
     private func onOK() {
@@ -115,7 +144,11 @@ struct DevicePickerSheet: View {
     }
 
     private func confirmDelete() {
-        schemeState.deleteMatchingSchemes()
+        schemeState.deleteMatchingSchemes(
+            for: selectedDevice,
+            forApp: schemeState.currentApp,
+            forDisplay: schemeState.currentDisplay
+        )
         isPresented = false
     }
 }

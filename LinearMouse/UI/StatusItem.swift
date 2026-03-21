@@ -107,9 +107,12 @@ class StatusItem: NSObject, NSMenuDelegate {
 
         if let button = statusItem.button {
             button.image = NSImage(named: "MenuIcon")
+            button.imagePosition = .imageOnly
             button.action = #selector(statusItemAction(sender:))
             button.target = self
         }
+
+        updateStatusItemBatteryIndicator()
 
         startAtLoginItem.state = LaunchAtLogin.isEnabled ? .on : .off
         LaunchAtLogin.publisher
@@ -141,6 +144,45 @@ class StatusItem: NSObject, NSMenuDelegate {
 
         let items = makeBatteryItems()
         updateBatteryItems(items)
+    }
+
+    private func updateStatusItemBatteryIndicator() {
+        guard let button = statusItem.button else {
+            return
+        }
+
+        let batteryTitle = currentBatteryIndicatorTitle()
+        button.title = batteryTitle.map { " \($0)" } ?? ""
+        button.imagePosition = batteryTitle == nil ? .imageOnly : .imageLeft
+    }
+
+    private func currentBatteryIndicatorTitle() -> String? {
+        Self.menuBarBatteryTitle(
+            currentBatteryLevel: currentDeviceBatteryLevel(),
+            mode: Defaults[.menuBarBatteryDisplayMode]
+        )
+    }
+
+    private func currentDeviceBatteryLevel() -> Int? {
+        guard let currentDevice = DeviceState.shared.currentDeviceRef?.value else {
+            return nil
+        }
+
+        return BatteryDeviceMonitor.shared.currentDeviceBatteryLevel(for: currentDevice)
+    }
+
+    static func menuBarBatteryTitle(currentBatteryLevel: Int?, mode: MenuBarBatteryDisplayMode) -> String? {
+        guard let threshold = mode.threshold,
+              let currentBatteryLevel
+        else {
+            return nil
+        }
+
+        guard currentBatteryLevel <= threshold else {
+            return nil
+        }
+
+        return "\(currentBatteryLevel)%"
     }
 
     private func baseMenuItems() -> [NSMenuItem] {
@@ -230,9 +272,19 @@ class StatusItem: NSObject, NSMenuDelegate {
                     return
                 }
 
+                self.updateStatusItemBatteryIndicator()
+
                 if self.isMenuOpen {
                     self.rebuildMenuItems(includeBatteryItems: true)
                 }
+            }
+            .store(in: &subscriptions)
+
+        DeviceState.shared
+            .$currentDeviceRef
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.updateStatusItemBatteryIndicator()
             }
             .store(in: &subscriptions)
 
@@ -242,6 +294,12 @@ class StatusItem: NSObject, NSMenuDelegate {
             }
 
             self.statusItem.isVisible = change.newValue
+            self.updateStatusItemBatteryIndicator()
+        }
+        .tieToLifetime(of: self)
+
+        Defaults.observe(.menuBarBatteryDisplayMode) { [weak self] _ in
+            self?.updateStatusItemBatteryIndicator()
         }
         .tieToLifetime(of: self)
     }
