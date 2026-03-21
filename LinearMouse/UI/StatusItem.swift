@@ -6,7 +6,7 @@ import Defaults
 import LaunchAtLogin
 import SwiftUI
 
-class StatusItem {
+class StatusItem: NSObject, NSMenuDelegate {
     static let shared = StatusItem()
 
     private lazy var statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -15,78 +15,61 @@ class StatusItem {
 
     private lazy var menu: NSMenu = {
         let menu = NSMenu()
+        menu.delegate = self
 
-        let openSettingsItem = NSMenuItem(
+        menu.items = baseMenuItems()
+
+        return menu
+    }()
+
+    private lazy var openSettingsItem: NSMenuItem = {
+        let item = NSMenuItem(
             title: String(format: NSLocalizedString("%@ Settings…", comment: ""), LinearMouse.appName),
             action: #selector(openSettings),
             keyEquivalent: ","
         )
+        item.target = self
+        return item
+    }()
 
-        let configurationItem = NSMenuItem(
+    private lazy var configurationItem: NSMenuItem = {
+        let item = NSMenuItem(
             title: NSLocalizedString("Config", comment: ""),
             action: nil,
             keyEquivalent: ""
         )
+        item.submenu = configurationMenu
+        return item
+    }()
 
-        configurationItem.submenu = configurationMenu
-
-        let startAtLoginItem = NSMenuItem(
+    private lazy var startAtLoginItem: NSMenuItem = {
+        let item = NSMenuItem(
             title: String(format: NSLocalizedString("Start at login", comment: "")),
             action: #selector(toggleStartAtLogin),
             keyEquivalent: ""
         )
-        LaunchAtLogin.publisher
-            .receive(on: RunLoop.main)
-            .sink { value in
-                startAtLoginItem.state = value ? .on : .off
-            }
-            .store(in: &subscriptions)
+        item.target = self
+        return item
+    }()
 
-        let openSettingsForFrontmostApplicationItem = NSMenuItem(
+    private lazy var openSettingsForFrontmostApplicationItem: NSMenuItem = {
+        let item = NSMenuItem(
             title: "",
             action: #selector(openSettingsForFrontmostApplication),
             keyEquivalent: ""
         )
-        func updateOpenSettingsForFrontmostApplicationItem() {
-            guard let url = NSWorkspace.shared.frontmostApplication?.bundleURL,
-                  let name = try? readInstalledApp(at: url)?.bundleName else {
-                openSettingsForFrontmostApplicationItem.isHidden = true
-                return
-            }
-            openSettingsForFrontmostApplicationItem.isHidden = false
-            openSettingsForFrontmostApplicationItem.title = String(
-                format: NSLocalizedString("Configure for %@…", comment: ""),
-                name
-            )
-        }
-        updateOpenSettingsForFrontmostApplicationItem()
-        NSWorkspace.shared.notificationCenter.addObserver(
-            forName: NSWorkspace.didActivateApplicationNotification,
-            object: nil,
-            queue: .main
-        ) { _ in
-            updateOpenSettingsForFrontmostApplicationItem()
-        }
+        item.target = self
+        return item
+    }()
 
-        let quitItem = NSMenuItem(
+    private lazy var quitItem: NSMenuItem = {
+        let item = NSMenuItem(
             title: String(format: NSLocalizedString("Quit %@", comment: ""), LinearMouse.appName),
             action: #selector(quit),
             keyEquivalent: "q"
         )
-
-        menu.items = [
-            openSettingsItem,
-            .separator(),
-            configurationItem,
-            startAtLoginItem,
-            .separator(),
-            openSettingsForFrontmostApplicationItem,
-            quitItem
-        ]
-
-        menu.items.forEach { $0.target = self }
-
-        return menu
+        item.target = self
+        return item
     }()
 
     private lazy var configurationMenu: NSMenu = {
@@ -115,11 +98,37 @@ class StatusItem {
         return configurationMenu
     }()
 
-    init() {
+    private var batteryItems = [NSMenuItem]()
+    private var batterySeparatorItem: NSMenuItem?
+    private var isMenuOpen = false
+
+    override init() {
+        super.init()
+
         if let button = statusItem.button {
             button.image = NSImage(named: "MenuIcon")
+            button.imagePosition = .imageOnly
             button.action = #selector(statusItemAction(sender:))
             button.target = self
+        }
+
+        updateStatusItemBatteryIndicator()
+
+        startAtLoginItem.state = LaunchAtLogin.isEnabled ? .on : .off
+        LaunchAtLogin.publisher
+            .receive(on: RunLoop.main)
+            .sink { [weak self] value in
+                self?.startAtLoginItem.state = value ? .on : .off
+            }
+            .store(in: &subscriptions)
+
+        updateOpenSettingsForFrontmostApplicationItem()
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.updateOpenSettingsForFrontmostApplicationItem()
         }
 
         AccessibilityPermission.pollingUntilEnabled { [weak self] in
@@ -127,8 +136,157 @@ class StatusItem {
         }
     }
 
+    private func rebuildMenuItems(includeBatteryItems: Bool) {
+        guard includeBatteryItems else {
+            removeBatteryItems()
+            return
+        }
+
+        let items = makeBatteryItems()
+        updateBatteryItems(items)
+    }
+
+    private func updateStatusItemBatteryIndicator() {
+        guard let button = statusItem.button else {
+            return
+        }
+
+        let batteryTitle = currentBatteryIndicatorTitle()
+        button.title = batteryTitle.map { " \($0)" } ?? ""
+        button.imagePosition = batteryTitle == nil ? .imageOnly : .imageLeft
+    }
+
+    private func currentBatteryIndicatorTitle() -> String? {
+        Self.menuBarBatteryTitle(
+            currentBatteryLevel: currentDeviceBatteryLevel(),
+            mode: Defaults[.menuBarBatteryDisplayMode]
+        )
+    }
+
+    private func currentDeviceBatteryLevel() -> Int? {
+        guard let currentDevice = DeviceState.shared.currentDeviceRef?.value else {
+            return nil
+        }
+
+        return BatteryDeviceMonitor.shared.currentDeviceBatteryLevel(for: currentDevice)
+    }
+
+    static func menuBarBatteryTitle(currentBatteryLevel: Int?, mode: MenuBarBatteryDisplayMode) -> String? {
+        guard let threshold = mode.threshold,
+              let currentBatteryLevel
+        else {
+            return nil
+        }
+
+        guard currentBatteryLevel <= threshold else {
+            return nil
+        }
+
+        return "\(currentBatteryLevel)%"
+    }
+
+    private func baseMenuItems() -> [NSMenuItem] {
+        [
+            openSettingsItem,
+            .separator(),
+            configurationItem,
+            startAtLoginItem,
+            .separator(),
+            openSettingsForFrontmostApplicationItem,
+            quitItem
+        ]
+    }
+
+    private func makeBatteryItems() -> [NSMenuItem] {
+        BatteryDeviceMonitor.shared
+            .devices
+            .map { ($0.name, $0.batteryLevel) }
+            .sorted { lhs, rhs in
+                lhs.0.localizedCaseInsensitiveCompare(rhs.0) == .orderedAscending
+            }
+            .map { name, batteryLevel in
+                let item = NSMenuItem(title: "\(name) - \(batteryLevel)%", action: nil, keyEquivalent: "")
+                item.isEnabled = false
+                return item
+            }
+    }
+
+    private func updateBatteryItems(_ items: [NSMenuItem]) {
+        removeBatteryItems()
+
+        guard !items.isEmpty else {
+            return
+        }
+
+        let header = makeSectionHeader(title: NSLocalizedString("Batteries", comment: ""))
+        let separator = NSMenuItem.separator()
+        menu.insertItem(separator, at: 0)
+        for item in items.reversed() {
+            menu.insertItem(item, at: 0)
+        }
+        menu.insertItem(header, at: 0)
+
+        batteryItems = [header] + items
+        batterySeparatorItem = separator
+    }
+
+    private func removeBatteryItems() {
+        for item in batteryItems {
+            menu.removeItem(item)
+        }
+        batteryItems.removeAll()
+
+        if let batterySeparatorItem {
+            menu.removeItem(batterySeparatorItem)
+            self.batterySeparatorItem = nil
+        }
+    }
+
+    private func makeSectionHeader(title: String) -> NSMenuItem {
+        let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
+        item.isEnabled = false
+        return item
+    }
+
+    private func updateOpenSettingsForFrontmostApplicationItem() {
+        guard let url = NSWorkspace.shared.frontmostApplication?.bundleURL,
+              let name = try? readInstalledApp(at: url)?.bundleName else {
+            openSettingsForFrontmostApplicationItem.isHidden = true
+            return
+        }
+        openSettingsForFrontmostApplicationItem.isHidden = false
+        openSettingsForFrontmostApplicationItem.title = String(
+            format: NSLocalizedString("Configure for %@…", comment: ""),
+            name
+        )
+    }
+
     private func setup() {
         statusItem.menu = menu
+
+        BatteryDeviceMonitor.shared
+            .$devices
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self, self.statusItem.menu != nil else {
+                    return
+                }
+
+                self.updateStatusItemBatteryIndicator()
+
+                if self.isMenuOpen {
+                    self.rebuildMenuItems(includeBatteryItems: true)
+                }
+            }
+            .store(in: &subscriptions)
+
+        DeviceState.shared
+            .$currentDeviceRef
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.updateStatusItemBatteryIndicator()
+            }
+            .store(in: &subscriptions)
 
         Defaults.observe(.showInMenuBar) { [weak self] change in
             guard let self else {
@@ -136,8 +294,24 @@ class StatusItem {
             }
 
             self.statusItem.isVisible = change.newValue
+            self.updateStatusItemBatteryIndicator()
         }
         .tieToLifetime(of: self)
+
+        Defaults.observe(.menuBarBatteryDisplayMode) { [weak self] _ in
+            self?.updateStatusItemBatteryIndicator()
+        }
+        .tieToLifetime(of: self)
+    }
+
+    func menuWillOpen(_: NSMenu) {
+        isMenuOpen = true
+        rebuildMenuItems(includeBatteryItems: true)
+    }
+
+    func menuDidClose(_: NSMenu) {
+        isMenuOpen = false
+        rebuildMenuItems(includeBatteryItems: false)
     }
 
     @objc private func statusItemAction(sender _: NSStatusBarButton) {

@@ -37,6 +37,58 @@ extension SchemeState {
         deviceState.currentDeviceRef?.value
     }
 
+    private func hasMatchingSchemes(for device: Device?, app: AppTarget?, display: String?) -> Bool {
+        guard let device else {
+            return false
+        }
+
+        let (appId, processPath) = extractAppComponents(from: app)
+
+        return schemes.contains { scheme in
+            guard let conditions = scheme.if else {
+                return false
+            }
+
+            return conditions.contains { condition in
+                guard let deviceMatcher = condition.device,
+                      deviceMatcher.match(with: device) else {
+                    return false
+                }
+
+                let appMatches = condition.app == appId && condition.processPath == processPath
+                let displayMatches = condition.display == display
+
+                return appMatches && displayMatches
+            }
+        }
+    }
+
+    private func deleteMatchingSchemes(for device: Device?, app: AppTarget?, display: String?) {
+        guard let device else {
+            return
+        }
+
+        let (appId, processPath) = extractAppComponents(from: app)
+
+        schemes.removeAll { scheme in
+            guard let conditions = scheme.if else {
+                return false
+            }
+
+            return conditions.contains { condition in
+                guard let deviceMatcher = condition.device,
+                      deviceMatcher.match(with: device) else {
+                    return false
+                }
+
+                let appMatches = condition.app == appId && condition.processPath == processPath
+                let displayMatches = condition.display == display
+
+                return appMatches && displayMatches
+            }
+        }
+    }
+
     var isSchemeValid: Bool {
         guard device != nil else {
             return false
@@ -137,65 +189,23 @@ extension SchemeState {
         hasMatchingSchemes(forApp: currentApp, forDisplay: currentDisplay)
     }
 
+    func hasMatchingSchemes(for device: Device?, forApp app: AppTarget?, forDisplay display: String?) -> Bool {
+        hasMatchingSchemes(for: device, app: app, display: display)
+    }
+
     func hasMatchingSchemes(forApp app: AppTarget?, forDisplay display: String?) -> Bool {
-        guard let device else {
-            return false
-        }
-
-        let (appId, processPath) = extractAppComponents(from: app)
-
-        return schemes.contains { scheme in
-            guard let conditions = scheme.if else {
-                return false
-            }
-
-            return conditions.contains { condition in
-                guard let deviceMatcher = condition.device,
-                      deviceMatcher.match(with: device) else {
-                    return false
-                }
-
-                let appMatches = condition.app == appId && condition.processPath == processPath
-                let displayMatches = condition.display == display
-
-                return appMatches && displayMatches
-            }
-        }
+        hasMatchingSchemes(for: device, app: app, display: display)
     }
 
     func deleteMatchingSchemes() {
         deleteMatchingSchemes(forApp: currentApp, forDisplay: currentDisplay)
     }
 
+    func deleteMatchingSchemes(for device: Device?, forApp app: AppTarget?, forDisplay display: String?) {
+        deleteMatchingSchemes(for: device, app: app, display: display)
+    }
+
     func deleteMatchingSchemes(forApp app: AppTarget?, forDisplay display: String?) {
-        guard let device else {
-            return
-        }
-
-        let (appId, processPath) = extractAppComponents(from: app)
-
-        // Remove all schemes that match the specified combination
-        schemes.removeAll { scheme in
-            guard let conditions = scheme.if else {
-                return false
-            }
-
-            // Check if any condition in the scheme matches our criteria
-            return conditions.contains { condition in
-                // Check if device matches
-                guard let deviceMatcher = condition.device,
-                      deviceMatcher.match(with: device) else {
-                    return false
-                }
-
-                // Check if app/processPath matches
-                let appMatches = condition.app == appId && condition.processPath == processPath
-
-                // Check if display matches
-                let displayMatches = condition.display == display
-
-                return appMatches && displayMatches
-            }
-        }
+        deleteMatchingSchemes(for: device, app: app, display: display)
     }
 }

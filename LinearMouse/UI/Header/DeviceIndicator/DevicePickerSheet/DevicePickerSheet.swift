@@ -13,13 +13,32 @@ struct DevicePickerSheet: View {
     @ObservedObject private var schemeState: SchemeState = .shared
     @ObservedObject private var deviceState: DeviceState = .shared
 
+    private var selectedDevice: Device? {
+        selectedDeviceRef?.value
+    }
+
     private var shouldShowDeleteButton: Bool {
-        // Only show if there are matching schemes
-        schemeState.hasMatchingSchemes
+        schemeState.hasMatchingSchemes(
+            for: selectedDevice,
+            forApp: schemeState.currentApp,
+            forDisplay: schemeState.currentDisplay
+        )
     }
 
     private var canConfirm: Bool {
         autoSwitchToActiveDevice || selectedDeviceRef?.value != nil
+    }
+
+    private var autoSwitchBinding: Binding<Bool> {
+        Binding(
+            get: { autoSwitchToActiveDevice },
+            set: { newValue in
+                autoSwitchToActiveDevice = newValue
+                if newValue {
+                    syncSelectionWithCurrentDevice()
+                }
+            }
+        )
     }
 
     var body: some View {
@@ -34,7 +53,7 @@ struct DevicePickerSheet: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                Toggle("", isOn: $autoSwitchToActiveDevice.animation())
+                Toggle("", isOn: autoSwitchBinding.animation())
                     .labelsHidden()
                     .toggleStyle(.switch)
                     .modifier(SheetToggleSizeModifier())
@@ -42,10 +61,10 @@ struct DevicePickerSheet: View {
             .padding(.horizontal, 18)
             .padding(.top, 18)
 
-            DevicePicker(selectedDeviceRef: $selectedDeviceRef)
-                .frame(minHeight: 248, maxHeight: 320)
-                .disabled(autoSwitchToActiveDevice)
-                .opacity(autoSwitchToActiveDevice ? 0.55 : 1)
+            DevicePicker(selectedDeviceRef: $selectedDeviceRef) { deviceRef in
+                handleDeviceSelection(deviceRef)
+            }
+            .frame(minHeight: 248, maxHeight: 320)
 
             HStack(spacing: 8) {
                 if shouldShowDeleteButton {
@@ -75,12 +94,17 @@ struct DevicePickerSheet: View {
         }
         .onAppear {
             autoSwitchToActiveDevice = Defaults[.autoSwitchToActiveDevice]
-            selectedDeviceRef = deviceState.currentDeviceRef
+            syncSelectionWithCurrentDevice()
+        }
+        .onReceive(deviceState.$currentDeviceRef.receive(on: RunLoop.main)) { currentDeviceRef in
+            if autoSwitchToActiveDevice {
+                selectedDeviceRef = currentDeviceRef
+            }
         }
         .alert(isPresented: $showDeleteAlert) {
             Alert(
                 title: Text("Delete Configuration?"),
-                message: Text("This will delete all settings for the current device."),
+                message: Text("This will delete all settings for the selected device."),
                 primaryButton: .destructive(Text("Delete")) {
                     confirmDelete()
                 },
@@ -91,6 +115,22 @@ struct DevicePickerSheet: View {
 
     private func onDelete() {
         showDeleteAlert = true
+    }
+
+    private func handleDeviceSelection(_ deviceRef: WeakRef<Device>) {
+        selectedDeviceRef = deviceRef
+
+        let isSelectingActiveDevice = deviceRef.value === DeviceManager.shared.lastActiveDeviceRef?.value
+        if isSelectingActiveDevice {
+            autoSwitchToActiveDevice = true
+            syncSelectionWithCurrentDevice()
+        } else if autoSwitchToActiveDevice {
+            autoSwitchToActiveDevice = false
+        }
+    }
+
+    private func syncSelectionWithCurrentDevice() {
+        selectedDeviceRef = deviceState.currentDeviceRef
     }
 
     private func onOK() {
@@ -104,7 +144,11 @@ struct DevicePickerSheet: View {
     }
 
     private func confirmDelete() {
-        schemeState.deleteMatchingSchemes()
+        schemeState.deleteMatchingSchemes(
+            for: selectedDevice,
+            forApp: schemeState.currentApp,
+            forDisplay: schemeState.currentDisplay
+        )
         isPresented = false
     }
 }

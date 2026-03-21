@@ -22,30 +22,22 @@ class Device {
 
     private(set) lazy var id: Int32 = OSAtomicIncrement32(&Self.nextID)
 
-    private(set) lazy var name: String = device.name
-    private(set) lazy var productName: String? = device.product
-    private(set) lazy var vendorID: Int? = device.vendorID
-    private(set) lazy var productID: Int? = device.productID
-    private(set) lazy var serialNumber: String? = device.serialNumber
-    private(set) lazy var buttonCount: Int? = device.buttonCount
-    private(set) lazy var category: Category = {
-        if let vendorID: Int = device.vendorID,
-           let productID: Int = device.productID {
-            if isAppleMagicMouse(vendorID: vendorID, productID: productID) {
-                return .mouse
-            }
-        }
-
-        if device.confirmsTo(kHIDPage_Digitizer, kHIDUsage_Dig_TouchPad) {
-            return .trackpad
-        }
-
-        return .mouse
-    }()
+    var name: String
+    var productName: String?
+    var vendorID: Int?
+    var productID: Int?
+    var serialNumber: String?
+    var buttonCount: Int?
+    var batteryLevel: Int?
+    private let categoryValue: Category
 
     private weak var manager: DeviceManager?
     private var inputReportHandlers: [InputReportHandler] = []
     private let device: PointerDevice
+
+    var pointerDevice: PointerDevice {
+        device
+    }
 
     private var removed = false
 
@@ -58,9 +50,25 @@ class Device {
 
     private var lastButtonStates: UInt8 = 0
 
+    var category: Category {
+        categoryValue
+    }
+
     init(_ manager: DeviceManager, _ device: PointerDevice) {
         self.manager = manager
         self.device = device
+
+        vendorID = device.vendorID
+        productID = device.productID
+        serialNumber = device.serialNumber
+        buttonCount = device.buttonCount
+
+        let rawProductName = device.product
+        let rawName = rawProductName ?? device.name
+        name = rawName
+        productName = rawProductName
+        batteryLevel = nil
+        categoryValue = Self.detectCategory(for: device)
 
         initialPointerResolution =
             device.pointerResolution ?? Self.fallbackPointerResolution
@@ -88,12 +96,13 @@ class Device {
         }
 
         os_log(
-            "Device initialized: %{public}@: HIDPointerResolution=%{public}f, HIDPointerAccelerationType=%{public}@",
+            "Device initialized: %{public}@: HIDPointerResolution=%{public}f, HIDPointerAccelerationType=%{public}@, battery=%{public}@",
             log: Self.log,
             type: .info,
             String(describing: device),
             initialPointerResolution,
-            device.pointerAccelerationType ?? "(unknown)"
+            device.pointerAccelerationType ?? "(unknown)",
+            batteryLevel.map { "\($0)%" } ?? "(unknown)"
         )
 
         Defaults.observe(.verbosedLoggingOn) { [weak self] change in
@@ -119,7 +128,21 @@ extension Device {
         case mouse, trackpad
     }
 
-    private func isAppleMagicMouse(vendorID: Int, productID: Int) -> Bool {
+    private static func detectCategory(for device: PointerDevice) -> Category {
+        if let vendorID = device.vendorID,
+           let productID = device.productID,
+           isAppleMagicMouse(vendorID: vendorID, productID: productID) {
+            return .mouse
+        }
+
+        if device.confirmsTo(kHIDPage_Digitizer, kHIDUsage_Dig_TouchPad) {
+            return .trackpad
+        }
+
+        return .mouse
+    }
+
+    private static func isAppleMagicMouse(vendorID: Int, productID: Int) -> Bool {
         [0x004C, 0x05AC].contains(vendorID)
             && [0x0269, 0x030D].contains(productID)
     }
@@ -265,20 +288,9 @@ extension Device {
             return
         }
 
-        manager.lastActiveDeviceId = id
-        manager.lastActiveDeviceRef = .init(self)
-
-        os_log(
-            """
-            Last active device changed: %{public}@, category=%{public}@ \
-            (Reason: Received input value: usagePage=0x%{public}02X, usage=0x%{public}02X)
-            """,
-            log: Self.log,
-            type: .info,
-            String(describing: device),
-            String(describing: category),
-            usagePage,
-            usage
+        manager.markDeviceActive(
+            self,
+            reason: "Received input value: usagePage=0x\(String(format: "%02X", usagePage)), usage=0x\(String(format: "%02X", usage))"
         )
     }
 
@@ -305,16 +317,18 @@ extension Device {
 
 extension Device: Hashable {
     static func == (lhs: Device, rhs: Device) -> Bool {
-        lhs.device == rhs.device
+        lhs === rhs
     }
 
     func hash(into hasher: inout Hasher) {
-        hasher.combine(device)
+        hasher.combine(ObjectIdentifier(self))
     }
 }
 
 extension Device: CustomStringConvertible {
     var description: String {
-        device.description
+        let vendorIDString = vendorID.map { String(format: "0x%04X", $0) } ?? "(nil)"
+        let productIDString = productID.map { String(format: "0x%04X", $0) } ?? "(nil)"
+        return String(format: "%@ (VID=%@, PID=%@)", name, vendorIDString, productIDString)
     }
 }

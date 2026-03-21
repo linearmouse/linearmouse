@@ -13,8 +13,10 @@ class DeviceManager: ObservableObject {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "DeviceManager")
 
     private let manager = PointerDeviceManager()
+    private let receiverMonitor = ReceiverMonitor()
 
     private var pointerDeviceToDevice = [PointerDevice: Device]()
+    @Published private(set) var receiverPairedDeviceIdentities = [Int: [ReceiverLogicalDeviceIdentity]]()
     @Published var devices: [Device] = []
 
     var lastActiveDeviceId: Int32?
@@ -35,6 +37,10 @@ class DeviceManager: ObservableObject {
             self?.eventReceived($0, $1, $2)
         }
         .tieToLifetime(of: self)
+
+        receiverMonitor.onPointingDevicesChanged = { [weak self] locationID, identities in
+            self?.receiverPointingDevicesChanged(locationID: locationID, identities: identities)
+        }
 
         for property in [
             kIOHIDMouseAccelerationType,
@@ -132,7 +138,7 @@ class DeviceManager: ObservableObject {
         objectWillChange.send()
 
         pointerDeviceToDevice[pointerDevice] = device
-        devices.append(device)
+        refreshVisibleDevices()
 
         os_log(
             "Device added: %{public}@",
@@ -142,6 +148,10 @@ class DeviceManager: ObservableObject {
         )
 
         updatePointerSpeed(for: device)
+
+        if shouldMonitorReceiver(device) {
+            receiverMonitor.startMonitoring(device: device)
+        }
     }
 
     private func deviceRemoved(_: PointerDeviceManager, _ pointerDevice: PointerDevice) {
@@ -157,8 +167,21 @@ class DeviceManager: ObservableObject {
             lastActiveDeviceRef = nil
         }
 
+        if let locationID = pointerDevice.locationID {
+            receiverMonitor.stopMonitoring(device: device)
+
+            let hasRemainingReceiverAtLocation = pointerDeviceToDevice
+                .filter { $0.key != pointerDevice }
+                .contains { _, existingDevice in
+                    existingDevice.pointerDevice.locationID == locationID && shouldMonitorReceiver(existingDevice)
+                }
+            if !hasRemainingReceiverAtLocation {
+                receiverPairedDeviceIdentities.removeValue(forKey: locationID)
+            }
+        }
+
         pointerDeviceToDevice.removeValue(forKey: pointerDevice)
-        devices.removeAll { $0 == device }
+        refreshVisibleDevices()
 
         os_log(
             "Device removed: %{public}@",
@@ -173,7 +196,7 @@ class DeviceManager: ObservableObject {
     /// It seems that extenal Trackpads do not trigger to `IOHIDDevice`'s inputValueCallback.
     /// That's why we need to observe events from `DeviceManager` too.
     private func eventReceived(_: PointerDeviceManager, _ pointerDevice: PointerDevice, _ event: IOHIDEvent) {
-        guard let device = pointerDeviceToDevice[pointerDevice] else {
+        guard let physicalDevice = pointerDeviceToDevice[pointerDevice] else {
             return
         }
 
@@ -187,20 +210,7 @@ class DeviceManager: ObservableObject {
             return
         }
 
-        if lastActiveDeviceId != device.id {
-            lastActiveDeviceId = device.id
-            lastActiveDeviceRef = .init(device)
-            os_log(
-                """
-                Last active device changed: %{public}@, category=%{public}@ \
-                (Reason: Received event from DeviceManager)
-                """,
-                log: Self.log,
-                type: .info,
-                String(describing: device),
-                String(describing: device.category)
-            )
-        }
+        markDeviceActive(physicalDevice, reason: "Received event from DeviceManager")
     }
 
     func deviceFromCGEvent(_ cgEvent: CGEvent) -> Device? {
@@ -217,7 +227,11 @@ class DeviceManager: ObservableObject {
             return lastActiveDeviceRef?.value
         }
 
-        return pointerDeviceToDevice[pointerDevice]
+        guard let physicalDevice = pointerDeviceToDevice[pointerDevice] else {
+            return lastActiveDeviceRef?.value
+        }
+
+        return physicalDevice
     }
 
     func updatePointerSpeed() {
@@ -319,5 +333,100 @@ class DeviceManager: ObservableObject {
             return nil
         }
         return value
+    }
+
+    func markDeviceActive(_ device: Device, reason: String) {
+        guard lastActiveDeviceId != device.id else {
+            return
+        }
+
+        lastActiveDeviceId = device.id
+        lastActiveDeviceRef = .init(device)
+
+        os_log(
+            "Last active device changed: %{public}@, category=%{public}@ (Reason: %{public}@)",
+            log: Self.log,
+            type: .info,
+            String(describing: device),
+            String(describing: device.category),
+            reason
+        )
+
+        updatePointerSpeed()
+    }
+
+    func pairedReceiverDevices(for device: Device) -> [ReceiverLogicalDeviceIdentity] {
+        guard shouldMonitorReceiver(device),
+              let locationID = device.pointerDevice.locationID
+        else {
+            return []
+        }
+
+        return receiverPairedDeviceIdentities[locationID] ?? []
+    }
+
+    func preferredName(for device: Device, fallback: String? = nil) -> String {
+        fallback ?? device.name
+    }
+
+    func displayName(for device: Device, fallbackBaseName: String? = nil) -> String {
+        Self.displayName(
+            baseName: preferredName(for: device, fallback: fallbackBaseName),
+            pairedDevices: pairedReceiverDevices(for: device)
+        )
+    }
+
+    private func shouldMonitorReceiver(_ device: Device) -> Bool {
+        guard let vendorID = device.vendorID,
+              vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID,
+              device.pointerDevice.transport == "USB"
+        else {
+            return false
+        }
+
+        let productName = device.productName ?? device.name
+        return productName.localizedCaseInsensitiveContains("receiver")
+    }
+
+    private func receiverPointingDevicesChanged(locationID: Int, identities: [ReceiverLogicalDeviceIdentity]) {
+        guard pointerDeviceToDevice.values.contains(where: { $0.pointerDevice.locationID == locationID }) else {
+            return
+        }
+
+        receiverPairedDeviceIdentities[locationID] = identities
+
+        let identitiesDescription = identities.map { identity in
+            let battery = identity.batteryLevel.map(String.init) ?? "(nil)"
+            return "slot=\(identity.slot) name=\(identity.name) battery=\(battery)"
+        }
+        .joined(separator: ", ")
+
+        os_log(
+            "Receiver logical devices updated for locationID=%{public}u: %{public}@",
+            log: Self.log,
+            type: .info,
+            UInt32(locationID),
+            identitiesDescription
+        )
+    }
+
+    private func refreshVisibleDevices() {
+        devices = pointerDeviceToDevice.values.sorted { $0.id < $1.id }
+    }
+
+    static func displayName(baseName: String, pairedDevices: [ReceiverLogicalDeviceIdentity]) -> String {
+        guard !pairedDevices.isEmpty else {
+            return baseName
+        }
+
+        if pairedDevices.count == 1, let pairedName = pairedDevices.first?.name {
+            return "\(baseName) (\(pairedName))"
+        }
+
+        return String(
+            format: NSLocalizedString("%@ (%lld devices)", comment: ""),
+            baseName,
+            Int64(pairedDevices.count)
+        )
     }
 }

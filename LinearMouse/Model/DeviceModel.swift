@@ -14,14 +14,22 @@ class DeviceModel: ObservableObject, Identifiable {
 
     @Published var isActive = false
 
-    let name: String
+    @Published var name: String
+    @Published var displayName: String
+    @Published var batteryLevel: Int?
+    @Published var pairedReceiverDevices: [ReceiverLogicalDeviceIdentity] = []
     let category: Device.Category
+    private let baseName: String
 
     init(deviceRef: WeakRef<Device>) {
         self.deviceRef = deviceRef
         id = deviceRef.value?.id ?? 0
 
-        name = deviceRef.value?.name ?? "(removed)"
+        let initialName = deviceRef.value?.name ?? "(removed)"
+        baseName = initialName
+        name = initialName
+        displayName = initialName
+        batteryLevel = deviceRef.value?.batteryLevel
         category = deviceRef.value?.category ?? .mouse
 
         DeviceManager.shared
@@ -33,10 +41,61 @@ class DeviceModel: ObservableObject, Identifiable {
                 self?.isActive = value
             }
             .store(in: &subscriptions)
+
+        DeviceManager.shared
+            .$receiverPairedDeviceIdentities
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.refreshReceiverPresentation()
+            }
+            .store(in: &subscriptions)
+
+        refreshReceiverPresentation()
+
+        DevicePickerBatteryCoordinator.shared.refresh(self)
+    }
+
+    func applyVendorSpecificMetadata(_ metadata: VendorSpecificDeviceMetadata?) {
+        if let name = metadata?.name {
+            self.name = name
+        }
+
+        batteryLevel = metadata?.batteryLevel
+        refreshReceiverPresentation()
+    }
+
+    private func refreshReceiverPresentation() {
+        guard let device = deviceRef.value else {
+            name = "(removed)"
+            displayName = "(removed)"
+            pairedReceiverDevices = []
+            return
+        }
+
+        let preferredName = DeviceManager.shared.preferredName(for: device, fallback: name)
+        let pairedDevices = DeviceManager.shared.pairedReceiverDevices(for: device)
+
+        name = preferredName
+        pairedReceiverDevices = pairedDevices
+        displayName = DeviceManager.displayName(baseName: preferredName, pairedDevices: pairedDevices)
+    }
+
+    func resetVendorSpecificMetadata() {
+        name = baseName
+        batteryLevel = deviceRef.value?.batteryLevel
+        refreshReceiverPresentation()
     }
 }
 
 extension DeviceModel {
+    var batteryDescription: String? {
+        guard pairedReceiverDevices.isEmpty else {
+            return nil
+        }
+
+        return batteryLevel.map { "\($0)%" }
+    }
+
     var isMouse: Bool {
         category == .mouse
     }

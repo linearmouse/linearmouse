@@ -209,6 +209,9 @@
         }
       }
     },
+    "- %@" : {
+
+    },
     "(0–1)" : {
       "localizations" : {
         "af" : {
@@ -2472,6 +2475,9 @@
         }
       }
     },
+    "%@ (%lld devices)" : {
+
+    },
     "%@ Settings…" : {
       "localizations" : {
         "af" : {
@@ -3795,6 +3801,9 @@
           }
         }
       }
+    },
+    "%lld%%" : {
+
     },
     "⇧ (Shift)" : {
       "localizations" : {
@@ -5252,6 +5261,9 @@
         }
       }
     },
+    "5% or below" : {
+
+    },
     "10" : {
       "localizations" : {
         "af" : {
@@ -5459,6 +5471,15 @@
           }
         }
       }
+    },
+    "10% or below" : {
+
+    },
+    "15% or below" : {
+
+    },
+    "20% or below" : {
+
     },
     "128px" : {
       "localizations" : {
@@ -6922,6 +6943,9 @@
           }
         }
       }
+    },
+    "Always show" : {
+
     },
     "App Expose" : {
       "localizations" : {
@@ -8794,6 +8818,9 @@
           }
         }
       }
+    },
+    "Batteries" : {
+
     },
     "Bug report" : {
       "localizations" : {
@@ -32112,6 +32139,9 @@
         }
       }
     },
+    "Off" : {
+
+    },
     "OK" : {
       "localizations" : {
         "af" : {
@@ -45249,6 +45279,9 @@
         }
       }
     },
+    "Show current battery" : {
+
+    },
     "Show desktop" : {
       "localizations" : {
         "af" : {
@@ -49417,6 +49450,7 @@
       }
     },
     "This will delete all settings for the current device." : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -49623,6 +49657,9 @@
           }
         }
       }
+    },
+    "This will delete all settings for the selected device." : {
+
     },
     "Threshold" : {
       "localizations" : {
