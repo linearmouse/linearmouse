@@ -71,6 +71,19 @@ final class ConfigurationTests: XCTestCase {
         XCTAssertEqual(scheme.buttons.autoScroll.trigger?.modifierFlags.contains(.maskCommand), true)
     }
 
+    func testMergeAutoScrollAllowsDisablingInheritedSetting() {
+        var scheme = Scheme()
+        scheme.buttons.autoScroll.enabled = true
+        scheme.buttons.autoScroll.modes = [.toggle]
+
+        var override = Scheme()
+        override.buttons.autoScroll.enabled = false
+        override.merge(into: &scheme)
+
+        XCTAssertEqual(scheme.buttons.autoScroll.enabled, false)
+        XCTAssertEqual(scheme.buttons.autoScroll.modes, [.toggle])
+    }
+
     func testDecodeAutoScrollSingleMode() throws {
         let autoScroll = try JSONDecoder().decode(
             Scheme.Buttons.AutoScroll.self,
