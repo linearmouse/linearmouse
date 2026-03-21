@@ -12,9 +12,6 @@ final class ReceiverMonitor {
     private var contexts = [Int: ReceiverContext]()
 
     var onPointingDevicesChanged: ((Int, [ReceiverLogicalDeviceIdentity]) -> Void)?
-    func receiverIdentities(for device: Device) -> [ReceiverLogicalDeviceIdentity] {
-        provider.receiverPointingDeviceIdentities(for: device.pointerDevice)
-    }
 
     func startMonitoring(device: Device) {
         guard let locationID = device.pointerDevice.locationID else {
@@ -93,15 +90,7 @@ private final class ReceiverContext {
     }
 
     private func workerMain() {
-        guard let channel = provider.receiverActivityChannel(for: locationID) else {
-            DispatchQueue.main.async { [weak self] in
-                self?.onDiscoveryTimedOut?()
-            }
-            return
-        }
-
-        channel.enableWirelessNotifications()
-        let identities = channel.discoverPointingDeviceIdentities()
+        let identities = provider.receiverPointingDeviceIdentities(for: device.pointerDevice)
         if !identities.isEmpty {
             discoveredAnySlot = true
             let identitiesDescription = identities.map { identity in

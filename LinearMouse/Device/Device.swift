@@ -49,21 +49,12 @@ class Device {
     private var reportObservationToken: ObservationToken?
 
     private var lastButtonStates: UInt8 = 0
-    var participatesInActiveTracking = true
-
-    var isLogicalDevice: Bool {
-        false
-    }
-
-    var identityHashValue: AnyHashable {
-        AnyHashable(ObjectIdentifier(self))
-    }
 
     var category: Category {
         categoryValue
     }
 
-    init(_ manager: DeviceManager, _ device: PointerDevice, observeInputs: Bool = true) {
+    init(_ manager: DeviceManager, _ device: PointerDevice) {
         self.manager = manager
         self.device = device
 
@@ -82,11 +73,9 @@ class Device {
         initialPointerResolution =
             device.pointerResolution ?? Self.fallbackPointerResolution
 
-        if observeInputs {
-            // TODO: More elegant way?
-            inputObservationToken = device.observeInput { [weak self] in
-                self?.inputValueCallback($0, $1)
-            }
+        // TODO: More elegant way?
+        inputObservationToken = device.observeInput { [weak self] in
+            self?.inputValueCallback($0, $1)
         }
 
         // Some bluetooth devices, such as Mi Dual Mode Wireless Mouse Silent Edition, report only
@@ -95,7 +84,7 @@ class Device {
         //
         // To work around this issue, we subscribe to the input reports and monitor the side button
         // states. When the side buttons are clicked, we simulate those events.
-        if observeInputs, let vendorID, let productID {
+        if let vendorID, let productID {
             let handlers = InputReportHandlerRegistry.handlers(for: vendorID, productID: productID)
             let needsObservation = handlers.contains { $0.alwaysNeedsReportObservation() } || buttonCount == 3
             if needsObservation, !handlers.isEmpty {
@@ -156,10 +145,6 @@ extension Device {
     private static func isAppleMagicMouse(vendorID: Int, productID: Int) -> Bool {
         [0x004C, 0x05AC].contains(vendorID)
             && [0x0269, 0x030D].contains(productID)
-    }
-
-    func matchesPhysicalDevice(_ pointerDevice: PointerDevice) -> Bool {
-        device == pointerDevice
     }
 
     /**
@@ -278,9 +263,7 @@ extension Device {
             return
         }
 
-        let activeDevice = manager.deviceForActivity(fromPhysicalDevice: self)
-
-        guard manager.lastActiveDeviceId != activeDevice.id else {
+        guard manager.lastActiveDeviceId != id else {
             return
         }
 
@@ -306,7 +289,7 @@ extension Device {
         }
 
         manager.markDeviceActive(
-            activeDevice,
+            self,
             reason: "Received input value: usagePage=0x\(String(format: "%02X", usagePage)), usage=0x\(String(format: "%02X", usage))"
         )
     }
@@ -338,7 +321,7 @@ extension Device: Hashable {
     }
 
     func hash(into hasher: inout Hasher) {
-        hasher.combine(identityHashValue)
+        hasher.combine(ObjectIdentifier(self))
     }
 }
 

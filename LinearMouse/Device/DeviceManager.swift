@@ -234,7 +234,7 @@ class DeviceManager: ObservableObject {
     }
 
     func updatePointerSpeed() {
-        for device in devicesToApplyPointerSettings() {
+        for device in devices {
             updatePointerSpeed(for: device)
         }
     }
@@ -354,10 +354,6 @@ class DeviceManager: ObservableObject {
         updatePointerSpeed()
     }
 
-    func deviceForActivity(fromPhysicalDevice device: Device) -> Device {
-        device
-    }
-
     func pairedReceiverDevices(for device: Device) -> [ReceiverLogicalDeviceIdentity] {
         guard let locationID = device.pointerDevice.locationID else {
             return []
@@ -412,33 +408,7 @@ class DeviceManager: ObservableObject {
         )
     }
 
-    private func devicesToApplyPointerSettings() -> [Device] {
-        var appliedReceiverLocationIDs = Set<Int>()
-        var result = [Device]()
-
-        for device in devices {
-            if let locationID = device.pointerDevice.locationID,
-               receiverPairedDeviceIdentities[locationID]?.isEmpty == false {
-                if appliedReceiverLocationIDs.insert(locationID).inserted {
-                    result.append(device)
-                }
-                continue
-            }
-
-            result.append(device)
-        }
-
-        return result
-    }
-
     private func refreshVisibleDevices() {
-        let physicalDevices = pointerDeviceToDevice.values.sorted { $0.id < $1.id }
-        var nextDevices = [Device]()
-
-        for device in physicalDevices {
-            nextDevices.append(device)
-        }
-
-        devices = nextDevices
+        devices = pointerDeviceToDevice.values.sorted { $0.id < $1.id }
     }
 }

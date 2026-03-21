@@ -173,7 +173,6 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
 
         let devices = deviceManager.devices
         XCTAssertTrue(devices.contains { ($0.productName ?? $0.name).contains("Receiver") && ($0.vendorID == 0x046D) })
-        XCTAssertFalse(devices.contains(where: \.isLogicalDevice))
         XCTAssertTrue(deviceManager.receiverPairedDeviceIdentities.values.contains { !$0.isEmpty })
     }
 
@@ -189,7 +188,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
 
         for device in deviceManager.devices {
             print(
-                "Published device name=\(device.name) productName=\(device.productName ?? "(nil)") battery=\(device.batteryLevel.map(String.init) ?? "(nil)") logical=\(device.isLogicalDevice) transport=\(device.pointerDevice.transport ?? "(nil)")"
+                "Published device name=\(device.name) productName=\(device.productName ?? "(nil)") battery=\(device.batteryLevel.map(String.init) ?? "(nil)") transport=\(device.pointerDevice.transport ?? "(nil)")"
             )
         }
     }
