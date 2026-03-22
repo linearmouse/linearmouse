@@ -303,7 +303,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "- %@"
           }
         },
@@ -399,13 +399,13 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "- %@"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "- %@"
           }
         },
@@ -511,7 +511,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–1)"
           }
         },
@@ -719,7 +719,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–3)"
           }
         },
@@ -815,13 +815,13 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–3)"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–3)"
           }
         },
@@ -927,7 +927,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–10)"
           }
         },
@@ -1135,7 +1135,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–20)"
           }
         },
@@ -1343,7 +1343,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "(0–128)"
           }
         },
@@ -2149,8 +2149,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%#@value@"
+            "state" : "translated",
+            "value" : "%.1f ピクセル"
           },
           "substitutions" : {
             "value" : {
@@ -2774,8 +2774,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%@ (%lld devices)"
+            "state" : "translated",
+            "value" : "%@（%lld デバイス）"
           }
         },
         "ko" : {
@@ -2870,14 +2870,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%@ (%lld devices)"
+            "state" : "translated",
+            "value" : "%@（%lld 台设备）"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%@ (%lld devices)"
+            "state" : "translated",
+            "value" : "%@ (%lld 部裝置)"
           }
         },
         "zh-Hant-HK" : {
@@ -3190,8 +3190,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ (%2$@)"
+            "state" : "translated",
+            "value" : "%1$@（%2$@）"
           }
         },
         "ko" : {
@@ -4098,8 +4098,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%lld pixels"
+            "state" : "translated",
+            "value" : "%lld ピクセル"
           }
         },
         "ko" : {
@@ -4200,8 +4200,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%lld pixels"
+            "state" : "translated",
+            "value" : "%lld 像素"
           }
         },
         "zh-Hant-HK" : {
@@ -4306,7 +4306,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "%lld%%"
           }
         },
@@ -4402,13 +4402,13 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "%lld%%"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "%lld%%"
           }
         },
@@ -4514,7 +4514,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "⇧ (Shift)"
           }
         },
@@ -4722,7 +4722,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "⌃ (Control)"
           }
         },
@@ -4930,7 +4930,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "⌘ (Command)"
           }
         },
@@ -5138,7 +5138,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "⌥ (Option)"
           }
         },
@@ -5346,7 +5346,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "▾"
           }
         },
@@ -5442,13 +5442,13 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "▾"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "▾"
           }
         },
@@ -5554,7 +5554,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "0"
           }
         },
@@ -5762,7 +5762,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "0px"
           }
         },
@@ -5970,8 +5970,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "5% or below"
+            "state" : "translated",
+            "value" : "5% 以下"
           }
         },
         "ko" : {
@@ -6066,14 +6066,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "5% or below"
+            "state" : "translated",
+            "value" : "5% 或以下"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "5% or below"
+            "state" : "translated",
+            "value" : "5% 或以下"
           }
         },
         "zh-Hant-HK" : {
@@ -6178,7 +6178,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "10"
           }
         },
@@ -6386,8 +6386,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "10% or below"
+            "state" : "translated",
+            "value" : "10% 以下"
           }
         },
         "ko" : {
@@ -6482,14 +6482,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "10% or below"
+            "state" : "translated",
+            "value" : "10% 或以下"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "10% or below"
+            "state" : "translated",
+            "value" : "10% 或以下"
           }
         },
         "zh-Hant-HK" : {
@@ -6594,8 +6594,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "15% or below"
+            "state" : "translated",
+            "value" : "15% 以下"
           }
         },
         "ko" : {
@@ -6690,14 +6690,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "15% or below"
+            "state" : "translated",
+            "value" : "15% 或以下"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "15% or below"
+            "state" : "translated",
+            "value" : "15% 或以下"
           }
         },
         "zh-Hant-HK" : {
@@ -6802,8 +6802,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "20% or below"
+            "state" : "translated",
+            "value" : "20% 以下"
           }
         },
         "ko" : {
@@ -6898,14 +6898,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "20% or below"
+            "state" : "translated",
+            "value" : "20% 或以下"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "20% or below"
+            "state" : "translated",
+            "value" : "20% 或以下"
           }
         },
         "zh-Hant-HK" : {
@@ -7010,7 +7010,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "128px"
           }
         },
@@ -7634,8 +7634,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Adaptive"
+            "state" : "translated",
+            "value" : "アダプティブ"
           }
         },
         "ko" : {
@@ -7730,14 +7730,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Adaptive"
+            "state" : "translated",
+            "value" : "自适应"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Adaptive"
+            "state" : "translated",
+            "value" : "自動"
           }
         },
         "zh-Hant-HK" : {
@@ -8473,8 +8473,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Always show"
+            "state" : "translated",
+            "value" : "常に表示"
           }
         },
         "ko" : {
@@ -8569,14 +8569,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Always show"
+            "state" : "translated",
+            "value" : "始终显示"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Always show"
+            "state" : "translated",
+            "value" : "永遠顯示"
           }
         },
         "zh-Hant-HK" : {
@@ -8681,7 +8681,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "App Expose"
           }
         },
@@ -8783,8 +8783,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "App Expose"
+            "state" : "translated",
+            "value" : "App Exposé"
           }
         },
         "zh-Hant-HK" : {
@@ -9513,8 +9513,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "auto"
+            "state" : "translated",
+            "value" : "自動"
           }
         },
         "ko" : {
@@ -9929,8 +9929,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Automatically follow the device that is currently active."
+            "state" : "translated",
+            "value" : "現在アクティブなデバイスを自動的に追跡します。"
           }
         },
         "ko" : {
@@ -10025,14 +10025,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Automatically follow the device that is currently active."
+            "state" : "translated",
+            "value" : "自动跟随当前激活的设备。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Automatically follow the device that is currently active."
+            "state" : "translated",
+            "value" : "自動追蹤目前作用中的裝置。"
           }
         },
         "zh-Hant-HK" : {
@@ -10553,8 +10553,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Batteries"
+            "state" : "translated",
+            "value" : "バッテリー"
           }
         },
         "ko" : {
@@ -10649,14 +10649,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Batteries"
+            "state" : "translated",
+            "value" : "电池"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Batteries"
+            "state" : "translated",
+            "value" : "電池"
           }
         },
         "zh-Hant-HK" : {
@@ -10761,8 +10761,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Battery %lld percent"
+            "state" : "translated",
+            "value" : "バッテリー %lld パーセント"
           }
         },
         "ko" : {
@@ -10857,14 +10857,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Battery %lld percent"
+            "state" : "translated",
+            "value" : "电池剩余 %lld％"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Battery %lld percent"
+            "state" : "translated",
+            "value" : "電池 %lld 百分比"
           }
         },
         "zh-Hant-HK" : {
@@ -11177,8 +11177,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Button"
+            "state" : "translated",
+            "value" : "ボタン"
           }
         },
         "ko" : {
@@ -11279,8 +11279,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Button"
+            "state" : "translated",
+            "value" : "按鈕"
           }
         },
         "zh-Hant-HK" : {
@@ -13264,8 +13264,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Choose a feel preset."
+            "state" : "translated",
+            "value" : "感触プリセットを選択します。"
           }
         },
         "ko" : {
@@ -13360,14 +13360,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Choose a feel preset."
+            "state" : "translated",
+            "value" : "选择一种感觉预设。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Choose a feel preset."
+            "state" : "translated",
+            "value" : "選擇一個觸感預設。"
           }
         },
         "zh-Hant-HK" : {
@@ -13472,8 +13472,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Choose a mouse button trigger. Left click without modifier keys is not allowed."
+            "state" : "translated",
+            "value" : "マウスボタンのトリガーを選択します。修飾キーなしの左クリックは許可されていません。"
           }
         },
         "ko" : {
@@ -13568,14 +13568,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Choose a mouse button trigger. Left click without modifier keys is not allowed."
+            "state" : "translated",
+            "value" : "选择一个鼠标按钮触发器。不允许使用不带修饰键的左键单击。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Choose a mouse button trigger. Left click without modifier keys is not allowed."
+            "state" : "translated",
+            "value" : "選擇滑鼠按鈕觸發條件。不允許使用不含修飾鍵的左鍵點按。"
           }
         },
         "zh-Hant-HK" : {
@@ -13680,8 +13680,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Click and release to keep autoscroll active, or hold and drag to scroll only until you let go."
+            "state" : "translated",
+            "value" : "クリックして離すとオートスクロールがアクティブになり、押したままドラッグすると離すまでスクロールします。"
           }
         },
         "ko" : {
@@ -13776,14 +13776,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Click and release to keep autoscroll active, or hold and drag to scroll only until you let go."
+            "state" : "translated",
+            "value" : "单击并释放以保持自动滚动处于活动状态，或按住并拖动以仅在松开前滚动。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Click and release to keep autoscroll active, or hold and drag to scroll only until you let go."
+            "state" : "translated",
+            "value" : "點按並放開以保持自動捲動作用中，或按住並拖移以僅在放開前捲動。"
           }
         },
         "zh-Hant-HK" : {
@@ -13888,8 +13888,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Click once to toggle"
+            "state" : "translated",
+            "value" : "一度クリックして切り替え"
           }
         },
         "ko" : {
@@ -13984,14 +13984,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Click once to toggle"
+            "state" : "translated",
+            "value" : "单击一次以切换"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Click once to toggle"
+            "state" : "translated",
+            "value" : "點按一次以切換"
           }
         },
         "zh-Hant-HK" : {
@@ -14096,8 +14096,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Click the trigger once to enter autoscroll, move in any direction to scroll, then click again to exit."
+            "state" : "translated",
+            "value" : "トリガーを一度クリックしてオートスクロールを開始し、任意の方向に移動してスクロールしてから、もう一度クリックして終了します。"
           }
         },
         "ko" : {
@@ -14192,14 +14192,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Click the trigger once to enter autoscroll, move in any direction to scroll, then click again to exit."
+            "state" : "translated",
+            "value" : "单击触发器一次以进入自动滚动，向任意方向移动以滚动，然后再次单击以退出。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Click the trigger once to enter autoscroll, move in any direction to scroll, then click again to exit."
+            "state" : "translated",
+            "value" : "點按觸發條件一次以進入自動捲動，朝任一方向移動以捲動，然後再點按一次以退出。"
           }
         },
         "zh-Hant-HK" : {
@@ -15552,8 +15552,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Convert pointer movement to scroll events"
+            "state" : "translated",
+            "value" : "ポインターの動きをスクロールイベントに変換"
           }
         },
         "ko" : {
@@ -15654,8 +15654,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Convert pointer movement to scroll events"
+            "state" : "translated",
+            "value" : "將指標移動轉換為捲動事件"
           }
         },
         "zh-Hant-HK" : {
@@ -17632,8 +17632,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Delete"
+            "state" : "translated",
+            "value" : "削除"
           }
         },
         "ko" : {
@@ -17734,8 +17734,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Delete"
+            "state" : "translated",
+            "value" : "刪除"
           }
         },
         "zh-Hant-HK" : {
@@ -17840,8 +17840,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Delete Configuration?"
+            "state" : "translated",
+            "value" : "設定を削除しますか？"
           }
         },
         "ko" : {
@@ -17942,8 +17942,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Delete Configuration?"
+            "state" : "translated",
+            "value" : "刪除設定？"
           }
         },
         "zh-Hant-HK" : {
@@ -18048,8 +18048,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Delete…"
+            "state" : "translated",
+            "value" : "削除…"
           }
         },
         "ko" : {
@@ -18150,8 +18150,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Delete…"
+            "state" : "translated",
+            "value" : "刪除…"
           }
         },
         "zh-Hant-HK" : {
@@ -18880,8 +18880,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Distance must be \"auto\" or a number or a string representing value and unit"
+            "state" : "translated",
+            "value" : "距離は「auto」または数値、あるいは値と単位を表す文字列である必要があります。"
           }
         },
         "ko" : {
@@ -18982,8 +18982,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Distance must be \"auto\" or a number or a string representing value and unit"
+            "state" : "translated",
+            "value" : "距離必須是「auto」或數字，或代表值與單位的字串"
           }
         },
         "zh-Hant-HK" : {
@@ -19296,8 +19296,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Due to system limitations, this device may not support adjusting Pointer Speed on newer versions of macOS."
+            "state" : "translated",
+            "value" : "システム上の制限により、このデバイスはmacOSの新しいバージョンでポインター速度の調整をサポートしていない場合があります。"
           }
         },
         "ko" : {
@@ -19392,14 +19392,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Due to system limitations, this device may not support adjusting Pointer Speed on newer versions of macOS."
+            "state" : "translated",
+            "value" : "由于系统限制，此设备可能不支持调整较新 macOS 版本上的指针速度。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Due to system limitations, this device may not support adjusting Pointer Speed on newer versions of macOS."
+            "state" : "translated",
+            "value" : "由於系統限制，此裝置可能不支援較新 macOS 版本中的指標速度調整。"
           }
         },
         "zh-Hant-HK" : {
@@ -19712,8 +19712,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Editable"
+            "state" : "translated",
+            "value" : "編集可能"
           }
         },
         "ko" : {
@@ -19808,14 +19808,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Editable"
+            "state" : "translated",
+            "value" : "可编辑"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Editable"
+            "state" : "translated",
+            "value" : "可編輯"
           }
         },
         "zh-Hant-HK" : {
@@ -19920,8 +19920,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Enable autoscroll"
+            "state" : "translated",
+            "value" : "オートスクロールを有効にする"
           }
         },
         "ko" : {
@@ -20016,14 +20016,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Enable autoscroll"
+            "state" : "translated",
+            "value" : "启用自动滚动"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Enable autoscroll"
+            "state" : "translated",
+            "value" : "啟用自動捲動"
           }
         },
         "zh-Hant-HK" : {
@@ -20128,8 +20128,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Enable gesture button"
+            "state" : "translated",
+            "value" : "ジェスチャーボタンを有効にする"
           }
         },
         "ko" : {
@@ -20224,14 +20224,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Enable gesture button"
+            "state" : "translated",
+            "value" : "启用手势按钮"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Enable gesture button"
+            "state" : "translated",
+            "value" : "啟用手勢按鈕"
           }
         },
         "zh-Hant-HK" : {
@@ -21584,8 +21584,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Failed to create GlobalEventTap: Accessibility permission not granted"
+            "state" : "translated",
+            "value" : "GlobalEventTapの作成に失敗しました: アクセシビリティの許可が得られませんでした"
           }
         },
         "ko" : {
@@ -21686,8 +21686,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Failed to create GlobalEventTap: Accessibility permission not granted"
+            "state" : "translated",
+            "value" : "無法建立 GlobalEventTap：未授權輔助使用權限"
           }
         },
         "zh-Hant-HK" : {
@@ -21792,8 +21792,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Failed to load the configuration: %@"
+            "state" : "translated",
+            "value" : "設定の読み込みに失敗しました: %@"
           }
         },
         "ko" : {
@@ -21894,8 +21894,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Failed to load the configuration: %@"
+            "state" : "translated",
+            "value" : "無法載入設定：%@"
           }
         },
         "zh-Hant-HK" : {
@@ -22000,8 +22000,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Failed to reload configuration"
+            "state" : "translated",
+            "value" : "設定の再読み込みに失敗しました"
           }
         },
         "ko" : {
@@ -22102,8 +22102,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Failed to reload configuration"
+            "state" : "translated",
+            "value" : "無法重新載入設定"
           }
         },
         "zh-Hant-HK" : {
@@ -22208,8 +22208,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Failed to save the configuration: %@"
+            "state" : "translated",
+            "value" : "設定の保存に失敗しました: %@"
           }
         },
         "ko" : {
@@ -22310,8 +22310,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Failed to save the configuration: %@"
+            "state" : "translated",
+            "value" : "無法儲存設定：%@"
           }
         },
         "zh-Hant-HK" : {
@@ -23040,8 +23040,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Flat"
+            "state" : "translated",
+            "value" : "フラット"
           }
         },
         "ko" : {
@@ -23136,14 +23136,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Flat"
+            "state" : "translated",
+            "value" : "平坦"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Flat"
+            "state" : "translated",
+            "value" : "平面"
           }
         },
         "zh-Hant-HK" : {
@@ -23456,8 +23456,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Forward button"
+            "state" : "translated",
+            "value" : "進むボタン"
           }
         },
         "ko" : {
@@ -23872,8 +23872,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Gesture Actions"
+            "state" : "translated",
+            "value" : "ジェスチャーアクション"
           }
         },
         "ko" : {
@@ -23968,14 +23968,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Gesture Actions"
+            "state" : "translated",
+            "value" : "手势操作"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Gesture Actions"
+            "state" : "translated",
+            "value" : "手勢動作"
           }
         },
         "zh-Hant-HK" : {
@@ -24288,8 +24288,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Hold the button and drag to trigger gestures. Drag at least %lld pixels in one direction."
+            "state" : "translated",
+            "value" : "ボタンを押したままドラッグしてジェスチャーをトリガーします。いずれかの方向に少なくとも%lldピクセルドラッグしてください。"
           }
         },
         "ko" : {
@@ -24384,14 +24384,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Hold the button and drag to trigger gestures. Drag at least %lld pixels in one direction."
+            "state" : "translated",
+            "value" : "按住按钮并拖动以触发手势。沿一个方向拖动至少 %lld 像素。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Hold the button and drag to trigger gestures. Drag at least %lld pixels in one direction."
+            "state" : "translated",
+            "value" : "按住按鈕並拖曳以觸發手勢。朝任一方向拖曳至少 %lld 個像素。"
           }
         },
         "zh-Hant-HK" : {
@@ -24496,8 +24496,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Hold the trigger while moving to scroll, then release it to stop."
+            "state" : "translated",
+            "value" : "トリガーを押したまま移動するとスクロールし、離すと停止します。"
           }
         },
         "ko" : {
@@ -24592,14 +24592,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Hold the trigger while moving to scroll, then release it to stop."
+            "state" : "translated",
+            "value" : "移动时按住触发器进行滚动，然后释放它以停止。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Hold the trigger while moving to scroll, then release it to stop."
+            "state" : "translated",
+            "value" : "移動時按住觸發器即可捲動，放開即可停止。"
           }
         },
         "zh-Hant-HK" : {
@@ -24704,8 +24704,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Hold to scroll"
+            "state" : "translated",
+            "value" : "長押しでスクロール"
           }
         },
         "ko" : {
@@ -24800,14 +24800,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Hold to scroll"
+            "state" : "translated",
+            "value" : "按住以滚动"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Hold to scroll"
+            "state" : "translated",
+            "value" : "按住以捲動"
           }
         },
         "zh-Hant-HK" : {
@@ -26174,8 +26174,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Immediate"
+            "state" : "translated",
+            "value" : "即時"
           }
         },
         "ko" : {
@@ -26270,14 +26270,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Immediate"
+            "state" : "translated",
+            "value" : "立即"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Immediate"
+            "state" : "translated",
+            "value" : "立即"
           }
         },
         "zh-Hant-HK" : {
@@ -27316,8 +27316,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Invalid JSON: %@"
+            "state" : "translated",
+            "value" : "無效的 JSON：%@"
           }
         },
         "zh-Hant-HK" : {
@@ -27422,8 +27422,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Invalid value"
+            "state" : "translated",
+            "value" : "無効な値"
           }
         },
         "ko" : {
@@ -27524,8 +27524,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Invalid value"
+            "state" : "translated",
+            "value" : "無效的值"
           }
         },
         "zh-Hant-HK" : {
@@ -28462,8 +28462,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Learn more"
+            "state" : "translated",
+            "value" : "詳細情報"
           }
         },
         "ko" : {
@@ -28558,14 +28558,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Learn more"
+            "state" : "translated",
+            "value" : "了解更多"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Learn more"
+            "state" : "translated",
+            "value" : "了解詳情"
           }
         },
         "zh-Hant-HK" : {
@@ -29294,8 +29294,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Long"
+            "state" : "translated",
+            "value" : "長押し"
           }
         },
         "ko" : {
@@ -29390,14 +29390,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Long"
+            "state" : "translated",
+            "value" : "长"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Long"
+            "state" : "translated",
+            "value" : "長"
           }
         },
         "zh-Hant-HK" : {
@@ -29710,8 +29710,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Loose"
+            "state" : "translated",
+            "value" : "緩い"
           }
         },
         "ko" : {
@@ -29806,14 +29806,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Loose"
+            "state" : "translated",
+            "value" : "松"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Loose"
+            "state" : "translated",
+            "value" : "寬鬆"
           }
         },
         "zh-Hant-HK" : {
@@ -30334,8 +30334,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Middle Button"
+            "state" : "translated",
+            "value" : "中央ボタン"
           }
         },
         "ko" : {
@@ -30430,14 +30430,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Middle Button"
+            "state" : "translated",
+            "value" : "中间按钮"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Middle Button"
+            "state" : "translated",
+            "value" : "中間按鈕"
           }
         },
         "zh-Hant-HK" : {
@@ -30750,8 +30750,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Missing key %1$@ at %2$@"
+            "state" : "translated",
+            "value" : "キー%1$@が%2$@に見つかりません"
           }
         },
         "ko" : {
@@ -30852,8 +30852,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Missing key %1$@ at %2$@"
+            "state" : "translated",
+            "value" : "遺失金鑰 %1$@，位置：%2$@"
           }
         },
         "zh-Hant-HK" : {
@@ -31166,8 +31166,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Modes"
+            "state" : "translated",
+            "value" : "モード"
           }
         },
         "ko" : {
@@ -31262,14 +31262,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Modes"
+            "state" : "translated",
+            "value" : "模式"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Modes"
+            "state" : "translated",
+            "value" : "模式"
           }
         },
         "zh-Hant-HK" : {
@@ -33662,8 +33662,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Next Space"
+            "state" : "translated",
+            "value" : "次のスペース"
           }
         },
         "ko" : {
@@ -33758,14 +33758,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Next Space"
+            "state" : "translated",
+            "value" : "下一个空间"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Next Space"
+            "state" : "translated",
+            "value" : "下一個空間"
           }
         },
         "zh-Hant-HK" : {
@@ -34180,8 +34180,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No device selected."
+            "state" : "translated",
+            "value" : "未選取任何裝置。"
           }
         },
         "zh-Hant-HK" : {
@@ -34286,8 +34286,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "None"
+            "state" : "translated",
+            "value" : "なし"
           }
         },
         "ko" : {
@@ -34382,14 +34382,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "None"
+            "state" : "translated",
+            "value" : "无"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "None"
+            "state" : "translated",
+            "value" : "無"
           }
         },
         "zh-Hant-HK" : {
@@ -34494,8 +34494,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Not specified"
+            "state" : "translated",
+            "value" : "指定なし"
           }
         },
         "ko" : {
@@ -34596,8 +34596,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Not specified"
+            "state" : "translated",
+            "value" : "未指定"
           }
         },
         "zh-Hant-HK" : {
@@ -34702,8 +34702,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Off"
+            "state" : "translated",
+            "value" : "オフ"
           }
         },
         "ko" : {
@@ -34798,14 +34798,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Off"
+            "state" : "translated",
+            "value" : "关闭"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Off"
+            "state" : "translated",
+            "value" : "關閉"
           }
         },
         "zh-Hant-HK" : {
@@ -35326,8 +35326,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Other App…"
+            "state" : "translated",
+            "value" : "他のアプリ…"
           }
         },
         "ko" : {
@@ -35428,8 +35428,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Other App…"
+            "state" : "translated",
+            "value" : "其他 App…"
           }
         },
         "zh-Hant-HK" : {
@@ -35534,8 +35534,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Other Executable…"
+            "state" : "translated",
+            "value" : "他の実行可能ファイル…"
           }
         },
         "ko" : {
@@ -35630,14 +35630,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Other Executable…"
+            "state" : "translated",
+            "value" : "其他可执行文件…"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Other Executable…"
+            "state" : "translated",
+            "value" : "其他可執行檔…"
           }
         },
         "zh-Hant-HK" : {
@@ -36789,8 +36789,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Preserve native middle-click on links and buttons"
+            "state" : "translated",
+            "value" : "リンクやボタンのネイティブな中央クリックを保持"
           }
         },
         "ko" : {
@@ -36885,14 +36885,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Preserve native middle-click on links and buttons"
+            "state" : "translated",
+            "value" : "保留链接和按钮的本机中间键单击"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Preserve native middle-click on links and buttons"
+            "state" : "translated",
+            "value" : "保留連結與按鈕的原生中間點擊"
           }
         },
         "zh-Hant-HK" : {
@@ -36997,8 +36997,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Press and hold a button while dragging to trigger gestures like switching desktop spaces or opening Mission Control."
+            "state" : "translated",
+            "value" : "ボタンを押したままドラッグして、デスクトップスペースの切り替えやMission Controlの起動などのジェスチャーをトリガーします。"
           }
         },
         "ko" : {
@@ -37093,14 +37093,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Press and hold a button while dragging to trigger gestures like switching desktop spaces or opening Mission Control."
+            "state" : "translated",
+            "value" : "按住按钮并拖动以触发切换桌面空间或打开调度中心等手势。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Press and hold a button while dragging to trigger gestures like switching desktop spaces or opening Mission Control."
+            "state" : "translated",
+            "value" : "按住按鈕並拖移，以觸發切換桌面空間或開啟「預覽」等手勢。"
           }
         },
         "zh-Hant-HK" : {
@@ -37413,8 +37413,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Previous Space"
+            "state" : "translated",
+            "value" : "前のスペース"
           }
         },
         "ko" : {
@@ -37509,14 +37509,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Previous Space"
+            "state" : "translated",
+            "value" : "上一个空间"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Previous Space"
+            "state" : "translated",
+            "value" : "上一個空間"
           }
         },
         "zh-Hant-HK" : {
@@ -39493,8 +39493,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Restore default preset"
+            "state" : "translated",
+            "value" : "デフォルトプリセットを復元"
           }
         },
         "ko" : {
@@ -39589,14 +39589,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Restore default preset"
+            "state" : "translated",
+            "value" : "恢复默认预设"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Restore default preset"
+            "state" : "translated",
+            "value" : "回復預設值"
           }
         },
         "zh-Hant-HK" : {
@@ -39708,8 +39708,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Restore natural preset"
+            "state" : "translated",
+            "value" : "自然なプリセットを復元"
           }
         },
         "ko" : {
@@ -39804,14 +39804,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Restore natural preset"
+            "state" : "translated",
+            "value" : "恢复自然预设"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Restore natural preset"
+            "state" : "translated",
+            "value" : "回復自然預設值"
           }
         },
         "zh-Hant-HK" : {
@@ -41788,8 +41788,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scroll acceleration"
+            "state" : "translated",
+            "value" : "スクロール加速度"
           }
         },
         "ko" : {
@@ -41884,14 +41884,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scroll acceleration"
+            "state" : "translated",
+            "value" : "滚动加速"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scroll acceleration"
+            "state" : "translated",
+            "value" : "捲動加速"
           }
         },
         "zh-Hant-HK" : {
@@ -41996,8 +41996,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scroll by moving away from an anchor point, similar to Windows middle-click autoscroll."
+            "state" : "translated",
+            "value" : "アンカーポイントから離れるようにスクロールします。Windowsの中クリック自動スクロールに似ています。"
           }
         },
         "ko" : {
@@ -42092,14 +42092,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scroll by moving away from an anchor point, similar to Windows middle-click autoscroll."
+            "state" : "translated",
+            "value" : "通过远离锚点滚动，类似于 Windows 中间键自动滚动。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scroll by moving away from an anchor point, similar to Windows middle-click autoscroll."
+            "state" : "translated",
+            "value" : "透過遠離錨點來捲動，類似於 Windows 中間點擊自動捲動。"
           }
         },
         "zh-Hant-HK" : {
@@ -42828,8 +42828,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scroll inertia"
+            "state" : "translated",
+            "value" : "スクロール慣性"
           }
         },
         "ko" : {
@@ -42924,14 +42924,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scroll inertia"
+            "state" : "translated",
+            "value" : "滚动惯性"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scroll inertia"
+            "state" : "translated",
+            "value" : "捲動慣性"
           }
         },
         "zh-Hant-HK" : {
@@ -43666,8 +43666,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scroll response"
+            "state" : "translated",
+            "value" : "スクロール応答"
           }
         },
         "ko" : {
@@ -43762,14 +43762,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scroll response"
+            "state" : "translated",
+            "value" : "滚动响应"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scroll response"
+            "state" : "translated",
+            "value" : "捲動反應"
           }
         },
         "zh-Hant-HK" : {
@@ -44498,8 +44498,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scroll speed"
+            "state" : "translated",
+            "value" : "スクロール速度"
           }
         },
         "ko" : {
@@ -44594,14 +44594,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scroll speed"
+            "state" : "translated",
+            "value" : "滚动速度"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scroll speed"
+            "state" : "translated",
+            "value" : "捲動速度"
           }
         },
         "zh-Hant-HK" : {
@@ -45752,8 +45752,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scrolling curve"
+            "state" : "translated",
+            "value" : "スクロールカーブ"
           }
         },
         "ko" : {
@@ -45848,14 +45848,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scrolling curve"
+            "state" : "translated",
+            "value" : "滚动曲线"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scrolling curve"
+            "state" : "translated",
+            "value" : "捲動曲線"
           }
         },
         "zh-Hant-HK" : {
@@ -46376,8 +46376,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scrolling settings are applied to converted events."
+            "state" : "translated",
+            "value" : "スクロール設定は変換されたイベントに適用されます。"
           }
         },
         "ko" : {
@@ -46478,8 +46478,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Scrolling settings are applied to converted events."
+            "state" : "translated",
+            "value" : "捲動設定會套用到轉換的事件。"
           }
         },
         "zh-Hant-HK" : {
@@ -47000,8 +47000,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Select an executable file"
+            "state" : "translated",
+            "value" : "実行可能ファイルを選択"
           }
         },
         "ko" : {
@@ -47096,14 +47096,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Select an executable file"
+            "state" : "translated",
+            "value" : "选择一个可执行文件"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Select an executable file"
+            "state" : "translated",
+            "value" : "選擇可執行檔"
           }
         },
         "zh-Hant-HK" : {
@@ -47208,8 +47208,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Select an item from the sidebar"
+            "state" : "translated",
+            "value" : "サイドバーから項目を選択"
           }
         },
         "ko" : {
@@ -47304,14 +47304,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Select an item from the sidebar"
+            "state" : "translated",
+            "value" : "从边栏中选择一项"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Select an item from the sidebar"
+            "state" : "translated",
+            "value" : "從側邊欄選擇項目"
           }
         },
         "zh-Hant-HK" : {
@@ -47416,8 +47416,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Selected"
+            "state" : "translated",
+            "value" : "選択済み"
           }
         },
         "ko" : {
@@ -47512,14 +47512,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Selected"
+            "state" : "translated",
+            "value" : "已选择"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Selected"
+            "state" : "translated",
+            "value" : "選取"
           }
         },
         "zh-Hant-HK" : {
@@ -47839,8 +47839,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Short"
+            "state" : "translated",
+            "value" : "短"
           }
         },
         "ko" : {
@@ -47935,14 +47935,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Short"
+            "state" : "translated",
+            "value" : "短"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Short"
+            "state" : "translated",
+            "value" : "短"
           }
         },
         "zh-Hant-HK" : {
@@ -48047,8 +48047,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Show current battery"
+            "state" : "translated",
+            "value" : "現在のバッテリーを表示"
           }
         },
         "ko" : {
@@ -48143,14 +48143,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Show current battery"
+            "state" : "translated",
+            "value" : "显示当前电池电量"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Show current battery"
+            "state" : "translated",
+            "value" : "顯示目前電池狀態"
           }
         },
         "zh-Hant-HK" : {
@@ -48463,8 +48463,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Show Desktop"
+            "state" : "translated",
+            "value" : "デスクトップを表示"
           }
         },
         "ko" : {
@@ -48559,14 +48559,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Show Desktop"
+            "state" : "translated",
+            "value" : "显示桌面"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Show Desktop"
+            "state" : "translated",
+            "value" : "顯示桌面"
           }
         },
         "zh-Hant-HK" : {
@@ -48773,8 +48773,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Show in Dock"
+            "state" : "translated",
+            "value" : "在 Dock 中顯示"
           }
         },
         "zh-Hant-HK" : {
@@ -49711,8 +49711,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Speed"
+            "state" : "translated",
+            "value" : "速度"
           }
         },
         "ko" : {
@@ -49807,14 +49807,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Speed"
+            "state" : "translated",
+            "value" : "速度"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Speed"
+            "state" : "translated",
+            "value" : "速度"
           }
         },
         "zh-Hant-HK" : {
@@ -50127,8 +50127,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Swipe down"
+            "state" : "translated",
+            "value" : "下にスワイプ"
           }
         },
         "ko" : {
@@ -50223,14 +50223,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Swipe down"
+            "state" : "translated",
+            "value" : "向下轻扫"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Swipe down"
+            "state" : "translated",
+            "value" : "向下滑動"
           }
         },
         "zh-Hant-HK" : {
@@ -50335,8 +50335,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Swipe left"
+            "state" : "translated",
+            "value" : "左にスワイプ"
           }
         },
         "ko" : {
@@ -50431,14 +50431,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Swipe left"
+            "state" : "translated",
+            "value" : "向左轻扫"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Swipe left"
+            "state" : "translated",
+            "value" : "向左滑動"
           }
         },
         "zh-Hant-HK" : {
@@ -50543,8 +50543,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Swipe right"
+            "state" : "translated",
+            "value" : "右にスワイプ"
           }
         },
         "ko" : {
@@ -50639,14 +50639,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Swipe right"
+            "state" : "translated",
+            "value" : "向右轻扫"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Swipe right"
+            "state" : "translated",
+            "value" : "向右滑動"
           }
         },
         "zh-Hant-HK" : {
@@ -50751,8 +50751,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Swipe up"
+            "state" : "translated",
+            "value" : "上にスワイプ"
           }
         },
         "ko" : {
@@ -50847,14 +50847,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Swipe up"
+            "state" : "translated",
+            "value" : "向上轻扫"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Swipe up"
+            "state" : "translated",
+            "value" : "向上滑動"
           }
         },
         "zh-Hant-HK" : {
@@ -51174,8 +51174,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Synthetic momentum"
+            "state" : "translated",
+            "value" : "合成モーメンタム"
           }
         },
         "ko" : {
@@ -51270,14 +51270,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Synthetic momentum"
+            "state" : "translated",
+            "value" : "合成动量"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Synthetic momentum"
+            "state" : "translated",
+            "value" : "合成動量"
           }
         },
         "zh-Hant-HK" : {
@@ -51798,8 +51798,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "The native middle-click check only applies when click once to toggle is enabled."
+            "state" : "translated",
+            "value" : "ネイティブの中クリックチェックは、ワンクリックでトグルが有効な場合にのみ適用されます。"
           }
         },
         "ko" : {
@@ -51894,14 +51894,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "The native middle-click check only applies when click once to toggle is enabled."
+            "state" : "translated",
+            "value" : "原生中间键单击检查仅在启用了“单击一次以切换”时适用。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "The native middle-click check only applies when click once to toggle is enabled."
+            "state" : "translated",
+            "value" : "原生中間點擊檢查僅在啟用「按一下切換」時適用。"
           }
         },
         "zh-Hant-HK" : {
@@ -52006,8 +52006,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "The native middle-click check only applies when the trigger is middle click without modifier keys."
+            "state" : "translated",
+            "value" : "ネイティブの中クリックチェックは、トリガーが修飾キーなしの中クリックの場合にのみ適用されます。"
           }
         },
         "ko" : {
@@ -52102,14 +52102,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "The native middle-click check only applies when the trigger is middle click without modifier keys."
+            "state" : "translated",
+            "value" : "原生中间键单击检查仅在触发器是未按修饰键的中间键单击时适用。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "The native middle-click check only applies when the trigger is middle click without modifier keys."
+            "state" : "translated",
+            "value" : "原生中間點擊檢查僅在觸發條件為不含修飾鍵的中間點擊時適用。"
           }
         },
         "zh-Hant-HK" : {
@@ -52214,8 +52214,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "This will delete all settings for \"%@\"."
+            "state" : "translated",
+            "value" : "これにより、「%@」の設定がすべて削除されます。"
           }
         },
         "ko" : {
@@ -52310,14 +52310,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "This will delete all settings for \"%@\"."
+            "state" : "translated",
+            "value" : "这将删除“%@”的所有设置。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "This will delete all settings for \"%@\"."
+            "state" : "translated",
+            "value" : "這將刪除「%@」的所有設定。"
           }
         },
         "zh-Hant-HK" : {
@@ -52423,8 +52423,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "This will delete all settings for the current device."
+            "state" : "translated",
+            "value" : "これにより、現在のデバイスの設定がすべて削除されます。"
           }
         },
         "ko" : {
@@ -52519,14 +52519,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "This will delete all settings for the current device."
+            "state" : "translated",
+            "value" : "这将删除当前设备的所有设置。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "This will delete all settings for the current device."
+            "state" : "translated",
+            "value" : "這將刪除目前裝置的所有設定。"
           }
         },
         "zh-Hant-HK" : {
@@ -52631,8 +52631,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "This will delete all settings for the selected device."
+            "state" : "translated",
+            "value" : "これにより、選択したデバイスの設定がすべて削除されます。"
           }
         },
         "ko" : {
@@ -52727,14 +52727,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "This will delete all settings for the selected device."
+            "state" : "translated",
+            "value" : "这将删除所选设备的所有设置。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "This will delete all settings for the selected device."
+            "state" : "translated",
+            "value" : "這將刪除所選裝置的所有設定。"
           }
         },
         "zh-Hant-HK" : {
@@ -52839,8 +52839,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Threshold"
+            "state" : "translated",
+            "value" : "しきい値"
           }
         },
         "ko" : {
@@ -52935,14 +52935,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Threshold"
+            "state" : "translated",
+            "value" : "阈值"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Threshold"
+            "state" : "translated",
+            "value" : "臨界值"
           }
         },
         "zh-Hant-HK" : {
@@ -53671,8 +53671,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Trigger"
+            "state" : "translated",
+            "value" : "トリガー"
           }
         },
         "ko" : {
@@ -53767,14 +53767,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Trigger"
+            "state" : "translated",
+            "value" : "触发器"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Trigger"
+            "state" : "translated",
+            "value" : "觸發條件"
           }
         },
         "zh-Hant-HK" : {
@@ -53879,8 +53879,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Type mismatch: expected %1$@ at %2$@"
+            "state" : "translated",
+            "value" : "%1$@を%2$@で予期しています"
           }
         },
         "ko" : {
@@ -53981,8 +53981,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Type mismatch: expected %1$@ at %2$@"
+            "state" : "translated",
+            "value" : "類型不符：預期為 %1$@，但收到 %2$@"
           }
         },
         "zh-Hant-HK" : {
@@ -54087,8 +54087,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unit must be empty or \"px\""
+            "state" : "translated",
+            "value" : "単位は空にするか、「px」にする必要があります"
           }
         },
         "ko" : {
@@ -54189,8 +54189,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unit must be empty or \"px\""
+            "state" : "translated",
+            "value" : "單位必須為空或「px」"
           }
         },
         "zh-Hant-HK" : {
@@ -54295,8 +54295,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "UniversalBackForward must be true, false, \"backOnly\" or \"forwardOnly\""
+            "state" : "translated",
+            "value" : "UniversalBackForwardはtrue、false、「backOnly」、または「forwardOnly」にする必要があります"
           }
         },
         "ko" : {
@@ -54397,8 +54397,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "UniversalBackForward must be true, false, \"backOnly\" or \"forwardOnly\""
+            "state" : "translated",
+            "value" : "UniversalBackForward 必須為 true、false、「backOnly」或「forwardOnly」"
           }
         },
         "zh-Hant-HK" : {
@@ -54503,8 +54503,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unknown"
+            "state" : "translated",
+            "value" : "不明"
           }
         },
         "ko" : {
@@ -54599,14 +54599,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unknown"
+            "state" : "translated",
+            "value" : "未知"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unknown"
+            "state" : "translated",
+            "value" : "未知"
           }
         },
         "zh-Hant-HK" : {
@@ -54711,8 +54711,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unsupported encoding, expected UTF-8"
+            "state" : "translated",
+            "value" : "サポートされていないエンコーディングです。UTF-8を予期しています"
           }
         },
         "ko" : {
@@ -54813,8 +54813,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unsupported encoding, expected UTF-8"
+            "state" : "translated",
+            "value" : "不支援的編碼，預期為 UTF-8"
           }
         },
         "zh-Hant-HK" : {
@@ -55758,8 +55758,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "When using plain middle click, keep browser-style middle-click behavior on pressable elements instead of entering autoscroll."
+            "state" : "translated",
+            "value" : "通常のミドルクリックを使用する場合、自動スクロールに入る代わりに、クリック可能な要素でブラウザスタイルのミドルクリック動作を維持します。"
           }
         },
         "ko" : {
@@ -55854,14 +55854,14 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "When using plain middle click, keep browser-style middle-click behavior on pressable elements instead of entering autoscroll."
+            "state" : "translated",
+            "value" : "使用纯中间键单击时，在可按元素上保留浏览器风格的中间键单击行为，而不是进入自动滚动。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "When using plain middle click, keep browser-style middle-click behavior on pressable elements instead of entering autoscroll."
+            "state" : "translated",
+            "value" : "使用純中間點擊時，在可按元素上保留瀏覽器風格的中間點擊行為，而非進入自動捲動。"
           }
         },
         "zh-Hant-HK" : {
@@ -56382,8 +56382,8 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Your configuration changes are now active."
+            "state" : "translated",
+            "value" : "設定の変更が適用されました。"
           }
         },
         "ko" : {
@@ -56484,8 +56484,8 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Your configuration changes are now active."
+            "state" : "translated",
+            "value" : "您的設定變更現已生效。"
           }
         },
         "zh-Hant-HK" : {
