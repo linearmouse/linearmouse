@@ -257,9 +257,9 @@ private final class ReceiverContext {
             let connectionSnapshots = provider.waitForReceiverConnectionChange(
                 using: receiverChannel,
                 timeout: ReceiverMonitor.refreshInterval
-            )                { [weak self] in
-                    self?.shouldContinueRunning() ?? false
-                }
+            ) { [weak self] in
+                self?.shouldContinueRunning() ?? false
+            }
 
             if !shouldContinueRunning() {
                 break
