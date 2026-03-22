@@ -164,11 +164,22 @@ class StatusItem: NSObject, NSMenuDelegate {
     }
 
     private func currentDeviceBatteryLevel() -> Int? {
-        guard let currentDevice = DeviceState.shared.currentDeviceRef?.value else {
+        guard let currentDevice = currentBatteryIndicatorDevice() else {
             return nil
         }
 
         return BatteryDeviceMonitor.shared.currentDeviceBatteryLevel(for: currentDevice)
+    }
+
+    private func currentBatteryIndicatorDevice() -> Device? {
+        Self.menuBarBatteryDevice(
+            activeDeviceRef: DeviceManager.shared.lastActiveDeviceRef,
+            selectedDeviceRef: DeviceState.shared.currentDeviceRef
+        )
+    }
+
+    static func menuBarBatteryDevice<T: AnyObject>(activeDeviceRef: WeakRef<T>?, selectedDeviceRef: WeakRef<T>?) -> T? {
+        activeDeviceRef?.value ?? selectedDeviceRef?.value
     }
 
     static func menuBarBatteryTitle(currentBatteryLevel: Int?, mode: MenuBarBatteryDisplayMode) -> String? {
@@ -282,6 +293,14 @@ class StatusItem: NSObject, NSMenuDelegate {
 
         DeviceState.shared
             .$currentDeviceRef
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.updateStatusItemBatteryIndicator()
+            }
+            .store(in: &subscriptions)
+
+        DeviceManager.shared
+            .$lastActiveDeviceRef
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.updateStatusItemBatteryIndicator()

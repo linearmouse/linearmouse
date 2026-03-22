@@ -1,6 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
+import Foundation
 @testable import LinearMouse
 import XCTest
 
@@ -19,6 +20,29 @@ final class StatusItemBatteryIndicatorTests: XCTestCase {
 
     func testMenuBarBatteryTitleAlwaysShowMode() {
         XCTAssertEqual(StatusItem.menuBarBatteryTitle(currentBatteryLevel: 100, mode: .always), "100%")
+    }
+
+    func testMenuBarBatteryDevicePrefersActiveDeviceOverSelectedDevice() {
+        let activeDevice = NSObject()
+        let selectedDevice = NSObject()
+
+        XCTAssertTrue(
+            StatusItem.menuBarBatteryDevice(
+                activeDeviceRef: WeakRef(activeDevice),
+                selectedDeviceRef: WeakRef(selectedDevice)
+            ) === activeDevice
+        )
+    }
+
+    func testMenuBarBatteryDeviceFallsBackToSelectedDevice() {
+        let selectedDevice = NSObject()
+
+        XCTAssertTrue(
+            StatusItem.menuBarBatteryDevice(
+                activeDeviceRef: nil,
+                selectedDeviceRef: WeakRef(selectedDevice)
+            ) === selectedDevice
+        )
     }
 
     func testCurrentDeviceBatteryLevelUsesLowestReceiverBattery() {
