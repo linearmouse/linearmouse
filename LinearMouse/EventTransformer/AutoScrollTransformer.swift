@@ -267,8 +267,8 @@ extension AutoScrollTransformer: EventTransformer {
             return false
         }
 
-        let eventFlags = EventView(event).modifierFlags
-        return eventFlags == trigger.modifierFlags
+        let eventFlags = ModifierState.normalize(event.flags)
+        return eventFlags == trigger.rawModifierFlags
     }
 
     private func matchesTriggerButton(_ event: CGEvent) -> Bool {
@@ -410,7 +410,7 @@ extension AutoScrollTransformer: EventTransformer {
         guard preserveNativeMiddleClick,
               hasToggleMode,
               triggerMouseButton == .center,
-              trigger.modifierFlags.isEmpty else {
+              trigger.rawModifierFlags.isEmpty else {
             return false
         }
 

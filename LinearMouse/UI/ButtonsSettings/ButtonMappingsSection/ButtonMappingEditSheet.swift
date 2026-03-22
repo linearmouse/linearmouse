@@ -32,19 +32,23 @@ struct ButtonMappingEditSheet: View {
                     if mode == .edit {
                         ButtonMappingButtonDescription<EmptyView>(mapping: mapping)
                     } else {
-                        ButtonMappingButtonRecorder(mapping: $mapping, autoStartRecording: mode == .create)
+                        ButtonMappingButtonRecorder(
+                            mapping: $mapping,
+                            autoStartRecording: mode == .create,
+                            keepGlobalRecordingActiveWhilePresented: mode == .create
+                        )
                     }
                 }
-                .formLabel(Text("Mouse button"))
+                .formLabel(Text("Trigger"))
 
                 if !valid, conflicted {
-                    Text("The mouse button is already assigned.")
+                    Text("The trigger is already assigned.")
                         .foregroundColor(.red)
                         .controlSize(.small)
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
-                if !valid, mapping.button == 0, mapping.modifierFlags.isEmpty {
+                if !valid, mapping.button == 0, mapping.logiButton == nil, mapping.modifierFlags.isEmpty {
                     Text("Assigning an action to the left button without any modifier keys is not allowed.")
                         .foregroundColor(.red)
                         .controlSize(.small)
@@ -54,7 +58,7 @@ struct ButtonMappingEditSheet: View {
                 if valid {
                     ButtonMappingAction(action: $mapping.action.default(.arg0(.auto)))
 
-                    if mapping.button != nil {
+                    if mapping.button != nil || mapping.logiButton != nil {
                         Toggle(isOn: $mapping.repeat.default(false)) {
                             Text("Repeat on hold")
                         }

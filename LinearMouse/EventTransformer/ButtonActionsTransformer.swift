@@ -14,10 +14,20 @@ class ButtonActionsTransformer {
     let mappings: [Scheme.Buttons.Mapping]
 
     var repeatTimer: Timer?
+    private var logitechRepeatTimer: Timer?
 
     static let keySimulator = KeySimulator()
     var keySimulator: KeySimulator {
         Self.keySimulator
+    }
+
+    struct LogitechEventContext {
+        let device: Device?
+        let pid: pid_t?
+        let display: String?
+        let controlIdentity: LogitechControlIdentity
+        let isPressed: Bool
+        let modifierFlags: CGEventFlags
     }
 
     init(mappings: [Scheme.Buttons.Mapping]) {
@@ -26,6 +36,7 @@ class ButtonActionsTransformer {
 
     deinit {
         repeatTimer?.invalidate()
+        logitechRepeatTimer?.invalidate()
     }
 }
 
@@ -135,6 +146,79 @@ extension ButtonActionsTransformer: EventTransformer {
         mappings.last { $0.match(with: event) }
     }
 
+    func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
+        guard !SettingsState.shared.recording else {
+            return false
+        }
+
+        let matchingMappings = mappings.filter { mapping in
+            guard let logiButton = mapping.logiButton,
+                  context.controlIdentity.matches(logiButton) else {
+                return false
+            }
+
+            return mapping.rawModifierFlags == ModifierState.normalize(context.modifierFlags)
+        }
+
+        guard let mapping = matchingMappings.last,
+              let action = mapping.action else {
+            return false
+        }
+
+        if case .arg0(.auto) = action {
+            return false
+        }
+
+        if mapping.repeat != true {
+            if handleLogitechModifiersHold(action: action, isPressed: context.isPressed) {
+                return true
+            }
+        }
+
+        logitechRepeatTimer?.invalidate()
+        logitechRepeatTimer = nil
+
+        let keyRepeatDelay = mapping.repeat == true ? NSEvent.keyRepeatDelay : 0
+        let keyRepeatInterval = mapping.repeat == true ? NSEvent.keyRepeatInterval : 0
+        let keyRepeatEnabled = keyRepeatDelay > 0 && keyRepeatInterval > 0
+        let shouldExecute = keyRepeatEnabled ? context.isPressed : !context.isPressed
+
+        guard shouldExecute else {
+            return true
+        }
+
+        queueLogitechActions(
+            event: nil,
+            action: action,
+            keyRepeatEnabled: keyRepeatEnabled,
+            keyRepeatDelay: keyRepeatDelay,
+            keyRepeatInterval: keyRepeatInterval
+        )
+
+        return true
+    }
+
+    private func handleLogitechModifiersHold(action: Scheme.Buttons.Mapping.Action, isPressed: Bool) -> Bool {
+        guard case let .arg1(.keyPress(keys)) = action else {
+            return false
+        }
+
+        guard keys.allSatisfy(\.isModifier) else {
+            return false
+        }
+
+        if isPressed {
+            os_log("Down keys: %{public}@", log: Self.log, type: .info, String(describing: keys))
+            try? keySimulator.down(keys: keys, tap: .cgSessionEventTap)
+        } else {
+            os_log("Up keys: %{public}@", log: Self.log, type: .info, String(describing: keys))
+            try? keySimulator.up(keys: keys.reversed(), tap: .cgSessionEventTap)
+            keySimulator.reset()
+        }
+
+        return true
+    }
+
     private func queueActions(
         event _: CGEvent?,
         action: Scheme.Buttons.Mapping.Action,
@@ -160,6 +244,44 @@ extension ButtonActionsTransformer: EventTransformer {
                 self.executeIgnoreErrors(action: action)
 
                 self.repeatTimer = Timer.scheduledTimer(
+                    withTimeInterval: keyRepeatInterval,
+                    repeats: true
+                ) { [weak self] _ in
+                    guard let self else {
+                        return
+                    }
+
+                    self.executeIgnoreErrors(action: action)
+                }
+            }
+        }
+    }
+
+    private func queueLogitechActions(
+        event _: CGEvent?,
+        action: Scheme.Buttons.Mapping.Action,
+        keyRepeatEnabled: Bool = false,
+        keyRepeatDelay: TimeInterval = 0,
+        keyRepeatInterval: TimeInterval = 0
+    ) {
+        DispatchQueue.main.async { [self] in
+            executeIgnoreErrors(action: action)
+
+            guard keyRepeatEnabled else {
+                return
+            }
+
+            logitechRepeatTimer = Timer.scheduledTimer(
+                withTimeInterval: keyRepeatDelay,
+                repeats: false
+            ) { [weak self] _ in
+                guard let self else {
+                    return
+                }
+
+                self.executeIgnoreErrors(action: action)
+
+                self.logitechRepeatTimer = Timer.scheduledTimer(
                     withTimeInterval: keyRepeatInterval,
                     repeats: true
                 ) { [weak self] _ in
@@ -523,6 +645,11 @@ extension ButtonActionsTransformer: Deactivatable {
             os_log("ButtonActionsTransformer is inactive, invalidate the repeat timer", log: Self.log, type: .info)
             repeatTimer.invalidate()
             self.repeatTimer = nil
+        }
+
+        if let logitechRepeatTimer {
+            logitechRepeatTimer.invalidate()
+            self.logitechRepeatTimer = nil
         }
     }
 }

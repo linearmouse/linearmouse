@@ -1,6 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
+import Combine
 import ObservationToken
 import SwiftUI
 
@@ -8,18 +9,27 @@ struct ButtonMappingButtonRecorder: View {
     @Binding var mapping: Scheme.Buttons.Mapping
 
     var autoStartRecording = false
+    var persistVirtualButtonForLogitechControl = false
+    var keepGlobalRecordingActiveWhilePresented = false
 
     @State private var recording = false {
         didSet {
             guard oldValue != recording else {
                 return
             }
-            SettingsState.shared.recording = recording
+            updateSharedRecordingState()
             recordingUpdated()
         }
     }
 
+    @State private var divertReady = false
     @State private var recordingObservationToken: ObservationToken?
+    @State private var divertReadyCancellable: AnyCancellable?
+    @State private var logitechControlCancellable: AnyCancellable?
+
+    private var waitingForDivert: Bool {
+        hasLogitechDevice() && !divertReady
+    }
 
     var body: some View {
         Button {
@@ -27,10 +37,14 @@ struct ButtonMappingButtonRecorder: View {
         } label: {
             Group {
                 if recording {
-                    ButtonMappingButtonDescription(mapping: mapping, showPartial: true) {
-                        Text("Recording")
+                    if waitingForDivert {
+                        Text("Waiting for device…")
+                    } else {
+                        ButtonMappingButtonDescription(mapping: mapping, showPartial: true) {
+                            Text("Recording")
+                        }
+                        .foregroundColor(.orange)
                     }
-                    .foregroundColor(.orange)
                 } else {
                     ButtonMappingButtonDescription(mapping: mapping) {
                         Text("Click to record")
@@ -40,13 +54,47 @@ struct ButtonMappingButtonRecorder: View {
             .frame(maxWidth: .infinity)
         }
         .onAppear {
+            updateSharedRecordingState()
+            beginDivertIfNeeded()
             if autoStartRecording {
                 recording = true
             }
         }
         .onDisappear {
+            cancelObservation()
             recording = false
+            updateSharedRecordingState(force: false)
         }
+    }
+
+    private func updateSharedRecordingState(force: Bool? = nil) {
+        let shouldRecord = force ?? (recording || keepGlobalRecordingActiveWhilePresented)
+        SettingsState.shared.recording = shouldRecord
+        if !shouldRecord {
+            SettingsState.shared.recordingDivertReady = false
+            divertReady = false
+        }
+    }
+
+    /// Start listening for divert readiness as soon as the view appears,
+    /// so the diversion completes before the user starts recording.
+    private func beginDivertIfNeeded() {
+        guard hasLogitechDevice(), divertReadyCancellable == nil else {
+            return
+        }
+
+        SettingsState.shared.recordingDivertReady = false
+        divertReadyCancellable = SettingsState.shared
+            .$recordingDivertReady
+            .filter(\.self)
+            .first()
+            .receive(on: DispatchQueue.main)
+            .sink { _ in
+                divertReady = true
+                if recording {
+                    startEventObservation()
+                }
+            }
     }
 
     private func recordingUpdated() {
@@ -54,33 +102,73 @@ struct ButtonMappingButtonRecorder: View {
             recordingObservationToken.cancel()
             self.recordingObservationToken = nil
         }
+        logitechControlCancellable?.cancel()
+        logitechControlCancellable = nil
 
         if recording {
             mapping.modifierFlags = []
             mapping.button = nil
+            mapping.logiButton = nil
             mapping.repeat = nil
             mapping.scroll = nil
 
-            recordingObservationToken = try? EventTap.observe([
-                .flagsChanged,
-                .scrollWheel,
-                .leftMouseDown, .leftMouseUp,
-                .rightMouseDown, .rightMouseUp,
-                .otherMouseDown, .otherMouseUp
-            ], place: .tailAppendEventTap) { _, event in
-                eventReceived(event)
+            if !waitingForDivert {
+                startEventObservation()
             }
-
-            if recordingObservationToken == nil {
-                recording = false
-            }
+            // Otherwise, the divertReady callback will call startEventObservation.
         }
+    }
+
+    private func startEventObservation() {
+        recordingObservationToken = try? EventTap.observe([
+            .flagsChanged,
+            .scrollWheel,
+            .leftMouseDown, .leftMouseUp,
+            .rightMouseDown, .rightMouseUp,
+            .otherMouseDown, .otherMouseUp
+        ], place: .tailAppendEventTap) { _, event in
+            eventReceived(event)
+        }
+
+        if recordingObservationToken == nil {
+            recording = false
+            return
+        }
+
+        // Observe Logitech control presses communicated via SettingsState
+        // (no synthetic CGEvent needed — the HID++ protocol detects presses directly)
+        logitechControlCancellable = SettingsState.shared
+            .$recordedLogitechControl
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { identity in
+                logitechControlReceived(identity)
+            }
+    }
+
+    private func cancelObservation() {
+        divertReadyCancellable?.cancel()
+        divertReadyCancellable = nil
+        logitechControlCancellable?.cancel()
+        logitechControlCancellable = nil
+        divertReady = false
+    }
+
+    private func hasLogitechDevice() -> Bool {
+        DeviceManager.shared.devices.contains(where: \.hasLogitechControlsMonitor)
+    }
+
+    private func logitechControlReceived(_ identity: LogitechControlIdentity) {
+        mapping.logiButton = identity
+        mapping.rawModifierFlags = ModifierState.normalize(ModifierState.shared.currentFlags)
+        SettingsState.shared.recordedLogitechControl = nil
+        recording = false
     }
 
     private func eventReceived(_ event: CGEvent) -> CGEvent? {
         mapping.button = nil
         mapping.scroll = nil
-        mapping.modifierFlags = .init(rawValue: UInt64(event.flags.rawValue))
+        mapping.rawModifierFlags = ModifierState.normalize(event.flags)
 
         switch event.type {
         case .flagsChanged:
