@@ -57,12 +57,29 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         let productID: Int?
         let serialNumber: String?
         let batteryLevel: Int?
+        let hasLiveMetadata: Bool
     }
 
     struct ReceiverSlotMetadata {
         let slot: UInt8
         let name: String?
         let batteryLevel: Int?
+    }
+
+    struct ReceiverConnectionSnapshot: Equatable {
+        let isConnected: Bool
+        let kind: UInt8?
+    }
+
+    struct ReceiverSlotDiscovery {
+        let slots: [ReceiverSlotInfo]
+        let connectionSnapshots: [UInt8: ReceiverConnectionSnapshot]
+    }
+
+    struct ReceiverPointingDeviceDiscovery {
+        let identities: [ReceiverLogicalDeviceIdentity]
+        let connectionSnapshots: [UInt8: ReceiverConnectionSnapshot]
+        let liveReachableSlots: Set<UInt8>
     }
 
     struct ReceiverSlotMatchCandidate {
@@ -72,6 +89,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         let serialNumber: String?
         let productID: Int?
         let batteryLevel: Int?
+        let hasLiveMetadata: Bool
     }
 
     private enum ApproximateBatteryLevel: UInt8 {
@@ -125,26 +143,118 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         return nil
     }
 
-    func receiverPointingDeviceIdentities(for device: VendorSpecificDeviceContext) -> [ReceiverLogicalDeviceIdentity] {
-        guard device.transport == "USB",
-              let locationID = device.locationID,
-              let receiverChannel = LogitechReceiverChannel.open(locationID: locationID),
-              let slots = receiverChannel.discoverPointingDeviceIdentities(baseName: device.product ?? device.name)
-        else {
-            return []
+    func receiverPointingDeviceDiscovery(for device: VendorSpecificDeviceContext) -> ReceiverPointingDeviceDiscovery {
+        guard device.transport == "USB" else {
+            os_log(
+                "Skip receiver discovery for non-USB device: name=%{public}@ transport=%{public}@",
+                log: Self.log,
+                type: .info,
+                device.name,
+                device.transport ?? "(nil)"
+            )
+            return .init(identities: [], connectionSnapshots: [:], liveReachableSlots: [])
         }
 
-        return slots.map { identity in
-            ReceiverLogicalDeviceIdentity(
-                receiverLocationID: locationID,
-                slot: identity.slot,
-                kind: identity.kind,
-                name: identity.name,
-                serialNumber: identity.serialNumber,
-                productID: identity.productID,
-                batteryLevel: identity.batteryLevel
+        guard let locationID = device.locationID else {
+            os_log(
+                "Skip receiver discovery without locationID: name=%{public}@",
+                log: Self.log,
+                type: .info,
+                device.name
             )
+            return .init(identities: [], connectionSnapshots: [:], liveReachableSlots: [])
         }
+
+        guard let receiverChannel = openReceiverChannel(for: device) else {
+            os_log(
+                "Failed to open receiver channel: locationID=%{public}u name=%{public}@",
+                log: Self.log,
+                type: .info,
+                UInt32(locationID),
+                device.product ?? device.name
+            )
+            return .init(identities: [], connectionSnapshots: [:], liveReachableSlots: [])
+        }
+
+        let discovery = receiverPointingDeviceDiscovery(for: device, using: receiverChannel)
+        let slots = discovery.identities
+
+        let slotSummary = slots.map { identity in
+            let battery = identity.batteryLevel.map(String.init) ?? "(nil)"
+            let name = identity.name
+            return "slot=\(identity.slot) kind=\(identity.kind.rawValue) name=\(name) battery=\(battery)"
+        }
+        .joined(separator: ", ")
+
+        os_log(
+            "Receiver discovery produced identities: locationID=%{public}u count=%{public}u identities=%{public}@",
+            log: Self.log,
+            type: .info,
+            UInt32(locationID),
+            UInt32(slots.count),
+            slotSummary
+        )
+
+        return discovery
+    }
+
+    func receiverPointingDeviceIdentities(for device: VendorSpecificDeviceContext) -> [ReceiverLogicalDeviceIdentity] {
+        receiverPointingDeviceDiscovery(for: device).identities
+    }
+
+    func openReceiverChannel(for device: VendorSpecificDeviceContext) -> LogitechReceiverChannel? {
+        guard device.transport == "USB",
+              let locationID = device.locationID
+        else {
+            return nil
+        }
+
+        return LogitechReceiverChannel.open(locationID: locationID)
+    }
+
+    func receiverPointingDeviceDiscovery(
+        for device: VendorSpecificDeviceContext,
+        using receiverChannel: LogitechReceiverChannel
+    ) -> ReceiverPointingDeviceDiscovery {
+        receiverChannel.discoverPointingDeviceDiscovery(baseName: device.product ?? device.name)
+    }
+
+    func waitForReceiverConnectionChange(
+        for device: VendorSpecificDeviceContext,
+        timeout: TimeInterval,
+        until shouldContinue: @escaping () -> Bool
+    ) -> [UInt8: ReceiverConnectionSnapshot] {
+        guard device.transport == "USB",
+              let locationID = device.locationID,
+              let receiverChannel = LogitechReceiverChannel.open(locationID: locationID)
+        else {
+            os_log(
+                "Skip receiver wait because channel is unavailable: name=%{public}@ transport=%{public}@ locationID=%{public}@",
+                log: Self.log,
+                type: .info,
+                device.name,
+                device.transport ?? "(nil)",
+                device.locationID.map(String.init) ?? "(nil)"
+            )
+
+            let deadline = Date().addingTimeInterval(timeout)
+            while shouldContinue(), Date() < deadline {
+                CFRunLoopRunInMode(.defaultMode, 0.1, true)
+            }
+            return [:]
+        }
+
+        receiverChannel.enableWirelessNotifications()
+        return receiverChannel.waitForConnectionSnapshots(timeout: timeout, until: shouldContinue)
+    }
+
+    func waitForReceiverConnectionChange(
+        using receiverChannel: LogitechReceiverChannel,
+        timeout: TimeInterval,
+        until shouldContinue: @escaping () -> Bool
+    ) -> [UInt8: ReceiverConnectionSnapshot] {
+        receiverChannel.enableWirelessNotifications()
+        return receiverChannel.waitForConnectionSnapshots(timeout: timeout, until: shouldContinue)
     }
 
     private func metadata(using transport: LogitechHIDPPTransport) -> VendorSpecificDeviceMetadata? {
@@ -183,9 +293,11 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         for device: VendorSpecificDeviceContext,
         using receiver: LogitechReceiverChannel
     ) -> ReceiverSlotMatchCandidate? {
-        guard let slots = receiver.discoverMatchCandidates(baseName: device.product ?? device.name) else {
+        guard let discovery = receiver.discoverMatchCandidates(baseName: device.product ?? device.name) else {
             return nil
         }
+
+        let slots = discovery.0
 
         let normalizedProduct = normalizeName(device.product ?? device.name)
         let normalizedSerial = normalizeSerial(device.serialNumber)
@@ -228,7 +340,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         return nil
     }
 
-    private func discoverRoutedSlots(using receiver: LogitechReceiverChannel) -> [ReceiverSlotMetadata] {
+    fileprivate func discoverRoutedSlots(using receiver: LogitechReceiverChannel) -> [ReceiverSlotMetadata] {
         var results = [ReceiverSlotMetadata]()
 
         for slot in UInt8(1) ... UInt8(6) {
@@ -261,7 +373,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         }
     }
 
-    private func readFriendlyName(using transport: LogitechHIDPPTransport) -> String? {
+    fileprivate func readFriendlyName(using transport: LogitechHIDPPTransport) -> String? {
         guard let featureIndex = transport.featureIndex(for: .deviceFriendlyName),
               let lengthResponse = transport.request(featureIndex: featureIndex, function: 0x00, parameters: []),
               let length = lengthResponse.payload.first,
@@ -278,7 +390,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         )
     }
 
-    private func readName(using transport: LogitechHIDPPTransport) -> String? {
+    fileprivate func readName(using transport: LogitechHIDPPTransport) -> String? {
         guard let featureIndex = transport.featureIndex(for: .deviceName),
               let lengthResponse = transport.request(featureIndex: featureIndex, function: 0x00, parameters: []),
               let length = lengthResponse.payload.first,
@@ -395,6 +507,40 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         }
 
         return serialNumber.uppercased().replacingOccurrences(of: ":", with: "")
+    }
+
+    static func parseReceiverConnectionNotification(
+        _ report: [UInt8]
+    ) -> (slot: UInt8, snapshot: ReceiverConnectionSnapshot)? {
+        guard report.count >= Constants.shortReportLength,
+              report[0] == Constants.shortReportID
+        else {
+            return nil
+        }
+
+        switch report[2] {
+        case 0x41:
+            let flags = report[4]
+            return (
+                slot: report[1],
+                snapshot: .init(isConnected: (flags & 0x40) == 0, kind: flags & 0x0F)
+            )
+        case 0x42:
+            return (
+                slot: report[1],
+                snapshot: .init(isConnected: (report[3] & 0x01) == 0, kind: nil)
+            )
+        default:
+            return nil
+        }
+    }
+
+    static func parseConnectedDeviceCount(_ response: [UInt8]) -> Int? {
+        guard response.count >= 6 else {
+            return nil
+        }
+
+        return Int(response[5])
     }
 }
 
@@ -622,27 +768,34 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         IOHIDManagerClose(manager, IOOptionBits(kIOHIDOptionsTypeNone))
     }
 
-    func discoverSlots() -> [LogitechHIDPPDeviceMetadataProvider.ReceiverSlotInfo]? {
-        _ = readConnectionState()
-
-        var discovered = [UInt8: UInt8]()
-        if triggerConnectionNotifications() {
-            let deadline = Date().addingTimeInterval(0.5)
-            while Date() < deadline {
-                guard let report = waitForInputReport(timeout: 0.05, matching: { response in
-                    let bytes = [UInt8](response)
-                    return bytes.count >= 7 && bytes[0] == LogitechHIDPPDeviceMetadataProvider.Constants
-                        .shortReportID && bytes[2] == 0x41
-                }) else {
-                    continue
+    func discoverSlots() -> LogitechHIDPPDeviceMetadataProvider.ReceiverSlotDiscovery? {
+        let metadataProvider = LogitechHIDPPDeviceMetadataProvider()
+        let connectedDeviceCount = readConnectionState().flatMap { response in
+            LogitechHIDPPDeviceMetadataProvider.parseConnectedDeviceCount(response)
+        }
+        let connectionSnapshots = discoverConnectionSnapshots()
+        let snapshotSummary = connectionSnapshots.keys
+            .sorted()
+            .compactMap { slot -> String? in
+                guard let snapshot = connectionSnapshots[slot] else {
+                    return nil
                 }
 
-                let bytes = [UInt8](report)
-                discovered[bytes[1]] = bytes[4] & 0x0F
+                let kind = snapshot.kind.map(String.init) ?? "(nil)"
+                return "slot=\(slot) connected=\(snapshot.isConnected) kind=\(kind)"
             }
-        }
+            .joined(separator: ", ")
 
-        var slots = [LogitechHIDPPDeviceMetadataProvider.ReceiverSlotInfo]()
+        os_log(
+            "Receiver slot discovery started: locationID=%{public}@ connectedCount=%{public}@ snapshots=%{public}@",
+            log: LogitechHIDPPDeviceMetadataProvider.log,
+            type: .info,
+            locationID.map(String.init) ?? "(nil)",
+            connectedDeviceCount.map(String.init) ?? "(nil)",
+            snapshotSummary
+        )
+
+        var pairedSlots = [LogitechHIDPPDeviceMetadataProvider.ReceiverSlotInfo]()
         for slot in UInt8(1) ... UInt8(6) {
             let pairingResponse = hidpp10LongRequest(
                 register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverInfoRegister,
@@ -658,40 +811,109 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
             )
 
             guard pairingResponse != nil || nameResponse != nil else {
+                os_log(
+                    "Receiver slot %u has no pairing or name response",
+                    log: LogitechHIDPPDeviceMetadataProvider.log,
+                    type: .info,
+                    slot
+                )
                 continue
             }
 
-            let kind = discovered[slot]
+            let kind = connectionSnapshots[slot]?.kind
                 ?? pairingResponse.flatMap(Self.parseReceiverKind)
                 ?? 0
-            let name = nameResponse.flatMap(Self.parseReceiverName)
+            let routedTransport = LogitechHIDPPTransport(device: self, deviceIndex: slot)
+            let routedName = routedTransport.flatMap { transport in
+                metadataProvider.readFriendlyName(using: transport) ?? metadataProvider.readName(using: transport)
+            }
+            let batteryLevel = routedTransport.flatMap {
+                metadataProvider.readReceiverBatteryLevel(using: $0)
+            }
+            let name = nameResponse.flatMap(Self.parseReceiverName) ?? routedName
             let productID = pairingResponse.flatMap(Self.parseReceiverProductID)
             let serialNumber = extendedPairingResponse.flatMap(Self.parseReceiverSerialNumber)
-            let batteryLevel = LogitechHIDPPTransport(device: self, deviceIndex: slot).flatMap {
-                LogitechHIDPPDeviceMetadataProvider().readReceiverBatteryLevel(using: $0)
-            }
-            slots.append(
+            pairedSlots.append(
                 .init(
                     slot: slot,
                     kind: kind,
                     name: name,
                     productID: productID,
                     serialNumber: serialNumber,
-                    batteryLevel: batteryLevel
+                    batteryLevel: batteryLevel,
+                    hasLiveMetadata: routedName != nil || batteryLevel != nil
                 )
+            )
+
+            os_log(
+                "Receiver slot %u raw candidate: pairing=%{public}@ name=%{public}@ kind=%{public}u battery=%{public}@",
+                log: LogitechHIDPPDeviceMetadataProvider.log,
+                type: .info,
+                slot,
+                pairingResponse != nil ? "yes" : "no",
+                name ?? "(nil)",
+                UInt32(kind),
+                batteryLevel.map(String.init) ?? "(nil)"
             )
         }
 
-        return slots.isEmpty ? nil : slots
+        let pairedSummary = pairedSlots.map { slot in
+            let battery = slot.batteryLevel.map(String.init) ?? "(nil)"
+            let name = slot.name ?? "(nil)"
+            return "slot=\(slot.slot) kind=\(slot.kind) name=\(name) battery=\(battery)"
+        }
+        .joined(separator: ", ")
+
+        os_log(
+            "Receiver slot metadata discovered: locationID=%{public}@ paired=%{public}u slots=%{public}@",
+            log: LogitechHIDPPDeviceMetadataProvider.log,
+            type: .info,
+            locationID.map(String.init) ?? "(nil)",
+            UInt32(pairedSlots.count),
+            pairedSummary
+        )
+
+        return pairedSlots.isEmpty ? nil : .init(slots: pairedSlots, connectionSnapshots: connectionSnapshots)
+    }
+
+    private func discoverConnectionSnapshots()
+        -> [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot] {
+        guard triggerConnectionNotifications() else {
+            return [:]
+        }
+
+        var snapshots = [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot]()
+        let deadline = Date().addingTimeInterval(0.5)
+        while Date() < deadline {
+            guard let report = waitForInputReport(timeout: 0.05, matching: { response in
+                LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(Array(response)) != nil
+            }) else {
+                continue
+            }
+
+            guard let notification = LogitechHIDPPDeviceMetadataProvider
+                .parseReceiverConnectionNotification(Array(report)) else {
+                continue
+            }
+
+            snapshots[notification.slot] = notification.snapshot
+        }
+
+        return snapshots
     }
 
     func discoverMatchCandidates(baseName: String)
-        -> [LogitechHIDPPDeviceMetadataProvider.ReceiverSlotMatchCandidate]? {
+        -> (
+            [LogitechHIDPPDeviceMetadataProvider.ReceiverSlotMatchCandidate],
+            [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot]
+        )? {
         enableWirelessNotifications()
 
-        guard let slots = discoverSlots() else {
+        guard let discovery = discoverSlots() else {
             return nil
         }
+
+        let slots = discovery.slots
 
         let provider = LogitechHIDPPDeviceMetadataProvider()
         let candidates = slots.map { slot in
@@ -702,11 +924,16 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
                 serialNumber: slot.serialNumber,
                 productID: slot.productID,
                 batteryLevel: slot.batteryLevel ?? LogitechHIDPPTransport(device: self, deviceIndex: slot.slot)
-                    .flatMap { provider.readReceiverBatteryLevel(using: $0) }
+                    .flatMap { provider.readReceiverBatteryLevel(using: $0) },
+                hasLiveMetadata: slot.hasLiveMetadata
             )
         }
 
-        return candidates.isEmpty ? nil : candidates
+        guard !candidates.isEmpty else {
+            return nil
+        }
+
+        return (candidates, discovery.connectionSnapshots)
     }
 
     func enableWirelessNotifications() {
@@ -718,12 +945,18 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         }
     }
 
-    func discoverPointingDeviceIdentities(baseName: String) -> [ReceiverLogicalDeviceIdentity]? {
+    func discoverPointingDeviceDiscovery(baseName: String) -> LogitechHIDPPDeviceMetadataProvider
+        .ReceiverPointingDeviceDiscovery {
         guard let locationID,
-              let slots = discoverMatchCandidates(baseName: baseName)
+              let discovery = discoverMatchCandidates(baseName: baseName)
         else {
-            return nil
+            return .init(identities: [], connectionSnapshots: [:], liveReachableSlots: [])
         }
+
+        let (slots, connectionSnapshots) = discovery
+        let liveReachableSlots = Set(slots.compactMap { slot in
+            slot.hasLiveMetadata ? slot.slot : nil
+        })
 
         let identities = slots.compactMap { slot -> ReceiverLogicalDeviceIdentity? in
             guard let kind = ReceiverLogicalDeviceKind(rawValue: slot.kind), kind.isPointingDevice else {
@@ -741,7 +974,50 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
             )
         }
 
-        return identities.isEmpty ? nil : identities
+        return .init(
+            identities: identities,
+            connectionSnapshots: connectionSnapshots,
+            liveReachableSlots: liveReachableSlots
+        )
+    }
+
+    func waitForConnectionSnapshots(
+        timeout: TimeInterval,
+        until shouldContinue: (() -> Bool)? = nil
+    ) -> [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot] {
+        guard let report = waitForInputReport(
+            timeout: timeout,
+            matching: { response in
+                LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(Array(response)) != nil
+            },
+            until: shouldContinue
+        ),
+            let initialNotification = LogitechHIDPPDeviceMetadataProvider
+            .parseReceiverConnectionNotification(Array(report))
+        else {
+            return [:]
+        }
+
+        var snapshots = [initialNotification.slot: initialNotification.snapshot]
+        let deadline = Date().addingTimeInterval(0.1)
+        while Date() < deadline {
+            guard let followup = waitForInputReport(
+                timeout: 0.02,
+                matching: { response in
+                    LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(Array(response)) != nil
+                },
+                until: shouldContinue
+            ),
+                let notification = LogitechHIDPPDeviceMetadataProvider
+                .parseReceiverConnectionNotification(Array(followup))
+            else {
+                continue
+            }
+
+            snapshots[notification.slot] = notification.snapshot
+        }
+
+        return snapshots
     }
 
     func readNotificationFlags() -> UInt32? {
@@ -946,7 +1222,11 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         strategyLock.unlock()
     }
 
-    private func waitForInputReport(timeout: TimeInterval, matching: @escaping (Data) -> Bool) -> Data? {
+    private func waitForInputReport(
+        timeout: TimeInterval,
+        matching: @escaping (Data) -> Bool,
+        until shouldContinue: (() -> Bool)? = nil
+    ) -> Data? {
         requestLock.lock()
         defer { requestLock.unlock() }
 
@@ -957,12 +1237,17 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         pendingSemaphore = semaphore
         pendingLock.unlock()
 
-        return waitForPendingResponse(timeout: timeout)
+        return waitForPendingResponse(timeout: timeout, until: shouldContinue)
     }
 
-    private func waitForPendingResponse(timeout: TimeInterval) -> Data? {
+    private func waitForPendingResponse(timeout: TimeInterval, until shouldContinue: (() -> Bool)? = nil) -> Data? {
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
+            if let shouldContinue, !shouldContinue() {
+                clearPendingRequest()
+                return nil
+            }
+
             pendingLock.lock()
             let response = pendingResponse
             pendingLock.unlock()

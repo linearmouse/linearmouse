@@ -29,12 +29,7 @@ struct ReceiverLogicalDeviceIdentity: Hashable {
     let productID: Int?
     let batteryLevel: Int?
 
-    static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.receiverLocationID == rhs.receiverLocationID && lhs.slot == rhs.slot
-    }
-
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(receiverLocationID)
-        hasher.combine(slot)
+    func isSameLogicalDevice(as other: Self) -> Bool {
+        receiverLocationID == other.receiverLocationID && slot == other.slot
     }
 }
