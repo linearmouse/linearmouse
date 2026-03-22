@@ -2,9 +2,18 @@
   "name": "linearmouse",
   "private": true,
   "scripts": {
-    "generate:json-schema": "ts-json-schema-generator --path 'Documentation/Configuration.d.ts' --type Configuration > Documentation/Configuration.json"
+    "generate:json-schema": "ts-json-schema-generator --path 'Documentation/Configuration.d.ts' --type Configuration > Documentation/Configuration.json",
+    "translate:xcstrings": "node Scripts/translate-xcstrings.mjs"
+  },
+  "dependencies": {
+    "@xmldom/xmldom": "^0.8.10",
+    "openai": "^4.104.0"
+  },
+  "overrides": {
+    "@types/node": "18.11.18"
   },
   "devDependencies": {
+    "@types/node": "18.11.18",
     "ts-json-schema-generator": "^1.0.0"
   }
 }
