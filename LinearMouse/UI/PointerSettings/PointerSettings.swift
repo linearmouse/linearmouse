@@ -5,6 +5,7 @@ import SwiftUI
 
 struct PointerSettings: View {
     @ObservedObject var state = PointerSettingsState.shared
+    @State private var isPointerSpeedLimitationPopoverPresented = false
 
     var body: some View {
         DetailView {
@@ -58,7 +59,41 @@ struct PointerSettings: View {
                                 in: 0.0 ... 1.0
                             ) {
                                 labelWithDescription {
-                                    Text("Pointer speed")
+                                    HStack(spacing: 4) {
+                                        Text("Pointer speed")
+
+                                        if state.showsPointerSpeedLimitationNotice {
+                                            Button {
+                                                isPointerSpeedLimitationPopoverPresented.toggle()
+                                            } label: {
+                                                Text(verbatim: "⚠︎")
+                                                    .foregroundColor(.orange)
+                                            }
+                                            .buttonStyle(PlainButtonStyle())
+                                            .popover(
+                                                isPresented: $isPointerSpeedLimitationPopoverPresented,
+                                                arrowEdge: .top
+                                            ) {
+                                                VStack(alignment: .leading, spacing: 10) {
+                                                    Text(
+                                                        "Due to system limitations, this device may not support adjusting Pointer Speed on newer versions of macOS."
+                                                    )
+                                                    .fixedSize(horizontal: false, vertical: true)
+
+                                                    HyperLink(
+                                                        URL(
+                                                            string: "https://go.linearmouse.app/pointer-speed-limitations"
+                                                        )!
+                                                    ) {
+                                                        Text("Learn more")
+                                                    }
+                                                }
+                                                .padding()
+                                                .frame(width: 280, alignment: .leading)
+                                            }
+                                        }
+                                    }
+
                                     Text("(0–1)")
                                 }
                             }

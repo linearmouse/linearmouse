@@ -17152,6 +17152,9 @@
         }
       }
     },
+    "Due to system limitations, this device may not support adjusting Pointer Speed on newer versions of macOS." : {
+
+    },
     "Edit" : {
       "localizations" : {
         "af" : {
@@ -26109,6 +26112,9 @@
           }
         }
       }
+    },
+    "Learn more" : {
+
     },
     "Left button" : {
       "localizations" : {
