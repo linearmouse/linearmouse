@@ -157,4 +157,38 @@ final class SmoothedScrollingEngineTests: XCTestCase {
         XCTAssertGreaterThan(abs(reengagedEmission.deltaY), abs(baselineTail.deltaY) * 3)
         XCTAssertGreaterThan(abs(reengagedEmission.deltaY), abs(freshPickup.deltaY) * 0.7)
     }
+
+    func testExclusiveAxisSwitchResetsPreviousAxisMomentum() throws {
+        let configuration = Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
+        let engine = SmoothedScrollingEngine(smoothed: .init(
+            vertical: configuration,
+            horizontal: configuration
+        ))
+
+        for step in 0 ..< 6 {
+            let timestamp = Double(step) / 120
+            engine.feed(deltaX: 0, deltaY: 40, timestamp: timestamp)
+            _ = engine.advance(to: timestamp + 1.0 / 120)
+        }
+
+        var verticalMomentumDetected = false
+        for step in 6 ..< 60 {
+            let timestamp = Double(step + 1) / 120
+            if let emission = engine.advance(to: timestamp), emission.momentumPhase == .continuous,
+               abs(emission.deltaY) > 0.01 {
+                verticalMomentumDetected = true
+                break
+            }
+        }
+        XCTAssertTrue(verticalMomentumDetected)
+
+        let switchTimestamp = 1.0
+        engine.resetOtherAxis(ifExclusiveIncomingAxis: .horizontal)
+        engine.feed(deltaX: 36, deltaY: 0, timestamp: switchTimestamp)
+        let switchedEmission = try XCTUnwrap(engine.advance(to: switchTimestamp + 1.0 / 120.0))
+
+        XCTAssertEqual(switchedEmission.scrollPhase, .began)
+        XCTAssertGreaterThan(abs(switchedEmission.deltaX), 0.01)
+        XCTAssertEqual(switchedEmission.deltaY, 0, accuracy: 0.001)
+    }
 }
