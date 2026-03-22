@@ -172,12 +172,27 @@ function createClient(options) {
 
 async function exportLocalizations(projectPath, exportPath, languages) {
   const args = ['-exportLocalizations', '-project', projectPath, '-localizationPath', exportPath]
-  for (const language of languages) {
+  const exportLanguages = languages.length > 0 ? languages : await listProjectLanguages(projectPath)
+  for (const language of exportLanguages) {
     args.push('-exportLanguage', language)
   }
 
   console.log('Exporting localizations with xcodebuild...')
   await runCommand('xcodebuild', args)
+}
+
+async function listProjectLanguages(projectPath) {
+  const pbxprojPath = path.join(projectPath, 'project.pbxproj')
+  const projectText = await fs.readFile(pbxprojPath, 'utf8')
+  const match = projectText.match(/knownRegions = \(([^;]+)\);/s)
+  if (!match) {
+    return []
+  }
+
+  return match[1]
+    .split(',')
+    .map(item => item.replace(/\/\*.*?\*\//g, '').replace(/["\s]/g, ''))
+    .filter(language => language && language !== 'Base' && language !== 'en')
 }
 
 async function importLocalizations(projectPath, xclocPaths) {
@@ -316,7 +331,10 @@ function buildMessages(language, batch) {
   const system = [
     'You translate Apple XLIFF units for a macOS utility app.',
     'Return JSON only. Do not wrap it in Markdown.',
-    'Preserve placeholders and special tokens exactly, including %@, %1$@, %d, %lld, %.1f, %#@value@, %% and escaped newlines.',
+    'Use the provided note field as translator context whenever it is present.',
+    'PLACEHOLDERS are sacred. Preserve placeholders and special tokens exactly, including PLACEHOLDER, %@, %1$@, %2$@, %d, %lld, %.1f, %#@value@, %%, escaped newlines, escaped tabs, and surrounding punctuation.',
+    'ICU plural categories differ by locale: Chinese commonly uses other, English commonly uses one and other, and some locales also use zero, two, few, or many.',
+    'If an id refers to a plural or substitution branch such as .plural. or .substitutions., translate only that branch, do not invent or remove categories, and keep placeholder skeletons like %#@value@ unchanged.',
     'Keep ids unchanged.',
     'Use concise, natural product UI wording.',
     'If a string should remain identical in the target language, return it unchanged.',
