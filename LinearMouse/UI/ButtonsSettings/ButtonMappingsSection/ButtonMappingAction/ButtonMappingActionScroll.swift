@@ -21,7 +21,7 @@ extension ButtonMappingActionScroll {
             HStack {
                 Picker(String(""), selection: $distance.mode) {
                     ForEach(Mode.allCases) {
-                        Text($0.description).tag($0)
+                        $0.label.tag($0)
                     }
                 }
                 .modifier(PickerViewModifier())

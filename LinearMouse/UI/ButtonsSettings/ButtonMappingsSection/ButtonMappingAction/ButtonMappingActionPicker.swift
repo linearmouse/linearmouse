@@ -38,7 +38,7 @@ extension ButtonMappingActionPicker {
             ForEach(nodes) { node in
                 switch node {
                 case let .actionType(actionType):
-                    Text(actionType.description.capitalized).tag(actionType)
+                    actionType.label.tag(actionType)
                 case let .section(header, getNodes):
                     Section(header: Text(header)) {
                         Self(nodes: getNodes())

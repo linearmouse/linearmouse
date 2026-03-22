@@ -39,3 +39,25 @@ extension Binding where Value == Scheme.Scrolling.Modifiers.Action? {
         )
     }
 }
+
+extension Scheme.Scrolling.Modifiers.Action.Kind {
+    @ViewBuilder
+    var label: some View {
+        switch self {
+        case .defaultAction:
+            Text("Default action")
+        case .ignore:
+            Text("Ignore modifier")
+        case .noAction:
+            Text("No action")
+        case .alterOrientation:
+            Text("Alter orientation")
+        case .changeSpeed:
+            Text("Change speed")
+        case .zoom:
+            Text("Zoom")
+        case .pinchZoom:
+            Text("Pinch zoom")
+        }
+    }
+}

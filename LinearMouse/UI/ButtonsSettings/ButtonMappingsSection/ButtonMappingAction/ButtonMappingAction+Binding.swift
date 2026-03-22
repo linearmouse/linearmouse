@@ -79,3 +79,25 @@ extension Binding where Value == Scheme.Buttons.Mapping.Action {
         )
     }
 }
+
+extension Scheme.Buttons.Mapping.Action.Kind {
+    @ViewBuilder
+    var label: some View {
+        switch self {
+        case let .arg0(value):
+            Text(value.description.capitalized)
+        case .run:
+            Text("Run shell command…")
+        case .mouseWheelScrollUp:
+            Text("Scroll up…")
+        case .mouseWheelScrollDown:
+            Text("Scroll down…")
+        case .mouseWheelScrollLeft:
+            Text("Scroll left…")
+        case .mouseWheelScrollRight:
+            Text("Scroll right…")
+        case .keyPress:
+            Text("Keyboard shortcut…")
+        }
+    }
+}

@@ -1,8 +1,6 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
-import Foundation
-
 extension Scheme.Buttons.Mapping.Action {
     enum Kind: Equatable, Hashable {
         case arg0(Arg0)
@@ -49,27 +47,6 @@ extension Scheme.Buttons.Mapping.Action {
             self = .arg1(.mouseWheelScrollRight(.line(3)))
         case .keyPress:
             self = .arg1(.keyPress([]))
-        }
-    }
-}
-
-extension Scheme.Buttons.Mapping.Action.Kind: CustomStringConvertible {
-    var description: String {
-        switch self {
-        case let .arg0(value):
-            return value.description
-        case .run:
-            return NSLocalizedString("Run shell command…", comment: "")
-        case .mouseWheelScrollUp:
-            return NSLocalizedString("Scroll up…", comment: "")
-        case .mouseWheelScrollDown:
-            return NSLocalizedString("Scroll down…", comment: "")
-        case .mouseWheelScrollLeft:
-            return NSLocalizedString("Scroll left…", comment: "")
-        case .mouseWheelScrollRight:
-            return NSLocalizedString("Scroll right…", comment: "")
-        case .keyPress:
-            return NSLocalizedString("Keyboard shortcut…", comment: "")
         }
     }
 }

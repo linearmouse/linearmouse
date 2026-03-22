@@ -51,3 +51,15 @@ extension Binding where Value == Scheme.Scrolling.Distance {
         )
     }
 }
+
+extension Scheme.Scrolling.Distance.Mode {
+    @ViewBuilder
+    var label: some View {
+        switch self {
+        case .byLines:
+            Text("By Lines")
+        case .byPixels:
+            Text("By Pixels")
+        }
+    }
+}

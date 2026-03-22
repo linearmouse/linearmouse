@@ -12,7 +12,7 @@ extension ScrollingSettings.ModifierKeysSection {
         var body: some View {
             Picker(label, selection: $action.kind) {
                 ForEach(ActionType.allCases) { type in
-                    Text(type.description).tag(type)
+                    type.label.tag(type)
                     if type == .defaultAction || type == .noAction {
                         Divider()
                     }

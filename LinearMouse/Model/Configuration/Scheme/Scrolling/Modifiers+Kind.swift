@@ -1,21 +1,19 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
-import Foundation
-
 extension Scheme.Scrolling.Modifiers.Action {
-    enum Kind: String, CaseIterable, Identifiable {
+    enum Kind: CaseIterable, Identifiable {
         var id: Self {
             self
         }
 
-        case defaultAction = "Default action"
-        case ignore = "Ignore modifier"
-        case noAction = "No action"
-        case alterOrientation = "Alter orientation"
-        case changeSpeed = "Change speed"
-        case zoom = "Zoom"
-        case pinchZoom = "Pinch zoom"
+        case defaultAction
+        case ignore
+        case noAction
+        case alterOrientation
+        case changeSpeed
+        case zoom
+        case pinchZoom
     }
 
     var kind: Kind {
@@ -54,11 +52,5 @@ extension Scheme.Scrolling.Modifiers.Action {
         case .pinchZoom:
             self = .pinchZoom
         }
-    }
-}
-
-extension Scheme.Scrolling.Modifiers.Action.Kind: CustomStringConvertible {
-    var description: String {
-        NSLocalizedString(rawValue, comment: "").capitalized
     }
 }
