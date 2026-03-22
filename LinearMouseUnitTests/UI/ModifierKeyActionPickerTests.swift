@@ -6,40 +6,46 @@ import SwiftUI
 import XCTest
 
 final class ModifierKeyActionPickerTests: XCTestCase {
-    func testNilActionDisplaysDefaultAction() {
-        let picker = makePicker(action: nil)
+    func testNilActionBindingDisplaysDefaultAction() {
+        let binding = makeActionBinding(action: nil)
 
-        XCTAssertEqual(picker.actionType.wrappedValue, .defaultAction)
+        XCTAssertEqual(binding.kind.wrappedValue, Scheme.Scrolling.Modifiers.Action.Kind.defaultAction)
     }
 
     func testSelectingDefaultActionStoresAutoAction() {
         var action: Scheme.Scrolling.Modifiers.Action?
-        let picker = makePicker(action: action) { action = $0 }
+        let binding = makeActionBinding(action: action) { action = $0 }
 
-        picker.actionType.wrappedValue = .defaultAction
+        binding.kind.wrappedValue = .defaultAction
 
         XCTAssertEqual(action, .auto)
     }
 
     func testSelectingNoActionStoresPreventDefaultAction() {
         var action: Scheme.Scrolling.Modifiers.Action?
-        let picker = makePicker(action: action) { action = $0 }
+        let binding = makeActionBinding(action: action) { action = $0 }
 
-        picker.actionType.wrappedValue = .noAction
+        binding.kind.wrappedValue = .noAction
 
         XCTAssertEqual(action, .preventDefault)
     }
 
-    private func makePicker(
+    func testChangeSpeedFactorBindingRoundsToNearestHalfAboveOne() {
+        var action: Scheme.Scrolling.Modifiers.Action? = .changeSpeed(scale: 1)
+        let binding = makeActionBinding(action: action) { action = $0 }
+
+        binding.speedFactor.wrappedValue = 2.74
+
+        XCTAssertEqual(action, .changeSpeed(scale: 2.5))
+    }
+
+    private func makeActionBinding(
         action: Scheme.Scrolling.Modifiers.Action?,
         setter: @escaping (Scheme.Scrolling.Modifiers.Action?) -> Void = { _ in }
-    ) -> ScrollingSettings.ModifierKeysSection.ModifierKeyActionPicker {
-        ScrollingSettings.ModifierKeysSection.ModifierKeyActionPicker(
-            label: "Test",
-            action: Binding(
-                get: { action },
-                set: setter
-            )
+    ) -> Binding<Scheme.Scrolling.Modifiers.Action?> {
+        Binding(
+            get: { action },
+            set: setter
         )
     }
 }

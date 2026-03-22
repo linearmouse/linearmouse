@@ -9,21 +9,7 @@ struct ButtonMappingActionKeyPress: View {
     @Binding var action: Scheme.Buttons.Mapping.Action
 
     var body: some View {
-        KeyboardShortcutRecorder(keys: keys)
-    }
-
-    private var keys: Binding<[Key]> {
-        Binding<[Key]>(
-            get: {
-                guard case let .arg1(.keyPress(keys)) = action else {
-                    return []
-                }
-                return keys
-            },
-            set: {
-                action = .arg1(.keyPress($0))
-            }
-        )
+        KeyboardShortcutRecorder(keys: $action.keyPressKeys)
     }
 }
 

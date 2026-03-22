@@ -20,12 +20,7 @@ struct ButtonMappingActionPicker: View, Equatable {
 }
 
 extension ButtonMappingActionPicker {
-    enum ActionType: Equatable, Hashable {
-        case arg0(Scheme.Buttons.Mapping.Action.Arg0)
-        case run
-        case mouseWheelScrollUp, mouseWheelScrollDown, mouseWheelScrollLeft, mouseWheelScrollRight
-        case keyPress
-    }
+    typealias ActionType = Scheme.Buttons.Mapping.Action.Kind
 
     indirect enum ActionTypeTreeNode: Identifiable {
         var id: UUID {
@@ -114,25 +109,4 @@ extension ButtonMappingActionPicker {
         ]
         }
     ]
-}
-
-extension ButtonMappingActionPicker.ActionType: CustomStringConvertible {
-    var description: String {
-        switch self {
-        case let .arg0(value):
-            return value.description
-        case .run:
-            return NSLocalizedString("Run shell command…", comment: "")
-        case .mouseWheelScrollUp:
-            return NSLocalizedString("Scroll up…", comment: "")
-        case .mouseWheelScrollDown:
-            return NSLocalizedString("Scroll down…", comment: "")
-        case .mouseWheelScrollLeft:
-            return NSLocalizedString("Scroll left…", comment: "")
-        case .mouseWheelScrollRight:
-            return NSLocalizedString("Scroll right…", comment: "")
-        case .keyPress:
-            return NSLocalizedString("Keyboard shortcut…", comment: "")
-        }
-    }
 }
