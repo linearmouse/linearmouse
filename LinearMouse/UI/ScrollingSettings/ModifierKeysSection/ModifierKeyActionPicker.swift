@@ -58,7 +58,7 @@ extension ScrollingSettings.ModifierKeysSection.ModifierKeyActionPicker {
         Binding<ActionType>(
             get: {
                 guard let action else {
-                    return .noAction
+                    return .defaultAction
                 }
 
                 switch action {
