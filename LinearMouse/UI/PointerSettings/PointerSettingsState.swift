@@ -88,6 +88,10 @@ extension PointerSettingsState {
         return formatter
     }
 
+    var showsPointerSpeedLimitationNotice: Bool {
+        mergedScheme.firstMatchedDevice?.showsPointerSpeedLimitationNotice ?? false
+    }
+
     func revertPointerSpeed() {
         let device = scheme.firstMatchedDevice
 

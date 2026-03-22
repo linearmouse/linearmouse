@@ -128,6 +128,11 @@ extension Device {
         case mouse, trackpad
     }
 
+    private static let appleVendorIDs = Set([0x004C, 0x05AC])
+    private static let appleMagicMouseProductIDs = Set([0x0269, 0x030D])
+    private static let appleMagicTrackpadProductIDs = Set([0x0265, 0x030E])
+    private static let appleBuiltInTrackpadProductIDs = Set([0x0273, 0x0276, 0x0278, 0x0340])
+
     private static func detectCategory(for device: PointerDevice) -> Category {
         if let vendorID = device.vendorID,
            let productID = device.productID,
@@ -143,8 +148,28 @@ extension Device {
     }
 
     private static func isAppleMagicMouse(vendorID: Int, productID: Int) -> Bool {
-        [0x004C, 0x05AC].contains(vendorID)
-            && [0x0269, 0x030D].contains(productID)
+        appleVendorIDs.contains(vendorID)
+            && appleMagicMouseProductIDs.contains(productID)
+    }
+
+    private static func isAppleMagicTrackpad(vendorID: Int, productID: Int) -> Bool {
+        appleVendorIDs.contains(vendorID)
+            && appleMagicTrackpadProductIDs.contains(productID)
+    }
+
+    private static func isAppleBuiltInTrackpad(vendorID: Int, productID: Int) -> Bool {
+        vendorID == 0x05AC
+            && appleBuiltInTrackpadProductIDs.contains(productID)
+    }
+
+    var showsPointerSpeedLimitationNotice: Bool {
+        guard let vendorID, let productID else {
+            return false
+        }
+
+        return Self.isAppleMagicMouse(vendorID: vendorID, productID: productID)
+            || Self.isAppleMagicTrackpad(vendorID: vendorID, productID: productID)
+            || Self.isAppleBuiltInTrackpad(vendorID: vendorID, productID: productID)
     }
 
     /**
