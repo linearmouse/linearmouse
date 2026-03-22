@@ -1,6 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
+import CoreGraphics
 @testable import LinearMouse
 import XCTest
 
@@ -109,6 +110,137 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertEqual(
             LogitechHIDPPDeviceMetadataProvider.parseConnectedDeviceCount([0x10, 0xFF, 0x81, 0x02, 0x00, 0x01, 0x00]),
             1
+        )
+    }
+
+    func testLogitechDivertedButtonsNotificationMatchesGestureButtonEvent() {
+        XCTAssertTrue(
+            LogitechReprogrammableControlsMonitor.isDivertedButtonsNotification(
+                [0x10, 0x02, 0x05, 0x08, 0x00, 0xC3, 0x00],
+                featureIndex: 0x05,
+                slot: 0x02
+            )
+        )
+    }
+
+    func testLogitechDivertedButtonsNotificationParsesPressedControls() {
+        XCTAssertEqual(
+            LogitechReprogrammableControlsMonitor.parseDivertedButtonsNotification([
+                0x10,
+                0x02,
+                0x05,
+                0x08,
+                0x00,
+                0xC3,
+                0x00,
+                0xC4
+            ]),
+            Set([0x00C3, 0x00C4])
+        )
+    }
+
+    func testLogitechDivertedButtonsNotificationRejectsWrongSlot() {
+        XCTAssertFalse(
+            LogitechReprogrammableControlsMonitor.isDivertedButtonsNotification(
+                [0x10, 0x03, 0x05, 0x08, 0x00, 0xC3, 0x00],
+                featureIndex: 0x05,
+                slot: 0x02
+            )
+        )
+    }
+
+    func testPreferredReceiverIdentityChoosesSingleMouse() {
+        let identities: [ReceiverLogicalDeviceIdentity] = [
+            .init(
+                receiverLocationID: 0x1234,
+                slot: 1,
+                kind: .keyboard,
+                name: "Keyboard",
+                serialNumber: nil,
+                productID: nil,
+                batteryLevel: nil
+            ),
+            .init(
+                receiverLocationID: 0x1234,
+                slot: 2,
+                kind: .mouse,
+                name: "M720",
+                serialNumber: nil,
+                productID: nil,
+                batteryLevel: nil
+            )
+        ]
+
+        XCTAssertEqual(LogitechReprogrammableControlsMonitor.preferredIdentity(from: identities)?.slot, 2)
+    }
+
+    func testPreferredReceiverIdentityReturnsNilForMultipleMice() {
+        let identities: [ReceiverLogicalDeviceIdentity] = [
+            .init(
+                receiverLocationID: 0x1234,
+                slot: 1,
+                kind: .mouse,
+                name: "M720",
+                serialNumber: nil,
+                productID: nil,
+                batteryLevel: nil
+            ),
+            .init(
+                receiverLocationID: 0x1234,
+                slot: 2,
+                kind: .mouse,
+                name: "Anywhere",
+                serialNumber: nil,
+                productID: nil,
+                batteryLevel: nil
+            )
+        ]
+
+        XCTAssertNil(LogitechReprogrammableControlsMonitor.preferredIdentity(from: identities))
+    }
+
+    func testLogitechGestureButtonControlIDsIncludeM720ThumbButton() {
+        XCTAssertTrue(LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.gestureButtonControlIDs.contains(0x00D0))
+    }
+
+    func testLogitechGestureButtonTaskIDsIncludeM720GestureTasks() {
+        XCTAssertTrue(LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.gestureButtonTaskIDs.contains(0x00AD))
+        XCTAssertTrue(LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.gestureButtonTaskIDs.contains(0x00A9))
+    }
+
+    func testSyntheticButtonNumbersAreStableByControlID() {
+        let mapping = LogitechReprogrammableControlsMonitor.syntheticButtonNumbers(for: [0x00D7, 0x00D0, 0x00C3])
+
+        XCTAssertEqual(mapping[0x00C3], 8)
+        XCTAssertEqual(mapping[0x00D0], 9)
+        XCTAssertEqual(mapping[0x00D7], 10)
+    }
+
+    func testSyntheticButtonNumberIgnoresEnumerationOrder() {
+        let forward = LogitechReprogrammableControlsMonitor.syntheticButtonNumbers(for: [0x00D0, 0x00D7])
+        let reverse = LogitechReprogrammableControlsMonitor.syntheticButtonNumbers(for: [0x00D7, 0x00D0])
+
+        XCTAssertEqual(forward, reverse)
+        XCTAssertEqual(
+            LogitechReprogrammableControlsMonitor.syntheticButtonNumber(for: 0x00D0, among: [0x00D7, 0x00D0]),
+            8
+        )
+        XCTAssertEqual(
+            LogitechReprogrammableControlsMonitor.syntheticButtonNumber(for: 0x00D7, among: [0x00D7, 0x00D0]),
+            9
+        )
+    }
+
+    func testLogitechControlIdentityProvidesFriendlyUserVisibleName() {
+        XCTAssertEqual(
+            LogitechControlIdentity(controlID: 0x00D0, logicalDeviceProductID: nil, logicalDeviceSerialNumber: nil)
+                .userVisibleName,
+            "Logitech CID 0x00D0"
+        )
+        XCTAssertEqual(
+            LogitechControlIdentity(controlID: 0x1234, logicalDeviceProductID: nil, logicalDeviceSerialNumber: nil)
+                .userVisibleName,
+            "Logitech CID 0x1234"
         )
     }
 
@@ -320,9 +452,15 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             )
         ]
 
+        let expected = String(
+            format: NSLocalizedString("%@ (%lld devices)", comment: ""),
+            "USB Receiver",
+            Int64(identities.count)
+        )
+
         XCTAssertEqual(
             DeviceManager.displayName(baseName: "USB Receiver", pairedDevices: identities),
-            "USB Receiver (2 devices)"
+            expected
         )
     }
 }

@@ -2,12 +2,14 @@
 // Copyright (c) 2021-2026 LinearMouse
 
 extension Scheme.Buttons {
-    struct Mapping: Codable, Equatable, Hashable {
+    struct Mapping: Equatable, Hashable {
         var button: Int?
+        var logiButton: LogitechControlIdentity?
         var `repeat`: Bool?
 
         var scroll: ScrollDirection?
 
+        var modifierFlagsRaw: UInt64?
         var command: Bool?
         var shift: Bool?
         var option: Bool?
@@ -19,11 +21,11 @@ extension Scheme.Buttons {
 
 extension Scheme.Buttons.Mapping {
     var valid: Bool {
-        guard button != nil || scroll != nil else {
+        guard button != nil || logiButton != nil || scroll != nil else {
             return false
         }
 
-        guard !(button == 0 && modifierFlags.isEmpty) else {
+        guard !(button == 0 && logiButton == nil && modifierFlags.isEmpty) else {
             return false
         }
 
@@ -36,7 +38,11 @@ extension Scheme.Buttons.Mapping {
 
     var modifierFlags: CGEventFlags {
         get {
-            CGEventFlags([
+            if let modifierFlagsRaw {
+                return ModifierState.generic(from: CGEventFlags(rawValue: modifierFlagsRaw))
+            }
+
+            return CGEventFlags([
                 (command, CGEventFlags.maskCommand),
                 (shift, CGEventFlags.maskShift),
                 (option, CGEventFlags.maskAlternate),
@@ -48,17 +54,34 @@ extension Scheme.Buttons.Mapping {
         }
 
         set {
-            command = newValue.contains(.maskCommand)
-            shift = newValue.contains(.maskShift)
-            option = newValue.contains(.maskAlternate)
-            control = newValue.contains(.maskControl)
+            let normalizedFlags = ModifierState.normalize(newValue)
+            let sideSpecificFlags = ModifierState.sideSpecific(from: normalizedFlags)
+            modifierFlagsRaw = sideSpecificFlags.isEmpty ? nil : normalizedFlags.rawValue
+
+            let genericFlags = ModifierState.generic(from: normalizedFlags)
+            command = genericFlags.contains(.maskCommand)
+            shift = genericFlags.contains(.maskShift)
+            option = genericFlags.contains(.maskAlternate)
+            control = genericFlags.contains(.maskControl)
+        }
+    }
+
+    var rawModifierFlags: CGEventFlags {
+        get {
+            if let modifierFlagsRaw {
+                return ModifierState.normalize(CGEventFlags(rawValue: modifierFlagsRaw))
+            }
+
+            return ModifierState.generic(from: modifierFlags)
+        }
+
+        set {
+            modifierFlags = newValue
         }
     }
 
     func match(with event: CGEvent) -> Bool {
-        let view = EventView(event)
-
-        guard view.modifierFlags == modifierFlags else {
+        guard matches(modifierFlags: event.flags) else {
             return false
         }
 
@@ -73,6 +96,10 @@ extension Scheme.Buttons.Mapping {
                   mouseButton.rawValue == button else {
                 return false
             }
+        } else if logiButton != nil {
+            // Logitech control mappings are matched directly via handleLogitechControlEvent,
+            // not through the CGEvent pipeline.
+            return false
         }
 
         if let scroll {
@@ -106,10 +133,40 @@ extension Scheme.Buttons.Mapping {
     }
 
     func conflicted(with mapping: Self) -> Bool {
-        if button == mapping.button, scroll == mapping.scroll, modifierFlags == mapping.modifierFlags {
-            return true
+        guard scroll == mapping.scroll,
+              conflicts(withModifierFlagsOf: mapping) else {
+            return false
         }
-        return false
+
+        if let logiButton, let otherLogiButton = mapping.logiButton {
+            return logiButton == otherLogiButton
+        }
+
+        return button == mapping.button && logiButton == mapping.logiButton
+    }
+
+    func matches(modifierFlags eventFlags: CGEventFlags) -> Bool {
+        let normalizedFlags = ModifierState.normalize(eventFlags)
+
+        if let modifierFlagsRaw {
+            return normalizedFlags == ModifierState.normalize(CGEventFlags(rawValue: modifierFlagsRaw))
+        }
+
+        return ModifierState.generic(from: normalizedFlags) == modifierFlags
+    }
+
+    private func conflicts(withModifierFlagsOf mapping: Self) -> Bool {
+        switch (modifierFlagsRaw, mapping.modifierFlagsRaw) {
+        case let (lhsRaw?, rhsRaw?):
+            return ModifierState.normalize(CGEventFlags(rawValue: lhsRaw)) == ModifierState
+                .normalize(CGEventFlags(rawValue: rhsRaw))
+        case (_?, nil):
+            return mapping.matches(modifierFlags: rawModifierFlags)
+        case (nil, _?):
+            return matches(modifierFlags: mapping.rawModifierFlags)
+        case (nil, nil):
+            return modifierFlags == mapping.modifierFlags
+        }
     }
 }
 
@@ -120,7 +177,11 @@ extension Scheme.Buttons.Mapping: Comparable {
 
             if let button = mapping.button {
                 score |= ((button & 0xFF) << 8)
-            } else if mapping.scroll != nil {
+            }
+
+            if let logiButtonID = mapping.logiButton?.controlID {
+                score |= ((logiButtonID & 0xFFFF) << 20)
+            } else if mapping.button == nil, mapping.scroll != nil {
                 score |= (1 << 16)
             }
 
@@ -137,9 +198,60 @@ extension Scheme.Buttons.Mapping: Comparable {
                 score |= (1 << 3)
             }
 
+            score |= Int(truncatingIfNeeded: ModifierState.sideSpecific(from: mapping.rawModifierFlags).rawValue >> 4) &
+                0xF0
+
             return score
         }
 
         return score(lhs) < score(rhs)
+    }
+}
+
+extension Scheme.Buttons.Mapping: Codable {
+    private enum CodingKeys: String, CodingKey {
+        case button
+        case logiButton
+        case logitechControl
+        case `repeat`
+        case scroll
+        case modifierFlagsRaw
+        case command
+        case shift
+        case option
+        case control
+        case action
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        button = try container.decodeIfPresent(Int.self, forKey: .button)
+        logiButton = try container.decodeIfPresent(LogitechControlIdentity.self, forKey: .logiButton)
+            ?? container.decodeIfPresent(LogitechControlIdentity.self, forKey: .logitechControl)
+        `repeat` = try container.decodeIfPresent(Bool.self, forKey: .repeat)
+        scroll = try container.decodeIfPresent(ScrollDirection.self, forKey: .scroll)
+        modifierFlagsRaw = try container.decodeIfPresent(UInt64.self, forKey: .modifierFlagsRaw)
+        command = try container.decodeIfPresent(Bool.self, forKey: .command)
+        shift = try container.decodeIfPresent(Bool.self, forKey: .shift)
+        option = try container.decodeIfPresent(Bool.self, forKey: .option)
+        control = try container.decodeIfPresent(Bool.self, forKey: .control)
+
+        action = try container.decodeIfPresent(Action.self, forKey: .action)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encodeIfPresent(button, forKey: .button)
+        try container.encodeIfPresent(logiButton, forKey: .logiButton)
+        try container.encodeIfPresent(`repeat`, forKey: .repeat)
+        try container.encodeIfPresent(scroll, forKey: .scroll)
+        try container.encodeIfPresent(modifierFlagsRaw, forKey: .modifierFlagsRaw)
+        try container.encodeIfPresent(command, forKey: .command)
+        try container.encodeIfPresent(shift, forKey: .shift)
+        try container.encodeIfPresent(option, forKey: .option)
+        try container.encodeIfPresent(control, forKey: .control)
+        try container.encodeIfPresent(action, forKey: .action)
     }
 }

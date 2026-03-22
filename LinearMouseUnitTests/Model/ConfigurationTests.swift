@@ -84,6 +84,27 @@ final class ConfigurationTests: XCTestCase {
         XCTAssertEqual(scheme.buttons.autoScroll.modes, [.toggle])
     }
 
+    func testMappingDecodesLegacyGenericModifierFlagsWithoutRawFlags() throws {
+        let mapping = try JSONDecoder().decode(
+            Scheme.Buttons.Mapping.self,
+            from: XCTUnwrap(#"{"button":3,"command":true}"#.data(using: .utf8))
+        )
+
+        XCTAssertEqual(mapping.modifierFlags, [.maskCommand])
+        XCTAssertTrue(mapping.rawModifierFlags.contains(.maskCommand))
+        XCTAssertFalse(mapping.rawModifierFlags.contains(.init(rawValue: UInt64(NX_DEVICERCMDKEYMASK))))
+        XCTAssertNil(mapping.modifierFlagsRaw)
+    }
+
+    func testMappingPreservesRawSideSpecificModifierFlags() {
+        var mapping = Scheme.Buttons.Mapping(button: 3)
+        mapping.rawModifierFlags = [.maskCommand, .init(rawValue: UInt64(NX_DEVICERCMDKEYMASK))]
+
+        XCTAssertEqual(mapping.modifierFlags, [.maskCommand])
+        XCTAssertTrue(mapping.rawModifierFlags.contains(.init(rawValue: UInt64(NX_DEVICERCMDKEYMASK))))
+        XCTAssertEqual(mapping.modifierFlagsRaw, CGEventFlags.maskCommand.rawValue | UInt64(NX_DEVICERCMDKEYMASK))
+    }
+
     func testDecodeAutoScrollSingleMode() throws {
         let autoScroll = try JSONDecoder().decode(
             Scheme.Buttons.AutoScroll.self,

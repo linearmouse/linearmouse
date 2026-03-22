@@ -41,4 +41,13 @@ class SettingsState: ObservableObject {
 
     /// When `recording` is true, `ButtonActionsTransformer` should be temporarily disabled.
     @Published var recording = false
+
+    /// Set to `true` by `LogitechReprogrammableControlsMonitor` after all controls are diverted during recording.
+    /// The button recorder waits for this before showing the recording UI to prevent the user
+    /// from pressing a button before diversion is active.
+    @Published var recordingDivertReady = false
+
+    /// Set by `LogitechReprogrammableControlsMonitor` when a Logitech control is pressed during recording.
+    /// The button recorder observes this to capture Logitech button identity without synthetic events.
+    @Published var recordedLogitechControl: LogitechControlIdentity?
 }

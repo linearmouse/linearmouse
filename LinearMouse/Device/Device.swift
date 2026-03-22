@@ -33,6 +33,7 @@ class Device {
 
     private weak var manager: DeviceManager?
     private var inputReportHandlers: [InputReportHandler] = []
+    private var logitechReprogrammableControlsMonitor: LogitechReprogrammableControlsMonitor?
     private let device: PointerDevice
 
     var pointerDevice: PointerDevice {
@@ -95,6 +96,12 @@ class Device {
             }
         }
 
+        if LogitechReprogrammableControlsMonitor.supports(device: self) {
+            let monitor = LogitechReprogrammableControlsMonitor(device: self)
+            logitechReprogrammableControlsMonitor = monitor
+            monitor.start()
+        }
+
         os_log(
             "Device initialized: %{public}@: HIDPointerResolution=%{public}f, HIDPointerAccelerationType=%{public}@, battery=%{public}@",
             log: Self.log,
@@ -120,6 +127,16 @@ class Device {
 
         inputObservationToken = nil
         reportObservationToken = nil
+        logitechReprogrammableControlsMonitor?.stop()
+        logitechReprogrammableControlsMonitor = nil
+    }
+
+    func markActive(reason: String) {
+        manager?.markDeviceActive(self, reason: reason)
+    }
+
+    var hasLogitechControlsMonitor: Bool {
+        logitechReprogrammableControlsMonitor != nil
     }
 }
 

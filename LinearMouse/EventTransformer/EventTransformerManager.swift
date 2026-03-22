@@ -49,17 +49,6 @@ class EventTransformerManager {
         withMouseLocationPid mouseLocationPid: pid_t?,
         withDisplay display: String?
     ) -> EventTransformer {
-        let prevActiveCacheKey = activeCacheKey
-        defer {
-            if let prevActiveCacheKey,
-               prevActiveCacheKey != activeCacheKey {
-                transition(
-                    from: eventTransformerCache.value(forKey: prevActiveCacheKey),
-                    to: activeCacheKey.flatMap { eventTransformerCache.value(forKey: $0) }
-                )
-            }
-        }
-
         activeCacheKey = nil
 
         if sourcePid != nil, bypassEventsFromOtherApplications, !cgEvent.isLinearMouseSyntheticEvent {
@@ -83,14 +72,41 @@ class EventTransformerManager {
         }
 
         let pid = mouseLocationPid ?? targetPid
-
         let device = DeviceManager.shared.deviceFromCGEvent(cgEvent)
+
+        return get(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: true)
+    }
+
+    func get(withDevice device: Device?, withPid pid: pid_t?, withDisplay display: String?) -> EventTransformer {
+        get(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: false)
+    }
+
+    private func get(
+        withDevice device: Device?,
+        withPid pid: pid_t?,
+        withDisplay display: String?,
+        updateActiveCacheKey: Bool
+    ) -> EventTransformer {
+        let prevActiveCacheKey = activeCacheKey
+        defer {
+            if updateActiveCacheKey,
+               let prevActiveCacheKey,
+               prevActiveCacheKey != activeCacheKey {
+                transition(
+                    from: eventTransformerCache.value(forKey: prevActiveCacheKey),
+                    to: activeCacheKey.flatMap { eventTransformerCache.value(forKey: $0) }
+                )
+            }
+        }
+
         let cacheKey = CacheKey(
             deviceMatcher: device.map { DeviceMatcher(of: $0) },
             pid: pid,
             screen: display
         )
-        activeCacheKey = cacheKey
+        if updateActiveCacheKey {
+            activeCacheKey = cacheKey
+        }
         if let eventTransformer = eventTransformerCache.value(forKey: cacheKey) {
             return eventTransformer
         }
