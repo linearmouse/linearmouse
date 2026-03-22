@@ -168,14 +168,21 @@ class DeviceManager: ObservableObject {
         }
 
         if let locationID = pointerDevice.locationID {
-            receiverMonitor.stopMonitoring(device: device)
-
             let hasRemainingReceiverAtLocation = pointerDeviceToDevice
                 .filter { $0.key != pointerDevice }
                 .contains { _, existingDevice in
                     existingDevice.pointerDevice.locationID == locationID && shouldMonitorReceiver(existingDevice)
                 }
-            if !hasRemainingReceiverAtLocation {
+
+            if hasRemainingReceiverAtLocation {
+                os_log(
+                    "Keep receiver monitor running because another receiver device shares locationID=%{public}u",
+                    log: Self.log,
+                    type: .info,
+                    UInt32(locationID)
+                )
+            } else {
+                receiverMonitor.stopMonitoring(device: device)
                 receiverPairedDeviceIdentities.removeValue(forKey: locationID)
             }
         }
@@ -362,7 +369,16 @@ class DeviceManager: ObservableObject {
             return []
         }
 
-        return receiverPairedDeviceIdentities[locationID] ?? []
+        let identities = receiverPairedDeviceIdentities[locationID] ?? []
+        os_log(
+            "Receiver paired device lookup: locationID=%{public}u device=%{public}@ count=%{public}u",
+            log: Self.log,
+            type: .info,
+            UInt32(locationID),
+            String(describing: device),
+            UInt32(identities.count)
+        )
+        return identities
     }
 
     func preferredName(for device: Device, fallback: String? = nil) -> String {
@@ -390,6 +406,13 @@ class DeviceManager: ObservableObject {
 
     private func receiverPointingDevicesChanged(locationID: Int, identities: [ReceiverLogicalDeviceIdentity]) {
         guard pointerDeviceToDevice.values.contains(where: { $0.pointerDevice.locationID == locationID }) else {
+            os_log(
+                "Drop receiver logical device update because no visible device matches locationID=%{public}u count=%{public}u",
+                log: Self.log,
+                type: .info,
+                UInt32(locationID),
+                UInt32(identities.count)
+            )
             return
         }
 

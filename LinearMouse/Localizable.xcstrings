@@ -8822,6 +8822,9 @@
     "Batteries" : {
 
     },
+    "Battery %lld percent" : {
+
+    },
     "Bug report" : {
       "localizations" : {
         "af" : {

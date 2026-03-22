@@ -50,7 +50,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertTrue(provider.matches(device: device))
     }
 
-    func testReceiverLogicalDeviceIdentityEqualityUsesReceiverLocationAndSlot() {
+    func testReceiverLogicalDeviceIdentityUsesAllFieldsForEquality() {
         let lhs = ReceiverLogicalDeviceIdentity(
             receiverLocationID: 0x1234,
             slot: 1,
@@ -70,8 +70,169 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             batteryLevel: 80
         )
 
-        XCTAssertEqual(lhs, rhs)
-        XCTAssertEqual(lhs.hashValue, rhs.hashValue)
+        XCTAssertNotEqual(lhs, rhs)
+    }
+
+    func testReceiverLogicalDeviceIdentityCanDetectSameLogicalDevice() {
+        let lhs = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 0x1234,
+            slot: 1,
+            kind: .mouse,
+            name: "Mouse A",
+            serialNumber: "AAAA",
+            productID: 0x1234,
+            batteryLevel: 50
+        )
+        let rhs = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 0x1234,
+            slot: 1,
+            kind: .trackball,
+            name: "Mouse B",
+            serialNumber: "BBBB",
+            productID: 0x5678,
+            batteryLevel: 80
+        )
+
+        XCTAssertTrue(lhs.isSameLogicalDevice(as: rhs))
+    }
+
+    func testParseReceiverConnectionNotificationTracksConnectState() {
+        let notification = LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification([
+            0x10, 0x02, 0x41, 0x00, 0x02, 0x00, 0x00
+        ])
+
+        XCTAssertEqual(notification?.slot, 2)
+        XCTAssertEqual(notification?.snapshot, .init(isConnected: true, kind: 0x02))
+    }
+
+    func testParseConnectedDeviceCountReadsReceiverConnectionRegister() {
+        XCTAssertEqual(
+            LogitechHIDPPDeviceMetadataProvider.parseConnectedDeviceCount([0x10, 0xFF, 0x81, 0x02, 0x00, 0x01, 0x00]),
+            1
+        )
+    }
+
+    func testReceiverSlotStateStoreDoesNotResurrectDisconnectedSlotFromPairingMetadata() {
+        var store = ReceiverSlotStateStore()
+        let identity = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 0x1234,
+            slot: 1,
+            kind: .mouse,
+            name: "Mouse A",
+            serialNumber: "AAAA",
+            productID: 0x1234,
+            batteryLevel: 60
+        )
+
+        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
+            1: .init(isConnected: false, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
+        ], liveReachableSlots: []))
+        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [:], liveReachableSlots: []))
+
+        XCTAssertTrue(store.currentPublishedIdentities().isEmpty)
+    }
+
+    func testReceiverSlotStateStoreRestoresSlotAfterReconnectSnapshot() {
+        var store = ReceiverSlotStateStore()
+        let identity = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 0x1234,
+            slot: 1,
+            kind: .mouse,
+            name: "Mouse A",
+            serialNumber: "AAAA",
+            productID: 0x1234,
+            batteryLevel: 60
+        )
+
+        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
+            1: .init(isConnected: false, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
+        ], liveReachableSlots: []))
+        store.mergeConnectionSnapshots([
+            1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
+        ])
+
+        XCTAssertEqual(store.currentPublishedIdentities(), [identity])
+    }
+
+    func testReceiverSlotStateStoreTreatsFreshBatteryMetadataAsReconnectEvidence() {
+        var store = ReceiverSlotStateStore()
+        let disconnectedIdentity = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 0x1234,
+            slot: 1,
+            kind: .mouse,
+            name: "Mouse A",
+            serialNumber: "AAAA",
+            productID: 0x1234,
+            batteryLevel: nil
+        )
+        let reconnectedIdentity = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 0x1234,
+            slot: 1,
+            kind: .mouse,
+            name: "Mouse A",
+            serialNumber: "AAAA",
+            productID: 0x1234,
+            batteryLevel: 60
+        )
+
+        store.mergeDiscovery(.init(identities: [disconnectedIdentity], connectionSnapshots: [
+            1: .init(isConnected: false, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
+        ], liveReachableSlots: []))
+        store.mergeDiscovery(.init(identities: [reconnectedIdentity], connectionSnapshots: [:], liveReachableSlots: []))
+
+        XCTAssertEqual(store.currentPublishedIdentities(), [reconnectedIdentity])
+    }
+
+    func testReceiverSlotStateStoreTreatsLiveReachabilityAsReconnectEvidence() {
+        var store = ReceiverSlotStateStore()
+        let identity = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 0x1234,
+            slot: 1,
+            kind: .mouse,
+            name: "Mouse A",
+            serialNumber: "AAAA",
+            productID: 0x1234,
+            batteryLevel: nil
+        )
+
+        store.mergeDiscovery(.init(
+            identities: [identity],
+            connectionSnapshots: [1: .init(isConnected: false, kind: ReceiverLogicalDeviceKind.mouse.rawValue)],
+            liveReachableSlots: []
+        ))
+        store.mergeDiscovery(.init(
+            identities: [identity],
+            connectionSnapshots: [:],
+            liveReachableSlots: [1]
+        ))
+
+        XCTAssertEqual(store.currentPublishedIdentities(), [identity])
+    }
+
+    func testReceiverSlotStateStoreDoesNotReconnectWithoutEvidence() {
+        var store = ReceiverSlotStateStore()
+        let identity = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 0x1234,
+            slot: 1,
+            kind: .mouse,
+            name: "Mouse A",
+            serialNumber: "AAAA",
+            productID: 0x1234,
+            batteryLevel: nil
+        )
+
+        store.mergeDiscovery(.init(
+            identities: [identity],
+            connectionSnapshots: [1: .init(isConnected: false, kind: ReceiverLogicalDeviceKind.mouse.rawValue)],
+            liveReachableSlots: []
+        ))
+        store.mergeDiscovery(.init(
+            identities: [identity],
+            connectionSnapshots: [:],
+            liveReachableSlots: []
+        ))
+
+        XCTAssertTrue(store.currentPublishedIdentities().isEmpty)
     }
 
     func testConnectedBatteryDeviceDirectIdentityPrefersSerialNumber() {

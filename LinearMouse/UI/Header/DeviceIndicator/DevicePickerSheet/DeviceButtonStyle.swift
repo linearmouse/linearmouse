@@ -22,8 +22,7 @@ struct DeviceButtonStyle: ButtonStyle {
         configuration.label
             .padding(.vertical, 2)
             .padding(.horizontal, 12)
-            .foregroundColor(.white)
-            .colorMultiply(textColor)
+            .foregroundColor(textColor)
             .background(configuration.isPressed ? backgroundColorPressed : backgroundColor)
             .cornerRadius(12)
             .frame(maxWidth: .infinity, minHeight: 36)
