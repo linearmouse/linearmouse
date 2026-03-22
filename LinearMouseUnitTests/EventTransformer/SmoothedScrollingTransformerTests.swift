@@ -5,6 +5,158 @@
 import XCTest
 
 final class SmoothedScrollingTransformerTests: XCTestCase {
+    func testModifierAlterOrientationAppliesBeforeDiscreteSmoothedScrolling() throws {
+        var emittedEvents: [CGEvent] = []
+        var now = 0.0
+        let modifiers = Scheme.Scrolling.Modifiers(shift: .alterOrientation)
+        let smoothedTransformer = SmoothedScrollingTransformer(
+            smoothed: .init(vertical: Scheme.Scrolling.Smoothed.Preset.natural.defaultConfiguration),
+            now: { now },
+            eventSink: { emittedEvents.append($0.copy() ?? $0) }
+        )
+        let transformer: [EventTransformer] = [
+            ModifierActionsTransformer(modifiers: .init(vertical: modifiers, horizontal: modifiers)),
+            smoothedTransformer
+        ]
+
+        let originalEvent = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: 1,
+            wheel2: 0,
+            wheel3: 0
+        ))
+        originalEvent.flags = [.maskShift]
+
+        let transformedEvent = try XCTUnwrap(transformer.transform(originalEvent))
+        let transformedView = ScrollWheelEventView(transformedEvent)
+        XCTAssertEqual(transformedView.deltaX, 1)
+        XCTAssertEqual(transformedView.deltaY, 0)
+        XCTAssertEqual(transformedEvent.flags, [])
+
+        now = 1.0 / 120.0
+        smoothedTransformer.tick()
+        XCTAssertTrue(emittedEvents.isEmpty)
+    }
+
+    func testModifierChangeSpeedAppliesBeforeDiscreteSmoothedScrolling() throws {
+        var baselineEmittedEvents: [CGEvent] = []
+        var scaledEmittedEvents: [CGEvent] = []
+        var now = 0.0
+        let modifiers = Scheme.Scrolling.Modifiers(option: .changeSpeed(scale: 2))
+
+        let baselineTransformer = SmoothedScrollingTransformer(
+            smoothed: .init(vertical: Scheme.Scrolling.Smoothed.Preset.spring.defaultConfiguration),
+            now: { now },
+            eventSink: { baselineEmittedEvents.append($0.copy() ?? $0) }
+        )
+        let scaledTransformer = SmoothedScrollingTransformer(
+            smoothed: .init(vertical: Scheme.Scrolling.Smoothed.Preset.spring.defaultConfiguration),
+            now: { now },
+            eventSink: { scaledEmittedEvents.append($0.copy() ?? $0) }
+        )
+
+        let baselineChain: [EventTransformer] = [
+            ModifierActionsTransformer(modifiers: .init(vertical: modifiers, horizontal: modifiers)),
+            baselineTransformer
+        ]
+        let scaledChain: [EventTransformer] = [
+            ModifierActionsTransformer(modifiers: .init(vertical: modifiers, horizontal: modifiers)),
+            scaledTransformer
+        ]
+
+        let baselineEvent = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: 1,
+            wheel2: 0,
+            wheel3: 0
+        ))
+        let scaledEvent = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: 1,
+            wheel2: 0,
+            wheel3: 0
+        ))
+        scaledEvent.flags = [.maskAlternate]
+
+        XCTAssertNil(baselineChain.transform(baselineEvent))
+        XCTAssertNil(scaledChain.transform(scaledEvent))
+
+        now = 1.0 / 120.0
+        baselineTransformer.tick()
+        scaledTransformer.tick()
+
+        let baselineView = try ScrollWheelEventView(XCTUnwrap(baselineEmittedEvents.first))
+        let scaledView = try ScrollWheelEventView(XCTUnwrap(scaledEmittedEvents.first))
+        XCTAssertGreaterThan(abs(scaledView.deltaYPt), abs(baselineView.deltaYPt))
+    }
+
+    func testShiftOrientationSwitchClearsPreviousAxisMomentum() throws {
+        var emittedEvents: [CGEvent] = []
+        var now = 0.0
+        let modifiers = Scheme.Scrolling.Modifiers(shift: .alterOrientation)
+        let smoothedTransformer = SmoothedScrollingTransformer(
+            smoothed: .init(
+                vertical: Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration,
+                horizontal: Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
+            ),
+            now: { now },
+            eventSink: { emittedEvents.append($0.copy() ?? $0) }
+        )
+        let transformer: [EventTransformer] = [
+            ModifierActionsTransformer(modifiers: .init(vertical: modifiers, horizontal: modifiers)),
+            smoothedTransformer
+        ]
+
+        for step in 0 ..< 6 {
+            let event = try XCTUnwrap(CGEvent(
+                scrollWheelEvent2Source: nil,
+                units: .line,
+                wheelCount: 2,
+                wheel1: 1,
+                wheel2: 0,
+                wheel3: 0
+            ))
+            now = Double(step) / 120
+            XCTAssertNil(transformer.transform(event))
+            now += 1.0 / 120.0
+            smoothedTransformer.tick()
+        }
+
+        var sawVerticalMomentum = false
+        for _ in 0 ..< 30 {
+            now += 1.0 / 120.0
+            smoothedTransformer.tick()
+            if let view = emittedEvents.last.map(ScrollWheelEventView.init), abs(view.deltaYPt) > 0.01 {
+                sawVerticalMomentum = true
+            }
+        }
+        XCTAssertTrue(sawVerticalMomentum)
+
+        let shiftedEvent = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: 1,
+            wheel2: 0,
+            wheel3: 0
+        ))
+        shiftedEvent.flags = [.maskShift]
+        XCTAssertNil(transformer.transform(shiftedEvent))
+
+        now += 1.0 / 120.0
+        smoothedTransformer.tick()
+
+        let switchedView = try ScrollWheelEventView(XCTUnwrap(emittedEvents.last))
+        XCTAssertGreaterThan(abs(switchedView.deltaXPt), 0.01)
+        XCTAssertEqual(switchedView.deltaYPt, 0, accuracy: 0.001)
+    }
+
     func testSmoothedScrollingPreservesUnsmoothedAxisAndEmitsSyntheticEvent() throws {
         var emittedEvents: [CGEvent] = []
         var now = 0.0

@@ -70,6 +70,9 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
 
         if handlesX || handlesY {
             lastFlags = event.flags
+            if handlesX != handlesY {
+                engine.resetOtherAxis(ifExclusiveIncomingAxis: handlesX ? .horizontal : .vertical)
+            }
             engine.feed(
                 deltaX: handlesX ? deltaX : 0,
                 deltaY: handlesY ? deltaY : 0,
@@ -132,6 +135,9 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
         lastFlags = event.flags
 
         if handlesX || handlesY {
+            if handlesX != handlesY {
+                engine.resetOtherAxis(ifExclusiveIncomingAxis: handlesX ? .horizontal : .vertical)
+            }
             engine.feed(
                 deltaX: handlesX ? deltaX : 0,
                 deltaY: handlesY ? deltaY : 0,

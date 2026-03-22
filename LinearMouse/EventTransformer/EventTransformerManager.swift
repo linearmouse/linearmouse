@@ -129,8 +129,14 @@ class EventTransformerManager {
             horizontal: scheme.scrolling.smoothed.horizontal?.isEnabled == true ? scheme.scrolling.smoothed
                 .horizontal : nil
         )
+        let hasSmoothedScrolling = smoothed.vertical != nil || smoothed.horizontal != nil
 
-        if smoothed.vertical != nil || smoothed.horizontal != nil {
+        if let modifiers = scheme.scrolling.$modifiers,
+           hasSmoothedScrolling {
+            eventTransformer.append(ModifierActionsTransformer(modifiers: modifiers))
+        }
+
+        if hasSmoothedScrolling {
             eventTransformer.append(SmoothedScrollingTransformer(smoothed: smoothed))
         }
 
@@ -176,7 +182,8 @@ class EventTransformerManager {
             }
         }
 
-        if let modifiers = scheme.scrolling.$modifiers {
+        if let modifiers = scheme.scrolling.$modifiers,
+           !hasSmoothedScrolling {
             eventTransformer.append(ModifierActionsTransformer(modifiers: modifiers))
         }
 

@@ -5,6 +5,11 @@ import CoreGraphics
 import Foundation
 
 final class SmoothedScrollingEngine {
+    enum Axis {
+        case horizontal
+        case vertical
+    }
+
     struct Emission {
         var deltaX: Double
         var deltaY: Double
@@ -156,6 +161,7 @@ final class SmoothedScrollingEngine {
 
     private let inputGrace: TimeInterval = 1.0 / 25.0
     private let stopThreshold = 0.5
+    private let axisActivityThreshold = 0.01
 
     init(smoothed: Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Smoothed>) {
         horizontalBehavior = smoothed.horizontal.map { .smoothed(.init(configuration: $0)) } ?? .passthrough
@@ -168,6 +174,58 @@ final class SmoothedScrollingEngine {
             return pendingInputX != 0 || pendingInputY != 0
         case .touching, .momentum:
             return true
+        }
+    }
+
+    var exclusiveActiveAxis: Axis? {
+        let horizontalActive = axisIsActive(
+            pendingInput: pendingInputX,
+            desiredVelocity: desiredVelocityX,
+            velocity: velocityX
+        )
+        let verticalActive = axisIsActive(
+            pendingInput: pendingInputY,
+            desiredVelocity: desiredVelocityY,
+            velocity: velocityY
+        )
+
+        switch (horizontalActive, verticalActive) {
+        case (true, false):
+            return .horizontal
+        case (false, true):
+            return .vertical
+        default:
+            return nil
+        }
+    }
+
+    func resetOtherAxis(ifExclusiveIncomingAxis incomingAxis: Axis) {
+        guard let activeAxis = exclusiveActiveAxis,
+              activeAxis != incomingAxis else {
+            return
+        }
+
+        switch activeAxis {
+        case .horizontal:
+            pendingInputX = 0
+            desiredVelocityX = 0
+            velocityX = 0
+        case .vertical:
+            pendingInputY = 0
+            desiredVelocityY = 0
+            velocityY = 0
+        }
+
+        if abs(velocityX) <= stopThreshold,
+           abs(velocityY) <= stopThreshold,
+           pendingInputX == 0,
+           pendingInputY == 0 {
+            pendingMomentumBegin = false
+            reengagedFromMomentum = false
+            if sessionState == .momentum {
+                sessionState = .idle
+                touchHasBegun = false
+            }
         }
     }
 
@@ -324,5 +382,11 @@ final class SmoothedScrollingEngine {
 
             return velocity * dt
         }
+    }
+
+    private func axisIsActive(pendingInput: Double, desiredVelocity: Double, velocity: Double) -> Bool {
+        abs(pendingInput) >= axisActivityThreshold
+            || abs(desiredVelocity) >= axisActivityThreshold
+            || abs(velocity) >= axisActivityThreshold
     }
 }
