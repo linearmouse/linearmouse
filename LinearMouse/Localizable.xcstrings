@@ -111,12 +111,6 @@
             "value" : ""
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : ""
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -219,13 +213,13 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
@@ -237,61 +231,61 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "es" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
@@ -303,31 +297,25 @@
         },
         "it" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "- %@"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
@@ -339,91 +327,91 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "- %@"
           }
         }
@@ -433,13 +421,13 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
@@ -451,31 +439,31 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
@@ -487,25 +475,25 @@
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
@@ -517,13 +505,13 @@
         },
         "it" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
@@ -535,13 +523,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "(0–1)"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
@@ -553,49 +535,49 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
@@ -607,19 +589,19 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         },
@@ -637,7 +619,7 @@
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–1)"
           }
         }
@@ -647,13 +629,13 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
@@ -665,61 +647,61 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "es" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
@@ -731,31 +713,25 @@
         },
         "it" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "(0–3)"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
@@ -767,91 +743,91 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–3)"
           }
         }
@@ -861,13 +837,13 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
@@ -879,31 +855,31 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
@@ -915,25 +891,25 @@
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
@@ -945,13 +921,13 @@
         },
         "it" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
@@ -963,13 +939,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "(0–10)"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
@@ -981,49 +951,49 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
@@ -1035,19 +1005,19 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         },
@@ -1065,7 +1035,7 @@
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–10)"
           }
         }
@@ -1075,13 +1045,13 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
@@ -1093,31 +1063,31 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
@@ -1129,25 +1099,25 @@
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
@@ -1159,13 +1129,13 @@
         },
         "it" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
@@ -1177,13 +1147,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "(0–20)"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
@@ -1195,49 +1159,49 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
@@ -1249,19 +1213,19 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         },
@@ -1279,7 +1243,7 @@
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–20)"
           }
         }
@@ -1289,13 +1253,13 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
@@ -1307,31 +1271,31 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
@@ -1343,25 +1307,25 @@
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
@@ -1373,13 +1337,13 @@
         },
         "it" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
@@ -1391,13 +1355,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "(0–128)"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
@@ -1409,49 +1367,49 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
@@ -1463,19 +1421,19 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         },
@@ -1493,7 +1451,7 @@
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "(0–128)"
           }
         }
@@ -1609,12 +1567,6 @@
             "value" : "(active)"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(aktiv)"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -1717,7 +1669,7 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -1744,7 +1696,7 @@
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -1828,7 +1780,7 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -1855,7 +1807,7 @@
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -1894,7 +1846,7 @@
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -1921,7 +1873,7 @@
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -1948,7 +1900,7 @@
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2029,7 +1981,7 @@
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2056,7 +2008,7 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2083,7 +2035,7 @@
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2122,7 +2074,7 @@
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2170,7 +2122,7 @@
         },
         "it" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2180,7 +2132,7 @@
                 "plural" : {
                   "one" : {
                     "stringUnit" : {
-                      "state" : "translated",
+                      "state" : "new",
                       "value" : "%.1f pixel"
                     }
                   },
@@ -2239,7 +2191,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2251,57 +2203,6 @@
                     "stringUnit" : {
                       "state" : "translated",
                       "value" : "%.1f pixel"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%#@value@"
-          },
-          "substitutions" : {
-            "value" : {
-              "formatSpecifier" : "f",
-              "variations" : {
-                "plural" : {
-                  "few" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%.1f piksler"
-                    }
-                  },
-                  "many" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%.1f piksler"
-                    }
-                  },
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%.1f piksel"
-                    }
-                  },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%.1f piksler"
-                    }
-                  },
-                  "two" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%.1f piksler"
-                    }
-                  },
-                  "zero" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%.1f piksler"
                     }
                   }
                 }
@@ -2338,7 +2239,7 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2365,7 +2266,7 @@
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2404,7 +2305,7 @@
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2414,13 +2315,13 @@
                 "plural" : {
                   "one" : {
                     "stringUnit" : {
-                      "state" : "translated",
+                      "state" : "new",
                       "value" : "%.1f pixel"
                     }
                   },
                   "other" : {
                     "stringUnit" : {
-                      "state" : "translated",
+                      "state" : "new",
                       "value" : "%.1f pixels"
                     }
                   }
@@ -2431,7 +2332,7 @@
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2458,7 +2359,7 @@
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2474,7 +2375,7 @@
                   },
                   "one" : {
                     "stringUnit" : {
-                      "state" : "translated",
+                      "state" : "new",
                       "value" : "%.1f pixel"
                     }
                   },
@@ -2491,7 +2392,7 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2530,7 +2431,7 @@
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2552,7 +2453,7 @@
                   },
                   "one" : {
                     "stringUnit" : {
-                      "state" : "translated",
+                      "state" : "new",
                       "value" : "%.1f pixel"
                     }
                   },
@@ -2569,7 +2470,7 @@
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2629,7 +2530,7 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2656,7 +2557,7 @@
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2695,7 +2596,7 @@
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2758,7 +2659,7 @@
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%#@value@"
           },
           "substitutions" : {
@@ -2887,12 +2788,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ (%lld စက်)"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ (%lld enheter)"
           }
         },
         "nb-NO" : {
@@ -3103,12 +2998,6 @@
             "value" : "%@ ရဲ့ဆက်တင် …"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@-innstillinger…"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -3211,13 +3100,13 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
@@ -3229,31 +3118,31 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
@@ -3265,25 +3154,25 @@
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
@@ -3295,7 +3184,7 @@
         },
         "it" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
@@ -3313,13 +3202,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ (%2$@)"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
@@ -3331,49 +3214,49 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
@@ -3385,19 +3268,19 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         },
@@ -3415,7 +3298,7 @@
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%1$@ (%2$@)"
           }
         }
@@ -3795,48 +3678,6 @@
             }
           }
         },
-        "nb" : {
-          "variations" : {
-            "plural" : {
-              "few" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%d linjer"
-                }
-              },
-              "many" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%d linjer"
-                }
-              },
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%d linje"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%d linjer"
-                }
-              },
-              "two" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%d linjer"
-                }
-              },
-              "zero" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%d linjer"
-                }
-              }
-            }
-          }
-        },
         "nb-NO" : {
           "variations" : {
             "plural" : {
@@ -4197,7 +4038,7 @@
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld pixels"
           }
         },
@@ -4227,7 +4068,7 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld pixels"
           }
         },
@@ -4269,14 +4110,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld pixels"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld piksler"
           }
         },
         "nb-NO" : {
@@ -4287,7 +4122,7 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld pixels"
           }
         },
@@ -4299,13 +4134,13 @@
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld pixels"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld pixels"
           }
         },
@@ -4381,13 +4216,13 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
@@ -4399,7 +4234,7 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
@@ -4411,25 +4246,25 @@
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "es" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
@@ -4441,19 +4276,19 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
@@ -4465,31 +4300,25 @@
         },
         "it" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld%%"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
@@ -4501,91 +4330,91 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "%lld%%"
           }
         }
@@ -4601,7 +4430,7 @@
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
@@ -4619,13 +4448,13 @@
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
@@ -4637,7 +4466,7 @@
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
@@ -4661,13 +4490,13 @@
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
@@ -4685,7 +4514,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
@@ -4697,13 +4526,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "⇧ (Shift)"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
@@ -4715,49 +4538,49 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
@@ -4769,19 +4592,19 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         },
@@ -4799,7 +4622,7 @@
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⇧ (Shift)"
           }
         }
@@ -4815,7 +4638,7 @@
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
@@ -4827,19 +4650,19 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
@@ -4851,7 +4674,7 @@
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
@@ -4875,13 +4698,13 @@
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
@@ -4893,13 +4716,13 @@
         },
         "it" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
@@ -4911,14 +4734,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⌃ (Kontroll)"
           }
         },
         "nb-NO" : {
@@ -4929,73 +4746,73 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         },
@@ -5013,7 +4830,7 @@
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌃ (Control)"
           }
         }
@@ -5029,7 +4846,7 @@
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
@@ -5047,13 +4864,13 @@
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
@@ -5065,7 +4882,7 @@
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
@@ -5083,19 +4900,19 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
@@ -5113,7 +4930,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
@@ -5125,14 +4942,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⌘ (Kommando)"
           }
         },
         "nb-NO" : {
@@ -5143,19 +4954,19 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
@@ -5167,49 +4978,49 @@
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         },
@@ -5227,7 +5038,7 @@
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌘ (Command)"
           }
         }
@@ -5243,7 +5054,7 @@
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
@@ -5261,13 +5072,13 @@
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
@@ -5279,7 +5090,7 @@
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
@@ -5297,19 +5108,19 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
@@ -5327,7 +5138,7 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
@@ -5339,14 +5150,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⌥ (Alternativ)"
           }
         },
         "nb-NO" : {
@@ -5357,19 +5162,19 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
@@ -5381,49 +5186,49 @@
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         },
@@ -5441,7 +5246,7 @@
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "⌥ (Option)"
           }
         }
@@ -5451,13 +5256,13 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
@@ -5469,61 +5274,61 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "es" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
@@ -5535,31 +5340,25 @@
         },
         "it" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "▾"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
@@ -5571,91 +5370,91 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "▾"
           }
         }
@@ -5665,13 +5464,13 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
@@ -5683,31 +5482,31 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
@@ -5719,25 +5518,25 @@
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
@@ -5749,13 +5548,13 @@
         },
         "it" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
@@ -5767,13 +5566,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "0"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
@@ -5785,49 +5578,49 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
@@ -5839,19 +5632,19 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         },
@@ -5869,7 +5662,7 @@
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0"
           }
         }
@@ -5879,7 +5672,7 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
@@ -5897,31 +5690,31 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
@@ -5933,19 +5726,19 @@
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
@@ -5963,13 +5756,13 @@
         },
         "it" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
@@ -5981,13 +5774,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "0px"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
@@ -5999,49 +5786,49 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
@@ -6053,19 +5840,19 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         },
@@ -6083,7 +5870,7 @@
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "0px"
           }
         }
@@ -6199,12 +5986,6 @@
             "value" : "5% သို့မဟုတ် အောက်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "5 % eller mindre"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -6307,13 +6088,13 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
@@ -6325,31 +6106,31 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
@@ -6361,25 +6142,25 @@
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
@@ -6391,13 +6172,13 @@
         },
         "it" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
@@ -6409,13 +6190,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "10"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
@@ -6427,49 +6202,49 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
@@ -6481,19 +6256,19 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         },
@@ -6511,7 +6286,7 @@
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "10"
           }
         }
@@ -6625,12 +6400,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "10% သို့မဟုတ် အောက်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "10 % eller mindre"
           }
         },
         "nb-NO" : {
@@ -6841,12 +6610,6 @@
             "value" : "15% သို့မဟုတ် အောက်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "15 % eller mindre"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -7055,12 +6818,6 @@
             "value" : "20% သို့မဟုတ် အောက်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "20 % eller mindre"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -7163,7 +6920,7 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
@@ -7181,31 +6938,31 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
@@ -7217,19 +6974,19 @@
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
@@ -7247,13 +7004,13 @@
         },
         "it" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
@@ -7265,13 +7022,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "128px"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
@@ -7283,49 +7034,49 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
@@ -7337,19 +7088,19 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         },
@@ -7367,7 +7118,7 @@
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "128px"
           }
         }
@@ -7481,12 +7232,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "အမြန်မြှင့်တင်ပြီးသည်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Akselerert"
           }
         },
         "nb-NO" : {
@@ -7695,12 +7440,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "လုပ်ဆောင်ချက်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Handling"
           }
         },
         "nb-NO" : {
@@ -7912,12 +7651,6 @@
             "value" : "အလိုအလျောက်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Adaptiv"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -8126,12 +7859,6 @@
             "value" : "အက်ပ်ပလီကေးရှင်း များအားလုံး"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alle apper"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -8338,12 +8065,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Screens များအားလုံး"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alle skjermer"
           }
         },
         "nb-NO" : {
@@ -8561,12 +8282,6 @@
             "value" : "လမ်းကြောင်းပြောင်းရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Endre retning"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -8775,12 +8490,6 @@
             "value" : "အမြဲတမ်းပြပါ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis alltid"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -8884,13 +8593,13 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "App Expose"
           }
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "App Expose"
           }
         },
@@ -8914,7 +8623,7 @@
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "App Expose"
           }
         },
@@ -8926,7 +8635,7 @@
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "App Expose"
           }
         },
@@ -8950,13 +8659,13 @@
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "App Expose"
           }
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "App Expose"
           }
         },
@@ -8974,26 +8683,20 @@
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "App Expose"
           }
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "App Expose"
           }
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "App Expose"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appvinduer"
           }
         },
         "nb-NO" : {
@@ -9028,7 +8731,7 @@
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "App Expose"
           }
         },
@@ -9040,19 +8743,19 @@
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "App Expose"
           }
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "App Expose"
           }
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "App Expose"
           }
         },
@@ -9070,7 +8773,7 @@
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "App Expose"
           }
         },
@@ -9202,12 +8905,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "အက်ပ်ပလီကေးရှင်း ၏ ဝင်းဒိုးများ"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Applikasjonsvinduer"
           }
         },
         "nb-NO" : {
@@ -9418,12 +9115,6 @@
             "value" : "Mouse ခလုတ်များကို လုပ်ဆောင်ချက်များ သတ်မှတ်ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tilordne handlinger til museknapper"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -9632,12 +9323,6 @@
             "value" : "ဘယ်ဘက်ခလုတ်ကို modifier keys မရှိဘဲ လုပ်ဆောင်ခြင်းကို ခွင့်မပြုပါ။."
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Det er ikke tillatt å tilordne en handling til venstre knapp uten modifikator-taster."
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -9770,7 +9455,7 @@
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "auto"
           }
         },
@@ -9800,7 +9485,7 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "auto"
           }
         },
@@ -9846,12 +9531,6 @@
             "value" : "အလိုအလျောက်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "auto"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -9866,7 +9545,7 @@
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "auto"
           }
         },
@@ -9884,7 +9563,7 @@
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "auto"
           }
         },
@@ -9896,7 +9575,7 @@
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "auto"
           }
         },
@@ -10058,12 +9737,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "အလုပ်လုပ်နေသော device ကို အလိုအလျောက် ပြောင်းရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bytt automatisk til aktiv enhet"
           }
         },
         "nb-NO" : {
@@ -10274,12 +9947,6 @@
             "value" : "လက်ရှိအသက်ဝင်နေသော စက်ကို အလိုအလျောက် လိုက်နာပါ။"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Følg automatisk enheten som er aktiv for øyeblikket."
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -10486,12 +10153,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "နောက်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tilbake"
           }
         },
         "nb-NO" : {
@@ -10702,12 +10363,6 @@
             "value" : "ပြန်ထွက်သည့် ခလုတ်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tilbake-knapp"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -10870,7 +10525,7 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Batteries"
           }
         },
@@ -10914,12 +10569,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ဘက်ထရီများ"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Batterier"
           }
         },
         "nb-NO" : {
@@ -11130,12 +10779,6 @@
             "value" : "ဘက်ထရီ %lld ရာခိုင်နှုန်း"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Batteri %lld prosent"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -11342,12 +10985,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bug အစီရင်ခံစာ"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Feilrapport"
           }
         },
         "nb-NO" : {
@@ -11559,12 +11196,6 @@
             "value" : "ခလုတ်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Knapp"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -11771,12 +11402,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ခလုတ် %lld ၏ လုပ်ဆောင်ချက်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Knapp #%lld klikk"
           }
         },
         "nb-NO" : {
@@ -11987,12 +11612,6 @@
             "value" : "ခလုတ်များ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Knapper"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -12199,12 +11818,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lines အလိုက်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Etter linjer"
           }
         },
         "nb-NO" : {
@@ -12415,12 +12028,6 @@
             "value" : "Pixels အလိုက်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Etter piksler"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -12629,12 +12236,6 @@
             "value" : "တခြား အက်ပ်ပလီကေးရှင်း များမှ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Omgå hendelser fra andre applikasjoner"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -12841,12 +12442,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "မလုပ်တော့ပါ"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avbryt"
           }
         },
         "nb-NO" : {
@@ -13064,12 +12659,6 @@
             "value" : "အရှိန်ပြောင်းရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Endre hastighet"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -13276,12 +12865,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "အလိုအလျောက် update များကို စစ်ဆေးပါ"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sjekk for oppdateringer automatisk"
           }
         },
         "nb-NO" : {
@@ -13492,12 +13075,6 @@
             "value" : "Update များစစ်ရန်…"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Se etter oppdateringer…"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -13704,12 +13281,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ခံစားမှုကြိုတင်သတ်မှတ်ချက်ကို ရွေးချယ်ပါ။"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Velg en følelsesforhåndsinnstilling."
           }
         },
         "nb-NO" : {
@@ -13920,12 +13491,6 @@
             "value" : "မောက်ခလုတ်ကိုနှိုးဆွတ်ရန် ရွေးချယ်ပါ။ modifier keys မပါဘဲ ဘယ်ဘက်ကလစ်ကို ခွင့်မပြုပါ။"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Velg en museknapputløser. Venstreklikk uten modifikatorer er ikke tillatt."
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -14132,12 +13697,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "အလိုအလျောက် scroll ကို အသက်ဝင်စေရန် ကလစ်နှိပ်ပြီး လွှတ်ပါ၊ သို့မဟုတ် ဖိကိုင်ပြီး လွှတ်သည်အထိသာ scroll လုပ်ပါ။"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klikk og slipp for å holde autoscroll aktiv, eller hold og dra for å rulle bare til du slipper."
           }
         },
         "nb-NO" : {
@@ -14349,12 +13908,6 @@
             "value" : "တစ်ကြိမ်ကလစ်နှိပ်၍ ဖွင့်/ပိတ်လုပ်ပါ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klikk én gang for å veksle"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -14561,12 +14114,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "အလိုအလျောက် scroll ဝင်ရန် နှိုးဆွတ်ကို တစ်ကြိမ်ကလစ်နှိပ်ပါ၊ scroll လုပ်ရန် မည်သည့် ဦးတည်ရာသို့မဆို ရွှေ့ပါ၊ ထို့နောက် ထွက်ရန် ထပ်မံကလစ်နှိပ်ပါ။"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klikk utløseren én gang for å gå inn i autoscroll, beveg deg i en hvilken som helst retning for å rulle, og klikk deretter igjen for å avslutte."
           }
         },
         "nb-NO" : {
@@ -14777,12 +14324,6 @@
             "value" : "မှတ်တမ်းတင်ရန် နှိပ်ပါ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klikk for å spille inn"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -14989,12 +14530,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ဆက်တင်များ"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Konfig"
           }
         },
         "nb-NO" : {
@@ -15205,12 +14740,6 @@
             "value" : "Configuration ပြန်တင်ပြီးပါပြီ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Konfigurasjon lastet inn på nytt"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -15417,12 +14946,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ပြင်ဆင်ရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Konfigurer for"
           }
         },
         "nb-NO" : {
@@ -15633,12 +15156,6 @@
             "value" : "%@… အတွက် စီစဉ်သတ်မှတ်ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Konfigurer for %@…"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -15845,12 +15362,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ပြင်ဆင်ပြီး"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Konfigurert"
           }
         },
         "nb-NO" : {
@@ -16061,12 +15572,6 @@
             "value" : "Pointer ရွေ့လျားမှုကို scroll ဖြစ်ရပ်များအဖြစ် ပြောင်းလဲပါ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Konverter musepekerbevegelse til rullehendelser"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -16273,12 +15778,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mouse ရှိဘေးခလုတ်များအား Windows system အတိုင်း back and forward ထားရန်။."
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Konverter sideknappene for tilbake og fremover til sveipebevegelser for å tillate universell tilbake- og fremoverfunksjonalitet."
           }
         },
         "nb-NO" : {
@@ -16489,12 +15988,6 @@
             "value" : "Vertical မှ settings များကို ကူးယူပါ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kopier innstillinger fra vertikal"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -16701,12 +16194,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ဖန်တီးရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opprett"
           }
         },
         "nb-NO" : {
@@ -16917,12 +16404,6 @@
             "value" : "နေ့တိုင်း"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Daglig"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -17129,12 +16610,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ခလုတ်နှိပ်ချက်များကို ကန့်သတ်ရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Debounce knappetrykk"
           }
         },
         "nb-NO" : {
@@ -17345,12 +16820,6 @@
             "value" : "Screen အလင်း လျော့ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reduser skjermlysstyrken"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -17557,12 +17026,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ကီးဘုတ် အလင်း လျော့ရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reduser tastaturlysstyrken"
           }
         },
         "nb-NO" : {
@@ -17773,12 +17236,6 @@
             "value" : "အသံတိုးရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reduser volumet"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -17985,12 +17442,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "နဂိုမူလ လုပ်ဆောင်ချက်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Standardhandling"
           }
         },
         "nb-NO" : {
@@ -18201,12 +17652,6 @@
             "value" : "ဖျက်ပါ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Slett"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -18415,12 +17860,6 @@
             "value" : "Configuration ကို ဖျက်မည်လား?"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Slett konfigurasjon?"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -18625,14 +18064,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Delete…"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Slett…"
           }
         },
         "nb-NO" : {
@@ -18843,12 +18276,6 @@
             "value" : "ညွှန်ပြကိရိယာအရှိန်ကို ပိတ်ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Deaktiver pekerakselerasjon"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -19055,12 +18482,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Display"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Skjerm"
           }
         },
         "nb-NO" : {
@@ -19271,12 +18692,6 @@
             "value" : "အကွာအဝေး"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avstand"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -19483,12 +18898,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "အကွာအဝေးသည် \"auto\" သို့မဟုတ် နံပါတ်တစ်ခု သို့မဟုတ် တန်ဖိုးနှင့် ယူနစ်ကို ကိုယ်စားပြုသည့် စာကြောင်းတစ်ခု ဖြစ်ရမည်။"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avstand må være «auto» eller et tall eller en streng som representerer verdi og enhet"
           }
         },
         "nb-NO" : {
@@ -19699,12 +19108,6 @@
             "value" : "လှူရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Doner"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -19911,12 +19314,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "စနစ်၏ ကန့်သတ်ချက်များကြောင့်၊ ဤစက်ပစ္စည်းသည် macOS ၏ နောက်ဆုံးဗားရှင်းများတွင် Pointer Speed ကို ချိန်ညှိခြင်းကို မထောက်ပံ့နိုင်ပါ။"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "På grunn av systembegrensninger støtter kanskje ikke denne enheten justering av pekefart på nyere versjoner av macOS."
           }
         },
         "nb-NO" : {
@@ -20127,12 +19524,6 @@
             "value" : "ပြင်ဆင်ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rediger"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -20253,7 +19644,7 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Editable"
           }
         },
@@ -20283,7 +19674,7 @@
         },
         "es" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Editable"
           }
         },
@@ -20339,12 +19730,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "တည်းဖြတ်နိုင်သည်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Redigerbar"
           }
         },
         "nb-NO" : {
@@ -20555,12 +19940,6 @@
             "value" : "အလိုအလျောက် scroll ကို ဖွင့်ပါ။"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktiver autoscrolling"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -20767,12 +20146,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "အမူအယာ ခလုတ်ကို ဖွင့်ပါ။"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktiver gestknapp"
           }
         },
         "nb-NO" : {
@@ -20983,12 +20356,6 @@
             "value" : "Windows အတိုင်း back and forward ထားရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktiver universell tilbake og fremover"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -21195,12 +20562,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "အသေးစိတ် မှတ်တမ်းတင်ခြင်းကို ဖွင့်ရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktiver detaljert logging"
           }
         },
         "nb-NO" : {
@@ -21411,12 +20772,6 @@
             "value" : "ဤရွေးချယ်မှုကို ဖွင့်ခြင်းဖြင့် အားလုံးသော အသုံးပြုမှုဖြစ်ရပ်များကို မှတ်တမ်းတင်ပါမည်။ ၄င်းသည် %@ ကို အသုံးပြုနေစဉ် CPU အသုံးပြုမှုကို တိုးမြှင့်နိုင်ပါသည်၊ သို့သော် ပြဿနာများကို ဖြေရှင်းရန် အသုံးဝင်နိုင်ပါသည်။."
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktivering av dette alternativet vil logge alle inndatahendelser, noe som kan øke CPU-bruken mens du bruker %@, men kan være nyttig for feilsøking."
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -21623,12 +20978,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "လုပ်ဆောင်ပါ"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Utfør"
           }
         },
         "nb-NO" : {
@@ -21839,12 +21188,6 @@
             "value" : "မှတ်တမ်းများကို export လုပ်ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eksporter logger"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -22051,12 +21394,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "နောက်ဆုံး ၅ မိနစ်အတွင်းမှ မှတ်တမ်းများကို export လုပ်ပါ။."
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eksporter logger for de siste 5 minuttene."
           }
         },
         "nb-NO" : {
@@ -22267,12 +21604,6 @@
             "value" : "GlobalEventTap ကို ဖန်တီးရန် ပျက်ကွက်သည်- Accessibility ခွင့်ပြုချက် မရရှိပါ။"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kunne ikke opprette GlobalEventTap: Tilgjengelighetstillatelse ikke gitt"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -22479,12 +21810,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Configuration ကို load လုပ်ရန် ပျက်ကွက်သည်- %@"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kunne ikke laste konfigurasjonen: %@"
           }
         },
         "nb-NO" : {
@@ -22695,12 +22020,6 @@
             "value" : "Configuration ကို reload လုပ်ရန် ပျက်ကွက်သည်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kunne ikke laste inn konfigurasjonen på nytt"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -22907,12 +22226,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Configuration ကို သိမ်းဆည်းရန် ပျက်ကွက်သည်- %@"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kunne ikke lagre konfigurasjonen: %@"
           }
         },
         "nb-NO" : {
@@ -23123,12 +22436,6 @@
             "value" : "မြန်ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rask"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -23335,12 +22642,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ရှေ့သို့ရစ်ရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spol fremover"
           }
         },
         "nb-NO" : {
@@ -23551,12 +22852,6 @@
             "value" : "လုပ်ဆောင်ချက်အသစ်များ တောင်းခံရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Funksjonsforespørsel"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -23762,13 +23057,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Flat"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Flat"
           }
         },
@@ -23980,12 +23269,6 @@
             "value" : "အရှေ့"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fremover"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -24194,12 +23477,6 @@
             "value" : "ရှေ့သို့ ပြောင်းသော ခလုတ်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fremover-knapp"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -24320,7 +23597,7 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "General"
           }
         },
@@ -24406,12 +23683,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "အထွေထွေ"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Generelt"
           }
         },
         "nb-NO" : {
@@ -24622,12 +23893,6 @@
             "value" : "အမူအယာ လုပ်ဆောင်ချက်များ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bevegelseshandlinger"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -24834,12 +24099,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "အကူအညီ ပိုမိုရယူရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Få mer hjelp"
           }
         },
         "nb-NO" : {
@@ -25050,12 +24309,6 @@
             "value" : "အမူအယာများကို trigger လုပ်ရန် ခလုတ်ကို ကိုင်ပြီး ဆွဲပါ။ တစ်ဖက်သို့ အနည်းဆုံး %lld pixels ဆွဲပါ။"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hold inne knappen og dra for å utløse bevegelser. Dra minst %lld piksler i én retning."
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -25262,12 +24515,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Scroll လုပ်ရန် ရွှေ့နေစဉ် trigger ကို ကိုင်ထားပါ၊ ထို့နောက် ရပ်တန့်ရန် လွှတ်ပါ။"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hold utløseren mens du beveger deg for å rulle, slipp den deretter for å stoppe."
           }
         },
         "nb-NO" : {
@@ -25479,12 +24726,6 @@
             "value" : "Scroll လုပ်ရန် ကိုင်ထားပါ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hold for å rulle"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -25691,12 +24932,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ပင်မစာမျက်နှာ"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hjemmeside"
           }
         },
         "nb-NO" : {
@@ -25914,12 +25149,6 @@
             "value" : "အလျားလိုက်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Horisontal"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -26128,12 +25357,6 @@
             "value" : "အသုံးပြုခွင့်ပေးထားလျှင်၊ %@ သည် Logi Options+ ကဲ့သို့သော အက်ပ်ပလီကေးရှင်းများမှ လုပ်ဆောင်ချက်များကို အသုံးမပြုပါ။."
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hvis aktivert, vil %@ ikke endre hendelser sendt av andre programmer, som Logi Options+."
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -26340,12 +25563,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "သင်သည် ချို့ယွင်းချက်တစ်ခုကို report လုပ်မည့်အခါ မှတ်တမ်းများကို ပူးတွဲ၍ တင်ပါက အထောက်အကူပြုမည်ဖြစ်သည်။."
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hvis du rapporterer en feil, er det nyttig å legge ved loggene."
           }
         },
         "nb-NO" : {
@@ -26563,12 +25780,6 @@
             "value" : "Modifier ခလုတ်များ ကို လျစ်လျူရှုရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ignorer modifikator"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -26777,12 +25988,6 @@
             "value" : "အချိန်တစ်ခုအတွင်း ခဏခဏ နှိပ်ခြင်းကို ကန့်သန့်ရန်။."
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ignorer raske klikk innenfor en viss tidsperiode."
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -26988,14 +26193,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Immediate"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Umiddelbar"
           }
         },
         "nb-NO" : {
@@ -27206,12 +26405,6 @@
             "value" : "Screen အလင်း တိုးရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Øk skjermlysstyrken"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -27418,12 +26611,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ကီးဘုတ် အလင်း တိုးရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Øk tastaturlysstyrken"
           }
         },
         "nb-NO" : {
@@ -27634,12 +26821,6 @@
             "value" : "အသံကျယ်ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Øk volumet"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -27846,12 +27027,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ထည့်သွင်းပြီးသည်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Installert"
           }
         },
         "nb-NO" : {
@@ -28062,12 +27237,6 @@
             "value" : "JSON မှားယွင်းသည်- %@"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ugyldig JSON: %@"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -28274,12 +27443,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "တန်ဖိုး မှားယွင်းသည်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ugyldig verdi"
           }
         },
         "nb-NO" : {
@@ -28490,12 +27653,6 @@
             "value" : "ကီးဘုတ်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tastatur"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -28702,12 +27859,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ ၏ ကီးဘုတ်လက်ကွက် shortcut"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tastatursnarvei: %@"
           }
         },
         "nb-NO" : {
@@ -28918,12 +28069,6 @@
             "value" : "… ၏ ကီးဘုတ်လက်ကွက် shortcut"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tastatursnarvei…"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -29026,13 +28171,13 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Launchpad"
           }
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Launchpad"
           }
         },
@@ -29044,7 +28189,7 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Launchpad"
           }
         },
@@ -29080,7 +28225,7 @@
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Launchpad"
           }
         },
@@ -29098,7 +28243,7 @@
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Launchpad"
           }
         },
@@ -29127,12 +28272,6 @@
           }
         },
         "my" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Launchpad"
-          }
-        },
-        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Launchpad"
@@ -29170,7 +28309,7 @@
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Launchpad"
           }
         },
@@ -29188,13 +28327,13 @@
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Launchpad"
           }
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Launchpad"
           }
         },
@@ -29344,12 +28483,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ပိုမိုလေ့လာပါ"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Finn ut mer"
           }
         },
         "nb-NO" : {
@@ -29560,12 +28693,6 @@
             "value" : "ဘယ်ဘက်ခလုတ်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Venstre knapp"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -29772,12 +28899,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "မျဉ်းဖြောင့်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lineær"
           }
         },
         "nb-NO" : {
@@ -29988,12 +29109,6 @@
             "value" : "LinearMouse သည် Accessibility permission ကို ဖွင့်ပေးရန်လိုအပ်ပါသည်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "LinearMouse trenger tilgjengelighetstillatelse"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -30157,7 +29272,7 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Long"
           }
         },
@@ -30199,14 +29314,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Long"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lang"
           }
         },
         "nb-NO" : {
@@ -30417,12 +29526,6 @@
             "value" : "အချက်အလက် ထုတ်ယူကိရိယာများ နှင့် ရှာဖွေခြင်း"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Se opp og datafangere"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -30628,14 +29731,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Loose"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Løs"
           }
         },
         "nb-NO" : {
@@ -30740,7 +29837,7 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Media"
           }
         },
@@ -30794,7 +29891,7 @@
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Media"
           }
         },
@@ -30846,12 +29943,6 @@
             "value" : "မီဒီယာ အသံအတိုးအကျယ်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Media"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -30884,7 +29975,7 @@
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Media"
           }
         },
@@ -30908,7 +29999,7 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Media"
           }
         },
@@ -31058,12 +30149,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "အလယ်ခလုတ်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Midtre knapp"
           }
         },
         "nb-NO" : {
@@ -31274,12 +30359,6 @@
             "value" : "အလယ်ခလုတ်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Midtre knapp"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -31486,12 +30565,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "အလယ် ကလစ်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Midtklikk"
           }
         },
         "nb-NO" : {
@@ -31702,12 +30775,6 @@
             "value" : "%2$@ တွင် %1$@ key ကို မတွေ့ရပါ။"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mangler nøkkel %1$@ ved %2$@"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -31810,13 +30877,13 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Mission Control"
           }
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Mission Control"
           }
         },
@@ -31828,7 +30895,7 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Mission Control"
           }
         },
@@ -31864,7 +30931,7 @@
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Mission Control"
           }
         },
@@ -31882,7 +30949,7 @@
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Mission Control"
           }
         },
@@ -31911,12 +30978,6 @@
           }
         },
         "my" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mission Control"
-          }
-        },
-        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mission Control"
@@ -31954,7 +31015,7 @@
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Mission Control"
           }
         },
@@ -31972,13 +31033,13 @@
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Mission Control"
           }
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Mission Control"
           }
         },
@@ -32043,7 +31104,7 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Modes"
           }
         },
@@ -32085,7 +31146,7 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Modes"
           }
         },
@@ -32127,14 +31188,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Modes"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Moduser"
           }
         },
         "nb-NO" : {
@@ -32345,12 +31400,6 @@
             "value" : "Modifier ခလုတ်များ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hurtigtaster"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -32557,12 +31606,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "လ တိုင်း"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Månedlig"
           }
         },
         "nb-NO" : {
@@ -32773,12 +31816,6 @@
             "value" : "Mouse"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mus"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -32985,12 +32022,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mouse ခလုတ်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Museknapp"
           }
         },
         "nb-NO" : {
@@ -33201,12 +32232,6 @@
             "value" : "Mouse ခလုတ်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Museknapp"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -33413,12 +32438,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mouse ဘီး"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Musehjul"
           }
         },
         "nb-NO" : {
@@ -33629,12 +32648,6 @@
             "value" : "A space အား ဘယ်ဘက်သို့ ရွေးရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Flytt et mellomrom til venstre"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -33843,12 +32856,6 @@
             "value" : "A space အား ညာဘက်သို့ရွေ့ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Flytt et mellomrom til høyre"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -33951,7 +32958,7 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "ms"
           }
         },
@@ -33969,7 +32976,7 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "ms"
           }
         },
@@ -34005,7 +33012,7 @@
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "ms"
           }
         },
@@ -34057,12 +33064,6 @@
             "value" : "မီလီစက္ကန့်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ms"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -34095,7 +33096,7 @@
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "ms"
           }
         },
@@ -34269,12 +33270,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "အသံပိတ် / အသံဖွင့်ရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : " Demp / demp av"
           }
         },
         "nb-NO" : {
@@ -34485,12 +33480,6 @@
             "value" : "နောက်သို့"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Neste"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -34696,14 +33685,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Next Space"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Neste Space"
           }
         },
         "nb-NO" : {
@@ -34914,12 +33897,6 @@
             "value" : "လုပ်ဆောင်ချက်မရှိ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingen handling"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -35124,14 +34101,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "No device selected."
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingen enhet valgt."
           }
         },
         "nb-NO" : {
@@ -35338,14 +34309,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "None"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingen"
           }
         },
         "nb-NO" : {
@@ -35552,14 +34517,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Not specified"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ikke spesifisert"
           }
         },
         "nb-NO" : {
@@ -35766,14 +34725,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Off"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Av"
           }
         },
         "nb-NO" : {
@@ -35878,7 +34831,7 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "OK"
           }
         },
@@ -35932,7 +34885,7 @@
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "OK"
           }
         },
@@ -35984,12 +34937,6 @@
             "value" : "OK"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -36010,7 +34957,7 @@
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "OK"
           }
         },
@@ -36196,12 +35143,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Accessibility ကိုဖွင့်ရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Åpne tilgjengelighet"
           }
         },
         "nb-NO" : {
@@ -36408,14 +35349,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Other App…"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Annen app…"
           }
         },
         "nb-NO" : {
@@ -36622,14 +35557,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Other Executable…"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Annen kjørbar fil…"
           }
         },
         "nb-NO" : {
@@ -36847,12 +35776,6 @@
             "value" : "Zoom ချဲ့/ချုံ့ ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klyp for å zoome"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -37059,12 +35982,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ဖွင့်ရန် / ရပ်ရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spill av / pause"
           }
         },
         "nb-NO" : {
@@ -37275,12 +36192,6 @@
             "value" : "Pointer"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Peker"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -37487,12 +36398,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ညွှန်ပြကိရိယာအရှိန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pekerakselerasjon"
           }
         },
         "nb-NO" : {
@@ -37703,12 +36608,6 @@
             "value" : "ညွှန်ပြကိရိယာ ရွေ့နှုန်း"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pekehastighet"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -37913,14 +36812,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Preserve native middle-click on links and buttons"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Behold standard mellomklikk på lenker og knapper"
           }
         },
         "nb-NO" : {
@@ -38127,14 +37020,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Press and hold a button while dragging to trigger gestures like switching desktop spaces or opening Mission Control."
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hold inne en knapp mens du drar for å utløse handlinger som å bytte skrivebordsområder eller åpne Mission Control."
           }
         },
         "nb-NO" : {
@@ -38345,12 +37232,6 @@
             "value" : "ရှေ့သို့"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forrige"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -38556,14 +37437,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Previous Space"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forrige område"
           }
         },
         "nb-NO" : {
@@ -38774,12 +37649,6 @@
             "value" : "ဘယ်ဘက် ကလစ်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Primærklikk"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -38986,12 +37855,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ဘယ်ဘက် ကလစ် နှစ်ခါ"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Primært dobbeltklikk"
           }
         },
         "nb-NO" : {
@@ -39202,12 +38065,6 @@
             "value" : "%@ အားထွက်ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avslutt %@"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -39414,12 +38271,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Beta update များရရှိရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Motta betaoppdateringer"
           }
         },
         "nb-NO" : {
@@ -39630,12 +38481,6 @@
             "value" : "မှတ်တမ်းတင်နေပါသည်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opptak"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -39842,12 +38687,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ပြန်လည်လုပ်ဆောင်ရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Last inn på nytt"
           }
         },
         "nb-NO" : {
@@ -40058,12 +38897,6 @@
             "value" : "Config ကို ပြန်လည်လုပ်ဆောင်ခြင်း"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Last inn konfigurasjon på nytt"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -40270,12 +39103,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ဖိထားသည့် အချိန်တွင် ခဏခဏ လုပ်ဆောင်ရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gjenta ved holding"
           }
         },
         "nb-NO" : {
@@ -40486,12 +39313,6 @@
             "value" : "Mouse နှိပ်ပြီးချိန်တွင် Timer ပြန်စရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tilbakestill tidtaker ved museklikk opp"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -40696,14 +39517,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Restore default preset"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gjenopprett standard forhåndsinnstilling"
           }
         },
         "nb-NO" : {
@@ -40917,14 +39732,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Restore natural preset"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gjenopprett naturlig forhåndsinnstilling"
           }
         },
         "nb-NO" : {
@@ -41135,12 +39944,6 @@
             "value" : "Config ၏ တည်နေရာကို finder တွင်ပြရန်။"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis konfigurasjon i Finder…"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -41347,12 +40150,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Finder တွင် ပြရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis i Finder"
           }
         },
         "nb-NO" : {
@@ -41563,12 +40360,6 @@
             "value" : "ပြောင်းပြန် Scrolling"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reverser rulling"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -41775,12 +40566,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "မူလ setting အတိုင်းပြန်သွားရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gjenopprett systemstandarder"
           }
         },
         "nb-NO" : {
@@ -41991,12 +40776,6 @@
             "value" : "နောက်သို့ရစ်ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spol tilbake"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -42203,12 +40982,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ညာဘက်ခလုတ်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Høyre knapp"
           }
         },
         "nb-NO" : {
@@ -42419,12 +41192,6 @@
             "value" : "…၏ shell command ကို လုပ်ဆောင်ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kjør skallkommando…"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -42631,12 +41398,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ အား လုပ်ဆောင်ရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kjør: %@"
           }
         },
         "nb-NO" : {
@@ -42847,12 +41608,6 @@
             "value" : "လုပ်ဆောင်နေသည်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kjører"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -43057,14 +41812,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Scroll acceleration"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rullingsakselerasjon"
           }
         },
         "nb-NO" : {
@@ -43271,14 +42020,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Scroll by moving away from an anchor point, similar to Windows middle-click autoscroll."
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rull ved å bevege deg bort fra et ankerpunkt, lignende Windows-rulling med midtklikk."
           }
         },
         "nb-NO" : {
@@ -43489,12 +42232,6 @@
             "value" : "အောက်သို့ ရွေ့ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rull ned"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -43701,12 +42438,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ အား အောက်သို့ ရွေ့ရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rull ned %@"
           }
         },
         "nb-NO" : {
@@ -43917,12 +42648,6 @@
             "value" : "… အား အောက််သို့ ရွေ့ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rull ned…"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -44128,14 +42853,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Scroll inertia"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rullingsfart"
           }
         },
         "nb-NO" : {
@@ -44346,12 +43065,6 @@
             "value" : "ဘယ်ဘက်သို့ ရွေ့ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rull til venstre"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -44560,12 +43273,6 @@
             "value" : "%@ အား ဘယ်ဘက်သို့ ရွေ့ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rull til venstre %@"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -44772,12 +43479,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "… အား ဘက်ဘက်သို့ ရွေ့ရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rull til venstre…"
           }
         },
         "nb-NO" : {
@@ -44991,14 +43692,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Scroll response"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rullingsrespons"
           }
         },
         "nb-NO" : {
@@ -45209,12 +43904,6 @@
             "value" : "ညာဘက်သို့ ရွေ့ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rull til høyre"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -45421,12 +44110,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ အား ညာဘက်သို့ ရွေ့ရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rull til høyre %@"
           }
         },
         "nb-NO" : {
@@ -45637,12 +44320,6 @@
             "value" : "… အား ညာဘက်သို့ရွေ့ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rull til høyre…"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -45847,14 +44524,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Scroll speed"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rullehastighet"
           }
         },
         "nb-NO" : {
@@ -46065,12 +44736,6 @@
             "value" : "အပေါ်သို့ ရွေ့ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rull opp"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -46277,12 +44942,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ အားအပေါ်သို့  ရွေ့ရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rull opp %@"
           }
         },
         "nb-NO" : {
@@ -46493,12 +45152,6 @@
             "value" : "… အား အပေါ်သို့ရွေ့ရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rull opp…"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -46707,12 +45360,6 @@
             "value" : "Scrolling"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rulling"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -46919,12 +45566,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Scrolling အရှိန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rullingsakselerasjon"
           }
         },
         "nb-NO" : {
@@ -47138,14 +45779,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Scrolling curve"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rullingskurve"
           }
         },
         "nb-NO" : {
@@ -47356,12 +45991,6 @@
             "value" : "လက်ရှိဆက်တင်များအရ Scrolling ကို ပိတ်ထားသည်။"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rulling er deaktivert basert på gjeldende innstillinger."
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -47570,12 +46199,6 @@
             "value" : "Scrolling ပုံစံ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rullingsmodus"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -47780,14 +46403,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Scrolling settings are applied to converted events."
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rullingsinnstillinger brukes på konverterte hendelser."
           }
         },
         "nb-NO" : {
@@ -47998,12 +46615,6 @@
             "value" : "Scrolling အမြန်နှုန်း"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rullingshastighet"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -48212,12 +46823,6 @@
             "value" : "ညာဘက် ကလစ်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sekundært klikk"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -48422,14 +47027,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Select an executable file"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Velg en kjørbar fil"
           }
         },
         "nb-NO" : {
@@ -48636,14 +47235,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Select an item from the sidebar"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Velg et element fra sidepanelet"
           }
         },
         "nb-NO" : {
@@ -48851,14 +47444,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Selected"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Valgt"
           }
         },
         "nb-NO" : {
@@ -49076,12 +47663,6 @@
             "value" : "Settings"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Innstillinger"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -49287,14 +47868,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Short"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kort"
           }
         },
         "nb-NO" : {
@@ -49501,14 +48076,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Show current battery"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis gjeldende batteri"
           }
         },
         "nb-NO" : {
@@ -49719,12 +48288,6 @@
             "value" : "Screen အားပြရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis skrivebord"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -49930,14 +48493,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Show Desktop"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis skrivebord"
           }
         },
         "nb-NO" : {
@@ -50145,14 +48702,8 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Show in Dock"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis i Dock"
           }
         },
         "nb-NO" : {
@@ -50363,12 +48914,6 @@
             "value" : "Menu bar တွင်ပြရန်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis i menylinjen"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -50575,12 +49120,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "နှေးရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sakte"
           }
         },
         "nb-NO" : {
@@ -50791,12 +49330,6 @@
             "value" : "အလိုအလျောက် zoom"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Smart zoom"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -50853,7 +49386,7 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Smart zoom"
           }
         },
@@ -51003,12 +49536,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Swiping back and forward ကဲ့သို့ gestures အချို့သည် အလုပ်မလုပ်တော့နိုင်ပါ။."
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Noen bevegelser, som å sveipe frem og tilbake, kan slutte å fungere."
           }
         },
         "nb-NO" : {
@@ -51219,12 +49746,6 @@
             "value" : "အမြန်နှုန်း"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hastighet"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -51431,12 +49952,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "စက်ဖွင့်ချိန်တွင် အလိုအလျောက်စတင်ရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start ved pålogging"
           }
         },
         "nb-NO" : {
@@ -51647,12 +50162,6 @@
             "value" : "အောက်သို့ ပွတ်ဆွဲပါ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sveip ned"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -51859,12 +50368,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ဘယ်သို့ ပွတ်ဆွဲပါ"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sveip til venstre"
           }
         },
         "nb-NO" : {
@@ -52075,12 +50578,6 @@
             "value" : "ညာသို့ ပွတ်ဆွဲပါ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sveip til høyre"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -52289,12 +50786,6 @@
             "value" : "အပေါ်သို့ ပွတ်ဆွဲပါ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sveip opp"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -52501,12 +50992,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Primary and Secondary ခလုတ်များ ပြောင်းလဲရန်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bytt primær- og sekundærknapper"
           }
         },
         "nb-NO" : {
@@ -52725,12 +51210,6 @@
             "value" : "အတုအယောင် လှုပ်ရှားမှု"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Syntetisk momentum"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -52937,12 +51416,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Beta test တွင်ပါဝင်မှုအတွက် ကျေးဇူးတင်ပါတယ်။"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Takk for at du deltar i betatesten."
           }
         },
         "nb-NO" : {
@@ -53153,12 +51626,6 @@
             "value" : "ယခု mouse ၏ သတ်မှတ်ပြီးသားဖြစ်သည်။"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Museknappen er allerede tildelt."
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -53365,12 +51832,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "အလယ်ကလစ်ကို တစ်ကြိမ်နှိပ်၍ဖွင့်/ပိတ်လုပ်ခြင်းကို အသုံးပြုနေချိန်တွင်သာ မူရင်းအလယ်ကလစ်စစ်ဆေးမှု အကျုံးဝင်ပါသည်။"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Den native mellomklikk-sjekken gjelder kun når «klikk én gang for å veksle» er aktivert."
           }
         },
         "nb-NO" : {
@@ -53581,12 +52042,6 @@
             "value" : "အလယ်ကလစ်ကို modifier keys မပါဘဲ အသုံးပြုသည့်အခါတွင်သာ မူရင်းအလယ်ကလစ်စစ်ဆေးမှု အကျုံးဝင်ပါသည်။"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Den native mellomklikk-sjekken gjelder kun når utløseren er mellomklikk uten modifikator-taster."
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -53793,12 +52248,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ဤသည် \"%@\" အတွက် ဆက်တင်အားလုံးကို ဖျက်ပစ်ပါမည်။"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dette vil slette alle innstillinger for «%@»."
           }
         },
         "nb-NO" : {
@@ -54010,12 +52459,6 @@
             "value" : "ဤသည် လက်ရှိစက်ပစ္စည်းအတွက် ဆက်တင်အားလုံးကို ဖျက်ပစ်ပါမည်။"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dette vil slette alle innstillinger for den gjeldende enheten."
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -54222,12 +52665,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ဤသည် ရွေးချယ်ထားသော စက်ပစ္စည်းအတွက် ဆက်တင်အားလုံးကို ဖျက်ပစ်ပါမည်။"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dette vil slette alle innstillinger for den valgte enheten."
           }
         },
         "nb-NO" : {
@@ -54438,12 +52875,6 @@
             "value" : "အကန့်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Terskel"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -54650,12 +53081,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Settings များကို ပြရန်၊ %@ ကို ထပ်မံ ဖွင့်ပါ။."
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "For å vise innstillingene, start %@ på nytt."
           }
         },
         "nb-NO" : {
@@ -54866,12 +53291,6 @@
             "value" : "ခြေရာခံအမြန်နှုန်း"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sporingshastighet"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -54992,7 +53411,7 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Trackpad"
           }
         },
@@ -55080,12 +53499,6 @@
             "value" : "Trackpad"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Styreflate"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -55106,7 +53519,7 @@
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Trackpad"
           }
         },
@@ -55272,7 +53685,7 @@
         },
         "it" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Trigger"
           }
         },
@@ -55294,12 +53707,6 @@
             "value" : "လှုံ့ဆော်မှု"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Utløser"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -55308,7 +53715,7 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Trigger"
           }
         },
@@ -55506,12 +53913,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "အမျိုးအစား မကိုက်ညီပါ- %2$@ တွင် %1$@ ကို မျှော်လင့်သည်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Typefeil: forventet %1$@ ved %2$@"
           }
         },
         "nb-NO" : {
@@ -55722,12 +54123,6 @@
             "value" : "ယူနစ်သည် ဗလာ သို့မဟုတ် \"px\" ဖြစ်ရမည်"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enhet må være tom eller «px»"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -55934,12 +54329,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "UniversalBackForward သည် true, false, \"backOnly\" သို့မဟုတ် \"forwardOnly\" ဖြစ်ရမည်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "UniversalBackForward må være true, false, «backOnly» eller «forwardOnly»"
           }
         },
         "nb-NO" : {
@@ -56150,12 +54539,6 @@
             "value" : "မသိပါ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ukjent"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -56362,12 +54745,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "မထောက်ပံ့သော ကုဒ်နံပါတ်၊ UTF-8 ကို မျှော်လင့်သည်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ugyldig koding, forventet UTF-8"
           }
         },
         "nb-NO" : {
@@ -56578,12 +54955,6 @@
             "value" : "Update များစစ်ဆေးခြင်း ကာလ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Intervall for oppdateringskontroll"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -56792,12 +55163,6 @@
             "value" : "ဗားရှင်း %@"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versjon: %@"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -56919,7 +55284,7 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Vertical"
           }
         },
@@ -57011,12 +55376,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ဒေါင်လိုက်"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Loddrett"
           }
         },
         "nb-NO" : {
@@ -57227,12 +55586,6 @@
             "value" : "အပတ်တိုင်း"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ukentlig"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -57439,12 +55792,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "အလယ်ကလစ်ကို အသုံးပြုသည့်အခါ၊ အလိုအလျောက် scroll လုပ်ခြင်းအစား click လုပ်နိုင်သော အရာများပေါ်တွင် browser-style အလယ်ကလစ် အပြုအမူကို ထိန်းသိမ်းပါ။"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Når du bruker vanlig midtklikk, behold nettleser-lignende midtklikk-atferd på klikkbare elementer i stedet for å gå inn i autoscroll."
           }
         },
         "nb-NO" : {
@@ -57655,12 +56002,6 @@
             "value" : "စနစ်မူလ setting သို့ ပြန်သွားရန် ⌃⇧⌘Z ကိုလည်း နှိပ်နိုင်ပါသည်။."
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Du kan også trykke ⌃⇧⌘Z for å tilbakestille til systemstandarder."
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -57867,12 +56208,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "System Settings > Security & Privacy > Accessibility တွင် Accessibility permission ကိုခွင့်ပြုပေးရန် လိုအပ်ပါသည်။."
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Du må gi tilgjengelighetstillatelse i Systeminnstillinger > Sikkerhet og personvern > Tilgjengelighet."
           }
         },
         "nb-NO" : {
@@ -58083,12 +56418,6 @@
             "value" : "သင့်၏ ဖွဲ့စည်းပုံ ပြောင်းလဲမှုများ ယခု အသက်ဝင်နေပါပြီ။"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Konfigurasjonsendringene dine er nå aktive."
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -58210,7 +56539,7 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Zoom"
           }
         },
@@ -58304,12 +56633,6 @@
             "value" : "Zoom"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zoom"
-          }
-        },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "new",
@@ -58342,7 +56665,7 @@
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Zoom"
           }
         },
@@ -58366,7 +56689,7 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Zoom"
           }
         },
