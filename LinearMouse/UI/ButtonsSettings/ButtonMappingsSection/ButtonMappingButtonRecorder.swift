@@ -9,7 +9,8 @@ struct ButtonMappingButtonRecorder: View {
     @Binding var mapping: Scheme.Buttons.Mapping
 
     var autoStartRecording = false
-    var keepGlobalRecordingActiveWhilePresented = false
+
+    @ObservedObject private var settingsState = SettingsState.shared
 
     @State private var recording = false {
         didSet {
@@ -21,14 +22,8 @@ struct ButtonMappingButtonRecorder: View {
         }
     }
 
-    @State private var divertReady = false
     @State private var recordingObservationToken: ObservationToken?
-    @State private var divertReadyCancellable: AnyCancellable?
     @State private var recordedButtonCancellable: AnyCancellable?
-
-    private var waitingForDivert: Bool {
-        hasLogitechDevice() && !divertReady
-    }
 
     var body: some View {
         Button {
@@ -36,14 +31,10 @@ struct ButtonMappingButtonRecorder: View {
         } label: {
             Group {
                 if recording {
-                    if waitingForDivert {
-                        Text("Waiting for device…")
-                    } else {
-                        ButtonMappingButtonDescription(mapping: mapping, showPartial: true) {
-                            Text("Recording")
-                        }
-                        .foregroundColor(.orange)
+                    ButtonMappingButtonDescription(mapping: mapping, showPartial: true) {
+                        Text(settingsState.isPreparingVirtualButtonRecording ? "Waiting for device…" : "Recording")
                     }
+                    .foregroundColor(.orange)
                 } else {
                     ButtonMappingButtonDescription(mapping: mapping) {
                         Text("Click to record")
@@ -54,7 +45,6 @@ struct ButtonMappingButtonRecorder: View {
         }
         .onAppear {
             updateSharedRecordingState()
-            beginDivertIfNeeded()
             if autoStartRecording {
                 recording = true
             }
@@ -67,33 +57,14 @@ struct ButtonMappingButtonRecorder: View {
     }
 
     private func updateSharedRecordingState(force: Bool? = nil) {
-        let shouldRecord = force ?? (recording || keepGlobalRecordingActiveWhilePresented)
-        SettingsState.shared.recording = shouldRecord
-        if !shouldRecord {
-            SettingsState.shared.recordingDivertReady = false
-            divertReady = false
-        }
-    }
-
-    /// Start listening for divert readiness as soon as the view appears,
-    /// so the diversion completes before the user starts recording.
-    private func beginDivertIfNeeded() {
-        guard hasLogitechDevice(), divertReadyCancellable == nil else {
-            return
+        let shouldRecord = force ?? recording
+        if shouldRecord {
+            settingsState.beginVirtualButtonRecordingPreparation(for: logitechMonitorDeviceIDs())
+        } else {
+            settingsState.endVirtualButtonRecordingPreparation()
         }
 
-        SettingsState.shared.recordingDivertReady = false
-        divertReadyCancellable = SettingsState.shared
-            .$recordingDivertReady
-            .filter(\.self)
-            .first()
-            .receive(on: DispatchQueue.main)
-            .sink { _ in
-                divertReady = true
-                if recording {
-                    startEventObservation()
-                }
-            }
+        settingsState.recording = shouldRecord
     }
 
     private func recordingUpdated() {
@@ -109,11 +80,7 @@ struct ButtonMappingButtonRecorder: View {
             mapping.button = nil
             mapping.repeat = nil
             mapping.scroll = nil
-
-            if !waitingForDivert {
-                startEventObservation()
-            }
-            // Otherwise, the divertReady callback will call startEventObservation.
+            startEventObservation()
         }
     }
 
@@ -133,40 +100,44 @@ struct ButtonMappingButtonRecorder: View {
             return
         }
 
+        settingsState.recordedVirtualButtonEvent = nil
+
         // Observe Logitech control presses communicated via SettingsState
         // (no synthetic CGEvent needed — the HID++ protocol detects presses directly)
-        recordedButtonCancellable = SettingsState.shared
-            .$recordedButton
+        recordedButtonCancellable = settingsState
+            .$recordedVirtualButtonEvent
             .compactMap(\.self)
             .receive(on: DispatchQueue.main)
-            .sink { button in
-                virtualButtonReceived(button)
+            .sink { event in
+                virtualButtonReceived(event)
             }
     }
 
     private func cancelObservation() {
-        divertReadyCancellable?.cancel()
-        divertReadyCancellable = nil
         recordedButtonCancellable?.cancel()
         recordedButtonCancellable = nil
-        divertReady = false
     }
 
-    private func hasLogitechDevice() -> Bool {
-        DeviceManager.shared.devices.contains(where: \.hasLogitechControlsMonitor)
+    private func logitechMonitorDeviceIDs() -> Set<Int32> {
+        guard let currentDevice = DeviceState.shared.currentDeviceRef?.value,
+              currentDevice.hasLogitechControlsMonitor else {
+            return []
+        }
+
+        return [currentDevice.id]
     }
 
-    private func virtualButtonReceived(_ button: Scheme.Buttons.Mapping.Button) {
-        mapping.button = button
-        mapping.rawModifierFlags = ModifierState.normalize(ModifierState.shared.currentFlags)
-        SettingsState.shared.recordedButton = nil
+    private func virtualButtonReceived(_ event: SettingsState.RecordedVirtualButtonEvent) {
+        mapping.button = event.button
+        mapping.modifierFlags = event.modifierFlags
+        settingsState.recordedVirtualButtonEvent = nil
         recording = false
     }
 
     private func eventReceived(_ event: CGEvent) -> CGEvent? {
         mapping.button = nil
         mapping.scroll = nil
-        mapping.rawModifierFlags = ModifierState.normalize(event.flags)
+        mapping.modifierFlags = event.flags
 
         switch event.type {
         case .flagsChanged:

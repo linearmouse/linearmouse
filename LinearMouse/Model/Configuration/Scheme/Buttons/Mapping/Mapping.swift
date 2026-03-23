@@ -8,7 +8,6 @@ extension Scheme.Buttons {
 
         var scroll: ScrollDirection?
 
-        var modifierFlagsRaw: UInt64?
         var command: Bool?
         var shift: Bool?
         var option: Bool?
@@ -67,11 +66,7 @@ extension Scheme.Buttons.Mapping {
 
     var modifierFlags: CGEventFlags {
         get {
-            if let modifierFlagsRaw {
-                return ModifierState.generic(from: CGEventFlags(rawValue: modifierFlagsRaw))
-            }
-
-            return CGEventFlags([
+            CGEventFlags([
                 (command, CGEventFlags.maskCommand),
                 (shift, CGEventFlags.maskShift),
                 (option, CGEventFlags.maskAlternate),
@@ -83,29 +78,11 @@ extension Scheme.Buttons.Mapping {
         }
 
         set {
-            let normalizedFlags = ModifierState.normalize(newValue)
-            let sideSpecificFlags = ModifierState.sideSpecific(from: normalizedFlags)
-            modifierFlagsRaw = sideSpecificFlags.isEmpty ? nil : normalizedFlags.rawValue
-
-            let genericFlags = ModifierState.generic(from: normalizedFlags)
+            let genericFlags = ModifierState.generic(from: newValue)
             command = genericFlags.contains(.maskCommand)
             shift = genericFlags.contains(.maskShift)
             option = genericFlags.contains(.maskAlternate)
             control = genericFlags.contains(.maskControl)
-        }
-    }
-
-    var rawModifierFlags: CGEventFlags {
-        get {
-            if let modifierFlagsRaw {
-                return ModifierState.normalize(CGEventFlags(rawValue: modifierFlagsRaw))
-            }
-
-            return ModifierState.generic(from: modifierFlags)
-        }
-
-        set {
-            modifierFlags = newValue
         }
     }
 
@@ -114,7 +91,7 @@ extension Scheme.Buttons.Mapping {
             return false
         }
 
-        if let button {
+        if let mouseButtonNumber = button?.mouseButtonNumber {
             guard [.leftMouseDown, .leftMouseUp, .leftMouseDragged,
                    .rightMouseDown, .rightMouseUp, .rightMouseDragged,
                    .otherMouseDown, .otherMouseUp, .otherMouseDragged].contains(event.type) else {
@@ -122,7 +99,7 @@ extension Scheme.Buttons.Mapping {
             }
 
             guard let mouseButton = MouseEventView(event).mouseButton,
-                  Int(mouseButton.rawValue) == button.mouseButtonNumber else {
+                  Int(mouseButton.rawValue) == mouseButtonNumber else {
                 return false
             }
         } else if button?.logitechControl != nil {
@@ -171,27 +148,11 @@ extension Scheme.Buttons.Mapping {
     }
 
     func matches(modifierFlags eventFlags: CGEventFlags) -> Bool {
-        let normalizedFlags = ModifierState.normalize(eventFlags)
-
-        if let modifierFlagsRaw {
-            return normalizedFlags == ModifierState.normalize(CGEventFlags(rawValue: modifierFlagsRaw))
-        }
-
-        return ModifierState.generic(from: normalizedFlags) == modifierFlags
+        ModifierState.generic(from: eventFlags) == modifierFlags
     }
 
     private func conflicts(withModifierFlagsOf mapping: Self) -> Bool {
-        switch (modifierFlagsRaw, mapping.modifierFlagsRaw) {
-        case let (lhsRaw?, rhsRaw?):
-            return ModifierState.normalize(CGEventFlags(rawValue: lhsRaw)) == ModifierState
-                .normalize(CGEventFlags(rawValue: rhsRaw))
-        case (_?, nil):
-            return mapping.matches(modifierFlags: rawModifierFlags)
-        case (nil, _?):
-            return matches(modifierFlags: mapping.rawModifierFlags)
-        case (nil, nil):
-            return modifierFlags == mapping.modifierFlags
-        }
+        modifierFlags == mapping.modifierFlags
     }
 }
 
@@ -206,6 +167,7 @@ extension Scheme.Buttons.Mapping: Comparable {
 
             if let logiButtonID = mapping.button?.logitechControl?.controlID {
                 score |= ((logiButtonID & 0xFFFF) << 20)
+                score |= ((mapping.button?.logitechControl?.specificityScore ?? 0) << 18)
             } else if mapping.button == nil, mapping.scroll != nil {
                 score |= (1 << 16)
             }
@@ -223,9 +185,6 @@ extension Scheme.Buttons.Mapping: Comparable {
                 score |= (1 << 3)
             }
 
-            score |= Int(truncatingIfNeeded: ModifierState.sideSpecific(from: mapping.rawModifierFlags).rawValue >> 4) &
-                0xF0
-
             return score
         }
 
@@ -240,7 +199,6 @@ extension Scheme.Buttons.Mapping: Codable {
         case logitechControl
         case `repeat`
         case scroll
-        case modifierFlagsRaw
         case command
         case shift
         case option
@@ -257,12 +215,10 @@ extension Scheme.Buttons.Mapping: Codable {
             .map(Button.logitechControl)
         `repeat` = try container.decodeIfPresent(Bool.self, forKey: .repeat)
         scroll = try container.decodeIfPresent(ScrollDirection.self, forKey: .scroll)
-        modifierFlagsRaw = try container.decodeIfPresent(UInt64.self, forKey: .modifierFlagsRaw)
         command = try container.decodeIfPresent(Bool.self, forKey: .command)
         shift = try container.decodeIfPresent(Bool.self, forKey: .shift)
         option = try container.decodeIfPresent(Bool.self, forKey: .option)
         control = try container.decodeIfPresent(Bool.self, forKey: .control)
-
         action = try container.decodeIfPresent(Action.self, forKey: .action)
     }
 
@@ -272,7 +228,6 @@ extension Scheme.Buttons.Mapping: Codable {
         try container.encodeIfPresent(button, forKey: .button)
         try container.encodeIfPresent(`repeat`, forKey: .repeat)
         try container.encodeIfPresent(scroll, forKey: .scroll)
-        try container.encodeIfPresent(modifierFlagsRaw, forKey: .modifierFlagsRaw)
         try container.encodeIfPresent(command, forKey: .command)
         try container.encodeIfPresent(shift, forKey: .shift)
         try container.encodeIfPresent(option, forKey: .option)

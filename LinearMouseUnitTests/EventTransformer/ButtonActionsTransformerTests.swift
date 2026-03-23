@@ -6,11 +6,11 @@ import CoreGraphics
 import XCTest
 
 final class ButtonActionsTransformerTests: XCTestCase {
-    func testLogitechControlEventMatchesRightCommandOnlyMapping() {
+    func testLogitechControlEventMatchesGenericCommandMappingWithRightCommandFlag() {
         let transformer = ButtonActionsTransformer(mappings: [
             .init(
                 button: .logitechControl(.init(controlID: 0x0053)),
-                modifierFlagsRaw: CGEventFlags.maskCommand.rawValue | UInt64(NX_DEVICERCMDKEYMASK),
+                command: true,
                 action: .arg0(.none)
             )
         ])
@@ -27,32 +27,15 @@ final class ButtonActionsTransformerTests: XCTestCase {
         XCTAssertTrue(handled)
     }
 
-    func testLogitechControlEventDoesNotMatchLeftCommandForRightCommandOnlyMapping() {
+    func testLogitechSpecificMappingWinsOverGenericMapping() {
         let transformer = ButtonActionsTransformer(mappings: [
             .init(
-                button: .logitechControl(.init(controlID: 0x0053)),
-                modifierFlagsRaw: CGEventFlags.maskCommand.rawValue | UInt64(NX_DEVICERCMDKEYMASK),
-                action: .arg0(.none)
-            )
-        ])
-
-        let handled = transformer.handleLogitechControlEvent(.init(
-            device: nil,
-            pid: nil,
-            display: nil,
-            controlIdentity: .init(controlID: 0x0053),
-            isPressed: false,
-            modifierFlags: [.maskCommand, .init(rawValue: UInt64(NX_DEVICELCMDKEYMASK))]
-        ))
-
-        XCTAssertFalse(handled)
-    }
-
-    func testLogitechMouseButtonBackActionHandledDirectly() {
-        let transformer = ButtonActionsTransformer(mappings: [
-            .init(
-                button: .logitechControl(.init(controlID: 0x0053)),
+                button: .logitechControl(.init(controlID: 0x0053, productID: 0x405E, serialNumber: nil)),
                 action: .arg0(.mouseButtonBack)
+            ),
+            .init(
+                button: .logitechControl(.init(controlID: 0x0053)),
+                action: .arg0(.auto)
             )
         ])
 
@@ -60,7 +43,7 @@ final class ButtonActionsTransformerTests: XCTestCase {
             device: nil,
             pid: nil,
             display: nil,
-            controlIdentity: .init(controlID: 0x0053),
+            controlIdentity: .init(controlID: 0x0053, productID: 0x405E, serialNumber: nil),
             isPressed: false,
             modifierFlags: []
         ))
@@ -86,6 +69,26 @@ final class ButtonActionsTransformerTests: XCTestCase {
                 productID: 0x405E,
                 serialNumber: "45AFAFA6"
             ),
+            isPressed: false,
+            modifierFlags: []
+        ))
+
+        XCTAssertTrue(handled)
+    }
+
+    func testLogitechConfiguredProductIDMatchesEventWithoutSerialNumber() {
+        let transformer = ButtonActionsTransformer(mappings: [
+            .init(
+                button: .logitechControl(.init(controlID: 0x00C3, productID: 0x405E, serialNumber: nil)),
+                action: .arg0(.none)
+            )
+        ])
+
+        let handled = transformer.handleLogitechControlEvent(.init(
+            device: nil,
+            pid: nil,
+            display: nil,
+            controlIdentity: .init(controlID: 0x00C3, productID: 0x405E, serialNumber: nil),
             isPressed: false,
             modifierFlags: []
         ))

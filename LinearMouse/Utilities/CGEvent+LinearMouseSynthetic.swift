@@ -13,6 +13,18 @@ struct LogitechControlIdentity: Codable, Equatable, Hashable {
 }
 
 extension LogitechControlIdentity {
+    var specificityScore: Int {
+        if serialNumber != nil {
+            return 2
+        }
+
+        if productID != nil {
+            return 1
+        }
+
+        return 0
+    }
+
     var userVisibleName: String {
         String(format: "Logitech Control 0x%04X", controlID)
     }
@@ -26,14 +38,18 @@ extension LogitechControlIdentity {
             return false
         }
 
-        if let lhsSerial = serialNumber,
-           let rhsSerial = other.serialNumber {
-            return lhsSerial.caseInsensitiveCompare(rhsSerial) == .orderedSame
+        if let configuredSerialNumber = other.serialNumber {
+            guard let serialNumber else {
+                return false
+            }
+            return serialNumber.caseInsensitiveCompare(configuredSerialNumber) == .orderedSame
         }
 
-        if let lhsProductID = productID,
-           let rhsProductID = other.productID {
-            return lhsProductID == rhsProductID
+        if let configuredProductID = other.productID {
+            guard let productID else {
+                return false
+            }
+            return productID == configuredProductID
         }
 
         return other.serialNumber == nil && other.productID == nil
@@ -53,8 +69,7 @@ extension LogitechControlIdentity {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         controlID = try container.decode(Int.self, forKey: .controlID)
-        productID = try container.decodeIfPresent(Int.self, forKey: .productID)
-            ?? container.decodeIfPresent(Int.self, forKey: .logicalDeviceProductID)
+        productID = try decodeProductID(in: container, keys: [.productID, .logicalDeviceProductID])
         serialNumber = try container.decodeIfPresent(String.self, forKey: .serialNumber)
             ?? container.decodeIfPresent(String.self, forKey: .logicalDeviceSerialNumber)
     }
@@ -65,6 +80,38 @@ extension LogitechControlIdentity {
         try container.encode(controlID, forKey: .controlID)
         try container.encodeIfPresent(productID, forKey: .productID)
         try container.encodeIfPresent(serialNumber, forKey: .serialNumber)
+    }
+
+    private func decodeProductID(
+        in container: KeyedDecodingContainer<CodingKeys>,
+        keys: [CodingKeys]
+    ) throws -> Int? {
+        for key in keys {
+            if let value = try? container.decode(Int.self, forKey: key) {
+                return value
+            }
+
+            if let hexValue = try? container.decode(String.self, forKey: key) {
+                let normalized = hexValue.hasPrefix("0x") ? String(hexValue.dropFirst(2)) : hexValue
+                guard let parsed = Int(normalized, radix: 16) else {
+                    throw CustomDecodingError(in: container, error: ValueError.invalidProductID)
+                }
+                return parsed
+            }
+        }
+
+        return nil
+    }
+
+    private enum ValueError: LocalizedError {
+        case invalidProductID
+
+        var errorDescription: String? {
+            switch self {
+            case .invalidProductID:
+                return NSLocalizedString("Invalid Logitech productID", comment: "")
+            }
+        }
     }
 }
 

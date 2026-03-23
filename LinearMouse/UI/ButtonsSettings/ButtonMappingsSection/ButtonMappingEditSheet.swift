@@ -34,8 +34,7 @@ struct ButtonMappingEditSheet: View {
                     } else {
                         ButtonMappingButtonRecorder(
                             mapping: $mapping,
-                            autoStartRecording: mode == .create,
-                            keepGlobalRecordingActiveWhilePresented: mode == .create
+                            autoStartRecording: mode == .create
                         )
                     }
                 }

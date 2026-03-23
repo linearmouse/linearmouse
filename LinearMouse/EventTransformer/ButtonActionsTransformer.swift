@@ -157,11 +157,21 @@ extension ButtonActionsTransformer: EventTransformer {
                 return false
             }
 
-            return mapping.rawModifierFlags == ModifierState.normalize(context.modifierFlags)
+            return mapping.matches(modifierFlags: context.modifierFlags)
         }
 
-        guard let mapping = matchingMappings.last,
-              let action = mapping.action else {
+        guard let mapping = matchingMappings.enumerated()
+            .max(by: { lhs, rhs in
+                let lhsSpecificity = lhs.element.button?.logitechControl?.specificityScore ?? 0
+                let rhsSpecificity = rhs.element.button?.logitechControl?.specificityScore ?? 0
+
+                if lhsSpecificity == rhsSpecificity {
+                    return lhs.offset < rhs.offset
+                }
+
+                return lhsSpecificity < rhsSpecificity
+            })?.element,
+            let action = mapping.action else {
             return false
         }
 

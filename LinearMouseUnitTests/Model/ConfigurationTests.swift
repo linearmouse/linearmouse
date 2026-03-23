@@ -91,18 +91,8 @@ final class ConfigurationTests: XCTestCase {
         )
 
         XCTAssertEqual(mapping.modifierFlags, [.maskCommand])
-        XCTAssertTrue(mapping.rawModifierFlags.contains(.maskCommand))
-        XCTAssertFalse(mapping.rawModifierFlags.contains(.init(rawValue: UInt64(NX_DEVICERCMDKEYMASK))))
-        XCTAssertNil(mapping.modifierFlagsRaw)
-    }
-
-    func testMappingPreservesRawSideSpecificModifierFlags() {
-        var mapping = Scheme.Buttons.Mapping(button: .mouse(3))
-        mapping.rawModifierFlags = [.maskCommand, .init(rawValue: UInt64(NX_DEVICERCMDKEYMASK))]
-
-        XCTAssertEqual(mapping.modifierFlags, [.maskCommand])
-        XCTAssertTrue(mapping.rawModifierFlags.contains(.init(rawValue: UInt64(NX_DEVICERCMDKEYMASK))))
-        XCTAssertEqual(mapping.modifierFlagsRaw, CGEventFlags.maskCommand.rawValue | UInt64(NX_DEVICERCMDKEYMASK))
+        XCTAssertTrue(mapping.command == true)
+        XCTAssertFalse(mapping.shift == true)
     }
 
     func testMappingDecodesLegacyLogitechControlFieldIntoButton() throws {
@@ -133,6 +123,21 @@ final class ConfigurationTests: XCTestCase {
         XCTAssertEqual(button["controlID"] as? Int, 208)
         XCTAssertEqual(button["productID"] as? Int, 16_478)
         XCTAssertEqual(button["serialNumber"] as? String, "ABC123")
+    }
+
+    func testLogitechControlButtonDecodesHexProductID() throws {
+        let mapping = try JSONDecoder().decode(
+            Scheme.Buttons.Mapping.self,
+            from: XCTUnwrap(
+                #"{"button":{"kind":"logitechControl","controlID":208,"productID":"0x405E"}}"#
+                    .data(using: .utf8)
+            )
+        )
+
+        XCTAssertEqual(
+            mapping.button,
+            .logitechControl(.init(controlID: 208, productID: 0x405E, serialNumber: nil))
+        )
     }
 
     func testDecodeAutoScrollSingleMode() throws {

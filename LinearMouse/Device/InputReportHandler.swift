@@ -18,6 +18,7 @@ enum SyntheticMouseButtonEventEmitter {
         }
 
         event.flags = ModifierState.normalize(ModifierState.shared.currentFlags)
+        event.setIntegerValueField(.mouseEventButtonNumber, value: Int64(button))
         event.isLinearMouseSyntheticEvent = true
         event.post(tap: .cghidEventTap)
     }

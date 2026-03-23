@@ -150,56 +150,6 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         )
     }
 
-    func testPreferredReceiverIdentityChoosesSingleMouse() {
-        let identities: [ReceiverLogicalDeviceIdentity] = [
-            .init(
-                receiverLocationID: 0x1234,
-                slot: 1,
-                kind: .keyboard,
-                name: "Keyboard",
-                serialNumber: nil,
-                productID: nil,
-                batteryLevel: nil
-            ),
-            .init(
-                receiverLocationID: 0x1234,
-                slot: 2,
-                kind: .mouse,
-                name: "M720",
-                serialNumber: nil,
-                productID: nil,
-                batteryLevel: nil
-            )
-        ]
-
-        XCTAssertEqual(LogitechReprogrammableControlsMonitor.preferredIdentity(from: identities)?.slot, 2)
-    }
-
-    func testPreferredReceiverIdentityReturnsNilForMultipleMice() {
-        let identities: [ReceiverLogicalDeviceIdentity] = [
-            .init(
-                receiverLocationID: 0x1234,
-                slot: 1,
-                kind: .mouse,
-                name: "M720",
-                serialNumber: nil,
-                productID: nil,
-                batteryLevel: nil
-            ),
-            .init(
-                receiverLocationID: 0x1234,
-                slot: 2,
-                kind: .mouse,
-                name: "Anywhere",
-                serialNumber: nil,
-                productID: nil,
-                batteryLevel: nil
-            )
-        ]
-
-        XCTAssertNil(LogitechReprogrammableControlsMonitor.preferredIdentity(from: identities))
-    }
-
     func testLogitechGestureButtonControlIDsIncludeM720ThumbButton() {
         XCTAssertTrue(LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.gestureButtonControlIDs.contains(0x00D0))
     }

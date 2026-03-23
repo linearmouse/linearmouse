@@ -1620,6 +1620,8 @@ final class LogitechReprogrammableControlsMonitor {
         }
 
         guard let monitorTarget = resolveMonitorTarget() else {
+            finishVirtualButtonRecordingPreparationIfNeeded(sessionID: SettingsState.shared
+                .virtualButtonRecordingSessionID)
             os_log(
                 "Skip Logitech controls monitor because initialization failed: device=%{public}@",
                 log: Self.log,
@@ -1655,6 +1657,7 @@ final class LogitechReprogrammableControlsMonitor {
 
             let desiredControlIDs = desiredDivertedControlIDs(availableControls: allControls, identity: targetIdentity)
             let isRecording = SettingsState.shared.recording
+            let recordingSessionID = isRecording ? SettingsState.shared.virtualButtonRecordingSessionID : nil
             let monitoredControls = isRecording
                 ? allControls
                 : allControls.filter { desiredControlIDs.contains($0.controlID) }
@@ -1684,6 +1687,7 @@ final class LogitechReprogrammableControlsMonitor {
             }
 
             if monitoredControls.isEmpty {
+                finishVirtualButtonRecordingPreparationIfNeeded(sessionID: recordingSessionID)
                 os_log(
                     "Pause Logitech control diversion until configuration changes: locationID=%{public}u slot=%{public}u device=%{public}@ recording=%{public}@",
                     log: Self.log,
@@ -1730,6 +1734,7 @@ final class LogitechReprogrammableControlsMonitor {
             }
 
             guard !activeControlIDs.isEmpty else {
+                finishVirtualButtonRecordingPreparationIfNeeded(sessionID: recordingSessionID)
                 os_log(
                     "Failed to enable any Logitech control diversion: locationID=%{public}u slot=%{public}u device=%{public}@",
                     log: Self.log,
@@ -1784,11 +1789,7 @@ final class LogitechReprogrammableControlsMonitor {
                 controlSummary
             )
 
-            if isRecording {
-                DispatchQueue.main.async {
-                    SettingsState.shared.recordingDivertReady = true
-                }
-            }
+            finishVirtualButtonRecordingPreparationIfNeeded(sessionID: recordingSessionID)
 
             var pressedControls = Set<UInt16>()
             defer {
@@ -1863,7 +1864,10 @@ final class LogitechReprogrammableControlsMonitor {
                     if isRecording {
                         if isPressed {
                             DispatchQueue.main.async {
-                                SettingsState.shared.recordedButton = .logitechControl(controlIdentity)
+                                SettingsState.shared.recordedVirtualButtonEvent = .init(
+                                    button: .logitechControl(controlIdentity),
+                                    modifierFlags: modifierFlags
+                                )
                             }
                         }
                         continue
@@ -1915,6 +1919,19 @@ final class LogitechReprogrammableControlsMonitor {
         }
 
         return false
+    }
+
+    private func finishVirtualButtonRecordingPreparationIfNeeded(sessionID: UUID?) {
+        guard let sessionID else {
+            return
+        }
+
+        DispatchQueue.main.async {
+            SettingsState.shared.finishVirtualButtonRecordingPreparation(
+                for: self.device.id,
+                sessionID: sessionID
+            )
+        }
     }
 
     private func findMonitoredControls(using transport: LogitechHIDPPTransport, featureIndex: UInt8) -> [ControlInfo] {
@@ -1989,31 +2006,6 @@ final class LogitechReprogrammableControlsMonitor {
             return TargetDevice(slot: slot, identity: identity)
         }
 
-        let discovery = provider.receiverPointingDeviceDiscovery(for: device.pointerDevice, using: receiverChannel)
-        if let preferredIdentity = Self.preferredIdentity(from: discovery.identities) {
-            os_log(
-                "Resolved Logitech receiver device to logical slot: receiver=%{public}@ slot=%{public}u name=%{public}@",
-                log: Self.log,
-                type: .info,
-                device.productName ?? device.name,
-                preferredIdentity.slot,
-                preferredIdentity.name
-            )
-            return TargetDevice(slot: preferredIdentity.slot, identity: preferredIdentity)
-        }
-
-        let identitiesDescription = discovery.identities
-            .map { identity in
-                "slot=\(identity.slot) kind=\(identity.kind.rawValue) name=\(identity.name)"
-            }
-            .joined(separator: ", ")
-        os_log(
-            "Unable to resolve Logitech logical device from receiver: receiver=%{public}@ identities=%{public}@",
-            log: Self.log,
-            type: .info,
-            device.productName ?? device.name,
-            identitiesDescription
-        )
         return nil
     }
 
@@ -2147,6 +2139,22 @@ final class LogitechReprogrammableControlsMonitor {
                 self?.requestReconfiguration()
             }
             .store(in: &subscriptions)
+
+        ScreenManager.shared
+            .$currentScreenName
+            .dropFirst()
+            .sink { [weak self] _ in
+                self?.requestReconfiguration()
+            }
+            .store(in: &subscriptions)
+
+        NSWorkspace.shared
+            .notificationCenter
+            .publisher(for: NSWorkspace.didActivateApplicationNotification)
+            .sink { [weak self] _ in
+                self?.requestReconfiguration()
+            }
+            .store(in: &subscriptions)
     }
 
     private func requestReconfiguration() {
@@ -2207,33 +2215,21 @@ final class LogitechReprogrammableControlsMonitor {
     }
 
     private func matches(logiButton: LogitechControlIdentity, identity: ReceiverLogicalDeviceIdentity?) -> Bool {
-        if let identity,
-           let serialNumber = identity.serialNumber,
-           let productID = identity.productID {
-            if let configuredSerialNumber = logiButton.serialNumber,
-               configuredSerialNumber.caseInsensitiveCompare(serialNumber) == .orderedSame {
-                return true
+        if let configuredSerialNumber = logiButton.serialNumber {
+            guard let serialNumber = identity?.serialNumber else {
+                return false
             }
+            return configuredSerialNumber.caseInsensitiveCompare(serialNumber) == .orderedSame
+        }
 
-            if let configuredProductID = logiButton.productID {
-                return configuredProductID == productID
+        if let configuredProductID = logiButton.productID {
+            guard let productID = identity?.productID else {
+                return false
             }
+            return configuredProductID == productID
         }
 
         return logiButton.serialNumber == nil && logiButton.productID == nil
-    }
-
-    static func preferredIdentity(from identities: [ReceiverLogicalDeviceIdentity]) -> ReceiverLogicalDeviceIdentity? {
-        if identities.count == 1 {
-            return identities[0]
-        }
-
-        let mice = identities.filter { $0.kind == .mouse }
-        if mice.count == 1 {
-            return mice[0]
-        }
-
-        return nil
     }
 
     private func fetchControls(using transport: LogitechHIDPPTransport, featureIndex: UInt8) -> [ControlInfo] {
@@ -2571,6 +2567,8 @@ private protocol HIDPPNotificationHandling: AnyObject {
 }
 
 private final class HIDPPNotificationEndpoint: HIDPPNotificationHandling {
+    private static let maxBufferedReports = 64
+
     private let lock = NSLock()
     private let semaphore = DispatchSemaphore(value: 0)
     private var bufferedReports = [[UInt8]]()
@@ -2579,8 +2577,17 @@ private final class HIDPPNotificationEndpoint: HIDPPNotificationHandling {
 
     func handleInputReport(_ report: Data) {
         let bytes = [UInt8](report)
+        guard let reportID = bytes.first,
+              [LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
+               LogitechHIDPPDeviceMetadataProvider.Constants.longReportID].contains(reportID) else {
+            return
+        }
+
         lock.lock()
         bufferedReports.append(bytes)
+        if bufferedReports.count > Self.maxBufferedReports {
+            bufferedReports.removeFirst(bufferedReports.count - Self.maxBufferedReports)
+        }
         lock.unlock()
         semaphore.signal()
     }

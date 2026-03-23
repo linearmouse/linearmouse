@@ -3,11 +3,6 @@
 
 import SwiftUI
 
-private let rightControlMask = CGEventFlags(rawValue: UInt64(NX_DEVICERCTLKEYMASK))
-private let rightOptionMask = CGEventFlags(rawValue: UInt64(NX_DEVICERALTKEYMASK))
-private let rightShiftMask = CGEventFlags(rawValue: UInt64(NX_DEVICERSHIFTKEYMASK))
-private let rightCommandMask = CGEventFlags(rawValue: UInt64(NX_DEVICERCMDKEYMASK))
-
 struct ButtonMappingListItem: View {
     @Binding var mapping: Scheme.Buttons.Mapping
 
@@ -69,12 +64,12 @@ struct ButtonMappingButtonDescription<FallbackView: View>: View {
     }
 
     private var modifiersDescription: String {
-        let flags = mapping.rawModifierFlags
+        let flags = mapping.modifierFlags
         let modifierDescriptions: [(Bool, String)] = [
-            (flags.contains(CGEventFlags.maskControl), flags.contains(rightControlMask) ? "R⌃" : "⌃"),
-            (flags.contains(CGEventFlags.maskAlternate), flags.contains(rightOptionMask) ? "R⌥" : "⌥"),
-            (flags.contains(CGEventFlags.maskShift), flags.contains(rightShiftMask) ? "R⇧" : "⇧"),
-            (flags.contains(CGEventFlags.maskCommand), flags.contains(rightCommandMask) ? "R⌘" : "⌘")
+            (flags.contains(CGEventFlags.maskControl), "⌃"),
+            (flags.contains(CGEventFlags.maskAlternate), "⌥"),
+            (flags.contains(CGEventFlags.maskShift), "⇧"),
+            (flags.contains(CGEventFlags.maskCommand), "⌘")
         ]
 
         return modifierDescriptions
