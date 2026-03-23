@@ -3,6 +3,7 @@
 
 import CoreGraphics
 @testable import LinearMouse
+import PointerKit
 import XCTest
 
 final class VendorSpecificDeviceMetadataTests: XCTestCase {
@@ -10,13 +11,13 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         let matcher = VendorSpecificDeviceMatcher(
             vendorID: 0x046D,
             productIDs: [0xB015],
-            transports: ["Bluetooth Low Energy"]
+            transports: [PointerDeviceTransportName.bluetoothLowEnergy]
         )
 
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,
             productID: 0xB015,
-            transport: "Bluetooth Low Energy"
+            transport: PointerDeviceTransportName.bluetoothLowEnergy
         )
 
         XCTAssertTrue(matcher.matches(device: device))
@@ -26,13 +27,13 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         let matcher = VendorSpecificDeviceMatcher(
             vendorID: 0x046D,
             productIDs: nil,
-            transports: ["USB"]
+            transports: [PointerDeviceTransportName.usb]
         )
 
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,
             productID: 0xB015,
-            transport: "Bluetooth Low Energy"
+            transport: PointerDeviceTransportName.bluetoothLowEnergy
         )
 
         XCTAssertFalse(matcher.matches(device: device))
@@ -43,7 +44,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,
             productID: 0xB015,
-            transport: "Bluetooth Low Energy",
+            transport: PointerDeviceTransportName.bluetoothLowEnergy,
             maxInputReportSize: 20,
             maxOutputReportSize: 20
         )
@@ -208,26 +209,10 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertTrue(LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.gestureButtonTaskIDs.contains(0x00A9))
     }
 
-    func testSyntheticButtonNumbersAreStableByControlID() {
-        let mapping = LogitechReprogrammableControlsMonitor.syntheticButtonNumbers(for: [0x00D7, 0x00D0, 0x00C3])
-
-        XCTAssertEqual(mapping[0x00C3], 8)
-        XCTAssertEqual(mapping[0x00D0], 9)
-        XCTAssertEqual(mapping[0x00D7], 10)
-    }
-
-    func testSyntheticButtonNumberIgnoresEnumerationOrder() {
-        let forward = LogitechReprogrammableControlsMonitor.syntheticButtonNumbers(for: [0x00D0, 0x00D7])
-        let reverse = LogitechReprogrammableControlsMonitor.syntheticButtonNumbers(for: [0x00D7, 0x00D0])
-
-        XCTAssertEqual(forward, reverse)
+    func testLogitechVirtualControlsUseReservedVirtualButtonNumber() {
         XCTAssertEqual(
-            LogitechReprogrammableControlsMonitor.syntheticButtonNumber(for: 0x00D0, among: [0x00D7, 0x00D0]),
-            8
-        )
-        XCTAssertEqual(
-            LogitechReprogrammableControlsMonitor.syntheticButtonNumber(for: 0x00D7, among: [0x00D7, 0x00D0]),
-            9
+            LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.reservedVirtualButtonNumber,
+            0x1000
         )
     }
 
@@ -373,7 +358,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             productID: 0x405E,
             serialNumber: "ABC123",
             locationID: 0x1000,
-            transport: "USB",
+            transport: PointerDeviceTransportName.usb,
             fallbackName: "Mouse"
         )
 
@@ -386,7 +371,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             productID: 0x405E,
             serialNumber: nil,
             locationID: 0x2000,
-            transport: "USB",
+            transport: PointerDeviceTransportName.usb,
             fallbackName: "Mouse"
         )
 

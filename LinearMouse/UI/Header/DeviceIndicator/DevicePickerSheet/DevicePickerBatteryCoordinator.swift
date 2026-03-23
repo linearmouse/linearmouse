@@ -3,6 +3,7 @@
 
 import Combine
 import Foundation
+import PointerKit
 
 final class DevicePickerBatteryCoordinator {
     static let shared = DevicePickerBatteryCoordinator()
@@ -14,7 +15,7 @@ final class DevicePickerBatteryCoordinator {
     func refresh(_ deviceModel: DeviceModel) {
         guard let device = deviceModel.deviceRef.value,
               device.pointerDevice.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID,
-              device.pointerDevice.transport == "Bluetooth Low Energy" else {
+              device.pointerDevice.transport == PointerDeviceTransportName.bluetoothLowEnergy else {
             return
         }
 

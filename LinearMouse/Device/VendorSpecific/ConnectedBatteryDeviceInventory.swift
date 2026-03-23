@@ -3,6 +3,7 @@
 
 import Foundation
 import IOKit.hid
+import PointerKit
 
 private typealias AppleBatterySnapshot = (id: String, level: Int)
 
@@ -52,7 +53,7 @@ struct ConnectedBatteryDeviceInfo: Hashable {
     }
 
     static func isAppleBluetoothDevice(vendorID: Int?, transport: String?) -> Bool {
-        vendorID == 0x004C && transport == "Bluetooth"
+        vendorID == 0x004C && transport == PointerDeviceTransportName.bluetooth
     }
 }
 

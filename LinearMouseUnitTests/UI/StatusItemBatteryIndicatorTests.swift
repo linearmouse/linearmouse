@@ -3,6 +3,7 @@
 
 import Foundation
 @testable import LinearMouse
+import PointerKit
 import XCTest
 
 final class StatusItemBatteryIndicatorTests: XCTestCase {
@@ -98,11 +99,17 @@ final class StatusItemBatteryIndicatorTests: XCTestCase {
     }
 
     func testAppleBluetoothDeviceDetection() {
-        XCTAssertTrue(ConnectedBatteryDeviceInfo.isAppleBluetoothDevice(vendorID: 0x004C, transport: "Bluetooth"))
+        XCTAssertTrue(ConnectedBatteryDeviceInfo.isAppleBluetoothDevice(
+            vendorID: 0x004C,
+            transport: PointerDeviceTransportName.bluetooth
+        ))
         XCTAssertFalse(ConnectedBatteryDeviceInfo.isAppleBluetoothDevice(
             vendorID: 0x004C,
-            transport: "Bluetooth Low Energy"
+            transport: PointerDeviceTransportName.bluetoothLowEnergy
         ))
-        XCTAssertFalse(ConnectedBatteryDeviceInfo.isAppleBluetoothDevice(vendorID: 0x046D, transport: "Bluetooth"))
+        XCTAssertFalse(ConnectedBatteryDeviceInfo.isAppleBluetoothDevice(
+            vendorID: 0x046D,
+            transport: PointerDeviceTransportName.bluetooth
+        ))
     }
 }

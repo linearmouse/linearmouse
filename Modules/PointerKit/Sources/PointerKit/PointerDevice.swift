@@ -5,6 +5,14 @@ import Foundation
 import ObservationToken
 import PointerKitC
 
+/// Common IOHID transport names.
+/// This is a shared string namespace, not an exhaustive transport model.
+public enum PointerDeviceTransportName {
+    public static let usb = "USB"
+    public static let bluetooth = "Bluetooth"
+    public static let bluetoothLowEnergy = "Bluetooth Low Energy"
+}
+
 public class PointerDevice {
     let client: IOHIDServiceClient
     let device: IOHIDDevice?

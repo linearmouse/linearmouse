@@ -9,7 +9,6 @@ struct ButtonMappingButtonRecorder: View {
     @Binding var mapping: Scheme.Buttons.Mapping
 
     var autoStartRecording = false
-    var persistVirtualButtonForLogitechControl = false
     var keepGlobalRecordingActiveWhilePresented = false
 
     @State private var recording = false {
@@ -159,6 +158,7 @@ struct ButtonMappingButtonRecorder: View {
     }
 
     private func logitechControlReceived(_ identity: LogitechControlIdentity) {
+        mapping.button = LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.reservedVirtualButtonNumber
         mapping.logiButton = identity
         mapping.rawModifierFlags = ModifierState.normalize(ModifierState.shared.currentFlags)
         SettingsState.shared.recordedLogitechControl = nil

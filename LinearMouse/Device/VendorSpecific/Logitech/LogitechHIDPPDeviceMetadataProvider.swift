@@ -7,6 +7,7 @@ import Foundation
 import IOKit.hid
 import ObservationToken
 import os.log
+import PointerKit
 
 struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider {
     static let log = OSLog(
@@ -55,7 +56,10 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             0x00CE, 0x00CF, // Alternate back/forward
             0x00D9, 0x00DB // Additional back/forward variants
         ]
-        static let syntheticButtonBaseNumber = 8
+        /// Reserved button number written into config for virtual controls.
+        /// Older versions do not generate this button, so persisted mappings will not misfire after downgrade.
+        /// This value is intentionally vendor-agnostic so other protocol-backed controls can reuse it later.
+        static let reservedVirtualButtonNumber = 0x1000
 
         static let getControlCountFunction: UInt8 = 0x00
         static let getControlInfoFunction: UInt8 = 0x01
@@ -160,7 +164,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
     let matcher = VendorSpecificDeviceMatcher(
         vendorID: Constants.vendorID,
         productIDs: nil,
-        transports: ["Bluetooth Low Energy", "USB"]
+        transports: [PointerDeviceTransportName.bluetoothLowEnergy, PointerDeviceTransportName.usb]
     )
 
     func matches(device: VendorSpecificDeviceContext) -> Bool {
@@ -189,7 +193,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
     }
 
     func receiverPointingDeviceDiscovery(for device: VendorSpecificDeviceContext) -> ReceiverPointingDeviceDiscovery {
-        guard device.transport == "USB" else {
+        guard device.transport == PointerDeviceTransportName.usb else {
             os_log(
                 "Skip receiver discovery for non-USB device: name=%{public}@ transport=%{public}@",
                 log: Self.log,
@@ -248,7 +252,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
     }
 
     func openReceiverChannel(for device: VendorSpecificDeviceContext) -> LogitechReceiverChannel? {
-        guard device.transport == "USB",
+        guard device.transport == PointerDeviceTransportName.usb,
               let locationID = device.locationID
         else {
             return nil
@@ -258,7 +262,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
     }
 
     func receiverSlot(for device: VendorSpecificDeviceContext) -> UInt8? {
-        guard device.transport == "USB",
+        guard device.transport == PointerDeviceTransportName.usb,
               let locationID = device.locationID,
               let receiverChannel = LogitechReceiverChannel.open(locationID: locationID)
         else {
@@ -284,7 +288,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         timeout: TimeInterval,
         until shouldContinue: @escaping () -> Bool
     ) -> [UInt8: ReceiverConnectionSnapshot] {
-        guard device.transport == "USB",
+        guard device.transport == PointerDeviceTransportName.usb,
               let locationID = device.locationID,
               let receiverChannel = LogitechReceiverChannel.open(locationID: locationID)
         else {
@@ -330,7 +334,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
     }
 
     private func directTransport(for device: VendorSpecificDeviceContext) -> LogitechHIDPPTransport? {
-        guard device.transport == "Bluetooth Low Energy" else {
+        guard device.transport == PointerDeviceTransportName.bluetoothLowEnergy else {
             return nil
         }
 
@@ -338,7 +342,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
     }
 
     private func receiverTransport(for device: VendorSpecificDeviceContext) -> LogitechHIDPPTransport? {
-        guard device.transport == "USB",
+        guard device.transport == PointerDeviceTransportName.usb,
               let locationID = device.locationID,
               let receiverChannel = LogitechReceiverChannel.open(locationID: locationID),
               let slot = discoverReceiverSlot(for: device, using: receiverChannel)?.slot
@@ -552,7 +556,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
     }
 
     private func isReceiverVendorChannel(_ device: VendorSpecificDeviceContext) -> Bool {
-        device.transport == "USB"
+        device.transport == PointerDeviceTransportName.usb
             && device.primaryUsagePage == 0xFF00
             && device.primaryUsage == 0x01
     }
@@ -755,7 +759,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         let matching: [String: Any] = [
             kIOHIDVendorIDKey: LogitechHIDPPDeviceMetadataProvider.Constants.vendorID,
             "LocationID": locationID,
-            "Transport": "USB",
+            "Transport": PointerDeviceTransportName.usb,
             kIOHIDPrimaryUsagePageKey: 0xFF00,
             kIOHIDPrimaryUsageKey: 0x01
         ]
@@ -1570,7 +1574,8 @@ final class LogitechReprogrammableControlsMonitor {
     static func supports(device: Device) -> Bool {
         guard let vendorID = device.vendorID,
               vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID,
-              ["USB", "Bluetooth Low Energy"].contains(device.pointerDevice.transport)
+              [PointerDeviceTransportName.usb, PointerDeviceTransportName.bluetoothLowEnergy]
+              .contains(device.pointerDevice.transport)
         else {
             return false
         }
@@ -1653,8 +1658,9 @@ final class LogitechReprogrammableControlsMonitor {
             let monitoredControls = isRecording
                 ? allControls
                 : allControls.filter { desiredControlIDs.contains($0.controlID) }
-            let monitoredControlIDs = monitoredControls.map(\.controlID)
-            let buttonNumbersByControlID = Self.syntheticButtonNumbers(for: monitoredControlIDs)
+            let monitoredControlIDs = Set(monitoredControls.map(\.controlID))
+            let reservedVirtualButtonNumber =
+                LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.reservedVirtualButtonNumber
 
             if !isRecording {
                 let controlsToRestore = pendingReportingRestoreByControlID
@@ -1753,17 +1759,13 @@ final class LogitechReprogrammableControlsMonitor {
                     result[controlID] = reportingInfo
                 }
 
-            let controlSummary = monitoredControls.compactMap { control -> String? in
-                guard let buttonNumber = buttonNumbersByControlID[control.controlID] else {
-                    return nil
-                }
-
+            let controlSummary = monitoredControls.map { control in
                 let originalReporting = originalReportingByControlID[control.controlID]
                 let activeReporting = activeReportingByControlID[control.controlID]
                 return String(
                     format: "cid=0x%04X button=%d tid=0x%04X flags=%@ reporting=%@ mapped=0x%04X",
                     control.controlID,
-                    buttonNumber,
+                    reservedVirtualButtonNumber,
                     control.taskID,
                     describeControlFlags(control.flags),
                     describeReportingFlags(activeReporting?.flags ?? originalReporting?.flags ?? []),
@@ -1835,10 +1837,6 @@ final class LogitechReprogrammableControlsMonitor {
                 pressedControls = activeControls
 
                 for controlID in changedControls {
-                    guard let buttonNumber = buttonNumbersByControlID[controlID] else {
-                        continue
-                    }
-
                     let isPressed = activeControls.contains(controlID)
                     os_log(
                         "Logitech reprogrammable control event: locationID=%{public}u slot=%{public}u device=%{public}@ cid=0x%{public}04X button=%{public}d state=%{public}@ active=%{public}@",
@@ -1848,7 +1846,7 @@ final class LogitechReprogrammableControlsMonitor {
                         slot,
                         targetName,
                         controlID,
-                        buttonNumber,
+                        reservedVirtualButtonNumber,
                         isPressed ? "down" : "up",
                         activeControls.map { String(format: "0x%04X", $0) }.sorted().joined(separator: ",")
                     )
@@ -1899,7 +1897,7 @@ final class LogitechReprogrammableControlsMonitor {
                     }
 
                     postSyntheticButton(
-                        button: buttonNumber,
+                        button: reservedVirtualButtonNumber,
                         down: isPressed
                     )
                 }
@@ -1924,16 +1922,6 @@ final class LogitechReprogrammableControlsMonitor {
         return controls
             .filter(Self.shouldMonitor)
             .sorted { lhs, rhs in
-                guard let lhsButton = Self.syntheticButtonNumber(for: lhs.controlID, among: controls.map(\.controlID)),
-                      let rhsButton = Self.syntheticButtonNumber(for: rhs.controlID, among: controls.map(\.controlID))
-                else {
-                    return lhs.controlID < rhs.controlID
-                }
-
-                if lhsButton != rhsButton {
-                    return lhsButton < rhsButton
-                }
-
                 if lhs.controlID != rhs.controlID {
                     return lhs.controlID < rhs.controlID
                 }
@@ -1943,7 +1931,7 @@ final class LogitechReprogrammableControlsMonitor {
     }
 
     private func resolveMonitorTarget() -> MonitorTarget? {
-        if device.pointerDevice.transport == "Bluetooth Low Energy" {
+        if device.pointerDevice.transport == PointerDeviceTransportName.bluetoothLowEnergy {
             return buildDirectMonitorTarget()
         }
 
@@ -2110,21 +2098,6 @@ final class LogitechReprogrammableControlsMonitor {
             controls: controls,
             notificationEndpoint: receiverChannel
         )
-    }
-
-    static func syntheticButtonNumber(for controlID: UInt16, among controlIDs: [UInt16]) -> Int? {
-        let orderedControlIDs = Array(Set(controlIDs)).sorted()
-        guard let index = orderedControlIDs.firstIndex(of: controlID) else {
-            return nil
-        }
-
-        return LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.syntheticButtonBaseNumber + index
-    }
-
-    static func syntheticButtonNumbers(for controlIDs: [UInt16]) -> [UInt16: Int] {
-        Dictionary(uniqueKeysWithValues: Set(controlIDs).sorted().enumerated().map { index, controlID in
-            (controlID, LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.syntheticButtonBaseNumber + index)
-        })
     }
 
     private static func shouldMonitor(_ control: ControlInfo) -> Bool {

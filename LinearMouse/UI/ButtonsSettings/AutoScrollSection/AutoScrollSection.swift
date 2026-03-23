@@ -34,8 +34,7 @@ struct AutoScrollSection: View {
                         .font(.headline)
 
                     ButtonMappingButtonRecorder(
-                        mapping: state.autoScrollTriggerBinding,
-                        persistVirtualButtonForLogitechControl: true
+                        mapping: state.autoScrollTriggerBinding
                     )
 
                     if !state.autoScrollTriggerValid {
