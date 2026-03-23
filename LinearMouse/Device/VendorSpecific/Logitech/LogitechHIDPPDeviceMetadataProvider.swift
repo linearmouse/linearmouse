@@ -1555,7 +1555,6 @@ final class LogitechReprogrammableControlsMonitor {
     private let device: Device
     private let provider = LogitechHIDPPDeviceMetadataProvider()
     private let stateLock = NSLock()
-    private let stoppedSemaphore = DispatchSemaphore(value: 0)
     private var subscriptions = Set<AnyCancellable>()
     private var directDeviceReportObservationToken: ObservationToken?
 
@@ -1602,11 +1601,10 @@ final class LogitechReprogrammableControlsMonitor {
         stateLock.lock()
         running = false
         let thread = workerThread
+        workerThread = nil
         stateLock.unlock()
 
         thread?.cancel()
-        _ = stoppedSemaphore.wait(timeout: .now() + Constants.stopTimeout)
-        workerThread = nil
         subscriptions.removeAll()
         directDeviceReportObservationToken = nil
     }
@@ -1614,7 +1612,6 @@ final class LogitechReprogrammableControlsMonitor {
     private func workerMain() {
         defer {
             releaseButtonIfNeeded()
-            stoppedSemaphore.signal()
         }
 
         guard let monitorTarget = resolveMonitorTarget() else {

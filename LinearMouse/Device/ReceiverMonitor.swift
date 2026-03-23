@@ -141,7 +141,6 @@ private final class ReceiverContext {
     private var workerThread: Thread?
     private var isRunning = false
     private let stateLock = NSLock()
-    private let stoppedSemaphore = DispatchSemaphore(value: 0)
     private var lastPublishedIdentities = [ReceiverLogicalDeviceIdentity]()
     private var stateStore = ReceiverSlotStateStore()
 
@@ -176,17 +175,13 @@ private final class ReceiverContext {
         stateLock.lock()
         isRunning = false
         let thread = workerThread
-        stateLock.unlock()
-        thread?.cancel()
-        _ = stoppedSemaphore.wait(timeout: .now() + ReceiverMonitor.refreshInterval + 3)
         workerThread = nil
+        stateLock.unlock()
+
+        thread?.cancel()
     }
 
     private func workerMain() {
-        defer {
-            stoppedSemaphore.signal()
-        }
-
         let initialDeadline = Date().addingTimeInterval(ReceiverMonitor.initialDiscoveryTimeout)
         var hasPublishedInitialState = false
         var receiverChannel: LogitechReceiverChannel?
