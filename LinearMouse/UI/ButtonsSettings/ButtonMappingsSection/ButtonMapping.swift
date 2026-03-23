@@ -49,11 +49,7 @@ struct ButtonMappingButtonDescription<FallbackView: View>: View {
     var fallback: (() -> FallbackView)?
 
     var body: some View {
-        if let logiButton = mapping.logiButton {
-            descriptionRow {
-                Text(verbatim: logiButton.userVisibleName)
-            }
-        } else if let button = mapping.button {
+        if let button = mapping.button {
             descriptionRow {
                 Text(buttonDescription(of: button))
             }
@@ -98,16 +94,21 @@ struct ButtonMappingButtonDescription<FallbackView: View>: View {
         }
     }
 
-    private func buttonDescription(of button: Int) -> LocalizedStringKey {
+    private func buttonDescription(of button: Scheme.Buttons.Mapping.Button) -> LocalizedStringKey {
         switch button {
-        case 0:
-            return "Primary click"
-        case 1:
-            return "Secondary click"
-        case 2:
-            return "Middle click"
-        default:
-            return "Button #\(button) click"
+        case let .mouse(buttonNumber):
+            switch buttonNumber {
+            case 0:
+                return "Primary click"
+            case 1:
+                return "Secondary click"
+            case 2:
+                return "Middle click"
+            default:
+                return "Button #\(buttonNumber) click"
+            }
+        case let .logitechControl(identity):
+            return LocalizedStringKey(identity.userVisibleName)
         }
     }
 

@@ -48,7 +48,7 @@ struct ButtonMappingEditSheet: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
-                if !valid, mapping.button == 0, mapping.logiButton == nil, mapping.modifierFlags.isEmpty {
+                if !valid, mapping.button?.mouseButtonNumber == 0, mapping.modifierFlags.isEmpty {
                     Text("Assigning an action to the left button without any modifier keys is not allowed.")
                         .foregroundColor(.red)
                         .controlSize(.small)
@@ -58,7 +58,7 @@ struct ButtonMappingEditSheet: View {
                 if valid {
                     ButtonMappingAction(action: $mapping.action.default(.arg0(.auto)))
 
-                    if mapping.button != nil || mapping.logiButton != nil {
+                    if mapping.button != nil {
                         Toggle(isOn: $mapping.repeat.default(false)) {
                             Text("Repeat on hold")
                         }

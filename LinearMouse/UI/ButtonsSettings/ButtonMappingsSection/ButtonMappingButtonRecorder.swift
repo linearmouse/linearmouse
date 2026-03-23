@@ -24,7 +24,7 @@ struct ButtonMappingButtonRecorder: View {
     @State private var divertReady = false
     @State private var recordingObservationToken: ObservationToken?
     @State private var divertReadyCancellable: AnyCancellable?
-    @State private var logitechControlCancellable: AnyCancellable?
+    @State private var recordedButtonCancellable: AnyCancellable?
 
     private var waitingForDivert: Bool {
         hasLogitechDevice() && !divertReady
@@ -101,13 +101,12 @@ struct ButtonMappingButtonRecorder: View {
             recordingObservationToken.cancel()
             self.recordingObservationToken = nil
         }
-        logitechControlCancellable?.cancel()
-        logitechControlCancellable = nil
+        recordedButtonCancellable?.cancel()
+        recordedButtonCancellable = nil
 
         if recording {
             mapping.modifierFlags = []
             mapping.button = nil
-            mapping.logiButton = nil
             mapping.repeat = nil
             mapping.scroll = nil
 
@@ -136,20 +135,20 @@ struct ButtonMappingButtonRecorder: View {
 
         // Observe Logitech control presses communicated via SettingsState
         // (no synthetic CGEvent needed — the HID++ protocol detects presses directly)
-        logitechControlCancellable = SettingsState.shared
-            .$recordedLogitechControl
+        recordedButtonCancellable = SettingsState.shared
+            .$recordedButton
             .compactMap(\.self)
             .receive(on: DispatchQueue.main)
-            .sink { identity in
-                logitechControlReceived(identity)
+            .sink { button in
+                virtualButtonReceived(button)
             }
     }
 
     private func cancelObservation() {
         divertReadyCancellable?.cancel()
         divertReadyCancellable = nil
-        logitechControlCancellable?.cancel()
-        logitechControlCancellable = nil
+        recordedButtonCancellable?.cancel()
+        recordedButtonCancellable = nil
         divertReady = false
     }
 
@@ -157,11 +156,10 @@ struct ButtonMappingButtonRecorder: View {
         DeviceManager.shared.devices.contains(where: \.hasLogitechControlsMonitor)
     }
 
-    private func logitechControlReceived(_ identity: LogitechControlIdentity) {
-        mapping.button = LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.reservedVirtualButtonNumber
-        mapping.logiButton = identity
+    private func virtualButtonReceived(_ button: Scheme.Buttons.Mapping.Button) {
+        mapping.button = button
         mapping.rawModifierFlags = ModifierState.normalize(ModifierState.shared.currentFlags)
-        SettingsState.shared.recordedLogitechControl = nil
+        SettingsState.shared.recordedButton = nil
         recording = false
     }
 
@@ -175,11 +173,11 @@ struct ButtonMappingButtonRecorder: View {
             return nil
 
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
-            mapping.button = Int(event.getIntegerValueField(.mouseEventButtonNumber))
+            mapping.button = .mouse(Int(event.getIntegerValueField(.mouseEventButtonNumber)))
             return nil
 
         case .leftMouseUp, .rightMouseUp, .otherMouseUp:
-            mapping.button = Int(event.getIntegerValueField(.mouseEventButtonNumber))
+            mapping.button = .mouse(Int(event.getIntegerValueField(.mouseEventButtonNumber)))
 
         case .scrollWheel:
             let scrollWheelEventView = ScrollWheelEventView(event)

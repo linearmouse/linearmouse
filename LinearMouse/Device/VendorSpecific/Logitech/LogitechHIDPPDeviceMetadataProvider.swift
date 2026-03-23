@@ -1856,14 +1856,14 @@ final class LogitechReprogrammableControlsMonitor {
                     let modifierFlags = ModifierState.shared.currentFlags
                     let controlIdentity = LogitechControlIdentity(
                         controlID: Int(controlID),
-                        logicalDeviceProductID: targetIdentity?.productID,
-                        logicalDeviceSerialNumber: targetIdentity?.serialNumber
+                        productID: targetIdentity?.productID,
+                        serialNumber: targetIdentity?.serialNumber
                     )
 
                     if isRecording {
                         if isPressed {
                             DispatchQueue.main.async {
-                                SettingsState.shared.recordedLogitechControl = controlIdentity
+                                SettingsState.shared.recordedButton = .logitechControl(controlIdentity)
                             }
                         }
                         continue
@@ -2183,7 +2183,7 @@ final class LogitechReprogrammableControlsMonitor {
 
         let directMappings: [UInt16] = (scheme.buttons.mappings ?? [])
             .compactMap { (mapping: Scheme.Buttons.Mapping) -> UInt16? in
-                guard let logiButton = mapping.logiButton else {
+                guard let logiButton = mapping.button?.logitechControl else {
                     return nil
                 }
 
@@ -2195,7 +2195,7 @@ final class LogitechReprogrammableControlsMonitor {
             }
 
         let autoScrollControlID: UInt16? = {
-            guard let logiButton = scheme.buttons.autoScroll.trigger?.logiButton,
+            guard let logiButton = scheme.buttons.autoScroll.trigger?.button?.logitechControl,
                   matches(logiButton: logiButton, identity: identity) else {
                 return nil
             }
@@ -2210,17 +2210,17 @@ final class LogitechReprogrammableControlsMonitor {
         if let identity,
            let serialNumber = identity.serialNumber,
            let productID = identity.productID {
-            if let configuredSerialNumber = logiButton.logicalDeviceSerialNumber,
+            if let configuredSerialNumber = logiButton.serialNumber,
                configuredSerialNumber.caseInsensitiveCompare(serialNumber) == .orderedSame {
                 return true
             }
 
-            if let configuredProductID = logiButton.logicalDeviceProductID {
+            if let configuredProductID = logiButton.productID {
                 return configuredProductID == productID
             }
         }
 
-        return logiButton.logicalDeviceSerialNumber == nil && logiButton.logicalDeviceProductID == nil
+        return logiButton.serialNumber == nil && logiButton.productID == nil
     }
 
     static func preferredIdentity(from identities: [ReceiverLogicalDeviceIdentity]) -> ReceiverLogicalDeviceIdentity? {

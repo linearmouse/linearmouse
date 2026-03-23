@@ -47,7 +47,7 @@ class SettingsState: ObservableObject {
     /// from pressing a button before diversion is active.
     @Published var recordingDivertReady = false
 
-    /// Set by `LogitechReprogrammableControlsMonitor` when a Logitech control is pressed during recording.
-    /// The button recorder observes this to capture Logitech button identity without synthetic events.
-    @Published var recordedLogitechControl: LogitechControlIdentity?
+    /// Set by protocol-backed button monitors when a virtual button is pressed during recording.
+    /// The button recorder observes this to capture non-CGEvent button identity without synthetic events.
+    @Published var recordedButton: Scheme.Buttons.Mapping.Button?
 }

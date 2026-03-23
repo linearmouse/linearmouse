@@ -9,7 +9,7 @@ final class ButtonActionsTransformerTests: XCTestCase {
     func testLogitechControlEventMatchesRightCommandOnlyMapping() {
         let transformer = ButtonActionsTransformer(mappings: [
             .init(
-                logiButton: .init(controlID: 0x0053),
+                button: .logitechControl(.init(controlID: 0x0053)),
                 modifierFlagsRaw: CGEventFlags.maskCommand.rawValue | UInt64(NX_DEVICERCMDKEYMASK),
                 action: .arg0(.none)
             )
@@ -30,7 +30,7 @@ final class ButtonActionsTransformerTests: XCTestCase {
     func testLogitechControlEventDoesNotMatchLeftCommandForRightCommandOnlyMapping() {
         let transformer = ButtonActionsTransformer(mappings: [
             .init(
-                logiButton: .init(controlID: 0x0053),
+                button: .logitechControl(.init(controlID: 0x0053)),
                 modifierFlagsRaw: CGEventFlags.maskCommand.rawValue | UInt64(NX_DEVICERCMDKEYMASK),
                 action: .arg0(.none)
             )
@@ -51,7 +51,7 @@ final class ButtonActionsTransformerTests: XCTestCase {
     func testLogitechMouseButtonBackActionHandledDirectly() {
         let transformer = ButtonActionsTransformer(mappings: [
             .init(
-                logiButton: .init(controlID: 0x0053),
+                button: .logitechControl(.init(controlID: 0x0053)),
                 action: .arg0(.mouseButtonBack)
             )
         ])
@@ -72,7 +72,7 @@ final class ButtonActionsTransformerTests: XCTestCase {
         // A mapping with only controlID should match an event with full identity
         let transformer = ButtonActionsTransformer(mappings: [
             .init(
-                logiButton: .init(controlID: 0x00C3),
+                button: .logitechControl(.init(controlID: 0x00C3)),
                 action: .arg0(.none)
             )
         ])
@@ -83,8 +83,8 @@ final class ButtonActionsTransformerTests: XCTestCase {
             display: nil,
             controlIdentity: .init(
                 controlID: 0x00C3,
-                logicalDeviceProductID: 0x405E,
-                logicalDeviceSerialNumber: "45AFAFA6"
+                productID: 0x405E,
+                serialNumber: "45AFAFA6"
             ),
             isPressed: false,
             modifierFlags: []

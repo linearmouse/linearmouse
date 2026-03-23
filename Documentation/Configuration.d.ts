@@ -9,7 +9,7 @@ type IntString = string;
 /** @pattern ^0x[0-9a-fA-F]+$ */
 type HexString = string;
 
-type Button = Primary | Secondary | Auxiliary | Back | Forward | number;
+type PhysicalButton = Primary | Secondary | Auxiliary | Back | Forward | number;
 
 /**
  * @title Unset
@@ -514,7 +514,7 @@ declare namespace Scheme {
          * @title Button number
          * @description The button number. See https://developer.apple.com/documentation/coregraphics/cgmousebutton
          */
-        button: Button;
+        button: Mapping.Button;
 
         /**
          * @description Indicates if the command modifier key should be pressed.
@@ -544,7 +544,7 @@ declare namespace Scheme {
            * @title Button number
            * @description The button number. See https://developer.apple.com/documentation/coregraphics/cgmousebutton
            */
-          button: Button;
+          button: Mapping.Button;
 
           /**
            * @description Indicates if key repeat is enabled. If the value is true, the action will be repeatedly executed when the button is hold according to the key repeat settings in System Settings.
@@ -586,6 +586,30 @@ declare namespace Scheme {
     };
 
     namespace Mapping {
+      type Button = PhysicalButton | LogitechControlButton;
+
+      type LogitechControlButton = {
+        /**
+         * @description Logitech control button identifier.
+         */
+        kind: "logitechControl";
+
+        /**
+         * @description Logitech control ID (CID).
+         */
+        controlID: Int;
+
+        /**
+         * @description Match a specific Logitech device product ID when needed.
+         */
+        productID?: HexString | Int;
+
+        /**
+         * @description Match a specific Logitech device serial number when needed.
+         */
+        serialNumber?: string;
+      };
+
       type Action =
         | SimpleAction
         | Run
@@ -964,7 +988,7 @@ declare namespace Scheme {
       /**
        * @description Buttons to debounce.
        */
-      buttons?: Button[];
+      buttons?: PhysicalButton[];
     };
 
     type Gesture = {
@@ -980,7 +1004,7 @@ declare namespace Scheme {
        * @description The button number to use for gestures. Default is 2 (middle button/scroll wheel).
        * @default 2
        */
-      button?: Button;
+      button?: PhysicalButton;
 
       /**
        * @title Threshold

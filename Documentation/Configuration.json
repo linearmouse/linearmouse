@@ -12,28 +12,6 @@
       "description": "Forth button, typically the back button.",
       "type": "number"
     },
-    "Button": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/Primary"
-        },
-        {
-          "$ref": "#/definitions/Secondary"
-        },
-        {
-          "$ref": "#/definitions/Auxiliary"
-        },
-        {
-          "$ref": "#/definitions/Back"
-        },
-        {
-          "$ref": "#/definitions/Forward"
-        },
-        {
-          "type": "number"
-        }
-      ]
-    },
     "Configuration": {
       "additionalProperties": false,
       "properties": {
@@ -78,6 +56,28 @@
     "IntString": {
       "pattern": "^\\d+$",
       "type": "string"
+    },
+    "PhysicalButton": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Primary"
+        },
+        {
+          "$ref": "#/definitions/Secondary"
+        },
+        {
+          "$ref": "#/definitions/Auxiliary"
+        },
+        {
+          "$ref": "#/definitions/Back"
+        },
+        {
+          "$ref": "#/definitions/Forward"
+        },
+        {
+          "type": "number"
+        }
+      ]
     },
     "Primary": {
       "const": 0,
@@ -206,7 +206,7 @@
       "additionalProperties": false,
       "properties": {
         "button": {
-          "$ref": "#/definitions/Button",
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Button",
           "description": "The button number. See https://developer.apple.com/documentation/coregraphics/cgmousebutton",
           "title": "Button number"
         },
@@ -238,7 +238,7 @@
         "buttons": {
           "description": "Buttons to debounce.",
           "items": {
-            "$ref": "#/definitions/Button"
+            "$ref": "#/definitions/PhysicalButton"
           },
           "type": "array"
         },
@@ -262,7 +262,7 @@
           "title": "Gesture actions"
         },
         "button": {
-          "$ref": "#/definitions/Button",
+          "$ref": "#/definitions/PhysicalButton",
           "default": 2,
           "description": "The button number to use for gestures. Default is 2 (middle button/scroll wheel).",
           "title": "Button"
@@ -352,7 +352,7 @@
               "title": "Action"
             },
             "button": {
-              "$ref": "#/definitions/Button",
+              "$ref": "#/definitions/Scheme.Buttons.Mapping.Button",
               "description": "The button number. See https://developer.apple.com/documentation/coregraphics/cgmousebutton",
               "title": "Button number"
             },
@@ -452,6 +452,16 @@
       "const": "auto",
       "description": "Do not modify the button behavior.",
       "type": "string"
+    },
+    "Scheme.Buttons.Mapping.Button": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/PhysicalButton"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.LogitechControlButton"
+        }
+      ]
     },
     "Scheme.Buttons.Mapping.DisplayBrightnessDown": {
       "const": "display.brightnessDown",
@@ -598,6 +608,40 @@
       "const": "launchpad",
       "description": "Launchpad.",
       "type": "string"
+    },
+    "Scheme.Buttons.Mapping.LogitechControlButton": {
+      "additionalProperties": false,
+      "properties": {
+        "controlID": {
+          "$ref": "#/definitions/Int",
+          "description": "Logitech control ID (CID)."
+        },
+        "kind": {
+          "const": "logitechControl",
+          "description": "Logitech control button identifier.",
+          "type": "string"
+        },
+        "productID": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/HexString"
+            },
+            {
+              "$ref": "#/definitions/Int"
+            }
+          ],
+          "description": "Match a specific Logitech device product ID when needed."
+        },
+        "serialNumber": {
+          "description": "Match a specific Logitech device serial number when needed.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "controlID"
+      ],
+      "type": "object"
     },
     "Scheme.Buttons.Mapping.LookUpAndDataDetectors": {
       "const": "lookUpAndDataDetectors",

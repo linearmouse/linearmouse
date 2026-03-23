@@ -218,14 +218,14 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
 
     func testLogitechControlIdentityProvidesFriendlyUserVisibleName() {
         XCTAssertEqual(
-            LogitechControlIdentity(controlID: 0x00D0, logicalDeviceProductID: nil, logicalDeviceSerialNumber: nil)
+            LogitechControlIdentity(controlID: 0x00D0, productID: nil, serialNumber: nil)
                 .userVisibleName,
-            "Logitech CID 0x00D0"
+            "Logitech Control 0x00D0"
         )
         XCTAssertEqual(
-            LogitechControlIdentity(controlID: 0x1234, logicalDeviceProductID: nil, logicalDeviceSerialNumber: nil)
+            LogitechControlIdentity(controlID: 0x1234, productID: nil, serialNumber: nil)
                 .userVisibleName,
-            "Logitech CID 0x1234"
+            "Logitech Control 0x1234"
         )
     }
 

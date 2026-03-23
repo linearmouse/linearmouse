@@ -27,7 +27,7 @@ extension ButtonsSettingsState {
 
     private var defaultAutoScrollTrigger: Scheme.Buttons.Mapping {
         var mapping = Scheme.Buttons.Mapping()
-        mapping.button = Int(CGMouseButton.center.rawValue)
+        mapping.button = .mouse(Int(CGMouseButton.center.rawValue))
         return mapping
     }
 
@@ -236,7 +236,7 @@ extension ButtonsSettingsState {
 
     var autoScrollUsesPlainMiddleClick: Bool {
         let trigger = autoScrollTrigger
-        return trigger.button == Int(CGMouseButton.center.rawValue) && trigger.modifierFlags.isEmpty
+        return trigger.button == .mouse(Int(CGMouseButton.center.rawValue)) && trigger.modifierFlags.isEmpty
     }
 
     var autoScrollPreserveNativeMiddleClickAvailable: Bool {

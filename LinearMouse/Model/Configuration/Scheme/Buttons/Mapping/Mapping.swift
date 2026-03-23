@@ -3,8 +3,7 @@
 
 extension Scheme.Buttons {
     struct Mapping: Equatable, Hashable {
-        var button: Int?
-        var logiButton: LogitechControlIdentity?
+        var button: Button?
         var `repeat`: Bool?
 
         var scroll: ScrollDirection?
@@ -20,12 +19,42 @@ extension Scheme.Buttons {
 }
 
 extension Scheme.Buttons.Mapping {
+    enum Button: Equatable, Hashable {
+        case mouse(Int)
+        case logitechControl(LogitechControlIdentity)
+
+        var mouseButtonNumber: Int? {
+            guard case let .mouse(buttonNumber) = self else {
+                return nil
+            }
+
+            return buttonNumber
+        }
+
+        var logitechControl: LogitechControlIdentity? {
+            guard case let .logitechControl(identity) = self else {
+                return nil
+            }
+
+            return identity
+        }
+
+        var syntheticMouseButtonNumber: Int {
+            switch self {
+            case let .mouse(buttonNumber):
+                return buttonNumber
+            case .logitechControl:
+                return LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.reservedVirtualButtonNumber
+            }
+        }
+    }
+
     var valid: Bool {
-        guard button != nil || logiButton != nil || scroll != nil else {
+        guard button != nil || scroll != nil else {
             return false
         }
 
-        guard !(button == 0 && logiButton == nil && modifierFlags.isEmpty) else {
+        guard !(button?.mouseButtonNumber == 0 && modifierFlags.isEmpty) else {
             return false
         }
 
@@ -93,10 +122,10 @@ extension Scheme.Buttons.Mapping {
             }
 
             guard let mouseButton = MouseEventView(event).mouseButton,
-                  mouseButton.rawValue == button else {
+                  Int(mouseButton.rawValue) == button.mouseButtonNumber else {
                 return false
             }
-        } else if logiButton != nil {
+        } else if button?.logitechControl != nil {
             // Logitech control mappings are matched directly via handleLogitechControlEvent,
             // not through the CGEvent pipeline.
             return false
@@ -138,11 +167,7 @@ extension Scheme.Buttons.Mapping {
             return false
         }
 
-        if let logiButton, let otherLogiButton = mapping.logiButton {
-            return logiButton == otherLogiButton
-        }
-
-        return button == mapping.button && logiButton == mapping.logiButton
+        return button == mapping.button
     }
 
     func matches(modifierFlags eventFlags: CGEventFlags) -> Bool {
@@ -175,11 +200,11 @@ extension Scheme.Buttons.Mapping: Comparable {
         func score(_ mapping: Scheme.Buttons.Mapping) -> Int {
             var score = 0
 
-            if let button = mapping.button {
-                score |= ((button & 0xFF) << 8)
+            if let mouseButtonNumber = mapping.button?.mouseButtonNumber {
+                score |= ((mouseButtonNumber & 0xFF) << 8)
             }
 
-            if let logiButtonID = mapping.logiButton?.controlID {
+            if let logiButtonID = mapping.button?.logitechControl?.controlID {
                 score |= ((logiButtonID & 0xFFFF) << 20)
             } else if mapping.button == nil, mapping.scroll != nil {
                 score |= (1 << 16)
@@ -226,9 +251,10 @@ extension Scheme.Buttons.Mapping: Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        button = try container.decodeIfPresent(Int.self, forKey: .button)
-        logiButton = try container.decodeIfPresent(LogitechControlIdentity.self, forKey: .logiButton)
+        button = try container.decodeIfPresent(Button.self, forKey: .button)
+            ?? container.decodeIfPresent(LogitechControlIdentity.self, forKey: .logiButton).map(Button.logitechControl)
             ?? container.decodeIfPresent(LogitechControlIdentity.self, forKey: .logitechControl)
+            .map(Button.logitechControl)
         `repeat` = try container.decodeIfPresent(Bool.self, forKey: .repeat)
         scroll = try container.decodeIfPresent(ScrollDirection.self, forKey: .scroll)
         modifierFlagsRaw = try container.decodeIfPresent(UInt64.self, forKey: .modifierFlagsRaw)
@@ -244,7 +270,6 @@ extension Scheme.Buttons.Mapping: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encodeIfPresent(button, forKey: .button)
-        try container.encodeIfPresent(logiButton, forKey: .logiButton)
         try container.encodeIfPresent(`repeat`, forKey: .repeat)
         try container.encodeIfPresent(scroll, forKey: .scroll)
         try container.encodeIfPresent(modifierFlagsRaw, forKey: .modifierFlagsRaw)
@@ -253,5 +278,38 @@ extension Scheme.Buttons.Mapping: Codable {
         try container.encodeIfPresent(option, forKey: .option)
         try container.encodeIfPresent(control, forKey: .control)
         try container.encodeIfPresent(action, forKey: .action)
+    }
+}
+
+extension Scheme.Buttons.Mapping.Button: Codable {
+    private enum CodingKeys: String, CodingKey {
+        case kind
+    }
+
+    private enum Kind: String, Codable {
+        case logitechControl
+    }
+
+    init(from decoder: Decoder) throws {
+        if let buttonNumber = try? decoder.singleValueContainer().decode(Int.self) {
+            self = .mouse(buttonNumber)
+            return
+        }
+
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        switch try container.decode(Kind.self, forKey: .kind) {
+        case .logitechControl:
+            self = try .logitechControl(LogitechControlIdentity(from: decoder))
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .mouse(buttonNumber):
+            var container = encoder.singleValueContainer()
+            try container.encode(buttonNumber)
+        case let .logitechControl(identity):
+            try identity.encode(to: encoder)
+        }
     }
 }

@@ -5,14 +5,16 @@ import CoreGraphics
 import Foundation
 
 struct LogitechControlIdentity: Codable, Equatable, Hashable {
+    static let kind = "logitechControl"
+
     var controlID: Int
-    var logicalDeviceProductID: Int?
-    var logicalDeviceSerialNumber: String?
+    var productID: Int?
+    var serialNumber: String?
 }
 
 extension LogitechControlIdentity {
     var userVisibleName: String {
-        String(format: "Logitech CID 0x%04X", controlID)
+        String(format: "Logitech Control 0x%04X", controlID)
     }
 
     var controlIDValue: UInt16? {
@@ -24,17 +26,45 @@ extension LogitechControlIdentity {
             return false
         }
 
-        if let lhsSerial = logicalDeviceSerialNumber,
-           let rhsSerial = other.logicalDeviceSerialNumber {
+        if let lhsSerial = serialNumber,
+           let rhsSerial = other.serialNumber {
             return lhsSerial.caseInsensitiveCompare(rhsSerial) == .orderedSame
         }
 
-        if let lhsProductID = logicalDeviceProductID,
-           let rhsProductID = other.logicalDeviceProductID {
+        if let lhsProductID = productID,
+           let rhsProductID = other.productID {
             return lhsProductID == rhsProductID
         }
 
-        return other.logicalDeviceSerialNumber == nil && other.logicalDeviceProductID == nil
+        return other.serialNumber == nil && other.productID == nil
+    }
+}
+
+extension LogitechControlIdentity {
+    private enum CodingKeys: String, CodingKey {
+        case kind
+        case controlID
+        case productID
+        case serialNumber
+        case logicalDeviceProductID
+        case logicalDeviceSerialNumber
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        controlID = try container.decode(Int.self, forKey: .controlID)
+        productID = try container.decodeIfPresent(Int.self, forKey: .productID)
+            ?? container.decodeIfPresent(Int.self, forKey: .logicalDeviceProductID)
+        serialNumber = try container.decodeIfPresent(String.self, forKey: .serialNumber)
+            ?? container.decodeIfPresent(String.self, forKey: .logicalDeviceSerialNumber)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(Self.kind, forKey: .kind)
+        try container.encode(controlID, forKey: .controlID)
+        try container.encodeIfPresent(productID, forKey: .productID)
+        try container.encodeIfPresent(serialNumber, forKey: .serialNumber)
     }
 }
 

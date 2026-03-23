@@ -36,7 +36,7 @@ final class ConfigurationTests: XCTestCase {
         scheme.buttons.autoScroll.modes = [.hold]
 
         var trigger = Scheme.Buttons.Mapping()
-        trigger.button = 4
+        trigger.button = .mouse(4)
         trigger.shift = true
         scheme.buttons.autoScroll.trigger = trigger
 
@@ -44,7 +44,7 @@ final class ConfigurationTests: XCTestCase {
 
         XCTAssertEqual(scheme.buttons.autoScroll.enabled, true)
         XCTAssertEqual(scheme.buttons.autoScroll.modes, [.hold])
-        XCTAssertEqual(scheme.buttons.autoScroll.trigger?.button, 4)
+        XCTAssertEqual(scheme.buttons.autoScroll.trigger?.button, .mouse(4))
         XCTAssertEqual(scheme.buttons.autoScroll.trigger?.modifierFlags.contains(.maskShift), true)
     }
 
@@ -55,7 +55,7 @@ final class ConfigurationTests: XCTestCase {
         scheme.buttons.autoScroll.speed = 1
 
         var trigger = Scheme.Buttons.Mapping()
-        trigger.button = 2
+        trigger.button = .mouse(2)
         trigger.command = true
         scheme.buttons.autoScroll.trigger = trigger
 
@@ -67,7 +67,7 @@ final class ConfigurationTests: XCTestCase {
         XCTAssertEqual(scheme.buttons.autoScroll.enabled, true)
         XCTAssertEqual(scheme.buttons.autoScroll.modes, [.toggle, .hold])
         XCTAssertEqual(scheme.buttons.autoScroll.speed, 2)
-        XCTAssertEqual(scheme.buttons.autoScroll.trigger?.button, 2)
+        XCTAssertEqual(scheme.buttons.autoScroll.trigger?.button, .mouse(2))
         XCTAssertEqual(scheme.buttons.autoScroll.trigger?.modifierFlags.contains(.maskCommand), true)
     }
 
@@ -97,12 +97,42 @@ final class ConfigurationTests: XCTestCase {
     }
 
     func testMappingPreservesRawSideSpecificModifierFlags() {
-        var mapping = Scheme.Buttons.Mapping(button: 3)
+        var mapping = Scheme.Buttons.Mapping(button: .mouse(3))
         mapping.rawModifierFlags = [.maskCommand, .init(rawValue: UInt64(NX_DEVICERCMDKEYMASK))]
 
         XCTAssertEqual(mapping.modifierFlags, [.maskCommand])
         XCTAssertTrue(mapping.rawModifierFlags.contains(.init(rawValue: UInt64(NX_DEVICERCMDKEYMASK))))
         XCTAssertEqual(mapping.modifierFlagsRaw, CGEventFlags.maskCommand.rawValue | UInt64(NX_DEVICERCMDKEYMASK))
+    }
+
+    func testMappingDecodesLegacyLogitechControlFieldIntoButton() throws {
+        let mapping = try JSONDecoder().decode(
+            Scheme.Buttons.Mapping.self,
+            from: XCTUnwrap(
+                #"{"logiButton":{"controlID":208,"logicalDeviceProductID":16478,"logicalDeviceSerialNumber":"ABC123"}}"#
+                    .data(using: .utf8)
+            )
+        )
+
+        XCTAssertEqual(
+            mapping.button,
+            .logitechControl(.init(controlID: 208, productID: 16_478, serialNumber: "ABC123"))
+        )
+    }
+
+    func testMappingEncodesLogitechControlButtonAsTaggedStructure() throws {
+        let mapping = Scheme.Buttons.Mapping(
+            button: .logitechControl(.init(controlID: 208, productID: 16_478, serialNumber: "ABC123"))
+        )
+
+        let data = try JSONEncoder().encode(mapping)
+        let jsonObject = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let button = try XCTUnwrap(jsonObject["button"] as? [String: Any])
+
+        XCTAssertEqual(button["kind"] as? String, "logitechControl")
+        XCTAssertEqual(button["controlID"] as? Int, 208)
+        XCTAssertEqual(button["productID"] as? Int, 16_478)
+        XCTAssertEqual(button["serialNumber"] as? String, "ABC123")
     }
 
     func testDecodeAutoScrollSingleMode() throws {
