@@ -225,7 +225,10 @@ class EventTransformerManager {
         }
 
         if let mappings = scheme.buttons.mappings {
-            eventTransformer.append(ButtonActionsTransformer(mappings: mappings))
+            eventTransformer.append(ButtonActionsTransformer(
+                mappings: mappings,
+                universalBackForward: scheme.buttons.universalBackForward
+            ))
         }
 
         if let universalBackForward = scheme.buttons.universalBackForward,

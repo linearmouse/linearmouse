@@ -12,6 +12,7 @@ class ButtonActionsTransformer {
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ButtonActions")
 
     let mappings: [Scheme.Buttons.Mapping]
+    let universalBackForward: Scheme.Buttons.UniversalBackForward?
 
     var repeatTimer: Timer?
     private var logitechRepeatTimer: Timer?
@@ -30,8 +31,12 @@ class ButtonActionsTransformer {
         let modifierFlags: CGEventFlags
     }
 
-    init(mappings: [Scheme.Buttons.Mapping]) {
+    init(
+        mappings: [Scheme.Buttons.Mapping],
+        universalBackForward: Scheme.Buttons.UniversalBackForward? = nil
+    ) {
         self.mappings = mappings
+        self.universalBackForward = universalBackForward
     }
 
     deinit {
@@ -200,6 +205,7 @@ extension ButtonActionsTransformer: EventTransformer {
         queueLogitechActions(
             event: nil,
             action: action,
+            targetBundleIdentifier: context.pid?.bundleIdentifier,
             keyRepeatEnabled: keyRepeatEnabled,
             keyRepeatDelay: keyRepeatDelay,
             keyRepeatInterval: keyRepeatInterval
@@ -230,14 +236,16 @@ extension ButtonActionsTransformer: EventTransformer {
     }
 
     private func queueActions(
-        event _: CGEvent?,
+        event: CGEvent?,
         action: Scheme.Buttons.Mapping.Action,
         keyRepeatEnabled: Bool = false,
         keyRepeatDelay: TimeInterval = 0,
         keyRepeatInterval: TimeInterval = 0
     ) {
+        let targetBundleIdentifier = event.flatMap { MouseEventView($0).targetPid?.bundleIdentifier }
+
         DispatchQueue.main.async { [self] in
-            executeIgnoreErrors(action: action)
+            executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
 
             guard keyRepeatEnabled else {
                 return
@@ -251,7 +259,7 @@ extension ButtonActionsTransformer: EventTransformer {
                     return
                 }
 
-                self.executeIgnoreErrors(action: action)
+                self.executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
 
                 self.repeatTimer = Timer.scheduledTimer(
                     withTimeInterval: keyRepeatInterval,
@@ -261,7 +269,7 @@ extension ButtonActionsTransformer: EventTransformer {
                         return
                     }
 
-                    self.executeIgnoreErrors(action: action)
+                    self.executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
                 }
             }
         }
@@ -270,12 +278,13 @@ extension ButtonActionsTransformer: EventTransformer {
     private func queueLogitechActions(
         event _: CGEvent?,
         action: Scheme.Buttons.Mapping.Action,
+        targetBundleIdentifier: String?,
         keyRepeatEnabled: Bool = false,
         keyRepeatDelay: TimeInterval = 0,
         keyRepeatInterval: TimeInterval = 0
     ) {
         DispatchQueue.main.async { [self] in
-            executeIgnoreErrors(action: action)
+            executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
 
             guard keyRepeatEnabled else {
                 return
@@ -289,7 +298,7 @@ extension ButtonActionsTransformer: EventTransformer {
                     return
                 }
 
-                self.executeIgnoreErrors(action: action)
+                self.executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
 
                 self.logitechRepeatTimer = Timer.scheduledTimer(
                     withTimeInterval: keyRepeatInterval,
@@ -299,13 +308,16 @@ extension ButtonActionsTransformer: EventTransformer {
                         return
                     }
 
-                    self.executeIgnoreErrors(action: action)
+                    self.executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
                 }
             }
         }
     }
 
-    private func executeIgnoreErrors(action: Scheme.Buttons.Mapping.Action) {
+    private func executeIgnoreErrors(
+        action: Scheme.Buttons.Mapping.Action,
+        targetBundleIdentifier: String?
+    ) {
         do {
             os_log(
                 "Execute action: %{public}@",
@@ -314,7 +326,7 @@ extension ButtonActionsTransformer: EventTransformer {
                 String(describing: action)
             )
 
-            try execute(action: action)
+            try execute(action: action, targetBundleIdentifier: targetBundleIdentifier)
         } catch {
             os_log(
                 "Failed to execute: %{public}@: %{public}@",
@@ -327,7 +339,10 @@ extension ButtonActionsTransformer: EventTransformer {
     }
 
     // swiftlint:disable:next cyclomatic_complexity
-    private func execute(action: Scheme.Buttons.Mapping.Action) throws {
+    private func execute(
+        action: Scheme.Buttons.Mapping.Action,
+        targetBundleIdentifier: String?
+    ) throws {
         switch action {
         case .arg0(.none), .arg0(.auto):
             return
@@ -418,10 +433,10 @@ extension ButtonActionsTransformer: EventTransformer {
             postClickEvent(mouseButton: .right)
 
         case .arg0(.mouseButtonBack):
-            postClickEvent(mouseButton: .back)
+            postMouseButtonAction(mouseButton: .back, targetBundleIdentifier: targetBundleIdentifier)
 
         case .arg0(.mouseButtonForward):
-            postClickEvent(mouseButton: .forward)
+            postMouseButtonAction(mouseButton: .forward, targetBundleIdentifier: targetBundleIdentifier)
 
         case let .arg1(.run(command)):
             let task = Process()
@@ -445,6 +460,21 @@ extension ButtonActionsTransformer: EventTransformer {
             try keySimulator.press(keys: keys, tap: .cgSessionEventTap)
             keySimulator.reset()
         }
+    }
+
+    private func postMouseButtonAction(
+        mouseButton: CGMouseButton,
+        targetBundleIdentifier: String?
+    ) {
+        guard !UniversalBackForwardTransformer.postNavigationSwipeIfNeeded(
+            for: mouseButton,
+            universalBackForward: universalBackForward,
+            targetBundleIdentifier: targetBundleIdentifier
+        ) else {
+            return
+        }
+
+        postClickEvent(mouseButton: mouseButton)
     }
 
     private func postScrollEvent(horizontal: Int32, vertical: Int32) {

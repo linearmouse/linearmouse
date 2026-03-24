@@ -15,31 +15,46 @@ class UniversalBackForwardTransformer: EventTransformer {
         "com.operasoftware.Opera"
     ]
 
-    private let interestedButtons: Set<CGMouseButton>
+    enum Replacement: Equatable {
+        case mouseButton(CGMouseButton)
+        case navigationSwipe(NavigationSwipeDirection)
+    }
 
-    init(universalBackForward: Scheme.Buttons.UniversalBackForward) {
-        switch universalBackForward {
-        case .none:
-            interestedButtons = []
-        case .both:
-            interestedButtons = [.back, .forward]
-        case .backOnly:
-            interestedButtons = [.back]
-        case .forwardOnly:
-            interestedButtons = [.forward]
+    enum NavigationSwipeDirection: Equatable {
+        case left
+        case right
+
+        var hidDirection: IOHIDSwipeMask {
+            switch self {
+            case .left:
+                return .swipeLeft
+            case .right:
+                return .swipeRight
+            }
         }
     }
 
-    private func shouldHandleEvent(_ view: MouseEventView) -> Bool {
-        guard let mouseButton = view.mouseButton else {
-            return false
-        }
+    private let universalBackForward: Scheme.Buttons.UniversalBackForward
 
-        guard interestedButtons.contains(mouseButton) else {
-            return false
-        }
+    init(universalBackForward: Scheme.Buttons.UniversalBackForward) {
+        self.universalBackForward = universalBackForward
+    }
 
-        guard let bundleIdentifier = view.targetPid?.bundleIdentifier else {
+    static func interestedButtons(for universalBackForward: Scheme.Buttons.UniversalBackForward) -> Set<CGMouseButton> {
+        switch universalBackForward {
+        case .none:
+            return []
+        case .both:
+            return [.back, .forward]
+        case .backOnly:
+            return [.back]
+        case .forwardOnly:
+            return [.forward]
+        }
+    }
+
+    static func supportsTargetBundleIdentifier(_ bundleIdentifier: String?) -> Bool {
+        guard let bundleIdentifier else {
             return false
         }
 
@@ -51,11 +66,65 @@ class UniversalBackForwardTransformer: EventTransformer {
         }
     }
 
+    static func replacement(
+        for mouseButton: CGMouseButton,
+        universalBackForward: Scheme.Buttons.UniversalBackForward?,
+        targetBundleIdentifier: String?
+    ) -> Replacement {
+        guard let universalBackForward,
+              interestedButtons(for: universalBackForward).contains(mouseButton),
+              supportsTargetBundleIdentifier(targetBundleIdentifier) else {
+            return .mouseButton(mouseButton)
+        }
+
+        switch mouseButton {
+        case .back:
+            return .navigationSwipe(.left)
+        case .forward:
+            return .navigationSwipe(.right)
+        default:
+            return .mouseButton(mouseButton)
+        }
+    }
+
+    @discardableResult
+    static func postNavigationSwipeIfNeeded(
+        for mouseButton: CGMouseButton,
+        universalBackForward: Scheme.Buttons.UniversalBackForward?,
+        targetBundleIdentifier: String?
+    ) -> Bool {
+        guard case let .navigationSwipe(direction) = replacement(
+            for: mouseButton,
+            universalBackForward: universalBackForward,
+            targetBundleIdentifier: targetBundleIdentifier
+        ) else {
+            return false
+        }
+
+        guard let event = GestureEvent(
+            navigationSwipeSource: nil,
+            direction: direction.hidDirection
+        ) else {
+            return false
+        }
+
+        event.post(tap: .cgSessionEventTap)
+        return true
+    }
+
     func transform(_ event: CGEvent) -> CGEvent? {
         let view = MouseEventView(event)
+        guard let mouseButton = view.mouseButton else {
+            return event
+        }
 
-        let targetBundleIdentifierString = view.targetPid?.bundleIdentifier ?? "(nil)"
-        guard shouldHandleEvent(view) else {
+        let targetBundleIdentifier = view.targetPid?.bundleIdentifier
+        let targetBundleIdentifierString = targetBundleIdentifier ?? "(nil)"
+        guard case let .navigationSwipe(direction) = Self.replacement(
+            for: mouseButton,
+            universalBackForward: universalBackForward,
+            targetBundleIdentifier: targetBundleIdentifier
+        ) else {
             return event
         }
 
@@ -71,18 +140,8 @@ class UniversalBackForwardTransformer: EventTransformer {
         }
 
         os_log("Convert to swipe: %{public}@", log: Self.log, type: .info, targetBundleIdentifierString)
-        switch view.mouseButton {
-        case CGMouseButton.back:
-            if let event = GestureEvent(navigationSwipeSource: nil, direction: .swipeLeft) {
-                event.post(tap: .cgSessionEventTap)
-            }
-        case CGMouseButton.forward:
-            if let event = GestureEvent(navigationSwipeSource: nil, direction: .swipeRight) {
-                event.post(tap: .cgSessionEventTap)
-            }
-        default:
-            break
-        }
+        GestureEvent(navigationSwipeSource: nil, direction: direction.hidDirection)?
+            .post(tap: .cgSessionEventTap)
         return nil
     }
 }
