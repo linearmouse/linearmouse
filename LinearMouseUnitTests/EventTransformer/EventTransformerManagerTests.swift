@@ -128,4 +128,35 @@ final class EventTransformerManagerTests: XCTestCase {
         XCTAssertGreaterThan(transformedView.deltaYFixedPt, -12)
         XCTAssertEqual(transformedView.scrollPhase, .began)
     }
+
+    func testButtonActionTransformerReceivesUniversalBackForwardSetting() throws {
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(buttons: .init(
+                mappings: [.init(scroll: .left, action: .arg0(.mouseButtonBack))],
+                universalBackForward: .both
+            ))
+        ])
+
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: 0,
+            wheel2: 1,
+            wheel3: 0
+        ))
+
+        let transformer = EventTransformerManager.shared.get(
+            withCGEvent: event,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: nil
+        )
+        let buttonActionsTransformer = try XCTUnwrap((transformer as? [EventTransformer])?
+            .compactMap { $0 as? ButtonActionsTransformer }
+            .first)
+
+        XCTAssertEqual(buttonActionsTransformer.universalBackForward, .both)
+    }
 }
