@@ -27335,6 +27335,9 @@
         }
       }
     },
+    "Invalid Logitech productID" : {
+
+    },
     "Invalid value" : {
       "localizations" : {
         "af" : {
@@ -31915,6 +31918,7 @@
       }
     },
     "Mouse button" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -51517,6 +51521,7 @@
       }
     },
     "The mouse button is already assigned." : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -52139,6 +52144,9 @@
           }
         }
       }
+    },
+    "The trigger is already assigned." : {
+
     },
     "This will delete all settings for \"%@\"." : {
       "localizations" : {
@@ -55475,6 +55483,9 @@
           }
         }
       }
+    },
+    "Waiting for device…" : {
+
     },
     "Weekly" : {
       "localizations" : {

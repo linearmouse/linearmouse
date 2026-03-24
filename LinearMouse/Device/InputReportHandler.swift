@@ -4,6 +4,26 @@
 import CoreGraphics
 import Foundation
 
+enum SyntheticMouseButtonEventEmitter {
+    static func post(button: Int, down: Bool) {
+        guard let location = CGEvent(source: nil)?.location,
+              let mouseButton = CGMouseButton(rawValue: UInt32(button)),
+              let event = CGEvent(
+                  mouseEventSource: nil,
+                  mouseType: down ? .otherMouseDown : .otherMouseUp,
+                  mouseCursorPosition: location,
+                  mouseButton: mouseButton
+              ) else {
+            return
+        }
+
+        event.flags = ModifierState.normalize(ModifierState.shared.currentFlags)
+        event.setIntegerValueField(.mouseEventButtonNumber, value: Int64(button))
+        event.isLinearMouseSyntheticEvent = true
+        event.post(tap: .cghidEventTap)
+    }
+}
+
 /// Context passed through the handler chain
 class InputReportContext {
     let report: Data
@@ -34,18 +54,7 @@ extension InputReportHandler {
     }
 
     func simulateButtonEvent(button: Int, down: Bool) {
-        guard let location = CGEvent(source: nil)?.location else {
-            return
-        }
-        guard let event = CGEvent(
-            mouseEventSource: nil,
-            mouseType: down ? .otherMouseDown : .otherMouseUp,
-            mouseCursorPosition: location,
-            mouseButton: .init(rawValue: UInt32(button))!
-        ) else {
-            return
-        }
-        event.post(tap: .cghidEventTap)
+        SyntheticMouseButtonEventEmitter.post(button: button, down: down)
     }
 }
 

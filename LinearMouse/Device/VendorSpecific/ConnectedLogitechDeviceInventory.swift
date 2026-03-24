@@ -11,7 +11,8 @@ enum ConnectedLogitechDeviceInventory {
 
         for device in pointerDevices where device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID {
             let productName = device.product ?? device.name
-            if device.transport == "USB", productName.localizedCaseInsensitiveContains("receiver") {
+            if device.transport == PointerDeviceTransportName.usb,
+               productName.localizedCaseInsensitiveContains("receiver") {
                 continue
             }
 

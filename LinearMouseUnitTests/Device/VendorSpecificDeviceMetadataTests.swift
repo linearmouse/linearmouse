@@ -1,7 +1,9 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
+import CoreGraphics
 @testable import LinearMouse
+import PointerKit
 import XCTest
 
 final class VendorSpecificDeviceMetadataTests: XCTestCase {
@@ -9,13 +11,13 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         let matcher = VendorSpecificDeviceMatcher(
             vendorID: 0x046D,
             productIDs: [0xB015],
-            transports: ["Bluetooth Low Energy"]
+            transports: [PointerDeviceTransportName.bluetoothLowEnergy]
         )
 
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,
             productID: 0xB015,
-            transport: "Bluetooth Low Energy"
+            transport: PointerDeviceTransportName.bluetoothLowEnergy
         )
 
         XCTAssertTrue(matcher.matches(device: device))
@@ -25,13 +27,13 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         let matcher = VendorSpecificDeviceMatcher(
             vendorID: 0x046D,
             productIDs: nil,
-            transports: ["USB"]
+            transports: [PointerDeviceTransportName.usb]
         )
 
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,
             productID: 0xB015,
-            transport: "Bluetooth Low Energy"
+            transport: PointerDeviceTransportName.bluetoothLowEnergy
         )
 
         XCTAssertFalse(matcher.matches(device: device))
@@ -42,7 +44,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,
             productID: 0xB015,
-            transport: "Bluetooth Low Energy",
+            transport: PointerDeviceTransportName.bluetoothLowEnergy,
             maxInputReportSize: 20,
             maxOutputReportSize: 20
         )
@@ -109,6 +111,71 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertEqual(
             LogitechHIDPPDeviceMetadataProvider.parseConnectedDeviceCount([0x10, 0xFF, 0x81, 0x02, 0x00, 0x01, 0x00]),
             1
+        )
+    }
+
+    func testLogitechDivertedButtonsNotificationMatchesGestureButtonEvent() {
+        XCTAssertTrue(
+            LogitechReprogrammableControlsMonitor.isDivertedButtonsNotification(
+                [0x10, 0x02, 0x05, 0x08, 0x00, 0xC3, 0x00],
+                featureIndex: 0x05,
+                slot: 0x02
+            )
+        )
+    }
+
+    func testLogitechDivertedButtonsNotificationParsesPressedControls() {
+        XCTAssertEqual(
+            LogitechReprogrammableControlsMonitor.parseDivertedButtonsNotification([
+                0x10,
+                0x02,
+                0x05,
+                0x08,
+                0x00,
+                0xC3,
+                0x00,
+                0xC4
+            ]),
+            Set([0x00C3, 0x00C4])
+        )
+    }
+
+    func testLogitechDivertedButtonsNotificationRejectsWrongSlot() {
+        XCTAssertFalse(
+            LogitechReprogrammableControlsMonitor.isDivertedButtonsNotification(
+                [0x10, 0x03, 0x05, 0x08, 0x00, 0xC3, 0x00],
+                featureIndex: 0x05,
+                slot: 0x02
+            )
+        )
+    }
+
+    func testLogitechGestureButtonControlIDsIncludeM720ThumbButton() {
+        XCTAssertTrue(LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.gestureButtonControlIDs.contains(0x00D0))
+    }
+
+    func testLogitechGestureButtonTaskIDsIncludeM720GestureTasks() {
+        XCTAssertTrue(LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.gestureButtonTaskIDs.contains(0x00AD))
+        XCTAssertTrue(LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.gestureButtonTaskIDs.contains(0x00A9))
+    }
+
+    func testLogitechVirtualControlsUseReservedVirtualButtonNumber() {
+        XCTAssertEqual(
+            LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.reservedVirtualButtonNumber,
+            0x1000
+        )
+    }
+
+    func testLogitechControlIdentityProvidesFriendlyUserVisibleName() {
+        XCTAssertEqual(
+            LogitechControlIdentity(controlID: 0x00D0, productID: nil, serialNumber: nil)
+                .userVisibleName,
+            "Logitech Control 0x00D0"
+        )
+        XCTAssertEqual(
+            LogitechControlIdentity(controlID: 0x1234, productID: nil, serialNumber: nil)
+                .userVisibleName,
+            "Logitech Control 0x1234"
         )
     }
 
@@ -241,7 +308,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             productID: 0x405E,
             serialNumber: "ABC123",
             locationID: 0x1000,
-            transport: "USB",
+            transport: PointerDeviceTransportName.usb,
             fallbackName: "Mouse"
         )
 
@@ -254,7 +321,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             productID: 0x405E,
             serialNumber: nil,
             locationID: 0x2000,
-            transport: "USB",
+            transport: PointerDeviceTransportName.usb,
             fallbackName: "Mouse"
         )
 
@@ -320,9 +387,15 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             )
         ]
 
+        let expected = String(
+            format: NSLocalizedString("%@ (%lld devices)", comment: ""),
+            "USB Receiver",
+            Int64(identities.count)
+        )
+
         XCTAssertEqual(
             DeviceManager.displayName(baseName: "USB Receiver", pairedDevices: identities),
-            "USB Receiver (2 devices)"
+            expected
         )
     }
 }

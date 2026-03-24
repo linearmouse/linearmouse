@@ -395,7 +395,7 @@ class DeviceManager: ObservableObject {
     private func shouldMonitorReceiver(_ device: Device) -> Bool {
         guard let vendorID = device.vendorID,
               vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID,
-              device.pointerDevice.transport == "USB"
+              device.pointerDevice.transport == PointerDeviceTransportName.usb
         else {
             return false
         }

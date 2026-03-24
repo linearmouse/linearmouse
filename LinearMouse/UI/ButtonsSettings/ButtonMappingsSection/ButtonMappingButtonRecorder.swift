@@ -1,6 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
+import Combine
 import ObservationToken
 import SwiftUI
 
@@ -9,17 +10,20 @@ struct ButtonMappingButtonRecorder: View {
 
     var autoStartRecording = false
 
+    @ObservedObject private var settingsState = SettingsState.shared
+
     @State private var recording = false {
         didSet {
             guard oldValue != recording else {
                 return
             }
-            SettingsState.shared.recording = recording
+            updateSharedRecordingState()
             recordingUpdated()
         }
     }
 
     @State private var recordingObservationToken: ObservationToken?
+    @State private var recordedButtonCancellable: AnyCancellable?
 
     var body: some View {
         Button {
@@ -28,7 +32,7 @@ struct ButtonMappingButtonRecorder: View {
             Group {
                 if recording {
                     ButtonMappingButtonDescription(mapping: mapping, showPartial: true) {
-                        Text("Recording")
+                        Text(settingsState.isPreparingVirtualButtonRecording ? "Waiting for device…" : "Recording")
                     }
                     .foregroundColor(.orange)
                 } else {
@@ -40,13 +44,27 @@ struct ButtonMappingButtonRecorder: View {
             .frame(maxWidth: .infinity)
         }
         .onAppear {
+            updateSharedRecordingState()
             if autoStartRecording {
                 recording = true
             }
         }
         .onDisappear {
+            cancelObservation()
             recording = false
+            updateSharedRecordingState(force: false)
         }
+    }
+
+    private func updateSharedRecordingState(force: Bool? = nil) {
+        let shouldRecord = force ?? recording
+        if shouldRecord {
+            settingsState.beginVirtualButtonRecordingPreparation(for: logitechMonitorDeviceIDs())
+        } else {
+            settingsState.endVirtualButtonRecordingPreparation()
+        }
+
+        settingsState.recording = shouldRecord
     }
 
     private func recordingUpdated() {
@@ -54,44 +72,83 @@ struct ButtonMappingButtonRecorder: View {
             recordingObservationToken.cancel()
             self.recordingObservationToken = nil
         }
+        recordedButtonCancellable?.cancel()
+        recordedButtonCancellable = nil
 
         if recording {
             mapping.modifierFlags = []
             mapping.button = nil
             mapping.repeat = nil
             mapping.scroll = nil
-
-            recordingObservationToken = try? EventTap.observe([
-                .flagsChanged,
-                .scrollWheel,
-                .leftMouseDown, .leftMouseUp,
-                .rightMouseDown, .rightMouseUp,
-                .otherMouseDown, .otherMouseUp
-            ], place: .tailAppendEventTap) { _, event in
-                eventReceived(event)
-            }
-
-            if recordingObservationToken == nil {
-                recording = false
-            }
+            startEventObservation()
         }
+    }
+
+    private func startEventObservation() {
+        recordingObservationToken = try? EventTap.observe([
+            .flagsChanged,
+            .scrollWheel,
+            .leftMouseDown, .leftMouseUp,
+            .rightMouseDown, .rightMouseUp,
+            .otherMouseDown, .otherMouseUp
+        ], place: .tailAppendEventTap) { _, event in
+            eventReceived(event)
+        }
+
+        if recordingObservationToken == nil {
+            recording = false
+            return
+        }
+
+        settingsState.recordedVirtualButtonEvent = nil
+
+        // Observe Logitech control presses communicated via SettingsState
+        // (no synthetic CGEvent needed — the HID++ protocol detects presses directly)
+        recordedButtonCancellable = settingsState
+            .$recordedVirtualButtonEvent
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { event in
+                virtualButtonReceived(event)
+            }
+    }
+
+    private func cancelObservation() {
+        recordedButtonCancellable?.cancel()
+        recordedButtonCancellable = nil
+    }
+
+    private func logitechMonitorDeviceIDs() -> Set<Int32> {
+        guard let currentDevice = DeviceState.shared.currentDeviceRef?.value,
+              currentDevice.hasLogitechControlsMonitor else {
+            return []
+        }
+
+        return [currentDevice.id]
+    }
+
+    private func virtualButtonReceived(_ event: SettingsState.RecordedVirtualButtonEvent) {
+        mapping.button = event.button
+        mapping.modifierFlags = event.modifierFlags
+        settingsState.recordedVirtualButtonEvent = nil
+        recording = false
     }
 
     private func eventReceived(_ event: CGEvent) -> CGEvent? {
         mapping.button = nil
         mapping.scroll = nil
-        mapping.modifierFlags = .init(rawValue: UInt64(event.flags.rawValue))
+        mapping.modifierFlags = event.flags
 
         switch event.type {
         case .flagsChanged:
             return nil
 
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
-            mapping.button = Int(event.getIntegerValueField(.mouseEventButtonNumber))
+            mapping.button = .mouse(Int(event.getIntegerValueField(.mouseEventButtonNumber)))
             return nil
 
         case .leftMouseUp, .rightMouseUp, .otherMouseUp:
-            mapping.button = Int(event.getIntegerValueField(.mouseEventButtonNumber))
+            mapping.button = .mouse(Int(event.getIntegerValueField(.mouseEventButtonNumber)))
 
         case .scrollWheel:
             let scrollWheelEventView = ScrollWheelEventView(event)

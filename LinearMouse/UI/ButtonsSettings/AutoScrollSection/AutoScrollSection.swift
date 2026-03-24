@@ -33,7 +33,9 @@ struct AutoScrollSection: View {
                     Text("Trigger")
                         .font(.headline)
 
-                    ButtonMappingButtonRecorder(mapping: state.autoScrollTriggerBinding)
+                    ButtonMappingButtonRecorder(
+                        mapping: state.autoScrollTriggerBinding
+                    )
 
                     if !state.autoScrollTriggerValid {
                         Text("Choose a mouse button trigger. Left click without modifier keys is not allowed.")

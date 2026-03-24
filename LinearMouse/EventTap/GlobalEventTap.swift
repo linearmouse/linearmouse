@@ -17,6 +17,8 @@ class GlobalEventTap {
     init() {}
 
     private func callback(_ event: CGEvent) -> CGEvent? {
+        ModifierState.shared.update(with: event)
+
         let mouseEventView = MouseEventView(event)
         let eventTransformer = EventTransformerManager.shared.get(
             withCGEvent: event,

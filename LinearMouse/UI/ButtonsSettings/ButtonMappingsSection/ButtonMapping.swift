@@ -45,13 +45,11 @@ struct ButtonMappingButtonDescription<FallbackView: View>: View {
 
     var body: some View {
         if let button = mapping.button {
-            HStack(spacing: 5) {
-                Text(modifiersDescription)
+            descriptionRow {
                 Text(buttonDescription(of: button))
             }
         } else if let scroll = mapping.scroll {
-            HStack(spacing: 5) {
-                Text(modifiersDescription)
+            descriptionRow {
                 Text(scrollDescription(of: scroll))
             }
         } else if showPartial, !mapping.modifierFlags.isEmpty {
@@ -66,26 +64,46 @@ struct ButtonMappingButtonDescription<FallbackView: View>: View {
     }
 
     private var modifiersDescription: String {
-        [
-            (mapping.control, "⌃"),
-            (mapping.option, "⌥"),
-            (mapping.shift, "⇧"),
-            (mapping.command, "⌘")
+        let flags = mapping.modifierFlags
+        let modifierDescriptions: [(Bool, String)] = [
+            (flags.contains(CGEventFlags.maskControl), "⌃"),
+            (flags.contains(CGEventFlags.maskAlternate), "⌥"),
+            (flags.contains(CGEventFlags.maskShift), "⇧"),
+            (flags.contains(CGEventFlags.maskCommand), "⌘")
         ]
-        .compactMap { $0.0 == true ? $0.1 : nil }
-        .joined()
+
+        return modifierDescriptions
+            .compactMap { $0.0 == true ? $0.1 : nil }
+            .joined()
     }
 
-    private func buttonDescription(of button: Int) -> LocalizedStringKey {
+    @ViewBuilder
+    private func descriptionRow<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        if modifiersDescription.isEmpty {
+            content()
+        } else {
+            HStack(spacing: 5) {
+                Text(modifiersDescription)
+                content()
+            }
+        }
+    }
+
+    private func buttonDescription(of button: Scheme.Buttons.Mapping.Button) -> LocalizedStringKey {
         switch button {
-        case 0:
-            return "Primary click"
-        case 1:
-            return "Secondary click"
-        case 2:
-            return "Middle click"
-        default:
-            return "Button #\(button) click"
+        case let .mouse(buttonNumber):
+            switch buttonNumber {
+            case 0:
+                return "Primary click"
+            case 1:
+                return "Secondary click"
+            case 2:
+                return "Middle click"
+            default:
+                return "Button #\(buttonNumber) click"
+            }
+        case let .logitechControl(identity):
+            return LocalizedStringKey(identity.userVisibleName)
         }
     }
 

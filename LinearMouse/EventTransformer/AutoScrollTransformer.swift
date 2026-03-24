@@ -126,7 +126,8 @@ extension AutoScrollTransformer: EventTransformer {
 
     private var triggerMouseButton: CGMouseButton {
         let defaultButton = UInt32(CGMouseButton.center.rawValue)
-        return CGMouseButton(rawValue: UInt32(trigger.button ?? Int(defaultButton))) ?? .center
+        let buttonNumber = trigger.button?.syntheticMouseButtonNumber ?? Int(defaultButton)
+        return CGMouseButton(rawValue: UInt32(buttonNumber)) ?? .center
     }
 
     private func handleTriggerDown(_ event: CGEvent) -> CGEvent? {
@@ -267,8 +268,7 @@ extension AutoScrollTransformer: EventTransformer {
             return false
         }
 
-        let eventFlags = EventView(event).modifierFlags
-        return eventFlags == trigger.modifierFlags
+        return trigger.matches(modifierFlags: event.flags)
     }
 
     private func matchesTriggerButton(_ event: CGEvent) -> Bool {
