@@ -862,7 +862,6 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
     }
 
     func discoverSlots() -> LogitechHIDPPDeviceMetadataProvider.ReceiverSlotDiscovery? {
-        let metadataProvider = LogitechHIDPPDeviceMetadataProvider()
         let connectedDeviceCount = readConnectionState().flatMap { response in
             LogitechHIDPPDeviceMetadataProvider.parseConnectedDeviceCount(response)
         }
@@ -890,20 +889,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
 
         var pairedSlots = [LogitechHIDPPDeviceMetadataProvider.ReceiverSlotInfo]()
         for slot in UInt8(1) ... UInt8(6) {
-            let pairingResponse = hidpp10LongRequest(
-                register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverInfoRegister,
-                subregister: UInt8(0x20 + Int(slot) - 1)
-            )
-            let extendedPairingResponse = hidpp10LongRequest(
-                register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverInfoRegister,
-                subregister: UInt8(0x30 + Int(slot) - 1)
-            )
-            let nameResponse = hidpp10LongRequest(
-                register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverInfoRegister,
-                subregister: UInt8(0x40 + Int(slot) - 1)
-            )
-
-            guard pairingResponse != nil || nameResponse != nil else {
+            guard let slotInfo = discoverSlotInfo(slot, connectionSnapshot: connectionSnapshots[slot]) else {
                 os_log(
                     "Receiver slot %u has no pairing or name response",
                     log: LogitechHIDPPDeviceMetadataProvider.log,
@@ -913,40 +899,16 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
                 continue
             }
 
-            let kind = connectionSnapshots[slot]?.kind
-                ?? pairingResponse.flatMap(Self.parseReceiverKind)
-                ?? 0
-            let routedTransport = LogitechHIDPPTransport(device: self, deviceIndex: slot)
-            let routedName = routedTransport.flatMap { transport in
-                metadataProvider.readFriendlyName(using: transport) ?? metadataProvider.readName(using: transport)
-            }
-            let batteryLevel = routedTransport.flatMap {
-                metadataProvider.readReceiverBatteryLevel(using: $0)
-            }
-            let name = nameResponse.flatMap(Self.parseReceiverName) ?? routedName
-            let productID = pairingResponse.flatMap(Self.parseReceiverProductID)
-            let serialNumber = extendedPairingResponse.flatMap(Self.parseReceiverSerialNumber)
-            pairedSlots.append(
-                .init(
-                    slot: slot,
-                    kind: kind,
-                    name: name,
-                    productID: productID,
-                    serialNumber: serialNumber,
-                    batteryLevel: batteryLevel,
-                    hasLiveMetadata: routedName != nil || batteryLevel != nil
-                )
-            )
+            pairedSlots.append(slotInfo)
 
             os_log(
-                "Receiver slot %u raw candidate: pairing=%{public}@ name=%{public}@ kind=%{public}u battery=%{public}@",
+                "Receiver slot %u raw candidate: name=%{public}@ kind=%{public}u battery=%{public}@",
                 log: LogitechHIDPPDeviceMetadataProvider.log,
                 type: .info,
                 slot,
-                pairingResponse != nil ? "yes" : "no",
-                name ?? "(nil)",
-                UInt32(kind),
-                batteryLevel.map(String.init) ?? "(nil)"
+                slotInfo.name ?? "(nil)",
+                UInt32(slotInfo.kind),
+                slotInfo.batteryLevel.map(String.init) ?? "(nil)"
             )
         }
 

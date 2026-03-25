@@ -119,7 +119,15 @@ struct ReceiverSlotStateStore {
         _ newSnapshots: [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot]
     ) {
         for (slot, snapshot) in newSnapshots {
-            slotPresenceBySlot[slot] = snapshot.isConnected ? .connected : .disconnected
+            let newPresence: SlotPresenceState = snapshot.isConnected ? .connected : .disconnected
+            let oldPresence = slotPresenceBySlot[slot]
+            slotPresenceBySlot[slot] = newPresence
+
+            // Clear stale identity when a device reconnects to a slot,
+            // so the next needsIdentityRefresh check will trigger a refresh.
+            if newPresence == .connected, oldPresence == .disconnected {
+                pairedIdentitiesBySlot.removeValue(forKey: slot)
+            }
         }
     }
 
@@ -193,16 +201,16 @@ private final class ReceiverContext {
     private func workerMain() {
         let initialDeadline = Date().addingTimeInterval(ReceiverMonitor.initialDiscoveryTimeout)
         var hasPublishedInitialState = false
-        var receiverChannel: LogitechReceiverChannel?
+        var currentChannel: LogitechReceiverChannel?
         var hasCompletedInitialDiscovery = false
 
         while shouldContinueRunning() {
-            if receiverChannel == nil {
-                receiverChannel = provider.openReceiverChannel(for: device.pointerDevice)
+            if currentChannel == nil {
+                currentChannel = provider.openReceiverChannel(for: device.pointerDevice)
                 hasCompletedInitialDiscovery = false
             }
 
-            guard let receiverChannel else {
+            guard let receiverChannel = currentChannel else {
                 os_log(
                     "Receiver monitor is waiting for channel: locationID=%{public}d device=%{public}@",
                     log: ReceiverMonitor.log,
@@ -280,7 +288,17 @@ private final class ReceiverContext {
             }
 
             guard !connectionSnapshots.isEmpty else {
-                // Timeout with no events — just continue waiting
+                // Timeout with no events — verify channel is still alive
+                if receiverChannel.readNotificationFlags() == nil {
+                    os_log(
+                        "Receiver channel appears dead, will reopen: locationID=%{public}d device=%{public}@",
+                        log: ReceiverMonitor.log,
+                        type: .info,
+                        locationID,
+                        String(describing: device)
+                    )
+                    currentChannel = nil
+                }
                 continue
             }
 
