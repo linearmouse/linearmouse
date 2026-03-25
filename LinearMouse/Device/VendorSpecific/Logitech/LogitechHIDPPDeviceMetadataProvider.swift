@@ -216,10 +216,10 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
 
         guard let receiverChannel = openReceiverChannel(for: device) else {
             os_log(
-                "Failed to open receiver channel: locationID=%{public}u name=%{public}@",
+                "Failed to open receiver channel: locationID=%{public}d name=%{public}@",
                 log: Self.log,
                 type: .info,
-                UInt32(locationID),
+                locationID,
                 device.product ?? device.name
             )
             return .init(identities: [], connectionSnapshots: [:], liveReachableSlots: [])
@@ -236,10 +236,10 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         .joined(separator: ", ")
 
         os_log(
-            "Receiver discovery produced identities: locationID=%{public}u count=%{public}u identities=%{public}@",
+            "Receiver discovery produced identities: locationID=%{public}d count=%{public}u identities=%{public}@",
             log: Self.log,
             type: .info,
-            UInt32(locationID),
+            locationID,
             UInt32(slots.count),
             slotSummary
         )
@@ -281,6 +281,35 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         using receiverChannel: LogitechReceiverChannel
     ) -> ReceiverPointingDeviceDiscovery {
         receiverChannel.discoverPointingDeviceDiscovery(baseName: device.product ?? device.name)
+    }
+
+    func receiverSlotIdentity(
+        for device: VendorSpecificDeviceContext,
+        slot: UInt8,
+        connectionSnapshot: ReceiverConnectionSnapshot?,
+        using receiverChannel: LogitechReceiverChannel
+    ) -> ReceiverLogicalDeviceIdentity? {
+        guard let locationID = receiverChannel.locationID else {
+            return nil
+        }
+
+        guard let slotInfo = receiverChannel.discoverSlotInfo(slot, connectionSnapshot: connectionSnapshot) else {
+            return nil
+        }
+
+        guard let kind = ReceiverLogicalDeviceKind(rawValue: slotInfo.kind), kind.isPointingDevice else {
+            return nil
+        }
+
+        return ReceiverLogicalDeviceIdentity(
+            receiverLocationID: locationID,
+            slot: slot,
+            kind: kind,
+            name: slotInfo.name ?? device.product ?? device.name,
+            serialNumber: slotInfo.serialNumber,
+            productID: slotInfo.productID,
+            batteryLevel: slotInfo.batteryLevel
+        )
     }
 
     func waitForReceiverConnectionChange(
@@ -938,6 +967,53 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         )
 
         return pairedSlots.isEmpty ? nil : .init(slots: pairedSlots, connectionSnapshots: connectionSnapshots)
+    }
+
+    func discoverSlotInfo(
+        _ slot: UInt8,
+        connectionSnapshot: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot? = nil
+    ) -> LogitechHIDPPDeviceMetadataProvider.ReceiverSlotInfo? {
+        let metadataProvider = LogitechHIDPPDeviceMetadataProvider()
+        let pairingResponse = hidpp10LongRequest(
+            register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverInfoRegister,
+            subregister: UInt8(0x20 + Int(slot) - 1)
+        )
+        let extendedPairingResponse = hidpp10LongRequest(
+            register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverInfoRegister,
+            subregister: UInt8(0x30 + Int(slot) - 1)
+        )
+        let nameResponse = hidpp10LongRequest(
+            register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverInfoRegister,
+            subregister: UInt8(0x40 + Int(slot) - 1)
+        )
+
+        guard pairingResponse != nil || nameResponse != nil else {
+            return nil
+        }
+
+        let kind = connectionSnapshot?.kind
+            ?? pairingResponse.flatMap(Self.parseReceiverKind)
+            ?? 0
+        let routedTransport = LogitechHIDPPTransport(device: self, deviceIndex: slot)
+        let routedName = routedTransport.flatMap { transport in
+            metadataProvider.readFriendlyName(using: transport) ?? metadataProvider.readName(using: transport)
+        }
+        let batteryLevel = routedTransport.flatMap {
+            metadataProvider.readReceiverBatteryLevel(using: $0)
+        }
+        let name = nameResponse.flatMap(Self.parseReceiverName) ?? routedName
+        let productID = pairingResponse.flatMap(Self.parseReceiverProductID)
+        let serialNumber = extendedPairingResponse.flatMap(Self.parseReceiverSerialNumber)
+
+        return .init(
+            slot: slot,
+            kind: kind,
+            name: name,
+            productID: productID,
+            serialNumber: serialNumber,
+            batteryLevel: batteryLevel,
+            hasLiveMetadata: routedName != nil || batteryLevel != nil
+        )
     }
 
     private func discoverConnectionSnapshots()
@@ -1689,10 +1765,10 @@ final class LogitechReprogrammableControlsMonitor {
             if monitoredControls.isEmpty {
                 finishVirtualButtonRecordingPreparationIfNeeded(sessionID: recordingSessionID)
                 os_log(
-                    "Pause Logitech control diversion until configuration changes: locationID=%{public}u slot=%{public}u device=%{public}@ recording=%{public}@",
+                    "Pause Logitech control diversion until configuration changes: locationID=%{public}d slot=%{public}u device=%{public}@ recording=%{public}@",
                     log: Self.log,
                     type: .info,
-                    UInt32(locationID),
+                    locationID,
                     slot,
                     targetName,
                     isRecording ? "true" : "false"
@@ -1720,10 +1796,10 @@ final class LogitechReprogrammableControlsMonitor {
             let activeControlIDs = monitoredControls.compactMap { control -> UInt16? in
                 guard setDiverted(true, for: control.controlID, using: transport, featureIndex: featureIndex) else {
                     os_log(
-                        "Failed to enable Logitech control diversion: locationID=%{public}u slot=%{public}u cid=0x%{public}04X",
+                        "Failed to enable Logitech control diversion: locationID=%{public}d slot=%{public}u cid=0x%{public}04X",
                         log: Self.log,
                         type: .error,
-                        UInt32(locationID),
+                        locationID,
                         slot,
                         control.controlID
                     )
@@ -1736,10 +1812,10 @@ final class LogitechReprogrammableControlsMonitor {
             guard !activeControlIDs.isEmpty else {
                 finishVirtualButtonRecordingPreparationIfNeeded(sessionID: recordingSessionID)
                 os_log(
-                    "Failed to enable any Logitech control diversion: locationID=%{public}u slot=%{public}u device=%{public}@",
+                    "Failed to enable any Logitech control diversion: locationID=%{public}d slot=%{public}u device=%{public}@",
                     log: Self.log,
                     type: .error,
-                    UInt32(locationID),
+                    locationID,
                     slot,
                     targetName
                 )
@@ -1780,10 +1856,10 @@ final class LogitechReprogrammableControlsMonitor {
             .joined(separator: " | ")
 
             os_log(
-                "Logitech controls monitor enabled: locationID=%{public}u slot=%{public}u device=%{public}@ controls=%{public}@",
+                "Logitech controls monitor enabled: locationID=%{public}d slot=%{public}u device=%{public}@ controls=%{public}@",
                 log: Self.log,
                 type: .info,
-                UInt32(locationID),
+                locationID,
                 slot,
                 targetName,
                 controlSummary
@@ -1813,10 +1889,10 @@ final class LogitechReprogrammableControlsMonitor {
             while shouldContinueRunning() {
                 if consumeReconfigurationRequest() {
                     os_log(
-                        "Restart Logitech control monitor to refresh diverted controls: locationID=%{public}u slot=%{public}u device=%{public}@",
+                        "Restart Logitech control monitor to refresh diverted controls: locationID=%{public}d slot=%{public}u device=%{public}@",
                         log: Self.log,
                         type: .info,
-                        UInt32(locationID),
+                        locationID,
                         slot,
                         targetName
                     )
@@ -1840,10 +1916,10 @@ final class LogitechReprogrammableControlsMonitor {
                 for controlID in changedControls {
                     let isPressed = activeControls.contains(controlID)
                     os_log(
-                        "Logitech reprogrammable control event: locationID=%{public}u slot=%{public}u device=%{public}@ cid=0x%{public}04X button=%{public}d state=%{public}@ active=%{public}@",
+                        "Logitech reprogrammable control event: locationID=%{public}d slot=%{public}u device=%{public}@ cid=0x%{public}04X button=%{public}d state=%{public}@ active=%{public}@",
                         log: Self.log,
                         type: .info,
-                        UInt32(locationID),
+                        locationID,
                         slot,
                         targetName,
                         controlID,
@@ -2353,11 +2429,11 @@ final class LogitechReprogrammableControlsMonitor {
 
             guard setDiverted(shouldBeDiverted, for: controlID, using: transport, featureIndex: featureIndex) else {
                 os_log(
-                    "%{public}s failed: locationID=%{public}u slot=%{public}u cid=0x%{public}04X target=%{public}@",
+                    "%{public}s failed: locationID=%{public}d slot=%{public}u cid=0x%{public}04X target=%{public}@",
                     log: Self.log,
                     type: .error,
                     String(describing: reason),
-                    UInt32(locationID),
+                    locationID,
                     slot,
                     controlID,
                     shouldBeDiverted ? "diverted" : "native"
@@ -2372,11 +2448,11 @@ final class LogitechReprogrammableControlsMonitor {
                 featureIndex: featureIndex
             ) else {
                 os_log(
-                    "%{public}s verification failed: locationID=%{public}u slot=%{public}u cid=0x%{public}04X",
+                    "%{public}s verification failed: locationID=%{public}d slot=%{public}u cid=0x%{public}04X",
                     log: Self.log,
                     type: .error,
                     String(describing: reason),
-                    UInt32(locationID),
+                    locationID,
                     slot,
                     controlID
                 )
@@ -2387,11 +2463,11 @@ final class LogitechReprogrammableControlsMonitor {
             let isDiverted = currentReportingInfo.flags.contains(.diverted)
             guard isDiverted == shouldBeDiverted else {
                 os_log(
-                    "%{public}s verification mismatch: locationID=%{public}u slot=%{public}u cid=0x%{public}04X target=%{public}@ actual=%{public}@ reporting=%{public}@",
+                    "%{public}s verification mismatch: locationID=%{public}d slot=%{public}u cid=0x%{public}04X target=%{public}@ actual=%{public}@ reporting=%{public}@",
                     log: Self.log,
                     type: .error,
                     String(describing: reason),
-                    UInt32(locationID),
+                    locationID,
                     slot,
                     controlID,
                     shouldBeDiverted ? "diverted" : "native",
@@ -2476,10 +2552,10 @@ final class LogitechReprogrammableControlsMonitor {
         let controls = fetchControls(using: transport, featureIndex: featureIndex)
         guard !controls.isEmpty else {
             os_log(
-                "No Logitech reprogrammable controls discovered: locationID=%{public}u slot=%{public}u",
+                "No Logitech reprogrammable controls discovered: locationID=%{public}d slot=%{public}u",
                 log: Self.log,
                 type: .info,
-                UInt32(locationID),
+                locationID,
                 slot
             )
             return
@@ -2502,10 +2578,10 @@ final class LogitechReprogrammableControlsMonitor {
         .joined(separator: " | ")
 
         os_log(
-            "Logitech REPROG_CONTROLS_V4 dump: locationID=%{public}u slot=%{public}u controls=%{public}@",
+            "Logitech REPROG_CONTROLS_V4 dump: locationID=%{public}d slot=%{public}u controls=%{public}@",
             log: Self.log,
             type: .info,
-            UInt32(locationID),
+            locationID,
             slot,
             summary
         )

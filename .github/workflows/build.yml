@@ -60,6 +60,9 @@ jobs:
         env:
           NOTARIZATION_PASSWORD: ${{ secrets.NOTARIZATION_PASSWORD }}
         run: make prepublish
+      - name: Prepare dSYM archive
+        if: github.event_name != 'pull_request'
+        run: cd build/LinearMouse.xcarchive/dSYMs && zip -r "$GITHUB_WORKSPACE/build/LinearMouse.dSYM.zip" LinearMouse.app.dSYM
       - name: Upload dmg
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
@@ -73,6 +76,8 @@ jobs:
         with:
           draft: true
           prerelease: ${{ contains(github.ref, '-') }}
-          files: build/LinearMouse.dmg
+          files: |
+            build/LinearMouse.dmg
+            build/LinearMouse.dSYM.zip
           fail_on_unmatched_files: true
           generate_release_notes: true

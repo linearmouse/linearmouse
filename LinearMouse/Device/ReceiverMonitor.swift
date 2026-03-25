@@ -123,6 +123,15 @@ struct ReceiverSlotStateStore {
         }
     }
 
+    mutating func updateSlotIdentity(_ identity: ReceiverLogicalDeviceIdentity) {
+        pairedIdentitiesBySlot[identity.slot] = identity
+        slotPresenceBySlot[identity.slot] = .connected
+    }
+
+    func needsIdentityRefresh(slot: UInt8) -> Bool {
+        pairedIdentitiesBySlot[slot] == nil
+    }
+
     func currentPublishedIdentities() -> [ReceiverLogicalDeviceIdentity] {
         pairedIdentitiesBySlot.keys.sorted().compactMap { slot in
             guard let identity = pairedIdentitiesBySlot[slot] else {
@@ -185,18 +194,20 @@ private final class ReceiverContext {
         let initialDeadline = Date().addingTimeInterval(ReceiverMonitor.initialDiscoveryTimeout)
         var hasPublishedInitialState = false
         var receiverChannel: LogitechReceiverChannel?
+        var hasCompletedInitialDiscovery = false
 
         while shouldContinueRunning() {
             if receiverChannel == nil {
                 receiverChannel = provider.openReceiverChannel(for: device.pointerDevice)
+                hasCompletedInitialDiscovery = false
             }
 
             guard let receiverChannel else {
                 os_log(
-                    "Receiver monitor is waiting for channel: locationID=%{public}u device=%{public}@",
+                    "Receiver monitor is waiting for channel: locationID=%{public}d device=%{public}@",
                     log: ReceiverMonitor.log,
                     type: .info,
-                    UInt32(locationID),
+                    locationID,
                     String(describing: device)
                 )
 
@@ -211,44 +222,52 @@ private final class ReceiverContext {
                 continue
             }
 
-            let discovery = provider.receiverPointingDeviceDiscovery(for: device.pointerDevice, using: receiverChannel)
-            mergeDiscovery(discovery)
-            let identities = currentPublishedIdentities()
-            let identitiesDescription = identities.map { identity in
-                let battery = identity.batteryLevel.map(String.init) ?? "(nil)"
-                return "slot=\(identity.slot) name=\(identity.name) battery=\(battery)"
-            }
-            .joined(separator: ", ")
+            // Full discovery only once per channel open
+            if !hasCompletedInitialDiscovery {
+                let discovery = provider.receiverPointingDeviceDiscovery(
+                    for: device.pointerDevice, using: receiverChannel
+                )
+                mergeDiscovery(discovery)
+                hasCompletedInitialDiscovery = true
 
-            os_log(
-                "Receiver scan completed: locationID=%{public}u count=%{public}u identities=%{public}@",
-                log: ReceiverMonitor.log,
-                type: .info,
-                UInt32(locationID),
-                UInt32(identities.count),
-                identitiesDescription
-            )
+                let identities = currentPublishedIdentities()
+                let identitiesDescription = identities.map { identity in
+                    let battery = identity.batteryLevel.map(String.init) ?? "(nil)"
+                    return "slot=\(identity.slot) name=\(identity.name) battery=\(battery)"
+                }
+                .joined(separator: ", ")
 
-            if identities != lastPublishedIdentities {
-                publish(identities)
-                hasPublishedInitialState = true
-            } else if !hasPublishedInitialState, !identities.isEmpty {
-                publish(identities)
-                hasPublishedInitialState = true
-            } else if !hasPublishedInitialState, Date() >= initialDeadline {
                 os_log(
-                    "Receiver logical discovery timed out: locationID=%{public}u device=%{public}@",
+                    "Receiver initial discovery completed: locationID=%{public}d count=%{public}u identities=%{public}@",
                     log: ReceiverMonitor.log,
                     type: .info,
-                    UInt32(locationID),
-                    String(describing: device)
+                    locationID,
+                    UInt32(identities.count),
+                    identitiesDescription
                 )
-                DispatchQueue.main.async { [weak self] in
-                    self?.onDiscoveryTimedOut?()
+
+                if identities != lastPublishedIdentities {
+                    publish(identities)
+                    hasPublishedInitialState = true
+                } else if !hasPublishedInitialState, !identities.isEmpty {
+                    publish(identities)
+                    hasPublishedInitialState = true
+                } else if !hasPublishedInitialState, Date() >= initialDeadline {
+                    os_log(
+                        "Receiver logical discovery timed out: locationID=%{public}d device=%{public}@",
+                        log: ReceiverMonitor.log,
+                        type: .info,
+                        locationID,
+                        String(describing: device)
+                    )
+                    DispatchQueue.main.async { [weak self] in
+                        self?.onDiscoveryTimedOut?()
+                    }
+                    hasPublishedInitialState = true
                 }
-                hasPublishedInitialState = true
             }
 
+            // Wait for connection events (event-driven, no periodic rescan)
             let connectionSnapshots = provider.waitForReceiverConnectionChange(
                 using: receiverChannel,
                 timeout: ReceiverMonitor.refreshInterval
@@ -260,34 +279,47 @@ private final class ReceiverContext {
                 break
             }
 
+            guard !connectionSnapshots.isEmpty else {
+                // Timeout with no events — just continue waiting
+                continue
+            }
+
             mergeConnectionSnapshots(connectionSnapshots)
 
-            if !connectionSnapshots.isEmpty {
-                let snapshotDescription = connectionSnapshots.keys
-                    .sorted()
-                    .compactMap { slot -> String? in
-                        guard let snapshot = connectionSnapshots[slot] else {
-                            return nil
-                        }
-
-                        return "slot=\(slot) connected=\(snapshot.isConnected)"
-                    }
-                    .joined(separator: ", ")
-
-                os_log(
-                    "Receiver connection change detected: locationID=%{public}u device=%{public}@ snapshots=%{public}@",
-                    log: ReceiverMonitor.log,
-                    type: .info,
-                    UInt32(locationID),
-                    String(describing: device),
-                    snapshotDescription
-                )
-
-                let identities = currentPublishedIdentities()
-                if identities != lastPublishedIdentities {
-                    publish(identities)
+            // For newly connected devices, read their identity info
+            for (slot, snapshot) in connectionSnapshots where snapshot.isConnected {
+                if needsIdentityRefresh(slot: slot) {
+                    refreshSlotIdentity(
+                        slot: slot,
+                        connectionSnapshot: snapshot,
+                        using: receiverChannel
+                    )
                 }
-                continue
+            }
+
+            let snapshotDescription = connectionSnapshots.keys
+                .sorted()
+                .compactMap { slot -> String? in
+                    guard let snapshot = connectionSnapshots[slot] else {
+                        return nil
+                    }
+
+                    return "slot=\(slot) connected=\(snapshot.isConnected)"
+                }
+                .joined(separator: ", ")
+
+            os_log(
+                "Receiver connection change detected: locationID=%{public}d device=%{public}@ snapshots=%{public}@",
+                log: ReceiverMonitor.log,
+                type: .info,
+                locationID,
+                String(describing: device),
+                snapshotDescription
+            )
+
+            let identities = currentPublishedIdentities()
+            if identities != lastPublishedIdentities {
+                publish(identities)
             }
         }
     }
@@ -302,10 +334,10 @@ private final class ReceiverContext {
         .joined(separator: ", ")
 
         os_log(
-            "Receiver logical discovery updated: locationID=%{public}u identities=%{public}@",
+            "Receiver logical discovery updated: locationID=%{public}d identities=%{public}@",
             log: ReceiverMonitor.log,
             type: .info,
-            UInt32(locationID),
+            locationID,
             identitiesDescription
         )
 
@@ -336,6 +368,42 @@ private final class ReceiverContext {
         stateLock.lock()
         stateStore.mergeConnectionSnapshots(newSnapshots)
         stateLock.unlock()
+    }
+
+    private func refreshSlotIdentity(
+        slot: UInt8,
+        connectionSnapshot: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot?,
+        using receiverChannel: LogitechReceiverChannel
+    ) {
+        guard let identity = provider.receiverSlotIdentity(
+            for: device.pointerDevice,
+            slot: slot,
+            connectionSnapshot: connectionSnapshot,
+            using: receiverChannel
+        ) else {
+            return
+        }
+
+        stateLock.lock()
+        stateStore.updateSlotIdentity(identity)
+        stateLock.unlock()
+
+        os_log(
+            "Refreshed slot identity: locationID=%{public}d slot=%{public}u name=%{public}@ battery=%{public}@",
+            log: ReceiverMonitor.log,
+            type: .info,
+            locationID,
+            slot,
+            identity.name,
+            identity.batteryLevel.map(String.init) ?? "(nil)"
+        )
+    }
+
+    private func needsIdentityRefresh(slot: UInt8) -> Bool {
+        stateLock.lock()
+        let needs = stateStore.needsIdentityRefresh(slot: slot)
+        stateLock.unlock()
+        return needs
     }
 
     private func currentPublishedIdentities() -> [ReceiverLogicalDeviceIdentity] {
