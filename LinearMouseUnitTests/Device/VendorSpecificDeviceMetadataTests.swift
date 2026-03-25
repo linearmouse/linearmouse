@@ -199,7 +199,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertTrue(store.currentPublishedIdentities().isEmpty)
     }
 
-    func testReceiverSlotStateStoreRestoresSlotAfterReconnectSnapshot() {
+    func testReceiverSlotStateStoreClearsIdentityOnReconnectAndAllowsRefresh() {
         var store = ReceiverSlotStateStore()
         let identity = ReceiverLogicalDeviceIdentity(
             receiverLocationID: 0x1234,
@@ -214,10 +214,17 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
             1: .init(isConnected: false, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ], liveReachableSlots: []))
+
+        // After disconnect→connect transition, identity is cleared for refresh
         store.mergeConnectionSnapshots([
             1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ])
+        XCTAssertTrue(store.needsIdentityRefresh(slot: 1))
+        XCTAssertEqual(store.currentPublishedIdentities(), [])
 
+        // After refresh, identity is restored
+        store.updateSlotIdentity(identity)
+        XCTAssertFalse(store.needsIdentityRefresh(slot: 1))
         XCTAssertEqual(store.currentPublishedIdentities(), [identity])
     }
 

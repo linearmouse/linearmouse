@@ -28,7 +28,12 @@ class SettingsWindowController: NSWindowController {
         window.delegate = self
         window.title = LinearMouse.appName
         window.minSize = NSSize(width: 850, height: 600)
-        window.titlebarAppearsTransparent = true
+
+        if #available(macOS 26.0, *) {
+            // On macOS 26+, keep titlebar opaque to enable scroll edge effect (progressive blur)
+        } else {
+            window.titlebarAppearsTransparent = true
+        }
 
         // Setup split view controller
         let splitVC = SettingsSplitViewController()

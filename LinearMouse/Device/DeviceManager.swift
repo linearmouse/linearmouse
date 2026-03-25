@@ -176,10 +176,10 @@ class DeviceManager: ObservableObject {
 
             if hasRemainingReceiverAtLocation {
                 os_log(
-                    "Keep receiver monitor running because another receiver device shares locationID=%{public}u",
+                    "Keep receiver monitor running because another receiver device shares locationID=%{public}d",
                     log: Self.log,
                     type: .info,
-                    UInt32(locationID)
+                    locationID
                 )
             } else {
                 receiverMonitor.stopMonitoring(device: device)
@@ -371,10 +371,10 @@ class DeviceManager: ObservableObject {
 
         let identities = receiverPairedDeviceIdentities[locationID] ?? []
         os_log(
-            "Receiver paired device lookup: locationID=%{public}u device=%{public}@ count=%{public}u",
+            "Receiver paired device lookup: locationID=%{public}d device=%{public}@ count=%{public}u",
             log: Self.log,
             type: .info,
-            UInt32(locationID),
+            locationID,
             String(describing: device),
             UInt32(identities.count)
         )
@@ -407,10 +407,10 @@ class DeviceManager: ObservableObject {
     private func receiverPointingDevicesChanged(locationID: Int, identities: [ReceiverLogicalDeviceIdentity]) {
         guard pointerDeviceToDevice.values.contains(where: { $0.pointerDevice.locationID == locationID }) else {
             os_log(
-                "Drop receiver logical device update because no visible device matches locationID=%{public}u count=%{public}u",
+                "Drop receiver logical device update because no visible device matches locationID=%{public}d count=%{public}u",
                 log: Self.log,
                 type: .info,
-                UInt32(locationID),
+                locationID,
                 UInt32(identities.count)
             )
             return
@@ -425,10 +425,10 @@ class DeviceManager: ObservableObject {
         .joined(separator: ", ")
 
         os_log(
-            "Receiver logical devices updated for locationID=%{public}u: %{public}@",
+            "Receiver logical devices updated for locationID=%{public}d: %{public}@",
             log: Self.log,
             type: .info,
-            UInt32(locationID),
+            locationID,
             identitiesDescription
         )
     }
