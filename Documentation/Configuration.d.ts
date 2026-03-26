@@ -1000,9 +1000,15 @@ declare namespace Scheme {
       enabled?: boolean;
 
       /**
+       * @title Trigger
+       * @description Choose the mouse button and modifier keys used to activate gestures.
+       */
+      trigger?: Gesture.Trigger;
+
+      /**
        * @title Button
-       * @description The button number to use for gestures. Default is 2 (middle button/scroll wheel).
-       * @default 2
+       * @description Deprecated. Use trigger instead.
+       * @deprecated
        */
       button?: PhysicalButton;
 
@@ -1041,6 +1047,34 @@ declare namespace Scheme {
     };
 
     namespace Gesture {
+      type Trigger = {
+        /**
+         * @title Button number
+         * @description The button number. See https://developer.apple.com/documentation/coregraphics/cgmousebutton
+         */
+        button: Mapping.Button;
+
+        /**
+         * @description Indicates if the command modifier key should be pressed.
+         */
+        command?: boolean;
+
+        /**
+         * @description Indicates if the shift modifier key should be pressed.
+         */
+        shift?: boolean;
+
+        /**
+         * @description Indicates if the option modifier key should be pressed.
+         */
+        option?: boolean;
+
+        /**
+         * @description Indicates if the control modifier key should be pressed.
+         */
+        control?: boolean;
+      };
+
       type Actions = {
         /**
          * @title Swipe left action

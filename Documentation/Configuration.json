@@ -263,8 +263,8 @@
         },
         "button": {
           "$ref": "#/definitions/PhysicalButton",
-          "default": 2,
-          "description": "The button number to use for gestures. Default is 2 (middle button/scroll wheel).",
+          "deprecated": true,
+          "description": "Deprecated. Use trigger instead.",
           "title": "Button"
         },
         "cooldownMs": {
@@ -296,6 +296,11 @@
           "maximum": 200,
           "minimum": 20,
           "title": "Threshold"
+        },
+        "trigger": {
+          "$ref": "#/definitions/Scheme.Buttons.Gesture.Trigger",
+          "description": "Choose the mouse button and modifier keys used to activate gestures.",
+          "title": "Trigger"
         }
       },
       "type": "object"
@@ -341,6 +346,36 @@
         "launchpad"
       ],
       "type": "string"
+    },
+    "Scheme.Buttons.Gesture.Trigger": {
+      "additionalProperties": false,
+      "properties": {
+        "button": {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Button",
+          "description": "The button number. See https://developer.apple.com/documentation/coregraphics/cgmousebutton",
+          "title": "Button number"
+        },
+        "command": {
+          "description": "Indicates if the command modifier key should be pressed.",
+          "type": "boolean"
+        },
+        "control": {
+          "description": "Indicates if the control modifier key should be pressed.",
+          "type": "boolean"
+        },
+        "option": {
+          "description": "Indicates if the option modifier key should be pressed.",
+          "type": "boolean"
+        },
+        "shift": {
+          "description": "Indicates if the shift modifier key should be pressed.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "button"
+      ],
+      "type": "object"
     },
     "Scheme.Buttons.Mapping": {
       "anyOf": [

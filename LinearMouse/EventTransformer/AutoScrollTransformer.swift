@@ -130,6 +130,10 @@ extension AutoScrollTransformer: EventTransformer {
         return CGMouseButton(rawValue: UInt32(buttonNumber)) ?? .center
     }
 
+    private var triggerIsLogitechControl: Bool {
+        trigger.button?.logitechControl != nil
+    }
+
     private func handleTriggerDown(_ event: CGEvent) -> CGEvent? {
         guard matchesTriggerButton(event) else {
             return event
@@ -235,8 +239,10 @@ extension AutoScrollTransformer: EventTransformer {
         case let .active(anchor, _, session):
             let point = pointerLocation(for: event)
             let resolvedSession: Session
+            let isDragOrLogitechMove = event.type == triggerMouseDraggedEventType
+                || (triggerIsLogitechControl && event.type == .mouseMoved)
             if session == .pendingToggleOrHold,
-               event.type == triggerMouseDraggedEventType,
+               isDragOrLogitechMove,
                exceedsDeadZone(from: anchor, to: point) {
                 resolvedSession = .hold
             } else {
@@ -815,6 +821,61 @@ private enum AccessibilityQueryResult<Value> {
 private struct ActivationProbe {
     let point: CGPoint
     let hit: ActivationHit
+}
+
+extension AutoScrollTransformer {
+    func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
+        guard let triggerLogitechControl = trigger.button?.logitechControl,
+              context.controlIdentity.matches(triggerLogitechControl) else {
+            return false
+        }
+
+        let mouseLocation = NSEvent.mouseLocation
+        DispatchQueue.main.async { [self] in
+            handleLogitechControlEventOnMain(context, mouseLocation: mouseLocation)
+        }
+        return true
+    }
+
+    private func handleLogitechControlEventOnMain(
+        _ context: LogitechEventContext,
+        mouseLocation: NSPoint
+    ) {
+        if context.isPressed {
+            // If already active in toggle mode, deactivate on re-press
+            if case let .active(_, _, session) = state, session == .toggle {
+                guard hasToggleMode else {
+                    return
+                }
+                deactivate()
+                return
+            }
+
+            guard trigger.matches(modifierFlags: context.modifierFlags) else {
+                return
+            }
+
+            activate(at: CGPoint(x: mouseLocation.x, y: mouseLocation.y), session: activationSession)
+            return
+        }
+        switch state {
+        case let .active(anchor, current, session):
+            switch session {
+            case .hold:
+                deactivate()
+            case .pendingToggleOrHold:
+                if exceedsDeadZone(from: anchor, to: current) {
+                    deactivate()
+                } else {
+                    state = .active(anchor: anchor, current: current, session: .toggle)
+                }
+            case .toggle:
+                break
+            }
+        default:
+            break
+        }
+    }
 }
 
 extension AutoScrollTransformer: Deactivatable {
