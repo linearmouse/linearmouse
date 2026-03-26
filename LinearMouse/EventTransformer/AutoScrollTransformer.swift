@@ -349,7 +349,7 @@ extension AutoScrollTransformer: EventTransformer {
             return
         }
 
-        postContinuousScrollEvent(horizontal: horizontal, vertical: vertical)
+        postContinuousScrollEvent(horizontal: horizontal, vertical: vertical, at: anchor)
     }
 
     private func scrollAmount(for delta: Double) -> Double {
@@ -365,7 +365,7 @@ extension AutoScrollTransformer: EventTransformer {
         return delta.sign == .minus ? -value : value
     }
 
-    private func postContinuousScrollEvent(horizontal: Double, vertical: Double) {
+    private func postContinuousScrollEvent(horizontal: Double, vertical: Double, at anchor: CGPoint) {
         guard let event = CGEvent(
             scrollWheelEvent2Source: nil,
             units: .pixel,
@@ -376,6 +376,11 @@ extension AutoScrollTransformer: EventTransformer {
         ) else {
             return
         }
+
+        // Set location to the anchor point so the scroll targets the window
+        // where auto-scroll was activated, not the current cursor position.
+        let screenHeight = NSScreen.main?.frame.height ?? 0
+        event.location = CGPoint(x: anchor.x, y: screenHeight - anchor.y)
 
         event.setDoubleValueField(.scrollWheelEventPointDeltaAxis1, value: vertical)
         event.setDoubleValueField(.scrollWheelEventFixedPtDeltaAxis1, value: vertical)
