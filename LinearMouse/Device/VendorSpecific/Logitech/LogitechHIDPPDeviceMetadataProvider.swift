@@ -1912,17 +1912,23 @@ final class LogitechReprogrammableControlsMonitor {
                         continue
                     }
 
-                    let frontmostPid = NSWorkspace.shared.frontmostApplication?.processIdentifier
+                    let mouseLocation = NSEvent.mouseLocation
+                    let mouseLocationWindowID = CGWindowID(NSWindow.windowNumber(
+                        at: mouseLocation,
+                        belowWindowWithWindowNumber: 0
+                    ))
+                    let mouseLocationPid = mouseLocationWindowID.ownerPid
+                        ?? NSWorkspace.shared.frontmostApplication?.processIdentifier
                     let display = ScreenManager.shared.currentScreenName
                     let transformer = EventTransformerManager.shared.get(
                         withDevice: device,
-                        withPid: frontmostPid,
+                        withPid: mouseLocationPid,
                         withDisplay: display
                     )
 
                     let logitechContext = ButtonActionsTransformer.LogitechEventContext(
                         device: device,
-                        pid: frontmostPid,
+                        pid: mouseLocationPid,
                         display: display,
                         controlIdentity: controlIdentity,
                         isPressed: isPressed,
