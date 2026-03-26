@@ -855,8 +855,7 @@ extension AutoScrollTransformer {
                 return
             }
 
-            let flippedY = (NSScreen.main?.frame.height ?? 0) - mouseLocation.y
-            activate(at: CGPoint(x: mouseLocation.x, y: flippedY), session: activationSession)
+            activate(at: CGPoint(x: mouseLocation.x, y: mouseLocation.y), session: activationSession)
             return
         }
         switch state {
