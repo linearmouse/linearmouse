@@ -1926,7 +1926,7 @@ final class LogitechReprogrammableControlsMonitor {
                         withDisplay: display
                     )
 
-                    let logitechContext = ButtonActionsTransformer.LogitechEventContext(
+                    let logitechContext = LogitechEventContext(
                         device: device,
                         pid: mouseLocationPid,
                         display: display,
@@ -1936,15 +1936,15 @@ final class LogitechReprogrammableControlsMonitor {
                     )
 
                     let handledInternally = (transformer as? [EventTransformer])?.contains { transformer in
-                        if let transformer = transformer as? ButtonActionsTransformer {
-                            return transformer.handleLogitechControlEvent(logitechContext)
-                        }
-
                         if let transformer = transformer as? AutoScrollTransformer {
                             return transformer.handleLogitechControlEvent(logitechContext)
                         }
 
                         if let transformer = transformer as? GestureButtonTransformer {
+                            return transformer.handleLogitechControlEvent(logitechContext)
+                        }
+
+                        if let transformer = transformer as? ButtonActionsTransformer {
                             return transformer.handleLogitechControlEvent(logitechContext)
                         }
 
@@ -2238,9 +2238,16 @@ final class LogitechReprogrammableControlsMonitor {
             return Set(availableControls.map(\.controlID))
         }
 
+        let mouseLocation = NSEvent.mouseLocation
+        let mouseLocationWindowID = CGWindowID(NSWindow.windowNumber(
+            at: mouseLocation,
+            belowWindowWithWindowNumber: 0
+        ))
+        let mouseLocationPid = mouseLocationWindowID.ownerPid
+            ?? NSWorkspace.shared.frontmostApplication?.processIdentifier
         let scheme = ConfigurationState.shared.configuration.matchScheme(
             withDevice: device,
-            withPid: NSWorkspace.shared.frontmostApplication?.processIdentifier,
+            withPid: mouseLocationPid,
             withDisplay: ScreenManager.shared.currentScreenName
         )
 
@@ -2258,7 +2265,7 @@ final class LogitechReprogrammableControlsMonitor {
             }
 
         let autoScrollControlID: UInt16? = {
-            guard scheme.buttons.autoScroll.enabled ?? true,
+            guard scheme.buttons.autoScroll.enabled ?? false,
                   let logiButton = scheme.buttons.autoScroll.trigger?.button?.logitechControl,
                   matches(logiButton: logiButton, identity: identity) else {
                 return nil
@@ -2267,7 +2274,7 @@ final class LogitechReprogrammableControlsMonitor {
         }()
 
         let gestureControlID: UInt16? = {
-            guard scheme.buttons.gesture.enabled ?? true,
+            guard scheme.buttons.gesture.enabled ?? false,
                   let logiButton = scheme.buttons.gesture.trigger?.button?.logitechControl,
                   matches(logiButton: logiButton, identity: identity) else {
                 return nil

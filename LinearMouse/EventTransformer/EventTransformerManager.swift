@@ -212,7 +212,7 @@ class EventTransformerManager {
         }
 
         if let gesture = scheme.buttons.$gesture,
-           gesture.enabled ?? true,
+           gesture.enabled ?? false,
            let trigger = gesture.trigger,
            trigger.button != nil {
             eventTransformer.append(GestureButtonTransformer(
@@ -251,7 +251,7 @@ class EventTransformerManager {
         }
 
         guard let autoScroll,
-              autoScroll.enabled ?? true,
+              autoScroll.enabled ?? false,
               let trigger = autoScroll.trigger,
               trigger.valid else {
             sharedAutoScrollTransformer?.deactivate()

@@ -824,38 +824,49 @@ private struct ActivationProbe {
 }
 
 extension AutoScrollTransformer {
-    func handleLogitechControlEvent(_ context: ButtonActionsTransformer.LogitechEventContext) -> Bool {
+    func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
         guard let triggerLogitechControl = trigger.button?.logitechControl,
               context.controlIdentity.matches(triggerLogitechControl) else {
             return false
         }
 
+        let mouseLocation = NSEvent.mouseLocation
+        DispatchQueue.main.async { [self] in
+            handleLogitechControlEventOnMain(context, mouseLocation: mouseLocation)
+        }
+        return true
+    }
+
+    private func handleLogitechControlEventOnMain(
+        _ context: LogitechEventContext,
+        mouseLocation: NSPoint
+    ) {
         if context.isPressed {
             // If already active in toggle mode, deactivate on re-press
             if case let .active(_, _, session) = state, session == .toggle {
                 guard hasToggleMode else {
-                    return true
+                    return
                 }
-                DispatchQueue.main.async { [self] in deactivate() }
-                return true
+                deactivate()
+                return
             }
 
             guard trigger.matches(modifierFlags: context.modifierFlags) else {
-                return false
+                return
             }
 
-            let location = CGEvent(source: nil)?.unflippedLocation ?? .zero
-            DispatchQueue.main.async { [self] in activate(at: location, session: activationSession) }
-            return true
+            let flippedY = (NSScreen.main?.frame.height ?? 0) - mouseLocation.y
+            activate(at: CGPoint(x: mouseLocation.x, y: flippedY), session: activationSession)
+            return
         }
         switch state {
         case let .active(anchor, current, session):
             switch session {
             case .hold:
-                DispatchQueue.main.async { [self] in deactivate() }
+                deactivate()
             case .pendingToggleOrHold:
                 if exceedsDeadZone(from: anchor, to: current) {
-                    DispatchQueue.main.async { [self] in deactivate() }
+                    deactivate()
                 } else {
                     state = .active(anchor: anchor, current: current, session: .toggle)
                 }
@@ -865,7 +876,6 @@ extension AutoScrollTransformer {
         default:
             break
         }
-        return true
     }
 }
 

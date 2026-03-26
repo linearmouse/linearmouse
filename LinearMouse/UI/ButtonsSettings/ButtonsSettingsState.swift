@@ -114,7 +114,7 @@ extension ButtonsSettingsState {
 
     var autoScrollEnabled: Bool {
         get {
-            mergedScheme.buttons.autoScroll.enabled ?? true
+            mergedScheme.buttons.autoScroll.enabled ?? false
         }
         set {
             guard newValue != autoScrollEnabled else {
@@ -260,7 +260,7 @@ extension ButtonsSettingsState {
 
     var gestureEnabled: Bool {
         get {
-            mergedScheme.buttons.gesture.enabled ?? true
+            mergedScheme.buttons.gesture.enabled ?? false
         }
         set {
             guard newValue != gestureEnabled else {

@@ -1006,6 +1006,13 @@ declare namespace Scheme {
       trigger?: Gesture.Trigger;
 
       /**
+       * @title Button
+       * @description Deprecated. Use trigger instead.
+       * @deprecated
+       */
+      button?: PhysicalButton;
+
+      /**
        * @title Threshold
        * @description The distance in pixels that must be dragged before triggering a gesture.
        * @default 50

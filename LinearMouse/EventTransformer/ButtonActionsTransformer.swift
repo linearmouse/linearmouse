@@ -22,15 +22,6 @@ class ButtonActionsTransformer {
         Self.keySimulator
     }
 
-    struct LogitechEventContext {
-        let device: Device?
-        let pid: pid_t?
-        let display: String?
-        let controlIdentity: LogitechControlIdentity
-        let isPressed: Bool
-        let modifierFlags: CGEventFlags
-    }
-
     init(
         mappings: [Scheme.Buttons.Mapping],
         universalBackForward: Scheme.Buttons.UniversalBackForward? = nil

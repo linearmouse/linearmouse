@@ -261,6 +261,12 @@
           "description": "Actions to trigger for each gesture direction.",
           "title": "Gesture actions"
         },
+        "button": {
+          "$ref": "#/definitions/PhysicalButton",
+          "deprecated": true,
+          "description": "Deprecated. Use trigger instead.",
+          "title": "Button"
+        },
         "cooldownMs": {
           "$ref": "#/definitions/Int",
           "default": 500,
