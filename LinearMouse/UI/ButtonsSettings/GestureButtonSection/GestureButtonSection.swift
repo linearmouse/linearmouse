@@ -23,12 +23,21 @@ struct GestureButtonSection: View {
                 }
 
                 if state.gestureEnabled {
-                    Picker("Button", selection: $state.gestureButton) {
-                        Text("Middle Button").tag(2)
-//                    Text("Back Button").tag(3)
-//                    Text("Forward Button").tag(4)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Trigger")
+                            .font(.headline)
+
+                        ButtonMappingButtonRecorder(
+                            mapping: state.gestureTriggerBinding
+                        )
+
+                        if !state.gestureTriggerValid {
+                            Text("Choose a mouse button trigger. Left click without modifier keys is not allowed.")
+                                .foregroundColor(.red)
+                                .controlSize(.small)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
                     }
-                    .modifier(PickerViewModifier())
 
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {

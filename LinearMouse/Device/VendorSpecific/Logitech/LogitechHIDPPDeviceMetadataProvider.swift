@@ -49,9 +49,10 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         static let virtualGestureButtonControlIDs: Set<UInt16> = [0x00D7]
         static let gestureButtonTaskIDs: Set<UInt16> = [0x009C, 0x00A9, 0x00AD]
         static let virtualGestureButtonTaskIDs: Set<UInt16> = [0x00B4]
-        /// Back/forward control IDs that should never be diverted.
-        /// These are natively handled by the OS and diverting them would break compatibility.
-        static let nativeBackForwardControlIDs: Set<UInt16> = [
+        /// Control IDs that should never be diverted because they are natively handled by the OS.
+        /// Diverting these would break their default behavior (click, back/forward, etc.).
+        static let nativeControlIDs: Set<UInt16> = [
+            0x0050, 0x0051, 0x0052, // Left / right / middle mouse button
             0x0053, 0x0056, // Standard back/forward
             0x00CE, 0x00CF, // Alternate back/forward
             0x00D9, 0x00DB // Additional back/forward variants
@@ -1919,19 +1920,29 @@ final class LogitechReprogrammableControlsMonitor {
                         withDisplay: display
                     )
 
+                    let logitechContext = ButtonActionsTransformer.LogitechEventContext(
+                        device: device,
+                        pid: frontmostPid,
+                        display: display,
+                        controlIdentity: controlIdentity,
+                        isPressed: isPressed,
+                        modifierFlags: modifierFlags
+                    )
+
                     let handledInternally = (transformer as? [EventTransformer])?.contains { transformer in
-                        guard let transformer = transformer as? ButtonActionsTransformer else {
-                            return false
+                        if let transformer = transformer as? ButtonActionsTransformer {
+                            return transformer.handleLogitechControlEvent(logitechContext)
                         }
 
-                        return transformer.handleLogitechControlEvent(.init(
-                            device: device,
-                            pid: frontmostPid,
-                            display: display,
-                            controlIdentity: controlIdentity,
-                            isPressed: isPressed,
-                            modifierFlags: modifierFlags
-                        ))
+                        if let transformer = transformer as? AutoScrollTransformer {
+                            return transformer.handleLogitechControlEvent(logitechContext)
+                        }
+
+                        if let transformer = transformer as? GestureButtonTransformer {
+                            return transformer.handleLogitechControlEvent(logitechContext)
+                        }
+
+                        return false
                     } == true
 
                     guard !handledInternally else {
@@ -2140,7 +2151,7 @@ final class LogitechReprogrammableControlsMonitor {
             return false
         }
 
-        guard !LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.nativeBackForwardControlIDs
+        guard !LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.nativeControlIDs
             .contains(control.controlID) else {
             return false
         }
@@ -2241,14 +2252,24 @@ final class LogitechReprogrammableControlsMonitor {
             }
 
         let autoScrollControlID: UInt16? = {
-            guard let logiButton = scheme.buttons.autoScroll.trigger?.button?.logitechControl,
+            guard scheme.buttons.autoScroll.enabled ?? true,
+                  let logiButton = scheme.buttons.autoScroll.trigger?.button?.logitechControl,
                   matches(logiButton: logiButton, identity: identity) else {
                 return nil
             }
             return logiButton.controlIDValue
         }()
 
-        return Set(directMappings + [autoScrollControlID].compactMap(\.self))
+        let gestureControlID: UInt16? = {
+            guard scheme.buttons.gesture.enabled ?? true,
+                  let logiButton = scheme.buttons.gesture.trigger?.button?.logitechControl,
+                  matches(logiButton: logiButton, identity: identity) else {
+                return nil
+            }
+            return logiButton.controlIDValue
+        }()
+
+        return Set(directMappings + [autoScrollControlID, gestureControlID].compactMap(\.self))
             .intersection(availableControls.map(\.controlID))
     }
 

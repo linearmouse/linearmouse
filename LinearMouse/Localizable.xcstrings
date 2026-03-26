@@ -11087,6 +11087,7 @@
     },
     "Button" : {
       "comment" : "Generic singular UI label for choosing a mouse button trigger.",
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -30253,6 +30254,7 @@
       }
     },
     "Middle Button" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {

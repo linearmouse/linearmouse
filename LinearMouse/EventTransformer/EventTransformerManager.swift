@@ -212,11 +212,11 @@ class EventTransformerManager {
         }
 
         if let gesture = scheme.buttons.$gesture,
-           gesture.enabled ?? false,
-           let button = gesture.button,
-           let mouseButton = CGMouseButton(rawValue: UInt32(button)) {
+           gesture.enabled ?? true,
+           let trigger = gesture.trigger,
+           trigger.button != nil {
             eventTransformer.append(GestureButtonTransformer(
-                button: mouseButton,
+                trigger: trigger,
                 threshold: Double(gesture.threshold ?? 50),
                 deadZone: Double(gesture.deadZone ?? 40),
                 cooldownMs: gesture.cooldownMs ?? 500,
@@ -251,7 +251,7 @@ class EventTransformerManager {
         }
 
         guard let autoScroll,
-              autoScroll.enabled ?? false,
+              autoScroll.enabled ?? true,
               let trigger = autoScroll.trigger,
               trigger.valid else {
             sharedAutoScrollTransformer?.deactivate()

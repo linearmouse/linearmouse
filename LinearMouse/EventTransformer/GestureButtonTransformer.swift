@@ -11,7 +11,8 @@ class GestureButtonTransformer {
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "GestureButton")
 
     // Configuration
-    private let button: CGMouseButton
+    private let trigger: Scheme.Buttons.Mapping
+    private let triggerMouseButton: CGMouseButton
     private let threshold: Double
     private let deadZone: Double
     private let cooldownMs: Int
@@ -28,25 +29,20 @@ class GestureButtonTransformer {
     private var state: State = .idle
 
     init(
-        button: CGMouseButton,
+        trigger: Scheme.Buttons.Mapping,
         threshold: Double,
         deadZone: Double,
         cooldownMs: Int,
         actions: Scheme.Buttons.Gesture.Actions
     ) {
-        self.button = button
+        self.trigger = trigger
+        let defaultButton = UInt32(CGMouseButton.center.rawValue)
+        let buttonNumber = trigger.button?.syntheticMouseButtonNumber ?? Int(defaultButton)
+        triggerMouseButton = CGMouseButton(rawValue: UInt32(buttonNumber)) ?? .center
         self.threshold = threshold
         self.deadZone = deadZone
         self.cooldownMs = cooldownMs
         self.actions = actions
-
-//        os_log(
-//            "GestureButtonTransformer initialized - button: %d, threshold: %.1f",
-//            log: Self.log,
-//            type: .info,
-//            button.rawValue,
-//            threshold
-//        )
     }
 }
 
@@ -56,7 +52,7 @@ extension GestureButtonTransformer: EventTransformer {
         if case let .cooldown(until) = state {
             if DispatchTime.now().uptimeNanoseconds < until {
                 // Still in cooldown - consume our button events
-                if isOurButtonEvent(event) {
+                if matchesTriggerButton(event) {
 //                    os_log("Event consumed during cooldown", log: Self.log, type: .debug)
                     return nil
                 }
@@ -70,7 +66,7 @@ extension GestureButtonTransformer: EventTransformer {
         switch event.type {
         case mouseDownEventType:
             return handleButtonDown(event)
-        case mouseDraggedEventType:
+        case mouseDraggedEventType, .mouseMoved:
             return handleDragged(event)
         case mouseUpEventType:
             return handleButtonUp(event)
@@ -80,27 +76,33 @@ extension GestureButtonTransformer: EventTransformer {
     }
 
     private var mouseDownEventType: CGEventType {
-        button.fixedCGEventType(of: .otherMouseDown)
+        triggerMouseButton.fixedCGEventType(of: .otherMouseDown)
     }
 
     private var mouseUpEventType: CGEventType {
-        button.fixedCGEventType(of: .otherMouseUp)
+        triggerMouseButton.fixedCGEventType(of: .otherMouseUp)
     }
 
     private var mouseDraggedEventType: CGEventType {
-        button.fixedCGEventType(of: .otherMouseDragged)
+        triggerMouseButton.fixedCGEventType(of: .otherMouseDragged)
     }
 
-    private func isOurButtonEvent(_ event: CGEvent) -> Bool {
-        let mouseEventView = MouseEventView(event)
-        guard let eventButton = mouseEventView.mouseButton else {
+    private func matchesTriggerButton(_ event: CGEvent) -> Bool {
+        guard let eventButton = MouseEventView(event).mouseButton else {
             return false
         }
-        return eventButton == button
+        return eventButton == triggerMouseButton
+    }
+
+    private func matchesActivationTrigger(_ event: CGEvent) -> Bool {
+        guard matchesTriggerButton(event) else {
+            return false
+        }
+        return trigger.matches(modifierFlags: event.flags)
     }
 
     private func handleButtonDown(_ event: CGEvent) -> CGEvent? {
-        guard isOurButtonEvent(event) else {
+        guard matchesActivationTrigger(event) else {
             return event
         }
 
@@ -117,8 +119,16 @@ extension GestureButtonTransformer: EventTransformer {
             return event
         }
 
-        guard isOurButtonEvent(event) else {
-            return event
+        let isMouseMoved = event.type == .mouseMoved
+
+        // For drag events, verify button match.
+        // mouseMoved events don't carry a button number but are used to track
+        // movement when the trigger is a Logitech HID++ control (which generates
+        // synthetic button events that don't produce OS-level drag events).
+        if !isMouseMoved {
+            guard matchesTriggerButton(event) else {
+                return event
+            }
         }
 
         // Accumulate deltas
@@ -156,19 +166,19 @@ extension GestureButtonTransformer: EventTransformer {
                 state = .idle
             }
 
-            // Consume the drag event
+            // Consume the event
             return nil
         }
 
         // Update state with new deltas
         state = .tracking(startTime: startTime, deltaX: deltaX, deltaY: deltaY)
 
-        // Consume the drag event while tracking
-        return nil
+        // Consume drag events while tracking; pass through mouseMoved events
+        return isMouseMoved ? event : nil
     }
 
     private func handleButtonUp(_ event: CGEvent) -> CGEvent? {
-        guard isOurButtonEvent(event) else {
+        guard matchesTriggerButton(event) else {
             return event
         }
 
@@ -264,6 +274,38 @@ extension GestureButtonTransformer: EventTransformer {
         case .launchpad:
             launchpad()
         }
+    }
+}
+
+extension GestureButtonTransformer {
+    func handleLogitechControlEvent(_ context: ButtonActionsTransformer.LogitechEventContext) -> Bool {
+        guard let triggerLogitechControl = trigger.button?.logitechControl,
+              context.controlIdentity.matches(triggerLogitechControl),
+              trigger.matches(modifierFlags: context.modifierFlags) else {
+            return false
+        }
+
+        // Check cooldown
+        if case let .cooldown(until) = state {
+            if DispatchTime.now().uptimeNanoseconds < until {
+                return true
+            }
+            state = .idle
+        }
+
+        if context.isPressed {
+            state = .tracking(startTime: DispatchTime.now().uptimeNanoseconds, deltaX: 0, deltaY: 0)
+            os_log("Started tracking gesture (Logitech control)", log: Self.log, type: .info)
+        } else {
+            if case .tracking = state {
+                state = .idle
+            }
+            if case .cooldown = state {
+                return true
+            }
+        }
+
+        return true
     }
 }
 

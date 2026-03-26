@@ -47,7 +47,8 @@ class GlobalEventTap {
 
         var eventTypes: [CGEventType] = EventType.all
         if SchemeState.shared.schemes.contains(where: { $0.pointer.redirectsToScroll ?? false }) ||
-            SchemeState.shared.schemes.contains(where: { $0.buttons.$autoScroll?.enabled ?? false }) {
+            SchemeState.shared.schemes.contains(where: { $0.buttons.$autoScroll?.enabled ?? true }) ||
+            SchemeState.shared.schemes.contains(where: { $0.buttons.$gesture?.enabled ?? true }) {
             eventTypes.append(EventType.mouseMoved)
         }
 

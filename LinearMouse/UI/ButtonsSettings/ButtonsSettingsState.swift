@@ -114,7 +114,7 @@ extension ButtonsSettingsState {
 
     var autoScrollEnabled: Bool {
         get {
-            mergedScheme.buttons.autoScroll.enabled ?? false
+            mergedScheme.buttons.autoScroll.enabled ?? true
         }
         set {
             guard newValue != autoScrollEnabled else {
@@ -252,32 +252,76 @@ extension ButtonsSettingsState {
         mappings = (mappings + [mapping]).sorted()
     }
 
+    private var defaultGestureTrigger: Scheme.Buttons.Mapping {
+        var mapping = Scheme.Buttons.Mapping()
+        mapping.button = .mouse(Int(CGMouseButton.center.rawValue))
+        return mapping
+    }
+
     var gestureEnabled: Bool {
         get {
-            mergedScheme.buttons.gesture.enabled ?? false
+            mergedScheme.buttons.gesture.enabled ?? true
         }
         set {
+            guard newValue != gestureEnabled else {
+                return
+            }
+
             if newValue {
                 scheme.buttons.gesture.enabled = true
-                scheme.buttons.gesture.button = 2
-                scheme.buttons.gesture.threshold = 50
-                scheme.buttons.gesture.actions.left = .spaceLeft
-                scheme.buttons.gesture.actions.right = .spaceRight
-                scheme.buttons.gesture.actions.up = .missionControl
-                scheme.buttons.gesture.actions.down = .appExpose
+                if scheme.buttons.gesture.trigger == nil {
+                    scheme.buttons.gesture.trigger = defaultGestureTrigger
+                }
+                if scheme.buttons.gesture.threshold == nil {
+                    scheme.buttons.gesture.threshold = 50
+                }
+                if scheme.buttons.gesture.actions.left == nil {
+                    scheme.buttons.gesture.actions.left = .spaceLeft
+                }
+                if scheme.buttons.gesture.actions.right == nil {
+                    scheme.buttons.gesture.actions.right = .spaceRight
+                }
+                if scheme.buttons.gesture.actions.up == nil {
+                    scheme.buttons.gesture.actions.up = .missionControl
+                }
+                if scheme.buttons.gesture.actions.down == nil {
+                    scheme.buttons.gesture.actions.down = .appExpose
+                }
             } else {
-                scheme.buttons.$gesture = nil
+                scheme.buttons.gesture.enabled = false
             }
+
+            GlobalEventTap.shared.stop()
+            GlobalEventTap.shared.start()
         }
     }
 
-    var gestureButton: Int {
+    var gestureTrigger: Scheme.Buttons.Mapping {
         get {
-            mergedScheme.buttons.gesture.button ?? 2
+            mergedScheme.buttons.gesture.trigger ?? defaultGestureTrigger
         }
         set {
-            scheme.buttons.gesture.button = newValue
+            var trigger = newValue
+            trigger.action = nil
+            trigger.repeat = nil
+            trigger.scroll = nil
+            scheme.buttons.gesture.trigger = trigger
         }
+    }
+
+    var gestureTriggerBinding: Binding<Scheme.Buttons.Mapping> {
+        Binding(
+            get: { [self] in
+                gestureTrigger
+            },
+            set: { [self] in
+                gestureTrigger = $0
+            }
+        )
+    }
+
+    var gestureTriggerValid: Bool {
+        gestureTrigger.valid
     }
 
     var gestureThreshold: Int {
