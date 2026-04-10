@@ -17,6 +17,7 @@ class GestureButtonTransformer {
     private let deadZone: Double
     private let cooldownMs: Int
     private let actions: Scheme.Buttons.Gesture.Actions
+    private var cooldownNanos: UInt64 { UInt64(cooldownMs) * 1_000_000 }
 
     /// State machine
     private enum State {
@@ -48,12 +49,24 @@ class GestureButtonTransformer {
 
 extension GestureButtonTransformer: EventTransformer {
     func transform(_ event: CGEvent) -> CGEvent? {
+        // Never re-process our own synthetic events.
+        if event.isLinearMouseSyntheticEvent {
+            return event
+        }
+
         // Check if we're in cooldown
         if case let .cooldown(until) = state {
             if DispatchTime.now().uptimeNanoseconds < until {
                 // Still in cooldown - consume our button events
                 if matchesTriggerButton(event) {
-//                    os_log("Event consumed during cooldown", log: Self.log, type: .debug)
+                    // When consuming a mouseUp during cooldown, post a synthetic
+                    // mouseUp so that macOS (and apps) see the button release.
+                    // Without this, the button appears stuck in the pressed state,
+                    // which breaks drag operations in other apps.
+                    if event.type == mouseUpEventType {
+                        postSyntheticMouseUp(from: event)
+                        state = .idle
+                    }
                     return nil
                 }
                 return event
@@ -157,7 +170,6 @@ extension GestureButtonTransformer: EventTransformer {
                 state = .triggered
 
                 // Enter cooldown
-                let cooldownNanos = UInt64(cooldownMs) * 1_000_000
                 state = .cooldown(until: DispatchTime.now().uptimeNanoseconds + cooldownNanos)
 
                 os_log("Entering cooldown for %d ms", log: Self.log, type: .info, cooldownMs)
@@ -190,9 +202,12 @@ extension GestureButtonTransformer: EventTransformer {
             return event
         }
 
-        // If we triggered, stay in cooldown and consume the event
+        // If we triggered, enter cooldown and release the button.
+        // A synthetic mouseUp must be posted because handleButtonDown passed
+        // through the original mouseDown — without this, the button appears
+        // stuck and breaks drag in other apps (see issue #1138).
         if case .triggered = state {
-            let cooldownNanos = UInt64(cooldownMs) * 1_000_000
+            postSyntheticMouseUp(from: event)
             state = .cooldown(until: DispatchTime.now().uptimeNanoseconds + cooldownNanos)
             return nil
         }
@@ -251,6 +266,21 @@ extension GestureButtonTransformer: EventTransformer {
         return deltaY > 0 ? (actions.down ?? .appExpose) : (actions.up ?? .missionControl)
     }
 
+    private func postSyntheticMouseUp(from event: CGEvent) {
+        guard let mouseUpEvent = CGEvent(
+            mouseEventSource: nil,
+            mouseType: mouseUpEventType,
+            mouseCursorPosition: event.location,
+            mouseButton: triggerMouseButton
+        ) else {
+            return
+        }
+        mouseUpEvent.flags = event.flags
+        mouseUpEvent.isLinearMouseSyntheticEvent = true
+        mouseUpEvent.post(tap: .cgSessionEventTap)
+        os_log("Posted synthetic mouseUp to release trigger button", log: Self.log, type: .debug)
+    }
+
     private func executeGesture(_ action: Scheme.Buttons.Gesture.GestureAction) throws {
         switch action {
         case .none:
@@ -294,6 +324,11 @@ extension GestureButtonTransformer {
         // Check cooldown
         if case let .cooldown(until) = state {
             if DispatchTime.now().uptimeNanoseconds < until {
+                // Allow release events to clear the state even during cooldown,
+                // preventing the state machine from getting stuck.
+                if !context.isPressed {
+                    state = .idle
+                }
                 return
             }
             state = .idle
@@ -310,7 +345,7 @@ extension GestureButtonTransformer {
             case .tracking:
                 state = .idle
             case .cooldown:
-                break
+                state = .idle
             default:
                 break
             }
