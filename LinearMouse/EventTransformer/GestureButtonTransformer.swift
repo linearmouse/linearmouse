@@ -48,12 +48,22 @@ class GestureButtonTransformer {
 
 extension GestureButtonTransformer: EventTransformer {
     func transform(_ event: CGEvent) -> CGEvent? {
+        if event.isLinearMouseSyntheticEvent {
+            return event
+        }
+
         // Check if we're in cooldown
         if case let .cooldown(until) = state {
             if DispatchTime.now().uptimeNanoseconds < until {
                 // Still in cooldown - consume our button events
                 if matchesTriggerButton(event) {
-//                    os_log("Event consumed during cooldown", log: Self.log, type: .debug)
+                    if event.type == mouseUpEventType {
+                        os_log("Releasing trigger button during cooldown", log: Self.log, type: .debug)
+                        releaseTriggerButton(from: event)
+                        state = .idle
+                    } else {
+                        os_log("Event consumed during cooldown", log: Self.log, type: .debug)
+                    }
                     return nil
                 }
                 return event
@@ -192,6 +202,7 @@ extension GestureButtonTransformer: EventTransformer {
 
         // If we triggered, stay in cooldown and consume the event
         if case .triggered = state {
+            releaseTriggerButton(from: event)
             let cooldownNanos = UInt64(cooldownMs) * 1_000_000
             state = .cooldown(until: DispatchTime.now().uptimeNanoseconds + cooldownNanos)
             return nil
@@ -249,6 +260,20 @@ extension GestureButtonTransformer: EventTransformer {
         }
         // Use defaults if actions not configured
         return deltaY > 0 ? (actions.down ?? .appExpose) : (actions.up ?? .missionControl)
+    }
+
+    private func releaseTriggerButton(from event: CGEvent) {
+        guard let mouseUpEvent = CGEvent(
+            mouseEventSource: nil,
+            mouseType: mouseUpEventType,
+            mouseCursorPosition: event.location,
+            mouseButton: triggerMouseButton
+        ) else {
+            return
+        }
+        mouseUpEvent.flags = event.flags
+        mouseUpEvent.isLinearMouseSyntheticEvent = true
+        mouseUpEvent.post(tap: .cgSessionEventTap)
     }
 
     private func executeGesture(_ action: Scheme.Buttons.Gesture.GestureAction) throws {
