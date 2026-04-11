@@ -4,6 +4,7 @@
 import Combine
 import Foundation
 import PublishedObject
+import SwiftUI
 
 class ScrollingSettingsState: ObservableObject {
     static let shared: ScrollingSettingsState = .init()
@@ -38,6 +39,15 @@ extension ScrollingSettingsState {
         case smoothed = "Smoothed"
         case byLines = "By Lines"
         case byPixels = "By Pixels"
+
+        var label: LocalizedStringKey {
+            switch self {
+            case .accelerated: "Accelerated"
+            case .smoothed: "Smoothed"
+            case .byLines: "By Lines"
+            case .byPixels: "By Pixels"
+            }
+        }
     }
 
     var scrollingMode: ScrollingMode {

@@ -11,7 +11,7 @@ extension ScrollingSettings {
             Section {
                 Picker("Scrolling mode", selection: $state.scrollingMode) {
                     ForEach(ScrollingSettingsState.ScrollingMode.allCases) { scrollingMode in
-                        Text(NSLocalizedString(scrollingMode.rawValue, comment: "")).tag(scrollingMode)
+                        Text(scrollingMode.label).tag(scrollingMode)
                     }
                 }
                 .modifier(PickerViewModifier())
