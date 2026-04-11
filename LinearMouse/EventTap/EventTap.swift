@@ -46,13 +46,19 @@ extension EventTap {
             return Unmanaged.passUnretained(event)
 
         default:
+            let originalEvent = event
+
             // If the callback returns nil, ignore the event.
             guard let event = callback(proxy, event) else {
                 return nil
             }
 
-            // Or, return the event reference.
-            return Unmanaged.passUnretained(event)
+            // If the callback returns a different event (e.g. a copy),
+            // use passRetained to transfer ownership to the caller.
+            if event === originalEvent {
+                return Unmanaged.passUnretained(event)
+            }
+            return Unmanaged.passRetained(event)
         }
     }
 
@@ -94,9 +100,24 @@ extension EventTap {
         let cfRunLoop = runLoop.getCFRunLoop()
         CFRunLoopAddSource(cfRunLoop, runLoopSource, .commonModes)
 
+        // Periodically check if the tap is still enabled and re-enable it if needed.
+        // This recovers from cases where the system silently disables the tap
+        // (e.g. due to an invalid event or other transient errors).
+        let healthCheckTimer = Timer(timeInterval: 5, repeats: true) { _ in
+            guard CFMachPortIsValid(tap) else {
+                return
+            }
+            if !CGEvent.tapIsEnabled(tap: tap) {
+                os_log("EventTap found disabled, re-enabling", log: log, type: .error)
+                CGEvent.tapEnable(tap: tap, enable: true)
+            }
+        }
+        runLoop.add(healthCheckTimer, forMode: .common)
+
         return ObservationToken {
             // The lifetime of contextHolder needs to be extended until the observation token is cancelled.
             withExtendedLifetime(contextHolder) {
+                healthCheckTimer.invalidate()
                 CGEvent.tapEnable(tap: tap, enable: false)
                 CFRunLoopRemoveSource(cfRunLoop, runLoopSource, .commonModes)
                 CFMachPortInvalidate(tap)
