@@ -897,11 +897,12 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         let orderedSlots = connectedSlotNumbers + remainingSlots
 
         var pairedSlots = [LogitechHIDPPDeviceMetadataProvider.ReceiverSlotInfo]()
+        var connectedSlotsFound = 0
         for slot in orderedSlots {
             guard let slotInfo = discoverSlotInfo(slot, connectionSnapshot: connectionSnapshots[slot]) else {
                 // Skip remaining unconnected slots if we already found all connected devices
                 if let connectedDeviceCount,
-                   pairedSlots.count >= connectedDeviceCount,
+                   connectedSlotsFound >= connectedDeviceCount,
                    !connectedSlotNumbers.contains(slot) {
                     break
                 }
@@ -909,6 +910,9 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
             }
 
             pairedSlots.append(slotInfo)
+            if connectedSlotNumbers.contains(slot) {
+                connectedSlotsFound += 1
+            }
 
             os_log(
                 "Receiver slot %u raw candidate: name=%{public}@ kind=%{public}u battery=%{public}@",
@@ -1000,8 +1004,9 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
             guard let report = waitForInputReport(timeout: 0.05, matching: { response in
                 LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(Array(response)) != nil
             }) else {
-                // No more notifications pending — if we already have enough snapshots, exit early
-                if let expectedCount, snapshots.count >= expectedCount {
+                // No more notifications pending — if we already have enough connected snapshots, exit early
+                if let expectedCount,
+                   snapshots.values.filter(\.isConnected).count >= expectedCount {
                     break
                 }
                 continue
@@ -1014,8 +1019,9 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
 
             snapshots[notification.slot] = notification.snapshot
 
-            // Exit early once we have all expected device snapshots
-            if let expectedCount, snapshots.count >= expectedCount {
+            // Exit early once we have all expected connected device snapshots
+            if let expectedCount,
+               snapshots.values.filter(\.isConnected).count >= expectedCount {
                 break
             }
         }
@@ -2161,7 +2167,9 @@ final class LogitechReprogrammableControlsMonitor {
         })
         let candidateSlots: [UInt8] = discovery.identities.isEmpty
             ? Array(connectedSlots.sorted())
-            : discovery.identities.map(\.slot)
+            : discovery.identities
+            .map(\.slot)
+            .filter { connectedSlots.contains($0) }
 
         let scannedTargets = candidateSlots.compactMap { slot in
             buildMonitorTarget(
