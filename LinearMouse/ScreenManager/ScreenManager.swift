@@ -16,15 +16,15 @@ class ScreenManager: ObservableObject {
     @Published private(set) var currentScreen: NSScreen?
     @Published private(set) var currentScreenName: String? {
         didSet {
-            screenNameLock.withLock { _atomicCurrentScreenName = currentScreenName }
+            screenNameLock.withLock { _currentScreenNameSnapshot = currentScreenName }
         }
     }
 
     /// Thread-safe access to `currentScreenName`, for use from the background event tap thread.
     private let screenNameLock = NSLock()
-    private var _atomicCurrentScreenName: String?
-    var atomicCurrentScreenName: String? {
-        screenNameLock.withLock { _atomicCurrentScreenName }
+    private var _currentScreenNameSnapshot: String?
+    var currentScreenNameSnapshot: String? {
+        screenNameLock.withLock { _currentScreenNameSnapshot }
     }
 
     private var hasDisplaySpecificSchemes = false

@@ -26,7 +26,7 @@ class GlobalEventTap {
             withSourcePid: mouseEventView.sourcePid,
             withTargetPid: mouseEventView.targetPid,
             withMouseLocationPid: mouseEventView.mouseLocationWindowID.ownerPid,
-            withDisplay: ScreenManager.shared.atomicCurrentScreenName
+            withDisplay: ScreenManager.shared.currentScreenNameSnapshot
         )
         return eventTransformer.transform(event)
     }
