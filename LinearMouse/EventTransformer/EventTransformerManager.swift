@@ -13,6 +13,10 @@ class EventTransformerManager {
 
     @Default(.bypassEventsFromOtherApplications) var bypassEventsFromOtherApplications
 
+    /// Protects cache, activeCacheKey, and sharedAutoScrollTransformer from concurrent access
+    /// across the event tap thread, Logitech HID thread, and main thread.
+    private let lock = NSLock()
+
     private var eventTransformerCache = LRUCache<CacheKey, EventTransformer>(countLimit: 16)
     private var activeCacheKey: CacheKey?
     private var sharedAutoScrollTransformer: AutoScrollTransformer?
@@ -30,10 +34,23 @@ class EventTransformerManager {
             .$configuration
             .removeDuplicates()
             .sink { [weak self] _ in
-                self?.sharedAutoScrollTransformer?.deactivate()
-                self?.sharedAutoScrollTransformer = nil
-                self?.activeCacheKey = nil
-                self?.eventTransformerCache.removeAllValues()
+                guard let self else {
+                    return
+                }
+                self.lock.lock()
+                let oldAutoScroll = self.sharedAutoScrollTransformer
+                self.sharedAutoScrollTransformer = nil
+                self.activeCacheKey = nil
+                self.eventTransformerCache.removeAllValues()
+                self.lock.unlock()
+
+                // Dispatch transformer deactivation to the event thread where
+                // Timer.invalidate() is safe (same thread the timers were created on).
+                if let oldAutoScroll {
+                    GlobalEventTap.performOnEventThread {
+                        oldAutoScroll.deactivate()
+                    }
+                }
             }
             .store(in: &subscriptions)
     }
@@ -49,8 +66,6 @@ class EventTransformerManager {
         withMouseLocationPid mouseLocationPid: pid_t?,
         withDisplay display: String?
     ) -> EventTransformer {
-        activeCacheKey = nil
-
         if sourcePid != nil, bypassEventsFromOtherApplications, !cgEvent.isLinearMouseSyntheticEvent {
             os_log(
                 "Return noop transformer because this event is sent by %{public}s",
@@ -74,20 +89,27 @@ class EventTransformerManager {
         let pid = mouseLocationPid ?? targetPid
         let device = DeviceManager.shared.deviceFromCGEvent(cgEvent)
 
-        return get(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: true)
+        lock.lock()
+        defer { lock.unlock() }
+        return getUnderLock(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: true)
     }
 
     func get(withDevice device: Device?, withPid pid: pid_t?, withDisplay display: String?) -> EventTransformer {
-        get(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: false)
+        lock.lock()
+        defer { lock.unlock() }
+        return getUnderLock(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: false)
     }
 
-    private func get(
+    private func getUnderLock(
         withDevice device: Device?,
         withPid pid: pid_t?,
         withDisplay display: String?,
         updateActiveCacheKey: Bool
     ) -> EventTransformer {
         let prevActiveCacheKey = activeCacheKey
+        if updateActiveCacheKey {
+            activeCacheKey = nil
+        }
         defer {
             if updateActiveCacheKey,
                let prevActiveCacheKey,

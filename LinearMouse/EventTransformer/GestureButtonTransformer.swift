@@ -284,43 +284,39 @@ extension GestureButtonTransformer {
             return false
         }
 
-        DispatchQueue.main.async { [self] in
-            handleLogitechControlEventOnMain(context)
+        // Dispatch state mutation to the event processing thread to maintain single-threaded access.
+        GlobalEventTap.performOnEventThread { [self] in
+            // Check cooldown
+            if case let .cooldown(until) = state {
+                if DispatchTime.now().uptimeNanoseconds < until {
+                    return
+                }
+                state = .idle
+            }
+
+            if context.isPressed {
+                guard trigger.matches(modifierFlags: context.modifierFlags) else {
+                    return
+                }
+                state = .tracking(startTime: DispatchTime.now().uptimeNanoseconds, deltaX: 0, deltaY: 0)
+                os_log("Started tracking gesture (Logitech control)", log: Self.log, type: .info)
+            } else {
+                switch state {
+                case .tracking:
+                    state = .idle
+                case .cooldown:
+                    break
+                default:
+                    break
+                }
+            }
         }
         return true
-    }
-
-    private func handleLogitechControlEventOnMain(_ context: LogitechEventContext) {
-        // Check cooldown
-        if case let .cooldown(until) = state {
-            if DispatchTime.now().uptimeNanoseconds < until {
-                return
-            }
-            state = .idle
-        }
-
-        if context.isPressed {
-            guard trigger.matches(modifierFlags: context.modifierFlags) else {
-                return
-            }
-            state = .tracking(startTime: DispatchTime.now().uptimeNanoseconds, deltaX: 0, deltaY: 0)
-            os_log("Started tracking gesture (Logitech control)", log: Self.log, type: .info)
-        } else {
-            switch state {
-            case .tracking:
-                state = .idle
-            case .cooldown:
-                break
-            default:
-                break
-            }
-        }
     }
 }
 
 extension GestureButtonTransformer: Deactivatable {
     func deactivate() {
-//        os_log("Deactivating gesture transformer", log: Self.log, type: .info)
         state = .idle
     }
 }

@@ -11,8 +11,31 @@ class GlobalEventTap {
 
     static let shared = GlobalEventTap()
 
+    /// The RunLoop running on the dedicated event processing thread.
+    /// All transformer state access (transform, tick, deactivate) must happen on this RunLoop's thread.
+    static var processingRunLoop: RunLoop? {
+        shared._processingRunLoop
+    }
+
+    /// Schedule a block to run on the event processing thread.
+    /// Use this from other threads (e.g. Logitech HID thread) to serialize transformer state access.
+    static func performOnEventThread(_ block: @escaping () -> Void) {
+        guard let cfRunLoop = shared._processingRunLoop?.getCFRunLoop() else {
+            return
+        }
+        CFRunLoopPerformBlock(cfRunLoop, CFRunLoopMode.commonModes.rawValue, block)
+        CFRunLoopWakeUp(cfRunLoop)
+    }
+
     private var observationToken: ObservationToken?
     private lazy var watchdog = GlobalEventTapWatchdog()
+
+    /// Background thread dedicated to the CGEvent tap RunLoop.
+    private var eventThread: Thread?
+
+    /// The RunLoop running on the background event thread.
+    private var _processingRunLoop: RunLoop?
+    private let runLoopReady = DispatchSemaphore(value: 0)
 
     init() {}
 
@@ -25,7 +48,7 @@ class GlobalEventTap {
             withSourcePid: mouseEventView.sourcePid,
             withTargetPid: mouseEventView.targetPid,
             withMouseLocationPid: mouseEventView.mouseLocationWindowID.ownerPid,
-            withDisplay: ScreenManager.shared.currentScreenName
+            withDisplay: ScreenManager.shared.atomicCurrentScreenName
         )
         return eventTransformer.transform(event)
     }
@@ -52,8 +75,34 @@ class GlobalEventTap {
             eventTypes.append(EventType.mouseMoved)
         }
 
+        // Start the background event thread with its own RunLoop.
+        let thread = Thread { [weak self] in
+            guard let self else {
+                return
+            }
+            let runLoop = RunLoop.current
+            // Add a keep-alive port so the RunLoop doesn't exit before the event tap source is added.
+            runLoop.add(Port(), forMode: .common)
+            self._processingRunLoop = runLoop
+            self.runLoopReady.signal()
+            CFRunLoopRun()
+        }
+        thread.name = "com.linearmouse.event-tap"
+        thread.qualityOfService = .userInteractive
+        thread.start()
+        eventThread = thread
+
+        runLoopReady.wait()
+
+        guard let processingRunLoop = _processingRunLoop else {
+            return
+        }
+
         do {
-            observationToken = try EventTap.observe(eventTypes) { [weak self] in self?.callback($1) }
+            observationToken = try EventTap.observe(
+                eventTypes,
+                at: processingRunLoop
+            ) { [weak self] in self?.callback($1) }
         } catch {
             NSAlert(error: error).runModal()
         }
@@ -63,6 +112,13 @@ class GlobalEventTap {
 
     func stop() {
         observationToken = nil
+
+        if let cfRunLoop = _processingRunLoop?.getCFRunLoop() {
+            CFRunLoopStop(cfRunLoop)
+        }
+        eventThread?.cancel()
+        eventThread = nil
+        _processingRunLoop = nil
 
         watchdog.stop()
     }

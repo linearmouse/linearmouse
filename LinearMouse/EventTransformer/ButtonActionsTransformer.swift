@@ -31,8 +31,12 @@ class ButtonActionsTransformer {
     }
 
     deinit {
-        repeatTimer?.invalidate()
-        logitechRepeatTimer?.invalidate()
+        let timer = repeatTimer
+        let logTimer = logitechRepeatTimer
+        GlobalEventTap.performOnEventThread {
+            timer?.invalidate()
+            logTimer?.invalidate()
+        }
     }
 }
 
@@ -147,6 +151,7 @@ extension ButtonActionsTransformer: EventTransformer {
             return false
         }
 
+        // Matching is read-only on immutable mappings, safe from any thread.
         let matchingMappings = mappings.filter { mapping in
             guard let logiButton = mapping.button?.logitechControl,
                   context.controlIdentity.matches(logiButton) else {
@@ -175,32 +180,35 @@ extension ButtonActionsTransformer: EventTransformer {
             return false
         }
 
-        if mapping.repeat != true {
-            if handleLogitechModifiersHold(action: action, isPressed: context.isPressed) {
-                return true
+        // Dispatch timer and action work to the event thread for single-threaded state access.
+        GlobalEventTap.performOnEventThread { [self] in
+            if mapping.repeat != true {
+                if handleLogitechModifiersHold(action: action, isPressed: context.isPressed) {
+                    return
+                }
             }
+
+            logitechRepeatTimer?.invalidate()
+            logitechRepeatTimer = nil
+
+            let keyRepeatDelay = mapping.repeat == true ? NSEvent.keyRepeatDelay : 0
+            let keyRepeatInterval = mapping.repeat == true ? NSEvent.keyRepeatInterval : 0
+            let keyRepeatEnabled = keyRepeatDelay > 0 && keyRepeatInterval > 0
+            let shouldExecute = keyRepeatEnabled ? context.isPressed : !context.isPressed
+
+            guard shouldExecute else {
+                return
+            }
+
+            queueLogitechActions(
+                event: nil,
+                action: action,
+                targetBundleIdentifier: context.pid?.bundleIdentifier,
+                keyRepeatEnabled: keyRepeatEnabled,
+                keyRepeatDelay: keyRepeatDelay,
+                keyRepeatInterval: keyRepeatInterval
+            )
         }
-
-        logitechRepeatTimer?.invalidate()
-        logitechRepeatTimer = nil
-
-        let keyRepeatDelay = mapping.repeat == true ? NSEvent.keyRepeatDelay : 0
-        let keyRepeatInterval = mapping.repeat == true ? NSEvent.keyRepeatInterval : 0
-        let keyRepeatEnabled = keyRepeatDelay > 0 && keyRepeatInterval > 0
-        let shouldExecute = keyRepeatEnabled ? context.isPressed : !context.isPressed
-
-        guard shouldExecute else {
-            return true
-        }
-
-        queueLogitechActions(
-            event: nil,
-            action: action,
-            targetBundleIdentifier: context.pid?.bundleIdentifier,
-            keyRepeatEnabled: keyRepeatEnabled,
-            keyRepeatDelay: keyRepeatDelay,
-            keyRepeatInterval: keyRepeatInterval
-        )
 
         return true
     }
@@ -237,33 +245,34 @@ extension ButtonActionsTransformer: EventTransformer {
 
         DispatchQueue.main.async { [self] in
             executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
+        }
 
-            guard keyRepeatEnabled else {
+        guard keyRepeatEnabled, let runLoop = GlobalEventTap.processingRunLoop else {
+            return
+        }
+
+        // Schedule repeat timer on the event processing RunLoop so it can be safely
+        // invalidated from transform() on the same thread.
+        repeatTimer = Timer(timeInterval: keyRepeatDelay, repeats: false) { [weak self] _ in
+            guard let self else {
                 return
             }
 
-            repeatTimer = Timer.scheduledTimer(
-                withTimeInterval: keyRepeatDelay,
-                repeats: false
-            ) { [weak self] _ in
+            DispatchQueue.main.async { [self] in
+                self.executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
+            }
+
+            self.repeatTimer = Timer(timeInterval: keyRepeatInterval, repeats: true) { [weak self] _ in
                 guard let self else {
                     return
                 }
-
-                self.executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
-
-                self.repeatTimer = Timer.scheduledTimer(
-                    withTimeInterval: keyRepeatInterval,
-                    repeats: true
-                ) { [weak self] _ in
-                    guard let self else {
-                        return
-                    }
-
+                DispatchQueue.main.async { [self] in
                     self.executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
                 }
             }
+            runLoop.add(self.repeatTimer!, forMode: .common)
         }
+        runLoop.add(repeatTimer!, forMode: .common)
     }
 
     private func queueLogitechActions(
@@ -276,33 +285,32 @@ extension ButtonActionsTransformer: EventTransformer {
     ) {
         DispatchQueue.main.async { [self] in
             executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
+        }
 
-            guard keyRepeatEnabled else {
+        guard keyRepeatEnabled, let runLoop = GlobalEventTap.processingRunLoop else {
+            return
+        }
+
+        logitechRepeatTimer = Timer(timeInterval: keyRepeatDelay, repeats: false) { [weak self] _ in
+            guard let self else {
                 return
             }
 
-            logitechRepeatTimer = Timer.scheduledTimer(
-                withTimeInterval: keyRepeatDelay,
-                repeats: false
-            ) { [weak self] _ in
+            DispatchQueue.main.async { [self] in
+                self.executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
+            }
+
+            self.logitechRepeatTimer = Timer(timeInterval: keyRepeatInterval, repeats: true) { [weak self] _ in
                 guard let self else {
                     return
                 }
-
-                self.executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
-
-                self.logitechRepeatTimer = Timer.scheduledTimer(
-                    withTimeInterval: keyRepeatInterval,
-                    repeats: true
-                ) { [weak self] _ in
-                    guard let self else {
-                        return
-                    }
-
+                DispatchQueue.main.async { [self] in
                     self.executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
                 }
             }
+            runLoop.add(self.logitechRepeatTimer!, forMode: .common)
         }
+        runLoop.add(logitechRepeatTimer!, forMode: .common)
     }
 
     private func executeIgnoreErrors(

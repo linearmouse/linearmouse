@@ -15,8 +15,9 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
     private let smoothed: Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Smoothed>
     private let now: () -> TimeInterval
     private let eventSink: (CGEvent) -> Void
+
     private var engine: SmoothedScrollingEngine
-    private var timer: DispatchSourceTimer?
+    private var timer: Timer?
     private var lastFlags: CGEventFlags = []
 
     init(
@@ -107,13 +108,15 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
             return
         }
 
-        let timer = DispatchSource.makeTimerSource(queue: .main)
-        timer.schedule(deadline: .now(), repeating: Self.timerInterval)
-        timer.setEventHandler { [weak self] in
+        guard let runLoop = GlobalEventTap.processingRunLoop else {
+            return
+        }
+
+        let timer = Timer(timeInterval: Self.timerInterval, repeats: true) { [weak self] _ in
             self?.tick()
         }
+        runLoop.add(timer, forMode: .common)
         self.timer = timer
-        timer.resume()
     }
 
     private func transformNativeContinuousGesture(
@@ -179,7 +182,7 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
     }
 
     private func stopTimer() {
-        timer?.cancel()
+        timer?.invalidate()
         timer = nil
     }
 

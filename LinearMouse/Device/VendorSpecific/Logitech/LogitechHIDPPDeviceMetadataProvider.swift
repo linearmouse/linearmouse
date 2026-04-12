@@ -1955,7 +1955,7 @@ final class LogitechReprogrammableControlsMonitor {
                     ))
                     let mouseLocationPid = mouseLocationWindowID.ownerPid
                         ?? NSWorkspace.shared.frontmostApplication?.processIdentifier
-                    let display = ScreenManager.shared.currentScreenName
+                    let display = ScreenManager.shared.atomicCurrentScreenName
                     let transformer = EventTransformerManager.shared.get(
                         withDevice: device,
                         withPid: mouseLocationPid,
@@ -2350,7 +2350,7 @@ final class LogitechReprogrammableControlsMonitor {
         let scheme = ConfigurationState.shared.configuration.matchScheme(
             withDevice: device,
             withPid: mouseLocationPid,
-            withDisplay: ScreenManager.shared.currentScreenName
+            withDisplay: ScreenManager.shared.atomicCurrentScreenName
         )
 
         let directMappings: [UInt16] = (scheme.buttons.mappings ?? [])
