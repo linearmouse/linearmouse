@@ -431,6 +431,12 @@ class DeviceManager: ObservableObject {
             locationID,
             identitiesDescription
         )
+
+        // Notify Logitech control monitors on devices sharing this locationID
+        // to re-divert controls, as device firmware resets diversion on reconnect.
+        for (_, device) in pointerDeviceToDevice where device.pointerDevice.locationID == locationID {
+            device.requestLogitechControlsForcedReconfiguration()
+        }
     }
 
     private func refreshVisibleDevices() {

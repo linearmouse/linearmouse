@@ -866,7 +866,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         let connectedDeviceCount = readConnectionState().flatMap { response in
             LogitechHIDPPDeviceMetadataProvider.parseConnectedDeviceCount(response)
         }
-        let connectionSnapshots = discoverConnectionSnapshots()
+        let connectionSnapshots = discoverConnectionSnapshots(expectedCount: connectedDeviceCount)
         let snapshotSummary = connectionSnapshots.keys
             .sorted()
             .compactMap { slot -> String? in
@@ -888,15 +888,23 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
             snapshotSummary
         )
 
+        // Prioritize slots known to be connected, then scan remaining slots
+        let connectedSlotNumbers = connectionSnapshots
+            .filter(\.value.isConnected)
+            .map(\.key)
+            .sorted()
+        let remainingSlots = (UInt8(1) ... UInt8(6)).filter { !connectedSlotNumbers.contains($0) }
+        let orderedSlots = connectedSlotNumbers + remainingSlots
+
         var pairedSlots = [LogitechHIDPPDeviceMetadataProvider.ReceiverSlotInfo]()
-        for slot in UInt8(1) ... UInt8(6) {
+        for slot in orderedSlots {
             guard let slotInfo = discoverSlotInfo(slot, connectionSnapshot: connectionSnapshots[slot]) else {
-                os_log(
-                    "Receiver slot %u has no pairing or name response",
-                    log: LogitechHIDPPDeviceMetadataProvider.log,
-                    type: .info,
-                    slot
-                )
+                // Skip remaining unconnected slots if we already found all connected devices
+                if let connectedDeviceCount,
+                   pairedSlots.count >= connectedDeviceCount,
+                   !connectedSlotNumbers.contains(slot) {
+                    break
+                }
                 continue
             }
 
@@ -979,8 +987,9 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         )
     }
 
-    private func discoverConnectionSnapshots()
-        -> [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot] {
+    private func discoverConnectionSnapshots(
+        expectedCount: Int? = nil
+    ) -> [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot] {
         guard triggerConnectionNotifications() else {
             return [:]
         }
@@ -991,6 +1000,10 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
             guard let report = waitForInputReport(timeout: 0.05, matching: { response in
                 LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(Array(response)) != nil
             }) else {
+                // No more notifications pending — if we already have enough snapshots, exit early
+                if let expectedCount, snapshots.count >= expectedCount {
+                    break
+                }
                 continue
             }
 
@@ -1000,6 +1013,11 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
             }
 
             snapshots[notification.slot] = notification.snapshot
+
+            // Exit early once we have all expected device snapshots
+            if let expectedCount, snapshots.count >= expectedCount {
+                break
+            }
         }
 
         return snapshots
@@ -1605,6 +1623,7 @@ final class LogitechReprogrammableControlsMonitor {
     private var running = false
     private var pressedButtons = Set<Int>()
     private var needsReconfiguration = false
+    private var needsForcedReconfiguration = false
 
     init(device: Device) {
         self.device = device
@@ -1757,7 +1776,8 @@ final class LogitechReprogrammableControlsMonitor {
                     result[control.controlID] = reportingInfo
                 }
             let activeControlIDs = monitoredControls.compactMap { control -> UInt16? in
-                guard setDiverted(true, for: control.controlID, using: transport, featureIndex: featureIndex) else {
+                guard setDivertedWithRetry(true, for: control.controlID, using: transport, featureIndex: featureIndex)
+                else {
                     os_log(
                         "Failed to enable Logitech control diversion: locationID=%{public}d slot=%{public}u cid=0x%{public}04X",
                         log: Self.log,
@@ -1850,16 +1870,36 @@ final class LogitechReprogrammableControlsMonitor {
             }
 
             while shouldContinueRunning() {
-                if consumeReconfigurationRequest() {
-                    os_log(
-                        "Restart Logitech control monitor to refresh diverted controls: locationID=%{public}d slot=%{public}u device=%{public}@",
-                        log: Self.log,
-                        type: .info,
-                        locationID,
-                        slot,
-                        targetName
+                let reconfigResult = consumeReconfigurationRequest()
+                if reconfigResult.needed {
+                    if reconfigResult.forced {
+                        os_log(
+                            "Restart Logitech control monitor (forced, e.g. device reconnect): locationID=%{public}d slot=%{public}u device=%{public}@",
+                            log: Self.log,
+                            type: .info,
+                            locationID,
+                            slot,
+                            targetName
+                        )
+                        break
+                    }
+
+                    let newDesiredControlIDs = desiredDivertedControlIDs(
+                        availableControls: allControls, identity: targetIdentity
                     )
-                    break
+                    let newIsRecording = SettingsState.shared.recording
+
+                    if newDesiredControlIDs != desiredControlIDs || newIsRecording != isRecording {
+                        os_log(
+                            "Restart Logitech control monitor to refresh diverted controls: locationID=%{public}d slot=%{public}u device=%{public}@",
+                            log: Self.log,
+                            type: .info,
+                            locationID,
+                            slot,
+                            targetName
+                        )
+                        break
+                    }
                 }
 
                 guard let report = monitorTarget.notificationEndpoint.waitForHIDPPNotification(
@@ -1966,7 +2006,7 @@ final class LogitechReprogrammableControlsMonitor {
 
     private func waitForReconfigurationOrStop() -> Bool {
         while shouldContinueRunning() {
-            if consumeReconfigurationRequest() {
+            if consumeReconfigurationRequest().needed {
                 return true
             }
 
@@ -2054,9 +2094,48 @@ final class LogitechReprogrammableControlsMonitor {
         return endpoint
     }
 
-    private func resolveTargetDevice(using receiverChannel: LogitechReceiverChannel) -> TargetDevice? {
+    private func resolveTargetDevice(
+        using receiverChannel: LogitechReceiverChannel,
+        discovery: LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery
+    ) -> TargetDevice? {
+        let desiredProductID = device.pointerDevice.productID
+        let desiredSerial = device.pointerDevice
+            .serialNumber?
+            .lowercased()
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let desiredName = (device.pointerDevice.product ?? device.pointerDevice.name)
+            .lowercased()
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Try to match device to a slot using discovery results directly,
+        // avoiding a second full slot scan.
+        let matched: ReceiverLogicalDeviceIdentity? =
+            // Match by serial number
+            discovery.identities.first {
+                guard let serial = $0.serialNumber?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines),
+                      let desired = desiredSerial, !desired.isEmpty else {
+                    return false
+                }
+                return serial == desired
+            }
+            // Match by product ID
+            ?? discovery.identities.first {
+                guard let pid = $0.productID, let desired = desiredProductID else {
+                    return false
+                }
+                return pid == desired
+            }
+            // Match by name
+            ?? discovery.identities.first {
+                $0.name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) == desiredName
+            }
+
+        if let matched {
+            return TargetDevice(slot: matched.slot, identity: matched)
+        }
+
+        // Fallback: use the original slot matching via HID++ pairing info
         if let slot = provider.receiverSlot(for: device.pointerDevice, using: receiverChannel) {
-            let discovery = provider.receiverPointingDeviceDiscovery(for: device.pointerDevice, using: receiverChannel)
             let identity = discovery.identities.first { $0.slot == slot }
             return TargetDevice(slot: slot, identity: identity)
         }
@@ -2067,7 +2146,7 @@ final class LogitechReprogrammableControlsMonitor {
     private func resolveMonitorTarget(using receiverChannel: LogitechReceiverChannel) -> MonitorTarget? {
         let discovery = provider.receiverPointingDeviceDiscovery(for: device.pointerDevice, using: receiverChannel)
 
-        if let targetDevice = resolveTargetDevice(using: receiverChannel),
+        if let targetDevice = resolveTargetDevice(using: receiverChannel, discovery: discovery),
            let target = buildMonitorTarget(
                slot: targetDevice.slot,
                identity: targetDevice.identity,
@@ -2076,7 +2155,15 @@ final class LogitechReprogrammableControlsMonitor {
             return target
         }
 
-        let scannedTargets = (UInt8(1) ... UInt8(6)).compactMap { slot in
+        // Only scan connected slots instead of all 6
+        let connectedSlots = Set(discovery.connectionSnapshots.compactMap { slot, snapshot in
+            snapshot.isConnected ? slot : nil
+        })
+        let candidateSlots: [UInt8] = discovery.identities.isEmpty
+            ? Array(connectedSlots.sorted())
+            : discovery.identities.map(\.slot)
+
+        let scannedTargets = candidateSlots.compactMap { slot in
             buildMonitorTarget(
                 slot: slot,
                 identity: discovery.identities.first { $0.slot == slot },
@@ -2212,22 +2299,31 @@ final class LogitechReprogrammableControlsMonitor {
             .store(in: &subscriptions)
     }
 
-    private func requestReconfiguration() {
+    func requestReconfiguration() {
         stateLock.lock()
         needsReconfiguration = true
         stateLock.unlock()
     }
 
-    private func consumeReconfigurationRequest() -> Bool {
+    func requestForcedReconfiguration() {
+        stateLock.lock()
+        needsReconfiguration = true
+        needsForcedReconfiguration = true
+        stateLock.unlock()
+    }
+
+    private func consumeReconfigurationRequest() -> (needed: Bool, forced: Bool) {
         stateLock.lock()
         defer { stateLock.unlock() }
 
         guard needsReconfiguration else {
-            return false
+            return (false, false)
         }
 
+        let forced = needsForcedReconfiguration
         needsReconfiguration = false
-        return true
+        needsForcedReconfiguration = false
+        return (true, forced)
     }
 
     private func desiredDivertedControlIDs(
@@ -2406,9 +2502,57 @@ final class LogitechReprogrammableControlsMonitor {
                 controlID,
                 response.payload.map { String(format: "%02X", $0) }.joined(separator: " ")
             )
+
+            // Read back the reporting state to verify diversion actually took effect
+            guard let verifyReporting = readReportingInfo(
+                for: controlID, using: transport, featureIndex: featureIndex
+            ) else {
+                os_log(
+                    "Logitech setCidReporting verification failed (read-back error): cid=0x%{public}04X",
+                    log: Self.log, type: .error, controlID
+                )
+                return false
+            }
+            let actuallyDiverted = verifyReporting.flags.contains(.diverted)
+            guard actuallyDiverted == enabled else {
+                os_log(
+                    "Logitech setCidReporting verification mismatch: cid=0x%{public}04X wanted=%{public}@ actual=%{public}@",
+                    log: Self.log, type: .error, controlID,
+                    enabled ? "diverted" : "native",
+                    actuallyDiverted ? "diverted" : "native"
+                )
+                return false
+            }
         }
 
         return true
+    }
+
+    private func setDivertedWithRetry(
+        _ enabled: Bool,
+        for controlID: UInt16,
+        using transport: LogitechHIDPPTransport,
+        featureIndex: UInt8,
+        maxAttempts: Int = 3,
+        retryDelay: TimeInterval = 0.05
+    ) -> Bool {
+        for attempt in 1 ... maxAttempts {
+            if setDiverted(enabled, for: controlID, using: transport, featureIndex: featureIndex) {
+                return true
+            }
+
+            guard attempt < maxAttempts, shouldContinueRunning() else {
+                break
+            }
+
+            os_log(
+                "Logitech setCidReporting retry %{public}d/%{public}d: cid=0x%{public}04X",
+                log: Self.log, type: .info,
+                attempt, maxAttempts, controlID
+            )
+            Thread.sleep(forTimeInterval: retryDelay)
+        }
+        return false
     }
 
     private func restoreReportingState(

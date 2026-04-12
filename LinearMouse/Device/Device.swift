@@ -138,6 +138,10 @@ class Device {
     var hasLogitechControlsMonitor: Bool {
         logitechReprogrammableControlsMonitor != nil
     }
+
+    func requestLogitechControlsForcedReconfiguration() {
+        logitechReprogrammableControlsMonitor?.requestForcedReconfiguration()
+    }
 }
 
 extension Device {
