@@ -68,6 +68,8 @@ final class EventThread {
     /// then returns. This makes `stop(); start()` safe — the old thread is fully
     /// torn down before a new one is created.
     func stop() {
+        precondition(!isCurrent, "EventThread.stop() must not be called from the event thread")
+
         guard let cfRunLoop = runLoop?.getCFRunLoop() else {
             return
         }
@@ -140,6 +142,8 @@ final class EventThread {
         repeats: Bool,
         handler: @escaping () -> Void
     ) -> EventThreadTimer? {
+        precondition(isCurrent, "EventThread.scheduleTimer(...) must run on the event thread")
+
         guard let runLoop else {
             return nil
         }

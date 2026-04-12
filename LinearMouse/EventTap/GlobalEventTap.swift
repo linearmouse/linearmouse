@@ -58,16 +58,19 @@ class GlobalEventTap {
         }
         eventThread.start()
 
-        guard let processingRunLoop = eventThread.runLoop else {
+        guard let observationResult = eventThread.performAndWait({
+            Result {
+                try EventTap.observe(eventTypes) { [weak self] in self?.callback($1) }
+            }
+        }) else {
+            eventThread.stop()
             return
         }
 
-        do {
-            observationToken = try EventTap.observe(
-                eventTypes,
-                at: processingRunLoop
-            ) { [weak self] in self?.callback($1) }
-        } catch {
+        switch observationResult {
+        case let .success(token):
+            observationToken = token
+        case let .failure(error):
             eventThread.stop()
             NSAlert(error: error).runModal()
             return

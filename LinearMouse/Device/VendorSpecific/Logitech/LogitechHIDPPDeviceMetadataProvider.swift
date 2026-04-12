@@ -1948,7 +1948,7 @@ final class LogitechReprogrammableControlsMonitor {
                         continue
                     }
 
-                    let mouseLocation = NSEvent.mouseLocation
+                    let mouseLocation = CGEvent(source: nil)?.location ?? .zero
                     let mouseLocationWindowID = CGWindowID(NSWindow.windowNumber(
                         at: mouseLocation,
                         belowWindowWithWindowNumber: 0
@@ -1961,6 +1961,7 @@ final class LogitechReprogrammableControlsMonitor {
                         device: device,
                         pid: mouseLocationPid,
                         display: display,
+                        mouseLocation: mouseLocation,
                         controlIdentity: controlIdentity,
                         isPressed: isPressed,
                         modifierFlags: modifierFlags

@@ -843,8 +843,6 @@ extension AutoScrollTransformer: LogitechControlEventHandling {
             return false
         }
 
-        let mouseLocation = NSEvent.mouseLocation
-
         if context.isPressed {
             // If already active in toggle mode, deactivate on re-press
             if case let .active(_, _, session) = state, session == .toggle {
@@ -859,7 +857,7 @@ extension AutoScrollTransformer: LogitechControlEventHandling {
                 return true
             }
 
-            activate(at: CGPoint(x: mouseLocation.x, y: mouseLocation.y), session: activationSession)
+            activate(at: context.mouseLocation, session: activationSession)
             return true
         }
 
