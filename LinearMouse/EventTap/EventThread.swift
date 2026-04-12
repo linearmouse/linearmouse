@@ -68,17 +68,17 @@ final class EventThread {
             return
         }
 
-        // Nil out early so that new perform() calls during teardown return false
-        // instead of enqueuing on the dying RunLoop.
-        thread?.cancel()
-        thread = nil
-        runLoop = nil
-
         // Queue the willStop callback and CFRunLoopStop via FIFO ordering.
         // All previously queued blocks (e.g. timer invalidations) complete first.
+        // thread/runLoop are kept alive until onWillStop finishes so that isCurrent
+        // and perform() still work correctly during teardown.
         let done = DispatchSemaphore(value: 0)
         CFRunLoopPerformBlock(cfRunLoop, CFRunLoopMode.commonModes.rawValue) { [weak self] in
             self?.onWillStop?()
+            // Clear state after onWillStop so isCurrent was valid during teardown.
+            self?.thread?.cancel()
+            self?.thread = nil
+            self?.runLoop = nil
         }
         CFRunLoopPerformBlock(cfRunLoop, CFRunLoopMode.commonModes.rawValue) {
             CFRunLoopStop(cfRunLoop)
