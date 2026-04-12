@@ -2542,6 +2542,9 @@ final class LogitechReprogrammableControlsMonitor {
         maxAttempts: Int = 3,
         retryDelay: TimeInterval = 0.05
     ) -> Bool {
+        guard maxAttempts >= 1 else {
+            return false
+        }
         for attempt in 1 ... maxAttempts {
             if setDiverted(enabled, for: controlID, using: transport, featureIndex: featureIndex) {
                 return true
