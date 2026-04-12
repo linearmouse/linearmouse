@@ -58,24 +58,37 @@ final class EventThread {
         runLoopReady.wait()
     }
 
+    /// Stop the event thread synchronously.
+    ///
+    /// Fires `onWillStop` on the event thread, waits for the RunLoop to exit,
+    /// then returns. This makes `stop(); start()` safe — the old thread is fully
+    /// torn down before a new one is created.
     func stop() {
         guard let cfRunLoop = runLoop?.getCFRunLoop() else {
             return
         }
 
+        // Nil out early so that new perform() calls during teardown return false
+        // instead of enqueuing on the dying RunLoop.
+        thread?.cancel()
+        thread = nil
+        runLoop = nil
+
         // Queue the willStop callback and CFRunLoopStop via FIFO ordering.
         // All previously queued blocks (e.g. timer invalidations) complete first.
+        let done = DispatchSemaphore(value: 0)
         CFRunLoopPerformBlock(cfRunLoop, CFRunLoopMode.commonModes.rawValue) { [weak self] in
             self?.onWillStop?()
         }
         CFRunLoopPerformBlock(cfRunLoop, CFRunLoopMode.commonModes.rawValue) {
             CFRunLoopStop(cfRunLoop)
+            done.signal()
         }
         CFRunLoopWakeUp(cfRunLoop)
 
-        thread?.cancel()
-        thread = nil
-        runLoop = nil
+        // Wait for the event thread to finish. The onWillStop callback only uses
+        // DispatchQueue.main.async (non-blocking) and NSLock (no deadlock risk).
+        done.wait()
     }
 
     // MARK: - Dispatch
