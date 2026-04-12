@@ -146,9 +146,12 @@ final class EventThread {
             return scheduleTimerOnCurrentThread(interval: interval, repeats: repeats, handler: handler)
         }
 
-        return performAndWait {
+        guard let timer = performAndWait({
             self.scheduleTimerOnCurrentThread(interval: interval, repeats: repeats, handler: handler)
+        }) else {
+            return nil
         }
+        return timer
     }
 
     private func scheduleTimerOnCurrentThread(
