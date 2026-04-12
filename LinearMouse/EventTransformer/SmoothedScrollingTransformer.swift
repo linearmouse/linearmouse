@@ -17,7 +17,7 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
     private let eventSink: (CGEvent) -> Void
 
     private var engine: SmoothedScrollingEngine
-    private var timer: Timer?
+    private var timer: EventThreadTimer?
     private var lastFlags: CGEventFlags = []
 
     init(
@@ -29,17 +29,6 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
         self.now = now
         self.eventSink = eventSink
         engine = SmoothedScrollingEngine(smoothed: smoothed)
-    }
-
-    deinit {
-        // Timer is held by the RunLoop even after this object is released (e.g. cache clear).
-        // Dispatch invalidation to the event thread where the timer was created.
-        let timer = self.timer
-        if let timer {
-            GlobalEventTap.performOnEventThread {
-                timer.invalidate()
-            }
-        }
     }
 
     func transform(_ event: CGEvent) -> CGEvent? {
@@ -119,15 +108,12 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
             return
         }
 
-        guard let runLoop = GlobalEventTap.processingRunLoop else {
-            return
-        }
-
-        let timer = Timer(timeInterval: Self.timerInterval, repeats: true) { [weak self] _ in
+        timer = EventThread.shared.scheduleTimer(
+            interval: Self.timerInterval,
+            repeats: true
+        ) { [weak self] in
             self?.tick()
         }
-        runLoop.add(timer, forMode: .common)
-        self.timer = timer
     }
 
     private func transformNativeContinuousGesture(

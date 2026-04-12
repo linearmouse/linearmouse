@@ -37,17 +37,11 @@ class EventTransformerManager {
                 guard let self else {
                     return
                 }
-                self.lock.lock()
-                let oldAutoScroll = self.sharedAutoScrollTransformer
-                self.sharedAutoScrollTransformer = nil
-                self.activeCacheKey = nil
-                self.eventTransformerCache.removeAllValues()
-                self.lock.unlock()
 
-                // Dispatch transformer deactivation to the event thread where
-                // Timer.invalidate() is safe (same thread the timers were created on).
+                let oldAutoScroll = self.lock.withLock { self.clearCacheUnderLock() }
+
                 if let oldAutoScroll {
-                    GlobalEventTap.performOnEventThread {
+                    EventThread.shared.perform {
                         oldAutoScroll.deactivate()
                     }
                 }
@@ -55,21 +49,23 @@ class EventTransformerManager {
             .store(in: &subscriptions)
     }
 
-    /// Called when the event tap stops. Clears all cached transformers so they are
-    /// recreated with the new RunLoop on restart. Transformer deinit handles timer cleanup.
+    /// Called from `EventThread.onWillStop` (already on the event thread).
+    /// Clears all cached transformers so they are recreated with the new RunLoop on restart.
     func resetForRestart() {
-        lock.lock()
-        let oldAutoScroll = sharedAutoScrollTransformer
+        let oldAutoScroll = lock.withLock { clearCacheUnderLock() }
+
+        // Already on the event thread — deactivate synchronously.
+        oldAutoScroll?.deactivate()
+    }
+
+    /// Clears the cache and returns the old auto-scroll transformer for deactivation.
+    /// Must be called while holding `lock`.
+    private func clearCacheUnderLock() -> AutoScrollTransformer? {
+        let old = sharedAutoScrollTransformer
         sharedAutoScrollTransformer = nil
         activeCacheKey = nil
         eventTransformerCache.removeAllValues()
-        lock.unlock()
-
-        if let oldAutoScroll {
-            GlobalEventTap.performOnEventThread {
-                oldAutoScroll.deactivate()
-            }
-        }
+        return old
     }
 
     private let sourceBundleIdentifierBypassSet: Set<String> = [
@@ -106,15 +102,15 @@ class EventTransformerManager {
         let pid = mouseLocationPid ?? targetPid
         let device = DeviceManager.shared.deviceFromCGEvent(cgEvent)
 
-        lock.lock()
-        defer { lock.unlock() }
-        return getUnderLock(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: true)
+        return lock.withLock {
+            getUnderLock(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: true)
+        }
     }
 
     func get(withDevice device: Device?, withPid pid: pid_t?, withDisplay display: String?) -> EventTransformer {
-        lock.lock()
-        defer { lock.unlock() }
-        return getUnderLock(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: false)
+        lock.withLock {
+            getUnderLock(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: false)
+        }
     }
 
     private func getUnderLock(
@@ -328,7 +324,7 @@ class EventTransformerManager {
         let old = sharedAutoScrollTransformer
         sharedAutoScrollTransformer = nil
         if let old {
-            GlobalEventTap.performOnEventThread {
+            EventThread.shared.perform {
                 old.deactivate()
             }
         }

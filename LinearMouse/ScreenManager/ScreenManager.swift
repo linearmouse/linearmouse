@@ -16,9 +16,7 @@ class ScreenManager: ObservableObject {
     @Published private(set) var currentScreen: NSScreen?
     @Published private(set) var currentScreenName: String? {
         didSet {
-            screenNameLock.lock()
-            _atomicCurrentScreenName = currentScreenName
-            screenNameLock.unlock()
+            screenNameLock.withLock { _atomicCurrentScreenName = currentScreenName }
         }
     }
 
@@ -26,9 +24,7 @@ class ScreenManager: ObservableObject {
     private let screenNameLock = NSLock()
     private var _atomicCurrentScreenName: String?
     var atomicCurrentScreenName: String? {
-        screenNameLock.lock()
-        defer { screenNameLock.unlock() }
-        return _atomicCurrentScreenName
+        screenNameLock.withLock { _atomicCurrentScreenName }
     }
 
     private var hasDisplaySpecificSchemes = false

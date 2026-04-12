@@ -67,7 +67,7 @@ final class AutoScrollTransformer {
     private var state: State = .idle
     private var suppressTriggerUp = false
     private var suppressedExitMouseButton: CGMouseButton?
-    private var timer: Timer?
+    private var timer: EventThreadTimer?
     private let indicatorController = AutoScrollIndicatorWindowController()
 
     init(
@@ -83,12 +83,6 @@ final class AutoScrollTransformer {
     }
 
     deinit {
-        let timer = self.timer
-        if let timer {
-            GlobalEventTap.performOnEventThread {
-                timer.invalidate()
-            }
-        }
         DispatchQueue.main.async { [indicatorController] in
             indicatorController.hide()
         }
@@ -348,15 +342,12 @@ extension AutoScrollTransformer: EventTransformer {
             return
         }
 
-        guard let runLoop = GlobalEventTap.processingRunLoop else {
-            return
-        }
-
-        let timer = Timer(timeInterval: Self.timerInterval, repeats: true) { [weak self] _ in
+        timer = EventThread.shared.scheduleTimer(
+            interval: Self.timerInterval,
+            repeats: true
+        ) { [weak self] in
             self?.tick()
         }
-        runLoop.add(timer, forMode: .common)
-        self.timer = timer
     }
 
     private func tick() {
@@ -856,7 +847,7 @@ extension AutoScrollTransformer {
 
         // Dispatch state mutation to the event processing thread to maintain single-threaded access.
         // If the event thread is not running, return false so the caller falls back to synthetic button.
-        guard GlobalEventTap.performOnEventThread({ [self] in
+        guard EventThread.shared.perform({ [self] in
             if context.isPressed {
                 // If already active in toggle mode, deactivate on re-press
                 if case let .active(_, _, session) = state, session == .toggle {
