@@ -81,6 +81,18 @@ final class AutoScrollTransformer {
         self.speed = speed
         self.preserveNativeMiddleClick = preserveNativeMiddleClick
     }
+
+    deinit {
+        let timer = self.timer
+        if let timer {
+            GlobalEventTap.performOnEventThread {
+                timer.invalidate()
+            }
+        }
+        DispatchQueue.main.async { [indicatorController] in
+            indicatorController.hide()
+        }
+    }
 }
 
 extension AutoScrollTransformer: EventTransformer {
@@ -843,7 +855,8 @@ extension AutoScrollTransformer {
         let mouseLocation = NSEvent.mouseLocation
 
         // Dispatch state mutation to the event processing thread to maintain single-threaded access.
-        GlobalEventTap.performOnEventThread { [self] in
+        // If the event thread is not running, return false so the caller falls back to synthetic button.
+        guard GlobalEventTap.performOnEventThread({ [self] in
             if context.isPressed {
                 // If already active in toggle mode, deactivate on re-press
                 if case let .active(_, _, session) = state, session == .toggle {
@@ -878,6 +891,8 @@ extension AutoScrollTransformer {
             default:
                 break
             }
+        }) else {
+            return false
         }
         return true
     }

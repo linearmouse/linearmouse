@@ -31,6 +31,17 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
         engine = SmoothedScrollingEngine(smoothed: smoothed)
     }
 
+    deinit {
+        // Timer is held by the RunLoop even after this object is released (e.g. cache clear).
+        // Dispatch invalidation to the event thread where the timer was created.
+        let timer = self.timer
+        if let timer {
+            GlobalEventTap.performOnEventThread {
+                timer.invalidate()
+            }
+        }
+    }
+
     func transform(_ event: CGEvent) -> CGEvent? {
         guard event.type == .scrollWheel else {
             return event

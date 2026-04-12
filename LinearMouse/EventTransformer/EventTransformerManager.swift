@@ -276,8 +276,7 @@ class EventTransformerManager {
               autoScroll.enabled ?? false,
               let trigger = autoScroll.trigger,
               trigger.valid else {
-            sharedAutoScrollTransformer?.deactivate()
-            sharedAutoScrollTransformer = nil
+            deactivateAutoScrollOnEventThread()
             return nil
         }
 
@@ -295,7 +294,7 @@ class EventTransformerManager {
             return sharedAutoScrollTransformer
         }
 
-        sharedAutoScrollTransformer?.deactivate()
+        deactivateAutoScrollOnEventThread()
         let transformer = AutoScrollTransformer(
             trigger: trigger,
             modes: modes,
@@ -304,6 +303,18 @@ class EventTransformerManager {
         )
         sharedAutoScrollTransformer = transformer
         return transformer
+    }
+
+    /// Deactivate the shared auto-scroll transformer on the event thread (where its
+    /// Timer was created), then clear the reference. Safe to call from any thread.
+    private func deactivateAutoScrollOnEventThread() {
+        let old = sharedAutoScrollTransformer
+        sharedAutoScrollTransformer = nil
+        if let old {
+            GlobalEventTap.performOnEventThread {
+                old.deactivate()
+            }
+        }
     }
 
     private func transition(from previous: EventTransformer?, to current: EventTransformer?) {

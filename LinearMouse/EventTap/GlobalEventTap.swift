@@ -19,12 +19,15 @@ class GlobalEventTap {
 
     /// Schedule a block to run on the event processing thread.
     /// Use this from other threads (e.g. Logitech HID thread) to serialize transformer state access.
-    static func performOnEventThread(_ block: @escaping () -> Void) {
+    /// Returns `false` if the event thread is not running (block is not enqueued).
+    @discardableResult
+    static func performOnEventThread(_ block: @escaping () -> Void) -> Bool {
         guard let cfRunLoop = shared._processingRunLoop?.getCFRunLoop() else {
-            return
+            return false
         }
         CFRunLoopPerformBlock(cfRunLoop, CFRunLoopMode.commonModes.rawValue, block)
         CFRunLoopWakeUp(cfRunLoop)
+        return true
     }
 
     private var observationToken: ObservationToken?
@@ -104,17 +107,30 @@ class GlobalEventTap {
                 at: processingRunLoop
             ) { [weak self] in self?.callback($1) }
         } catch {
+            // Clean up the event thread that was just created.
+            CFRunLoopStop(processingRunLoop.getCFRunLoop())
+            eventThread?.cancel()
+            eventThread = nil
+            _processingRunLoop = nil
+
             NSAlert(error: error).runModal()
+            return
         }
 
         watchdog.start()
     }
 
     func stop() {
+        // Release the observation token, which dispatches timer invalidation
+        // to the event RunLoop (see EventTap.observe).
         observationToken = nil
 
         if let cfRunLoop = _processingRunLoop?.getCFRunLoop() {
-            CFRunLoopStop(cfRunLoop)
+            // Queue RunLoop stop after any pending cleanup blocks (FIFO ordering).
+            CFRunLoopPerformBlock(cfRunLoop, CFRunLoopMode.commonModes.rawValue) {
+                CFRunLoopStop(cfRunLoop)
+            }
+            CFRunLoopWakeUp(cfRunLoop)
         }
         eventThread?.cancel()
         eventThread = nil

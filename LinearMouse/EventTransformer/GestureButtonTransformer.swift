@@ -285,7 +285,8 @@ extension GestureButtonTransformer {
         }
 
         // Dispatch state mutation to the event processing thread to maintain single-threaded access.
-        GlobalEventTap.performOnEventThread { [self] in
+        // If the event thread is not running, return false so the caller falls back to synthetic button.
+        return GlobalEventTap.performOnEventThread { [self] in
             // Check cooldown
             if case let .cooldown(until) = state {
                 if DispatchTime.now().uptimeNanoseconds < until {
@@ -311,7 +312,6 @@ extension GestureButtonTransformer {
                 }
             }
         }
-        return true
     }
 }
 

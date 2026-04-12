@@ -181,6 +181,8 @@ extension ButtonActionsTransformer: EventTransformer {
         }
 
         // Dispatch timer and action work to the event thread for single-threaded state access.
+        // The mapping matched, so return true regardless of whether the dispatch succeeds
+        // (the event is claimed by this transformer).
         GlobalEventTap.performOnEventThread { [self] in
             if mapping.repeat != true {
                 if handleLogitechModifiersHold(action: action, isPressed: context.isPressed) {
