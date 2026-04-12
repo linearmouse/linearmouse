@@ -146,12 +146,14 @@ extension ButtonActionsTransformer: EventTransformer {
         mappings.last { $0.match(with: event) }
     }
 
-    func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
+    /// Find the best Logitech mapping for the given control event context (read-only, thread-safe).
+    func findLogitechMapping(
+        for context: LogitechEventContext
+    ) -> (mapping: Scheme.Buttons.Mapping, action: Scheme.Buttons.Mapping.Action)? {
         guard !SettingsState.shared.recording else {
-            return false
+            return nil
         }
 
-        // Matching is read-only on immutable mappings, safe from any thread.
         let matchingMappings = mappings.filter { mapping in
             guard let logiButton = mapping.button?.logitechControl,
                   context.controlIdentity.matches(logiButton) else {
@@ -173,17 +175,24 @@ extension ButtonActionsTransformer: EventTransformer {
                 return lhsSpecificity < rhsSpecificity
             })?.element,
             let action = mapping.action else {
-            return false
+            return nil
         }
 
         if case .arg0(.auto) = action {
+            return nil
+        }
+
+        return (mapping, action)
+    }
+
+    func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
+        guard let (mapping, action) = findLogitechMapping(for: context) else {
             return false
         }
 
         // Dispatch timer and action work to the event thread for single-threaded state access.
-        // The mapping matched, so return true regardless of whether the dispatch succeeds
-        // (the event is claimed by this transformer).
-        GlobalEventTap.performOnEventThread { [self] in
+        // If the event thread is not running, return false so the caller falls back to synthetic button.
+        return GlobalEventTap.performOnEventThread { [self] in
             if mapping.repeat != true {
                 if handleLogitechModifiersHold(action: action, isPressed: context.isPressed) {
                     return
@@ -211,8 +220,6 @@ extension ButtonActionsTransformer: EventTransformer {
                 keyRepeatInterval: keyRepeatInterval
             )
         }
-
-        return true
     }
 
     private func handleLogitechModifiersHold(action: Scheme.Buttons.Mapping.Action, isPressed: Bool) -> Bool {

@@ -55,6 +55,23 @@ class EventTransformerManager {
             .store(in: &subscriptions)
     }
 
+    /// Called when the event tap stops. Clears all cached transformers so they are
+    /// recreated with the new RunLoop on restart. Transformer deinit handles timer cleanup.
+    func resetForRestart() {
+        lock.lock()
+        let oldAutoScroll = sharedAutoScrollTransformer
+        sharedAutoScrollTransformer = nil
+        activeCacheKey = nil
+        eventTransformerCache.removeAllValues()
+        lock.unlock()
+
+        if let oldAutoScroll {
+            GlobalEventTap.performOnEventThread {
+                oldAutoScroll.deactivate()
+            }
+        }
+    }
+
     private let sourceBundleIdentifierBypassSet: Set<String> = [
         "cc.ffitch.shottr"
     ]

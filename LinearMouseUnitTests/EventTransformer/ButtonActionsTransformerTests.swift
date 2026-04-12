@@ -15,7 +15,7 @@ final class ButtonActionsTransformerTests: XCTestCase {
             )
         ])
 
-        let handled = transformer.handleLogitechControlEvent(.init(
+        let result = transformer.findLogitechMapping(for: .init(
             device: nil,
             pid: nil,
             display: nil,
@@ -24,7 +24,7 @@ final class ButtonActionsTransformerTests: XCTestCase {
             modifierFlags: [.maskCommand, .init(rawValue: UInt64(NX_DEVICERCMDKEYMASK))]
         ))
 
-        XCTAssertTrue(handled)
+        XCTAssertNotNil(result)
     }
 
     func testLogitechSpecificMappingWinsOverGenericMapping() {
@@ -39,7 +39,7 @@ final class ButtonActionsTransformerTests: XCTestCase {
             )
         ])
 
-        let handled = transformer.handleLogitechControlEvent(.init(
+        let result = transformer.findLogitechMapping(for: .init(
             device: nil,
             pid: nil,
             display: nil,
@@ -48,7 +48,8 @@ final class ButtonActionsTransformerTests: XCTestCase {
             modifierFlags: []
         ))
 
-        XCTAssertTrue(handled)
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result?.action, .arg0(.mouseButtonBack))
     }
 
     func testLogitechControlEventMatchesWithPartialIdentity() {
@@ -60,7 +61,7 @@ final class ButtonActionsTransformerTests: XCTestCase {
             )
         ])
 
-        let handled = transformer.handleLogitechControlEvent(.init(
+        let result = transformer.findLogitechMapping(for: .init(
             device: nil,
             pid: nil,
             display: nil,
@@ -73,7 +74,7 @@ final class ButtonActionsTransformerTests: XCTestCase {
             modifierFlags: []
         ))
 
-        XCTAssertTrue(handled)
+        XCTAssertNotNil(result)
     }
 
     func testLogitechConfiguredProductIDMatchesEventWithoutSerialNumber() {
@@ -84,7 +85,7 @@ final class ButtonActionsTransformerTests: XCTestCase {
             )
         ])
 
-        let handled = transformer.handleLogitechControlEvent(.init(
+        let result = transformer.findLogitechMapping(for: .init(
             device: nil,
             pid: nil,
             display: nil,
@@ -93,6 +94,6 @@ final class ButtonActionsTransformerTests: XCTestCase {
             modifierFlags: []
         ))
 
-        XCTAssertTrue(handled)
+        XCTAssertNotNil(result)
     }
 }

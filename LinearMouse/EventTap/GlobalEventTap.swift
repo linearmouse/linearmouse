@@ -125,6 +125,10 @@ class GlobalEventTap {
         // to the event RunLoop (see EventTap.observe).
         observationToken = nil
 
+        // Clear the transformer cache so stale timer references from the old
+        // RunLoop are not reused if start() is called again.
+        EventTransformerManager.shared.resetForRestart()
+
         if let cfRunLoop = _processingRunLoop?.getCFRunLoop() {
             // Queue RunLoop stop after any pending cleanup blocks (FIFO ordering).
             CFRunLoopPerformBlock(cfRunLoop, CFRunLoopMode.commonModes.rawValue) {
