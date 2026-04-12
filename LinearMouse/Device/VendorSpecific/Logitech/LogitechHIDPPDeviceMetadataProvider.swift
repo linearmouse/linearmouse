@@ -897,22 +897,12 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         let orderedSlots = connectedSlotNumbers + remainingSlots
 
         var pairedSlots = [LogitechHIDPPDeviceMetadataProvider.ReceiverSlotInfo]()
-        var connectedSlotsFound = 0
         for slot in orderedSlots {
             guard let slotInfo = discoverSlotInfo(slot, connectionSnapshot: connectionSnapshots[slot]) else {
-                // Skip remaining unconnected slots if we already found all connected devices
-                if let connectedDeviceCount,
-                   connectedSlotsFound >= connectedDeviceCount,
-                   !connectedSlotNumbers.contains(slot) {
-                    break
-                }
                 continue
             }
 
             pairedSlots.append(slotInfo)
-            if connectedSlotNumbers.contains(slot) {
-                connectedSlotsFound += 1
-            }
 
             os_log(
                 "Receiver slot %u raw candidate: name=%{public}@ kind=%{public}u battery=%{public}@",
@@ -2165,11 +2155,19 @@ final class LogitechReprogrammableControlsMonitor {
         let connectedSlots = Set(discovery.connectionSnapshots.compactMap { slot, snapshot in
             snapshot.isConnected ? slot : nil
         })
-        let candidateSlots: [UInt8] = discovery.identities.isEmpty
-            ? Array(connectedSlots.sorted())
-            : discovery.identities
-            .map(\.slot)
-            .filter { connectedSlots.contains($0) }
+        // Prefer connected slots; fall back to identity slots or all 1...6
+        // when connection snapshots are unavailable.
+        let identitySlots = Array(Set(discovery.identities.map(\.slot))).sorted()
+        let candidateSlots: [UInt8]
+        if !connectedSlots.isEmpty {
+            candidateSlots = identitySlots.isEmpty
+                ? Array(connectedSlots.sorted())
+                : identitySlots.filter { connectedSlots.contains($0) }
+        } else if !identitySlots.isEmpty {
+            candidateSlots = identitySlots
+        } else {
+            candidateSlots = Array(UInt8(1) ... UInt8(6))
+        }
 
         let scannedTargets = candidateSlots.compactMap { slot in
             buildMonitorTarget(
