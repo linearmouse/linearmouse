@@ -57,8 +57,44 @@ class EventTransformerManager {
         withMouseLocationPid mouseLocationPid: pid_t?,
         withDisplay display: String?
     ) -> EventTransformer {
-        assert(EventThread.shared.isCurrent, "EventTransformerManager.get(withCGEvent:...) must run on EventThread")
+        if EventThread.shared.isCurrent {
+            return getOnCurrentThread(
+                withCGEvent: cgEvent,
+                withSourcePid: sourcePid,
+                withTargetPid: targetPid,
+                withMouseLocationPid: mouseLocationPid,
+                withDisplay: display
+            )
+        }
 
+        if let transformer = EventThread.shared.performAndWait({
+            self.getOnCurrentThread(
+                withCGEvent: cgEvent,
+                withSourcePid: sourcePid,
+                withTargetPid: targetPid,
+                withMouseLocationPid: mouseLocationPid,
+                withDisplay: display
+            )
+        }) {
+            return transformer
+        }
+
+        return getOnCurrentThread(
+            withCGEvent: cgEvent,
+            withSourcePid: sourcePid,
+            withTargetPid: targetPid,
+            withMouseLocationPid: mouseLocationPid,
+            withDisplay: display
+        )
+    }
+
+    private func getOnCurrentThread(
+        withCGEvent cgEvent: CGEvent,
+        withSourcePid sourcePid: pid_t?,
+        withTargetPid targetPid: pid_t?,
+        withMouseLocationPid mouseLocationPid: pid_t?,
+        withDisplay display: String?
+    ) -> EventTransformer {
         if sourcePid != nil, bypassEventsFromOtherApplications, !cgEvent.isLinearMouseSyntheticEvent {
             os_log(
                 "Return noop transformer because this event is sent by %{public}s",
@@ -86,16 +122,42 @@ class EventTransformerManager {
     }
 
     func get(withDevice device: Device?, withPid pid: pid_t?, withDisplay display: String?) -> EventTransformer {
-        assert(EventThread.shared.isCurrent, "EventTransformerManager.get(withDevice:...) must run on EventThread")
-        return get(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: false)
+        if EventThread.shared.isCurrent {
+            return getOnCurrentThread(withDevice: device, withPid: pid, withDisplay: display)
+        }
+
+        if let transformer = EventThread.shared.performAndWait({
+            self.getOnCurrentThread(withDevice: device, withPid: pid, withDisplay: display)
+        }) {
+            return transformer
+        }
+
+        return getOnCurrentThread(withDevice: device, withPid: pid, withDisplay: display)
+    }
+
+    private func getOnCurrentThread(
+        withDevice device: Device?,
+        withPid pid: pid_t?,
+        withDisplay display: String?
+    ) -> EventTransformer {
+        get(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: false)
     }
 
     func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
-        assert(
-            EventThread.shared.isCurrent,
-            "EventTransformerManager.handleLogitechControlEvent(_:) must run on EventThread"
-        )
+        if EventThread.shared.isCurrent {
+            return handleLogitechControlEventOnCurrentThread(context)
+        }
 
+        if let handled = EventThread.shared.performAndWait({
+            self.handleLogitechControlEventOnCurrentThread(context)
+        }) {
+            return handled
+        }
+
+        return handleLogitechControlEventOnCurrentThread(context)
+    }
+
+    private func handleLogitechControlEventOnCurrentThread(_ context: LogitechEventContext) -> Bool {
         let transformer = get(withDevice: context.device, withPid: context.pid, withDisplay: context.display)
         return (transformer as? LogitechControlEventHandling)?.handleLogitechControlEvent(context) ?? false
     }

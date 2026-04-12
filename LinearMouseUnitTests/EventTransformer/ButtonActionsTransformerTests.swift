@@ -19,6 +19,7 @@ final class ButtonActionsTransformerTests: XCTestCase {
             device: nil,
             pid: nil,
             display: nil,
+            mouseLocation: .zero,
             controlIdentity: .init(controlID: 0x0053),
             isPressed: false,
             modifierFlags: [.maskCommand, .init(rawValue: UInt64(NX_DEVICERCMDKEYMASK))]
@@ -43,13 +44,14 @@ final class ButtonActionsTransformerTests: XCTestCase {
             device: nil,
             pid: nil,
             display: nil,
+            mouseLocation: .zero,
             controlIdentity: .init(controlID: 0x0053, productID: 0x405E, serialNumber: nil),
             isPressed: false,
             modifierFlags: []
         ))
 
         XCTAssertNotNil(result)
-        XCTAssertEqual(result?.action, .arg0(.mouseButtonBack))
+        XCTAssertEqual(result?.action, Scheme.Buttons.Mapping.Action.arg0(.mouseButtonBack))
     }
 
     func testLogitechControlEventMatchesWithPartialIdentity() {
@@ -65,6 +67,7 @@ final class ButtonActionsTransformerTests: XCTestCase {
             device: nil,
             pid: nil,
             display: nil,
+            mouseLocation: .zero,
             controlIdentity: .init(
                 controlID: 0x00C3,
                 productID: 0x405E,
@@ -89,6 +92,7 @@ final class ButtonActionsTransformerTests: XCTestCase {
             device: nil,
             pid: nil,
             display: nil,
+            mouseLocation: .zero,
             controlIdentity: .init(controlID: 0x00C3, productID: 0x405E, serialNumber: nil),
             isPressed: false,
             modifierFlags: []

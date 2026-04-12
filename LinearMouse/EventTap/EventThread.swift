@@ -142,8 +142,20 @@ final class EventThread {
         repeats: Bool,
         handler: @escaping () -> Void
     ) -> EventThreadTimer? {
-        precondition(isCurrent, "EventThread.scheduleTimer(...) must run on the event thread")
+        if isCurrent {
+            return scheduleTimerOnCurrentThread(interval: interval, repeats: repeats, handler: handler)
+        }
 
+        return performAndWait {
+            self.scheduleTimerOnCurrentThread(interval: interval, repeats: repeats, handler: handler)
+        }
+    }
+
+    private func scheduleTimerOnCurrentThread(
+        interval: TimeInterval,
+        repeats: Bool,
+        handler: @escaping () -> Void
+    ) -> EventThreadTimer? {
         guard let runLoop else {
             return nil
         }
