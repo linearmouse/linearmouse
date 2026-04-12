@@ -416,6 +416,7 @@ class DeviceManager: ObservableObject {
             return
         }
 
+        let previousIdentities = receiverPairedDeviceIdentities[locationID] ?? []
         receiverPairedDeviceIdentities[locationID] = identities
 
         let identitiesDescription = identities.map { identity in
@@ -431,6 +432,17 @@ class DeviceManager: ObservableObject {
             locationID,
             identitiesDescription
         )
+
+        // Only trigger forced reconfiguration when a device has actually reconnected
+        // (a slot appeared that wasn't in the previous identity set), since device
+        // firmware resets diversion state on reconnect.
+        let previousSlots = Set(previousIdentities.map(\.slot))
+        let hasReconnectedDevice = identities.contains { !previousSlots.contains($0.slot) }
+        if hasReconnectedDevice {
+            for (_, device) in pointerDeviceToDevice where device.pointerDevice.locationID == locationID {
+                device.requestLogitechControlsForcedReconfiguration()
+            }
+        }
     }
 
     private func refreshVisibleDevices() {
