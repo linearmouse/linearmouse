@@ -4,6 +4,10 @@
 import Foundation
 import os.log
 
+private final class EventThreadResultBox<Value> {
+    var value: Value?
+}
+
 /// Manages a dedicated background thread with its own RunLoop for CGEvent processing.
 ///
 /// All event transformer state access (transform, tick, deactivate) must happen on this thread.
@@ -52,8 +56,8 @@ final class EventThread {
         }
         thread.name = "com.linearmouse.event-thread"
         thread.qualityOfService = .userInteractive
-        thread.start()
         self.thread = thread
+        thread.start()
 
         runLoopReady.wait()
     }
@@ -86,8 +90,8 @@ final class EventThread {
         }
         CFRunLoopWakeUp(cfRunLoop)
 
-        // Wait for the event thread to finish. The onWillStop callback only uses
-        // DispatchQueue.main.async (non-blocking) and NSLock (no deadlock risk).
+        // Wait for the event thread to finish. The teardown callback only posts
+        // non-blocking work back to the main queue.
         done.wait()
     }
 
@@ -103,6 +107,28 @@ final class EventThread {
         CFRunLoopPerformBlock(cfRunLoop, CFRunLoopMode.commonModes.rawValue, block)
         CFRunLoopWakeUp(cfRunLoop)
         return true
+    }
+
+    /// Execute a block on the event thread and wait for the result.
+    /// Returns `nil` if the event thread is not running.
+    func performAndWait<T>(_ block: @escaping () -> T) -> T? {
+        if isCurrent {
+            return block()
+        }
+
+        guard let cfRunLoop = runLoop?.getCFRunLoop() else {
+            return nil
+        }
+
+        let done = DispatchSemaphore(value: 0)
+        let result = EventThreadResultBox<T>()
+        CFRunLoopPerformBlock(cfRunLoop, CFRunLoopMode.commonModes.rawValue) {
+            result.value = block()
+            done.signal()
+        }
+        CFRunLoopWakeUp(cfRunLoop)
+        done.wait()
+        return result.value
     }
 
     // MARK: - Timer

@@ -277,41 +277,38 @@ extension GestureButtonTransformer: EventTransformer {
     }
 }
 
-extension GestureButtonTransformer {
+extension GestureButtonTransformer: LogitechControlEventHandling {
     func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
         guard let triggerLogitechControl = trigger.button?.logitechControl,
               context.controlIdentity.matches(triggerLogitechControl) else {
             return false
         }
 
-        // Dispatch state mutation to the event processing thread to maintain single-threaded access.
-        // If the event thread is not running, return false so the caller falls back to synthetic button.
-        return EventThread.shared.perform { [self] in
-            // Check cooldown
-            if case let .cooldown(until) = state {
-                if DispatchTime.now().uptimeNanoseconds < until {
-                    return
-                }
-                state = .idle
+        if case let .cooldown(until) = state {
+            if DispatchTime.now().uptimeNanoseconds < until {
+                return true
             }
+            state = .idle
+        }
 
-            if context.isPressed {
-                guard trigger.matches(modifierFlags: context.modifierFlags) else {
-                    return
-                }
-                state = .tracking(startTime: DispatchTime.now().uptimeNanoseconds, deltaX: 0, deltaY: 0)
-                os_log("Started tracking gesture (Logitech control)", log: Self.log, type: .info)
-            } else {
-                switch state {
-                case .tracking:
-                    state = .idle
-                case .cooldown:
-                    break
-                default:
-                    break
-                }
+        if context.isPressed {
+            guard trigger.matches(modifierFlags: context.modifierFlags) else {
+                return true
+            }
+            state = .tracking(startTime: DispatchTime.now().uptimeNanoseconds, deltaX: 0, deltaY: 0)
+            os_log("Started tracking gesture (Logitech control)", log: Self.log, type: .info)
+        } else {
+            switch state {
+            case .tracking:
+                state = .idle
+            case .cooldown:
+                break
+            default:
+                break
             }
         }
+
+        return true
     }
 }
 

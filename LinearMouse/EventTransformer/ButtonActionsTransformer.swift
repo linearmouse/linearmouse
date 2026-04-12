@@ -50,7 +50,7 @@ class ButtonActionsTransformer {
     }
 }
 
-extension ButtonActionsTransformer: EventTransformer {
+extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandling {
     var mouseDownEventTypes: [CGEventType] {
         [.leftMouseDown, .rightMouseDown, .otherMouseDown]
     }
@@ -200,36 +200,33 @@ extension ButtonActionsTransformer: EventTransformer {
             return false
         }
 
-        // Dispatch timer and action work to the event thread for single-threaded state access.
-        // If the event thread is not running, return false so the caller falls back to synthetic button.
-        return EventThread.shared.perform { [self] in
-            if mapping.repeat != true {
-                if handleLogitechModifiersHold(action: action, isPressed: context.isPressed) {
-                    return
-                }
+        if mapping.repeat != true {
+            if handleLogitechModifiersHold(action: action, isPressed: context.isPressed) {
+                return true
             }
-
-            logitechRepeatTimer?.invalidate()
-            logitechRepeatTimer = nil
-
-            let keyRepeatDelay = mapping.repeat == true ? NSEvent.keyRepeatDelay : 0
-            let keyRepeatInterval = mapping.repeat == true ? NSEvent.keyRepeatInterval : 0
-            let keyRepeatEnabled = keyRepeatDelay > 0 && keyRepeatInterval > 0
-            let shouldExecute = keyRepeatEnabled ? context.isPressed : !context.isPressed
-
-            guard shouldExecute else {
-                return
-            }
-
-            queueLogitechActions(
-                event: nil,
-                action: action,
-                targetBundleIdentifier: context.pid?.bundleIdentifier,
-                keyRepeatEnabled: keyRepeatEnabled,
-                keyRepeatDelay: keyRepeatDelay,
-                keyRepeatInterval: keyRepeatInterval
-            )
         }
+
+        logitechRepeatTimer?.invalidate()
+        logitechRepeatTimer = nil
+
+        let keyRepeatDelay = mapping.repeat == true ? NSEvent.keyRepeatDelay : 0
+        let keyRepeatInterval = mapping.repeat == true ? NSEvent.keyRepeatInterval : 0
+        let keyRepeatEnabled = keyRepeatDelay > 0 && keyRepeatInterval > 0
+        let shouldExecute = keyRepeatEnabled ? context.isPressed : !context.isPressed
+
+        guard shouldExecute else {
+            return true
+        }
+
+        queueLogitechActions(
+            event: nil,
+            action: action,
+            targetBundleIdentifier: context.pid?.bundleIdentifier,
+            keyRepeatEnabled: keyRepeatEnabled,
+            keyRepeatDelay: keyRepeatDelay,
+            keyRepeatInterval: keyRepeatInterval
+        )
+        return true
     }
 
     private func handleLogitechModifiersHold(action: Scheme.Buttons.Mapping.Action, isPressed: Bool) -> Bool {

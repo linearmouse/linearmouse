@@ -836,7 +836,7 @@ private struct ActivationProbe {
     let hit: ActivationHit
 }
 
-extension AutoScrollTransformer {
+extension AutoScrollTransformer: LogitechControlEventHandling {
     func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
         guard let triggerLogitechControl = trigger.button?.logitechControl,
               context.controlIdentity.matches(triggerLogitechControl) else {
@@ -845,46 +845,42 @@ extension AutoScrollTransformer {
 
         let mouseLocation = NSEvent.mouseLocation
 
-        // Dispatch state mutation to the event processing thread to maintain single-threaded access.
-        // If the event thread is not running, return false so the caller falls back to synthetic button.
-        guard EventThread.shared.perform({ [self] in
-            if context.isPressed {
-                // If already active in toggle mode, deactivate on re-press
-                if case let .active(_, _, session) = state, session == .toggle {
-                    guard hasToggleMode else {
-                        return
-                    }
-                    deactivate()
-                    return
+        if context.isPressed {
+            // If already active in toggle mode, deactivate on re-press
+            if case let .active(_, _, session) = state, session == .toggle {
+                guard hasToggleMode else {
+                    return true
                 }
-
-                guard trigger.matches(modifierFlags: context.modifierFlags) else {
-                    return
-                }
-
-                activate(at: CGPoint(x: mouseLocation.x, y: mouseLocation.y), session: activationSession)
-                return
+                deactivate()
+                return true
             }
-            switch state {
-            case let .active(anchor, current, session):
-                switch session {
-                case .hold:
+
+            guard trigger.matches(modifierFlags: context.modifierFlags) else {
+                return true
+            }
+
+            activate(at: CGPoint(x: mouseLocation.x, y: mouseLocation.y), session: activationSession)
+            return true
+        }
+
+        switch state {
+        case let .active(anchor, current, session):
+            switch session {
+            case .hold:
+                deactivate()
+            case .pendingToggleOrHold:
+                if exceedsDeadZone(from: anchor, to: current) {
                     deactivate()
-                case .pendingToggleOrHold:
-                    if exceedsDeadZone(from: anchor, to: current) {
-                        deactivate()
-                    } else {
-                        state = .active(anchor: anchor, current: current, session: .toggle)
-                    }
-                case .toggle:
-                    break
+                } else {
+                    state = .active(anchor: anchor, current: current, session: .toggle)
                 }
-            default:
+            case .toggle:
                 break
             }
-        }) else {
-            return false
+        default:
+            break
         }
+
         return true
     }
 }

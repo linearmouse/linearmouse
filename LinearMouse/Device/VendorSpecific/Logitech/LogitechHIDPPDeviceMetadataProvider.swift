@@ -1956,11 +1956,6 @@ final class LogitechReprogrammableControlsMonitor {
                     let mouseLocationPid = mouseLocationWindowID.ownerPid
                         ?? NSWorkspace.shared.frontmostApplication?.processIdentifier
                     let display = ScreenManager.shared.atomicCurrentScreenName
-                    let transformer = EventTransformerManager.shared.get(
-                        withDevice: device,
-                        withPid: mouseLocationPid,
-                        withDisplay: display
-                    )
 
                     let logitechContext = LogitechEventContext(
                         device: device,
@@ -1971,21 +1966,9 @@ final class LogitechReprogrammableControlsMonitor {
                         modifierFlags: modifierFlags
                     )
 
-                    let handledInternally = (transformer as? [EventTransformer])?.contains { transformer in
-                        if let transformer = transformer as? AutoScrollTransformer {
-                            return transformer.handleLogitechControlEvent(logitechContext)
-                        }
-
-                        if let transformer = transformer as? GestureButtonTransformer {
-                            return transformer.handleLogitechControlEvent(logitechContext)
-                        }
-
-                        if let transformer = transformer as? ButtonActionsTransformer {
-                            return transformer.handleLogitechControlEvent(logitechContext)
-                        }
-
-                        return false
-                    } == true
+                    let handledInternally = EventThread.shared.performAndWait {
+                        EventTransformerManager.shared.handleLogitechControlEvent(logitechContext)
+                    } ?? false
 
                     guard !handledInternally else {
                         continue

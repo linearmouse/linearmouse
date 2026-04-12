@@ -13,10 +13,6 @@ class EventTransformerManager {
 
     @Default(.bypassEventsFromOtherApplications) var bypassEventsFromOtherApplications
 
-    /// Protects cache, activeCacheKey, and sharedAutoScrollTransformer from concurrent access
-    /// across the event tap thread, Logitech HID thread, and main thread.
-    private let lock = NSLock()
-
     private var eventTransformerCache = LRUCache<CacheKey, EventTransformer>(countLimit: 16)
     private var activeCacheKey: CacheKey?
     private var sharedAutoScrollTransformer: AutoScrollTransformer?
@@ -38,34 +34,16 @@ class EventTransformerManager {
                     return
                 }
 
-                let oldAutoScroll = self.lock.withLock { self.clearCacheUnderLock() }
-
-                if let oldAutoScroll {
-                    EventThread.shared.perform {
-                        oldAutoScroll.deactivate()
-                    }
+                if EventThread.shared.performAndWait({ self.resetState() }) == nil {
+                    self.resetState()
                 }
             }
             .store(in: &subscriptions)
     }
 
-    /// Called from `EventThread.onWillStop` (already on the event thread).
-    /// Clears all cached transformers so they are recreated with the new RunLoop on restart.
+    /// Called from `EventThread.onWillStop` on the event thread.
     func resetForRestart() {
-        let oldAutoScroll = lock.withLock { clearCacheUnderLock() }
-
-        // Already on the event thread — deactivate synchronously.
-        oldAutoScroll?.deactivate()
-    }
-
-    /// Clears the cache and returns the old auto-scroll transformer for deactivation.
-    /// Must be called while holding `lock`.
-    private func clearCacheUnderLock() -> AutoScrollTransformer? {
-        let old = sharedAutoScrollTransformer
-        sharedAutoScrollTransformer = nil
-        activeCacheKey = nil
-        eventTransformerCache.removeAllValues()
-        return old
+        resetState()
     }
 
     private let sourceBundleIdentifierBypassSet: Set<String> = [
@@ -79,6 +57,8 @@ class EventTransformerManager {
         withMouseLocationPid mouseLocationPid: pid_t?,
         withDisplay display: String?
     ) -> EventTransformer {
+        assert(EventThread.shared.isCurrent, "EventTransformerManager.get(withCGEvent:...) must run on EventThread")
+
         if sourcePid != nil, bypassEventsFromOtherApplications, !cgEvent.isLinearMouseSyntheticEvent {
             os_log(
                 "Return noop transformer because this event is sent by %{public}s",
@@ -102,18 +82,25 @@ class EventTransformerManager {
         let pid = mouseLocationPid ?? targetPid
         let device = DeviceManager.shared.deviceFromCGEvent(cgEvent)
 
-        return lock.withLock {
-            getUnderLock(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: true)
-        }
+        return get(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: true)
     }
 
     func get(withDevice device: Device?, withPid pid: pid_t?, withDisplay display: String?) -> EventTransformer {
-        lock.withLock {
-            getUnderLock(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: false)
-        }
+        assert(EventThread.shared.isCurrent, "EventTransformerManager.get(withDevice:...) must run on EventThread")
+        return get(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: false)
     }
 
-    private func getUnderLock(
+    func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
+        assert(
+            EventThread.shared.isCurrent,
+            "EventTransformerManager.handleLogitechControlEvent(_:) must run on EventThread"
+        )
+
+        let transformer = get(withDevice: context.device, withPid: context.pid, withDisplay: context.display)
+        return (transformer as? LogitechControlEventHandling)?.handleLogitechControlEvent(context) ?? false
+    }
+
+    private func get(
         withDevice device: Device?,
         withPid pid: pid_t?,
         withDisplay display: String?,
@@ -289,7 +276,8 @@ class EventTransformerManager {
               autoScroll.enabled ?? false,
               let trigger = autoScroll.trigger,
               trigger.valid else {
-            deactivateAutoScrollOnEventThread()
+            sharedAutoScrollTransformer?.deactivate()
+            sharedAutoScrollTransformer = nil
             return nil
         }
 
@@ -307,7 +295,8 @@ class EventTransformerManager {
             return sharedAutoScrollTransformer
         }
 
-        deactivateAutoScrollOnEventThread()
+        sharedAutoScrollTransformer?.deactivate()
+        sharedAutoScrollTransformer = nil
         let transformer = AutoScrollTransformer(
             trigger: trigger,
             modes: modes,
@@ -318,18 +307,6 @@ class EventTransformerManager {
         return transformer
     }
 
-    /// Deactivate the shared auto-scroll transformer on the event thread (where its
-    /// Timer was created), then clear the reference. Safe to call from any thread.
-    private func deactivateAutoScrollOnEventThread() {
-        let old = sharedAutoScrollTransformer
-        sharedAutoScrollTransformer = nil
-        if let old {
-            EventThread.shared.perform {
-                old.deactivate()
-            }
-        }
-    }
-
     private func transition(from previous: EventTransformer?, to current: EventTransformer?) {
         let preservedAutoScrollTransformer = sharedAutoScrollTransformer?.isAutoscrollActive == true
             ? sharedAutoScrollTransformer
@@ -337,6 +314,14 @@ class EventTransformerManager {
 
         deactivate(previous, excluding: preservedAutoScrollTransformer)
         reactivate(current, excluding: preservedAutoScrollTransformer)
+    }
+
+    private func resetState() {
+        let oldAutoScroll = sharedAutoScrollTransformer
+        sharedAutoScrollTransformer = nil
+        activeCacheKey = nil
+        eventTransformerCache.removeAllValues()
+        oldAutoScroll?.deactivate()
     }
 
     private func deactivate(

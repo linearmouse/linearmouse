@@ -9,6 +9,10 @@ protocol EventTransformer {
     func transform(_ event: CGEvent) -> CGEvent?
 }
 
+protocol LogitechControlEventHandling {
+    func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool
+}
+
 extension [EventTransformer]: EventTransformer {
     func transform(_ event: CGEvent) -> CGEvent? {
         var event: CGEvent? = event
@@ -18,6 +22,14 @@ extension [EventTransformer]: EventTransformer {
         }
 
         return event
+    }
+}
+
+extension [EventTransformer]: LogitechControlEventHandling {
+    func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
+        contains { eventTransformer in
+            (eventTransformer as? LogitechControlEventHandling)?.handleLogitechControlEvent(context) == true
+        }
     }
 }
 
