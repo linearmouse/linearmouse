@@ -15,16 +15,17 @@ final class ButtonActionsTransformerTests: XCTestCase {
             )
         ])
 
-        let handled = transformer.handleLogitechControlEvent(.init(
+        let result = transformer.findLogitechMapping(for: .init(
             device: nil,
             pid: nil,
             display: nil,
+            mouseLocation: .zero,
             controlIdentity: .init(controlID: 0x0053),
             isPressed: false,
             modifierFlags: [.maskCommand, .init(rawValue: UInt64(NX_DEVICERCMDKEYMASK))]
         ))
 
-        XCTAssertTrue(handled)
+        XCTAssertNotNil(result)
     }
 
     func testLogitechSpecificMappingWinsOverGenericMapping() {
@@ -39,16 +40,18 @@ final class ButtonActionsTransformerTests: XCTestCase {
             )
         ])
 
-        let handled = transformer.handleLogitechControlEvent(.init(
+        let result = transformer.findLogitechMapping(for: .init(
             device: nil,
             pid: nil,
             display: nil,
+            mouseLocation: .zero,
             controlIdentity: .init(controlID: 0x0053, productID: 0x405E, serialNumber: nil),
             isPressed: false,
             modifierFlags: []
         ))
 
-        XCTAssertTrue(handled)
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result?.action, Scheme.Buttons.Mapping.Action.arg0(.mouseButtonBack))
     }
 
     func testLogitechControlEventMatchesWithPartialIdentity() {
@@ -60,10 +63,11 @@ final class ButtonActionsTransformerTests: XCTestCase {
             )
         ])
 
-        let handled = transformer.handleLogitechControlEvent(.init(
+        let result = transformer.findLogitechMapping(for: .init(
             device: nil,
             pid: nil,
             display: nil,
+            mouseLocation: .zero,
             controlIdentity: .init(
                 controlID: 0x00C3,
                 productID: 0x405E,
@@ -73,7 +77,7 @@ final class ButtonActionsTransformerTests: XCTestCase {
             modifierFlags: []
         ))
 
-        XCTAssertTrue(handled)
+        XCTAssertNotNil(result)
     }
 
     func testLogitechConfiguredProductIDMatchesEventWithoutSerialNumber() {
@@ -84,15 +88,16 @@ final class ButtonActionsTransformerTests: XCTestCase {
             )
         ])
 
-        let handled = transformer.handleLogitechControlEvent(.init(
+        let result = transformer.findLogitechMapping(for: .init(
             device: nil,
             pid: nil,
             display: nil,
+            mouseLocation: .zero,
             controlIdentity: .init(controlID: 0x00C3, productID: 0x405E, serialNumber: nil),
             isPressed: false,
             modifierFlags: []
         ))
 
-        XCTAssertTrue(handled)
+        XCTAssertNotNil(result)
     }
 }

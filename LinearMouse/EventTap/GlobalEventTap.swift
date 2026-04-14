@@ -13,6 +13,7 @@ class GlobalEventTap {
 
     private var observationToken: ObservationToken?
     private lazy var watchdog = GlobalEventTapWatchdog()
+    private let eventThread = EventThread.shared
 
     init() {}
 
@@ -25,7 +26,7 @@ class GlobalEventTap {
             withSourcePid: mouseEventView.sourcePid,
             withTargetPid: mouseEventView.targetPid,
             withMouseLocationPid: mouseEventView.mouseLocationWindowID.ownerPid,
-            withDisplay: ScreenManager.shared.currentScreenName
+            withDisplay: ScreenManager.shared.currentScreenNameSnapshot
         )
         return eventTransformer.transform(event)
     }
@@ -52,17 +53,40 @@ class GlobalEventTap {
             eventTypes.append(EventType.mouseMoved)
         }
 
-        do {
-            observationToken = try EventTap.observe(eventTypes) { [weak self] in self?.callback($1) }
-        } catch {
+        eventThread.onWillStop = {
+            EventTransformerManager.shared.resetForRestart()
+        }
+        eventThread.start()
+
+        guard let observationResult = eventThread.performAndWait({
+            Result {
+                try EventTap.observe(eventTypes) { [weak self] in self?.callback($1) }
+            }
+        }) else {
+            eventThread.stop()
+            return
+        }
+
+        switch observationResult {
+        case let .success(token):
+            observationToken = token
+        case let .failure(error):
+            eventThread.stop()
             NSAlert(error: error).runModal()
+            return
         }
 
         watchdog.start()
     }
 
     func stop() {
+        // Release the observation token, which dispatches timer invalidation
+        // to the event RunLoop (see EventTap.observe).
         observationToken = nil
+
+        // EventThread.stop() fires onWillStop (which calls resetForRestart)
+        // then stops the RunLoop, all in FIFO order.
+        eventThread.stop()
 
         watchdog.stop()
     }

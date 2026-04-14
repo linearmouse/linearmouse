@@ -14,8 +14,13 @@ class ButtonActionsTransformer {
     let mappings: [Scheme.Buttons.Mapping]
     let universalBackForward: Scheme.Buttons.UniversalBackForward?
 
-    var repeatTimer: Timer?
-    private var logitechRepeatTimer: Timer?
+    private enum TimerSlot {
+        case standard
+        case logitech
+    }
+
+    var repeatTimer: EventThreadTimer?
+    private var logitechRepeatTimer: EventThreadTimer?
 
     static let keySimulator = KeySimulator()
     var keySimulator: KeySimulator {
@@ -30,13 +35,22 @@ class ButtonActionsTransformer {
         self.universalBackForward = universalBackForward
     }
 
-    deinit {
-        repeatTimer?.invalidate()
-        logitechRepeatTimer?.invalidate()
+    private func timer(for slot: TimerSlot) -> EventThreadTimer? {
+        switch slot {
+        case .standard: repeatTimer
+        case .logitech: logitechRepeatTimer
+        }
+    }
+
+    private func setTimer(_ slot: TimerSlot, _ timer: EventThreadTimer?) {
+        switch slot {
+        case .standard: repeatTimer = timer
+        case .logitech: logitechRepeatTimer = timer
+        }
     }
 }
 
-extension ButtonActionsTransformer: EventTransformer {
+extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandling {
     var mouseDownEventTypes: [CGEventType] {
         [.leftMouseDown, .rightMouseDown, .otherMouseDown]
     }
@@ -142,9 +156,12 @@ extension ButtonActionsTransformer: EventTransformer {
         mappings.last { $0.match(with: event) }
     }
 
-    func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
+    /// Find the best Logitech mapping for the given control event context (read-only, thread-safe).
+    func findLogitechMapping(
+        for context: LogitechEventContext
+    ) -> (mapping: Scheme.Buttons.Mapping, action: Scheme.Buttons.Mapping.Action)? {
         guard !SettingsState.shared.recording else {
-            return false
+            return nil
         }
 
         let matchingMappings = mappings.filter { mapping in
@@ -168,10 +185,18 @@ extension ButtonActionsTransformer: EventTransformer {
                 return lhsSpecificity < rhsSpecificity
             })?.element,
             let action = mapping.action else {
-            return false
+            return nil
         }
 
         if case .arg0(.auto) = action {
+            return nil
+        }
+
+        return (mapping, action)
+    }
+
+    func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
+        guard let (mapping, action) = findLogitechMapping(for: context) else {
             return false
         }
 
@@ -201,7 +226,6 @@ extension ButtonActionsTransformer: EventTransformer {
             keyRepeatDelay: keyRepeatDelay,
             keyRepeatInterval: keyRepeatInterval
         )
-
         return true
     }
 
@@ -234,36 +258,14 @@ extension ButtonActionsTransformer: EventTransformer {
         keyRepeatInterval: TimeInterval = 0
     ) {
         let targetBundleIdentifier = event.flatMap { MouseEventView($0).targetPid?.bundleIdentifier }
-
-        DispatchQueue.main.async { [self] in
-            executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
-
-            guard keyRepeatEnabled else {
-                return
-            }
-
-            repeatTimer = Timer.scheduledTimer(
-                withTimeInterval: keyRepeatDelay,
-                repeats: false
-            ) { [weak self] _ in
-                guard let self else {
-                    return
-                }
-
-                self.executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
-
-                self.repeatTimer = Timer.scheduledTimer(
-                    withTimeInterval: keyRepeatInterval,
-                    repeats: true
-                ) { [weak self] _ in
-                    guard let self else {
-                        return
-                    }
-
-                    self.executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
-                }
-            }
-        }
+        scheduleRepeatActions(
+            slot: .standard,
+            action: action,
+            targetBundleIdentifier: targetBundleIdentifier,
+            keyRepeatEnabled: keyRepeatEnabled,
+            keyRepeatDelay: keyRepeatDelay,
+            keyRepeatInterval: keyRepeatInterval
+        )
     }
 
     private func queueLogitechActions(
@@ -274,35 +276,56 @@ extension ButtonActionsTransformer: EventTransformer {
         keyRepeatDelay: TimeInterval = 0,
         keyRepeatInterval: TimeInterval = 0
     ) {
+        scheduleRepeatActions(
+            slot: .logitech,
+            action: action,
+            targetBundleIdentifier: targetBundleIdentifier,
+            keyRepeatEnabled: keyRepeatEnabled,
+            keyRepeatDelay: keyRepeatDelay,
+            keyRepeatInterval: keyRepeatInterval
+        )
+    }
+
+    private func scheduleRepeatActions(
+        slot: TimerSlot,
+        action: Scheme.Buttons.Mapping.Action,
+        targetBundleIdentifier: String?,
+        keyRepeatEnabled: Bool,
+        keyRepeatDelay: TimeInterval,
+        keyRepeatInterval: TimeInterval
+    ) {
         DispatchQueue.main.async { [self] in
             executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
+        }
 
-            guard keyRepeatEnabled else {
+        guard keyRepeatEnabled else {
+            return
+        }
+
+        setTimer(slot, EventThread.shared.scheduleTimer(
+            interval: keyRepeatDelay,
+            repeats: false
+        ) { [weak self] in
+            guard let self else {
                 return
             }
 
-            logitechRepeatTimer = Timer.scheduledTimer(
-                withTimeInterval: keyRepeatDelay,
-                repeats: false
-            ) { [weak self] _ in
+            DispatchQueue.main.async { [self] in
+                self.executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
+            }
+
+            self.setTimer(slot, EventThread.shared.scheduleTimer(
+                interval: keyRepeatInterval,
+                repeats: true
+            ) { [weak self] in
                 guard let self else {
                     return
                 }
-
-                self.executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
-
-                self.logitechRepeatTimer = Timer.scheduledTimer(
-                    withTimeInterval: keyRepeatInterval,
-                    repeats: true
-                ) { [weak self] _ in
-                    guard let self else {
-                        return
-                    }
-
+                DispatchQueue.main.async { [self] in
                     self.executeIgnoreErrors(action: action, targetBundleIdentifier: targetBundleIdentifier)
                 }
-            }
-        }
+            })
+        })
     }
 
     private func executeIgnoreErrors(

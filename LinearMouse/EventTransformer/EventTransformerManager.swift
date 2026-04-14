@@ -30,12 +30,20 @@ class EventTransformerManager {
             .$configuration
             .removeDuplicates()
             .sink { [weak self] _ in
-                self?.sharedAutoScrollTransformer?.deactivate()
-                self?.sharedAutoScrollTransformer = nil
-                self?.activeCacheKey = nil
-                self?.eventTransformerCache.removeAllValues()
+                guard let self else {
+                    return
+                }
+
+                if EventThread.shared.performAndWait({ self.resetState() }) == nil {
+                    self.resetState()
+                }
             }
             .store(in: &subscriptions)
+    }
+
+    /// Called from `EventThread.onWillStop` on the event thread.
+    func resetForRestart() {
+        resetState()
     }
 
     private let sourceBundleIdentifierBypassSet: Set<String> = [
@@ -49,8 +57,44 @@ class EventTransformerManager {
         withMouseLocationPid mouseLocationPid: pid_t?,
         withDisplay display: String?
     ) -> EventTransformer {
-        activeCacheKey = nil
+        if EventThread.shared.isCurrent {
+            return getOnCurrentThread(
+                withCGEvent: cgEvent,
+                withSourcePid: sourcePid,
+                withTargetPid: targetPid,
+                withMouseLocationPid: mouseLocationPid,
+                withDisplay: display
+            )
+        }
 
+        if let transformer = EventThread.shared.performAndWait({
+            self.getOnCurrentThread(
+                withCGEvent: cgEvent,
+                withSourcePid: sourcePid,
+                withTargetPid: targetPid,
+                withMouseLocationPid: mouseLocationPid,
+                withDisplay: display
+            )
+        }) {
+            return transformer
+        }
+
+        return getOnCurrentThread(
+            withCGEvent: cgEvent,
+            withSourcePid: sourcePid,
+            withTargetPid: targetPid,
+            withMouseLocationPid: mouseLocationPid,
+            withDisplay: display
+        )
+    }
+
+    private func getOnCurrentThread(
+        withCGEvent cgEvent: CGEvent,
+        withSourcePid sourcePid: pid_t?,
+        withTargetPid targetPid: pid_t?,
+        withMouseLocationPid mouseLocationPid: pid_t?,
+        withDisplay display: String?
+    ) -> EventTransformer {
         if sourcePid != nil, bypassEventsFromOtherApplications, !cgEvent.isLinearMouseSyntheticEvent {
             os_log(
                 "Return noop transformer because this event is sent by %{public}s",
@@ -78,7 +122,44 @@ class EventTransformerManager {
     }
 
     func get(withDevice device: Device?, withPid pid: pid_t?, withDisplay display: String?) -> EventTransformer {
+        if EventThread.shared.isCurrent {
+            return getOnCurrentThread(withDevice: device, withPid: pid, withDisplay: display)
+        }
+
+        if let transformer = EventThread.shared.performAndWait({
+            self.getOnCurrentThread(withDevice: device, withPid: pid, withDisplay: display)
+        }) {
+            return transformer
+        }
+
+        return getOnCurrentThread(withDevice: device, withPid: pid, withDisplay: display)
+    }
+
+    private func getOnCurrentThread(
+        withDevice device: Device?,
+        withPid pid: pid_t?,
+        withDisplay display: String?
+    ) -> EventTransformer {
         get(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: false)
+    }
+
+    func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
+        if EventThread.shared.isCurrent {
+            return handleLogitechControlEventOnCurrentThread(context)
+        }
+
+        if let handled = EventThread.shared.performAndWait({
+            self.handleLogitechControlEventOnCurrentThread(context)
+        }) {
+            return handled
+        }
+
+        return handleLogitechControlEventOnCurrentThread(context)
+    }
+
+    private func handleLogitechControlEventOnCurrentThread(_ context: LogitechEventContext) -> Bool {
+        let transformer = get(withDevice: context.device, withPid: context.pid, withDisplay: context.display)
+        return (transformer as? LogitechControlEventHandling)?.handleLogitechControlEvent(context) ?? false
     }
 
     private func get(
@@ -88,6 +169,9 @@ class EventTransformerManager {
         updateActiveCacheKey: Bool
     ) -> EventTransformer {
         let prevActiveCacheKey = activeCacheKey
+        if updateActiveCacheKey {
+            activeCacheKey = nil
+        }
         defer {
             if updateActiveCacheKey,
                let prevActiveCacheKey,
@@ -274,6 +358,7 @@ class EventTransformerManager {
         }
 
         sharedAutoScrollTransformer?.deactivate()
+        sharedAutoScrollTransformer = nil
         let transformer = AutoScrollTransformer(
             trigger: trigger,
             modes: modes,
@@ -291,6 +376,14 @@ class EventTransformerManager {
 
         deactivate(previous, excluding: preservedAutoScrollTransformer)
         reactivate(current, excluding: preservedAutoScrollTransformer)
+    }
+
+    private func resetState() {
+        let oldAutoScroll = sharedAutoScrollTransformer
+        sharedAutoScrollTransformer = nil
+        activeCacheKey = nil
+        eventTransformerCache.removeAllValues()
+        oldAutoScroll?.deactivate()
     }
 
     private func deactivate(

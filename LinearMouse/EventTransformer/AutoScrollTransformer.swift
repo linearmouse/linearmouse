@@ -67,7 +67,7 @@ final class AutoScrollTransformer {
     private var state: State = .idle
     private var suppressTriggerUp = false
     private var suppressedExitMouseButton: CGMouseButton?
-    private var timer: DispatchSourceTimer?
+    private var timer: EventThreadTimer?
     private let indicatorController = AutoScrollIndicatorWindowController()
 
     init(
@@ -80,6 +80,12 @@ final class AutoScrollTransformer {
         self.modes = modes
         self.speed = speed
         self.preserveNativeMiddleClick = preserveNativeMiddleClick
+    }
+
+    deinit {
+        DispatchQueue.main.async { [indicatorController] in
+            indicatorController.hide()
+        }
     }
 }
 
@@ -225,7 +231,10 @@ extension AutoScrollTransformer: EventTransformer {
                exceedsDeadZone(from: anchor, to: point) {
                 activate(at: anchor, session: .hold)
                 state = .active(anchor: anchor, current: point, session: .hold)
-                indicatorController.update(delta: CGVector(dx: point.x - anchor.x, dy: point.y - anchor.y))
+                let delta = CGVector(dx: point.x - anchor.x, dy: point.y - anchor.y)
+                DispatchQueue.main.async { [indicatorController] in
+                    indicatorController.update(delta: delta)
+                }
                 return nil
             }
 
@@ -250,7 +259,10 @@ extension AutoScrollTransformer: EventTransformer {
             }
 
             state = .active(anchor: anchor, current: point, session: resolvedSession)
-            indicatorController.update(delta: CGVector(dx: point.x - anchor.x, dy: point.y - anchor.y))
+            let delta = CGVector(dx: point.x - anchor.x, dy: point.y - anchor.y)
+            DispatchQueue.main.async { [indicatorController] in
+                indicatorController.update(delta: delta)
+            }
 
             if event.type == triggerMouseDraggedEventType, suppressTriggerUp {
                 return nil
@@ -318,8 +330,10 @@ extension AutoScrollTransformer: EventTransformer {
 
         suppressedExitMouseButton = nil
         state = .active(anchor: point, current: point, session: session)
-        indicatorController.show(at: point)
-        indicatorController.update(delta: .zero)
+        DispatchQueue.main.async { [indicatorController] in
+            indicatorController.show(at: point)
+            indicatorController.update(delta: .zero)
+        }
         startTimerIfNeeded()
     }
 
@@ -328,13 +342,12 @@ extension AutoScrollTransformer: EventTransformer {
             return
         }
 
-        let timer = DispatchSource.makeTimerSource(queue: .main)
-        timer.schedule(deadline: .now(), repeating: Self.timerInterval)
-        timer.setEventHandler { [weak self] in
+        timer = EventThread.shared.scheduleTimer(
+            interval: Self.timerInterval,
+            repeats: true
+        ) { [weak self] in
             self?.tick()
         }
-        self.timer = timer
-        timer.resume()
     }
 
     private func tick() {
@@ -823,41 +836,31 @@ private struct ActivationProbe {
     let hit: ActivationHit
 }
 
-extension AutoScrollTransformer {
+extension AutoScrollTransformer: LogitechControlEventHandling {
     func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
         guard let triggerLogitechControl = trigger.button?.logitechControl,
               context.controlIdentity.matches(triggerLogitechControl) else {
             return false
         }
 
-        let mouseLocation = NSEvent.mouseLocation
-        DispatchQueue.main.async { [self] in
-            handleLogitechControlEventOnMain(context, mouseLocation: mouseLocation)
-        }
-        return true
-    }
-
-    private func handleLogitechControlEventOnMain(
-        _ context: LogitechEventContext,
-        mouseLocation: NSPoint
-    ) {
         if context.isPressed {
             // If already active in toggle mode, deactivate on re-press
             if case let .active(_, _, session) = state, session == .toggle {
                 guard hasToggleMode else {
-                    return
+                    return true
                 }
                 deactivate()
-                return
+                return true
             }
 
             guard trigger.matches(modifierFlags: context.modifierFlags) else {
-                return
+                return true
             }
 
-            activate(at: CGPoint(x: mouseLocation.x, y: mouseLocation.y), session: activationSession)
-            return
+            activate(at: context.mouseLocation, session: activationSession)
+            return true
         }
+
         switch state {
         case let .active(anchor, current, session):
             switch session {
@@ -875,6 +878,8 @@ extension AutoScrollTransformer {
         default:
             break
         }
+
+        return true
     }
 }
 
@@ -886,12 +891,12 @@ extension AutoScrollTransformer: Deactivatable {
 
         state = .idle
         suppressTriggerUp = false
-        indicatorController.hide()
-
-        if let timer {
-            timer.cancel()
-            self.timer = nil
+        DispatchQueue.main.async { [indicatorController] in
+            indicatorController.hide()
         }
+
+        timer?.invalidate()
+        timer = nil
     }
 }
 

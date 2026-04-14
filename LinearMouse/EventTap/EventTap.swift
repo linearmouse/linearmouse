@@ -117,7 +117,13 @@ extension EventTap {
         return ObservationToken {
             // The lifetime of contextHolder needs to be extended until the observation token is cancelled.
             withExtendedLifetime(contextHolder) {
-                healthCheckTimer.invalidate()
+                // Timer.invalidate() must be called from the thread where the timer was installed.
+                // Dispatch it to the target RunLoop; the remaining teardown calls are thread-safe.
+                CFRunLoopPerformBlock(cfRunLoop, CFRunLoopMode.commonModes.rawValue) {
+                    healthCheckTimer.invalidate()
+                }
+                CFRunLoopWakeUp(cfRunLoop)
+
                 CGEvent.tapEnable(tap: tap, enable: false)
                 CFRunLoopRemoveSource(cfRunLoop, runLoopSource, .commonModes)
                 CFMachPortInvalidate(tap)

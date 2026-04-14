@@ -1948,44 +1948,28 @@ final class LogitechReprogrammableControlsMonitor {
                         continue
                     }
 
-                    let mouseLocation = NSEvent.mouseLocation
+                    let mouseLocation = CGEvent(source: nil)?.location ?? .zero
                     let mouseLocationWindowID = CGWindowID(NSWindow.windowNumber(
                         at: mouseLocation,
                         belowWindowWithWindowNumber: 0
                     ))
                     let mouseLocationPid = mouseLocationWindowID.ownerPid
                         ?? NSWorkspace.shared.frontmostApplication?.processIdentifier
-                    let display = ScreenManager.shared.currentScreenName
-                    let transformer = EventTransformerManager.shared.get(
-                        withDevice: device,
-                        withPid: mouseLocationPid,
-                        withDisplay: display
-                    )
+                    let display = ScreenManager.shared.currentScreenNameSnapshot
 
                     let logitechContext = LogitechEventContext(
                         device: device,
                         pid: mouseLocationPid,
                         display: display,
+                        mouseLocation: mouseLocation,
                         controlIdentity: controlIdentity,
                         isPressed: isPressed,
                         modifierFlags: modifierFlags
                     )
 
-                    let handledInternally = (transformer as? [EventTransformer])?.contains { transformer in
-                        if let transformer = transformer as? AutoScrollTransformer {
-                            return transformer.handleLogitechControlEvent(logitechContext)
-                        }
-
-                        if let transformer = transformer as? GestureButtonTransformer {
-                            return transformer.handleLogitechControlEvent(logitechContext)
-                        }
-
-                        if let transformer = transformer as? ButtonActionsTransformer {
-                            return transformer.handleLogitechControlEvent(logitechContext)
-                        }
-
-                        return false
-                    } == true
+                    let handledInternally = EventThread.shared.performAndWait {
+                        EventTransformerManager.shared.handleLogitechControlEvent(logitechContext)
+                    } ?? false
 
                     guard !handledInternally else {
                         continue
@@ -2350,7 +2334,7 @@ final class LogitechReprogrammableControlsMonitor {
         let scheme = ConfigurationState.shared.configuration.matchScheme(
             withDevice: device,
             withPid: mouseLocationPid,
-            withDisplay: ScreenManager.shared.currentScreenName
+            withDisplay: ScreenManager.shared.currentScreenNameSnapshot
         )
 
         let directMappings: [UInt16] = (scheme.buttons.mappings ?? [])

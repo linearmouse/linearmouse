@@ -7,6 +7,7 @@ struct LogitechEventContext {
     let device: Device?
     let pid: pid_t?
     let display: String?
+    let mouseLocation: CGPoint
     let controlIdentity: LogitechControlIdentity
     let isPressed: Bool
     let modifierFlags: CGEventFlags

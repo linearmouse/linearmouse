@@ -2150,7 +2150,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%.1f ピクセル"
+            "value" : "%#@value@"
           },
           "substitutions" : {
             "value" : {
