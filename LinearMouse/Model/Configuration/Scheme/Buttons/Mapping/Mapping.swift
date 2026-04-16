@@ -5,6 +5,7 @@ extension Scheme.Buttons {
     struct Mapping: Equatable, Hashable {
         var button: Button?
         var `repeat`: Bool?
+        var hold: Bool?
 
         var scroll: ScrollDirection?
 
@@ -62,6 +63,43 @@ extension Scheme.Buttons.Mapping {
 
     enum ScrollDirection: String, Codable, Hashable {
         case up, down, left, right
+    }
+
+    enum KeyPressBehavior: String, CaseIterable, Identifiable {
+        case sendOnRelease
+        case `repeat`
+        case holdWhilePressed
+
+        var id: Self {
+            self
+        }
+    }
+
+    var keyPressBehavior: KeyPressBehavior {
+        get {
+            if hold == true {
+                return .holdWhilePressed
+            }
+
+            if `repeat` == true {
+                return .repeat
+            }
+
+            return .sendOnRelease
+        }
+        set {
+            switch newValue {
+            case .sendOnRelease:
+                `repeat` = nil
+                hold = nil
+            case .repeat:
+                `repeat` = true
+                hold = nil
+            case .holdWhilePressed:
+                `repeat` = nil
+                hold = true
+            }
+        }
     }
 
     var modifierFlags: CGEventFlags {
@@ -198,6 +236,7 @@ extension Scheme.Buttons.Mapping: Codable {
         case logiButton
         case logitechControl
         case `repeat`
+        case hold
         case scroll
         case command
         case shift
@@ -214,6 +253,7 @@ extension Scheme.Buttons.Mapping: Codable {
             ?? container.decodeIfPresent(LogitechControlIdentity.self, forKey: .logitechControl)
             .map(Button.logitechControl)
         `repeat` = try container.decodeIfPresent(Bool.self, forKey: .repeat)
+        hold = try container.decodeIfPresent(Bool.self, forKey: .hold)
         scroll = try container.decodeIfPresent(ScrollDirection.self, forKey: .scroll)
         command = try container.decodeIfPresent(Bool.self, forKey: .command)
         shift = try container.decodeIfPresent(Bool.self, forKey: .shift)
@@ -227,6 +267,7 @@ extension Scheme.Buttons.Mapping: Codable {
 
         try container.encodeIfPresent(button, forKey: .button)
         try container.encodeIfPresent(`repeat`, forKey: .repeat)
+        try container.encodeIfPresent(hold, forKey: .hold)
         try container.encodeIfPresent(scroll, forKey: .scroll)
         try container.encodeIfPresent(command, forKey: .command)
         try container.encodeIfPresent(shift, forKey: .shift)

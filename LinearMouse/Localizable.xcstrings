@@ -24200,6 +24200,9 @@
         }
       }
     },
+    "Hold keys while pressed" : {
+
+    },
     "Hold the button and drag to trigger gestures. Drag at least %lld pixels in one direction." : {
       "localizations" : {
         "af" : {
@@ -39206,6 +39209,9 @@
         }
       }
     },
+    "Repeat" : {
+
+    },
     "Repeat on hold" : {
       "localizations" : {
         "af" : {
@@ -47756,6 +47762,9 @@
           }
         }
       }
+    },
+    "Send once on release" : {
+
     },
     "Settings" : {
       "extractionState" : "manual",
@@ -56727,6 +56736,9 @@
           }
         }
       }
+    },
+    "While pressed" : {
+
     },
     "You may also press ⌃⇧⌘Z to revert to system defaults." : {
       "localizations" : {

@@ -21,6 +21,7 @@ class ButtonActionsTransformer {
 
     var repeatTimer: EventThreadTimer?
     private var logitechRepeatTimer: EventThreadTimer?
+    private var heldKeysByButton = [Scheme.Buttons.Mapping.Button: [Key]]()
 
     static let keySimulator = KeySimulator()
     var keySimulator: KeySimulator {
@@ -121,6 +122,10 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
         if event.type == .scrollWheel {
             queueActions(event: event.copy(), action: action)
         } else {
+            if handleKeyPressHold(event: event, mapping: mapping, action: action) {
+                return nil
+            }
+
             // FIXME: `NSEvent.keyRepeatDelay` and `NSEvent.keyRepeatInterval` are not kept up to date
             // TODO: Support override `repeatDelay` and `repeatInterval`
             let keyRepeatDelay = mapping.repeat == true ? KeyboardSettingsSnapshot.shared.keyRepeatDelay : 0
@@ -130,9 +135,6 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
             if !keyRepeatEnabled {
                 if handleButtonSwaps(event: event, action: action) {
                     return event
-                }
-                if handleModifiersHold(event: event, action: action) {
-                    return nil
                 }
             }
 
@@ -204,10 +206,8 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
             return false
         }
 
-        if mapping.repeat != true {
-            if handleLogitechModifiersHold(action: action, isPressed: context.isPressed) {
-                return true
-            }
+        if handleLogitechKeyPressHold(mapping: mapping, action: action, context: context) {
+            return true
         }
 
         logitechRepeatTimer?.invalidate()
@@ -233,22 +233,32 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
         return true
     }
 
-    private func handleLogitechModifiersHold(action: Scheme.Buttons.Mapping.Action, isPressed: Bool) -> Bool {
+    private func shouldHoldKeys(
+        for mapping: Scheme.Buttons.Mapping,
+        action: Scheme.Buttons.Mapping.Action
+    ) -> Bool {
         guard case let .arg1(.keyPress(keys)) = action else {
             return false
         }
 
-        guard keys.allSatisfy(\.isModifier) else {
+        return mapping.hold == true || keys.allSatisfy(\.isModifier)
+    }
+
+    private func handleLogitechKeyPressHold(
+        mapping: Scheme.Buttons.Mapping,
+        action: Scheme.Buttons.Mapping.Action,
+        context: LogitechEventContext
+    ) -> Bool {
+        guard let button = mapping.button,
+              shouldHoldKeys(for: mapping, action: action),
+              case let .arg1(.keyPress(keys)) = action else {
             return false
         }
 
-        if isPressed {
-            os_log("Down keys: %{public}@", log: Self.log, type: .info, String(describing: keys))
-            try? keySimulator.down(keys: keys, tap: .cgSessionEventTap)
+        if context.isPressed {
+            pressAndStoreHeldKeys(keys, for: button)
         } else {
-            os_log("Up keys: %{public}@", log: Self.log, type: .info, String(describing: keys))
-            try? keySimulator.up(keys: keys.reversed(), tap: .cgSessionEventTap)
-            keySimulator.reset()
+            releaseHeldKeys(for: button, fallbackKeys: keys)
         }
 
         return true
@@ -623,46 +633,54 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
         return true
     }
 
-    private func handleModifiersHold(event: CGEvent, action: Scheme.Buttons.Mapping.Action) -> Bool {
-        guard [mouseDownEventTypes, mouseUpEventTypes]
-            .flatMap(\.self)
-            .contains(event.type)
-        else {
+    private func handleKeyPressHold(
+        event: CGEvent,
+        mapping: Scheme.Buttons.Mapping,
+        action: Scheme.Buttons.Mapping.Action
+    ) -> Bool {
+        guard let button = mapping.button,
+              [mouseDownEventTypes, mouseUpEventTypes, mouseDraggedEventTypes]
+              .flatMap(\.self)
+              .contains(event.type),
+              shouldHoldKeys(for: mapping, action: action),
+              case let .arg1(.keyPress(keys)) = action else {
             return false
         }
 
-        guard case let .arg1(.keyPress(keys)) = action else {
-            return false
-        }
-
-        guard keys.allSatisfy(\.isModifier) else {
-            return false
+        if mouseDraggedEventTypes.contains(event.type) {
+            return true
         }
 
         if mouseDownEventTypes.contains(event.type) {
-            os_log(
-                "Down keys: %{public}@",
-                log: Self.log,
-                type: .info,
-                String(describing: keys)
-            )
-            try? keySimulator.down(keys: keys, tap: .cgSessionEventTap)
+            pressAndStoreHeldKeys(keys, for: button)
             return true
         }
 
         if mouseUpEventTypes.contains(event.type) {
-            os_log(
-                "Up keys: %{public}@",
-                log: Self.log,
-                type: .info,
-                String(describing: keys)
-            )
-            try? keySimulator.up(keys: keys.reversed(), tap: .cgSessionEventTap)
-            keySimulator.reset()
+            releaseHeldKeys(for: button, fallbackKeys: keys)
             return true
         }
 
         return false
+    }
+
+    private func pressAndStoreHeldKeys(_ keys: [Key], for button: Scheme.Buttons.Mapping.Button) {
+        if heldKeysByButton[button] == keys {
+            return
+        }
+
+        heldKeysByButton[button] = keys
+
+        os_log("Down keys: %{public}@", log: Self.log, type: .info, String(describing: keys))
+        try? keySimulator.down(keys: keys, tap: .cgSessionEventTap)
+    }
+
+    private func releaseHeldKeys(for button: Scheme.Buttons.Mapping.Button, fallbackKeys: [Key]) {
+        let keys = heldKeysByButton.removeValue(forKey: button) ?? fallbackKeys
+
+        os_log("Up keys: %{public}@", log: Self.log, type: .info, String(describing: keys))
+        try? keySimulator.up(keys: keys.reversed(), tap: .cgSessionEventTap)
+        keySimulator.reset()
     }
 
     private func postClickEvent(mouseButton: CGMouseButton, clickState: Int64? = nil) {
@@ -709,5 +727,12 @@ extension ButtonActionsTransformer: Deactivatable {
             logitechRepeatTimer.invalidate()
             self.logitechRepeatTimer = nil
         }
+
+        let heldKeys = heldKeysByButton.values
+        heldKeysByButton.removeAll()
+        for keys in heldKeys {
+            try? keySimulator.up(keys: keys.reversed(), tap: .cgSessionEventTap)
+        }
+        keySimulator.reset()
     }
 }

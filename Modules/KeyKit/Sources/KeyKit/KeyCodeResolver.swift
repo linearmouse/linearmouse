@@ -1,7 +1,6 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
-import AppKit
 import Carbon
 import Combine
 import Foundation
@@ -47,17 +46,7 @@ public class KeyCodeResolver {
         var newReversedMapping: [CGKeyCode: Key] = [:]
 
         for keyCode: CGKeyCode in 0 ..< 128 {
-            guard let cgEvent = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: true) else {
-                continue
-            }
-            cgEvent.flags = []
-            guard let nsEvent = NSEvent(cgEvent: cgEvent) else {
-                continue
-            }
-            guard nsEvent.type == .keyDown else {
-                continue
-            }
-            guard let characters = nsEvent.characters, characters.count == 1 else {
+            guard let characters = translatedCharacters(for: keyCode), characters.count == 1 else {
                 continue
             }
             guard newMapping[characters] == nil else {
@@ -130,6 +119,58 @@ public class KeyCodeResolver {
             mapping = newMapping
             reversedMapping = newReversedMapping
         }
+    }
+
+    private func translatedCharacters(for keyCode: CGKeyCode) -> String? {
+        guard let layoutData = currentKeyboardLayoutData(),
+              let layoutBytes = CFDataGetBytePtr(layoutData) else {
+            return nil
+        }
+
+        let keyboardType = UInt32(LMGetKbdType())
+
+        var deadKeyState: UInt32 = 0
+        var length = 0
+        var chars = [UniChar](repeating: 0, count: 4)
+
+        let status = layoutBytes.withMemoryRebound(to: UCKeyboardLayout.self, capacity: 1) { keyboardLayout in
+            UCKeyTranslate(
+                keyboardLayout,
+                UInt16(keyCode),
+                UInt16(kUCKeyActionDisplay),
+                0,
+                keyboardType,
+                OptionBits(kUCKeyTranslateNoDeadKeysBit),
+                &deadKeyState,
+                chars.count,
+                &length,
+                &chars
+            )
+        }
+
+        guard status == noErr, length > 0 else {
+            return nil
+        }
+
+        return String(utf16CodeUnits: chars, count: Int(length)).lowercased()
+    }
+
+    private func currentKeyboardLayoutData() -> CFData? {
+        let sources: [Unmanaged<TISInputSource>?] = [
+            TISCopyCurrentKeyboardLayoutInputSource(),
+            TISCopyCurrentASCIICapableKeyboardLayoutInputSource()
+        ]
+
+        for source in sources {
+            guard let source = source?.takeRetainedValue(),
+                  let layoutDataPointer = TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData) else {
+                continue
+            }
+
+            return unsafeBitCast(layoutDataPointer, to: CFData.self)
+        }
+
+        return nil
     }
 
     public func keyCode(for key: Key) -> CGKeyCode? {

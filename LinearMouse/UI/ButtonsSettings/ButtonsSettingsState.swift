@@ -214,6 +214,7 @@ extension ButtonsSettingsState {
             var trigger = newValue
             trigger.action = nil
             trigger.repeat = nil
+            trigger.hold = nil
             trigger.scroll = nil
             scheme.buttons.autoScroll.trigger = trigger
         }
@@ -304,6 +305,7 @@ extension ButtonsSettingsState {
             var trigger = newValue
             trigger.action = nil
             trigger.repeat = nil
+            trigger.hold = nil
             trigger.scroll = nil
             scheme.buttons.gesture.trigger = trigger
         }

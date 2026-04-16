@@ -58,8 +58,19 @@ struct ButtonMappingEditSheet: View {
                     ButtonMappingAction(action: $mapping.action.default(.arg0(.auto)))
 
                     if mapping.button != nil {
-                        Toggle(isOn: $mapping.repeat.default(false)) {
-                            Text("Repeat on hold")
+                        if mapping.isKeyPressAction {
+                            Picker("While pressed", selection: $mapping.keyPressBehavior) {
+                                Text("Send once on release").tag(Scheme.Buttons.Mapping.KeyPressBehavior.sendOnRelease)
+                                Text("Repeat").tag(Scheme.Buttons.Mapping.KeyPressBehavior.repeat)
+                                Text("Hold keys while pressed").tag(
+                                    Scheme.Buttons.Mapping.KeyPressBehavior.holdWhilePressed
+                                )
+                            }
+                            .modifier(PickerViewModifier())
+                        } else {
+                            Toggle(isOn: $mapping.repeat.default(false)) {
+                                Text("Repeat on hold")
+                            }
                         }
                     }
                 }
@@ -101,5 +112,28 @@ extension ButtonMappingEditSheet {
 
     var valid: Bool {
         mapping.valid && !conflicted
+    }
+}
+
+private extension Scheme.Buttons.Mapping {
+    var isKeyPressAction: Bool {
+        guard case .arg1(.keyPress) = action else {
+            return false
+        }
+
+        return true
+    }
+}
+
+private extension Binding where Value == Scheme.Buttons.Mapping {
+    var keyPressBehavior: Binding<Scheme.Buttons.Mapping.KeyPressBehavior> {
+        Binding<Scheme.Buttons.Mapping.KeyPressBehavior>(
+            get: {
+                wrappedValue.keyPressBehavior
+            },
+            set: {
+                wrappedValue.keyPressBehavior = $0
+            }
+        )
     }
 }
