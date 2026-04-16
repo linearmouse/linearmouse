@@ -113,6 +113,10 @@ class UniversalBackForwardTransformer: EventTransformer {
     }
 
     func transform(_ event: CGEvent) -> CGEvent? {
+        if event.isGestureCleanupRelease {
+            return event
+        }
+
         let view = MouseEventView(event)
         guard let mouseButton = view.mouseButton else {
             return event
