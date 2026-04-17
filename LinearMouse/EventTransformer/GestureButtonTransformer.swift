@@ -258,7 +258,6 @@ extension GestureButtonTransformer: EventTransformer {
         return deltaY > 0 ? (actions.down ?? .appExpose) : (actions.up ?? .missionControl)
     }
 
-
     private func executeGesture(_ action: Scheme.Buttons.Gesture.GestureAction) throws {
         switch action {
         case .none:
