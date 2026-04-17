@@ -23,7 +23,7 @@ class GestureButtonTransformer {
         case idle
         case tracking(startTime: UInt64, deltaX: Double, deltaY: Double)
         case triggered
-        case cooldown(until: UInt64)
+        case cooldown(until: UInt64, released: Bool)
     }
 
     private var state: State = .idle
@@ -49,11 +49,17 @@ class GestureButtonTransformer {
 extension GestureButtonTransformer: EventTransformer {
     func transform(_ event: CGEvent) -> CGEvent? {
         // Check if we're in cooldown
-        if case let .cooldown(until) = state {
+        if case let .cooldown(until, released) = state {
             if DispatchTime.now().uptimeNanoseconds < until {
                 // Still in cooldown - consume our button events
                 if matchesTriggerButton(event) {
-//                    os_log("Event consumed during cooldown", log: Self.log, type: .debug)
+                    if event.type == mouseUpEventType, !released {
+                        os_log("Releasing trigger button during cooldown", log: Self.log, type: .debug)
+                        state = .cooldown(until: until, released: true)
+                        event.isGestureCleanupRelease = true
+                        return event
+                    }
+                    os_log("Event consumed during cooldown", log: Self.log, type: .debug)
                     return nil
                 }
                 return event
@@ -158,7 +164,7 @@ extension GestureButtonTransformer: EventTransformer {
 
                 // Enter cooldown
                 let cooldownNanos = UInt64(cooldownMs) * 1_000_000
-                state = .cooldown(until: DispatchTime.now().uptimeNanoseconds + cooldownNanos)
+                state = .cooldown(until: DispatchTime.now().uptimeNanoseconds + cooldownNanos, released: false)
 
                 os_log("Entering cooldown for %d ms", log: Self.log, type: .info, cooldownMs)
             } catch {
@@ -190,11 +196,12 @@ extension GestureButtonTransformer: EventTransformer {
             return event
         }
 
-        // If we triggered, stay in cooldown and consume the event
+        // If we triggered, enter cooldown and pass the release through
         if case .triggered = state {
             let cooldownNanos = UInt64(cooldownMs) * 1_000_000
-            state = .cooldown(until: DispatchTime.now().uptimeNanoseconds + cooldownNanos)
-            return nil
+            state = .cooldown(until: DispatchTime.now().uptimeNanoseconds + cooldownNanos, released: true)
+            event.isGestureCleanupRelease = true
+            return event
         }
 
         return event
@@ -284,7 +291,7 @@ extension GestureButtonTransformer: LogitechControlEventHandling {
             return false
         }
 
-        if case let .cooldown(until) = state {
+        if case let .cooldown(until, _) = state {
             if DispatchTime.now().uptimeNanoseconds < until {
                 return true
             }

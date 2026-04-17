@@ -117,6 +117,7 @@ extension LogitechControlIdentity {
 
 extension CGEvent {
     private static let linearMouseSyntheticEventUserData: Int64 = 0x534D_4F4F_5448
+    private static let gestureCleanupReleaseUserData: Int64 = 0x4745_5354_5552
 
     var isLinearMouseSyntheticEvent: Bool {
         get {
@@ -126,6 +127,18 @@ extension CGEvent {
             setIntegerValueField(
                 .eventSourceUserData,
                 value: newValue ? Self.linearMouseSyntheticEventUserData : 0
+            )
+        }
+    }
+
+    var isGestureCleanupRelease: Bool {
+        get {
+            getIntegerValueField(.eventSourceUserData) == Self.gestureCleanupReleaseUserData
+        }
+        set {
+            setIntegerValueField(
+                .eventSourceUserData,
+                value: newValue ? Self.gestureCleanupReleaseUserData : 0
             )
         }
     }

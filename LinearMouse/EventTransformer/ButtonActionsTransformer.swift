@@ -81,6 +81,10 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
             return event
         }
 
+        if event.isGestureCleanupRelease {
+            return event
+        }
+
         guard !SettingsState.shared.recording else {
             return event
         }
