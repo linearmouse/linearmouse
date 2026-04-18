@@ -6,8 +6,6 @@ import Foundation
 import LRUCache
 import SwiftUI
 
-private let processInfoBufferSize = 4096
-
 extension Comparable {
     func clamped(to range: ClosedRange<Self>) -> Self {
         min(max(range.lowerBound, self), range.upperBound)
@@ -70,18 +68,19 @@ extension Decimal {
 }
 
 extension pid_t {
-    private static var processPathCache = LRUCache<pid_t, String>(countLimit: 16)
-    private static var processNameCache = LRUCache<pid_t, String>(countLimit: 16)
-    private static var bundleIdentifierCache = LRUCache<pid_t, String>(countLimit: 16)
+    private static var bundleIdentifierCache = LRUCache<Self, String>(countLimit: 16)
+    private static var processPathCache = LRUCache<Self, String>(countLimit: 16)
+    private static var processNameCache = LRUCache<Self, String>(countLimit: 16)
 
     var bundleIdentifier: String? {
-        if let cached = Self.bundleIdentifierCache.value(forKey: self) {
-            return cached
-        }
-        guard let bundleIdentifier = processPath.flatMap(bundleIdentifierForProcessPath) else {
+        guard let bundleIdentifier = Self.bundleIdentifierCache.value(forKey: self)
+            ?? NSRunningApplication(processIdentifier: self)?.bundleIdentifier
+        else {
             return nil
         }
+
         Self.bundleIdentifierCache.setValue(bundleIdentifier, forKey: self)
+
         return bundleIdentifier
     }
 
@@ -89,11 +88,9 @@ extension pid_t {
         if let cached = Self.processPathCache.value(forKey: self) {
             return cached
         }
-        var buffer = [CChar](repeating: 0, count: processInfoBufferSize)
-        guard getProcessPath(self, &buffer, UInt32(buffer.count)) > 0 else {
+        guard let path = NSRunningApplication(processIdentifier: self)?.executableURL?.path else {
             return nil
         }
-        let path = String(cString: buffer)
         Self.processPathCache.setValue(path, forKey: self)
         return path
     }
@@ -102,10 +99,7 @@ extension pid_t {
         if let cached = Self.processNameCache.value(forKey: self) {
             return cached
         }
-        // `proc_name()` is capped at MAXCOMLEN (16) and would silently truncate long binary
-        // names like "Google Chrome Helper", so derive the name from the full executable path.
-        guard let name = processPath.map({ URL(fileURLWithPath: $0).lastPathComponent }),
-              !name.isEmpty else {
+        guard let name = NSRunningApplication(processIdentifier: self)?.executableURL?.lastPathComponent else {
             return nil
         }
         Self.processNameCache.setValue(name, forKey: self)
@@ -131,31 +125,6 @@ extension pid_t {
 
         return pid
     }
-}
-
-private func bundleIdentifierForProcessPath(_ processPath: String) -> String? {
-    var url = URL(fileURLWithPath: processPath)
-    let normalizedProcessPath = url.standardizedFileURL.path
-
-    while url.path != "/" {
-        if let bundle = Bundle(url: url),
-           let executableName = bundle.object(forInfoDictionaryKey: kCFBundleExecutableKey as String) as? String {
-            let executablePath = url
-                .appendingPathComponent("Contents")
-                .appendingPathComponent("MacOS")
-                .appendingPathComponent(executableName)
-                .standardizedFileURL
-                .path
-
-            if executablePath == normalizedProcessPath {
-                return bundle.bundleIdentifier
-            }
-        }
-
-        url.deleteLastPathComponent()
-    }
-
-    return nil
 }
 
 extension CGMouseButton {
