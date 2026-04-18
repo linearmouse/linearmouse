@@ -1,6 +1,7 @@
 #ifndef LINEARMOUSE_PROCESS_H
 #define LINEARMOUSE_PROCESS_H
 
+#include <libproc.h>
 #include <sys/sysctl.h>
 
 typedef struct ProcessInfo {
@@ -9,5 +10,7 @@ typedef struct ProcessInfo {
 } ProcessInfo;
 
 ProcessInfo getProcessInfo(pid_t pid);
+int getProcessPath(pid_t pid, char *buffer, uint32_t bufferSize);
+int getProcessName(pid_t pid, char *buffer, uint32_t bufferSize);
 
 #endif /* LINEARMOUSE_PROCESS_H */

@@ -126,7 +126,7 @@ class DeviceManager: ObservableObject {
                 "Frontmost app changed: %{public}@",
                 log: Self.log,
                 type: .info,
-                NSWorkspace.shared.frontmostApplication?.bundleIdentifier ?? "(nil)"
+                FrontmostApplicationTracker.shared.bundleIdentifier ?? "(nil)"
             )
             self?.updatePointerSpeed()
         }
@@ -248,10 +248,9 @@ class DeviceManager: ObservableObject {
     }
 
     func updatePointerSpeed(for device: Device) {
-        let frontmostApp = NSWorkspace.shared.frontmostApplication
         let scheme = ConfigurationState.shared.configuration.matchScheme(
             withDevice: device,
-            withPid: frontmostApp?.processIdentifier,
+            withPid: FrontmostApplicationTracker.shared.processIdentifier,
             withDisplay: ScreenManager.shared
                 .currentScreenName
         )

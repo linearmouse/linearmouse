@@ -12,6 +12,8 @@ class ModifierActionsTransformer {
         category: "ModifierActionsTransformer"
     )
 
+    private static let keySimulator = KeySimulator()
+
     typealias Modifiers = Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Modifiers>
     typealias Action = Scheme.Scrolling.Modifiers.Action
 
@@ -79,11 +81,10 @@ extension ModifierActionsTransformer: EventTransformer {
             if deltaSignum == 0 {
                 return event
             }
-            let keySimulator = KeySimulator()
             if deltaSignum > 0 {
-                try? keySimulator.press(.command, .numpadPlus, tap: .cgSessionEventTap)
+                try? Self.keySimulator.press(.command, .numpadPlus, tap: .cgSessionEventTap)
             } else {
-                try? keySimulator.press(.command, .numpadMinus, tap: .cgSessionEventTap)
+                try? Self.keySimulator.press(.command, .numpadMinus, tap: .cgSessionEventTap)
             }
             return nil
         case .pinchZoom:
