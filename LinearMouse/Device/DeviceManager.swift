@@ -121,12 +121,14 @@ class DeviceManager: ObservableObject {
             forName: NSWorkspace.didActivateApplicationNotification,
             object: nil,
             queue: .main
-        ) { [weak self] _ in
+        ) { [weak self] notification in
+            let application = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+            FrontmostApplicationTracker.shared.update(with: application)
             os_log(
                 "Frontmost app changed: %{public}@",
                 log: Self.log,
                 type: .info,
-                FrontmostApplicationTracker.shared.bundleIdentifier ?? "(nil)"
+                application?.bundleIdentifier ?? "(nil)"
             )
             self?.updatePointerSpeed()
         }

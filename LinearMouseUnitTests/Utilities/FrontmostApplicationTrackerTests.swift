@@ -5,13 +5,13 @@
 import XCTest
 
 final class FrontmostApplicationTrackerTests: XCTestCase {
-    func testSnapshotCanBeReadOffMainThreadAfterMainThreadStart() {
-        let started = expectation(description: "Tracker started on main thread")
+    func testSnapshotCanBeReadOffMainThreadAfterMainThreadPrime() {
+        let primed = expectation(description: "Tracker primed on main thread")
         DispatchQueue.main.async {
-            FrontmostApplicationTracker.shared.start()
-            started.fulfill()
+            FrontmostApplicationTracker.shared.prime()
+            primed.fulfill()
         }
-        wait(for: [started], timeout: 5)
+        wait(for: [primed], timeout: 5)
 
         let readSnapshot = expectation(description: "Read tracker snapshot off the main thread")
         DispatchQueue.global(qos: .userInitiated).async {

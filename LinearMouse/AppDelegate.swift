@@ -65,7 +65,7 @@ extension AppDelegate {
     func setup() {
         setupConfiguration()
         setupNotifications()
-        FrontmostApplicationTracker.shared.start()
+        FrontmostApplicationTracker.shared.prime()
         KeyboardSettingsSnapshot.shared.refresh()
         start()
     }

@@ -11,6 +11,5 @@ typedef struct ProcessInfo {
 
 ProcessInfo getProcessInfo(pid_t pid);
 int getProcessPath(pid_t pid, char *buffer, uint32_t bufferSize);
-int getProcessName(pid_t pid, char *buffer, uint32_t bufferSize);
 
 #endif /* LINEARMOUSE_PROCESS_H */

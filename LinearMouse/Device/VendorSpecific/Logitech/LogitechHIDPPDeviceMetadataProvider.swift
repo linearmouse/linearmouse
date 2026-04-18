@@ -2279,7 +2279,9 @@ final class LogitechReprogrammableControlsMonitor {
         NSWorkspace.shared
             .notificationCenter
             .publisher(for: NSWorkspace.didActivateApplicationNotification)
-            .sink { [weak self] _ in
+            .sink { [weak self] notification in
+                let application = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+                FrontmostApplicationTracker.shared.update(with: application)
                 self?.requestReconfiguration()
             }
             .store(in: &subscriptions)

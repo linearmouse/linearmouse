@@ -18,7 +18,3 @@ ProcessInfo getProcessInfo(pid_t pid) {
 int getProcessPath(pid_t pid, char *buffer, uint32_t bufferSize) {
     return proc_pidpath(pid, buffer, bufferSize);
 }
-
-int getProcessName(pid_t pid, char *buffer, uint32_t bufferSize) {
-    return proc_name(pid, buffer, bufferSize);
-}

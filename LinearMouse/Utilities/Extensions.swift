@@ -102,18 +102,12 @@ extension pid_t {
         if let cached = Self.processNameCache.value(forKey: self) {
             return cached
         }
-        var buffer = [CChar](repeating: 0, count: processInfoBufferSize)
-        let resolvedName: String?
-        if getProcessName(self, &buffer, UInt32(buffer.count)) > 0 {
-            resolvedName = String(cString: buffer)
-        } else {
-            resolvedName = processPath.map { URL(fileURLWithPath: $0).lastPathComponent }
-        }
-
-        guard let name = resolvedName, !name.isEmpty else {
+        // `proc_name()` is capped at MAXCOMLEN (16) and would silently truncate long binary
+        // names like "Google Chrome Helper", so derive the name from the full executable path.
+        guard let name = processPath.map({ URL(fileURLWithPath: $0).lastPathComponent }),
+              !name.isEmpty else {
             return nil
         }
-
         Self.processNameCache.setValue(name, forKey: self)
         return name
     }

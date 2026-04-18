@@ -4,14 +4,16 @@
 import AppKit
 import Foundation
 
-/// Main-thread snapshot of the frontmost application, for readers on the event thread that cannot touch AppKit.
+/// Thread-safe snapshot of the frontmost application so event-thread code can read it without
+/// touching AppKit. Callers subscribe to `NSWorkspace.didActivateApplicationNotification`
+/// themselves and call `update(with:)` before acting on the snapshot, avoiding any ordering race
+/// between multiple observers.
 final class FrontmostApplicationTracker {
     static let shared = FrontmostApplicationTracker()
 
     private let lock = NSLock()
     private var _processIdentifier: pid_t?
     private var _bundleIdentifier: String?
-    private var observer: Any?
 
     private init() {}
 
@@ -23,26 +25,15 @@ final class FrontmostApplicationTracker {
         lock.withLock { _bundleIdentifier }
     }
 
-    /// Call once from the main thread at app launch.
-    func start() {
+    /// Seed the snapshot from the current frontmost application. Call once from the main thread at
+    /// app launch so that the first event processed before any activation notification still sees
+    /// a valid value.
+    func prime() {
         assert(Thread.isMainThread)
-        guard observer == nil else {
-            return
-        }
-
-        observer = NSWorkspace.shared.notificationCenter.addObserver(
-            forName: NSWorkspace.didActivateApplicationNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            let application = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
-            self?.update(with: application)
-        }
-
         update(with: NSWorkspace.shared.frontmostApplication)
     }
 
-    private func update(with application: NSRunningApplication?) {
+    func update(with application: NSRunningApplication?) {
         let pid = application?.processIdentifier
         let bundleID = application?.bundleIdentifier
         lock.withLock {
