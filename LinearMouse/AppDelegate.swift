@@ -94,6 +94,7 @@ extension AppDelegate {
             queue: .main
         ) { [weak self] _ in
             os_log("Session active", log: Self.log, type: .info)
+            FrontmostApplicationTracker.shared.prime()
             KeyboardSettingsSnapshot.shared.refresh()
             self?.start()
         }
