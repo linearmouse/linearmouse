@@ -2150,7 +2150,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%#@value@"
+            "value" : "%.1f ピクセル"
           },
           "substitutions" : {
             "value" : {
@@ -12228,7 +12228,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "다른 앱에서 보낸 이벤트 무시"
+            "value" : "다른 앱에서 보낸 이벤트 제외"
           }
         },
         "my" : {
@@ -14732,7 +14732,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "설정 새로고침 완료"
+            "value" : "설정 새로고침 완료됨"
           }
         },
         "my" : {
