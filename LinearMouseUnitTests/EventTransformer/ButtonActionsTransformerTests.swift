@@ -39,7 +39,8 @@ private final class RecordingKeySimulator: KeySimulating {
 
 private func logitechContext(
     _ controlID: Int,
-    pressed: Bool
+    pressed: Bool,
+    modifierFlags: CGEventFlags = []
 ) -> LogitechEventContext {
     .init(
         device: nil,
@@ -48,7 +49,7 @@ private func logitechContext(
         mouseLocation: .zero,
         controlIdentity: .init(controlID: controlID),
         isPressed: pressed,
-        modifierFlags: []
+        modifierFlags: modifierFlags
     )
 }
 
@@ -166,6 +167,40 @@ final class ButtonActionsTransformerTests: XCTestCase {
         XCTAssertTrue(transformer.handleLogitechControlEvent(logitechContext(0x0001, pressed: true)))
         XCTAssertTrue(transformer.handleLogitechControlEvent(logitechContext(0x0001, pressed: false)))
 
+        XCTAssertEqual(simulator.events, [.down([.a]), .up([.a]), .reset])
+    }
+
+    func testHoldIgnoresSecondPressEvenWithDifferentKeys() {
+        // If a duplicate pressed=true arrives that resolves to a different mapping (e.g. the
+        // event's modifier flags changed mid-hold), we must not overwrite the tracked keys —
+        // doing so would orphan the originally-pressed keys (release would only release the
+        // overwritten set, leaving the originals stuck).
+        let simulator = RecordingKeySimulator()
+        let transformer = ButtonActionsTransformer(
+            mappings: [
+                .init(
+                    button: .logitechControl(.init(controlID: 0x0001)),
+                    hold: true,
+                    action: .arg1(.keyPress([.a]))
+                ),
+                .init(
+                    button: .logitechControl(.init(controlID: 0x0001)),
+                    hold: true,
+                    shift: true,
+                    action: .arg1(.keyPress([.b]))
+                )
+            ],
+            keySimulator: simulator
+        )
+
+        _ = transformer.handleLogitechControlEvent(logitechContext(0x0001, pressed: true))
+        _ = transformer.handleLogitechControlEvent(
+            logitechContext(0x0001, pressed: true, modifierFlags: .maskShift)
+        )
+        _ = transformer.handleLogitechControlEvent(logitechContext(0x0001, pressed: false))
+
+        // Only the first mapping's keys are pressed and released; the second pressed event is
+        // ignored entirely so nothing gets stuck.
         XCTAssertEqual(simulator.events, [.down([.a]), .up([.a]), .reset])
     }
 

@@ -665,7 +665,12 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
     }
 
     private func pressAndStoreHeldKeys(_ keys: [Key], for button: Scheme.Buttons.Mapping.Button) {
-        if heldKeysByButton[button] == keys {
+        // Treat the down→up cycle as atomic: once a button is tracked, ignore any subsequent
+        // pressed=true reports until release. Otherwise a stuttering pressed=true that resolves
+        // to a different mapping (e.g. modifier flags changed mid-hold and matched another rule)
+        // would overwrite `heldKeysByButton[button]` without releasing the originally pressed
+        // keys, leaving them stuck until something else clears them.
+        if heldKeysByButton[button] != nil {
             return
         }
 
