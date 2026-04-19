@@ -123,7 +123,6 @@ class DeviceManager: ObservableObject {
             queue: .main
         ) { [weak self] notification in
             let application = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
-            FrontmostApplicationTracker.shared.update(with: application)
             os_log(
                 "Frontmost app changed: %{public}@",
                 log: Self.log,
@@ -252,7 +251,7 @@ class DeviceManager: ObservableObject {
     func updatePointerSpeed(for device: Device) {
         let scheme = ConfigurationState.shared.configuration.matchScheme(
             withDevice: device,
-            withPid: FrontmostApplicationTracker.shared.processIdentifier,
+            withPid: NSWorkspace.shared.frontmostApplication?.processIdentifier,
             withDisplay: ScreenManager.shared
                 .currentScreenName
         )

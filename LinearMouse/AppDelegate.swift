@@ -65,7 +65,6 @@ extension AppDelegate {
     func setup() {
         setupConfiguration()
         setupNotifications()
-        FrontmostApplicationTracker.shared.prime()
         KeyboardSettingsSnapshot.shared.refresh()
         start()
     }
@@ -94,7 +93,6 @@ extension AppDelegate {
             queue: .main
         ) { [weak self] _ in
             os_log("Session active", log: Self.log, type: .info)
-            FrontmostApplicationTracker.shared.prime()
             KeyboardSettingsSnapshot.shared.refresh()
             self?.start()
         }

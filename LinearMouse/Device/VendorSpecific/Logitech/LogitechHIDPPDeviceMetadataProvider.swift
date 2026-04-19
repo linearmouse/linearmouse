@@ -1950,7 +1950,7 @@ final class LogitechReprogrammableControlsMonitor {
 
                     let mouseLocation = CGEvent(source: nil)?.location ?? .zero
                     let mouseLocationPid = mouseLocation.topmostWindowOwnerPid
-                        ?? FrontmostApplicationTracker.shared.processIdentifier
+                        ?? NSWorkspace.shared.frontmostApplication?.processIdentifier
                     let display = ScreenManager.shared.currentScreenNameSnapshot
 
                     let logitechContext = LogitechEventContext(
@@ -2279,9 +2279,7 @@ final class LogitechReprogrammableControlsMonitor {
         NSWorkspace.shared
             .notificationCenter
             .publisher(for: NSWorkspace.didActivateApplicationNotification)
-            .sink { [weak self] notification in
-                let application = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
-                FrontmostApplicationTracker.shared.update(with: application)
+            .sink { [weak self] _ in
                 self?.requestReconfiguration()
             }
             .store(in: &subscriptions)
@@ -2324,7 +2322,7 @@ final class LogitechReprogrammableControlsMonitor {
 
         let mouseLocation = CGEvent(source: nil)?.location ?? .zero
         let mouseLocationPid = mouseLocation.topmostWindowOwnerPid
-            ?? FrontmostApplicationTracker.shared.processIdentifier
+            ?? NSWorkspace.shared.frontmostApplication?.processIdentifier
         let scheme = ConfigurationState.shared.configuration.matchScheme(
             withDevice: device,
             withPid: mouseLocationPid,
