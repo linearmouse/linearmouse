@@ -74,16 +74,16 @@ public class KeySimulator {
 
 public extension KeySimulator {
     func reset() {
-        lock.lock()
-        defer { lock.unlock() }
-        flags = []
+        lock.withLock {
+            flags = []
+        }
     }
 
     func down(keys: [Key], tap: CGEventTapLocation? = nil) throws {
-        lock.lock()
-        defer { lock.unlock() }
-        for key in keys {
-            try postKeyLocked(key, keyDown: true, tap: tap)
+        try lock.withLock {
+            for key in keys {
+                try postKeyLocked(key, keyDown: true, tap: tap)
+            }
         }
     }
 
@@ -92,10 +92,10 @@ public extension KeySimulator {
     }
 
     func up(keys: [Key], tap: CGEventTapLocation? = nil) throws {
-        lock.lock()
-        defer { lock.unlock() }
-        for key in keys {
-            try postKeyLocked(key, keyDown: false, tap: tap)
+        try lock.withLock {
+            for key in keys {
+                try postKeyLocked(key, keyDown: false, tap: tap)
+            }
         }
     }
 
@@ -104,13 +104,13 @@ public extension KeySimulator {
     }
 
     func press(keys: [Key], tap: CGEventTapLocation? = nil) throws {
-        lock.lock()
-        defer { lock.unlock() }
-        for key in keys {
-            try postKeyLocked(key, keyDown: true, tap: tap)
-        }
-        for key in keys.reversed() {
-            try postKeyLocked(key, keyDown: false, tap: tap)
+        try lock.withLock {
+            for key in keys {
+                try postKeyLocked(key, keyDown: true, tap: tap)
+            }
+            for key in keys.reversed() {
+                try postKeyLocked(key, keyDown: false, tap: tap)
+            }
         }
     }
 
@@ -119,16 +119,16 @@ public extension KeySimulator {
     }
 
     func modifiedCGEventFlags(of event: CGEvent) -> CGEventFlags? {
-        lock.lock()
-        defer { lock.unlock() }
-        guard !flags.isEmpty else {
-            return nil
-        }
+        lock.withLock {
+            guard !flags.isEmpty else {
+                return nil
+            }
 
-        guard event.type == .keyDown || event.type == .keyUp else {
-            return nil
-        }
+            guard event.type == .keyDown || event.type == .keyUp else {
+                return nil
+            }
 
-        return event.flags.union(flags)
+            return event.flags.union(flags)
+        }
     }
 }
