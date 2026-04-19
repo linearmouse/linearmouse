@@ -18,6 +18,12 @@ struct KensingtonSlimbladeHandler: InputReportHandler {
     private static let topLeftMask: UInt8 = 0x1
     private static let topRightMask: UInt8 = 0x2
 
+    private let emit: MouseButtonEmitter
+
+    init(emit: @escaping MouseButtonEmitter = SyntheticMouseButtonEventEmitter.post) {
+        self.emit = emit
+    }
+
     func matches(vendorID: Int, productID: Int) -> Bool {
         vendorID == Self.vendorID && productID == Self.productID
     }
@@ -45,13 +51,13 @@ struct KensingtonSlimbladeHandler: InputReportHandler {
         // Check top left button (maps to button 3)
         if toggled & Self.topLeftMask != 0 {
             let down = buttonStates & Self.topLeftMask != 0
-            simulateButtonEvent(button: 3, down: down)
+            emit(3, down)
         }
 
         // Check top right button (maps to button 4)
         if toggled & Self.topRightMask != 0 {
             let down = buttonStates & Self.topRightMask != 0
-            simulateButtonEvent(button: 4, down: down)
+            emit(4, down)
         }
 
         context.lastButtonStates = buttonStates

@@ -20,6 +20,12 @@ struct GenericSideButtonHandler: InputReportHandler {
         .init(vendorID: 0x248A, productID: 0x8266) // Delux M729DB mouse
     ]
 
+    private let emit: MouseButtonEmitter
+
+    init(emit: @escaping MouseButtonEmitter = SyntheticMouseButtonEventEmitter.post) {
+        self.emit = emit
+    }
+
     func matches(vendorID: Int, productID: Int) -> Bool {
         Self.supportedProducts.contains(.init(vendorID: vendorID, productID: productID))
     }
@@ -45,7 +51,7 @@ struct GenericSideButtonHandler: InputReportHandler {
                 continue
             }
             let down = buttonStates & (1 << button) != 0
-            simulateButtonEvent(button: button, down: down)
+            emit(button, down)
         }
 
         context.lastButtonStates = buttonStates

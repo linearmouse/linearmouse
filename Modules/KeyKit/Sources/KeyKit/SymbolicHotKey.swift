@@ -108,13 +108,43 @@ public func postSymbolicHotKey(_ hotkey: SymbolicHotKey) throws {
         }
     }
 
+    let flags = CGEventFlags(rawValue: UInt64(modifiers.rawValue))
+    let modifierKeyCodes: [(CGEventFlags, CGKeyCode)] = [
+        (.maskShift, 0x38), // kVK_Shift
+        (.maskControl, 0x3B), // kVK_Control
+        (.maskAlternate, 0x3A), // kVK_Option
+        (.maskCommand, 0x37) // kVK_Command
+    ]
+    let activeModifiers = modifierKeyCodes.filter { flags.contains($0.0) }
+
+    // Bookend the synthetic hotkey with explicit `flagsChanged` events that mirror a real
+    // keyboard: the kernel's global modifier state would otherwise remain "held" after we
+    // post a key event whose `flags` field includes a modifier (e.g. Control sticks until
+    // a real keystroke clears it).
+    var accumulated = CGEventFlags()
+    for (flag, keyCode) in activeModifiers {
+        accumulated.insert(flag)
+        let event = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: true)!
+        event.type = .flagsChanged
+        event.flags = accumulated
+        event.post(tap: .cgSessionEventTap)
+    }
+
     let keyDown = CGEvent(keyboardEventSource: nil, virtualKey: virtualKeyCode, keyDown: true)!
-    keyDown.flags = CGEventFlags(rawValue: UInt64(modifiers.rawValue))
+    keyDown.flags = flags
     let keyUp = CGEvent(keyboardEventSource: nil, virtualKey: virtualKeyCode, keyDown: false)!
-    keyUp.flags = CGEventFlags(rawValue: UInt64(modifiers.rawValue))
+    keyUp.flags = flags
 
     keyDown.post(tap: .cgSessionEventTap)
     keyUp.post(tap: .cgSessionEventTap)
+
+    for (flag, keyCode) in activeModifiers.reversed() {
+        accumulated.remove(flag)
+        let event = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: false)!
+        event.type = .flagsChanged
+        event.flags = accumulated
+        event.post(tap: .cgSessionEventTap)
+    }
 }
 
 private func waitUntilCGEventsBeingHandled() {
