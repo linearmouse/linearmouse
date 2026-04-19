@@ -123,8 +123,8 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
         } else {
             // FIXME: `NSEvent.keyRepeatDelay` and `NSEvent.keyRepeatInterval` are not kept up to date
             // TODO: Support override `repeatDelay` and `repeatInterval`
-            let keyRepeatDelay = mapping.repeat == true ? NSEvent.keyRepeatDelay : 0
-            let keyRepeatInterval = mapping.repeat == true ? NSEvent.keyRepeatInterval : 0
+            let keyRepeatDelay = mapping.repeat == true ? KeyboardSettingsSnapshot.shared.keyRepeatDelay : 0
+            let keyRepeatInterval = mapping.repeat == true ? KeyboardSettingsSnapshot.shared.keyRepeatInterval : 0
             let keyRepeatEnabled = keyRepeatDelay > 0 && keyRepeatInterval > 0
 
             if !keyRepeatEnabled {
@@ -213,8 +213,8 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
         logitechRepeatTimer?.invalidate()
         logitechRepeatTimer = nil
 
-        let keyRepeatDelay = mapping.repeat == true ? NSEvent.keyRepeatDelay : 0
-        let keyRepeatInterval = mapping.repeat == true ? NSEvent.keyRepeatInterval : 0
+        let keyRepeatDelay = mapping.repeat == true ? KeyboardSettingsSnapshot.shared.keyRepeatDelay : 0
+        let keyRepeatInterval = mapping.repeat == true ? KeyboardSettingsSnapshot.shared.keyRepeatInterval : 0
         let keyRepeatEnabled = keyRepeatDelay > 0 && keyRepeatInterval > 0
         let shouldExecute = keyRepeatEnabled ? context.isPressed : !context.isPressed
 

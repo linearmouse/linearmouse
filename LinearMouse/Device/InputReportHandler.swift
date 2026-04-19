@@ -4,6 +4,8 @@
 import CoreGraphics
 import Foundation
 
+typealias MouseButtonEmitter = (_ button: Int, _ down: Bool) -> Void
+
 enum SyntheticMouseButtonEventEmitter {
     static func post(button: Int, down: Bool) {
         guard let location = CGEvent(source: nil)?.location,
@@ -51,10 +53,6 @@ protocol InputReportHandler {
 extension InputReportHandler {
     func alwaysNeedsReportObservation() -> Bool {
         false
-    }
-
-    func simulateButtonEvent(button: Int, down: Bool) {
-        SyntheticMouseButtonEventEmitter.post(button: button, down: down)
     }
 }
 

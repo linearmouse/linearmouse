@@ -9,6 +9,7 @@ import Foundation
 /// Keyboard layout-independent key code resolver.
 public class KeyCodeResolver {
     private var subscriptions = Set<AnyCancellable>()
+    private let mappingLock = NSLock()
     private var mapping: [String: CGKeyCode] = [:]
     private var reversedMapping: [CGKeyCode: Key] = [:]
 
@@ -16,22 +17,29 @@ public class KeyCodeResolver {
         DistributedNotificationCenter.default
             .publisher(for: .init(kTISNotifyEnabledKeyboardInputSourcesChanged as String))
             .sink { [weak self] _ in
-                Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { _ in
-                    self?.updateMapping()
-                }
+                self?.scheduleMappingUpdate(after: 0.1)
             }
             .store(in: &subscriptions)
 
         DistributedNotificationCenter.default
             .publisher(for: .init(kTISNotifySelectedKeyboardInputSourceChanged as String))
             .sink { [weak self] _ in
-                Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { _ in
-                    self?.updateMapping()
-                }
+                self?.scheduleMappingUpdate(after: 0.1)
             }
             .store(in: &subscriptions)
 
-        updateMapping()
+        // `NSEvent.characters` below asserts on the main thread.
+        if Thread.isMainThread {
+            updateMapping()
+        } else {
+            DispatchQueue.main.sync { updateMapping() }
+        }
+    }
+
+    private func scheduleMappingUpdate(after delay: TimeInterval) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+            self?.updateMapping()
+        }
     }
 
     private func updateMapping() {
@@ -118,15 +126,17 @@ public class KeyCodeResolver {
             newReversedMapping[keyCode] = key
         }
 
-        mapping = newMapping
-        reversedMapping = newReversedMapping
+        mappingLock.withLock {
+            mapping = newMapping
+            reversedMapping = newReversedMapping
+        }
     }
 
     public func keyCode(for key: Key) -> CGKeyCode? {
-        mapping[key.rawValue]
+        mappingLock.withLock { mapping[key.rawValue] }
     }
 
     public func key(from keyCode: CGKeyCode) -> Key? {
-        reversedMapping[keyCode]
+        mappingLock.withLock { reversedMapping[keyCode] }
     }
 }

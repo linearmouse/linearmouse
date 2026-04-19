@@ -5,6 +5,18 @@
 import XCTest
 
 final class InputReportHandlerTests: XCTestCase {
+    /// Captures emissions from the handlers so tests can assert against them without
+    /// posting real `otherMouseDown` events into the OS.
+    private final class EmissionRecorder {
+        private(set) var events: [(button: Int, down: Bool)] = []
+
+        var emit: MouseButtonEmitter {
+            { [weak self] button, down in
+                self?.events.append((button, down))
+            }
+        }
+    }
+
     // MARK: - InputReportContext Tests
 
     func testContextInitialization() {
@@ -49,7 +61,7 @@ final class InputReportHandlerTests: XCTestCase {
     }
 
     func testGenericHandlerCallsNext() {
-        let handler = GenericSideButtonHandler()
+        let handler = GenericSideButtonHandler { _, _ in }
         let context = InputReportContext(report: Data([0x00, 0x00]), lastButtonStates: 0x00)
 
         var nextCalled = false
@@ -61,7 +73,7 @@ final class InputReportHandlerTests: XCTestCase {
     }
 
     func testGenericHandlerCallsNextEvenWithShortReport() {
-        let handler = GenericSideButtonHandler()
+        let handler = GenericSideButtonHandler { _, _ in }
         let context = InputReportContext(report: Data([0x00]), lastButtonStates: 0x00)
 
         var nextCalled = false
@@ -73,7 +85,8 @@ final class InputReportHandlerTests: XCTestCase {
     }
 
     func testGenericHandlerUpdatesButtonStates() {
-        let handler = GenericSideButtonHandler()
+        let recorder = EmissionRecorder()
+        let handler = GenericSideButtonHandler(emit: recorder.emit)
         // Button 3 pressed: bit 3 set (0x08)
         let context = InputReportContext(report: Data([0x00, 0x08]), lastButtonStates: 0x00)
 
@@ -83,45 +96,66 @@ final class InputReportHandlerTests: XCTestCase {
     }
 
     func testGenericHandlerDetectsButton3Toggle() {
-        let handler = GenericSideButtonHandler()
+        let recorder = EmissionRecorder()
+        let handler = GenericSideButtonHandler(emit: recorder.emit)
         // Button 3 pressed: bit 3 set (0x08)
         let context = InputReportContext(report: Data([0x00, 0x08]), lastButtonStates: 0x00)
 
         handler.handleReport(context) { _ in }
 
-        // State should be updated
         XCTAssertEqual(context.lastButtonStates, 0x08)
+        XCTAssertEqual(recorder.events.map(\.button), [3])
+        XCTAssertEqual(recorder.events.map(\.down), [true])
+    }
+
+    func testGenericHandlerEmitsButton3ReleaseOnUp() {
+        let recorder = EmissionRecorder()
+        let handler = GenericSideButtonHandler(emit: recorder.emit)
+        let context = InputReportContext(report: Data([0x00, 0x00]), lastButtonStates: 0x08)
+
+        handler.handleReport(context) { _ in }
+
+        XCTAssertEqual(context.lastButtonStates, 0x00)
+        XCTAssertEqual(recorder.events.map(\.button), [3])
+        XCTAssertEqual(recorder.events.map(\.down), [false])
     }
 
     func testGenericHandlerDetectsButton4Toggle() {
-        let handler = GenericSideButtonHandler()
+        let recorder = EmissionRecorder()
+        let handler = GenericSideButtonHandler(emit: recorder.emit)
         // Button 4 pressed: bit 4 set (0x10)
         let context = InputReportContext(report: Data([0x00, 0x10]), lastButtonStates: 0x00)
 
         handler.handleReport(context) { _ in }
 
         XCTAssertEqual(context.lastButtonStates, 0x10)
+        XCTAssertEqual(recorder.events.map(\.button), [4])
+        XCTAssertEqual(recorder.events.map(\.down), [true])
     }
 
     func testGenericHandlerDetectsBothButtonsToggle() {
-        let handler = GenericSideButtonHandler()
+        let recorder = EmissionRecorder()
+        let handler = GenericSideButtonHandler(emit: recorder.emit)
         // Both buttons pressed: bits 3 and 4 set (0x18)
         let context = InputReportContext(report: Data([0x00, 0x18]), lastButtonStates: 0x00)
 
         handler.handleReport(context) { _ in }
 
         XCTAssertEqual(context.lastButtonStates, 0x18)
+        XCTAssertEqual(recorder.events.map(\.button), [3, 4])
+        XCTAssertEqual(recorder.events.map(\.down), [true, true])
     }
 
     func testGenericHandlerNoChangeWhenNoToggle() {
-        let handler = GenericSideButtonHandler()
+        let recorder = EmissionRecorder()
+        let handler = GenericSideButtonHandler(emit: recorder.emit)
         // Same state as before
         let context = InputReportContext(report: Data([0x00, 0x08]), lastButtonStates: 0x08)
 
         handler.handleReport(context) { _ in }
 
-        // State should remain the same
         XCTAssertEqual(context.lastButtonStates, 0x08)
+        XCTAssertTrue(recorder.events.isEmpty)
     }
 
     // MARK: - KensingtonSlimbladeHandler Tests
@@ -145,7 +179,7 @@ final class InputReportHandlerTests: XCTestCase {
     }
 
     func testSlimbladeHandlerCallsNext() {
-        let handler = KensingtonSlimbladeHandler()
+        let handler = KensingtonSlimbladeHandler { _, _ in }
         let context = InputReportContext(
             report: Data([0x00, 0x00, 0x00, 0x00, 0x00]),
             lastButtonStates: 0x00
@@ -160,7 +194,7 @@ final class InputReportHandlerTests: XCTestCase {
     }
 
     func testSlimbladeHandlerCallsNextEvenWithShortReport() {
-        let handler = KensingtonSlimbladeHandler()
+        let handler = KensingtonSlimbladeHandler { _, _ in }
         let context = InputReportContext(report: Data([0x00, 0x00]), lastButtonStates: 0x00)
 
         var nextCalled = false
@@ -172,7 +206,8 @@ final class InputReportHandlerTests: XCTestCase {
     }
 
     func testSlimbladeHandlerDetectsTopLeftButton() {
-        let handler = KensingtonSlimbladeHandler()
+        let recorder = EmissionRecorder()
+        let handler = KensingtonSlimbladeHandler(emit: recorder.emit)
         // Top left button pressed: bit 0 set in byte 4
         let context = InputReportContext(
             report: Data([0x00, 0x00, 0x00, 0x00, 0x01]),
@@ -182,10 +217,28 @@ final class InputReportHandlerTests: XCTestCase {
         handler.handleReport(context) { _ in }
 
         XCTAssertEqual(context.lastButtonStates, 0x01)
+        XCTAssertEqual(recorder.events.map(\.button), [3])
+        XCTAssertEqual(recorder.events.map(\.down), [true])
+    }
+
+    func testSlimbladeHandlerEmitsTopLeftReleaseOnUp() {
+        let recorder = EmissionRecorder()
+        let handler = KensingtonSlimbladeHandler(emit: recorder.emit)
+        let context = InputReportContext(
+            report: Data([0x00, 0x00, 0x00, 0x00, 0x00]),
+            lastButtonStates: 0x01
+        )
+
+        handler.handleReport(context) { _ in }
+
+        XCTAssertEqual(context.lastButtonStates, 0x00)
+        XCTAssertEqual(recorder.events.map(\.button), [3])
+        XCTAssertEqual(recorder.events.map(\.down), [false])
     }
 
     func testSlimbladeHandlerDetectsTopRightButton() {
-        let handler = KensingtonSlimbladeHandler()
+        let recorder = EmissionRecorder()
+        let handler = KensingtonSlimbladeHandler(emit: recorder.emit)
         // Top right button pressed: bit 1 set in byte 4
         let context = InputReportContext(
             report: Data([0x00, 0x00, 0x00, 0x00, 0x02]),
@@ -195,10 +248,13 @@ final class InputReportHandlerTests: XCTestCase {
         handler.handleReport(context) { _ in }
 
         XCTAssertEqual(context.lastButtonStates, 0x02)
+        XCTAssertEqual(recorder.events.map(\.button), [4])
+        XCTAssertEqual(recorder.events.map(\.down), [true])
     }
 
     func testSlimbladeHandlerDetectsBothTopButtons() {
-        let handler = KensingtonSlimbladeHandler()
+        let recorder = EmissionRecorder()
+        let handler = KensingtonSlimbladeHandler(emit: recorder.emit)
         // Both top buttons pressed: bits 0 and 1 set in byte 4
         let context = InputReportContext(
             report: Data([0x00, 0x00, 0x00, 0x00, 0x03]),
@@ -208,6 +264,8 @@ final class InputReportHandlerTests: XCTestCase {
         handler.handleReport(context) { _ in }
 
         XCTAssertEqual(context.lastButtonStates, 0x03)
+        XCTAssertEqual(recorder.events.map(\.button), [3, 4])
+        XCTAssertEqual(recorder.events.map(\.down), [true, true])
     }
 
     // MARK: - InputReportHandlerRegistry Tests

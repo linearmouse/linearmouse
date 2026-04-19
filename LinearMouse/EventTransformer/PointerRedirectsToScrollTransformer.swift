@@ -1,7 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
-import AppKit
+import CoreGraphics
 import Foundation
 
 class PointerRedirectsToScrollTransformer: EventTransformer {
@@ -13,7 +13,7 @@ class PointerRedirectsToScrollTransformer: EventTransformer {
         // Despite making this function return nil, the mouseMoved event
         // still causes the cursor to move, so we need to manually move
         // the cursor to maintain a fixed position during scrolling.
-        CGWarpMouseCursorPosition(topLeftScreenCoordinates())
+        CGWarpMouseCursorPosition(event.location)
 
         let deltaX = event.getDoubleValueField(.mouseEventDeltaX)
         let deltaY = event.getDoubleValueField(.mouseEventDeltaY)
@@ -32,13 +32,5 @@ class PointerRedirectsToScrollTransformer: EventTransformer {
         }
 
         return nil
-    }
-
-    private func topLeftScreenCoordinates() -> CGPoint {
-        let mouseLocation = NSEvent.mouseLocation
-        guard let screen = NSScreen.main else {
-            return mouseLocation
-        }
-        return CGPoint(x: mouseLocation.x, y: screen.frame.height - mouseLocation.y)
     }
 }

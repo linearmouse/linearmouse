@@ -65,6 +65,7 @@ extension AppDelegate {
     func setup() {
         setupConfiguration()
         setupNotifications()
+        KeyboardSettingsSnapshot.shared.refresh()
         start()
     }
 
@@ -92,6 +93,7 @@ extension AppDelegate {
             queue: .main
         ) { [weak self] _ in
             os_log("Session active", log: Self.log, type: .info)
+            KeyboardSettingsSnapshot.shared.refresh()
             self?.start()
         }
     }

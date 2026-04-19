@@ -3,7 +3,6 @@
 
 import AppKit
 import Foundation
-import LRUCache
 
 class MouseEventView: EventView {
     var mouseButton: CGMouseButton? {
@@ -48,10 +47,7 @@ class MouseEventView: EventView {
         return pid
     }
 
-    var mouseLocationWindowID: CGWindowID {
-        CGWindowID(NSWindow.windowNumber(
-            at: NSPointFromCGPoint(event.unflippedLocation),
-            belowWindowWithWindowNumber: 0
-        ))
+    var mouseLocationOwnerPid: pid_t? {
+        event.location.topmostWindowOwnerPid
     }
 }

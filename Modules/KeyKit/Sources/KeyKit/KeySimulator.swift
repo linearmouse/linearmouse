@@ -10,12 +10,13 @@ public enum KeySimulatorError: Error {
 /// Simulate key presses.
 public class KeySimulator {
     private let keyCodeResolver = KeyCodeResolver()
+    private let lock = NSLock()
 
     private var flags = CGEventFlags()
 
     public init() {}
 
-    private func postKey(_ key: Key, keyDown: Bool, tap: CGEventTapLocation? = nil) throws {
+    private func postKeyLocked(_ key: Key, keyDown: Bool, tap: CGEventTapLocation? = nil) throws {
         var flagsToToggle = CGEventFlags()
         switch key {
         case .command, .commandRight:
@@ -73,12 +74,16 @@ public class KeySimulator {
 
 public extension KeySimulator {
     func reset() {
-        flags = []
+        lock.withLock {
+            flags = []
+        }
     }
 
     func down(keys: [Key], tap: CGEventTapLocation? = nil) throws {
-        for key in keys {
-            try postKey(key, keyDown: true, tap: tap)
+        try lock.withLock {
+            for key in keys {
+                try postKeyLocked(key, keyDown: true, tap: tap)
+            }
         }
     }
 
@@ -87,8 +92,10 @@ public extension KeySimulator {
     }
 
     func up(keys: [Key], tap: CGEventTapLocation? = nil) throws {
-        for key in keys {
-            try postKey(key, keyDown: false, tap: tap)
+        try lock.withLock {
+            for key in keys {
+                try postKeyLocked(key, keyDown: false, tap: tap)
+            }
         }
     }
 
@@ -97,8 +104,14 @@ public extension KeySimulator {
     }
 
     func press(keys: [Key], tap: CGEventTapLocation? = nil) throws {
-        try down(keys: keys, tap: tap)
-        try up(keys: keys.reversed(), tap: tap)
+        try lock.withLock {
+            for key in keys {
+                try postKeyLocked(key, keyDown: true, tap: tap)
+            }
+            for key in keys.reversed() {
+                try postKeyLocked(key, keyDown: false, tap: tap)
+            }
+        }
     }
 
     func press(_ keys: Key..., tap: CGEventTapLocation? = nil) throws {
@@ -106,14 +119,16 @@ public extension KeySimulator {
     }
 
     func modifiedCGEventFlags(of event: CGEvent) -> CGEventFlags? {
-        guard !flags.isEmpty else {
-            return nil
-        }
+        lock.withLock {
+            guard !flags.isEmpty else {
+                return nil
+            }
 
-        guard event.type == .keyDown || event.type == .keyUp else {
-            return nil
-        }
+            guard event.type == .keyDown || event.type == .keyUp else {
+                return nil
+            }
 
-        return event.flags.union(flags)
+            return event.flags.union(flags)
+        }
     }
 }

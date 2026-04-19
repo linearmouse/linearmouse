@@ -154,36 +154,3 @@ extension Binding {
         Binding<UnwrappedValue>(get: { wrappedValue ?? value }, set: { wrappedValue = $0 })
     }
 }
-
-private var cgWindowIDOwnerPidCache = LRUCache<CGWindowID, pid_t?>(countLimit: 16)
-
-extension CGWindowID {
-    var ownerPid: pid_t? {
-        if let ownerPid = cgWindowIDOwnerPidCache.value(forKey: self) {
-            return ownerPid
-        }
-
-        func getOwnerPid() -> pid_t? {
-            let options = CGWindowListOption(arrayLiteral: [.excludeDesktopElements, .optionOnScreenOnly])
-            guard let windowListInfo = CGWindowListCopyWindowInfo(
-                options,
-                kCGNullWindowID
-            ) as NSArray? as? [[String: Any]]
-            else {
-                return nil
-            }
-
-            for windowInfo in windowListInfo {
-                if let windowID = windowInfo[kCGWindowNumber as String] as? CGWindowID, windowID == self {
-                    return windowInfo[kCGWindowOwnerPID as String] as? pid_t
-                }
-            }
-            return nil
-        }
-
-        let ownerPid = getOwnerPid()
-        cgWindowIDOwnerPidCache.setValue(ownerPid, forKey: self)
-
-        return ownerPid
-    }
-}
