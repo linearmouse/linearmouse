@@ -8177,7 +8177,7 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Battery %@"
           }
         },
@@ -11114,7 +11114,7 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Circular"
           }
         },
@@ -11144,7 +11144,7 @@
         },
         "es" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Circular"
           }
         },
@@ -11222,19 +11222,19 @@
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Circular"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Circular"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Circular"
           }
         },
@@ -21219,7 +21219,7 @@
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Elastic"
           }
         },
@@ -36303,7 +36303,7 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Natural"
           }
         },
@@ -36333,7 +36333,7 @@
         },
         "es" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Natural"
           }
         },
@@ -36411,19 +36411,19 @@
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Natural"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Natural"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Natural"
           }
         },
