@@ -53,7 +53,7 @@ struct DevicePickerSheet: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                Toggle("", isOn: autoSwitchBinding.animation())
+                Toggle(String(""), isOn: autoSwitchBinding.animation())
                     .labelsHidden()
                     .toggleStyle(.switch)
                     .modifier(SheetToggleSizeModifier())

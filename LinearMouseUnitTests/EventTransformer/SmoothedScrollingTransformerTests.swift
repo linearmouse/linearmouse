@@ -264,9 +264,87 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
 
         let transformedEvent = try XCTUnwrap(transformer.transform(originalEvent))
         let transformedView = ScrollWheelEventView(transformedEvent)
-        XCTAssertEqual(transformedView.deltaYPt, 1, accuracy: 0.001)
+        XCTAssertEqual(transformedView.deltaYPt, 0, accuracy: 0.001)
         XCTAssertGreaterThan(transformedView.deltaYFixedPt, 0)
         XCTAssertLessThan(transformedView.deltaYFixedPt, 9)
         XCTAssertEqual(transformedView.scrollPhase, .began)
+    }
+
+    func testExtendedSpeedRangeProducesMuchStrongerInitialEmission() throws {
+        let baseline = try firstDiscreteEmission(
+            configuration: .init(
+                enabled: true,
+                preset: .easeInOut,
+                response: Decimal(string: "0.68"),
+                speed: Decimal(string: "3.0"),
+                acceleration: Decimal(string: "1.10"),
+                inertia: Decimal(string: "0.74")
+            )
+        )
+        let boosted = try firstDiscreteEmission(
+            configuration: .init(
+                enabled: true,
+                preset: .easeInOut,
+                response: Decimal(string: "0.68"),
+                speed: Decimal(string: "8.0"),
+                acceleration: Decimal(string: "1.10"),
+                inertia: Decimal(string: "0.74")
+            )
+        )
+
+        XCTAssertGreaterThan(abs(boosted.deltaYPt), abs(baseline.deltaYPt) * 1.8)
+    }
+
+    func testExtendedResponseRangeProducesMuchQuickerPickup() throws {
+        let baseline = try firstDiscreteEmission(
+            configuration: .init(
+                enabled: true,
+                preset: .easeInOut,
+                response: Decimal(string: "1.0"),
+                speed: Decimal(string: "1.00"),
+                acceleration: Decimal(string: "1.10"),
+                inertia: Decimal(string: "0.74")
+            )
+        )
+        let extended = try firstDiscreteEmission(
+            configuration: .init(
+                enabled: true,
+                preset: .easeInOut,
+                response: Decimal(string: "2.0"),
+                speed: Decimal(string: "1.00"),
+                acceleration: Decimal(string: "1.10"),
+                inertia: Decimal(string: "0.74")
+            )
+        )
+
+        XCTAssertGreaterThan(abs(extended.deltaYPt), abs(baseline.deltaYPt) * 1.25)
+    }
+
+    private func firstDiscreteEmission(
+        configuration: Scheme.Scrolling.Smoothed
+    ) throws -> ScrollWheelEventView {
+        var emittedEvents: [CGEvent] = []
+        var now = 0.0
+        let transformer = SmoothedScrollingTransformer(
+            smoothed: .init(vertical: configuration),
+            now: { now },
+            eventSink: { emittedEvents.append($0.copy() ?? $0) }
+        )
+
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: 1,
+            wheel2: 0,
+            wheel3: 0
+        ))
+
+        XCTAssertNil(transformer.transform(event))
+
+        now = 1.0 / 120.0
+        transformer.tick()
+
+        return try ScrollWheelEventView(XCTUnwrap(emittedEvents.first))
     }
 }

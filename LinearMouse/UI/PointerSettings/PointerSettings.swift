@@ -39,7 +39,7 @@ struct PointerSettings: View {
                             ) {
                                 labelWithDescription {
                                     Text("Pointer acceleration")
-                                    Text("(0–20)")
+                                    Text(verbatim: "(0–20)")
                                 }
                             }
                             TextField(
@@ -94,7 +94,7 @@ struct PointerSettings: View {
                                         }
                                     }
 
-                                    Text("(0–1)")
+                                    Text(verbatim: "(0–1)")
                                 }
                             }
                             TextField(
@@ -130,7 +130,7 @@ struct PointerSettings: View {
                             ) {
                                 labelWithDescription {
                                     Text("Tracking speed")
-                                    Text("(0–20)")
+                                    Text(verbatim: "(0–20)")
                                 }
                             }
                             TextField(

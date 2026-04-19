@@ -26,12 +26,12 @@ extension ScrollingSettings {
 
                 sliderRow(
                     title: "Scroll response",
-                    description: "(0–1)",
+                    description: "(0–2)",
                     value: Binding(
                         get: { state.smoothedResponse },
                         set: { state.smoothedResponse = $0 }
                     ),
-                    range: 0.0 ... 1.0,
+                    range: Scheme.Scrolling.Smoothed.responseRange,
                     minimumValueLabel: "Loose",
                     maximumValueLabel: "Immediate",
                     formatter: state.smoothedResponseFormatter
@@ -39,12 +39,12 @@ extension ScrollingSettings {
 
                 sliderRow(
                     title: "Scroll speed",
-                    description: "(0–3)",
+                    description: "(0–8)",
                     value: Binding(
                         get: { state.smoothedSpeed },
                         set: { state.smoothedSpeed = $0 }
                     ),
-                    range: 0.0 ... 3.0,
+                    range: Scheme.Scrolling.Smoothed.speedRange,
                     minimumValueLabel: "Slow",
                     maximumValueLabel: "Fast",
                     formatter: state.smoothedSpeedFormatter
@@ -52,12 +52,12 @@ extension ScrollingSettings {
 
                 sliderRow(
                     title: "Scroll acceleration",
-                    description: "(0–3)",
+                    description: "(0–8)",
                     value: Binding(
                         get: { state.smoothedAcceleration },
                         set: { state.smoothedAcceleration = $0 }
                     ),
-                    range: 0.0 ... 3.0,
+                    range: Scheme.Scrolling.Smoothed.accelerationRange,
                     minimumValueLabel: "Flat",
                     maximumValueLabel: "Adaptive",
                     formatter: state.smoothedAccelerationFormatter
@@ -65,12 +65,12 @@ extension ScrollingSettings {
 
                 sliderRow(
                     title: "Scroll inertia",
-                    description: "(0–3)",
+                    description: "(0–8)",
                     value: Binding(
                         get: { state.smoothedInertia },
                         set: { state.smoothedInertia = $0 }
                     ),
-                    range: 0.0 ... 3.0,
+                    range: Scheme.Scrolling.Smoothed.inertiaRange,
                     minimumValueLabel: "Short",
                     maximumValueLabel: "Long",
                     formatter: state.smoothedInertiaFormatter
@@ -104,11 +104,11 @@ extension ScrollingSettings {
                     .frame(width: 92, height: 44)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(state.smoothedPreset.displayName)
+                        Text(state.smoothedPreset.presentation.title)
                             .font(.headline)
                             .foregroundColor(.primary)
 
-                        Text(presetFootnote(for: state.smoothedPreset))
+                        Text(state.smoothedPreset.presentation.subtitle)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .lineLimit(1)
@@ -164,12 +164,12 @@ extension ScrollingSettings {
 
                     VStack(alignment: .leading, spacing: 3) {
                         HStack(alignment: .firstTextBaseline, spacing: 6) {
-                            Text(preset.displayName)
+                            Text(preset.presentation.title)
                                 .font(.system(size: 13, weight: .semibold))
                                 .foregroundColor(.primary)
                                 .lineLimit(1)
 
-                            if preset == .custom {
+                            if preset.presentation.showsEditableBadge {
                                 Text("Editable")
                                     .font(.system(size: 10, weight: .medium))
                                     .foregroundColor(.secondary)
@@ -203,64 +203,9 @@ extension ScrollingSettings {
             .buttonStyle(.plain)
         }
 
-        private func presetFootnote(for preset: Scheme.Scrolling.Smoothed.Preset) -> String {
-            switch preset {
-            case .custom:
-                return "Use this when you want to fine-tune the feel yourself."
-            case .linear:
-                return "Direct and immediate, with a short controlled tail."
-            case .easeIn:
-                return "Soft start that builds momentum as you keep scrolling."
-            case .easeOut:
-                return "Fast initial response that settles quickly."
-            case .easeInOut:
-                return "Balanced ramp-up and release."
-            case .easeOutIn:
-                return "Quick pickup with a softer body."
-            case .quadratic:
-                return "Ease-in quad with a noticeable but manageable ramp-up."
-            case .cubic:
-                return "Ease-in cubic with a stronger progressive build."
-            case .quartic:
-                return "Ease-in quartic with the strongest front-loaded ramp."
-            case .easeOutCubic:
-                return "Fast cubic pickup that settles into a shorter tail."
-            case .easeInOutCubic:
-                return "Cubic ease-in-out with a weightier middle section."
-            case .easeOutQuartic:
-                return "Very fast quartic pickup with a crisp release."
-            case .easeInOutQuartic:
-                return "Quartic ease-in-out with the boldest mid-curve."
-            case .quintic:
-                return "Aggressive curve with a deep push."
-            case .sine:
-                return "Gentle, wave-like motion."
-            case .exponential:
-                return "Very strong build-up for bold flicks."
-            case .circular:
-                return "Rounded entry with a stable tail."
-            case .back:
-                return "Taut and punchy with a tighter stop."
-            case .bounce:
-                return "Playful, short-lived motion."
-            case .elastic:
-                return "Springy movement with a longer tail."
-            case .spring:
-                return "Fast pickup with a lively, cushioned rebound."
-            case .natural:
-                return "Legacy balanced preset kept for compatibility."
-            case .smooth:
-                return "Stable and fluid, with a longer carry than Linear."
-            case .snappy:
-                return "The quickest start, with the shortest tail."
-            case .gentle:
-                return "Soft and gliding, with the longest tail."
-            }
-        }
-
         private func sliderRow(
             title: LocalizedStringKey,
-            description: LocalizedStringKey,
+            description: String,
             value: Binding<Double>,
             range: ClosedRange<Double>,
             minimumValueLabel: LocalizedStringKey,
@@ -274,7 +219,7 @@ extension ScrollingSettings {
                 ) {
                     labelWithDescription {
                         Text(title)
-                        Text(description)
+                        Text(verbatim: description)
                     }
                 } minimumValueLabel: {
                     Text(minimumValueLabel)
@@ -618,63 +563,6 @@ private struct DeferredNumberField: NSViewRepresentable {
             let clamped = min(max(number.doubleValue, parent.range.lowerBound), parent.range.upperBound)
             parent.value = clamped
             textField.stringValue = parent.formattedValue(clamped)
-        }
-    }
-}
-
-private extension Scheme.Scrolling.Smoothed.Preset {
-    var displayName: String {
-        switch self {
-        case .custom:
-            return "Custom"
-        case .linear:
-            return "Linear"
-        case .easeIn:
-            return "Ease In"
-        case .easeOut:
-            return "Ease Out"
-        case .easeInOut:
-            return "Ease In Out"
-        case .easeOutIn:
-            return "Ease Out In"
-        case .quadratic:
-            return "Ease In Quad"
-        case .cubic:
-            return "Ease In Cubic"
-        case .quartic:
-            return "Ease In Quartic"
-        case .easeOutCubic:
-            return "Ease Out Cubic"
-        case .easeInOutCubic:
-            return "Ease In Out Cubic"
-        case .easeOutQuartic:
-            return "Ease Out Quartic"
-        case .easeInOutQuartic:
-            return "Ease In Out Quartic"
-        case .quintic:
-            return "Quintic"
-        case .sine:
-            return "Sine"
-        case .exponential:
-            return "Exponential"
-        case .circular:
-            return "Circular"
-        case .back:
-            return "Back"
-        case .bounce:
-            return "Bounce"
-        case .elastic:
-            return "Elastic"
-        case .spring:
-            return "Spring"
-        case .natural:
-            return "Natural"
-        case .smooth:
-            return "Smooth"
-        case .snappy:
-            return "Snappy"
-        case .gentle:
-            return "Gentle"
         }
     }
 }

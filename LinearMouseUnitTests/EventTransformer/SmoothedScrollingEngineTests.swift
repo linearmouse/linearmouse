@@ -36,18 +36,18 @@ final class SmoothedScrollingEngineTests: XCTestCase {
             }
         }
 
-        XCTAssertEqual(emissions.first?.scrollPhase, .began)
-        XCTAssertTrue(emissions.dropFirst().contains { $0.scrollPhase == .changed })
-        let endedIndex = emissions.firstIndex { $0.scrollPhase == .ended }
-        let momentumBeginIndex = emissions.firstIndex { $0.momentumPhase == .begin }
+        XCTAssertEqual(emissions.first?.phase, .touchBegan)
+        XCTAssertTrue(emissions.dropFirst().contains { $0.phase == .touchChanged })
+        let endedIndex = emissions.firstIndex { $0.phase == .touchEnded }
+        let momentumBeginIndex = emissions.firstIndex { $0.phase == .momentumBegan }
         XCTAssertNotNil(endedIndex)
         XCTAssertNotNil(momentumBeginIndex)
         if let endedIndex, let momentumBeginIndex {
             XCTAssertLessThan(endedIndex, momentumBeginIndex)
         }
-        XCTAssertTrue(emissions.contains { $0.momentumPhase == .begin })
-        XCTAssertTrue(emissions.contains { $0.momentumPhase == .continuous })
-        XCTAssertEqual(emissions.last?.momentumPhase, .end)
+        XCTAssertTrue(emissions.contains { $0.phase == .momentumBegan })
+        XCTAssertTrue(emissions.contains { $0.phase == .momentumChanged })
+        XCTAssertEqual(emissions.last?.phase, .momentumEnded)
     }
 
     func testSmoothedScrollingPreservesPassthroughAxis() {
@@ -67,7 +67,7 @@ final class SmoothedScrollingEngineTests: XCTestCase {
         engine.feed(deltaX: 18, deltaY: 24, timestamp: 0)
         let emission = engine.advance(to: 1.0 / 120)
 
-        XCTAssertEqual(emission?.scrollPhase, .began)
+        XCTAssertEqual(emission?.phase, .touchBegan)
         XCTAssertEqual(emission?.deltaX ?? 0, 18, accuracy: 0.001)
         XCTAssertGreaterThan(abs(emission?.deltaY ?? 0), 0)
     }
@@ -106,7 +106,7 @@ final class SmoothedScrollingEngineTests: XCTestCase {
 
         for step in 6 ..< 24 {
             let timestamp = Double(step + 1) / 120
-            if let emission = engine.advance(to: timestamp), emission.momentumPhase == .continuous {
+            if let emission = engine.advance(to: timestamp), emission.phase == .momentumChanged {
                 latestMomentumEmission = emission
             }
         }
@@ -116,7 +116,7 @@ final class SmoothedScrollingEngineTests: XCTestCase {
         engine.feed(deltaX: 0, deltaY: 36, timestamp: reengagementTimestamp)
         let reengagedEmission = try XCTUnwrap(engine.advance(to: reengagementTimestamp + 1.0 / 120.0))
 
-        XCTAssertEqual(reengagedEmission.scrollPhase, .began)
+        XCTAssertEqual(reengagedEmission.phase, .touchBegan)
         XCTAssertGreaterThan(abs(reengagedEmission.deltaY), abs(baseline.deltaY))
         XCTAssertLessThan(abs(reengagedEmission.deltaY), abs(baseline.deltaY) * 2.6)
     }
@@ -137,7 +137,7 @@ final class SmoothedScrollingEngineTests: XCTestCase {
         for step in 6 ..< 240 {
             let timestamp = Double(step + 1) / 120
             if let emission = engine.advance(to: timestamp),
-               emission.momentumPhase == .continuous,
+               emission.phase == .momentumChanged,
                abs(emission.deltaY) < 0.25 {
                 tailEmission = emission
                 break
@@ -153,7 +153,7 @@ final class SmoothedScrollingEngineTests: XCTestCase {
         engine.feed(deltaX: 0, deltaY: 36, timestamp: reengagementTimestamp)
         let reengagedEmission = try XCTUnwrap(engine.advance(to: reengagementTimestamp + 1.0 / 120.0))
 
-        XCTAssertEqual(reengagedEmission.scrollPhase, .began)
+        XCTAssertEqual(reengagedEmission.phase, .touchBegan)
         XCTAssertGreaterThan(abs(reengagedEmission.deltaY), abs(baselineTail.deltaY) * 3)
         XCTAssertGreaterThan(abs(reengagedEmission.deltaY), abs(freshPickup.deltaY) * 0.7)
     }
@@ -174,7 +174,7 @@ final class SmoothedScrollingEngineTests: XCTestCase {
         var verticalMomentumDetected = false
         for step in 6 ..< 60 {
             let timestamp = Double(step + 1) / 120
-            if let emission = engine.advance(to: timestamp), emission.momentumPhase == .continuous,
+            if let emission = engine.advance(to: timestamp), emission.phase == .momentumChanged,
                abs(emission.deltaY) > 0.01 {
                 verticalMomentumDetected = true
                 break
@@ -187,7 +187,7 @@ final class SmoothedScrollingEngineTests: XCTestCase {
         engine.feed(deltaX: 36, deltaY: 0, timestamp: switchTimestamp)
         let switchedEmission = try XCTUnwrap(engine.advance(to: switchTimestamp + 1.0 / 120.0))
 
-        XCTAssertEqual(switchedEmission.scrollPhase, .began)
+        XCTAssertEqual(switchedEmission.phase, .touchBegan)
         XCTAssertGreaterThan(abs(switchedEmission.deltaX), 0.01)
         XCTAssertEqual(switchedEmission.deltaY, 0, accuracy: 0.001)
     }

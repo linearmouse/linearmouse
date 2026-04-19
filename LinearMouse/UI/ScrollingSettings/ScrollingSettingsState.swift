@@ -43,7 +43,7 @@ extension ScrollingSettingsState {
         var label: LocalizedStringKey {
             switch self {
             case .accelerated: "Accelerated"
-            case .smoothed: "Smoothed"
+            case .smoothed: "Smoothed (Beta)"
             case .byLines: "By Lines"
             case .byPixels: "By Pixels"
             }
@@ -144,7 +144,7 @@ extension ScrollingSettingsState {
     var smoothedResponse: Double {
         get { currentSmoothedConfiguration?.response?.asTruncatedDouble ?? 0.68 }
         set {
-            updateSmoothedConfigurationAsCustom {
+            updateSmoothedConfiguration {
                 $0.response = Decimal(newValue).rounded(2)
             }
         }
@@ -157,7 +157,7 @@ extension ScrollingSettingsState {
     var smoothedSpeed: Double {
         get { currentSmoothedConfiguration?.speed?.asTruncatedDouble ?? 1.02 }
         set {
-            updateSmoothedConfigurationAsCustom {
+            updateSmoothedConfiguration {
                 $0.speed = Decimal(newValue).rounded(2)
             }
         }
@@ -170,7 +170,7 @@ extension ScrollingSettingsState {
     var smoothedAcceleration: Double {
         get { currentSmoothedConfiguration?.acceleration?.asTruncatedDouble ?? 1.10 }
         set {
-            updateSmoothedConfigurationAsCustom {
+            updateSmoothedConfiguration {
                 $0.acceleration = Decimal(newValue).rounded(2)
             }
         }
@@ -183,7 +183,7 @@ extension ScrollingSettingsState {
     var smoothedInertia: Double {
         get { currentSmoothedConfiguration?.inertia?.asTruncatedDouble ?? 0.74 }
         set {
-            updateSmoothedConfigurationAsCustom {
+            updateSmoothedConfiguration {
                 $0.inertia = Decimal(newValue).rounded(2)
             }
         }
@@ -270,18 +270,24 @@ extension ScrollingSettingsState {
         }
     }
 
-    private func makeCustomSmoothedConfiguration() -> Scheme.Scrolling.Smoothed {
+    private func makeEditableSmoothedConfiguration() -> Scheme.Scrolling.Smoothed {
         var configuration = currentSmoothedConfiguration
             ?? scheme.scrolling.smoothed[direction]
             ?? smoothedCache[direction]
             ?? makeDefaultSmoothedConfiguration()
         configuration.enabled = true
+        configuration.preset = configuration.preset ?? .defaultPreset
+        return configuration
+    }
+
+    private func makeCustomSmoothedConfiguration() -> Scheme.Scrolling.Smoothed {
+        var configuration = makeEditableSmoothedConfiguration()
         configuration.preset = .custom
         return configuration
     }
 
-    private func updateSmoothedConfigurationAsCustom(_ update: (inout Scheme.Scrolling.Smoothed) -> Void) {
-        var configuration = makeCustomSmoothedConfiguration()
+    private func updateSmoothedConfiguration(_ update: (inout Scheme.Scrolling.Smoothed) -> Void) {
+        var configuration = makeEditableSmoothedConfiguration()
         update(&configuration)
         setSmoothedConfiguration(configuration)
     }

@@ -9,12 +9,10 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
         subsystem: Bundle.main.bundleIdentifier!, category: "SmoothedScrolling"
     )
     private static let timerInterval: TimeInterval = 1.0 / 120.0
-    private static let inputLineStepInPoints = 36.0
-    private static let outputLineStepInPoints = 12.0
-
     private let smoothed: Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Smoothed>
     private let now: () -> TimeInterval
     private let eventSink: (CGEvent) -> Void
+    private let delivery = SmoothedScrollEventDelivery()
 
     private var engine: SmoothedScrollingEngine
     private var timer: EventThreadTimer?
@@ -42,8 +40,8 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
             return event
         }
 
-        let deltaX = deltaXInPixels(from: view)
-        let deltaY = deltaYInPixels(from: view)
+        let deltaX = delivery.deltaXInPixels(from: view)
+        let deltaY = delivery.deltaYInPixels(from: view)
         let hasNativePhase = view.scrollPhase != nil
         let hasNativeMomentum = view.momentumPhase != .none
 
@@ -85,14 +83,14 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
         let passthroughEvent = event.copy() ?? event
         let passthroughView = ScrollWheelEventView(passthroughEvent)
         if interceptsX {
-            zeroHorizontal(on: passthroughView)
+            delivery.zeroHorizontal(on: passthroughView)
         }
         if interceptsY {
-            zeroVertical(on: passthroughView)
+            delivery.zeroVertical(on: passthroughView)
         }
 
-        return deltaXInPixels(from: passthroughView) == 0
-            && deltaYInPixels(from: passthroughView) == 0
+        return delivery.deltaXInPixels(from: passthroughView) == 0
+            && delivery.deltaYInPixels(from: passthroughView) == 0
             ? nil
             : passthroughEvent
     }
@@ -126,7 +124,6 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
     ) -> CGEvent? {
         let interceptsX = smoothed.horizontal != nil
         let interceptsY = smoothed.vertical != nil
-        let ensureVisibleTouchDelta = view.scrollPhase == .began || view.scrollPhase == .changed
 
         guard interceptsX || interceptsY else {
             return event
@@ -146,26 +143,20 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
         }
 
         if let emission = engine.advance(to: now()) {
+            delivery.apply(phases: delivery.phasesFor(emission.phase), to: view)
+
             if interceptsX {
-                setHorizontal(
-                    handlesX ? emission.deltaX : 0,
-                    on: view,
-                    ensureVisiblePointDelta: ensureVisibleTouchDelta
-                )
+                delivery.setHorizontal(handlesX ? emission.deltaX : 0, on: view)
             }
             if interceptsY {
-                setVertical(
-                    handlesY ? emission.deltaY : 0,
-                    on: view,
-                    ensureVisiblePointDelta: ensureVisibleTouchDelta
-                )
+                delivery.setVertical(handlesY ? emission.deltaY : 0, on: view)
             }
         } else {
             if interceptsX, !handlesX {
-                zeroHorizontal(on: view)
+                delivery.zeroHorizontal(on: view)
             }
             if interceptsY, !handlesY {
-                zeroVertical(on: view)
+                delivery.zeroVertical(on: view)
             }
         }
 
@@ -214,10 +205,9 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
 
         let view = ScrollWheelEventView(event)
         view.continuous = true
-        setHorizontal(emission.deltaX, on: view)
-        setVertical(emission.deltaY, on: view)
-        view.scrollPhase = emission.scrollPhase
-        view.momentumPhase = emission.momentumPhase
+        delivery.setHorizontal(emission.deltaX, on: view)
+        delivery.setVertical(emission.deltaY, on: view)
+        delivery.apply(phases: delivery.phasesFor(emission.phase), to: view)
         event.isLinearMouseSyntheticEvent = true
         event.flags = lastFlags
         eventSink(event)
@@ -228,12 +218,43 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
             type: .info,
             emission.deltaX,
             emission.deltaY,
-            String(describing: emission.scrollPhase),
-            String(describing: emission.momentumPhase)
+            String(describing: view.scrollPhase),
+            String(describing: view.momentumPhase)
         )
     }
+}
 
-    private func deltaXInPixels(from view: ScrollWheelEventView) -> Double {
+private struct SmoothedScrollEventDelivery {
+    private static let inputLineStepInPoints = 36.0
+    private static let outputLineStepInPoints = 12.0
+
+    func apply(
+        phases: (scrollPhase: CGScrollPhase?, momentumPhase: CGMomentumScrollPhase),
+        to view: ScrollWheelEventView
+    ) {
+        view.scrollPhase = phases.scrollPhase
+        view.momentumPhase = phases.momentumPhase
+    }
+
+    func phasesFor(_ phase: SmoothedScrollingEngine
+        .Phase) -> (scrollPhase: CGScrollPhase?, momentumPhase: CGMomentumScrollPhase) {
+        switch phase {
+        case .touchBegan:
+            return (.began, .none)
+        case .touchChanged:
+            return (.changed, .none)
+        case .touchEnded:
+            return (.ended, .none)
+        case .momentumBegan:
+            return (nil, .begin)
+        case .momentumChanged:
+            return (nil, .continuous)
+        case .momentumEnded:
+            return (nil, .end)
+        }
+    }
+
+    func deltaXInPixels(from view: ScrollWheelEventView) -> Double {
         if !view.continuous {
             if view.deltaX != 0 {
                 return Double(view.deltaX) * Self.inputLineStepInPoints
@@ -254,7 +275,7 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
         return Double(view.deltaX) * Self.inputLineStepInPoints
     }
 
-    private func deltaYInPixels(from view: ScrollWheelEventView) -> Double {
+    func deltaYInPixels(from view: ScrollWheelEventView) -> Double {
         if !view.continuous {
             if view.deltaY != 0 {
                 return Double(view.deltaY) * Self.inputLineStepInPoints
@@ -275,33 +296,25 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
         return Double(view.deltaY) * Self.inputLineStepInPoints
     }
 
-    private func setHorizontal(
-        _ value: Double,
-        on view: ScrollWheelEventView,
-        ensureVisiblePointDelta: Bool = false
-    ) {
+    func setHorizontal(_ value: Double, on view: ScrollWheelEventView) {
         view.deltaX = integerDelta(for: value)
-        view.deltaXPt = pointDelta(for: value, ensureVisible: ensureVisiblePointDelta)
+        view.deltaXPt = pointDelta(for: value)
         view.deltaXFixedPt = value
         view.ioHidScrollX = value
     }
 
-    private func setVertical(
-        _ value: Double,
-        on view: ScrollWheelEventView,
-        ensureVisiblePointDelta: Bool = false
-    ) {
+    func setVertical(_ value: Double, on view: ScrollWheelEventView) {
         view.deltaY = integerDelta(for: value)
-        view.deltaYPt = pointDelta(for: value, ensureVisible: ensureVisiblePointDelta)
+        view.deltaYPt = pointDelta(for: value)
         view.deltaYFixedPt = value
         view.ioHidScrollY = value
     }
 
-    private func zeroHorizontal(on view: ScrollWheelEventView) {
+    func zeroHorizontal(on view: ScrollWheelEventView) {
         setHorizontal(0, on: view)
     }
 
-    private func zeroVertical(on view: ScrollWheelEventView) {
+    func zeroVertical(on view: ScrollWheelEventView) {
         setVertical(0, on: view)
     }
 
@@ -309,16 +322,11 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
         Int64((value / Self.outputLineStepInPoints).rounded(.towardZero))
     }
 
-    private func pointDelta(for value: Double, ensureVisible: Bool) -> Double {
+    private func pointDelta(for value: Double) -> Double {
         guard value != 0 else {
             return 0
         }
 
-        let truncated = Double(Int64(value.rounded(.towardZero)))
-        if truncated != 0 {
-            return truncated
-        }
-
-        return ensureVisible ? (value.sign == .minus ? -1 : 1) : 0
+        return Double(Int64(value.rounded(.towardZero)))
     }
 }
