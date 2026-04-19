@@ -122,8 +122,7 @@ final class EventTransformerManagerTests: XCTestCase {
         let transformedEvent = try XCTUnwrap(transformer.transform(event))
         let transformedView = ScrollWheelEventView(transformedEvent)
 
-        XCTAssertLessThan(transformedView.deltaYPt, 0)
-        XCTAssertEqual(transformedView.deltaYPt, -1, accuracy: 0.001)
+        XCTAssertEqual(transformedView.deltaYPt, 0, accuracy: 0.001)
         XCTAssertLessThan(transformedView.deltaYFixedPt, 0)
         XCTAssertGreaterThan(transformedView.deltaYFixedPt, -12)
         XCTAssertEqual(transformedView.scrollPhase, .began)

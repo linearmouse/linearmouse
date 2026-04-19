@@ -2,6 +2,7 @@
 // Copyright (c) 2021-2026 LinearMouse
 
 import Foundation
+import SwiftUI
 
 extension Scheme.Scrolling {
     struct Smoothed: Equatable, Codable, ImplicitInitable {
@@ -73,6 +74,11 @@ extension Scheme.Scrolling {
 }
 
 extension Scheme.Scrolling.Smoothed {
+    static let responseRange: ClosedRange<Double> = 0.0 ... 2.0
+    static let speedRange: ClosedRange<Double> = 0.0 ... 8.0
+    static let accelerationRange: ClosedRange<Double> = 0.0 ... 8.0
+    static let inertiaRange: ClosedRange<Double> = 0.0 ... 8.0
+
     var resolvedPreset: Preset {
         preset ?? .defaultPreset
     }
@@ -121,6 +127,12 @@ extension Scheme.Scrolling.Smoothed {
 }
 
 extension Scheme.Scrolling.Smoothed.Preset {
+    struct Presentation: Equatable {
+        var title: LocalizedStringKey
+        var subtitle: LocalizedStringKey
+        var showsEditableBadge = false
+    }
+
     static var defaultPreset: Self {
         .easeInOut
     }
@@ -195,6 +207,65 @@ extension Scheme.Scrolling.Smoothed.Preset {
             return .init(response: 1.00, inputExponent: 0.88, accelerationGain: 0.05, decay: 0.76, velocityScale: 32)
         case .gentle:
             return .init(response: 0.42, inputExponent: 1.00, accelerationGain: 0.05, decay: 0.97, velocityScale: 34)
+        }
+    }
+
+    var presentation: Presentation {
+        switch self {
+        case .custom:
+            return .init(
+                title: "Custom",
+                subtitle: "Use this when you want to fine-tune the feel yourself.",
+                showsEditableBadge: true
+            )
+        case .linear:
+            return .init(title: "Linear", subtitle: "Direct and immediate, with a short controlled tail.")
+        case .easeIn:
+            return .init(title: "Ease In", subtitle: "Soft start that builds momentum as you keep scrolling.")
+        case .easeOut:
+            return .init(title: "Ease Out", subtitle: "Fast initial response that settles quickly.")
+        case .easeInOut:
+            return .init(title: "Ease In Out", subtitle: "Balanced ramp-up and release.")
+        case .easeOutIn:
+            return .init(title: "Ease Out In", subtitle: "Quick pickup with a softer body.")
+        case .quadratic:
+            return .init(title: "Ease In Quad", subtitle: "Ease-in quad with a noticeable but manageable ramp-up.")
+        case .cubic:
+            return .init(title: "Ease In Cubic", subtitle: "Ease-in cubic with a stronger progressive build.")
+        case .quartic:
+            return .init(title: "Ease In Quartic", subtitle: "Ease-in quartic with the strongest front-loaded ramp.")
+        case .easeOutCubic:
+            return .init(title: "Ease Out Cubic", subtitle: "Fast cubic pickup that settles into a shorter tail.")
+        case .easeInOutCubic:
+            return .init(title: "Ease In Out Cubic", subtitle: "Cubic ease-in-out with a weightier middle section.")
+        case .easeOutQuartic:
+            return .init(title: "Ease Out Quartic", subtitle: "Very fast quartic pickup with a crisp release.")
+        case .easeInOutQuartic:
+            return .init(title: "Ease In Out Quartic", subtitle: "Quartic ease-in-out with the boldest mid-curve.")
+        case .quintic:
+            return .init(title: "Quintic", subtitle: "Aggressive curve with a deep push.")
+        case .sine:
+            return .init(title: "Sine", subtitle: "Gentle, wave-like motion.")
+        case .exponential:
+            return .init(title: "Exponential", subtitle: "Very strong build-up for bold flicks.")
+        case .circular:
+            return .init(title: "Circular", subtitle: "Rounded entry with a stable tail.")
+        case .back:
+            return .init(title: "Back", subtitle: "Taut and punchy with a tighter stop.")
+        case .bounce:
+            return .init(title: "Bounce", subtitle: "Playful, short-lived motion.")
+        case .elastic:
+            return .init(title: "Elastic", subtitle: "Springy movement with a longer tail.")
+        case .spring:
+            return .init(title: "Spring", subtitle: "Fast pickup with a lively, cushioned rebound.")
+        case .natural:
+            return .init(title: "Natural", subtitle: "Legacy balanced preset kept for compatibility.")
+        case .smooth:
+            return .init(title: "Smooth", subtitle: "Stable and fluid, with a longer carry than Linear.")
+        case .snappy:
+            return .init(title: "Snappy", subtitle: "The quickest start, with the shortest tail.")
+        case .gentle:
+            return .init(title: "Gentle", subtitle: "Soft and gliding, with the longest tail.")
         }
     }
 

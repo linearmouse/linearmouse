@@ -34,9 +34,9 @@ extension ButtonMappingActionScroll {
                         in: 0 ... 10,
                         step: 1
                     ) {} minimumValueLabel: {
-                        Text("0")
+                        Text(verbatim: "0")
                     } maximumValueLabel: {
-                        Text("10")
+                        Text(verbatim: "10")
                     }
                     .labelsHidden()
 
@@ -45,9 +45,9 @@ extension ButtonMappingActionScroll {
                         value: $distance.pixelCount,
                         in: 0 ... 128
                     ) {} minimumValueLabel: {
-                        Text("0px")
+                        Text(verbatim: "0px")
                     } maximumValueLabel: {
-                        Text("128px")
+                        Text(verbatim: "128px")
                     }
                     .labelsHidden()
                 }

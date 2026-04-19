@@ -143,13 +143,13 @@ private struct BatteryLevelIndicator: View {
                     .frame(width: compact ? 2 : 2.5, height: bodyHeight * 0.42)
             }
 
-            Text("\(clampedLevel)%")
+            Text(verbatim: formattedPercent(clampedLevel))
                 .font(compact ? .caption : .callout)
                 .foregroundColor(.secondary)
                 .font(.system(size: compact ? 11 : 12, weight: .regular, design: .monospaced))
         }
         .fixedSize()
         .accessibilityElement(children: .ignore)
-        .accessibility(label: Text("Battery \(clampedLevel) percent"))
+        .accessibility(label: Text("Battery \(formattedPercent(clampedLevel))"))
     }
 }

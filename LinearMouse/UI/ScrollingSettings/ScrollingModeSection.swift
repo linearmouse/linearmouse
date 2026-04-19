@@ -25,7 +25,7 @@ extension ScrollingSettings {
                         ) {
                             labelWithDescription {
                                 Text("Scrolling acceleration")
-                                Text("(0–10)")
+                                Text(verbatim: "(0–10)")
                             }
                         } minimumValueLabel: {
                             Text("Linear")
@@ -50,7 +50,7 @@ extension ScrollingSettings {
                         ) {
                             labelWithDescription {
                                 Text("Scrolling speed")
-                                Text("(0–128)")
+                                Text(verbatim: "(0–128)")
                             }
                         } minimumValueLabel: {
                             Text("Slow")
@@ -105,9 +105,9 @@ extension ScrollingSettings {
                     ) {
                         Text("Distance")
                     } minimumValueLabel: {
-                        Text("0")
+                        Text(verbatim: "0")
                     } maximumValueLabel: {
-                        Text("10")
+                        Text(verbatim: "10")
                     }
 
                 case .byPixels:
@@ -117,9 +117,9 @@ extension ScrollingSettings {
                     ) {
                         Text("Distance")
                     } minimumValueLabel: {
-                        Text("0px")
+                        Text(verbatim: "0px")
                     } maximumValueLabel: {
-                        Text("128px")
+                        Text(verbatim: "128px")
                     }
                 }
             }

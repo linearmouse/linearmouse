@@ -5,6 +5,15 @@ import CoreGraphics
 import Foundation
 
 final class SmoothedScrollingEngine {
+    enum Phase {
+        case touchBegan
+        case touchChanged
+        case touchEnded
+        case momentumBegan
+        case momentumChanged
+        case momentumEnded
+    }
+
     enum Axis {
         case horizontal
         case vertical
@@ -13,8 +22,7 @@ final class SmoothedScrollingEngine {
     struct Emission {
         var deltaX: Double
         var deltaY: Double
-        var scrollPhase: CGScrollPhase?
-        var momentumPhase: CGMomentumScrollPhase
+        var phase: Phase
     }
 
     private enum SessionState {
@@ -29,6 +37,8 @@ final class SmoothedScrollingEngine {
     }
 
     private struct AxisTuning {
+        private static let legacyUpperBound = 3.0
+
         let configuration: Scheme.Scrolling.Smoothed
 
         init(configuration: Scheme.Scrolling.Smoothed) {
@@ -40,19 +50,23 @@ final class SmoothedScrollingEngine {
         }
 
         private var response: Double {
-            (configuration.response?.asTruncatedDouble ?? 0.45).clamped(to: 0.05 ... 1.0)
+            (configuration.response?.asTruncatedDouble ?? 0.45)
+                .clamped(to: Scheme.Scrolling.Smoothed.responseRange)
         }
 
         private var speed: Double {
-            (configuration.speed?.asTruncatedDouble ?? 1).clamped(to: 0 ... 3)
+            (configuration.speed?.asTruncatedDouble ?? 1)
+                .clamped(to: Scheme.Scrolling.Smoothed.speedRange)
         }
 
         private var acceleration: Double {
-            (configuration.acceleration?.asTruncatedDouble ?? 1.2).clamped(to: 0 ... 3)
+            (configuration.acceleration?.asTruncatedDouble ?? 1.2)
+                .clamped(to: Scheme.Scrolling.Smoothed.accelerationRange)
         }
 
         private var inertia: Double {
-            (configuration.inertia?.asTruncatedDouble ?? 0.65).clamped(to: 0 ... 3)
+            (configuration.inertia?.asTruncatedDouble ?? 0.65)
+                .clamped(to: Scheme.Scrolling.Smoothed.inertiaRange)
         }
 
         func desiredVelocity(for input: Double) -> Double {
@@ -64,7 +78,7 @@ final class SmoothedScrollingEngine {
             let baseMagnitude = abs(input)
             let normalizedMagnitude = (baseMagnitude / (baseMagnitude + 24)).clamped(to: 0 ... 1)
             let curvedMagnitude = pow(normalizedMagnitude, profile.inputExponent)
-            let magnitude = baseMagnitude * (0.58 + curvedMagnitude * 0.42)
+            let magnitude = baseMagnitude * curvedMagnitude
             let speedBoost = 0.85 + speed * 0.4
             let accelerationBoost = 1 + acceleration * profile.accelerationGain
             let velocity = magnitude * profile.velocityScale * speedBoost * accelerationBoost
@@ -114,12 +128,12 @@ final class SmoothedScrollingEngine {
 
         func blendFactor(for dt: TimeInterval) -> Double {
             let scaled = presetProfile.response * 0.75 + response * 0.8
-            return (scaled * dt * 60).clamped(to: 0.05 ... 1.0)
+            return (scaled * dt * 60).clamped(to: 0.0 ... 1.0)
         }
 
         func reengagementBlendFactor(for dt: TimeInterval, desiredVelocity: Double, currentVelocity: Double) -> Double {
             let baseBlend = blendFactor(for: dt)
-            let softenedBlend = (baseBlend * (0.10 + response * 0.08)).clamped(to: 0.02 ... 0.12)
+            let softenedBlend = (baseBlend * (0.10 + response * 0.08)).clamped(to: 0.0 ... 0.12)
             let recovery = pow(tailRecovery(inputVelocity: desiredVelocity, currentVelocity: currentVelocity), 0.55)
             return (softenedBlend + (baseBlend - softenedBlend) * recovery).clamped(to: softenedBlend ... baseBlend)
         }
@@ -137,9 +151,14 @@ final class SmoothedScrollingEngine {
 
         func momentumDecay(for dt: TimeInterval) -> Double {
             let profile = presetProfile
-            let inertiaBoost = ((inertia - 0.65) * 0.05).clamped(to: -0.08 ... 0.10)
+            let legacyInertiaBoost = ((min(inertia, Self.legacyUpperBound) - 0.65) * 0.05)
+                .clamped(to: -0.08 ... 0.10)
+            let extendedInertiaBoost = max(inertia - Self.legacyUpperBound, 0) * 0.01
+            let decayCeiling = inertia > Self.legacyUpperBound ? 0.99 : 0.98
             let dtScale = max(dt * 60, 0.25)
-            return pow((profile.decay + inertiaBoost).clamped(to: 0.72 ... 0.98), dtScale)
+            let decay = (profile.decay + legacyInertiaBoost + extendedInertiaBoost)
+                .clamped(to: 0.72 ... decayCeiling)
+            return pow(decay, dtScale)
         }
     }
 
@@ -296,14 +315,18 @@ final class SmoothedScrollingEngine {
 
                 let phase: CGScrollPhase = touchHasBegun ? .changed : .began
                 touchHasBegun = true
-                return .init(deltaX: emissionX, deltaY: emissionY, scrollPhase: phase, momentumPhase: .none)
+                return .init(
+                    deltaX: emissionX,
+                    deltaY: emissionY,
+                    phase: phase == .began ? .touchBegan : .touchChanged
+                )
             }
 
             if shouldContinueMomentum {
                 sessionState = .momentum
                 pendingMomentumBegin = true
                 touchHasBegun = false
-                return .init(deltaX: 0, deltaY: 0, scrollPhase: .ended, momentumPhase: .none)
+                return .init(deltaX: 0, deltaY: 0, phase: .touchEnded)
             }
 
             sessionState = .idle
@@ -312,7 +335,7 @@ final class SmoothedScrollingEngine {
             desiredVelocityX = 0
             desiredVelocityY = 0
             touchHasBegun = false
-            return .init(deltaX: emissionX, deltaY: emissionY, scrollPhase: .ended, momentumPhase: .none)
+            return .init(deltaX: emissionX, deltaY: emissionY, phase: .touchEnded)
 
         case .momentum:
             guard hasMovement || shouldContinueMomentum else {
@@ -323,15 +346,15 @@ final class SmoothedScrollingEngine {
                 desiredVelocityY = 0
                 touchHasBegun = false
                 pendingMomentumBegin = false
-                return .init(deltaX: 0, deltaY: 0, scrollPhase: nil, momentumPhase: .end)
+                return .init(deltaX: 0, deltaY: 0, phase: .momentumEnded)
             }
 
             if pendingMomentumBegin {
                 pendingMomentumBegin = false
-                return .init(deltaX: emissionX, deltaY: emissionY, scrollPhase: nil, momentumPhase: .begin)
+                return .init(deltaX: emissionX, deltaY: emissionY, phase: .momentumBegan)
             }
 
-            return .init(deltaX: emissionX, deltaY: emissionY, scrollPhase: nil, momentumPhase: .continuous)
+            return .init(deltaX: emissionX, deltaY: emissionY, phase: .momentumChanged)
         }
     }
 

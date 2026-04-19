@@ -27,7 +27,7 @@ extension ScrollingSettings.ModifierKeysSection {
                         in: 0.05 ... 10.00
                     )
                     .labelsHidden()
-                    Text(String(format: "%0.2f ×", $action.speedFactor.wrappedValue))
+                    Text(verbatim: String(format: "%0.2f ×", $action.speedFactor.wrappedValue))
                         .frame(width: 60, alignment: .trailing)
                 }
             }

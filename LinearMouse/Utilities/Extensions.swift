@@ -6,6 +6,14 @@ import Foundation
 import LRUCache
 import SwiftUI
 
+private let wholePercentNumberFormatter: NumberFormatter = {
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .percent
+    formatter.maximumFractionDigits = 0
+    formatter.minimumFractionDigits = 0
+    return formatter
+}()
+
 extension Comparable {
     func clamped(to range: ClosedRange<Self>) -> Self {
         min(max(range.lowerBound, self), range.upperBound)
@@ -65,6 +73,11 @@ extension Decimal {
         NSDecimalRound(&roundedValue, &mutableSelf, scale, .plain)
         return roundedValue
     }
+}
+
+func formattedPercent<Value: BinaryInteger>(_ value: Value) -> String {
+    wholePercentNumberFormatter.string(from: NSNumber(value: Double(Int(value)) / 100.0))
+        ?? "\(value)%"
 }
 
 extension pid_t {

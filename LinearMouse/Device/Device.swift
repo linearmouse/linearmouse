@@ -109,7 +109,7 @@ class Device {
             String(describing: device),
             initialPointerResolution,
             device.pointerAccelerationType ?? "(unknown)",
-            batteryLevel.map { "\($0)%" } ?? "(unknown)"
+            batteryLevel.map(formattedPercent) ?? "(unknown)"
         )
 
         Defaults.observe(.verbosedLoggingOn) { [weak self] change in

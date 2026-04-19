@@ -112,7 +112,7 @@ extension DeviceModel {
             return nil
         }
 
-        return batteryLevel.map { "\($0)%" }
+        return batteryLevel.map(formattedPercent)
     }
 
     var isMouse: Bool {

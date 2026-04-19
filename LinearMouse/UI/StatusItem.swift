@@ -193,7 +193,7 @@ class StatusItem: NSObject, NSMenuDelegate {
             return nil
         }
 
-        return "\(currentBatteryLevel)%"
+        return formattedPercent(currentBatteryLevel)
     }
 
     private func baseMenuItems() -> [NSMenuItem] {
@@ -216,7 +216,11 @@ class StatusItem: NSObject, NSMenuDelegate {
                 lhs.0.localizedCaseInsensitiveCompare(rhs.0) == .orderedAscending
             }
             .map { name, batteryLevel in
-                let item = NSMenuItem(title: "\(name) - \(batteryLevel)%", action: nil, keyEquivalent: "")
+                let item = NSMenuItem(
+                    title: "\(name) - \(formattedPercent(batteryLevel))",
+                    action: nil,
+                    keyEquivalent: ""
+                )
                 item.isEnabled = false
                 return item
             }

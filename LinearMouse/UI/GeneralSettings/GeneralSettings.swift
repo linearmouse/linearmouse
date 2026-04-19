@@ -27,10 +27,10 @@ struct GeneralSettings: View {
                     if showInMenuBar {
                         Picker("Show current battery", selection: $menuBarBatteryDisplayMode.animation()) {
                             Text("Off").tag(MenuBarBatteryDisplayMode.off)
-                            Text("5% or below").tag(MenuBarBatteryDisplayMode.below5)
-                            Text("10% or below").tag(MenuBarBatteryDisplayMode.below10)
-                            Text("15% or below").tag(MenuBarBatteryDisplayMode.below15)
-                            Text("20% or below").tag(MenuBarBatteryDisplayMode.below20)
+                            batteryThresholdText(5).tag(MenuBarBatteryDisplayMode.below5)
+                            batteryThresholdText(10).tag(MenuBarBatteryDisplayMode.below10)
+                            batteryThresholdText(15).tag(MenuBarBatteryDisplayMode.below15)
+                            batteryThresholdText(20).tag(MenuBarBatteryDisplayMode.below20)
                             Text("Always show").tag(MenuBarBatteryDisplayMode.always)
                         }
                         .padding(.leading, 20)
@@ -102,6 +102,10 @@ struct GeneralSettings: View {
             }
             .modifier(FormViewModifier())
         }
+    }
+
+    private func batteryThresholdText(_ threshold: Int) -> Text {
+        Text("\(formattedPercent(threshold)) or below")
     }
 }
 
