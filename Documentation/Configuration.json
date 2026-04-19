@@ -399,6 +399,10 @@
               "description": "Indicates if the control modifier key should be pressed.",
               "type": "boolean"
             },
+            "hold": {
+              "description": "Indicates if keyboard shortcut actions should stay pressed while the button is held. When enabled, LinearMouse sends key down on button press and key up on button release instead of repeating the shortcut.",
+              "type": "boolean"
+            },
             "option": {
               "description": "Indicates if the option modifier key should be pressed.",
               "type": "boolean"

@@ -584,6 +584,42 @@ If you hold <kbd>option + back</kbd>, the volume will continue to decrease.
 }
 ```
 
+### Hold keyboard shortcuts while pressed
+
+With `hold: true`, keyboard shortcut actions stay pressed for as long as the mouse button is held.
+
+This is different from `repeat: true`:
+
+- `repeat: true` keeps sending the shortcut over and over.
+- `hold: true` sends key down when the mouse button is pressed, then key up when it is released.
+
+This is useful for apps that expect a real held key, such as timeline scrubbing or temporary tools.
+
+```json
+{
+  "schemes": [
+    {
+      "if": {
+        "device": {
+          "category": "mouse"
+        }
+      },
+      "buttons": {
+        "mappings": [
+          {
+            "button": 3,
+            "hold": true,
+            "action": {
+              "keyPress": ["c"]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
 ### Volume up and down with <kbd>option + scrollUp</kbd> and <kbd>option + scrollDown</kbd>
 
 `scroll` can be specified instead of `button` to map scroll events to specific actions.

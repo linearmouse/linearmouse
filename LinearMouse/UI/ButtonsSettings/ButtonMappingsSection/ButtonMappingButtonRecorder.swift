@@ -79,6 +79,7 @@ struct ButtonMappingButtonRecorder: View {
             mapping.modifierFlags = []
             mapping.button = nil
             mapping.repeat = nil
+            mapping.hold = nil
             mapping.scroll = nil
             startEventObservation()
         }

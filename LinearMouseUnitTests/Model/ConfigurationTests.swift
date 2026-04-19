@@ -125,6 +125,48 @@ final class ConfigurationTests: XCTestCase {
         XCTAssertEqual(button["serialNumber"] as? String, "ABC123")
     }
 
+    func testMappingDecodesHoldFlag() throws {
+        let mapping = try JSONDecoder().decode(
+            Scheme.Buttons.Mapping.self,
+            from: XCTUnwrap(#"{"button":3,"hold":true,"action":{"keyPress":["c"]}}"#.data(using: .utf8))
+        )
+
+        XCTAssertEqual(mapping.button, .mouse(3))
+        XCTAssertEqual(mapping.hold, true)
+        XCTAssertNil(mapping.repeat)
+    }
+
+    func testMappingEncodesHoldFlag() throws {
+        let mapping = Scheme.Buttons.Mapping(
+            button: .mouse(3),
+            hold: true,
+            action: .arg1(.keyPress([.c]))
+        )
+
+        let data = try JSONEncoder().encode(mapping)
+        let jsonObject = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+
+        XCTAssertEqual(jsonObject["button"] as? Int, 3)
+        XCTAssertEqual(jsonObject["hold"] as? Bool, true)
+        XCTAssertNil(jsonObject["repeat"])
+    }
+
+    func testKeyPressBehaviorMapsFlagsExclusively() {
+        var mapping = Scheme.Buttons.Mapping()
+
+        mapping.keyPressBehavior = .repeat
+        XCTAssertEqual(mapping.repeat, true)
+        XCTAssertNil(mapping.hold)
+
+        mapping.keyPressBehavior = .holdWhilePressed
+        XCTAssertEqual(mapping.hold, true)
+        XCTAssertNil(mapping.repeat)
+
+        mapping.keyPressBehavior = .sendOnRelease
+        XCTAssertNil(mapping.hold)
+        XCTAssertNil(mapping.repeat)
+    }
+
     func testLogitechControlButtonDecodesHexProductID() throws {
         let mapping = try JSONDecoder().decode(
             Scheme.Buttons.Mapping.self,

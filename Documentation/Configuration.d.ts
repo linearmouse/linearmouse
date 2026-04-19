@@ -550,6 +550,11 @@ declare namespace Scheme {
            * @description Indicates if key repeat is enabled. If the value is true, the action will be repeatedly executed when the button is hold according to the key repeat settings in System Settings.
            */
           repeat?: boolean;
+
+          /**
+           * @description Indicates if keyboard shortcut actions should stay pressed while the button is held. When enabled, LinearMouse sends key down on button press and key up on button release instead of repeating the shortcut.
+           */
+          hold?: boolean;
         }
       | {
           /**
