@@ -7,8 +7,18 @@ public enum KeySimulatorError: Error {
     case unsupportedKey
 }
 
+/// Abstracts `KeySimulator` so call sites can inject a recorder/mock and avoid posting real key
+/// events from unit tests.
+public protocol KeySimulating: AnyObject {
+    func down(keys: [Key], tap: CGEventTapLocation?) throws
+    func up(keys: [Key], tap: CGEventTapLocation?) throws
+    func press(keys: [Key], tap: CGEventTapLocation?) throws
+    func reset()
+    func modifiedCGEventFlags(of event: CGEvent) -> CGEventFlags?
+}
+
 /// Simulate key presses.
-public class KeySimulator {
+public class KeySimulator: KeySimulating {
     private let keyCodeResolver = KeyCodeResolver()
     private let lock = NSLock()
 

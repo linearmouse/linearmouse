@@ -23,17 +23,17 @@ class ButtonActionsTransformer {
     private var logitechRepeatTimer: EventThreadTimer?
     private var heldKeysByButton = [Scheme.Buttons.Mapping.Button: [Key]]()
 
-    static let keySimulator = KeySimulator()
-    var keySimulator: KeySimulator {
-        Self.keySimulator
-    }
+    private static let defaultKeySimulator = KeySimulator()
+    let keySimulator: KeySimulating
 
     init(
         mappings: [Scheme.Buttons.Mapping],
-        universalBackForward: Scheme.Buttons.UniversalBackForward? = nil
+        universalBackForward: Scheme.Buttons.UniversalBackForward? = nil,
+        keySimulator: KeySimulating? = nil
     ) {
         self.mappings = mappings
         self.universalBackForward = universalBackForward
+        self.keySimulator = keySimulator ?? Self.defaultKeySimulator
     }
 
     private func timer(for slot: TimerSlot) -> EventThreadTimer? {
@@ -680,7 +680,14 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
 
         os_log("Up keys: %{public}@", log: Self.log, type: .info, String(describing: keys))
         try? keySimulator.up(keys: keys.reversed(), tap: .cgSessionEventTap)
-        keySimulator.reset()
+
+        // Only clear KeySimulator's tracked modifier flags once nothing is held; otherwise an
+        // overlapping hold on another button would have its modifier state forgotten, which then
+        // leaks into the next synthetic event we emit (event.flags would be missing the still-held
+        // modifier and the OS would interpret it as released).
+        if heldKeysByButton.isEmpty {
+            keySimulator.reset()
+        }
     }
 
     private func postClickEvent(mouseButton: CGMouseButton, clickState: Int64? = nil) {

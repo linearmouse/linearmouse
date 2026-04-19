@@ -27,16 +27,13 @@ public class KeyCodeResolver {
             }
             .store(in: &subscriptions)
 
-        // `NSEvent.characters` below asserts on the main thread.
-        if Thread.isMainThread {
-            updateMapping()
-        } else {
-            DispatchQueue.main.sync { updateMapping() }
-        }
+        updateMapping()
     }
 
     private func scheduleMappingUpdate(after delay: TimeInterval) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+        // The TIS-source-changed notification fires before the new layout is fully published; a
+        // small delay lets the new source settle before we re-translate.
+        DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + delay) { [weak self] in
             self?.updateMapping()
         }
     }
@@ -152,6 +149,8 @@ public class KeyCodeResolver {
             return nil
         }
 
+        // Layouts that uppercase-by-default (none in the standard ones, but defensive against
+        // exotic third-party layouts) would otherwise miss the lowercase entries in `Key`.
         return String(utf16CodeUnits: chars, count: Int(length)).lowercased()
     }
 
