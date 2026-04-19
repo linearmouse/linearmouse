@@ -27,14 +27,27 @@ public class KeyCodeResolver {
             }
             .store(in: &subscriptions)
 
-        updateMapping()
+        runOnMain { self.updateMapping() }
     }
 
     private func scheduleMappingUpdate(after delay: TimeInterval) {
         // The TIS-source-changed notification fires before the new layout is fully published; a
         // small delay lets the new source settle before we re-translate.
-        DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + delay) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
             self?.updateMapping()
+        }
+    }
+
+    /// `TISCopyCurrentKeyboardLayoutInputSource` and `TISGetInputSourceProperty` (used inside
+    /// `updateMapping`) are not reliably thread-safe — they trap with `EXC_BREAKPOINT` when called
+    /// off the main thread, even though `UCKeyTranslate` itself is fine. Force the work onto the
+    /// main thread; updates are infrequent enough (init + input-source notifications) that the
+    /// hop is negligible.
+    private func runOnMain(_ work: @escaping () -> Void) {
+        if Thread.isMainThread {
+            work()
+        } else {
+            DispatchQueue.main.sync(execute: work)
         }
     }
 
