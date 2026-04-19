@@ -341,8 +341,6 @@ private struct SmoothedCurvePreview: View {
             return 1 - pow(1 - t, 2.2)
         case .easeInOut:
             return easeInOutPower(t, power: 2.0)
-        case .easeOutIn:
-            return easeOutInPower(t, power: 2.0)
         case .quadratic:
             return pow(t, 2.0)
         case .cubic:
@@ -357,30 +355,8 @@ private struct SmoothedCurvePreview: View {
             return 1 - pow(1 - t, 4.0)
         case .easeInOutQuartic:
             return easeInOutPower(t, power: 4.0)
-        case .quintic:
-            return pow(t, 5.0)
-        case .sine:
-            return 1 - cos((t * .pi) / 2)
-        case .exponential:
-            return t == 0 ? 0 : pow(2, 10 * (t - 1))
-        case .circular:
-            return 1 - sqrt(max(0, 1 - t * t))
-        case .back:
-            return backCurve(t)
-        case .bounce:
-            return bounceCurve(t)
-        case .elastic:
-            return elasticCurve(t)
-        case .spring:
-            return springCurve(t)
-        case .natural:
-            return easeOutInPower(t, power: 1.55)
         case .smooth:
             return easeInOutPower(t, power: 1.45)
-        case .snappy:
-            return 1 - pow(1 - t, 3.6)
-        case .gentle:
-            return 1 - pow(1 - t, 1.35)
         }
     }
 
@@ -409,57 +385,6 @@ private struct SmoothedCurvePreview: View {
         }
 
         return 1 - 0.5 * pow((1 - t) * 2, power)
-    }
-
-    private func easeOutInPower(_ t: CGFloat, power: CGFloat) -> CGFloat {
-        if t < 0.5 {
-            return 0.5 * (1 - pow(1 - t * 2, power))
-        }
-
-        return 0.5 + 0.5 * pow((t - 0.5) * 2, power)
-    }
-
-    private func backCurve(_ t: CGFloat) -> CGFloat {
-        let c1: CGFloat = 1.35
-        let c3 = c1 + 1
-        let value = c3 * t * t * t - c1 * t * t
-        return max(0, min(1, value))
-    }
-
-    private func bounceCurve(_ t: CGFloat) -> CGFloat {
-        let n1: CGFloat = 7.5625
-        let d1: CGFloat = 2.75
-        let value: CGFloat
-
-        if t < 1 / d1 {
-            value = n1 * t * t
-        } else if t < 2 / d1 {
-            let local = t - 1.5 / d1
-            value = n1 * local * local + 0.75
-        } else if t < 2.5 / d1 {
-            let local = t - 2.25 / d1
-            value = n1 * local * local + 0.9375
-        } else {
-            let local = t - 2.625 / d1
-            value = n1 * local * local + 0.984375
-        }
-
-        return max(0, min(1, value))
-    }
-
-    private func elasticCurve(_ t: CGFloat) -> CGFloat {
-        guard t != 0, t != 1 else {
-            return t
-        }
-
-        let c4 = (2 * CGFloat.pi) / 3
-        let value = -pow(2, 10 * t - 10) * sin((t * 10 - 10.75) * c4)
-        return max(0, min(1, value + 1))
-    }
-
-    private func springCurve(_ t: CGFloat) -> CGFloat {
-        let value = 1 - exp(-6 * t) * cos(8.5 * t)
-        return max(0, min(1, value))
     }
 }
 
