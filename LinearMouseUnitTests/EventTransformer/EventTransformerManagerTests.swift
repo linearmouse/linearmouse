@@ -17,7 +17,7 @@ final class EventTransformerManagerTests: XCTestCase {
                 scrolling: .init(
                     reverse: .init(vertical: true),
                     acceleration: .init(vertical: 2),
-                    smoothed: .init(vertical: .init(enabled: true, preset: .natural)),
+                    smoothed: .init(vertical: .init(enabled: true, preset: .smooth)),
                     modifiers: .init(vertical: modifiers)
                 )
             )
@@ -56,7 +56,7 @@ final class EventTransformerManagerTests: XCTestCase {
     func testDisabledSmoothedConfigurationFallsBackToLegacyScrolling() throws {
         ConfigurationState.shared.configuration = .init(schemes: [
             Scheme(scrolling: .init(
-                smoothed: .init(vertical: .init(enabled: true, preset: .natural))
+                smoothed: .init(vertical: .init(enabled: true, preset: .smooth))
             )),
             Scheme(scrolling: .init(
                 distance: .init(vertical: .line(3)),

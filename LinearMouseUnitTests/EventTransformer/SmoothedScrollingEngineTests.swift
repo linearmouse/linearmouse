@@ -10,7 +10,7 @@ final class SmoothedScrollingEngineTests: XCTestCase {
             smoothed: .init(
                 vertical: .init(
                     enabled: true,
-                    preset: .natural,
+                    preset: .smooth,
                     response: Decimal(string: "0.45"),
                     speed: 1,
                     acceleration: Decimal(string: "1.2"),
@@ -55,7 +55,7 @@ final class SmoothedScrollingEngineTests: XCTestCase {
             smoothed: .init(
                 vertical: .init(
                     enabled: true,
-                    preset: .natural,
+                    preset: .smooth,
                     response: Decimal(string: "0.45"),
                     speed: 1,
                     acceleration: Decimal(string: "1.2"),

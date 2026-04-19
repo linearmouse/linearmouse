@@ -10,7 +10,7 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         var now = 0.0
         let modifiers = Scheme.Scrolling.Modifiers(shift: .alterOrientation)
         let smoothedTransformer = SmoothedScrollingTransformer(
-            smoothed: .init(vertical: Scheme.Scrolling.Smoothed.Preset.natural.defaultConfiguration),
+            smoothed: .init(vertical: Scheme.Scrolling.Smoothed.Preset.smooth.defaultConfiguration),
             now: { now },
             eventSink: { emittedEvents.append($0.copy() ?? $0) }
         )
@@ -47,12 +47,12 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         let modifiers = Scheme.Scrolling.Modifiers(option: .changeSpeed(scale: 2))
 
         let baselineTransformer = SmoothedScrollingTransformer(
-            smoothed: .init(vertical: Scheme.Scrolling.Smoothed.Preset.spring.defaultConfiguration),
+            smoothed: .init(vertical: Scheme.Scrolling.Smoothed.Preset.smooth.defaultConfiguration),
             now: { now },
             eventSink: { baselineEmittedEvents.append($0.copy() ?? $0) }
         )
         let scaledTransformer = SmoothedScrollingTransformer(
-            smoothed: .init(vertical: Scheme.Scrolling.Smoothed.Preset.spring.defaultConfiguration),
+            smoothed: .init(vertical: Scheme.Scrolling.Smoothed.Preset.smooth.defaultConfiguration),
             now: { now },
             eventSink: { scaledEmittedEvents.append($0.copy() ?? $0) }
         )
@@ -164,7 +164,7 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
             smoothed: .init(
                 vertical: .init(
                     enabled: true,
-                    preset: .natural,
+                    preset: .smooth,
                     response: Decimal(string: "0.45"),
                     speed: 1,
                     acceleration: Decimal(string: "1.2"),
@@ -208,7 +208,7 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         var now = 0.0
         let transformer = SmoothedScrollingTransformer(
             smoothed: .init(
-                vertical: Scheme.Scrolling.Smoothed.Preset.spring.defaultConfiguration
+                vertical: Scheme.Scrolling.Smoothed.Preset.smooth.defaultConfiguration
             ),
             now: { now },
             eventSink: { emittedEvents.append($0.copy() ?? $0) }

@@ -207,7 +207,7 @@ final class ConfigurationTests: XCTestCase {
             scrolling: .init(
                 smoothed: .init(
                     vertical: .init(
-                        preset: .natural,
+                        preset: .smooth,
                         response: Decimal(string: "0.45"),
                         speed: 1,
                         acceleration: Decimal(string: "1.2"),
@@ -221,14 +221,14 @@ final class ConfigurationTests: XCTestCase {
             scrolling: .init(
                 smoothed: .init(
                     vertical: .init(
-                        preset: .snappy,
+                        preset: .smooth,
                         inertia: 8
                     )
                 )
             )
         ).merge(into: &scheme)
 
-        XCTAssertEqual(scheme.scrolling.smoothed.vertical?.preset, .snappy)
+        XCTAssertEqual(scheme.scrolling.smoothed.vertical?.preset, .smooth)
         XCTAssertEqual(scheme.scrolling.smoothed.vertical?.response, Decimal(string: "0.45"))
         XCTAssertEqual(scheme.scrolling.smoothed.vertical?.speed, 1)
         XCTAssertEqual(scheme.scrolling.smoothed.vertical?.acceleration, Decimal(string: "1.2"))
