@@ -59,12 +59,14 @@ struct ButtonMappingButtonRecorder: View {
     private func updateSharedRecordingState(force: Bool? = nil) {
         let shouldRecord = force ?? recording
         if shouldRecord {
-            settingsState.beginVirtualButtonRecordingPreparation(for: logitechMonitorDeviceIDs())
+            let monitorDevices = logitechMonitorDevices()
+            settingsState.beginVirtualButtonRecordingPreparation(for: Set(monitorDevices.map(\.id)))
+            settingsState.recording = shouldRecord
+            monitorDevices.forEach { $0.prepareLogitechControlsRecording() }
         } else {
             settingsState.endVirtualButtonRecordingPreparation()
+            settingsState.recording = shouldRecord
         }
-
-        settingsState.recording = shouldRecord
     }
 
     private func recordingUpdated() {
@@ -119,13 +121,13 @@ struct ButtonMappingButtonRecorder: View {
         recordedButtonCancellable = nil
     }
 
-    private func logitechMonitorDeviceIDs() -> Set<Int32> {
+    private func logitechMonitorDevices() -> [Device] {
         guard let currentDevice = DeviceState.shared.currentDeviceRef?.value,
               currentDevice.hasLogitechControlsMonitor else {
             return []
         }
 
-        return [currentDevice.id]
+        return [currentDevice]
     }
 
     private func virtualButtonReceived(_ event: SettingsState.RecordedVirtualButtonEvent) {

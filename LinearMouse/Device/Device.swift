@@ -1,6 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
+import Combine
 import Defaults
 import Foundation
 import ObservationToken
@@ -34,6 +35,7 @@ class Device {
     private weak var manager: DeviceManager?
     private var inputReportHandlers: [InputReportHandler] = []
     private var logitechReprogrammableControlsMonitor: LogitechReprogrammableControlsMonitor?
+    private var logitechControlsMonitorSubscriptions = Set<AnyCancellable>()
     private let device: PointerDevice
 
     var pointerDevice: PointerDevice {
@@ -99,7 +101,8 @@ class Device {
         if LogitechReprogrammableControlsMonitor.supports(device: self) {
             let monitor = LogitechReprogrammableControlsMonitor(device: self)
             logitechReprogrammableControlsMonitor = monitor
-            monitor.start()
+            observeLogitechControlsMonitorDemand()
+            updateLogitechControlsMonitorRunning()
         }
 
         os_log(
@@ -129,6 +132,7 @@ class Device {
         reportObservationToken = nil
         logitechReprogrammableControlsMonitor?.stop()
         logitechReprogrammableControlsMonitor = nil
+        logitechControlsMonitorSubscriptions.removeAll()
     }
 
     func markActive(reason: String) {
@@ -140,7 +144,47 @@ class Device {
     }
 
     func requestLogitechControlsForcedReconfiguration() {
+        updateLogitechControlsMonitorRunning()
         logitechReprogrammableControlsMonitor?.requestForcedReconfiguration()
+    }
+
+    func prepareLogitechControlsRecording() {
+        guard let logitechReprogrammableControlsMonitor else {
+            return
+        }
+
+        logitechReprogrammableControlsMonitor.start()
+        logitechReprogrammableControlsMonitor.requestReconfiguration()
+    }
+
+    private func observeLogitechControlsMonitorDemand() {
+        ConfigurationState.shared
+            .$configuration
+            .dropFirst()
+            .sink { [weak self] _ in
+                self?.updateLogitechControlsMonitorRunning()
+            }
+            .store(in: &logitechControlsMonitorSubscriptions)
+
+        SettingsState.shared
+            .$recording
+            .dropFirst()
+            .sink { [weak self] _ in
+                self?.updateLogitechControlsMonitorRunning()
+            }
+            .store(in: &logitechControlsMonitorSubscriptions)
+    }
+
+    private func updateLogitechControlsMonitorRunning() {
+        guard let logitechReprogrammableControlsMonitor else {
+            return
+        }
+
+        if LogitechReprogrammableControlsMonitor.isNeeded() {
+            logitechReprogrammableControlsMonitor.start()
+        } else {
+            logitechReprogrammableControlsMonitor.stop()
+        }
     }
 }
 
