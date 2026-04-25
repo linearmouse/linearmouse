@@ -21,14 +21,27 @@ class GlobalEventTap {
         ModifierState.shared.update(with: event)
 
         let mouseEventView = MouseEventView(event)
+        let usesProcessConditions = ConfigurationState.shared.configuration.usesProcessConditions
         let eventTransformer = EventTransformerManager.shared.get(
             withCGEvent: event,
             withSourcePid: mouseEventView.sourcePid,
-            withTargetPid: mouseEventView.targetPid,
-            withMouseLocationPid: mouseEventView.mouseLocationOwnerPid,
+            withTargetPid: usesProcessConditions ? mouseEventView.targetPid : nil,
+            withMouseLocationPid: usesProcessConditions ? mouseEventView.mouseLocationOwnerPid : nil,
             withDisplay: ScreenManager.shared.currentScreenNameSnapshot
         )
-        return eventTransformer.transform(event)
+        let transformedEvent = eventTransformer.transform(event)
+        invalidateWindowInfoCacheIfNeeded(for: event)
+        return transformedEvent
+    }
+
+    private func invalidateWindowInfoCacheIfNeeded(for event: CGEvent) {
+        switch event.type {
+        case .leftMouseDown, .rightMouseDown, .otherMouseDown,
+             .leftMouseUp, .rightMouseUp, .otherMouseUp:
+            WindowInfoCache.shared.invalidate()
+        default:
+            break
+        }
     }
 
     func start() {
@@ -55,6 +68,7 @@ class GlobalEventTap {
 
         eventThread.onWillStop = {
             EventTransformerManager.shared.resetForRestart()
+            WindowInfoCache.shared.invalidate()
         }
         eventThread.start()
 

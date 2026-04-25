@@ -57,6 +57,18 @@ extension Configuration.ConfigurationError: LocalizedError {
 }
 
 extension Configuration {
+    var usesProcessConditions: Bool {
+        schemes.contains { scheme in
+            scheme.if?.contains { condition in
+                condition.app != nil ||
+                    condition.parentApp != nil ||
+                    condition.groupApp != nil ||
+                    condition.processName != nil ||
+                    condition.processPath != nil
+            } ?? false
+        }
+    }
+
     static func load(from string: String) throws -> Configuration {
         do {
             let jsonPatcher = try JSONPatcher(original: string)

@@ -9,6 +9,14 @@ final class ConfigurationTests: XCTestCase {
         try print(Configuration(schemes: []).dump())
     }
 
+    func testUsesProcessConditions() {
+        XCTAssertFalse(Configuration(schemes: []).usesProcessConditions)
+        XCTAssertFalse(Configuration(schemes: [Scheme(if: [.init(display: "Built-in Display")])]).usesProcessConditions)
+        XCTAssertTrue(Configuration(schemes: [Scheme(if: [.init(app: "com.apple.finder")])]).usesProcessConditions)
+        XCTAssertTrue(Configuration(schemes: [Scheme(if: [.init(processPath: "/Applications/Foo.app/Foo")])])
+            .usesProcessConditions)
+    }
+
     func testMergeScheme() {
         var scheme = Scheme()
 
