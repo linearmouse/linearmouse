@@ -86,6 +86,10 @@ vertical and horizontal scrolling. You can choose a preset such as `easeIn`, `ea
 Set `enabled` to `false` to explicitly disable an inherited smoothed scrolling configuration for a
 direction.
 
+Set `bouncing` to `false` to avoid rubber-band overscroll when smoothed scrolling emits synthetic
+continuous scroll events. This keeps the smoothed momentum tail, but sends it without scroll
+phase/momentum phase markers so apps are less likely to treat it like a trackpad gesture.
+
 For example, to use a smoother scrolling profile for a mouse:
 
 ```json
@@ -104,7 +108,8 @@ For example, to use a smoother scrolling profile for a mouse:
           "response": 0.45,
           "speed": 1,
           "acceleration": 1.2,
-          "inertia": 0.65
+          "inertia": 0.65,
+          "bouncing": false
         }
       }
     }

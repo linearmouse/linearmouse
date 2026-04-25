@@ -248,7 +248,7 @@ declare namespace Scheme {
 
       /**
        * @description The preset curve to use.
-       * @default "natural"
+       * @default "easeInOut"
        */
       preset?: Smoothed.Preset;
 
@@ -271,6 +271,12 @@ declare namespace Scheme {
        * @description The scrolling inertia.
        */
       inertia?: number;
+
+      /**
+       * @description Set to `false` to avoid rubber-band overscroll when smoothed scrolling emits synthetic continuous scroll events.
+       * @default true
+       */
+      bouncing?: boolean;
     };
 
     namespace Smoothed {
@@ -280,7 +286,6 @@ declare namespace Scheme {
         | "easeIn"
         | "easeOut"
         | "easeInOut"
-        | "easeOutIn"
         | "quadratic"
         | "cubic"
         | "quartic"
@@ -288,18 +293,7 @@ declare namespace Scheme {
         | "easeInOutCubic"
         | "easeOutQuartic"
         | "easeInOutQuartic"
-        | "quintic"
-        | "sine"
-        | "exponential"
-        | "circular"
-        | "back"
-        | "bounce"
-        | "elastic"
-        | "spring"
-        | "natural"
-        | "smooth"
-        | "snappy"
-        | "gentle";
+        | "smooth";
     }
 
     type Modifiers = {

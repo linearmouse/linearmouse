@@ -270,6 +270,69 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         XCTAssertEqual(transformedView.scrollPhase, .began)
     }
 
+    func testDiscreteSmoothedScrollingCanSuppressBouncingPhases() throws {
+        var emittedEvents: [CGEvent] = []
+        var now = 0.0
+        var configuration = Scheme.Scrolling.Smoothed.Preset.smooth.defaultConfiguration
+        configuration.bouncing = false
+        let transformer = SmoothedScrollingTransformer(
+            smoothed: .init(vertical: configuration),
+            now: { now },
+            eventSink: { emittedEvents.append($0.copy() ?? $0) }
+        )
+
+        let originalEvent = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: 1,
+            wheel2: 0,
+            wheel3: 0
+        ))
+
+        XCTAssertNil(transformer.transform(originalEvent))
+
+        now = 1.0 / 120.0
+        transformer.tick()
+
+        let emittedEvent = try XCTUnwrap(emittedEvents.first)
+        let emittedView = ScrollWheelEventView(emittedEvent)
+        XCTAssertTrue(emittedEvent.isLinearMouseSyntheticEvent)
+        XCTAssertGreaterThan(abs(emittedView.deltaYPt), 0)
+        XCTAssertEqual(emittedView.scrollPhase, nil)
+        XCTAssertEqual(emittedView.momentumPhase, .none)
+    }
+
+    func testContinuousTrackpadInputCanSuppressBouncingPhases() throws {
+        var now = 0.0
+        var configuration = Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
+        configuration.bouncing = false
+        let transformer = SmoothedScrollingTransformer(
+            smoothed: .init(vertical: configuration)
+        ) { now }
+
+        let originalEvent = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .pixel,
+            wheelCount: 2,
+            wheel1: 0,
+            wheel2: 0,
+            wheel3: 0
+        ))
+        let originalView = ScrollWheelEventView(originalEvent)
+        originalView.continuous = true
+        originalView.deltaYPt = 9
+        originalView.deltaYFixedPt = 9
+        originalView.scrollPhase = .began
+
+        let transformedEvent = try XCTUnwrap(transformer.transform(originalEvent))
+        let transformedView = ScrollWheelEventView(transformedEvent)
+        XCTAssertGreaterThan(transformedView.deltaYFixedPt, 0)
+        XCTAssertLessThan(transformedView.deltaYFixedPt, 9)
+        XCTAssertEqual(transformedView.scrollPhase, nil)
+        XCTAssertEqual(transformedView.momentumPhase, .none)
+    }
+
     func testExtendedSpeedRangeProducesMuchStrongerInitialEmission() throws {
         let baseline = try firstDiscreteEmission(
             configuration: .init(

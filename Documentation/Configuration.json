@@ -1495,6 +1495,11 @@
           "description": "The scrolling acceleration.",
           "type": "number"
         },
+        "bouncing": {
+          "default": true,
+          "description": "Set to `false` to avoid rubber-band overscroll when smoothed scrolling emits synthetic continuous scroll events.",
+          "type": "boolean"
+        },
         "enabled": {
           "default": true,
           "description": "Set to `false` to explicitly disable inherited smoothed scrolling for this direction.",
@@ -1506,7 +1511,7 @@
         },
         "preset": {
           "$ref": "#/definitions/Scheme.Scrolling.Smoothed.Preset",
-          "default": "natural",
+          "default": "easeInOut",
           "description": "The preset curve to use."
         },
         "response": {
@@ -1527,7 +1532,6 @@
         "easeIn",
         "easeOut",
         "easeInOut",
-        "easeOutIn",
         "quadratic",
         "cubic",
         "quartic",
@@ -1535,18 +1539,7 @@
         "easeInOutCubic",
         "easeOutQuartic",
         "easeInOutQuartic",
-        "quintic",
-        "sine",
-        "exponential",
-        "circular",
-        "back",
-        "bounce",
-        "elastic",
-        "spring",
-        "natural",
-        "smooth",
-        "snappy",
-        "gentle"
+        "smooth"
       ],
       "type": "string"
     },

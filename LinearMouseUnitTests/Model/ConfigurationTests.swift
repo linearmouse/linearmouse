@@ -219,7 +219,8 @@ final class ConfigurationTests: XCTestCase {
                         response: Decimal(string: "0.45"),
                         speed: 1,
                         acceleration: Decimal(string: "1.2"),
-                        inertia: Decimal(string: "0.65")
+                        inertia: Decimal(string: "0.65"),
+                        bouncing: true
                     )
                 )
             )
@@ -241,5 +242,18 @@ final class ConfigurationTests: XCTestCase {
         XCTAssertEqual(scheme.scrolling.smoothed.vertical?.speed, 1)
         XCTAssertEqual(scheme.scrolling.smoothed.vertical?.acceleration, Decimal(string: "1.2"))
         XCTAssertEqual(scheme.scrolling.smoothed.vertical?.inertia, 8)
+        XCTAssertEqual(scheme.scrolling.smoothed.vertical?.bouncing, true)
+
+        Scheme(
+            scrolling: .init(
+                smoothed: .init(
+                    vertical: .init(
+                        bouncing: false
+                    )
+                )
+            )
+        ).merge(into: &scheme)
+
+        XCTAssertEqual(scheme.scrolling.smoothed.vertical?.bouncing, false)
     }
 }

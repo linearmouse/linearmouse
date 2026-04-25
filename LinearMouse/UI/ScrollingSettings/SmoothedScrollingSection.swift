@@ -76,6 +76,13 @@ extension ScrollingSettings {
                     formatter: state.smoothedInertiaFormatter
                 )
 
+                Toggle(isOn: $state.smoothedBouncing) {
+                    withDescription {
+                        Text("Allow scroll bouncing")
+                        Text("Let apps apply rubber-band overscroll at content edges.")
+                    }
+                }
+
                 HStack(spacing: 10) {
                     Button("Restore default preset") {
                         state.scrollingMode = .smoothed

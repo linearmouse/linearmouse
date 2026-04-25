@@ -40,6 +40,7 @@ extension Scheme.Scrolling {
         var speed: Decimal?
         var acceleration: Decimal?
         var inertia: Decimal?
+        var bouncing: Bool?
 
         init() {}
 
@@ -49,7 +50,8 @@ extension Scheme.Scrolling {
             response: Decimal? = nil,
             speed: Decimal? = nil,
             acceleration: Decimal? = nil,
-            inertia: Decimal? = nil
+            inertia: Decimal? = nil,
+            bouncing: Bool? = nil
         ) {
             self.enabled = enabled
             self.preset = preset
@@ -57,6 +59,7 @@ extension Scheme.Scrolling {
             self.speed = speed
             self.acceleration = acceleration
             self.inertia = inertia
+            self.bouncing = bouncing
         }
     }
 }
@@ -77,6 +80,10 @@ extension Scheme.Scrolling.Smoothed {
 
     var isEnabled: Bool {
         enabled ?? true
+    }
+
+    var allowsBouncing: Bool {
+        bouncing ?? true
     }
 
     func merge(into smoothed: inout Self) {
@@ -102,6 +109,10 @@ extension Scheme.Scrolling.Smoothed {
 
         if let inertia {
             smoothed.inertia = inertia
+        }
+
+        if let bouncing {
+            smoothed.bouncing = bouncing
         }
     }
 
@@ -247,7 +258,8 @@ extension Scheme.Scrolling.Smoothed.Preset {
             response: values.response,
             speed: values.speed,
             acceleration: values.acceleration,
-            inertia: values.inertia
+            inertia: values.inertia,
+            bouncing: true
         )
     }
 }
