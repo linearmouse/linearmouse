@@ -158,7 +158,8 @@ class EventTransformerManager {
     }
 
     private func handleLogitechControlEventOnCurrentThread(_ context: LogitechEventContext) -> Bool {
-        let transformer = get(withDevice: context.device, withPid: context.pid, withDisplay: context.display)
+        let pid = ConfigurationState.shared.configuration.usesProcessConditions ? context.pid : nil
+        let transformer = get(withDevice: context.device, withPid: pid, withDisplay: context.display)
         return (transformer as? LogitechControlEventHandling)?.handleLogitechControlEvent(context) ?? false
     }
 

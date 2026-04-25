@@ -1208,7 +1208,6 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         if let responseType = strategy.responseType {
             return performGetReportRequest(
                 report,
-                timeout: timeout,
                 matching: matching,
                 requestType: strategy.requestType,
                 responseType: responseType
@@ -1245,7 +1244,6 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
 
     private func performGetReportRequest(
         _ report: Data,
-        timeout _: TimeInterval,
         matching: @escaping (Data) -> Bool,
         requestType: IOHIDReportType,
         responseType: IOHIDReportType
@@ -1983,12 +1981,9 @@ final class LogitechReprogrammableControlsMonitor {
                         continue
                     }
 
-                    let usesProcessConditions = ConfigurationState.shared.configuration.usesProcessConditions
                     let mouseLocation = CGEvent(source: nil)?.location ?? .zero
-                    let mouseLocationPid = usesProcessConditions
-                        ? mouseLocation.topmostWindowOwnerPid
+                    let mouseLocationPid = mouseLocation.topmostWindowOwnerPid
                         ?? NSWorkspace.shared.frontmostApplication?.processIdentifier
-                        : nil
                     let display = ScreenManager.shared.currentScreenNameSnapshot
 
                     let logitechContext = LogitechEventContext(
@@ -2372,12 +2367,9 @@ final class LogitechReprogrammableControlsMonitor {
             return Set(availableControls.map(\.controlID))
         }
 
-        let usesProcessConditions = ConfigurationState.shared.configuration.usesProcessConditions
         let mouseLocation = CGEvent(source: nil)?.location ?? .zero
-        let mouseLocationPid = usesProcessConditions
-            ? mouseLocation.topmostWindowOwnerPid
+        let mouseLocationPid = mouseLocation.topmostWindowOwnerPid
             ?? NSWorkspace.shared.frontmostApplication?.processIdentifier
-            : nil
         let scheme = ConfigurationState.shared.configuration.matchScheme(
             withDevice: device,
             withPid: mouseLocationPid,
