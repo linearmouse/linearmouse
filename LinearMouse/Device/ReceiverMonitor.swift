@@ -160,6 +160,7 @@ private final class ReceiverContext {
     private let stateLock = NSLock()
     private var lastPublishedIdentities = [ReceiverLogicalDeviceIdentity]()
     private var stateStore = ReceiverSlotStateStore()
+    private var currentChannel: LogitechReceiverChannel?
 
     var onDiscoveryTimedOut: (() -> Void)?
     var onSlotsChanged: (([ReceiverLogicalDeviceIdentity]) -> Void)?
@@ -192,25 +193,35 @@ private final class ReceiverContext {
         stateLock.lock()
         isRunning = false
         let thread = workerThread
+        let channel = currentChannel
         workerThread = nil
         stateLock.unlock()
 
+        channel?.wake()
         thread?.cancel()
     }
 
     private func workerMain() {
         let initialDeadline = Date().addingTimeInterval(ReceiverMonitor.initialDiscoveryTimeout)
         var hasPublishedInitialState = false
-        var currentChannel: LogitechReceiverChannel?
         var hasCompletedInitialDiscovery = false
+        defer {
+            setCurrentChannel(nil)
+        }
 
         while shouldContinueRunning() {
-            if currentChannel == nil {
-                currentChannel = provider.openReceiverChannel(for: device.pointerDevice)
+            if currentChannelSnapshot() == nil {
+                let channel = provider.openReceiverChannel(for: device.pointerDevice)
+                setCurrentChannel(channel)
                 hasCompletedInitialDiscovery = false
+
+                if !shouldContinueRunning() {
+                    channel?.wake()
+                    break
+                }
             }
 
-            guard let receiverChannel = currentChannel else {
+            guard let receiverChannel = currentChannelSnapshot() else {
                 os_log(
                     "Receiver monitor is waiting for channel: locationID=%{public}d device=%{public}@",
                     log: ReceiverMonitor.log,
@@ -297,7 +308,7 @@ private final class ReceiverContext {
                         locationID,
                         String(describing: device)
                     )
-                    currentChannel = nil
+                    setCurrentChannel(nil)
                 }
                 continue
             }
@@ -368,6 +379,18 @@ private final class ReceiverContext {
         stateLock.lock()
         defer { stateLock.unlock() }
         return isRunning
+    }
+
+    private func setCurrentChannel(_ channel: LogitechReceiverChannel?) {
+        stateLock.lock()
+        currentChannel = channel
+        stateLock.unlock()
+    }
+
+    private func currentChannelSnapshot() -> LogitechReceiverChannel? {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        return currentChannel
     }
 
     private func mergeDiscovery(_ discovery: LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery) {

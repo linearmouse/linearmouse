@@ -765,6 +765,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
 
     private let manager: IOHIDManager
     private let device: IOHIDDevice
+    private let runLoop: CFRunLoop
     private var inputReportBuffer: UnsafeMutablePointer<UInt8>?
     private let pendingLock = NSLock()
     private let requestLock = NSLock()
@@ -812,6 +813,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
     init?(manager: IOHIDManager, device: IOHIDDevice) {
         self.manager = manager
         self.device = device
+        runLoop = CFRunLoopGetCurrent()
         vendorID = Self.getProperty(kIOHIDVendorIDKey, from: device)
         productID = Self.getProperty(kIOHIDProductIDKey, from: device)
         product = Self.getProperty(kIOHIDProductKey, from: device)
@@ -844,7 +846,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
             return nil
         }
 
-        IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
+        IOHIDDeviceScheduleWithRunLoop(device, runLoop, CFRunLoopMode.defaultMode.rawValue)
         IOHIDDeviceRegisterInputReportCallback(
             device,
             inputReportBuffer,
@@ -856,9 +858,9 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
 
     deinit {
         inputReportBuffer?.deallocate()
-        IOHIDDeviceUnscheduleFromRunLoop(device, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
+        IOHIDDeviceUnscheduleFromRunLoop(device, runLoop, CFRunLoopMode.defaultMode.rawValue)
         IOHIDDeviceClose(device, IOOptionBits(kIOHIDOptionsTypeNone))
-        IOHIDManagerUnscheduleFromRunLoop(manager, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
+        IOHIDManagerUnscheduleFromRunLoop(manager, runLoop, CFRunLoopMode.defaultMode.rawValue)
         IOHIDManagerClose(manager, IOOptionBits(kIOHIDOptionsTypeNone))
     }
 
@@ -1243,7 +1245,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
 
     private func performGetReportRequest(
         _ report: Data,
-        timeout: TimeInterval,
+        timeout _: TimeInterval,
         matching: @escaping (Data) -> Bool,
         requestType: IOHIDReportType,
         responseType: IOHIDReportType
@@ -1256,16 +1258,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
             return nil
         }
 
-        let deadline = Date().addingTimeInterval(timeout)
-        while Date() < deadline {
-            if let response = getMatchingReport(type: responseType, matching: matching) {
-                return response
-            }
-
-            CFRunLoopRunInMode(.defaultMode, 0.01, true)
-        }
-
-        return nil
+        return getMatchingReport(type: responseType, matching: matching)
     }
 
     private func sendReport(_ report: Data, type: IOHIDReportType) -> IOReturn {
@@ -1387,7 +1380,12 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
                 return response
             }
 
-            CFRunLoopRunInMode(.defaultMode, 0.01, true)
+            let remaining = deadline.timeIntervalSinceNow
+            guard remaining > 0 else {
+                break
+            }
+
+            CFRunLoopRunInMode(.defaultMode, remaining, true)
         }
 
         clearPendingRequest()
@@ -1413,6 +1411,15 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         pendingResponse = nil
         pendingSemaphore = nil
         pendingLock.unlock()
+    }
+
+    func wake() {
+        CFRunLoopWakeUp(runLoop)
+
+        pendingLock.lock()
+        let semaphore = pendingSemaphore
+        pendingLock.unlock()
+        semaphore?.signal()
     }
 
     private func readConnectionState() -> [UInt8]? {
@@ -1612,6 +1619,7 @@ final class LogitechReprogrammableControlsMonitor {
     private let device: Device
     private let provider = LogitechHIDPPDeviceMetadataProvider()
     private let stateLock = NSLock()
+    private let reconfigurationSemaphore = DispatchSemaphore(value: 0)
     private var subscriptions = Set<AnyCancellable>()
     private var directDeviceReportObservationToken: ObservationToken?
 
@@ -1620,6 +1628,7 @@ final class LogitechReprogrammableControlsMonitor {
     private var pressedButtons = Set<Int>()
     private var needsReconfiguration = false
     private var needsForcedReconfiguration = false
+    private weak var activeNotificationEndpoint: HIDPPNotificationHandling?
 
     init(device: Device) {
         self.device = device
@@ -1635,6 +1644,27 @@ final class LogitechReprogrammableControlsMonitor {
         }
 
         return true
+    }
+
+    static func isNeeded(configuration: Configuration = ConfigurationState.shared.configuration) -> Bool {
+        SettingsState.shared.recording || configuration.schemes.contains { scheme in
+            let buttons = scheme.buttons
+            if buttons.mappings?.contains(where: { $0.button?.logitechControl != nil }) == true {
+                return true
+            }
+
+            if buttons.$autoScroll?.enabled ?? false,
+               buttons.$autoScroll?.trigger?.button?.logitechControl != nil {
+                return true
+            }
+
+            if buttons.$gesture?.enabled ?? false,
+               buttons.$gesture?.trigger?.button?.logitechControl != nil {
+                return true
+            }
+
+            return false
+        }
     }
 
     func start() {
@@ -1660,9 +1690,12 @@ final class LogitechReprogrammableControlsMonitor {
         stateLock.lock()
         running = false
         let thread = workerThread
+        let notificationEndpoint = activeNotificationEndpoint
         workerThread = nil
         stateLock.unlock()
 
+        reconfigurationSemaphore.signal()
+        notificationEndpoint?.wake()
         thread?.cancel()
         subscriptions.removeAll()
         directDeviceReportObservationToken = nil
@@ -1671,6 +1704,7 @@ final class LogitechReprogrammableControlsMonitor {
     private func workerMain() {
         defer {
             releaseButtonIfNeeded()
+            setActiveNotificationEndpoint(nil)
         }
 
         guard let monitorTarget = resolveMonitorTarget() else {
@@ -1694,6 +1728,7 @@ final class LogitechReprogrammableControlsMonitor {
         let targetName = targetIdentity?.name ?? device.productName ?? device.name
         var pendingReportingRestoreByControlID = [UInt16: ReportingInfo]()
 
+        setActiveNotificationEndpoint(monitorTarget.notificationEndpoint)
         monitorTarget.notificationEndpoint.enableNotifications()
         logAvailableControls(transport: transport, featureIndex: featureIndex, slot: slot, locationID: locationID)
 
@@ -1948,9 +1983,12 @@ final class LogitechReprogrammableControlsMonitor {
                         continue
                     }
 
+                    let usesProcessConditions = ConfigurationState.shared.configuration.usesProcessConditions
                     let mouseLocation = CGEvent(source: nil)?.location ?? .zero
-                    let mouseLocationPid = mouseLocation.topmostWindowOwnerPid
+                    let mouseLocationPid = usesProcessConditions
+                        ? mouseLocation.topmostWindowOwnerPid
                         ?? NSWorkspace.shared.frontmostApplication?.processIdentifier
+                        : nil
                     let display = ScreenManager.shared.currentScreenNameSnapshot
 
                     let logitechContext = LogitechEventContext(
@@ -1986,7 +2024,7 @@ final class LogitechReprogrammableControlsMonitor {
                 return true
             }
 
-            Thread.sleep(forTimeInterval: Constants.notificationTimeout)
+            _ = reconfigurationSemaphore.wait(timeout: .now() + Constants.notificationTimeout)
         }
 
         return false
@@ -2288,14 +2326,22 @@ final class LogitechReprogrammableControlsMonitor {
     func requestReconfiguration() {
         stateLock.lock()
         needsReconfiguration = true
+        let notificationEndpoint = activeNotificationEndpoint
         stateLock.unlock()
+
+        reconfigurationSemaphore.signal()
+        notificationEndpoint?.wake()
     }
 
     func requestForcedReconfiguration() {
         stateLock.lock()
         needsReconfiguration = true
         needsForcedReconfiguration = true
+        let notificationEndpoint = activeNotificationEndpoint
         stateLock.unlock()
+
+        reconfigurationSemaphore.signal()
+        notificationEndpoint?.wake()
     }
 
     private func consumeReconfigurationRequest() -> (needed: Bool, forced: Bool) {
@@ -2312,6 +2358,12 @@ final class LogitechReprogrammableControlsMonitor {
         return (true, forced)
     }
 
+    private func setActiveNotificationEndpoint(_ endpoint: HIDPPNotificationHandling?) {
+        stateLock.lock()
+        activeNotificationEndpoint = endpoint
+        stateLock.unlock()
+    }
+
     private func desiredDivertedControlIDs(
         availableControls: [ControlInfo],
         identity: ReceiverLogicalDeviceIdentity?
@@ -2320,9 +2372,12 @@ final class LogitechReprogrammableControlsMonitor {
             return Set(availableControls.map(\.controlID))
         }
 
+        let usesProcessConditions = ConfigurationState.shared.configuration.usesProcessConditions
         let mouseLocation = CGEvent(source: nil)?.location ?? .zero
-        let mouseLocationPid = mouseLocation.topmostWindowOwnerPid
+        let mouseLocationPid = usesProcessConditions
+            ? mouseLocation.topmostWindowOwnerPid
             ?? NSWorkspace.shared.frontmostApplication?.processIdentifier
+            : nil
         let scheme = ConfigurationState.shared.configuration.matchScheme(
             withDevice: device,
             withPid: mouseLocationPid,
@@ -2760,6 +2815,7 @@ final class LogitechReprogrammableControlsMonitor {
 
 private protocol HIDPPNotificationHandling: AnyObject {
     func enableNotifications()
+    func wake()
     func waitForHIDPPNotification(
         timeout: TimeInterval,
         matching: @escaping ([UInt8]) -> Bool,
@@ -2775,6 +2831,10 @@ private final class HIDPPNotificationEndpoint: HIDPPNotificationHandling {
     private var bufferedReports = [[UInt8]]()
 
     func enableNotifications() {}
+
+    func wake() {
+        semaphore.signal()
+    }
 
     func handleInputReport(_ report: Data) {
         let bytes = [UInt8](report)
@@ -2813,7 +2873,7 @@ private final class HIDPPNotificationEndpoint: HIDPPNotificationHandling {
                 break
             }
 
-            _ = semaphore.wait(timeout: .now() + min(remaining, 0.01))
+            _ = semaphore.wait(timeout: .now() + remaining)
         }
 
         return dequeueFirstMatchingReport(matching: matching)
