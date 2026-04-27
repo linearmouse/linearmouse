@@ -5253,6 +5253,214 @@
         }
       }
     },
+    "Allow scroll bouncing" : {
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laat rol-terugspring toe"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "السماح بارتداد التمرير"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dozvoli odbijanje pri skrolovanju"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permet el rebot del desplaçament"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Povolit odskakování při posouvání"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tillad hop ved rulning"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scroll-Bounce erlauben"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Να επιτρέπεται η αναπήδηση κύλισης"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permitir rebote al desplazarse"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salli vierityksen kimmahdus"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autoriser le rebond du défilement"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשר קפיצת גלילה"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Görgetési visszapattanás engedélyezése"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Izinkan pantulan gulir"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consenti rimbalzo dello scorrimento"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スクロールのバウンスを許可"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "스크롤 바운스 허용"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "လှိမ့်ခြင်း ပြန်ခုန်မှုကို ခွင့်ပြုရန်"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tillat sprett ved rulling"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scroll-terugveren toestaan"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zezwalaj na odbijanie przewijania"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permitir ressalto da rolagem"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permitir ressalto da rolagem"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permite ricoșeul la derulare"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешить отскок при прокрутке"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Povoliť odskakovanie pri posúvaní"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дозволи одскакање при померању"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tillåt studs vid rullning"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydırma sekmesine izin ver"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дозволити відскок під час прокручування"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cho phép nảy khi cuộn"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "允许滚动回弹"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "允許捲動回彈"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "允許捲動回彈"
+          }
+        }
+      }
+    },
     "Alter orientation" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -15354,7 +15562,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "설정 삭제?"
+            "value" : "설정을 삭제하겠습니까?"
           }
         },
         "my" : {
@@ -30034,6 +30242,214 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "左鍵"
+          }
+        }
+      }
+    },
+    "Let apps apply rubber-band overscroll at content edges." : {
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laat programme elastiese oorrol by inhoudsrande toepas."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "السماح للتطبيقات بتطبيق التمرير المطاطي الزائد عند حواف المحتوى."
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dozvoli aplikacijama da primijene gumeno prekoračenje skrolovanja na ivicama sadržaja."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permet que les apps apliquin sobredesplaçament elàstic a les vores del contingut."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Umožnit aplikacím použít pružné přetažení na okrajích obsahu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lad apps anvende elastisk overrulning ved indholdets kanter."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apps dürfen an Inhaltsrändern elastisches Überscrollen anwenden."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Να επιτρέπεται στις εφαρμογές να εφαρμόζουν ελαστική υπερκύλιση στα άκρα του περιεχομένου."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permite que las apps apliquen sobredesplazamiento elástico en los bordes del contenido."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anna appien käyttää joustavaa ylivieritystä sisällön reunoilla."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autorise les apps à appliquer un surdéfilement élastique aux bords du contenu."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשר ליישומים להחיל גלילת יתר גמישה בקצות התוכן."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Engedélyezi, hogy az appok rugalmas túlgörgetést alkalmazzanak a tartalom szélein."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biarkan app menerapkan gulir lebih bergaya karet di tepi konten."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consenti alle app di applicare lo scorrimento elastico oltre i bordi del contenuto."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コンテンツの端でアプリによるラバーバンド状のオーバースクロールを許可します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "앱이 콘텐츠 가장자리에서 고무줄처럼 당겨지는 오버스크롤을 적용하도록 허용합니다."
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "အက်ပ်များကို အကြောင်းအရာအစွန်းများတွင် ရော်ဘာကြိုးပုံစံ အလွန်လှိမ့်ခြင်း အသုံးပြုခွင့်ပြုရန်။"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La apper bruke elastisk overrulling ved innholdskanter."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sta apps toe elastisch overscrollen toe te passen aan de randen van de inhoud."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pozwól aplikacjom stosować elastyczne przewijanie poza krawędziami treści."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permitir que as apps apliquem deslocamento elástico além dos limites do conteúdo."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permitir que apps apliquem rolagem elástica além das bordas do conteúdo."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permite aplicațiilor să aplice supraderulare elastică la marginile conținutului."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешить приложениям применять эластичную прокрутку за границами содержимого."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Umožniť aplikáciám použiť pružné posúvanie za okrajmi obsahu."
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дозволи апликацијама да примене еластично померање преко ивица садржаја."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Låt appar använda elastisk överrullning vid innehållskanter."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulamaların içerik kenarlarında lastik bant tarzı aşırı kaydırma uygulamasına izin ver."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дозволити програмам застосовувати еластичне прокручування за межі на краях вмісту."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cho phép ứng dụng áp dụng cuộn quá mức kiểu dây cao su ở mép nội dung."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "允许 App 在内容边缘应用橡皮筋式过度滚动。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "允許 App 在內容邊緣套用橡皮筋式過度捲動。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "允許 App 在內容邊緣套用橡筋式過度捲動。"
           }
         }
       }
@@ -58888,7 +59304,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "설정 변경 사항이 활성화되었습니다."
+            "value" : "설정 변경 사항이 적용되었습니다."
           }
         },
         "my" : {
