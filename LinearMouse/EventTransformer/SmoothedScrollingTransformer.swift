@@ -142,8 +142,14 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
             )
         }
 
+        let shouldResetAfterNativePhase = view.scrollPhase == .ended || view.momentumPhase == .end
+        let appliesPhases = allowsBouncingForConfiguredAxes(interceptsX: interceptsX, interceptsY: interceptsY)
+
         if let emission = engine.advance(to: now()) {
-            delivery.apply(phases: delivery.phasesFor(emission.phase), to: view)
+            delivery.apply(
+                phases: delivery.phasesFor(emission.phase, appliesPhases: appliesPhases),
+                to: view
+            )
 
             if interceptsX {
                 delivery.setHorizontal(handlesX ? emission.deltaX : 0, on: view)
@@ -160,8 +166,7 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
             }
         }
 
-        let shouldReset = view.scrollPhase == .ended || view.momentumPhase == .end
-        if shouldReset {
+        if shouldResetAfterNativePhase {
             engine = SmoothedScrollingEngine(smoothed: smoothed)
             stopTimer()
         }
@@ -207,7 +212,14 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
         view.continuous = true
         delivery.setHorizontal(emission.deltaX, on: view)
         delivery.setVertical(emission.deltaY, on: view)
-        delivery.apply(phases: delivery.phasesFor(emission.phase), to: view)
+        delivery.apply(
+            phases: delivery.phasesFor(emission.phase, appliesPhases: allowsBouncingForConfiguredAxes()),
+            to: view
+        )
+        guard view.scrollPhase != nil || view.momentumPhase != .none || emission.deltaX != 0 || emission.deltaY != 0
+        else {
+            return
+        }
         event.isLinearMouseSyntheticEvent = true
         event.flags = lastFlags
         eventSink(event)
@@ -221,6 +233,19 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
             String(describing: view.scrollPhase),
             String(describing: view.momentumPhase)
         )
+    }
+
+    private func allowsBouncingForConfiguredAxes(
+        interceptsX: Bool = true,
+        interceptsY: Bool = true
+    ) -> Bool {
+        if interceptsX, smoothed.horizontal?.allowsBouncing == false {
+            return false
+        }
+        if interceptsY, smoothed.vertical?.allowsBouncing == false {
+            return false
+        }
+        return true
     }
 }
 
@@ -236,8 +261,14 @@ private struct SmoothedScrollEventDelivery {
         view.momentumPhase = phases.momentumPhase
     }
 
-    func phasesFor(_ phase: SmoothedScrollingEngine
-        .Phase) -> (scrollPhase: CGScrollPhase?, momentumPhase: CGMomentumScrollPhase) {
+    func phasesFor(
+        _ phase: SmoothedScrollingEngine.Phase,
+        appliesPhases: Bool = true
+    ) -> (scrollPhase: CGScrollPhase?, momentumPhase: CGMomentumScrollPhase) {
+        guard appliesPhases else {
+            return (nil, .none)
+        }
+
         switch phase {
         case .touchBegan:
             return (.began, .none)

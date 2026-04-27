@@ -193,6 +193,15 @@ extension ScrollingSettingsState {
         decimalFormatter(maxFractionDigits: 2)
     }
 
+    var smoothedBouncing: Bool {
+        get { currentSmoothedConfiguration?.allowsBouncing ?? true }
+        set {
+            updateSmoothedConfiguration {
+                $0.bouncing = newValue
+            }
+        }
+    }
+
     var scrollingDisabled: Bool {
         switch scrollingMode {
         case .accelerated:
@@ -266,7 +275,9 @@ extension ScrollingSettingsState {
         if preset == .custom {
             setSmoothedConfiguration(makeCustomSmoothedConfiguration())
         } else {
-            setSmoothedConfiguration(preset.defaultConfiguration)
+            var configuration = preset.defaultConfiguration
+            configuration.bouncing = makeEditableSmoothedConfiguration().allowsBouncing
+            setSmoothedConfiguration(configuration)
         }
     }
 
