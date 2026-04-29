@@ -15562,7 +15562,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "설정 삭제?"
+            "value" : "설정을 삭제하겠습니까?"
           }
         },
         "my" : {
@@ -59304,7 +59304,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "설정 변경 사항이 활성화되었습니다."
+            "value" : "설정 변경 사항이 적용되었습니다."
           }
         },
         "my" : {
