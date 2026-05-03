@@ -125,6 +125,10 @@ extension Scheme.Buttons.Mapping {
     }
 
     func match(with event: CGEvent) -> Bool {
+        guard valid else {
+            return false
+        }
+
         guard matches(modifierFlags: event.flags) else {
             return false
         }

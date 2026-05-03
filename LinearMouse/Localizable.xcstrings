@@ -1640,6 +1640,20 @@
         }
       }
     },
+    "%@ Copy" : {
+      "comment" : "Duplicated custom rule name"
+    },
+    "%@ in %@" : {
+      "comment" : "Rule title for a device in an app",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ in %2$@"
+          }
+        }
+      }
+    },
     "%@ or below" : {
       "localizations" : {
         "af" : {
@@ -1847,6 +1861,9 @@
           }
         }
       }
+    },
+    "%@ Rules" : {
+
     },
     "%@ Settings…" : {
       "localizations" : {
@@ -2963,6 +2980,18 @@
           }
         }
       }
+    },
+    "%d mapping(s)" : {
+
+    },
+    "%d ms" : {
+
+    },
+    "%d rule(s). Active rules are marked with a dot for the current device, app, and display." : {
+
+    },
+    "%d settings" : {
+
     },
     "%lld pixels" : {
       "localizations" : {
@@ -4212,6 +4241,12 @@
         }
       }
     },
+    "1 setting" : {
+
+    },
+    "A rule applies when any group matches. Inside a group, all fields must match." : {
+
+    },
     "Accelerated" : {
       "localizations" : {
         "af" : {
@@ -4419,6 +4454,12 @@
           }
         }
       }
+    },
+    "Accelerated, linear, or smoothed" : {
+
+    },
+    "acceleration" : {
+
     },
     "Action" : {
       "localizations" : {
@@ -4628,6 +4669,15 @@
         }
       }
     },
+    "Actions for gesture directions" : {
+
+    },
+    "Active Now" : {
+
+    },
+    "Active Rule Chain" : {
+
+    },
     "Adaptive" : {
       "comment" : "Preset label for scroll feel. Means the app adapts the response automatically based on input movement.",
       "localizations" : {
@@ -4836,6 +4886,30 @@
           }
         }
       }
+    },
+    "Add a rule to define where pointer, scrolling, and button settings apply." : {
+
+    },
+    "Add Button Mapping" : {
+
+    },
+    "Add Condition…" : {
+
+    },
+    "Add Mapping" : {
+
+    },
+    "Add OR Group" : {
+
+    },
+    "Add Rule…" : {
+
+    },
+    "Add Setting…" : {
+
+    },
+    "Advanced fields remain editable here. Applying JSON replaces only the selected rule." : {
+
     },
     "All Apps" : {
       "localizations" : {
@@ -5252,6 +5326,21 @@
           }
         }
       }
+    },
+    "All Mice" : {
+      "comment" : "Rule title for all mouse devices"
+    },
+    "All Mice Rule" : {
+
+    },
+    "All Trackpads" : {
+      "comment" : "Rule title for all trackpad devices"
+    },
+    "All Trackpads Rule" : {
+
+    },
+    "Allow bouncing" : {
+
     },
     "Allow scroll bouncing" : {
       "localizations" : {
@@ -5676,6 +5765,12 @@
         }
       }
     },
+    "Always" : {
+
+    },
+    "Always applies · %@" : {
+
+    },
     "Always show" : {
       "localizations" : {
         "af" : {
@@ -5883,6 +5978,30 @@
           }
         }
       }
+    },
+    "Any" : {
+
+    },
+    "Any App" : {
+
+    },
+    "Any device" : {
+
+    },
+    "Any Device" : {
+
+    },
+    "Any device · any app · any display" : {
+
+    },
+    "Any display" : {
+
+    },
+    "Any of %d condition groups" : {
+
+    },
+    "App" : {
+
     },
     "App Expose" : {
       "comment" : "macOS feature name. Use the official localized system term if the target language has one.",
@@ -6093,6 +6212,9 @@
         }
       }
     },
+    "App: %@" : {
+
+    },
     "Application windows" : {
       "localizations" : {
         "af" : {
@@ -6300,6 +6422,12 @@
           }
         }
       }
+    },
+    "Applies To" : {
+
+    },
+    "Apply JSON" : {
+
     },
     "Assign actions to mouse buttons" : {
       "localizations" : {
@@ -6925,6 +7053,15 @@
         }
       }
     },
+    "Auto scroll" : {
+
+    },
+    "Auto Scroll" : {
+
+    },
+    "Auto scroll options" : {
+
+    },
     "Auto switch to the active device" : {
       "localizations" : {
         "af" : {
@@ -7549,6 +7686,12 @@
         }
       }
     },
+    "Back and forward" : {
+
+    },
+    "Back and Forward" : {
+
+    },
     "Back button" : {
       "localizations" : {
         "af" : {
@@ -7757,6 +7900,15 @@
         }
       }
     },
+    "Back Button" : {
+
+    },
+    "Back Only" : {
+
+    },
+    "Back, forward, and primary buttons" : {
+
+    },
     "Balanced ramp-up and release." : {
       "localizations" : {
         "af" : {
@@ -7964,6 +8116,9 @@
           }
         }
       }
+    },
+    "Base Configuration" : {
+      "comment" : "Fallback title for a global/base rule\nTitle for the hidden global/base rule"
     },
     "Batteries" : {
       "localizations" : {
@@ -8381,6 +8536,9 @@
         }
       }
     },
+    "Behavior" : {
+
+    },
     "Bug report" : {
       "localizations" : {
         "af" : {
@@ -8589,6 +8747,9 @@
         }
       }
     },
+    "Bug Report" : {
+
+    },
     "Button #%lld click" : {
       "localizations" : {
         "af" : {
@@ -8796,6 +8957,18 @@
           }
         }
       }
+    },
+    "Button %d" : {
+
+    },
+    "Button Mapping" : {
+
+    },
+    "Button mappings" : {
+
+    },
+    "Button Mappings" : {
+
     },
     "Buttons" : {
       "localizations" : {
@@ -9837,6 +10010,21 @@
         }
       }
     },
+    "Change Mapping Command" : {
+
+    },
+    "Change scroll while holding keys" : {
+
+    },
+    "Change Scrolling Mode" : {
+
+    },
+    "Change scrolling while holding keys" : {
+
+    },
+    "Change Setting" : {
+
+    },
     "Change speed" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10051,6 +10239,9 @@
           }
         }
       }
+    },
+    "Change Speed" : {
+
     },
     "Check for updates automatically" : {
       "localizations" : {
@@ -10468,6 +10659,9 @@
         }
       }
     },
+    "Choose" : {
+
+    },
     "Choose a feel preset." : {
       "localizations" : {
         "af" : {
@@ -10675,6 +10869,9 @@
           }
         }
       }
+    },
+    "Choose a mouse button trigger" : {
+
     },
     "Choose a mouse button trigger. Left click without modifier keys is not allowed." : {
       "localizations" : {
@@ -10884,6 +11081,27 @@
         }
       }
     },
+    "Choose Application" : {
+
+    },
+    "Choose Executable" : {
+
+    },
+    "Choose one scrolling model" : {
+
+    },
+    "Choose or create a rule to edit its settings." : {
+
+    },
+    "Choose…" : {
+
+    },
+    "Clear" : {
+
+    },
+    "Clear Rule Settings" : {
+
+    },
     "Click and release to keep autoscroll active, or hold and drag to scroll only until you let go." : {
       "localizations" : {
         "af" : {
@@ -11091,6 +11309,12 @@
           }
         }
       }
+    },
+    "Click debouncing" : {
+
+    },
+    "Click Debouncing" : {
+
     },
     "Click once to toggle" : {
       "comment" : "Autoscroll mode label. One click turns the mode on or off.",
@@ -11717,6 +11941,12 @@
         }
       }
     },
+    "Command" : {
+
+    },
+    "Condition Group %d" : {
+
+    },
     "Config" : {
       "localizations" : {
         "af" : {
@@ -11924,6 +12154,9 @@
           }
         }
       }
+    },
+    "Configuration" : {
+
     },
     "Configuration Reloaded" : {
       "localizations" : {
@@ -12757,6 +12990,9 @@
         }
       }
     },
+    "Convert Pointer Movement to Scroll" : {
+
+    },
     "Convert pointer movement to scroll events" : {
       "localizations" : {
         "af" : {
@@ -13589,6 +13825,12 @@
         }
       }
     },
+    "Create Rule" : {
+
+    },
+    "Cubic" : {
+
+    },
     "Cubic ease-in-out with a weightier middle section." : {
       "localizations" : {
         "af" : {
@@ -13797,6 +14039,18 @@
         }
       }
     },
+    "Current" : {
+
+    },
+    "Current Device" : {
+
+    },
+    "Current Device Rule" : {
+
+    },
+    "Current Display Rule" : {
+
+    },
     "Custom" : {
       "localizations" : {
         "af" : {
@@ -14004,6 +14258,9 @@
           }
         }
       }
+    },
+    "Custom Rule %d" : {
+      "comment" : "Fallback title for an unnamed custom rule"
     },
     "Daily" : {
       "localizations" : {
@@ -15045,6 +15302,9 @@
         }
       }
     },
+    "Default" : {
+      "comment" : "Section follows default settings"
+    },
     "Default action" : {
       "localizations" : {
         "af" : {
@@ -15252,6 +15512,9 @@
           }
         }
       }
+    },
+    "Defaults" : {
+
     },
     "Delete" : {
       "localizations" : {
@@ -15669,6 +15932,12 @@
         }
       }
     },
+    "Delete Rule" : {
+
+    },
+    "Delete Rule?" : {
+
+    },
     "Delete…" : {
       "localizations" : {
         "af" : {
@@ -15876,6 +16145,12 @@
           }
         }
       }
+    },
+    "Device" : {
+
+    },
+    "Device: %@" : {
+
     },
     "Direct and immediate, with a short controlled tail." : {
       "localizations" : {
@@ -16293,6 +16568,9 @@
         }
       }
     },
+    "Disable Pointer Acceleration" : {
+
+    },
     "Display" : {
       "localizations" : {
         "af" : {
@@ -16500,6 +16778,9 @@
           }
         }
       }
+    },
+    "Display: %@" : {
+
     },
     "Distance" : {
       "localizations" : {
@@ -17125,6 +17406,12 @@
         }
       }
     },
+    "Done" : {
+
+    },
+    "Down" : {
+
+    },
     "Due to system limitations, this device may not support adjusting Pointer Speed on newer versions of macOS." : {
       "localizations" : {
         "af" : {
@@ -17332,6 +17619,12 @@
           }
         }
       }
+    },
+    "Duplicate" : {
+
+    },
+    "Duplicate Rule" : {
+
     },
     "Ease In" : {
       "localizations" : {
@@ -20453,6 +20746,15 @@
         }
       }
     },
+    "Effective Values for Current Preview" : {
+
+    },
+    "Empty Conditional Rule" : {
+
+    },
+    "Enable auto scroll" : {
+
+    },
     "Enable autoscroll" : {
       "localizations" : {
         "af" : {
@@ -21909,6 +22211,9 @@
         }
       }
     },
+    "Export Logs" : {
+
+    },
     "Export the logs for the last 5 minutes." : {
       "localizations" : {
         "af" : {
@@ -22116,6 +22421,9 @@
           }
         }
       }
+    },
+    "Exporting…" : {
+
     },
     "Failed to create GlobalEventTap: Accessibility permission not granted" : {
       "localizations" : {
@@ -23989,6 +24297,21 @@
         }
       }
     },
+    "Feature Request" : {
+
+    },
+    "Filter rapid duplicate clicks" : {
+
+    },
+    "Filter repeated clicks" : {
+
+    },
+    "Fixed horizontal scroll distance" : {
+
+    },
+    "Fixed vertical scroll distance" : {
+
+    },
     "Flat" : {
       "comment" : "Preset label for scroll curve. Means flatter acceleration with less curvature.",
       "localizations" : {
@@ -24197,6 +24520,9 @@
           }
         }
       }
+    },
+    "Follow earlier rules" : {
+
     },
     "Forward" : {
       "localizations" : {
@@ -24614,6 +24940,18 @@
         }
       }
     },
+    "Forward Button" : {
+
+    },
+    "Forward Only" : {
+
+    },
+    "From %@" : {
+
+    },
+    "Frontmost App Rule" : {
+
+    },
     "General" : {
       "localizations" : {
         "af" : {
@@ -24821,6 +25159,12 @@
           }
         }
       }
+    },
+    "General Settings" : {
+
+    },
+    "General…" : {
+
     },
     "Gesture Actions" : {
       "localizations" : {
@@ -25030,6 +25374,15 @@
         }
       }
     },
+    "Gesture button" : {
+
+    },
+    "Gesture Button" : {
+
+    },
+    "Gesture options" : {
+
+    },
     "Get more help" : {
       "localizations" : {
         "af" : {
@@ -25237,6 +25590,24 @@
           }
         }
       }
+    },
+    "Global" : {
+
+    },
+    "Global Rule" : {
+
+    },
+    "Group %@" : {
+
+    },
+    "Group App" : {
+
+    },
+    "Group App: %@" : {
+
+    },
+    "Hold" : {
+
     },
     "Hold keys while pressed" : {
       "localizations" : {
@@ -26494,6 +26865,39 @@
         }
       }
     },
+    "horizontal acceleration" : {
+
+    },
+    "horizontal lines" : {
+
+    },
+    "horizontal pixels" : {
+
+    },
+    "Horizontal scroll acceleration" : {
+
+    },
+    "Horizontal scroll distance" : {
+
+    },
+    "Horizontal scroll speed" : {
+
+    },
+    "Horizontal scrolling acceleration" : {
+
+    },
+    "Horizontal Scrolling Acceleration" : {
+
+    },
+    "Horizontal scrolling distance" : {
+
+    },
+    "Horizontal scrolling speed" : {
+
+    },
+    "horizontal speed" : {
+
+    },
     "If enabled, %@ will not modify events sent by other applications, such as Logi Options+." : {
       "localizations" : {
         "af" : {
@@ -26909,6 +27313,9 @@
           }
         }
       }
+    },
+    "Ignore" : {
+
     },
     "Ignore modifier" : {
       "extractionState" : "manual",
@@ -27542,6 +27949,9 @@
         }
       }
     },
+    "Inactive Now" : {
+
+    },
     "Increase display brightness" : {
       "localizations" : {
         "af" : {
@@ -28165,6 +28575,9 @@
           }
         }
       }
+    },
+    "inertia" : {
+
     },
     "Installed" : {
       "localizations" : {
@@ -28790,6 +29203,9 @@
         }
       }
     },
+    "Invalid Rule JSON" : {
+
+    },
     "Invalid value" : {
       "localizations" : {
         "af" : {
@@ -28997,6 +29413,15 @@
           }
         }
       }
+    },
+    "Invert horizontal wheel movement" : {
+
+    },
+    "Invert vertical wheel movement" : {
+
+    },
+    "Keep native middle-click behavior" : {
+
     },
     "Keyboard" : {
       "localizations" : {
@@ -30038,6 +30463,9 @@
         }
       }
     },
+    "Left" : {
+
+    },
     "Left button" : {
       "localizations" : {
         "af" : {
@@ -30870,6 +31298,15 @@
         }
       }
     },
+    "Lines" : {
+
+    },
+    "Links" : {
+
+    },
+    "Logging" : {
+
+    },
     "Long" : {
       "comment" : "Preset label for inertia duration. Means the momentum effect lasts longer.",
       "localizations" : {
@@ -31496,6 +31933,18 @@
         }
       }
     },
+    "Manage" : {
+
+    },
+    "Manage Rules" : {
+
+    },
+    "Match Group %d" : {
+
+    },
+    "Matching rules apply from top to bottom. Later rules can replace earlier values." : {
+
+    },
     "Media" : {
       "localizations" : {
         "af" : {
@@ -31704,6 +32153,9 @@
         }
       }
     },
+    "Middle" : {
+
+    },
     "Middle button" : {
       "localizations" : {
         "af" : {
@@ -31911,6 +32363,9 @@
           }
         }
       }
+    },
+    "Middle Button" : {
+
     },
     "Middle click" : {
       "localizations" : {
@@ -32745,6 +33200,9 @@
         }
       }
     },
+    "Modifier keys" : {
+
+    },
     "Modifier Keys" : {
       "localizations" : {
         "af" : {
@@ -33577,6 +34035,9 @@
         }
       }
     },
+    "Mouse defaults" : {
+
+    },
     "Mouse Wheel" : {
       "localizations" : {
         "af" : {
@@ -33784,6 +34245,9 @@
           }
         }
       }
+    },
+    "Move Down" : {
+
     },
     "Move left a space" : {
       "localizations" : {
@@ -34201,6 +34665,9 @@
         }
       }
     },
+    "Move Up" : {
+
+    },
     "ms" : {
       "localizations" : {
         "af" : {
@@ -34616,6 +35083,9 @@
           }
         }
       }
+    },
+    "Navigation" : {
+
     },
     "Next" : {
       "localizations" : {
@@ -35242,6 +35712,18 @@
         }
       }
     },
+    "No Action" : {
+
+    },
+    "No App" : {
+
+    },
+    "No custom mappings in this rule." : {
+
+    },
+    "No Device" : {
+
+    },
     "No device selected." : {
       "localizations" : {
         "af" : {
@@ -35450,6 +35932,24 @@
         }
       }
     },
+    "No Display" : {
+
+    },
+    "No rule selected" : {
+
+    },
+    "No Rule Selected" : {
+
+    },
+    "No rules match the current preview context." : {
+
+    },
+    "No settings" : {
+
+    },
+    "No specific rules" : {
+
+    },
     "None" : {
       "localizations" : {
         "af" : {
@@ -35657,6 +36157,9 @@
           }
         }
       }
+    },
+    "Not active" : {
+
     },
     "Not specified" : {
       "localizations" : {
@@ -35867,6 +36370,7 @@
       }
     },
     "Off" : {
+      "comment" : "Off state",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -36281,6 +36785,9 @@
           }
         }
       }
+    },
+    "On" : {
+      "comment" : "On state"
     },
     "Open Accessibility" : {
       "localizations" : {
@@ -36906,6 +37413,15 @@
         }
       }
     },
+    "Parent %@" : {
+
+    },
+    "Parent App" : {
+
+    },
+    "Parent App: %@" : {
+
+    },
     "Pinch zoom" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -37120,6 +37636,12 @@
           }
         }
       }
+    },
+    "Pinch Zoom" : {
+
+    },
+    "Pixels" : {
+
     },
     "Play / pause" : {
       "localizations" : {
@@ -37745,6 +38267,12 @@
         }
       }
     },
+    "Pointer Acceleration" : {
+
+    },
+    "Pointer Movement" : {
+
+    },
     "Pointer speed" : {
       "localizations" : {
         "af" : {
@@ -37952,6 +38480,15 @@
           }
         }
       }
+    },
+    "Pointer Speed" : {
+
+    },
+    "Pointer to Scroll" : {
+
+    },
+    "Pointing" : {
+
     },
     "Preserve native middle-click on links and buttons" : {
       "localizations" : {
@@ -38786,6 +39323,12 @@
         }
       }
     },
+    "Primary" : {
+
+    },
+    "Primary Button" : {
+
+    },
     "Primary click" : {
       "localizations" : {
         "af" : {
@@ -38994,6 +39537,9 @@
         }
       }
     },
+    "Primary click needs a modifier" : {
+
+    },
     "Primary double-click" : {
       "localizations" : {
         "af" : {
@@ -39201,6 +39747,30 @@
           }
         }
       }
+    },
+    "Process conditions are matched against the frontmost or event-target process. They do not detect child processes running inside a terminal window." : {
+
+    },
+    "Process Group App" : {
+
+    },
+    "Process Name" : {
+
+    },
+    "Process Path" : {
+
+    },
+    "Process Path: %@" : {
+
+    },
+    "Process: %@" : {
+
+    },
+    "Quadratic" : {
+
+    },
+    "Quartic" : {
+
     },
     "Quartic ease-in-out with the boldest mid-curve." : {
       "localizations" : {
@@ -39826,6 +40396,15 @@
         }
       }
     },
+    "Record a button and choose an action" : {
+
+    },
+    "Record Button" : {
+
+    },
+    "Record Keyboard Shortcut" : {
+
+    },
     "Recording" : {
       "localizations" : {
         "af" : {
@@ -40033,6 +40612,9 @@
           }
         }
       }
+    },
+    "Recording unavailable" : {
+
     },
     "Reload" : {
       "localizations" : {
@@ -40449,6 +41031,18 @@
           }
         }
       }
+    },
+    "Remove" : {
+
+    },
+    "Remove Button Mapping" : {
+
+    },
+    "Rename Rule" : {
+
+    },
+    "Reorder Rules" : {
+
     },
     "Repeat" : {
       "localizations" : {
@@ -41074,6 +41668,12 @@
         }
       }
     },
+    "Reset timer when the button is released" : {
+
+    },
+    "response" : {
+
+    },
     "Restore default preset" : {
       "localizations" : {
         "af" : {
@@ -41698,6 +42298,12 @@
         }
       }
     },
+    "Reverse horizontal scrolling" : {
+
+    },
+    "Reverse Horizontal Scrolling" : {
+
+    },
     "Reverse scrolling" : {
       "localizations" : {
         "af" : {
@@ -41905,6 +42511,15 @@
           }
         }
       }
+    },
+    "Reverse vertical or horizontal scroll" : {
+
+    },
+    "Reverse vertical scrolling" : {
+
+    },
+    "Reverse Vertical Scrolling" : {
+
     },
     "Revert to system defaults" : {
       "localizations" : {
@@ -42322,6 +42937,9 @@
         }
       }
     },
+    "Right" : {
+
+    },
     "Right button" : {
       "localizations" : {
         "af" : {
@@ -42529,6 +43147,18 @@
           }
         }
       }
+    },
+    "Rule %d" : {
+
+    },
+    "Rule JSON" : {
+
+    },
+    "Rules" : {
+
+    },
+    "Rules are stored in the same order as the configuration file. Matching rules apply from top to bottom; a later rule only replaces values it explicitly sets." : {
+
     },
     "Run shell command…" : {
       "localizations" : {
@@ -43154,6 +43784,9 @@
         }
       }
     },
+    "Scope" : {
+
+    },
     "Scroll acceleration" : {
       "localizations" : {
         "af" : {
@@ -43361,6 +43994,12 @@
           }
         }
       }
+    },
+    "Scroll behavior" : {
+
+    },
+    "Scroll Behavior" : {
+
     },
     "Scroll by moving away from an anchor point, similar to Windows middle-click autoscroll." : {
       "localizations" : {
@@ -43570,6 +44209,12 @@
         }
       }
     },
+    "Scroll Direction" : {
+
+    },
+    "Scroll distance" : {
+
+    },
     "Scroll down" : {
       "localizations" : {
         "af" : {
@@ -43777,6 +44422,9 @@
           }
         }
       }
+    },
+    "Scroll Down" : {
+
     },
     "Scroll down %@" : {
       "localizations" : {
@@ -44193,6 +44841,9 @@
           }
         }
       }
+    },
+    "Scroll from a button trigger" : {
+
     },
     "Scroll inertia" : {
       "comment" : "Setting label for momentum that continues after scrolling input stops.",
@@ -44611,6 +45262,9 @@
         }
       }
     },
+    "Scroll Left" : {
+
+    },
     "Scroll left %@" : {
       "localizations" : {
         "af" : {
@@ -45026,6 +45680,9 @@
           }
         }
       }
+    },
+    "Scroll modifiers" : {
+
     },
     "Scroll response" : {
       "comment" : "Setting label for how quickly scrolling reacts to input movement.",
@@ -45449,6 +46106,9 @@
           }
         }
       }
+    },
+    "Scroll Right" : {
+
     },
     "Scroll right %@" : {
       "localizations" : {
@@ -46281,6 +46941,9 @@
           }
         }
       }
+    },
+    "Scroll Up" : {
+
     },
     "Scroll up %@" : {
       "localizations" : {
@@ -48161,6 +48824,12 @@
         }
       }
     },
+    "Secondary" : {
+
+    },
+    "Secondary Button" : {
+
+    },
     "Secondary click" : {
       "localizations" : {
         "af" : {
@@ -48578,6 +49247,7 @@
       }
     },
     "Select an item from the sidebar" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -49202,6 +49872,9 @@
         }
       }
     },
+    "Set here" : {
+
+    },
     "Settings" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -49416,6 +50089,9 @@
           }
         }
       }
+    },
+    "Settings in This Rule" : {
+
     },
     "Short" : {
       "comment" : "Preset label for inertia duration. Means the momentum effect ends sooner.",
@@ -50668,6 +51344,9 @@
         }
       }
     },
+    "Side buttons navigate back and forward" : {
+
+    },
     "Slow" : {
       "localizations" : {
         "af" : {
@@ -51292,6 +51971,12 @@
         }
       }
     },
+    "Smooth scrolling" : {
+
+    },
+    "Smoothed" : {
+
+    },
     "Smoothed (Beta)" : {
       "localizations" : {
         "af" : {
@@ -51499,6 +52184,9 @@
           }
         }
       }
+    },
+    "Smoothed scrolling" : {
+
     },
     "Soft start that builds momentum as you keep scrolling." : {
       "localizations" : {
@@ -51916,6 +52604,15 @@
         }
       }
     },
+    "Specific" : {
+
+    },
+    "Specific Device" : {
+
+    },
+    "speed" : {
+
+    },
     "Speed" : {
       "localizations" : {
         "af" : {
@@ -52123,6 +52820,9 @@
           }
         }
       }
+    },
+    "Speed and acceleration" : {
+
     },
     "Stable and fluid, with a longer carry than Linear." : {
       "localizations" : {
@@ -52539,6 +53239,18 @@
           }
         }
       }
+    },
+    "Starting point" : {
+
+    },
+    "Startup" : {
+
+    },
+    "Swap Axis" : {
+
+    },
+    "Swap primary and secondary buttons" : {
+
     },
     "Swipe down" : {
       "localizations" : {
@@ -53580,6 +54292,12 @@
         }
       }
     },
+    "Switch Primary and Secondary Buttons" : {
+
+    },
+    "System default" : {
+
+    },
     "Thank you for participating in the beta test." : {
       "localizations" : {
         "af" : {
@@ -54412,6 +55130,24 @@
         }
       }
     },
+    "This Device" : {
+
+    },
+    "This is a global rule and matches every context." : {
+
+    },
+    "This rule does not set any values yet. Add a setting to make it affect matching devices and apps." : {
+
+    },
+    "This rule has multiple condition groups. It matches when any group matches." : {
+
+    },
+    "This setting is edited through its parent control." : {
+
+    },
+    "This will delete “%@” and all settings stored in that rule." : {
+
+    },
     "This will delete all settings for \"%@\"." : {
       "localizations" : {
         "af" : {
@@ -54827,6 +55563,9 @@
           }
         }
       }
+    },
+    "threshold" : {
+
     },
     "Threshold" : {
       "localizations" : {
@@ -55244,6 +55983,9 @@
         }
       }
     },
+    "Toggle" : {
+
+    },
     "Tracking speed" : {
       "localizations" : {
         "af" : {
@@ -55660,6 +56402,9 @@
         }
       }
     },
+    "Trackpad defaults" : {
+
+    },
     "Trigger" : {
       "localizations" : {
         "af" : {
@@ -55867,6 +56612,18 @@
           }
         }
       }
+    },
+    "Trigger and drag actions" : {
+
+    },
+    "Trigger and speed for auto scroll" : {
+
+    },
+    "Trigger, mode, and speed" : {
+
+    },
+    "Tune momentum-like scrolling" : {
+
     },
     "Type mismatch: expected %1$@ at %2$@" : {
       "localizations" : {
@@ -56284,6 +57041,12 @@
         }
       }
     },
+    "Universal back and forward" : {
+
+    },
+    "Universal Back and Forward" : {
+
+    },
     "UniversalBackForward must be true, false, \"backOnly\" or \"forwardOnly\"" : {
       "localizations" : {
         "af" : {
@@ -56493,6 +57256,7 @@
       }
     },
     "Unknown" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -56699,6 +57463,12 @@
           }
         }
       }
+    },
+    "Unset" : {
+
+    },
+    "Unset Group" : {
+
     },
     "Unsupported encoding, expected UTF-8" : {
       "localizations" : {
@@ -56908,6 +57678,9 @@
         }
       }
     },
+    "Up" : {
+
+    },
     "Update check interval" : {
       "localizations" : {
         "af" : {
@@ -57116,6 +57889,30 @@
         }
       }
     },
+    "Updates" : {
+
+    },
+    "Use Current" : {
+
+    },
+    "Use Earlier Value" : {
+
+    },
+    "Use Earlier Values" : {
+
+    },
+    "Use Frontmost" : {
+
+    },
+    "Use movement as scrolling" : {
+
+    },
+    "Use raw pointer movement" : {
+
+    },
+    "Use the popover list to choose a rule. Reordering and full rule management are still handled by the configuration model in this prototype." : {
+
+    },
     "Use this when you want to fine-tune the feel yourself." : {
       "localizations" : {
         "af" : {
@@ -57323,6 +58120,9 @@
           }
         }
       }
+    },
+    "Verbose logging records input events and may increase CPU usage while using %@. Exported logs include entries from the last 5 minutes." : {
+
     },
     "Version: %@" : {
       "localizations" : {
@@ -57746,6 +58546,36 @@
           }
         }
       }
+    },
+    "vertical acceleration" : {
+
+    },
+    "vertical lines" : {
+
+    },
+    "vertical pixels" : {
+
+    },
+    "Vertical scroll acceleration" : {
+
+    },
+    "Vertical scroll speed" : {
+
+    },
+    "Vertical scrolling acceleration" : {
+
+    },
+    "Vertical Scrolling Acceleration" : {
+
+    },
+    "Vertical scrolling distance" : {
+
+    },
+    "Vertical scrolling speed" : {
+
+    },
+    "vertical speed" : {
+
     },
     "Very fast quartic pickup with a crisp release." : {
       "localizations" : {
@@ -58370,6 +59200,9 @@
           }
         }
       }
+    },
+    "When" : {
+
     },
     "When using plain middle click, keep browser-style middle-click behavior on pressable elements instead of entering autoscroll." : {
       "localizations" : {

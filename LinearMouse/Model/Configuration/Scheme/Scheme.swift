@@ -12,6 +12,8 @@ import Foundation
 /// There can be multiple active schemes at the same time. Settings in
 /// subsequent schemes will be merged into the previous ones.
 struct Scheme: Codable, Equatable {
+    var name: String?
+
     /// Defines the conditions under which this scheme is active.
     @SingleValueOrArray var `if`: [If]?
 
@@ -22,11 +24,13 @@ struct Scheme: Codable, Equatable {
     @ImplicitOptional var buttons: Buttons
 
     init(
+        name: String? = nil,
         if: [If]? = nil,
         scrolling: Scrolling? = nil,
         pointer: Pointer? = nil,
         buttons: Buttons? = nil
     ) {
+        self.name = name
         self.if = `if`
         $scrolling = scrolling
         $pointer = pointer

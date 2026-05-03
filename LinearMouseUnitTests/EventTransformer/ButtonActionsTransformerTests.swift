@@ -54,6 +54,35 @@ private func logitechContext(
 }
 
 final class ButtonActionsTransformerTests: XCTestCase {
+    func testMappingWithoutButtonOrScrollDoesNotMatchAnyButtonEvent() throws {
+        let event = try XCTUnwrap(CGEvent(
+            mouseEventSource: nil,
+            mouseType: .otherMouseUp,
+            mouseCursorPosition: .zero,
+            mouseButton: .center
+        ))
+        let mapping = Scheme.Buttons.Mapping(action: .arg1(.keyPress([.a])))
+
+        XCTAssertFalse(mapping.match(with: event))
+    }
+
+    func testInvalidMappingDoesNotHandleAnyButtonEvent() throws {
+        let simulator = RecordingKeySimulator()
+        let event = try XCTUnwrap(CGEvent(
+            mouseEventSource: nil,
+            mouseType: .otherMouseUp,
+            mouseCursorPosition: .zero,
+            mouseButton: .center
+        ))
+        let transformer = ButtonActionsTransformer(
+            mappings: [.init(action: .arg1(.keyPress([.a])))],
+            keySimulator: simulator
+        )
+
+        XCTAssertNotNil(transformer.transform(event))
+        XCTAssertEqual(simulator.events, [])
+    }
+
     func testLogitechControlEventMatchesGenericCommandMappingWithRightCommandFlag() {
         let transformer = ButtonActionsTransformer(mappings: [
             .init(
