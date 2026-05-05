@@ -243,12 +243,20 @@ class DeviceManager: ObservableObject {
     }
 
     func updatePointerSpeed() {
+        guard state == .running else {
+            return
+        }
+
         for device in devices {
             updatePointerSpeed(for: device)
         }
     }
 
     func updatePointerSpeed(for device: Device) {
+        guard state == .running else {
+            return
+        }
+
         let scheme = ConfigurationState.shared.configuration.matchScheme(
             withDevice: device,
             withPid: NSWorkspace.shared.frontmostApplication?.processIdentifier,

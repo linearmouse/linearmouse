@@ -60,8 +60,6 @@ class DeviceModel: ObservableObject, Identifiable {
 
         refreshReceiverPresentation()
         refreshBatteryLevel()
-
-        DevicePickerBatteryCoordinator.shared.refresh(self)
     }
 
     func applyVendorSpecificMetadata(_ metadata: VendorSpecificDeviceMetadata?) {

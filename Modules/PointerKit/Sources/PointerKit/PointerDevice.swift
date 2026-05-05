@@ -68,12 +68,22 @@ public class PointerDevice {
     }
 
     deinit {
-        inputReportBuffer?.deallocate()
-
         if let device {
-            IOHIDDeviceClose(device, IOOptionBits(kIOHIDOptionsTypeNone))
+            IOHIDDeviceRegisterInputValueCallback(device, nil, nil)
+            if let inputReportBuffer {
+                IOHIDDeviceRegisterInputReportCallback(
+                    device,
+                    inputReportBuffer,
+                    inputReportBufferLength,
+                    nil,
+                    nil
+                )
+            }
             IOHIDDeviceUnscheduleFromRunLoop(device, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
+            IOHIDDeviceClose(device, IOOptionBits(kIOHIDOptionsTypeNone))
         }
+
+        inputReportBuffer?.deallocate()
     }
 }
 

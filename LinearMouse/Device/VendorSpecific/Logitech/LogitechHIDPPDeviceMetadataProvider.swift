@@ -1622,6 +1622,7 @@ final class LogitechReprogrammableControlsMonitor {
     private var directDeviceReportObservationToken: ObservationToken?
 
     private var workerThread: Thread?
+    private var workerStoppedSemaphore: DispatchSemaphore?
     private var running = false
     private var pressedButtons = Set<Int>()
     private var needsReconfiguration = false
@@ -1633,36 +1634,72 @@ final class LogitechReprogrammableControlsMonitor {
     }
 
     static func supports(device: Device) -> Bool {
-        guard let vendorID = device.vendorID,
-              vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID,
-              [PointerDeviceTransportName.usb, PointerDeviceTransportName.bluetoothLowEnergy]
-              .contains(device.pointerDevice.transport)
-        else {
-            return false
-        }
+        supports(vendorID: device.vendorID, transport: device.pointerDevice.transport)
+    }
 
-        return true
+    static func supports(vendorID: Int?, transport: String?) -> Bool {
+        vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID
+            && [PointerDeviceTransportName.usb, PointerDeviceTransportName.bluetoothLowEnergy].contains(transport)
     }
 
     static func isNeeded(configuration: Configuration = ConfigurationState.shared.configuration) -> Bool {
-        SettingsState.shared.recording || configuration.schemes.contains { scheme in
-            let buttons = scheme.buttons
-            if buttons.mappings?.contains(where: { $0.button?.logitechControl != nil }) == true {
-                return true
-            }
+        SettingsState.shared.recording || configuration.schemes.contains(where: containsLogitechControl)
+    }
 
-            if buttons.$autoScroll?.enabled ?? false,
-               buttons.$autoScroll?.trigger?.button?.logitechControl != nil {
-                return true
-            }
-
-            if buttons.$gesture?.enabled ?? false,
-               buttons.$gesture?.trigger?.button?.logitechControl != nil {
-                return true
-            }
-
-            return false
+    static func isNeeded(for device: Device, configuration: Configuration = ConfigurationState.shared.configuration)
+        -> Bool {
+        if SettingsState.shared.recording {
+            return true
         }
+
+        guard device.pointerDevice.transport == PointerDeviceTransportName.bluetoothLowEnergy else {
+            return isNeeded(configuration: configuration)
+        }
+
+        return isNeeded(configuration: configuration, identity: directIdentity(for: device))
+    }
+
+    static func isNeeded(configuration: Configuration, identity: ReceiverLogicalDeviceIdentity) -> Bool {
+        configuration.schemes.contains { scheme in
+            logitechControls(in: scheme).contains { matches(logiButton: $0, identity: identity) }
+        }
+    }
+
+    private static func containsLogitechControl(in scheme: Scheme) -> Bool {
+        !logitechControls(in: scheme).isEmpty
+    }
+
+    private static func logitechControls(in scheme: Scheme) -> [LogitechControlIdentity] {
+        let buttons = scheme.buttons
+        let mappedControls = (buttons.mappings ?? []).compactMap(\.button?.logitechControl)
+        let autoScrollControl: LogitechControlIdentity? = {
+            guard buttons.$autoScroll?.enabled ?? false else {
+                return nil
+            }
+
+            return buttons.$autoScroll?.trigger?.button?.logitechControl
+        }()
+        let gestureControl: LogitechControlIdentity? = {
+            guard buttons.$gesture?.enabled ?? false else {
+                return nil
+            }
+
+            return buttons.$gesture?.trigger?.button?.logitechControl
+        }()
+
+        return mappedControls + [autoScrollControl, gestureControl].compactMap(\.self)
+    }
+
+    private static func directIdentity(for device: Device) -> ReceiverLogicalDeviceIdentity {
+        ReceiverLogicalDeviceIdentity(
+            receiverLocationID: device.pointerDevice.locationID ?? 0,
+            slot: 0,
+            kind: device.category == .trackpad ? .touchpad : .mouse,
+            name: device.productName ?? device.name,
+            serialNumber: device.serialNumber,
+            productID: device.productID,
+            batteryLevel: device.batteryLevel
+        )
     }
 
     func start() {
@@ -1674,11 +1711,13 @@ final class LogitechReprogrammableControlsMonitor {
         }
 
         running = true
+        let stoppedSemaphore = DispatchSemaphore(value: 0)
         let thread = Thread { [weak self] in
-            self?.workerMain()
+            self?.workerMain(stoppedSemaphore: stoppedSemaphore)
         }
         thread.name = "linearmouse.logitech-controls.\(device.id)"
         workerThread = thread
+        workerStoppedSemaphore = stoppedSemaphore
         thread.start()
 
         observeConfigurationChangesIfNeeded()
@@ -1689,20 +1728,26 @@ final class LogitechReprogrammableControlsMonitor {
         running = false
         let thread = workerThread
         let notificationEndpoint = activeNotificationEndpoint
+        let stoppedSemaphore = workerStoppedSemaphore
         workerThread = nil
+        workerStoppedSemaphore = nil
         stateLock.unlock()
 
         reconfigurationSemaphore.signal()
         notificationEndpoint?.wake()
         thread?.cancel()
+        if let thread, thread !== Thread.current {
+            _ = stoppedSemaphore?.wait(timeout: .now() + Constants.stopTimeout)
+        }
         subscriptions.removeAll()
         directDeviceReportObservationToken = nil
     }
 
-    private func workerMain() {
+    private func workerMain(stoppedSemaphore: DispatchSemaphore) {
         defer {
             releaseButtonIfNeeded()
             setActiveNotificationEndpoint(nil)
+            stoppedSemaphore.signal()
         }
 
         guard let monitorTarget = resolveMonitorTarget() else {
@@ -2382,7 +2427,7 @@ final class LogitechReprogrammableControlsMonitor {
                     return nil
                 }
 
-                guard matches(logiButton: logiButton, identity: identity) else {
+                guard Self.matches(logiButton: logiButton, identity: identity) else {
                     return nil
                 }
 
@@ -2392,7 +2437,7 @@ final class LogitechReprogrammableControlsMonitor {
         let autoScrollControlID: UInt16? = {
             guard scheme.buttons.autoScroll.enabled ?? false,
                   let logiButton = scheme.buttons.autoScroll.trigger?.button?.logitechControl,
-                  matches(logiButton: logiButton, identity: identity) else {
+                  Self.matches(logiButton: logiButton, identity: identity) else {
                 return nil
             }
             return logiButton.controlIDValue
@@ -2401,7 +2446,7 @@ final class LogitechReprogrammableControlsMonitor {
         let gestureControlID: UInt16? = {
             guard scheme.buttons.gesture.enabled ?? false,
                   let logiButton = scheme.buttons.gesture.trigger?.button?.logitechControl,
-                  matches(logiButton: logiButton, identity: identity) else {
+                  Self.matches(logiButton: logiButton, identity: identity) else {
                 return nil
             }
             return logiButton.controlIDValue
@@ -2411,7 +2456,7 @@ final class LogitechReprogrammableControlsMonitor {
             .intersection(availableControls.map(\.controlID))
     }
 
-    private func matches(logiButton: LogitechControlIdentity, identity: ReceiverLogicalDeviceIdentity?) -> Bool {
+    private static func matches(logiButton: LogitechControlIdentity, identity: ReceiverLogicalDeviceIdentity?) -> Bool {
         if let configuredSerialNumber = logiButton.serialNumber {
             guard let serialNumber = identity?.serialNumber else {
                 return false

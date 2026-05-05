@@ -5,11 +5,23 @@ import Foundation
 import PointerKit
 
 enum ConnectedLogitechDeviceInventory {
-    static func devices(from pointerDevices: [PointerDevice]) -> [ConnectedBatteryDeviceInfo] {
+    static func devices<DeviceContext: VendorSpecificDeviceContext>(
+        from devices: [DeviceContext],
+        includeBluetoothLowEnergy: Bool = false,
+        shouldContinue: () -> Bool = { true }
+    ) -> [ConnectedBatteryDeviceInfo] {
         var results = [ConnectedBatteryDeviceInfo]()
         var seen = Set<String>()
 
-        for device in pointerDevices where device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID {
+        for device in devices where device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID {
+            guard shouldContinue() else {
+                break
+            }
+
+            if device.transport == PointerDeviceTransportName.bluetoothLowEnergy, !includeBluetoothLowEnergy {
+                continue
+            }
+
             let productName = device.product ?? device.name
             if device.transport == PointerDeviceTransportName.usb,
                productName.localizedCaseInsensitiveContains("receiver") {

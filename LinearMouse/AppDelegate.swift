@@ -14,6 +14,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private let autoUpdateManager = AutoUpdateManager.shared
     private let statusItem = StatusItem.shared
     private var subscriptions = Set<AnyCancellable>()
+    private var sessionActive = true
+    private var sleeping = false
 
     func applicationDidFinishLaunching(_: Notification) {
         guard ProcessEnvironment.isRunningApp else {
@@ -66,7 +68,7 @@ extension AppDelegate {
         setupConfiguration()
         setupNotifications()
         KeyboardSettingsSnapshot.shared.refresh()
-        start()
+        startIfAllowed()
     }
 
     func setupConfiguration() {
@@ -84,6 +86,7 @@ extension AppDelegate {
             queue: .main
         ) { [weak self] _ in
             os_log("Session inactive", log: Self.log, type: .info)
+            self?.sessionActive = false
             self?.stop()
         }
 
@@ -93,9 +96,38 @@ extension AppDelegate {
             queue: .main
         ) { [weak self] _ in
             os_log("Session active", log: Self.log, type: .info)
+            self?.sessionActive = true
             KeyboardSettingsSnapshot.shared.refresh()
-            self?.start()
+            self?.startIfAllowed()
         }
+
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.willSleepNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            os_log("System will sleep", log: Self.log, type: .info)
+            self?.sleeping = true
+            self?.stop()
+        }
+
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didWakeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            os_log("System did wake", log: Self.log, type: .info)
+            self?.sleeping = false
+            self?.startIfAllowed()
+        }
+    }
+
+    func startIfAllowed() {
+        guard sessionActive, !sleeping else {
+            return
+        }
+
+        start()
     }
 
     func start() {

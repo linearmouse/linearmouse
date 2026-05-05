@@ -137,6 +137,7 @@ class Device {
 
     func markActive(reason: String) {
         manager?.markDeviceActive(self, reason: reason)
+        BatteryDeviceMonitor.shared.refreshDirectLogitechBluetoothBatteryIfNeeded(for: self)
     }
 
     var hasLogitechControlsMonitor: Bool {
@@ -180,7 +181,7 @@ class Device {
             return
         }
 
-        if LogitechReprogrammableControlsMonitor.isNeeded() {
+        if LogitechReprogrammableControlsMonitor.isNeeded(for: self) {
             logitechReprogrammableControlsMonitor.start()
         } else {
             logitechReprogrammableControlsMonitor.stop()
