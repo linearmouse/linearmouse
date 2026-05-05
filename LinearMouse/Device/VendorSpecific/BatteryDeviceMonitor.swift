@@ -211,7 +211,7 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
             let logitechDevices = ConnectedLogitechDeviceInventory
                 .devices(
                     from: directlyAddressableLogitechDevices.map(\.pointerDevice)
-                )                    { [weak self] in self?.shouldContinueRefreshing == true }
+                ) { [weak self] in self?.shouldContinueRefreshing == true }
             guard self.shouldContinueRefreshing else {
                 self.finishRefreshCycle()
                 return
