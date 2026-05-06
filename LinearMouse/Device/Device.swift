@@ -130,7 +130,7 @@ class Device {
 
         inputObservationToken = nil
         reportObservationToken = nil
-        logitechReprogrammableControlsMonitor?.stop()
+        logitechReprogrammableControlsMonitor?.disable()
         logitechReprogrammableControlsMonitor = nil
         logitechControlsMonitorSubscriptions.removeAll()
     }
@@ -154,7 +154,7 @@ class Device {
             return
         }
 
-        logitechReprogrammableControlsMonitor.start()
+        logitechReprogrammableControlsMonitor.enable()
         logitechReprogrammableControlsMonitor.requestReconfiguration()
     }
 
@@ -182,9 +182,9 @@ class Device {
         }
 
         if LogitechReprogrammableControlsMonitor.isNeeded(for: self) {
-            logitechReprogrammableControlsMonitor.start()
+            logitechReprogrammableControlsMonitor.enable()
         } else {
-            logitechReprogrammableControlsMonitor.stop()
+            logitechReprogrammableControlsMonitor.disable()
         }
     }
 }
