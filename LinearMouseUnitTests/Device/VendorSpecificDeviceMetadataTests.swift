@@ -82,26 +82,6 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertEqual(device.outputReportRequestCount, 0)
     }
 
-    func testConnectedLogitechInventoryCanExplicitlyQueryBluetoothLowEnergyDevices() {
-        let device = MockVendorSpecificDeviceContext(
-            vendorID: 0x046D,
-            productID: 0xB015,
-            product: "Logi M650",
-            name: "Logi M650",
-            transport: PointerDeviceTransportName.bluetoothLowEnergy,
-            maxInputReportSize: 20,
-            maxOutputReportSize: 20
-        )
-
-        let devices = ConnectedLogitechDeviceInventory.devices(
-            from: [device],
-            includeBluetoothLowEnergy: true
-        )
-
-        XCTAssertTrue(devices.isEmpty)
-        XCTAssertGreaterThan(device.outputReportRequestCount, 0)
-    }
-
     func testLogitechControlsMonitorSupportsUsbAndBluetoothLowEnergyLogitechDevices() {
         XCTAssertTrue(
             LogitechReprogrammableControlsMonitor.supports(

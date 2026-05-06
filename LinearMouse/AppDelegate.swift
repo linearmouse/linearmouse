@@ -132,12 +132,12 @@ extension AppDelegate {
 
     func start() {
         DeviceManager.shared.start()
-        BatteryDeviceMonitor.shared.start()
+        BatteryDeviceMonitor.shared.enable()
         GlobalEventTap.shared.start()
     }
 
     func stop() {
-        BatteryDeviceMonitor.shared.stop()
+        BatteryDeviceMonitor.shared.disable()
         DeviceManager.shared.stop()
         GlobalEventTap.shared.stop()
     }

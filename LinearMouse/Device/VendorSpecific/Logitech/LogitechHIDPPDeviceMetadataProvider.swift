@@ -1698,6 +1698,7 @@ final class LogitechReprogrammableControlsMonitor {
 
     func disable() {
         state.disable()
+        releaseButtonIfNeeded()
         subscriptions.removeAll()
     }
 
@@ -2813,9 +2814,13 @@ private final class LogitechReprogrammableControlsMonitorState {
 
     func disable() {
         let (thread, endpoint, token) = queue.sync { () -> WorkerResources in
+            let resources = (workerThread, activeNotificationEndpoint, directDeviceReportObservationToken)
             isEnabled = false
-            defer { directDeviceReportObservationToken = nil }
-            return (workerThread, activeNotificationEndpoint, directDeviceReportObservationToken)
+            needsReconfiguration = false
+            needsForcedReconfiguration = false
+            activeNotificationEndpoint = nil
+            directDeviceReportObservationToken = nil
+            return resources
         }
 
         reconfigurationSemaphore.signal()
@@ -2833,9 +2838,13 @@ private final class LogitechReprogrammableControlsMonitorState {
 
             guard isEnabled, restartIfEnabled else {
                 isEnabled = false
+                needsReconfiguration = false
+                needsForcedReconfiguration = false
                 return (nil, nil, reportObservationToken)
             }
 
+            needsReconfiguration = false
+            needsForcedReconfiguration = false
             let nextThread = makeWorkerThread()
             workerThread = nextThread
             return (nextThread, nil, reportObservationToken)
@@ -2846,14 +2855,21 @@ private final class LogitechReprogrammableControlsMonitorState {
     }
 
     func requestReconfiguration(forced: Bool = false) {
-        let notificationEndpoint = queue.sync {
+        let request = queue.sync { () -> (accepted: Bool, endpoint: HIDPPNotificationHandling?) in
+            guard isEnabled else {
+                return (false, nil)
+            }
+
             needsReconfiguration = true
             needsForcedReconfiguration = needsForcedReconfiguration || forced
-            return activeNotificationEndpoint
+            return (true, activeNotificationEndpoint)
+        }
+        guard request.accepted else {
+            return
         }
 
         reconfigurationSemaphore.signal()
-        notificationEndpoint?.wake()
+        request.endpoint?.wake()
     }
 
     func consumeReconfigurationRequest() -> (needed: Bool, forced: Bool) {

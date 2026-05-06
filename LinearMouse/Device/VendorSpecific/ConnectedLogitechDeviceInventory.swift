@@ -7,7 +7,6 @@ import PointerKit
 enum ConnectedLogitechDeviceInventory {
     static func devices<DeviceContext: VendorSpecificDeviceContext>(
         from devices: [DeviceContext],
-        includeBluetoothLowEnergy: Bool = false,
         shouldContinue: () -> Bool = { true }
     ) -> [ConnectedBatteryDeviceInfo] {
         var results = [ConnectedBatteryDeviceInfo]()
@@ -18,7 +17,7 @@ enum ConnectedLogitechDeviceInventory {
                 break
             }
 
-            if device.transport == PointerDeviceTransportName.bluetoothLowEnergy, !includeBluetoothLowEnergy {
+            if device.transport == PointerDeviceTransportName.bluetoothLowEnergy {
                 continue
             }
 

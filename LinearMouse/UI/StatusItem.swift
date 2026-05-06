@@ -264,8 +264,8 @@ class StatusItem: NSObject, NSMenuDelegate {
     }
 
     private func updateOpenSettingsForFrontmostApplicationItem() {
-        guard let url = NSWorkspace.shared.frontmostApplication?.bundleURL,
-              let name = try? readInstalledApp(at: url)?.bundleName else {
+        guard let application = NSWorkspace.shared.frontmostApplication,
+              let name = Self.frontmostApplicationName(application) else {
             openSettingsForFrontmostApplicationItem.isHidden = true
             return
         }
@@ -274,6 +274,12 @@ class StatusItem: NSObject, NSMenuDelegate {
             format: NSLocalizedString("Configure for %@…", comment: ""),
             name
         )
+    }
+
+    private static func frontmostApplicationName(_ application: NSRunningApplication) -> String? {
+        application.localizedName ??
+            application.bundleURL?.deletingPathExtension().lastPathComponent ??
+            application.bundleIdentifier
     }
 
     private func setup() {
