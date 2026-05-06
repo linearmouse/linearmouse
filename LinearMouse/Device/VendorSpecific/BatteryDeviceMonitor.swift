@@ -111,19 +111,28 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
             return
         }
 
+        guard shouldContinueRefreshing else {
+            return
+        }
+
+        let now = Date()
+        let cacheKeys = beginDirectLogitechBluetoothRefresh(for: device, now: now, active: true)
+        guard !cacheKeys.isEmpty else {
+            return
+        }
+
         queue.async { [weak self, weak device] in
-            guard let self,
-                  let device,
+            guard let self else {
+                return
+            }
+            defer { self.finishDirectLogitechBluetoothRefresh(cacheKeys: cacheKeys) }
+
+            guard let device,
                   self.shouldContinueRefreshing else {
                 return
             }
 
-            let now = Date()
-            guard self.shouldRefreshDirectLogitechBluetoothDevice(device, now: now, active: true) else {
-                return
-            }
-
-            self.refreshDirectLogitechBluetoothDevices([device], now: now)
+            self.refreshDirectLogitechBluetoothDevice(device, cacheKeys: cacheKeys, now: now)
             self.refreshIfNeeded()
         }
     }
@@ -241,13 +250,7 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
                 && $0.pointerDevice.transport == PointerDeviceTransportName.bluetoothLowEnergy
         }
 
-        let uncachedDevices = directBluetoothDevices.filter {
-            cachedDirectLogitechBluetoothInfo(for: $0) == nil
-                && shouldRefreshDirectLogitechBluetoothDevice($0, active: false)
-        }
-        if !uncachedDevices.isEmpty {
-            refreshDirectLogitechBluetoothDevices(uncachedDevices)
-        }
+        refreshDirectLogitechBluetoothDevices(directBluetoothDevices, active: false)
 
         return directBluetoothDevices.compactMap { device in
             guard let cachedInfo = cachedDirectLogitechBluetoothInfo(for: device) else {
@@ -262,82 +265,131 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
         }
     }
 
-    private func refreshDirectLogitechBluetoothDevices(_ devices: [Device], now: Date = Date()) {
-        let devicesToRefresh = devices.filter {
-            let keys = Self.directLogitechBluetoothCacheKeys(for: $0)
-            directLogitechBluetoothLock.lock()
-            defer { directLogitechBluetoothLock.unlock() }
-            return !keys.contains { directLogitechBluetoothRefreshesInFlight.contains($0) }
-        }
-        guard !devicesToRefresh.isEmpty else {
+    private func refreshDirectLogitechBluetoothDevices(
+        _ devices: [Device],
+        now: Date = Date(),
+        active: Bool
+    ) {
+        let refreshes = beginDirectLogitechBluetoothRefreshes(for: devices, now: now, active: active)
+        guard !refreshes.isEmpty else {
             return
         }
 
-        let cacheKeys = devicesToRefresh.flatMap(Self.directLogitechBluetoothCacheKeys(for:))
-        directLogitechBluetoothLock.lock()
-        directLogitechBluetoothRefreshesInFlight.formUnion(cacheKeys)
-        directLogitechBluetoothLock.unlock()
         defer {
-            directLogitechBluetoothLock.lock()
-            directLogitechBluetoothRefreshesInFlight.subtract(cacheKeys)
-            directLogitechBluetoothLock.unlock()
+            finishDirectLogitechBluetoothRefreshes(refreshes)
         }
 
-        for device in devicesToRefresh {
-            let keys = Self.directLogitechBluetoothCacheKeys(for: device)
-            guard let metadata = VendorSpecificDeviceMetadataRegistry.metadata(for: device.pointerDevice),
-                  let batteryLevel = metadata.batteryLevel
-            else {
-                directLogitechBluetoothLock.lock()
-                for key in keys {
-                    directLogitechBluetoothFailedRefreshDates[key] = now
-                }
-                directLogitechBluetoothLock.unlock()
-                continue
-            }
-
-            let info = ConnectedBatteryDeviceInfo(
-                id: Self.directIdentity(for: device),
-                name: metadata.name ?? device.productName ?? device.name,
-                batteryLevel: batteryLevel
+        for refresh in refreshes {
+            refreshDirectLogitechBluetoothDevice(
+                refresh.device,
+                cacheKeys: refresh.cacheKeys,
+                now: now
             )
-            directLogitechBluetoothLock.lock()
-            for key in keys {
-                directLogitechBluetoothCache[key] = info
-                directLogitechBluetoothSuccessfulRefreshDates[key] = now
-                directLogitechBluetoothFailedRefreshDates.removeValue(forKey: key)
-            }
-            directLogitechBluetoothLock.unlock()
         }
     }
 
-    private func shouldRefreshDirectLogitechBluetoothDevice(
-        _ device: Device,
-        now: Date = Date(),
+    private func beginDirectLogitechBluetoothRefresh(
+        for device: Device,
+        now: Date,
         active: Bool
-    ) -> Bool {
-        let keys = Self.directLogitechBluetoothCacheKeys(for: device)
+    ) -> [String] {
         directLogitechBluetoothLock.lock()
         defer { directLogitechBluetoothLock.unlock() }
 
-        if keys.contains(where: { directLogitechBluetoothRefreshesInFlight.contains($0) }) {
+        let cacheKeys = Self.directLogitechBluetoothCacheKeys(for: device)
+        guard shouldRefreshDirectLogitechBluetoothDevice(cacheKeys: cacheKeys, now: now, active: active) else {
+            return []
+        }
+
+        directLogitechBluetoothRefreshesInFlight.formUnion(cacheKeys)
+        return cacheKeys
+    }
+
+    private func beginDirectLogitechBluetoothRefreshes(
+        for devices: [Device],
+        now: Date,
+        active: Bool
+    ) -> [(device: Device, cacheKeys: [String])] {
+        directLogitechBluetoothLock.lock()
+        defer { directLogitechBluetoothLock.unlock() }
+
+        return devices.compactMap { device -> (device: Device, cacheKeys: [String])? in
+            let cacheKeys = Self.directLogitechBluetoothCacheKeys(for: device)
+            guard shouldRefreshDirectLogitechBluetoothDevice(cacheKeys: cacheKeys, now: now, active: active) else {
+                return nil
+            }
+
+            directLogitechBluetoothRefreshesInFlight.formUnion(cacheKeys)
+            return (device, cacheKeys)
+        }
+    }
+
+    private func finishDirectLogitechBluetoothRefresh(cacheKeys: [String]) {
+        directLogitechBluetoothLock.lock()
+        directLogitechBluetoothRefreshesInFlight.subtract(cacheKeys)
+        directLogitechBluetoothLock.unlock()
+    }
+
+    private func finishDirectLogitechBluetoothRefreshes(_ refreshes: [(device: Device, cacheKeys: [String])]) {
+        directLogitechBluetoothLock.lock()
+        directLogitechBluetoothRefreshesInFlight.subtract(refreshes.flatMap(\.cacheKeys))
+        directLogitechBluetoothLock.unlock()
+    }
+
+    private func refreshDirectLogitechBluetoothDevice(
+        _ device: Device,
+        cacheKeys: [String],
+        now: Date
+    ) {
+        guard let metadata = VendorSpecificDeviceMetadataRegistry.metadata(for: device.pointerDevice),
+              let batteryLevel = metadata.batteryLevel
+        else {
+            directLogitechBluetoothLock.lock()
+            for key in cacheKeys {
+                directLogitechBluetoothFailedRefreshDates[key] = now
+            }
+            directLogitechBluetoothLock.unlock()
+            return
+        }
+
+        let info = ConnectedBatteryDeviceInfo(
+            id: Self.directIdentity(for: device),
+            name: metadata.name ?? device.productName ?? device.name,
+            batteryLevel: batteryLevel
+        )
+        directLogitechBluetoothLock.lock()
+        for key in cacheKeys {
+            directLogitechBluetoothCache[key] = info
+            directLogitechBluetoothSuccessfulRefreshDates[key] = now
+            directLogitechBluetoothFailedRefreshDates.removeValue(forKey: key)
+        }
+        directLogitechBluetoothLock.unlock()
+    }
+
+    private func shouldRefreshDirectLogitechBluetoothDevice(
+        cacheKeys: [String],
+        now: Date,
+        active: Bool
+    ) -> Bool {
+        if cacheKeys.contains(where: { directLogitechBluetoothRefreshesInFlight.contains($0) }) {
             return false
         }
 
-        if let latestFailure = keys.compactMap({ directLogitechBluetoothFailedRefreshDates[$0] }).max(),
+        if let latestFailure = cacheKeys.compactMap({ directLogitechBluetoothFailedRefreshDates[$0] }).max(),
            now.timeIntervalSince(latestFailure) < Self.directLogitechBluetoothFailedRefreshInterval {
             return false
         }
 
         guard active else {
-            return !keys.contains { directLogitechBluetoothCache[$0] != nil }
+            return !cacheKeys.contains { directLogitechBluetoothCache[$0] != nil }
         }
 
-        guard keys.contains(where: { directLogitechBluetoothCache[$0] != nil }) else {
+        guard cacheKeys.contains(where: { directLogitechBluetoothCache[$0] != nil }) else {
             return true
         }
 
-        guard let latestSuccess = keys.compactMap({ directLogitechBluetoothSuccessfulRefreshDates[$0] }).max() else {
+        guard let latestSuccess = cacheKeys.compactMap({ directLogitechBluetoothSuccessfulRefreshDates[$0] }).max()
+        else {
             return true
         }
 

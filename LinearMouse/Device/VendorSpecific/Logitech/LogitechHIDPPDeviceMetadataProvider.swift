@@ -1583,7 +1583,6 @@ final class LogitechReprogrammableControlsMonitor {
 
     private enum Constants {
         static let notificationTimeout: TimeInterval = 0.25
-        static let stopTimeout: TimeInterval = 3
     }
 
     private struct ControlInfo {
@@ -1622,7 +1621,9 @@ final class LogitechReprogrammableControlsMonitor {
     private var directDeviceReportObservationToken: ObservationToken?
 
     private var workerThread: Thread?
-    private var workerStoppedSemaphore: DispatchSemaphore?
+    private var workerGeneration = 0
+    private var activeWorkerGeneration: Int?
+    private var startRequestedAfterCurrentWorkerStops = false
     private var running = false
     private var pressedButtons = Set<Int>()
     private var needsReconfiguration = false
@@ -1703,54 +1704,96 @@ final class LogitechReprogrammableControlsMonitor {
     }
 
     func start() {
-        stateLock.lock()
-        defer { stateLock.unlock() }
+        let thread: Thread?
 
+        stateLock.lock()
         guard !running else {
+            stateLock.unlock()
             return
         }
 
         running = true
-        let stoppedSemaphore = DispatchSemaphore(value: 0)
-        let thread = Thread { [weak self] in
-            self?.workerMain(stoppedSemaphore: stoppedSemaphore)
+        if workerThread == nil {
+            thread = makeWorkerThreadLocked()
+        } else {
+            startRequestedAfterCurrentWorkerStops = true
+            thread = nil
         }
-        thread.name = "linearmouse.logitech-controls.\(device.id)"
-        workerThread = thread
-        workerStoppedSemaphore = stoppedSemaphore
-        thread.start()
+        stateLock.unlock()
 
+        thread?.start()
         observeConfigurationChangesIfNeeded()
     }
 
     func stop() {
+        let reportObservationToken: ObservationToken?
+
         stateLock.lock()
         running = false
+        startRequestedAfterCurrentWorkerStops = false
         let thread = workerThread
         let notificationEndpoint = activeNotificationEndpoint
-        let stoppedSemaphore = workerStoppedSemaphore
-        workerThread = nil
-        workerStoppedSemaphore = nil
+        reportObservationToken = directDeviceReportObservationToken
+        directDeviceReportObservationToken = nil
         stateLock.unlock()
 
         reconfigurationSemaphore.signal()
         notificationEndpoint?.wake()
         thread?.cancel()
-        if let thread, thread !== Thread.current {
-            _ = stoppedSemaphore?.wait(timeout: .now() + Constants.stopTimeout)
-        }
         subscriptions.removeAll()
-        directDeviceReportObservationToken = nil
+        _ = reportObservationToken
     }
 
-    private func workerMain(stoppedSemaphore: DispatchSemaphore) {
-        defer {
-            releaseButtonIfNeeded()
-            setActiveNotificationEndpoint(nil)
-            stoppedSemaphore.signal()
+    private func makeWorkerThreadLocked() -> Thread {
+        workerGeneration += 1
+        let generation = workerGeneration
+        activeWorkerGeneration = generation
+
+        let thread = Thread { [weak self] in
+            self?.workerMain(generation: generation)
+        }
+        thread.name = "linearmouse.logitech-controls.\(device.id).\(generation)"
+        workerThread = thread
+        return thread
+    }
+
+    private func workerDidStop(generation: Int) {
+        let thread: Thread?
+        let reportObservationToken: ObservationToken?
+
+        stateLock.lock()
+        guard activeWorkerGeneration == generation else {
+            stateLock.unlock()
+            return
         }
 
-        guard let monitorTarget = resolveMonitorTarget() else {
+        workerThread = nil
+        activeWorkerGeneration = nil
+        activeNotificationEndpoint = nil
+        reportObservationToken = directDeviceReportObservationToken
+        directDeviceReportObservationToken = nil
+
+        if startRequestedAfterCurrentWorkerStops {
+            startRequestedAfterCurrentWorkerStops = false
+            running = true
+            thread = makeWorkerThreadLocked()
+        } else {
+            running = false
+            thread = nil
+        }
+        stateLock.unlock()
+
+        _ = reportObservationToken
+        thread?.start()
+    }
+
+    private func workerMain(generation: Int) {
+        defer {
+            releaseButtonIfNeeded()
+            workerDidStop(generation: generation)
+        }
+
+        guard let monitorTarget = resolveMonitorTarget(generation: generation) else {
             finishVirtualButtonRecordingPreparationIfNeeded(sessionID: SettingsState.shared
                 .virtualButtonRecordingSessionID)
             os_log(
@@ -1771,11 +1814,11 @@ final class LogitechReprogrammableControlsMonitor {
         let targetName = targetIdentity?.name ?? device.productName ?? device.name
         var pendingReportingRestoreByControlID = [UInt16: ReportingInfo]()
 
-        setActiveNotificationEndpoint(monitorTarget.notificationEndpoint)
+        setActiveNotificationEndpoint(monitorTarget.notificationEndpoint, generation: generation)
         monitorTarget.notificationEndpoint.enableNotifications()
         logAvailableControls(transport: transport, featureIndex: featureIndex, slot: slot, locationID: locationID)
 
-        while shouldContinueRunning() {
+        while shouldContinueRunning(generation: generation) {
             if !pendingReportingRestoreByControlID.isEmpty {
                 pendingReportingRestoreByControlID = restoreReportingState(
                     pendingReportingRestoreByControlID,
@@ -1830,7 +1873,7 @@ final class LogitechReprogrammableControlsMonitor {
                     isRecording ? "true" : "false"
                 )
 
-                guard waitForReconfigurationOrStop() else {
+                guard waitForReconfigurationOrStop(generation: generation) else {
                     return
                 }
 
@@ -1850,7 +1893,13 @@ final class LogitechReprogrammableControlsMonitor {
                     result[control.controlID] = reportingInfo
                 }
             let activeControlIDs = monitoredControls.compactMap { control -> UInt16? in
-                guard setDivertedWithRetry(true, for: control.controlID, using: transport, featureIndex: featureIndex)
+                guard setDivertedWithRetry(
+                    true,
+                    for: control.controlID,
+                    using: transport,
+                    featureIndex: featureIndex,
+                    generation: generation
+                )
                 else {
                     os_log(
                         "Failed to enable Logitech control diversion: locationID=%{public}d slot=%{public}u cid=0x%{public}04X",
@@ -1877,7 +1926,7 @@ final class LogitechReprogrammableControlsMonitor {
                     targetName
                 )
 
-                guard waitForReconfigurationOrStop() else {
+                guard waitForReconfigurationOrStop(generation: generation) else {
                     return
                 }
 
@@ -1943,7 +1992,7 @@ final class LogitechReprogrammableControlsMonitor {
                 }
             }
 
-            while shouldContinueRunning() {
+            while shouldContinueRunning(generation: generation) {
                 let reconfigResult = consumeReconfigurationRequest()
                 if reconfigResult.needed {
                     if reconfigResult.forced {
@@ -1981,7 +2030,7 @@ final class LogitechReprogrammableControlsMonitor {
                     matching: { response in
                         Self.isDivertedButtonsNotification(response, featureIndex: featureIndex, slot: slot)
                     },
-                    until: { [weak self] in self?.shouldContinueRunning() == true }
+                    until: { [weak self] in self?.shouldContinueRunning(generation: generation) == true }
                 ) else {
                     continue
                 }
@@ -2058,8 +2107,8 @@ final class LogitechReprogrammableControlsMonitor {
         }
     }
 
-    private func waitForReconfigurationOrStop() -> Bool {
-        while shouldContinueRunning() {
+    private func waitForReconfigurationOrStop(generation: Int) -> Bool {
+        while shouldContinueRunning(generation: generation) {
             if consumeReconfigurationRequest().needed {
                 return true
             }
@@ -2096,9 +2145,9 @@ final class LogitechReprogrammableControlsMonitor {
             }
     }
 
-    private func resolveMonitorTarget() -> MonitorTarget? {
+    private func resolveMonitorTarget(generation: Int) -> MonitorTarget? {
         if device.pointerDevice.transport == PointerDeviceTransportName.bluetoothLowEnergy {
-            return buildDirectMonitorTarget()
+            return buildDirectMonitorTarget(generation: generation)
         }
 
         guard let receiverChannel = provider.openReceiverChannel(for: device.pointerDevice) else {
@@ -2108,7 +2157,7 @@ final class LogitechReprogrammableControlsMonitor {
         return resolveMonitorTarget(using: receiverChannel)
     }
 
-    private func buildDirectMonitorTarget() -> MonitorTarget? {
+    private func buildDirectMonitorTarget(generation: Int) -> MonitorTarget? {
         guard let transport = LogitechHIDPPTransport(device: device.pointerDevice, deviceIndex: nil),
               let featureIndex = transport.featureIndex(for: .reprogControlsV4) else {
             return nil
@@ -2135,16 +2184,22 @@ final class LogitechReprogrammableControlsMonitor {
             transport: transport,
             featureIndex: featureIndex,
             controls: controls,
-            notificationEndpoint: directNotificationEndpoint()
+            notificationEndpoint: directNotificationEndpoint(generation: generation)
         )
     }
 
-    private func directNotificationEndpoint() -> HIDPPNotificationEndpoint {
-        directDeviceReportObservationToken = nil
+    private func directNotificationEndpoint(generation: Int) -> HIDPPNotificationEndpoint {
         let endpoint = HIDPPNotificationEndpoint()
-        directDeviceReportObservationToken = device.pointerDevice.observeReport { _, report in
+        let reportObservationToken = device.pointerDevice.observeReport { _, report in
             endpoint.handleInputReport(report)
         }
+
+        stateLock.lock()
+        if running, activeWorkerGeneration == generation {
+            directDeviceReportObservationToken = reportObservationToken
+        }
+        stateLock.unlock()
+
         return endpoint
     }
 
@@ -2398,9 +2453,11 @@ final class LogitechReprogrammableControlsMonitor {
         return (true, forced)
     }
 
-    private func setActiveNotificationEndpoint(_ endpoint: HIDPPNotificationHandling?) {
+    private func setActiveNotificationEndpoint(_ endpoint: HIDPPNotificationHandling?, generation: Int) {
         stateLock.lock()
-        activeNotificationEndpoint = endpoint
+        if activeWorkerGeneration == generation {
+            activeNotificationEndpoint = endpoint
+        }
         stateLock.unlock()
     }
 
@@ -2607,6 +2664,7 @@ final class LogitechReprogrammableControlsMonitor {
         for controlID: UInt16,
         using transport: LogitechHIDPPTransport,
         featureIndex: UInt8,
+        generation: Int,
         maxAttempts: Int = 3,
         retryDelay: TimeInterval = 0.05
     ) -> Bool {
@@ -2618,7 +2676,7 @@ final class LogitechReprogrammableControlsMonitor {
                 return true
             }
 
-            guard attempt < maxAttempts, shouldContinueRunning() else {
+            guard attempt < maxAttempts, shouldContinueRunning(generation: generation) else {
                 break
             }
 
@@ -2697,10 +2755,10 @@ final class LogitechReprogrammableControlsMonitor {
         }
     }
 
-    private func shouldContinueRunning() -> Bool {
+    private func shouldContinueRunning(generation: Int) -> Bool {
         stateLock.lock()
         defer { stateLock.unlock() }
-        return running && !Thread.current.isCancelled
+        return running && activeWorkerGeneration == generation && !Thread.current.isCancelled
     }
 
     private func postSyntheticButton(button: Int, down: Bool) {
