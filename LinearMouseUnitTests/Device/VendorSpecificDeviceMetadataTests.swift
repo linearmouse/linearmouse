@@ -65,6 +65,75 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertTrue(provider.matches(device: device))
     }
 
+    func testLogitechReceiverMonitoringAllowsSupportedUnifyingReceiverProductIDs() {
+        XCTAssertTrue(
+            LogitechHIDPPDeviceMetadataProvider.supportsReceiverMonitoring(
+                vendorID: 0x046D,
+                productID: 0xC52B,
+                transport: PointerDeviceTransportName.usb
+            )
+        )
+        XCTAssertTrue(
+            LogitechHIDPPDeviceMetadataProvider.supportsReceiverMonitoring(
+                vendorID: 0x046D,
+                productID: 0xC532,
+                transport: PointerDeviceTransportName.usb
+            )
+        )
+    }
+
+    func testLogitechReceiverMonitoringRejectsReceiversWithoutImplementedProtocolSupport() {
+        XCTAssertFalse(
+            LogitechHIDPPDeviceMetadataProvider.supportsReceiverMonitoring(
+                vendorID: 0x046D,
+                productID: 0xC52F,
+                transport: PointerDeviceTransportName.usb
+            )
+        )
+        XCTAssertFalse(
+            LogitechHIDPPDeviceMetadataProvider.supportsReceiverMonitoring(
+                vendorID: 0x046D,
+                productID: 0xC539,
+                transport: PointerDeviceTransportName.usb
+            )
+        )
+        XCTAssertFalse(
+            LogitechHIDPPDeviceMetadataProvider.supportsReceiverMonitoring(
+                vendorID: 0x046D,
+                productID: 0xC548,
+                transport: PointerDeviceTransportName.usb
+            )
+        )
+        XCTAssertFalse(
+            LogitechHIDPPDeviceMetadataProvider.supportsReceiverMonitoring(
+                vendorID: 0x046D,
+                productID: 0xC52B,
+                transport: PointerDeviceTransportName.bluetoothLowEnergy
+            )
+        )
+    }
+
+    func testLogitechKnownReceiverDetectionIncludesNanoReceivers() {
+        XCTAssertTrue(
+            LogitechHIDPPDeviceMetadataProvider.isKnownReceiver(
+                vendorID: 0x046D,
+                productID: 0xC52F
+            )
+        )
+        XCTAssertTrue(
+            LogitechHIDPPDeviceMetadataProvider.isKnownReceiver(
+                vendorID: 0x046D,
+                productID: 0xC548
+            )
+        )
+        XCTAssertFalse(
+            LogitechHIDPPDeviceMetadataProvider.isKnownReceiver(
+                vendorID: 0x046D,
+                productID: 0xB015
+            )
+        )
+    }
+
     func testConnectedLogitechInventoryDoesNotQueryBluetoothLowEnergyDevices() {
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,
@@ -72,6 +141,23 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             product: "Logi M650",
             name: "Logi M650",
             transport: PointerDeviceTransportName.bluetoothLowEnergy,
+            maxInputReportSize: 20,
+            maxOutputReportSize: 20
+        )
+
+        let devices = ConnectedLogitechDeviceInventory.devices(from: [device])
+
+        XCTAssertTrue(devices.isEmpty)
+        XCTAssertEqual(device.outputReportRequestCount, 0)
+    }
+
+    func testConnectedLogitechInventoryDoesNotQueryKnownUsbReceivers() {
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xC52F,
+            product: "Logitech USB Device",
+            name: "Logitech USB Device",
+            transport: PointerDeviceTransportName.usb,
             maxInputReportSize: 20,
             maxOutputReportSize: 20
         )

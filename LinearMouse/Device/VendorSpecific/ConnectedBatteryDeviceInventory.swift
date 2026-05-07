@@ -143,7 +143,7 @@ enum ConnectedBatteryDeviceInventory {
 
         let name: String = getProperty(kIOHIDProductKey, from: hidDevice) ?? "(unknown)"
 
-        if isGenericLogitechReceiver(name: name, hidDevice: hidDevice) {
+        if isGenericLogitechReceiver(hidDevice: hidDevice) {
             return nil
         }
 
@@ -161,14 +161,17 @@ enum ConnectedBatteryDeviceInventory {
         )
     }
 
-    private static func isGenericLogitechReceiver(name: String, hidDevice: IOHIDDevice) -> Bool {
+    private static func isGenericLogitechReceiver(hidDevice: IOHIDDevice) -> Bool {
         guard let vendorID: NSNumber = getProperty(kIOHIDVendorIDKey, from: hidDevice),
-              vendorID.intValue == 0x046D
+              let productID: NSNumber = getProperty(kIOHIDProductIDKey, from: hidDevice)
         else {
             return false
         }
 
-        return name.localizedCaseInsensitiveContains("receiver")
+        return LogitechHIDPPDeviceMetadataProvider.isKnownReceiver(
+            vendorID: vendorID.intValue,
+            productID: productID.intValue
+        )
     }
 
     private static func getProperty<T>(_ key: String, from device: IOHIDDevice) -> T? {

@@ -407,15 +407,11 @@ class DeviceManager: ObservableObject {
     }
 
     private func shouldMonitorReceiver(_ device: Device) -> Bool {
-        guard let vendorID = device.vendorID,
-              vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID,
-              device.pointerDevice.transport == PointerDeviceTransportName.usb
-        else {
-            return false
-        }
-
-        let productName = device.productName ?? device.name
-        return productName.localizedCaseInsensitiveContains("receiver")
+        LogitechHIDPPDeviceMetadataProvider.supportsReceiverMonitoring(
+            vendorID: device.vendorID,
+            productID: device.productID,
+            transport: device.pointerDevice.transport
+        )
     }
 
     private func receiverPointingDevicesChanged(locationID: Int, identities: [ReceiverLogicalDeviceIdentity]) {

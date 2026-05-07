@@ -181,8 +181,12 @@ private func waitUntilCGEventsBeingHandled() {
     CGEvent.tapEnable(tap: eventTap, enable: true)
 
     for _ in 0 ..< 10 {
-        CFRunLoopRunInMode(.defaultMode, 0.01, true)
+        // Process the event-tap source we just installed; sleep would prevent the mark event from being observed.
+        let result = CFRunLoopRunInMode(.defaultMode, 0.01, true)
         if seenMark {
+            break
+        }
+        if result == .finished {
             break
         }
     }

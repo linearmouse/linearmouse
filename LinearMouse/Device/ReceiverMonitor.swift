@@ -7,6 +7,7 @@ import os.log
 final class ReceiverMonitor {
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ReceiverMonitor")
     static let initialDiscoveryTimeout: TimeInterval = 3
+    static let channelOpenRetryInterval: TimeInterval = 0.5
     static let refreshInterval: TimeInterval = 15
 
     private let provider = LogitechHIDPPDeviceMetadataProvider()
@@ -161,6 +162,7 @@ private final class ReceiverContext {
     private var lastPublishedIdentities = [ReceiverLogicalDeviceIdentity]()
     private var stateStore = ReceiverSlotStateStore()
     private var currentChannel: LogitechReceiverChannel?
+    private let retrySemaphore = DispatchSemaphore(value: 0)
 
     var onDiscoveryTimedOut: (() -> Void)?
     var onSlotsChanged: (([ReceiverLogicalDeviceIdentity]) -> Void)?
@@ -198,6 +200,7 @@ private final class ReceiverContext {
         stateLock.unlock()
 
         channel?.wake()
+        retrySemaphore.signal()
         thread?.cancel()
     }
 
@@ -205,8 +208,11 @@ private final class ReceiverContext {
         let initialDeadline = Date().addingTimeInterval(ReceiverMonitor.initialDiscoveryTimeout)
         var hasPublishedInitialState = false
         var hasCompletedInitialDiscovery = false
+        var hasLoggedMissingChannel = false
+        var hasOpenedChannel = false
         defer {
             setCurrentChannel(nil)
+            markStopped()
         }
 
         while shouldContinueRunning() {
@@ -222,13 +228,16 @@ private final class ReceiverContext {
             }
 
             guard let receiverChannel = currentChannelSnapshot() else {
-                os_log(
-                    "Receiver monitor is waiting for channel: locationID=%{public}d device=%{public}@",
-                    log: ReceiverMonitor.log,
-                    type: .info,
-                    locationID,
-                    String(describing: device)
-                )
+                if !hasLoggedMissingChannel {
+                    os_log(
+                        "Receiver channel is unavailable, will retry briefly: locationID=%{public}d device=%{public}@",
+                        log: ReceiverMonitor.log,
+                        type: .info,
+                        locationID,
+                        String(describing: device)
+                    )
+                    hasLoggedMissingChannel = true
+                }
 
                 if !hasPublishedInitialState, Date() >= initialDeadline {
                     DispatchQueue.main.async { [weak self] in
@@ -237,9 +246,27 @@ private final class ReceiverContext {
                     hasPublishedInitialState = true
                 }
 
-                CFRunLoopRunInMode(.defaultMode, 0.5, true)
+                if Date() >= initialDeadline {
+                    if hasOpenedChannel {
+                        waitBeforeRetryingChannelOpen()
+                    } else {
+                        os_log(
+                            "Receiver channel unavailable after initial timeout, stopping monitor: locationID=%{public}d device=%{public}@",
+                            log: ReceiverMonitor.log,
+                            type: .info,
+                            locationID,
+                            String(describing: device)
+                        )
+                        break
+                    }
+                } else {
+                    waitBeforeRetryingChannelOpen(until: initialDeadline)
+                }
+
                 continue
             }
+            hasLoggedMissingChannel = false
+            hasOpenedChannel = true
 
             // Full discovery only once per channel open
             if !hasCompletedInitialDiscovery {
@@ -379,6 +406,28 @@ private final class ReceiverContext {
         stateLock.lock()
         defer { stateLock.unlock() }
         return isRunning
+    }
+
+    private func markStopped() {
+        stateLock.lock()
+        isRunning = false
+        workerThread = nil
+        stateLock.unlock()
+    }
+
+    private func waitBeforeRetryingChannelOpen(until deadline: Date? = nil) {
+        let retryDelay: TimeInterval
+        if let deadline {
+            retryDelay = min(ReceiverMonitor.channelOpenRetryInterval, max(0, deadline.timeIntervalSinceNow))
+        } else {
+            retryDelay = ReceiverMonitor.channelOpenRetryInterval
+        }
+
+        guard retryDelay > 0 else {
+            return
+        }
+
+        _ = retrySemaphore.wait(timeout: .now() + retryDelay)
     }
 
     private func setCurrentChannel(_ channel: LogitechReceiverChannel?) {

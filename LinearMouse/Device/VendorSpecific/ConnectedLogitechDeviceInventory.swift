@@ -21,9 +21,10 @@ enum ConnectedLogitechDeviceInventory {
                 continue
             }
 
-            let productName = device.product ?? device.name
-            if device.transport == PointerDeviceTransportName.usb,
-               productName.localizedCaseInsensitiveContains("receiver") {
+            if LogitechHIDPPDeviceMetadataProvider.isKnownReceiver(
+                vendorID: device.vendorID,
+                productID: device.productID
+            ) {
                 continue
             }
 
@@ -33,6 +34,7 @@ enum ConnectedLogitechDeviceInventory {
                 continue
             }
 
+            let productName = device.product ?? device.name
             let name = metadata.name ?? productName
             let identity = ConnectedBatteryDeviceInfo.directIdentity(
                 vendorID: device.vendorID,
