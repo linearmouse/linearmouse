@@ -56,6 +56,8 @@ extension Scheme.Scrolling.Modifiers.Action.Kind {
             Text("Change speed")
         case .zoom:
             Text("Zoom")
+        case .zoomReversed:
+            Text("Zoom (reversed)")
         case .pinchZoom:
             Text("Pinch zoom")
         case .pinchZoomReversed:

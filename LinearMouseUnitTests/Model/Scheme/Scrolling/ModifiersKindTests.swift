@@ -13,6 +13,34 @@ final class ModifiersKindTests: XCTestCase {
         XCTAssertEqual(Scheme.Scrolling.Modifiers.Action(kind: .defaultAction), .auto)
     }
 
+    func testActionKindMapsZoomReversed() {
+        XCTAssertEqual(Scheme.Scrolling.Modifiers.Action.zoomReversed.kind, .zoomReversed)
+    }
+
+    func testInitFromZoomReversedKindCreatesZoomReversedAction() {
+        XCTAssertEqual(Scheme.Scrolling.Modifiers.Action(kind: .zoomReversed), .zoomReversed)
+    }
+
+    func testZoomReversedCodable() throws {
+        typealias Action = Scheme.Scrolling.Modifiers.Action
+
+        let decoder = JSONDecoder()
+        let action = try decoder.decode(
+            Action.self,
+            from: Data(#"{"type":"zoomReversed"}"#.utf8)
+        )
+
+        XCTAssertEqual(action, .zoomReversed)
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+
+        XCTAssertEqual(
+            try String(data: encoder.encode(action), encoding: .utf8),
+            #"{"type":"zoomReversed"}"#
+        )
+    }
+
     func testActionKindMapsPinchZoomReversed() {
         XCTAssertEqual(Scheme.Scrolling.Modifiers.Action.pinchZoomReversed.kind, .pinchZoomReversed)
     }

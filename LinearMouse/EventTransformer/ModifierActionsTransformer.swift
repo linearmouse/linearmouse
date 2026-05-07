@@ -75,10 +75,13 @@ extension ModifierActionsTransformer: EventTransformer {
             scrollWheelEventView.swapXY()
         case let .changeSpeed(scale: scale):
             scrollWheelEventView.scale(factor: scale.asTruncatedDouble)
-        case .zoom:
+        case .zoom, .zoomReversed:
             let scrollWheelEventView = ScrollWheelEventView(event)
-            let deltaSignum = scrollWheelEventView.deltaYSignum != 0 ? scrollWheelEventView
+            var deltaSignum = scrollWheelEventView.deltaYSignum != 0 ? scrollWheelEventView
                 .deltaYSignum : scrollWheelEventView.deltaXSignum
+            if action == .zoomReversed {
+                deltaSignum *= -1
+            }
             if deltaSignum == 0 {
                 return event
             }
