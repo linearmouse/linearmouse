@@ -31,6 +31,59 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         static let receiverInfoRegister: UInt8 = 0xB5
         static let receiverWirelessNotifications: UInt32 = 0x000100
         static let receiverSoftwarePresentNotifications: UInt32 = 0x000800
+        /// Receiver PID source:
+        /// - Solaar receiver catalog: https://pwr-solaar.github.io/Solaar/devices/
+        /// - Linux receiver driver IDs: https://codebrowser.dev/linux/linux/drivers/hid/hid-logitech-dj.c.html
+        ///
+        /// Receiver monitoring currently uses the classic Unifying/DJ HID++ path:
+        /// vendor HID application 0xFF000001, receiver index 0xFF, and HID++ 1.0
+        /// receiver registers 0x00/0x02/0xB5. Keep this whitelist limited to
+        /// receiver kinds covered by that implementation.
+        static let monitorableReceiverProductIDs: Set<Int> = [
+            0xC52B, // Unifying receiver
+            0xC532 // Unifying receiver
+        ]
+        /// These are recognized as receiver dongles, but receiver monitoring is
+        /// intentionally disabled until their protocol/transport path is implemented.
+        static let knownReceiverProductIDsWithoutMonitoringSupport: Set<Int> = [
+            // 27 MHz / early HID++ receivers.
+            0xC513,
+            0xC517,
+            0xC51B,
+            // Nano receivers. Some are partial HID++ 1.0 devices, and C52F is
+            // mouse-only, so they need receiver-kind-specific handling.
+            0xC518,
+            0xC51A,
+            0xC521,
+            0xC525,
+            0xC526,
+            0xC52E,
+            0xC52F,
+            0xC534,
+            0xC535,
+            0xC542,
+            // Gaming / Lightspeed receiver kinds use different Linux driver data
+            // and have not been validated against this monitor path.
+            0xC531,
+            0xC537,
+            0xC539,
+            0xC53A,
+            0xC53D,
+            0xC53F,
+            0xC541,
+            0xC543,
+            0xC545,
+            0xC547,
+            0xC54D,
+            // Bolt receivers are a different receiver family.
+            0xC548
+        ]
+        static let knownReceiverProductIDs: Set<Int> = [
+            monitorableReceiverProductIDs,
+            knownReceiverProductIDsWithoutMonitoringSupport
+        ].reduce(into: []) { result, productIDs in
+            result.formUnion(productIDs)
+        }
     }
 
     enum FeatureID: UInt16 {
@@ -167,6 +220,27 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         productIDs: nil,
         transports: [PointerDeviceTransportName.bluetoothLowEnergy, PointerDeviceTransportName.usb]
     )
+
+    static func supportsReceiverMonitoring(vendorID: Int?, productID: Int?, transport: String?) -> Bool {
+        guard vendorID == Constants.vendorID,
+              transport == PointerDeviceTransportName.usb,
+              let productID
+        else {
+            return false
+        }
+
+        return Constants.monitorableReceiverProductIDs.contains(productID)
+    }
+
+    static func isKnownReceiver(vendorID: Int?, productID: Int?) -> Bool {
+        guard vendorID == Constants.vendorID,
+              let productID
+        else {
+            return false
+        }
+
+        return Constants.knownReceiverProductIDs.contains(productID)
+    }
 
     func matches(device: VendorSpecificDeviceContext) -> Bool {
         let maxInputReportSize = device.maxInputReportSize ?? 0
@@ -333,7 +407,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
 
             let deadline = Date().addingTimeInterval(timeout)
             while shouldContinue(), Date() < deadline {
-                CFRunLoopRunInMode(.defaultMode, 0.1, true)
+                Thread.sleep(forTimeInterval: min(0.1, max(0, deadline.timeIntervalSinceNow)))
             }
             return [:]
         }
@@ -1388,7 +1462,11 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
                 break
             }
 
-            CFRunLoopRunInMode(.defaultMode, remaining, true)
+            // Pump the HID++ channel run loop; semaphore-only waiting would block input-report delivery.
+            let result = CFRunLoopRunInMode(.defaultMode, remaining, true)
+            if result == .finished {
+                break
+            }
         }
 
         clearPendingRequest()

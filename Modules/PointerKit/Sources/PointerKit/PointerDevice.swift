@@ -535,7 +535,11 @@ extension PointerDevice {
                     break
                 }
 
-                CFRunLoopRunInMode(.defaultMode, 0.01, true)
+                // Pump the run loop that owns IOHIDDevice; sleep would block the input-report callback.
+                let result = CFRunLoopRunInMode(.defaultMode, 0.01, true)
+                if result == .finished {
+                    break
+                }
             }
         } else {
             _ = semaphore.wait(timeout: .now() + timeout)
