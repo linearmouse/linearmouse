@@ -21,6 +21,7 @@ extension Scheme.Scrolling.Modifiers {
         case changeSpeed(scale: Decimal)
         case zoom
         case pinchZoom
+        case pinchZoomReversed
     }
 }
 
@@ -67,6 +68,7 @@ extension Scheme.Scrolling.Modifiers.Action: Codable {
         case changeSpeed
         case zoom
         case pinchZoom
+        case pinchZoomReversed
     }
 
     init(from decoder: Decoder) throws {
@@ -89,6 +91,8 @@ extension Scheme.Scrolling.Modifiers.Action: Codable {
             self = .zoom
         case .pinchZoom:
             self = .pinchZoom
+        case .pinchZoomReversed:
+            self = .pinchZoomReversed
         }
     }
 
@@ -111,6 +115,8 @@ extension Scheme.Scrolling.Modifiers.Action: Codable {
             try container.encode(ActionType.zoom, forKey: .type)
         case .pinchZoom:
             try container.encode(ActionType.pinchZoom, forKey: .type)
+        case .pinchZoomReversed:
+            try container.encode(ActionType.pinchZoomReversed, forKey: .type)
         }
     }
 }

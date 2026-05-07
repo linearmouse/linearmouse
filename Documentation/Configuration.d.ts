@@ -373,6 +373,13 @@ declare namespace Scheme {
         type: "pinchZoom";
       };
 
+      /**
+       * @description Zoom in and out using reversed pinch gestures.
+       */
+      type PinchZoomReversed = {
+        type: "pinchZoomReversed";
+      };
+
       type Action =
         | None
         | Auto
@@ -381,7 +388,8 @@ declare namespace Scheme {
         | AlterOrientation
         | ChangeSpeed
         | Zoom
-        | PinchZoom;
+        | PinchZoom
+        | PinchZoomReversed;
     }
   }
 

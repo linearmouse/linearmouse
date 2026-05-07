@@ -14,6 +14,7 @@ extension Scheme.Scrolling.Modifiers.Action {
         case changeSpeed
         case zoom
         case pinchZoom
+        case pinchZoomReversed
     }
 
     var kind: Kind {
@@ -32,6 +33,8 @@ extension Scheme.Scrolling.Modifiers.Action {
             return .zoom
         case .pinchZoom:
             return .pinchZoom
+        case .pinchZoomReversed:
+            return .pinchZoomReversed
         }
     }
 
@@ -51,6 +54,8 @@ extension Scheme.Scrolling.Modifiers.Action {
             self = .zoom
         case .pinchZoom:
             self = .pinchZoom
+        case .pinchZoomReversed:
+            self = .pinchZoomReversed
         }
     }
 }

@@ -1367,6 +1367,9 @@
         },
         {
           "$ref": "#/definitions/Scheme.Scrolling.Modifiers.PinchZoom"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.PinchZoomReversed"
         }
       ]
     },
@@ -1452,6 +1455,20 @@
       "properties": {
         "type": {
           "const": "pinchZoom",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "Scheme.Scrolling.Modifiers.PinchZoomReversed": {
+      "additionalProperties": false,
+      "description": "Zoom in and out using reversed pinch gestures.",
+      "properties": {
+        "type": {
+          "const": "pinchZoomReversed",
           "type": "string"
         }
       },

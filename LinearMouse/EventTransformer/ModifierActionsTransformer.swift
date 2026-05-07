@@ -20,6 +20,7 @@ class ModifierActionsTransformer {
     private let modifiers: Modifiers
 
     private var pinchZoomBegan = false
+    private var pinchZoomReversed = false
 
     init(modifiers: Modifiers) {
         self.modifiers = modifiers
@@ -29,7 +30,7 @@ class ModifierActionsTransformer {
 extension ModifierActionsTransformer: EventTransformer {
     func transform(_ event: CGEvent) -> CGEvent? {
         if pinchZoomBegan {
-            return handlePinchZoom(event)
+            return handlePinchZoom(event, reverse: pinchZoomReversed)
         }
 
         guard event.type == .scrollWheel else {
@@ -88,19 +89,24 @@ extension ModifierActionsTransformer: EventTransformer {
             }
             return nil
         case .pinchZoom:
-            return handlePinchZoom(event)
+            pinchZoomReversed = false
+            return handlePinchZoom(event, reverse: false)
+        case .pinchZoomReversed:
+            pinchZoomReversed = true
+            return handlePinchZoom(event, reverse: true)
         }
 
         return event
     }
 
-    private func handlePinchZoom(_ event: CGEvent) -> CGEvent? {
+    private func handlePinchZoom(_ event: CGEvent, reverse: Bool) -> CGEvent? {
         guard event.type == .scrollWheel || event.type == .flagsChanged else {
             return event
         }
 
         if event.type == .flagsChanged {
             pinchZoomBegan = false
+            pinchZoomReversed = false
             GestureEvent(zoomSource: nil, phase: .ended, magnification: 0)?.post(tap: .cgSessionEventTap)
             os_log("pinch zoom ended", log: Self.log, type: .info)
             return event
@@ -113,7 +119,8 @@ extension ModifierActionsTransformer: EventTransformer {
         }
 
         let scrollWheelEventView = ScrollWheelEventView(event)
-        let magnification = Double(scrollWheelEventView.deltaYPt) * 0.005
+        let direction = reverse ? -1.0 : 1.0
+        let magnification = Double(scrollWheelEventView.deltaYPt) * 0.005 * direction
         GestureEvent(zoomSource: nil, phase: .changed, magnification: magnification)?.post(tap: .cgSessionEventTap)
         os_log("pinch zoom changed: magnification=%f", log: Self.log, type: .info, magnification)
 
@@ -125,6 +132,7 @@ extension ModifierActionsTransformer: Deactivatable {
     func deactivate() {
         if pinchZoomBegan {
             pinchZoomBegan = false
+            pinchZoomReversed = false
             GestureEvent(zoomSource: nil, phase: .ended, magnification: 0)?.post(tap: .cgSessionEventTap)
             os_log("ModifierActionsTransformer is inactive, pinch zoom ended", log: Self.log, type: .info)
         }
