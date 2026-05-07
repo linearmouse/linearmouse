@@ -74,6 +74,7 @@ extension EventTap {
         _ events: [CGEventType],
         place: CGEventTapPlacement = .headInsertEventTap,
         at runLoop: RunLoop = .current,
+        onInvalidated: (() -> Void)? = nil,
         callback: @escaping Callback
     ) throws -> ObservationToken {
         // Create a context holder. The lifetime of contextHolder should be the same as ObservationToken's.
@@ -103,8 +104,15 @@ extension EventTap {
         // Periodically check if the tap is still enabled and re-enable it if needed.
         // This recovers from cases where the system silently disables the tap
         // (e.g. due to an invalid event or other transient errors).
+        var didNotifyInvalidation = false
         let healthCheckTimer = Timer(timeInterval: 5, repeats: true) { _ in
             guard CFMachPortIsValid(tap) else {
+                guard !didNotifyInvalidation else {
+                    return
+                }
+                didNotifyInvalidation = true
+                os_log("EventTap became invalid", log: log, type: .error)
+                onInvalidated?()
                 return
             }
             if !CGEvent.tapIsEnabled(tap: tap) {
@@ -116,18 +124,14 @@ extension EventTap {
 
         return ObservationToken {
             // The lifetime of contextHolder needs to be extended until the observation token is cancelled.
-            withExtendedLifetime(contextHolder) {
-                // Timer.invalidate() must be called from the thread where the timer was installed.
-                // Dispatch it to the target RunLoop; the remaining teardown calls are thread-safe.
-                CFRunLoopPerformBlock(cfRunLoop, CFRunLoopMode.commonModes.rawValue) {
-                    healthCheckTimer.invalidate()
-                }
-                CFRunLoopWakeUp(cfRunLoop)
-
+            CFRunLoopPerformBlock(cfRunLoop, CFRunLoopMode.commonModes.rawValue) {
+                healthCheckTimer.invalidate()
                 CGEvent.tapEnable(tap: tap, enable: false)
                 CFRunLoopRemoveSource(cfRunLoop, runLoopSource, .commonModes)
                 CFMachPortInvalidate(tap)
+                withExtendedLifetime(contextHolder) {}
             }
+            CFRunLoopWakeUp(cfRunLoop)
         }
     }
 }

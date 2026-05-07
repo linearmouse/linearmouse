@@ -39,7 +39,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertFalse(matcher.matches(device: device))
     }
 
-    func testLogitechProviderMatchesLogitechDeviceShape() {
+    func testLogitechProviderMatchesBluetoothLowEnergyDeviceShape() {
         let provider = LogitechHIDPPDeviceMetadataProvider()
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,
@@ -50,6 +50,147 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         )
 
         XCTAssertTrue(provider.matches(device: device))
+    }
+
+    func testLogitechProviderMatchesUsbLogitechDeviceShape() {
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xB015,
+            transport: PointerDeviceTransportName.usb,
+            maxInputReportSize: 20,
+            maxOutputReportSize: 20
+        )
+
+        XCTAssertTrue(provider.matches(device: device))
+    }
+
+    func testConnectedLogitechInventoryDoesNotQueryBluetoothLowEnergyDevices() {
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xB015,
+            product: "Logi M650",
+            name: "Logi M650",
+            transport: PointerDeviceTransportName.bluetoothLowEnergy,
+            maxInputReportSize: 20,
+            maxOutputReportSize: 20
+        )
+
+        let devices = ConnectedLogitechDeviceInventory.devices(from: [device])
+
+        XCTAssertTrue(devices.isEmpty)
+        XCTAssertEqual(device.outputReportRequestCount, 0)
+    }
+
+    func testLogitechControlsMonitorSupportsUsbAndBluetoothLowEnergyLogitechDevices() {
+        XCTAssertTrue(
+            LogitechReprogrammableControlsMonitor.supports(
+                vendorID: 0x046D,
+                transport: PointerDeviceTransportName.usb
+            )
+        )
+        XCTAssertTrue(
+            LogitechReprogrammableControlsMonitor.supports(
+                vendorID: 0x046D,
+                transport: PointerDeviceTransportName.bluetoothLowEnergy
+            )
+        )
+        XCTAssertFalse(
+            LogitechReprogrammableControlsMonitor.supports(
+                vendorID: 0x3554,
+                transport: PointerDeviceTransportName.usb
+            )
+        )
+    }
+
+    func testLogitechControlsMonitorNeedsMatchingDirectBluetoothLowEnergyConfiguration() {
+        var mapping = Scheme.Buttons.Mapping()
+        mapping.button = .logitechControl(.init(controlID: 0x00D0, productID: 0xB015, serialNumber: "ABC"))
+        var buttons = Scheme.Buttons()
+        buttons.mappings = [mapping]
+        var configuration = Configuration()
+        configuration.schemes = [Scheme(buttons: buttons)]
+
+        let matchingIdentity = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 1,
+            slot: 0,
+            kind: .mouse,
+            name: "M720",
+            serialNumber: "abc",
+            productID: 0xB015,
+            batteryLevel: nil
+        )
+        let otherIdentity = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 2,
+            slot: 0,
+            kind: .mouse,
+            name: "M650",
+            serialNumber: "DEF",
+            productID: 0xB02A,
+            batteryLevel: nil
+        )
+
+        XCTAssertTrue(
+            LogitechReprogrammableControlsMonitor.isNeeded(
+                configuration: configuration,
+                identity: matchingIdentity
+            )
+        )
+        XCTAssertFalse(
+            LogitechReprogrammableControlsMonitor.isNeeded(
+                configuration: configuration,
+                identity: otherIdentity
+            )
+        )
+    }
+
+    func testLogitechControlsMonitorCanFallbackToProductWhenDirectBluetoothSerialIsMissing() {
+        var mapping = Scheme.Buttons.Mapping()
+        mapping.button = .logitechControl(.init(controlID: 0x00D0, productID: 0xB015, serialNumber: "ABC"))
+        var buttons = Scheme.Buttons()
+        buttons.mappings = [mapping]
+        var configuration = Configuration()
+        configuration.schemes = [Scheme(buttons: buttons)]
+
+        let identityWithoutSerial = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 1,
+            slot: 0,
+            kind: .mouse,
+            name: "M720",
+            serialNumber: nil,
+            productID: 0xB015,
+            batteryLevel: nil
+        )
+        let identityWithoutProduct = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 1,
+            slot: 0,
+            kind: .mouse,
+            name: "M720",
+            serialNumber: nil,
+            productID: nil,
+            batteryLevel: nil
+        )
+
+        XCTAssertFalse(
+            LogitechReprogrammableControlsMonitor.isNeeded(
+                configuration: configuration,
+                identity: identityWithoutSerial
+            )
+        )
+        XCTAssertTrue(
+            LogitechReprogrammableControlsMonitor.isNeeded(
+                configuration: configuration,
+                identity: identityWithoutSerial,
+                allowsIdentityFallback: true
+            )
+        )
+        XCTAssertFalse(
+            LogitechReprogrammableControlsMonitor.isNeeded(
+                configuration: configuration,
+                identity: identityWithoutProduct,
+                allowsIdentityFallback: true
+            )
+        )
     }
 
     func testReceiverLogicalDeviceIdentityUsesAllFieldsForEquality() {
@@ -119,9 +260,21 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             LogitechReprogrammableControlsMonitor.isDivertedButtonsNotification(
                 [0x10, 0x02, 0x05, 0x08, 0x00, 0xC3, 0x00],
                 featureIndex: 0x05,
-                slot: 0x02
+                deviceIndices: Set([0x02])
             )
         )
+    }
+
+    func testLogitechDivertedButtonsNotificationAcceptsDirectBluetoothIndices() {
+        for deviceIndex in LogitechHIDPPDeviceMetadataProvider.Constants.directReplyIndices {
+            XCTAssertTrue(
+                LogitechReprogrammableControlsMonitor.isDivertedButtonsNotification(
+                    [0x10, deviceIndex, 0x05, 0x08, 0x00, 0xD0, 0x00],
+                    featureIndex: 0x05,
+                    deviceIndices: LogitechHIDPPDeviceMetadataProvider.Constants.directReplyIndices
+                )
+            )
+        }
     }
 
     func testLogitechDivertedButtonsNotificationParsesPressedControls() {
@@ -145,7 +298,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             LogitechReprogrammableControlsMonitor.isDivertedButtonsNotification(
                 [0x10, 0x03, 0x05, 0x08, 0x00, 0xC3, 0x00],
                 featureIndex: 0x05,
-                slot: 0x02
+                deviceIndices: Set([0x02])
             )
         )
     }
@@ -176,6 +329,23 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             LogitechControlIdentity(controlID: 0x1234, productID: nil, serialNumber: nil)
                 .userVisibleName,
             "Logitech Control 0x1234"
+        )
+    }
+
+    func testLogitechControlIdentityFallbackOnlyUsesProductWhenSerialIsMissing() {
+        let configured = LogitechControlIdentity(controlID: 0x00D0, productID: 0xB015, serialNumber: "ABC")
+
+        XCTAssertTrue(
+            LogitechControlIdentity(controlID: 0x00D0, productID: 0xB015, serialNumber: nil)
+                .matches(configured, allowingIdentityFallback: true)
+        )
+        XCTAssertFalse(
+            LogitechControlIdentity(controlID: 0x00D0, productID: 0xB02A, serialNumber: nil)
+                .matches(configured, allowingIdentityFallback: true)
+        )
+        XCTAssertFalse(
+            LogitechControlIdentity(controlID: 0x00D0, productID: nil, serialNumber: nil)
+                .matches(configured, allowingIdentityFallback: true)
         )
     }
 
@@ -407,7 +577,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
     }
 }
 
-private struct MockVendorSpecificDeviceContext: VendorSpecificDeviceContext {
+private final class MockVendorSpecificDeviceContext: VendorSpecificDeviceContext {
     var vendorID: Int?
     var productID: Int?
     var product: String?
@@ -420,6 +590,7 @@ private struct MockVendorSpecificDeviceContext: VendorSpecificDeviceContext {
     var maxInputReportSize: Int?
     var maxOutputReportSize: Int?
     var maxFeatureReportSize: Int?
+    var outputReportRequestCount = 0
 
     init(
         vendorID: Int?,
@@ -454,6 +625,7 @@ private struct MockVendorSpecificDeviceContext: VendorSpecificDeviceContext {
         timeout _: TimeInterval,
         matching _: @escaping (Data) -> Bool
     ) -> Data? {
-        nil
+        outputReportRequestCount += 1
+        return nil
     }
 }

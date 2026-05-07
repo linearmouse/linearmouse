@@ -16,10 +16,28 @@ public enum PointerDeviceTransportName {
 public class PointerDevice {
     let client: IOHIDServiceClient
     let device: IOHIDDevice?
+    private let runLoop: CFRunLoop
+
+    private let stateLock = NSLock()
+    private var isValid = true
+
+    private let productValue: String?
+    private let vendorIDValue: Int?
+    private let productIDValue: Int?
+    private let serialNumberValue: String?
+    private let buttonCountValue: Int?
+    private let locationIDValue: Int?
+    private let primaryUsagePageValue: Int?
+    private let primaryUsageValue: Int?
+    private let maxInputReportSizeValue: Int?
+    private let maxOutputReportSizeValue: Int?
+    private let maxFeatureReportSizeValue: Int?
+    private let transportValue: String?
 
     public typealias InputValueClosure = (PointerDevice, IOHIDValue) -> Void
     public typealias InputReportClosure = (PointerDevice, Data) -> Void
 
+    private let inputReportRegistrationLock = NSLock()
     private var inputReportCallbackRegistered = false
     private var inputReportBuffer: UnsafeMutablePointer<UInt8>?
     private var inputReportBufferLength = 0
@@ -30,6 +48,7 @@ public class PointerDevice {
     private var pendingReportResponse: Data?
     private var pendingReportSemaphore: DispatchSemaphore?
 
+    private let observationsLock = NSLock()
     private var observations = (
         inputValue: [UUID: InputValueClosure](),
         inputReport: [UUID: InputReportClosure](),
@@ -56,24 +75,131 @@ public class PointerDevice {
 
     init(_ client: IOHIDServiceClient) {
         self.client = client
-        device = client.device
+        let device = client.device
+        self.device = device
+        runLoop = CFRunLoopGetCurrent()
+        productValue = Self.getStaticProperty(kIOHIDProductKey, client: client, device: device)
+        vendorIDValue = Self.getStaticProperty(kIOHIDVendorIDKey, client: client, device: device)
+        productIDValue = Self.getStaticProperty(kIOHIDProductIDKey, client: client, device: device)
+        serialNumberValue = Self.getStaticProperty(kIOHIDSerialNumberKey, client: client, device: device)
+        buttonCountValue = Self.getStaticProperty(kIOHIDPointerButtonCountKey, client: client, device: device)
+        locationIDValue = Self.getStaticProperty("LocationID", client: client, device: device)
+        primaryUsagePageValue = Self.getStaticProperty("PrimaryUsagePage", client: client, device: device)
+        primaryUsageValue = Self.getStaticProperty("PrimaryUsage", client: client, device: device)
+        maxInputReportSizeValue = Self.getStaticProperty("MaxInputReportSize", client: client, device: device)
+        maxOutputReportSizeValue = Self.getStaticProperty("MaxOutputReportSize", client: client, device: device)
+        maxFeatureReportSizeValue = Self.getStaticProperty("MaxFeatureReportSize", client: client, device: device)
+        transportValue = Self.getStaticProperty("Transport", client: client, device: device)
 
         if let device {
             IOHIDDeviceOpen(device, IOOptionBits(kIOHIDOptionsTypeNone))
             IOHIDDeviceSetInputValueMatching(device, nil)
             let this = Unmanaged.passUnretained(self).toOpaque()
             IOHIDDeviceRegisterInputValueCallback(device, Self.inputValueCallback, this)
-            IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
+            IOHIDDeviceScheduleWithRunLoop(device, runLoop, CFRunLoopMode.defaultMode.rawValue)
         }
     }
 
+    private static func getStaticProperty<T>(
+        _ key: String,
+        client: IOHIDServiceClient,
+        device: IOHIDDevice?
+    ) -> T? {
+        if let valueRef = device.flatMap({ IOHIDDeviceGetProperty($0, key as CFString) }),
+           let value = valueRef as? T {
+            return value
+        }
+
+        return client.getProperty(key)
+    }
+
     deinit {
-        inputReportBuffer?.deallocate()
+        invalidate()
 
         if let device {
+            IOHIDDeviceUnscheduleFromRunLoop(device, runLoop, CFRunLoopMode.defaultMode.rawValue)
             IOHIDDeviceClose(device, IOOptionBits(kIOHIDOptionsTypeNone))
-            IOHIDDeviceUnscheduleFromRunLoop(device, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
         }
+
+        inputReportBuffer?.deallocate()
+    }
+
+    func invalidate() {
+        stateLock.lock()
+        isValid = false
+        stateLock.unlock()
+
+        unregisterInputCallbacks()
+
+        pendingReportRequestLock.lock()
+        let semaphore = pendingReportSemaphore
+        clearPendingReportRequest()
+        pendingReportRequestLock.unlock()
+        semaphore?.signal()
+    }
+
+    private var valid: Bool {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        return isValid
+    }
+
+    private func getDynamicProperty<T>(_ key: String) -> T? {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        guard isValid else {
+            return nil
+        }
+
+        return client.getProperty(key)
+    }
+
+    private func setDynamicProperty<T>(_ value: T, forKey key: String) {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        guard isValid else {
+            return
+        }
+
+        client.setProperty(value, forKey: key)
+    }
+
+    private func getDynamicPropertyIOFixed(_ key: String) -> Double? {
+        (getDynamicProperty(key) as IOFixed?).map { Double($0) / 65_536 }
+    }
+
+    private func setDynamicPropertyIOFixed(_ value: Double?, forKey key: String) {
+        setDynamicProperty(value.map { IOFixed($0 * 65_536) }, forKey: key)
+    }
+
+    private func unregisterInputCallbacks() {
+        guard let device else {
+            return
+        }
+
+        IOHIDDeviceRegisterInputValueCallback(device, nil, nil)
+
+        inputReportRegistrationLock.lock()
+        unregisterInputReportCallbackLocked()
+        inputReportRegistrationLock.unlock()
+    }
+
+    private func unregisterInputReportCallbackLocked() {
+        guard inputReportCallbackRegistered,
+              let device,
+              let inputReportBuffer
+        else {
+            return
+        }
+
+        IOHIDDeviceRegisterInputReportCallback(
+            device,
+            inputReportBuffer,
+            inputReportBufferLength,
+            nil,
+            nil
+        )
+        inputReportCallbackRegistered = false
     }
 }
 
@@ -93,7 +219,7 @@ extension PointerDevice: Hashable {
 
 public extension PointerDevice {
     var product: String? {
-        client.getProperty(kIOHIDProductKey)
+        productValue
     }
 
     var name: String {
@@ -101,11 +227,11 @@ public extension PointerDevice {
     }
 
     var vendorID: Int? {
-        client.getProperty(kIOHIDVendorIDKey)
+        vendorIDValue
     }
 
     var productID: Int? {
-        client.getProperty(kIOHIDProductIDKey)
+        productIDValue
     }
 
     var vendorIDString: String {
@@ -125,39 +251,39 @@ public extension PointerDevice {
     }
 
     var serialNumber: String? {
-        client.getProperty(kIOHIDSerialNumberKey)
+        serialNumberValue
     }
 
     var buttonCount: Int? {
-        client.getProperty(kIOHIDPointerButtonCountKey)
+        buttonCountValue
     }
 
     var locationID: Int? {
-        client.getProperty("LocationID")
+        locationIDValue
     }
 
     var primaryUsagePage: Int? {
-        client.getProperty("PrimaryUsagePage")
+        primaryUsagePageValue
     }
 
     var primaryUsage: Int? {
-        client.getProperty("PrimaryUsage")
+        primaryUsageValue
     }
 
     var maxInputReportSize: Int? {
-        client.getProperty("MaxInputReportSize")
+        maxInputReportSizeValue
     }
 
     var maxOutputReportSize: Int? {
-        client.getProperty("MaxOutputReportSize")
+        maxOutputReportSizeValue
     }
 
     var maxFeatureReportSize: Int? {
-        client.getProperty("MaxFeatureReportSize")
+        maxFeatureReportSizeValue
     }
 
     var transport: String? {
-        client.getProperty("Transport")
+        transportValue
     }
 }
 
@@ -171,16 +297,16 @@ extension PointerDevice: CustomStringConvertible {
 
 public extension PointerDevice {
     /**
-     Indicates the pointer resolution.
-     The lower the value is, the faster the pointer moves.
+      Indicates the pointer resolution.
+      The lower the value is, the faster the pointer moves.
 
-     This value is in the range [10-1995].
+      This value is in the range [10-1995].
      */
     var pointerResolution: Double? {
-        get { client.getPropertyIOFixed(kIOHIDPointerResolutionKey) }
+        get { getDynamicPropertyIOFixed(kIOHIDPointerResolutionKey) }
 
         set {
-            client.setPropertyIOFixed(newValue.map { $0.clamp(10, 1995) }, forKey: kIOHIDPointerResolutionKey)
+            setDynamicPropertyIOFixed(newValue.map { $0.clamp(10, 1995) }, forKey: kIOHIDPointerResolutionKey)
 
             // HACK: Trigger a `pointerAcceleration` change to make `pointerResolution` take affect
             pointerAcceleration = pointerAcceleration
@@ -189,13 +315,13 @@ public extension PointerDevice {
 
     var pointerAccelerationType: String? {
         get {
-            if let pointerAccelerationType = client.getProperty(kIOHIDPointerAccelerationTypeKey) as String? {
+            if let pointerAccelerationType = getDynamicProperty(kIOHIDPointerAccelerationTypeKey) as String? {
                 return pointerAccelerationType
             }
 
             // Guess the type...
 
-            if (client.getProperty(kIOHIDPointerAccelerationKey) as IOFixed?) != nil {
+            if (getDynamicProperty(kIOHIDPointerAccelerationKey) as IOFixed?) != nil {
                 return kIOHIDPointerAccelerationKey
             }
 
@@ -203,18 +329,18 @@ public extension PointerDevice {
         }
 
         set {
-            client.setProperty(newValue, forKey: kIOHIDPointerAccelerationKey)
+            setDynamicProperty(newValue, forKey: kIOHIDPointerAccelerationKey)
         }
     }
 
     var useLinearScalingMouseAcceleration: Int? {
         get {
             // TODO: Use `kIOHIDUseLinearScalingMouseAccelerationKey`.
-            client.getProperty("HIDUseLinearScalingMouseAcceleration")
+            getDynamicProperty("HIDUseLinearScalingMouseAcceleration")
         }
         set {
             // TODO: Use `kIOHIDUseLinearScalingMouseAccelerationKey`.
-            client.setProperty(newValue, forKey: "HIDUseLinearScalingMouseAcceleration")
+            setDynamicProperty(newValue, forKey: "HIDUseLinearScalingMouseAcceleration")
         }
     }
 
@@ -228,11 +354,11 @@ public extension PointerDevice {
             if useLinearScalingMouseAcceleration == 1 {
                 return -1
             }
-            return client.getPropertyIOFixed(pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey)
+            return getDynamicPropertyIOFixed(pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey)
         }
 
         set {
-            client.setPropertyIOFixed(
+            setDynamicPropertyIOFixed(
                 newValue.map { $0 == -1 ? $0 : $0.clamp(0, 20) },
                 forKey: pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey
             )
@@ -244,17 +370,36 @@ public extension PointerDevice {
 
 extension PointerDevice {
     private func inputValueCallback(_ value: IOHIDValue) {
-        for (_, callback) in observations.inputValue {
+        guard valid else {
+            return
+        }
+
+        let callbacks = inputValueCallbacks()
+        for callback in callbacks {
             callback(self, value)
         }
     }
 
     public func observeInput(using closure: @escaping InputValueClosure) -> ObservationToken {
+        observationsLock.lock()
         let id = observations.inputValue.insert(closure)
+        observationsLock.unlock()
 
         return ObservationToken { [weak self] in
-            self?.observations.inputValue.removeValue(forKey: id)
+            guard let self else {
+                return
+            }
+
+            observationsLock.lock()
+            observations.inputValue.removeValue(forKey: id)
+            observationsLock.unlock()
         }
+    }
+
+    private func inputValueCallbacks() -> [InputValueClosure] {
+        observationsLock.lock()
+        defer { observationsLock.unlock() }
+        return Array(observations.inputValue.values)
     }
 }
 
@@ -262,9 +407,14 @@ extension PointerDevice {
 
 extension PointerDevice {
     private func inputReportCallback(_ report: Data) {
+        guard valid else {
+            return
+        }
+
         completePendingReportRequest(with: report)
 
-        for (_, callback) in observations.inputReport {
+        let callbacks = inputReportCallbacks()
+        for callback in callbacks {
             callback(self, report)
         }
     }
@@ -288,22 +438,26 @@ extension PointerDevice {
         pendingReportSemaphore = nil
     }
 
-    func ensureInputReportCallbackRegistered(minimumReportLength: Int = 0) {
-        guard let device else {
-            return
+    @discardableResult
+    func ensureInputReportCallbackRegistered(minimumReportLength: Int = 0) -> Bool {
+        inputReportRegistrationLock.lock()
+        defer { inputReportRegistrationLock.unlock() }
+
+        guard valid, let device else {
+            return false
         }
 
         let desiredReportLength = max(maxInputReportSize ?? 8, minimumReportLength, 8)
         if inputReportBufferLength < desiredReportLength {
+            unregisterInputReportCallbackLocked()
             let newBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: desiredReportLength)
             inputReportBuffer?.deallocate()
             inputReportBuffer = newBuffer
             inputReportBufferLength = desiredReportLength
-            inputReportCallbackRegistered = false
         }
 
         guard !inputReportCallbackRegistered, let inputReportBuffer else {
-            return
+            return true
         }
 
         let this = Unmanaged.passUnretained(self).toOpaque()
@@ -315,6 +469,7 @@ extension PointerDevice {
             this
         )
         inputReportCallbackRegistered = true
+        return true
     }
 
     public func performSynchronousOutputReportRequest(
@@ -322,14 +477,18 @@ extension PointerDevice {
         timeout: TimeInterval,
         matching: @escaping (Data) -> Bool
     ) -> Data? {
-        guard let device, !report.isEmpty else {
+        guard let device, !report.isEmpty, valid else {
             return nil
         }
 
         synchronousReportRequestLock.lock()
         defer { synchronousReportRequestLock.unlock() }
 
-        ensureInputReportCallbackRegistered(minimumReportLength: max(report.count, maxInputReportSize ?? 0))
+        guard ensureInputReportCallbackRegistered(minimumReportLength: max(report.count, maxInputReportSize ?? 0)),
+              valid
+        else {
+            return nil
+        }
 
         let semaphore = DispatchSemaphore(value: 0)
         pendingReportRequestLock.lock()
@@ -341,6 +500,12 @@ extension PointerDevice {
         let result = report.withUnsafeBytes { rawBuffer -> IOReturn in
             guard let baseAddress = rawBuffer.baseAddress?.assumingMemoryBound(to: UInt8.self) else {
                 return kIOReturnBadArgument
+            }
+
+            stateLock.lock()
+            defer { stateLock.unlock() }
+            guard isValid else {
+                return kIOReturnNotOpen
             }
 
             return IOHIDDeviceSetReport(
@@ -384,13 +549,29 @@ extension PointerDevice {
     }
 
     public func observeReport(using closure: @escaping InputReportClosure) -> ObservationToken {
-        ensureInputReportCallbackRegistered()
+        guard ensureInputReportCallbackRegistered() else {
+            return ObservationToken {}
+        }
 
+        observationsLock.lock()
         let id = observations.inputReport.insert(closure)
+        observationsLock.unlock()
 
         return ObservationToken { [weak self] in
-            self?.observations.inputReport.removeValue(forKey: id)
+            guard let self else {
+                return
+            }
+
+            observationsLock.lock()
+            observations.inputReport.removeValue(forKey: id)
+            observationsLock.unlock()
         }
+    }
+
+    private func inputReportCallbacks() -> [InputReportClosure] {
+        observationsLock.lock()
+        defer { observationsLock.unlock() }
+        return Array(observations.inputReport.values)
     }
 }
 
@@ -398,6 +579,12 @@ extension PointerDevice {
 
 public extension PointerDevice {
     func confirmsTo(_ usagePage: Int, _ usage: Int) -> Bool {
-        IOHIDServiceClientConformsTo(client, UInt32(usagePage), UInt32(usage)) != 0
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        guard isValid else {
+            return false
+        }
+
+        return IOHIDServiceClientConformsTo(client, UInt32(usagePage), UInt32(usage)) != 0
     }
 }

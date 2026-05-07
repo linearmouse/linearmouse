@@ -27,7 +27,6 @@ class DevicePickerState: ObservableObject {
         let previousIDs = self.devices.map(\.id)
         let nextDevices = devices.map { device in
             if let existingModel = cachedModels[device] {
-                DevicePickerBatteryCoordinator.shared.refresh(existingModel)
                 return existingModel
             }
 

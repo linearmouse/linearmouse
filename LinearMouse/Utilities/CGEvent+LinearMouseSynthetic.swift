@@ -33,26 +33,33 @@ extension LogitechControlIdentity {
         UInt16(exactly: controlID)
     }
 
-    func matches(_ other: LogitechControlIdentity) -> Bool {
-        guard controlID == other.controlID else {
+    func matches(_ configured: LogitechControlIdentity, allowingIdentityFallback: Bool = false) -> Bool {
+        guard controlID == configured.controlID else {
             return false
         }
 
-        if let configuredSerialNumber = other.serialNumber {
-            guard let serialNumber else {
-                return false
+        if let configuredSerialNumber = configured.serialNumber {
+            if let serialNumber {
+                return serialNumber.caseInsensitiveCompare(configuredSerialNumber) == .orderedSame
             }
-            return serialNumber.caseInsensitiveCompare(configuredSerialNumber) == .orderedSame
+
+            if allowingIdentityFallback,
+               let configuredProductID = configured.productID,
+               let productID {
+                return productID == configuredProductID
+            }
+
+            return false
         }
 
-        if let configuredProductID = other.productID {
+        if let configuredProductID = configured.productID {
             guard let productID else {
                 return false
             }
             return productID == configuredProductID
         }
 
-        return other.serialNumber == nil && other.productID == nil
+        return true
     }
 }
 

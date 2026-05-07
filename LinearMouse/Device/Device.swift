@@ -130,13 +130,18 @@ class Device {
 
         inputObservationToken = nil
         reportObservationToken = nil
-        logitechReprogrammableControlsMonitor?.stop()
+        logitechReprogrammableControlsMonitor?.disable()
         logitechReprogrammableControlsMonitor = nil
         logitechControlsMonitorSubscriptions.removeAll()
     }
 
     func markActive(reason: String) {
+        guard !removed else {
+            return
+        }
+
         manager?.markDeviceActive(self, reason: reason)
+        BatteryDeviceMonitor.shared.refreshDirectLogitechBluetoothBatteryIfNeeded(for: self)
     }
 
     var hasLogitechControlsMonitor: Bool {
@@ -153,7 +158,7 @@ class Device {
             return
         }
 
-        logitechReprogrammableControlsMonitor.start()
+        logitechReprogrammableControlsMonitor.enable()
         logitechReprogrammableControlsMonitor.requestReconfiguration()
     }
 
@@ -161,6 +166,7 @@ class Device {
         ConfigurationState.shared
             .$configuration
             .dropFirst()
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.updateLogitechControlsMonitorRunning()
             }
@@ -169,6 +175,7 @@ class Device {
         SettingsState.shared
             .$recording
             .dropFirst()
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.updateLogitechControlsMonitorRunning()
             }
@@ -176,14 +183,18 @@ class Device {
     }
 
     private func updateLogitechControlsMonitorRunning() {
+        guard !removed else {
+            return
+        }
+
         guard let logitechReprogrammableControlsMonitor else {
             return
         }
 
-        if LogitechReprogrammableControlsMonitor.isNeeded() {
-            logitechReprogrammableControlsMonitor.start()
+        if LogitechReprogrammableControlsMonitor.isNeeded(for: self) {
+            logitechReprogrammableControlsMonitor.enable()
         } else {
-            logitechReprogrammableControlsMonitor.stop()
+            logitechReprogrammableControlsMonitor.disable()
         }
     }
 }

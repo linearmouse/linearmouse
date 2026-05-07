@@ -249,6 +249,7 @@ extension PointerDeviceManager {
 
     private func removeDevice(_ device: PointerDevice) {
         serviceClientToPointerDevice.removeValue(forKey: device.client)
+        device.invalidate()
 
         for (_, callback) in observations.deviceRemoved {
             callback(self, device)
