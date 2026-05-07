@@ -1366,7 +1366,13 @@
           "$ref": "#/definitions/Scheme.Scrolling.Modifiers.Zoom"
         },
         {
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.ZoomReversed"
+        },
+        {
           "$ref": "#/definitions/Scheme.Scrolling.Modifiers.PinchZoom"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Scrolling.Modifiers.PinchZoomReversed"
         }
       ]
     },
@@ -1460,6 +1466,20 @@
       ],
       "type": "object"
     },
+    "Scheme.Scrolling.Modifiers.PinchZoomReversed": {
+      "additionalProperties": false,
+      "description": "Zoom in and out using reversed pinch gestures.",
+      "properties": {
+        "type": {
+          "const": "pinchZoomReversed",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
     "Scheme.Scrolling.Modifiers.PreventDefault": {
       "additionalProperties": false,
       "description": "No action.",
@@ -1480,6 +1500,20 @@
       "properties": {
         "type": {
           "const": "zoom",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "Scheme.Scrolling.Modifiers.ZoomReversed": {
+      "additionalProperties": false,
+      "description": "Zoom in and out using reversed ⌘+ and ⌘-.",
+      "properties": {
+        "type": {
+          "const": "zoomReversed",
           "type": "string"
         }
       },

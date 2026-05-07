@@ -367,10 +367,24 @@ declare namespace Scheme {
       };
 
       /**
+       * @description Zoom in and out using reversed ⌘+ and ⌘-.
+       */
+      type ZoomReversed = {
+        type: "zoomReversed";
+      };
+
+      /**
        * @description Zoom in and out using pinch gestures.
        */
       type PinchZoom = {
         type: "pinchZoom";
+      };
+
+      /**
+       * @description Zoom in and out using reversed pinch gestures.
+       */
+      type PinchZoomReversed = {
+        type: "pinchZoomReversed";
       };
 
       type Action =
@@ -381,7 +395,9 @@ declare namespace Scheme {
         | AlterOrientation
         | ChangeSpeed
         | Zoom
-        | PinchZoom;
+        | ZoomReversed
+        | PinchZoom
+        | PinchZoomReversed;
     }
   }
 
