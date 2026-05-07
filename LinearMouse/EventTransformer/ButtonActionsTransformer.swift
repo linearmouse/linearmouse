@@ -172,7 +172,7 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
 
         let matchingMappings = mappings.filter { mapping in
             guard let logiButton = mapping.button?.logitechControl,
-                  context.controlIdentity.matches(logiButton) else {
+                  context.matches(logiButton) else {
                 return false
             }
 

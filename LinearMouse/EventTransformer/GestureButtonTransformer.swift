@@ -287,7 +287,7 @@ extension GestureButtonTransformer: EventTransformer {
 extension GestureButtonTransformer: LogitechControlEventHandling {
     func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
         guard let triggerLogitechControl = trigger.button?.logitechControl,
-              context.controlIdentity.matches(triggerLogitechControl) else {
+              context.matches(triggerLogitechControl) else {
             return false
         }
 

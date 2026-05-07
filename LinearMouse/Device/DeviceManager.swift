@@ -370,6 +370,12 @@ class DeviceManager: ObservableObject {
         updatePointerSpeed()
     }
 
+    func requestLogitechControlsForcedReconfiguration() {
+        for device in devices {
+            device.requestLogitechControlsForcedReconfiguration()
+        }
+    }
+
     func pairedReceiverDevices(for device: Device) -> [ReceiverLogicalDeviceIdentity] {
         guard shouldMonitorReceiver(device),
               let locationID = device.pointerDevice.locationID

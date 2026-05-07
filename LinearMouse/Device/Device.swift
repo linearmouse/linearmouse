@@ -136,6 +136,10 @@ class Device {
     }
 
     func markActive(reason: String) {
+        guard !removed else {
+            return
+        }
+
         manager?.markDeviceActive(self, reason: reason)
         BatteryDeviceMonitor.shared.refreshDirectLogitechBluetoothBatteryIfNeeded(for: self)
     }
@@ -162,6 +166,7 @@ class Device {
         ConfigurationState.shared
             .$configuration
             .dropFirst()
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.updateLogitechControlsMonitorRunning()
             }
@@ -170,6 +175,7 @@ class Device {
         SettingsState.shared
             .$recording
             .dropFirst()
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.updateLogitechControlsMonitorRunning()
             }
@@ -177,6 +183,10 @@ class Device {
     }
 
     private func updateLogitechControlsMonitorRunning() {
+        guard !removed else {
+            return
+        }
+
         guard let logitechReprogrammableControlsMonitor else {
             return
         }

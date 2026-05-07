@@ -766,6 +766,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
     private let manager: IOHIDManager
     private let device: IOHIDDevice
     private let runLoop: CFRunLoop
+    private let inputReportBufferLength: Int
     private var inputReportBuffer: UnsafeMutablePointer<UInt8>?
     private let pendingLock = NSLock()
     private let requestLock = NSLock()
@@ -826,42 +827,46 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         maxInputReportSize = Self.getProperty("MaxInputReportSize", from: device)
         maxOutputReportSize = Self.getProperty("MaxOutputReportSize", from: device)
         maxFeatureReportSize = Self.getProperty("MaxFeatureReportSize", from: device)
-
-        let openStatus = IOHIDDeviceOpen(device, IOOptionBits(kIOHIDOptionsTypeNone))
-        guard openStatus == kIOReturnSuccess else {
-            IOHIDManagerUnscheduleFromRunLoop(manager, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
-            IOHIDManagerClose(manager, IOOptionBits(kIOHIDOptionsTypeNone))
-            return nil
-        }
-
-        let reportLength = max(
+        inputReportBufferLength = max(
             maxInputReportSize ?? LogitechHIDPPDeviceMetadataProvider.Constants.longReportLength,
             LogitechHIDPPDeviceMetadataProvider.Constants.longReportLength
         )
-        inputReportBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: reportLength)
-        guard let inputReportBuffer else {
-            IOHIDDeviceClose(device, IOOptionBits(kIOHIDOptionsTypeNone))
-            IOHIDManagerUnscheduleFromRunLoop(manager, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
+
+        let openStatus = IOHIDDeviceOpen(device, IOOptionBits(kIOHIDOptionsTypeNone))
+        guard openStatus == kIOReturnSuccess else {
+            IOHIDManagerUnscheduleFromRunLoop(manager, runLoop, CFRunLoopMode.defaultMode.rawValue)
             IOHIDManagerClose(manager, IOOptionBits(kIOHIDOptionsTypeNone))
             return nil
         }
+
+        let inputReportBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: inputReportBufferLength)
+        self.inputReportBuffer = inputReportBuffer
 
         IOHIDDeviceScheduleWithRunLoop(device, runLoop, CFRunLoopMode.defaultMode.rawValue)
         IOHIDDeviceRegisterInputReportCallback(
             device,
             inputReportBuffer,
-            reportLength,
+            inputReportBufferLength,
             Self.inputReportCallback,
             Unmanaged.passUnretained(self).toOpaque()
         )
     }
 
     deinit {
-        inputReportBuffer?.deallocate()
+        if let inputReportBuffer {
+            IOHIDDeviceRegisterInputReportCallback(
+                device,
+                inputReportBuffer,
+                inputReportBufferLength,
+                nil,
+                nil
+            )
+        }
         IOHIDDeviceUnscheduleFromRunLoop(device, runLoop, CFRunLoopMode.defaultMode.rawValue)
         IOHIDDeviceClose(device, IOOptionBits(kIOHIDOptionsTypeNone))
         IOHIDManagerUnscheduleFromRunLoop(manager, runLoop, CFRunLoopMode.defaultMode.rawValue)
         IOHIDManagerClose(manager, IOOptionBits(kIOHIDOptionsTypeNone))
+        inputReportBuffer?.deallocate()
     }
 
     func discoverSlots() -> LogitechHIDPPDeviceMetadataProvider.ReceiverSlotDiscovery? {
@@ -1583,6 +1588,7 @@ final class LogitechReprogrammableControlsMonitor {
 
     private enum Constants {
         static let notificationTimeout: TimeInterval = 0.25
+        static let initializationRetryTimeout: TimeInterval = 1
     }
 
     private struct ControlInfo {
@@ -1607,6 +1613,8 @@ final class LogitechReprogrammableControlsMonitor {
     private struct MonitorTarget {
         let slot: UInt8
         let identity: ReceiverLogicalDeviceIdentity?
+        let allowsIdentityFallback: Bool
+        let notificationDeviceIndices: Set<UInt8>
         let transport: LogitechHIDPPTransport
         let featureIndex: UInt8
         let controls: [ControlInfo]
@@ -1645,12 +1653,22 @@ final class LogitechReprogrammableControlsMonitor {
             return isNeeded(configuration: configuration)
         }
 
-        return isNeeded(configuration: configuration, identity: directIdentity(for: device))
+        return isNeeded(
+            configuration: configuration,
+            identity: directIdentity(for: device),
+            allowsIdentityFallback: true
+        )
     }
 
-    static func isNeeded(configuration: Configuration, identity: ReceiverLogicalDeviceIdentity) -> Bool {
+    static func isNeeded(
+        configuration: Configuration,
+        identity: ReceiverLogicalDeviceIdentity,
+        allowsIdentityFallback: Bool = false
+    ) -> Bool {
         configuration.schemes.contains { scheme in
-            logitechControls(in: scheme).contains { matches(logiButton: $0, identity: identity) }
+            logitechControls(in: scheme).contains {
+                matches(logiButton: $0, identity: identity, allowsIdentityFallback: allowsIdentityFallback)
+            }
         }
     }
 
@@ -1712,316 +1730,406 @@ final class LogitechReprogrammableControlsMonitor {
             )
         }
 
-        guard let monitorTarget = resolveMonitorTarget() else {
-            finishVirtualButtonRecordingPreparationIfNeeded(sessionID: SettingsState.shared
-                .virtualButtonRecordingSessionID)
-            os_log(
-                "Skip Logitech controls monitor because initialization failed: device=%{public}@",
-                log: Self.log,
-                type: .info,
-                String(describing: device)
-            )
-            return
-        }
-
-        let locationID = device.pointerDevice.locationID ?? 0
-        let slot = monitorTarget.slot
-        let transport = monitorTarget.transport
-        let featureIndex = monitorTarget.featureIndex
-        let allControls = monitorTarget.controls
-        let targetIdentity = monitorTarget.identity
-        let targetName = targetIdentity?.name ?? device.productName ?? device.name
-        var pendingReportingRestoreByControlID = [UInt16: ReportingInfo]()
-
-        state.setActiveNotificationEndpoint(monitorTarget.notificationEndpoint)
-        monitorTarget.notificationEndpoint.enableNotifications()
-        logAvailableControls(transport: transport, featureIndex: featureIndex, slot: slot, locationID: locationID)
-
-        while shouldContinueRunning() {
-            if !pendingReportingRestoreByControlID.isEmpty {
-                pendingReportingRestoreByControlID = restoreReportingState(
-                    pendingReportingRestoreByControlID,
-                    using: transport,
-                    featureIndex: featureIndex,
-                    locationID: locationID,
-                    slot: slot,
-                    reason: "retry pending restore"
+        targetLoop: while shouldContinueRunning() {
+            guard let monitorTarget = resolveMonitorTarget() else {
+                finishVirtualButtonRecordingPreparationIfNeeded(
+                    sessionID: readMainThreadSnapshotFromWorker {
+                        SettingsState.shared.virtualButtonRecordingSessionID
+                    }
                 )
+                os_log(
+                    "Retry Logitech controls monitor initialization because device is not ready: device=%{public}@",
+                    log: Self.log,
+                    type: .info,
+                    String(describing: device)
+                )
+
+                let waitResult = state.waitForReconfigurationOrStop(timeout: Constants.initializationRetryTimeout)
+                guard waitResult.shouldContinue else {
+                    return
+                }
+
+                continue
             }
 
-            let desiredControlIDs = desiredDivertedControlIDs(availableControls: allControls, identity: targetIdentity)
-            let isRecording = SettingsState.shared.recording
-            let recordingSessionID = isRecording ? SettingsState.shared.virtualButtonRecordingSessionID : nil
-            let monitoredControls = isRecording
-                ? allControls
-                : allControls.filter { desiredControlIDs.contains($0.controlID) }
-            let monitoredControlIDs = Set(monitoredControls.map(\.controlID))
-            let reservedVirtualButtonNumber =
-                LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.reservedVirtualButtonNumber
+            let locationID = device.pointerDevice.locationID ?? 0
+            let slot = monitorTarget.slot
+            let transport = monitorTarget.transport
+            let featureIndex = monitorTarget.featureIndex
+            let allControls = monitorTarget.controls
+            let targetIdentity = monitorTarget.identity
+            let targetName = targetIdentity?.name ?? device.productName ?? device.name
+            var pendingReportingRestoreByControlID = [UInt16: ReportingInfo]()
 
-            if !isRecording {
-                let controlsToRestore = pendingReportingRestoreByControlID
-                    .filter { !desiredControlIDs.contains($0.key) }
-                if !controlsToRestore.isEmpty {
-                    let failedRestoreByControlID = restoreReportingState(
-                        controlsToRestore,
+            state.setActiveNotificationEndpoint(monitorTarget.notificationEndpoint)
+            monitorTarget.notificationEndpoint.enableNotifications()
+            logAvailableControls(transport: transport, featureIndex: featureIndex, slot: slot, locationID: locationID)
+
+            while shouldContinueRunning() {
+                if !pendingReportingRestoreByControlID.isEmpty {
+                    pendingReportingRestoreByControlID = restoreReportingState(
+                        pendingReportingRestoreByControlID,
                         using: transport,
                         featureIndex: featureIndex,
                         locationID: locationID,
                         slot: slot,
-                        reason: "apply native reporting to unmonitored controls"
+                        reason: "retry pending restore"
                     )
-
-                    for controlID in Set(controlsToRestore.keys).subtracting(failedRestoreByControlID.keys) {
-                        pendingReportingRestoreByControlID.removeValue(forKey: controlID)
-                    }
-
-                    pendingReportingRestoreByControlID.merge(failedRestoreByControlID) { _, new in new }
                 }
-            }
 
-            if monitoredControls.isEmpty {
-                finishVirtualButtonRecordingPreparationIfNeeded(sessionID: recordingSessionID)
-                os_log(
-                    "Pause Logitech control diversion until configuration changes: locationID=%{public}d slot=%{public}u device=%{public}@ recording=%{public}@",
-                    log: Self.log,
-                    type: .info,
-                    locationID,
-                    slot,
-                    targetName,
-                    isRecording ? "true" : "false"
+                let controlSnapshot = monitorControlSnapshot(
+                    availableControls: allControls,
+                    identity: targetIdentity,
+                    allowsIdentityFallback: monitorTarget.allowsIdentityFallback
                 )
+                let desiredControlIDs = controlSnapshot.desiredControlIDs
+                let isRecording = controlSnapshot.isRecording
+                let recordingSessionID = controlSnapshot.recordingSessionID
+                let monitoredControls = isRecording
+                    ? allControls
+                    : allControls.filter { desiredControlIDs.contains($0.controlID) }
+                let monitoredControlIDs = Set(monitoredControls.map(\.controlID))
+                let reservedVirtualButtonNumber =
+                    LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.reservedVirtualButtonNumber
 
-                guard state.waitForReconfigurationOrStop(timeout: Constants.notificationTimeout) else {
-                    return
-                }
-
-                continue
-            }
-
-            let originalReportingByControlID = monitoredControls
-                .reduce(into: [UInt16: ReportingInfo]()) { result, control in
-                    guard let reportingInfo = readReportingInfo(
-                        for: control.controlID,
-                        using: transport,
-                        featureIndex: featureIndex
-                    ) else {
-                        return
-                    }
-
-                    result[control.controlID] = reportingInfo
-                }
-            let activeControlIDs = monitoredControls.compactMap { control -> UInt16? in
-                guard setDivertedWithRetry(
-                    true,
-                    for: control.controlID,
-                    using: transport,
-                    featureIndex: featureIndex
-                )
-                else {
-                    os_log(
-                        "Failed to enable Logitech control diversion: locationID=%{public}d slot=%{public}u cid=0x%{public}04X",
-                        log: Self.log,
-                        type: .error,
-                        locationID,
-                        slot,
-                        control.controlID
-                    )
-                    return nil
-                }
-
-                return control.controlID
-            }
-
-            guard !activeControlIDs.isEmpty else {
-                finishVirtualButtonRecordingPreparationIfNeeded(sessionID: recordingSessionID)
-                os_log(
-                    "Failed to enable any Logitech control diversion: locationID=%{public}d slot=%{public}u device=%{public}@",
-                    log: Self.log,
-                    type: .error,
-                    locationID,
-                    slot,
-                    targetName
-                )
-
-                guard state.waitForReconfigurationOrStop(timeout: Constants.notificationTimeout) else {
-                    return
-                }
-
-                continue
-            }
-
-            let activeReportingByControlID = activeControlIDs
-                .reduce(into: [UInt16: ReportingInfo]()) { result, controlID in
-                    guard let reportingInfo = readReportingInfo(
-                        for: controlID,
-                        using: transport,
-                        featureIndex: featureIndex
-                    ) else {
-                        return
-                    }
-
-                    result[controlID] = reportingInfo
-                }
-
-            let controlSummary = monitoredControls.map { control in
-                let originalReporting = originalReportingByControlID[control.controlID]
-                let activeReporting = activeReportingByControlID[control.controlID]
-                return String(
-                    format: "cid=0x%04X button=%d tid=0x%04X flags=%@ reporting=%@ mapped=0x%04X",
-                    control.controlID,
-                    reservedVirtualButtonNumber,
-                    control.taskID,
-                    describeControlFlags(control.flags),
-                    describeReportingFlags(activeReporting?.flags ?? originalReporting?.flags ?? []),
-                    activeReporting?.mappedControlID ?? originalReporting?.mappedControlID ?? control.controlID
-                )
-            }
-            .joined(separator: " | ")
-
-            os_log(
-                "Logitech controls monitor enabled: locationID=%{public}d slot=%{public}u device=%{public}@ controls=%{public}@",
-                log: Self.log,
-                type: .info,
-                locationID,
-                slot,
-                targetName,
-                controlSummary
-            )
-
-            finishVirtualButtonRecordingPreparationIfNeeded(sessionID: recordingSessionID)
-
-            var pressedControls = Set<UInt16>()
-            defer {
-                releaseButtonIfNeeded()
-
-                let failedRestoreByControlID = restoreReportingState(
-                    originalReportingByControlID,
-                    using: transport,
-                    featureIndex: featureIndex,
-                    locationID: locationID,
-                    slot: slot,
-                    reason: "restore original reporting"
-                )
-
-                pendingReportingRestoreByControlID.merge(failedRestoreByControlID) { _, new in new }
-                for controlID in Set(originalReportingByControlID.keys).subtracting(failedRestoreByControlID.keys) {
-                    pendingReportingRestoreByControlID.removeValue(forKey: controlID)
-                }
-            }
-
-            while shouldContinueRunning() {
-                let reconfigResult = state.consumeReconfigurationRequest()
-                if reconfigResult.needed {
-                    if reconfigResult.forced {
-                        os_log(
-                            "Restart Logitech control monitor (forced, e.g. device reconnect): locationID=%{public}d slot=%{public}u device=%{public}@",
-                            log: Self.log,
-                            type: .info,
-                            locationID,
-                            slot,
-                            targetName
+                if !isRecording {
+                    let controlsToRestore = pendingReportingRestoreByControlID
+                        .filter { !desiredControlIDs.contains($0.key) }
+                    if !controlsToRestore.isEmpty {
+                        let failedRestoreByControlID = restoreReportingState(
+                            controlsToRestore,
+                            using: transport,
+                            featureIndex: featureIndex,
+                            locationID: locationID,
+                            slot: slot,
+                            reason: "apply native reporting to unmonitored controls"
                         )
-                        break
-                    }
 
-                    let newDesiredControlIDs = desiredDivertedControlIDs(
-                        availableControls: allControls, identity: targetIdentity
-                    )
-                    let newIsRecording = SettingsState.shared.recording
+                        for controlID in Set(controlsToRestore.keys).subtracting(failedRestoreByControlID.keys) {
+                            pendingReportingRestoreByControlID.removeValue(forKey: controlID)
+                        }
 
-                    if newDesiredControlIDs != desiredControlIDs || newIsRecording != isRecording {
-                        os_log(
-                            "Restart Logitech control monitor to refresh diverted controls: locationID=%{public}d slot=%{public}u device=%{public}@",
-                            log: Self.log,
-                            type: .info,
-                            locationID,
-                            slot,
-                            targetName
-                        )
-                        break
+                        pendingReportingRestoreByControlID.merge(failedRestoreByControlID) { _, new in new }
                     }
                 }
 
-                guard let report = monitorTarget.notificationEndpoint.waitForHIDPPNotification(
-                    timeout: Constants.notificationTimeout,
-                    matching: { response in
-                        Self.isDivertedButtonsNotification(response, featureIndex: featureIndex, slot: slot)
-                    },
-                    until: { [weak self] in self?.shouldContinueRunning() == true }
-                ) else {
-                    continue
-                }
-
-                let activeControls = Self.parseDivertedButtonsNotification(report).intersection(monitoredControlIDs)
-                let changedControls = activeControls.symmetricDifference(pressedControls).sorted()
-                pressedControls = activeControls
-
-                for controlID in changedControls {
-                    let isPressed = activeControls.contains(controlID)
+                if monitoredControls.isEmpty {
+                    finishVirtualButtonRecordingPreparationIfNeeded(sessionID: recordingSessionID)
                     os_log(
-                        "Logitech reprogrammable control event: locationID=%{public}d slot=%{public}u device=%{public}@ cid=0x%{public}04X button=%{public}d state=%{public}@ active=%{public}@",
+                        "Pause Logitech control diversion until configuration changes: locationID=%{public}d slot=%{public}u device=%{public}@ recording=%{public}@",
                         log: Self.log,
                         type: .info,
                         locationID,
                         slot,
                         targetName,
-                        controlID,
-                        reservedVirtualButtonNumber,
-                        isPressed ? "down" : "up",
-                        activeControls.map { String(format: "0x%04X", $0) }.sorted().joined(separator: ",")
+                        isRecording ? "true" : "false"
                     )
 
-                    device.markActive(reason: "Received Logitech reprogrammable control event")
+                    let waitResult = state.waitForReconfigurationOrStop(timeout: Constants.notificationTimeout)
+                    guard waitResult.shouldContinue else {
+                        return
+                    }
 
-                    let modifierFlags = ModifierState.shared.currentFlags
-                    let controlIdentity = LogitechControlIdentity(
-                        controlID: Int(controlID),
-                        productID: targetIdentity?.productID,
-                        serialNumber: targetIdentity?.serialNumber
-                    )
+                    if waitResult.forced {
+                        continue targetLoop
+                    }
 
-                    if isRecording {
-                        if isPressed {
-                            DispatchQueue.main.async {
-                                SettingsState.shared.recordedVirtualButtonEvent = .init(
-                                    button: .logitechControl(controlIdentity),
-                                    modifierFlags: modifierFlags
-                                )
-                            }
+                    continue
+                }
+
+                let originalReportingByControlID = monitoredControls
+                    .reduce(into: [UInt16: ReportingInfo]()) { result, control in
+                        guard let reportingInfo = readReportingInfo(
+                            for: control.controlID,
+                            using: transport,
+                            featureIndex: featureIndex
+                        ) else {
+                            return
                         }
-                        continue
+
+                        result[control.controlID] = reportingInfo
+                    }
+                let activeControlIDs = monitoredControls.compactMap { control -> UInt16? in
+                    guard setDivertedWithRetry(
+                        true,
+                        for: control.controlID,
+                        using: transport,
+                        featureIndex: featureIndex
+                    )
+                    else {
+                        os_log(
+                            "Failed to enable Logitech control diversion: locationID=%{public}d slot=%{public}u cid=0x%{public}04X",
+                            log: Self.log,
+                            type: .error,
+                            locationID,
+                            slot,
+                            control.controlID
+                        )
+                        return nil
                     }
 
-                    let mouseLocation = CGEvent(source: nil)?.location ?? .zero
-                    let mouseLocationPid = mouseLocation.topmostWindowOwnerPid
-                        ?? NSWorkspace.shared.frontmostApplication?.processIdentifier
-                    let display = ScreenManager.shared.currentScreenNameSnapshot
+                    return control.controlID
+                }
 
-                    let logitechContext = LogitechEventContext(
-                        device: device,
-                        pid: mouseLocationPid,
-                        display: display,
-                        mouseLocation: mouseLocation,
-                        controlIdentity: controlIdentity,
-                        isPressed: isPressed,
-                        modifierFlags: modifierFlags
+                guard !activeControlIDs.isEmpty else {
+                    finishVirtualButtonRecordingPreparationIfNeeded(sessionID: recordingSessionID)
+                    os_log(
+                        "Failed to enable any Logitech control diversion: locationID=%{public}d slot=%{public}u device=%{public}@",
+                        log: Self.log,
+                        type: .error,
+                        locationID,
+                        slot,
+                        targetName
                     )
 
-                    let handledInternally = EventThread.shared.performAndWait {
-                        EventTransformerManager.shared.handleLogitechControlEvent(logitechContext)
-                    } ?? false
-
-                    guard !handledInternally else {
-                        continue
+                    let waitResult = state.waitForReconfigurationOrStop(timeout: Constants.notificationTimeout)
+                    guard waitResult.shouldContinue else {
+                        return
                     }
 
-                    postSyntheticButton(
-                        button: reservedVirtualButtonNumber,
-                        down: isPressed
+                    if waitResult.forced {
+                        continue targetLoop
+                    }
+
+                    continue
+                }
+
+                let activeReportingByControlID = activeControlIDs
+                    .reduce(into: [UInt16: ReportingInfo]()) { result, controlID in
+                        guard let reportingInfo = readReportingInfo(
+                            for: controlID,
+                            using: transport,
+                            featureIndex: featureIndex
+                        ) else {
+                            return
+                        }
+
+                        result[controlID] = reportingInfo
+                    }
+
+                let controlSummary = monitoredControls.map { control in
+                    let originalReporting = originalReportingByControlID[control.controlID]
+                    let activeReporting = activeReportingByControlID[control.controlID]
+                    return String(
+                        format: "cid=0x%04X button=%d tid=0x%04X flags=%@ reporting=%@ mapped=0x%04X",
+                        control.controlID,
+                        reservedVirtualButtonNumber,
+                        control.taskID,
+                        describeControlFlags(control.flags),
+                        describeReportingFlags(activeReporting?.flags ?? originalReporting?.flags ?? []),
+                        activeReporting?.mappedControlID ?? originalReporting?.mappedControlID ?? control.controlID
                     )
                 }
+                .joined(separator: " | ")
+
+                os_log(
+                    "Logitech controls monitor enabled: locationID=%{public}d slot=%{public}u device=%{public}@ controls=%{public}@",
+                    log: Self.log,
+                    type: .info,
+                    locationID,
+                    slot,
+                    targetName,
+                    controlSummary
+                )
+
+                finishVirtualButtonRecordingPreparationIfNeeded(sessionID: recordingSessionID)
+
+                var pressedControls = Set<UInt16>()
+                defer {
+                    releaseButtonIfNeeded()
+
+                    let failedRestoreByControlID = restoreReportingState(
+                        originalReportingByControlID,
+                        using: transport,
+                        featureIndex: featureIndex,
+                        locationID: locationID,
+                        slot: slot,
+                        reason: "restore original reporting"
+                    )
+
+                    pendingReportingRestoreByControlID.merge(failedRestoreByControlID) { _, new in new }
+                    for controlID in Set(originalReportingByControlID.keys).subtracting(failedRestoreByControlID.keys) {
+                        pendingReportingRestoreByControlID.removeValue(forKey: controlID)
+                    }
+                }
+
+                while shouldContinueRunning() {
+                    let reconfigResult = state.consumeReconfigurationRequest()
+                    if reconfigResult.needed {
+                        if reconfigResult.forced {
+                            os_log(
+                                "Restart Logitech control monitor (forced, e.g. device reconnect): locationID=%{public}d slot=%{public}u device=%{public}@",
+                                log: Self.log,
+                                type: .info,
+                                locationID,
+                                slot,
+                                targetName
+                            )
+                            continue targetLoop
+                        }
+
+                        let newControlSnapshot = monitorControlSnapshot(
+                            availableControls: allControls,
+                            identity: targetIdentity,
+                            allowsIdentityFallback: monitorTarget.allowsIdentityFallback
+                        )
+
+                        if newControlSnapshot.desiredControlIDs != desiredControlIDs
+                            || newControlSnapshot.isRecording != isRecording {
+                            os_log(
+                                "Restart Logitech control monitor to refresh diverted controls: locationID=%{public}d slot=%{public}u device=%{public}@",
+                                log: Self.log,
+                                type: .info,
+                                locationID,
+                                slot,
+                                targetName
+                            )
+                            break
+                        }
+                    }
+
+                    guard let report = monitorTarget.notificationEndpoint.waitForHIDPPNotification(
+                        timeout: Constants.notificationTimeout,
+                        matching: { response in
+                            Self.isDivertedButtonsNotification(
+                                response,
+                                featureIndex: featureIndex,
+                                deviceIndices: monitorTarget.notificationDeviceIndices
+                            )
+                        },
+                        until: { [weak self] in self?.shouldContinueRunning() == true }
+                    ) else {
+                        continue
+                    }
+
+                    let activeControls = Self.parseDivertedButtonsNotification(report).intersection(monitoredControlIDs)
+                    let changedControls = activeControls.symmetricDifference(pressedControls).sorted()
+                    pressedControls = activeControls
+
+                    for controlID in changedControls {
+                        let isPressed = activeControls.contains(controlID)
+                        os_log(
+                            "Logitech reprogrammable control event: locationID=%{public}d slot=%{public}u device=%{public}@ cid=0x%{public}04X button=%{public}d state=%{public}@ active=%{public}@",
+                            log: Self.log,
+                            type: .info,
+                            locationID,
+                            slot,
+                            targetName,
+                            controlID,
+                            reservedVirtualButtonNumber,
+                            isPressed ? "down" : "up",
+                            activeControls.map { String(format: "0x%04X", $0) }.sorted().joined(separator: ",")
+                        )
+
+                        notifyDeviceActive(reason: "Received Logitech reprogrammable control event")
+
+                        let modifierFlags = ModifierState.shared.currentFlags
+                        let controlIdentity = LogitechControlIdentity(
+                            controlID: Int(controlID),
+                            productID: targetIdentity?.productID,
+                            serialNumber: targetIdentity?.serialNumber
+                        )
+
+                        if isRecording {
+                            if isPressed {
+                                DispatchQueue.main.async {
+                                    SettingsState.shared.recordedVirtualButtonEvent = .init(
+                                        button: .logitechControl(controlIdentity),
+                                        modifierFlags: modifierFlags
+                                    )
+                                }
+                            }
+                            continue
+                        }
+
+                        let eventContext = eventContextSnapshot()
+
+                        let logitechContext = LogitechEventContext(
+                            device: device,
+                            pid: eventContext.pid,
+                            display: eventContext.display,
+                            mouseLocation: eventContext.mouseLocation,
+                            controlIdentity: controlIdentity,
+                            allowsIdentityFallback: monitorTarget.allowsIdentityFallback,
+                            isPressed: isPressed,
+                            modifierFlags: modifierFlags
+                        )
+
+                        let handledInternally = EventThread.shared.performAndWait {
+                            EventTransformerManager.shared.handleLogitechControlEvent(logitechContext)
+                        } ?? false
+
+                        guard !handledInternally else {
+                            continue
+                        }
+
+                        os_log(
+                            "Logitech control event was not handled internally; posting synthetic fallback: locationID=%{public}d slot=%{public}u device=%{public}@ cid=0x%{public}04X identityFallback=%{public}@",
+                            log: Self.log,
+                            type: .info,
+                            locationID,
+                            slot,
+                            targetName,
+                            controlID,
+                            monitorTarget.allowsIdentityFallback ? "true" : "false"
+                        )
+
+                        postSyntheticButton(
+                            button: reservedVirtualButtonNumber,
+                            down: isPressed
+                        )
+                    }
+                }
             }
+        }
+    }
+
+    private func monitorControlSnapshot(
+        availableControls: [ControlInfo],
+        identity: ReceiverLogicalDeviceIdentity?,
+        allowsIdentityFallback: Bool
+    ) -> (desiredControlIDs: Set<UInt16>, isRecording: Bool, recordingSessionID: UUID?) {
+        readMainThreadSnapshotFromWorker {
+            let isRecording = SettingsState.shared.recording
+            let recordingSessionID = isRecording ? SettingsState.shared.virtualButtonRecordingSessionID : nil
+            let mouseLocation = CGEvent(source: nil)?.location ?? .zero
+            let pid = mouseLocation.topmostWindowOwnerPid
+                ?? NSWorkspace.shared.frontmostApplication?.processIdentifier
+            let scheme = ConfigurationState.shared.configuration.matchScheme(
+                withDevice: device,
+                withPid: pid,
+                withDisplay: ScreenManager.shared.currentScreenNameSnapshot
+            )
+            return (
+                desiredControlIDs: desiredDivertedControlIDs(
+                    availableControls: availableControls,
+                    identity: identity,
+                    allowsIdentityFallback: allowsIdentityFallback,
+                    isRecording: isRecording,
+                    scheme: scheme
+                ),
+                isRecording: isRecording,
+                recordingSessionID: recordingSessionID
+            )
+        }
+    }
+
+    private func eventContextSnapshot() -> (mouseLocation: CGPoint, pid: pid_t?, display: String?) {
+        readMainThreadSnapshotFromWorker {
+            let mouseLocation = CGEvent(source: nil)?.location ?? .zero
+            let pid = mouseLocation.topmostWindowOwnerPid
+                ?? NSWorkspace.shared.frontmostApplication?.processIdentifier
+            return (mouseLocation, pid, ScreenManager.shared.currentScreenNameSnapshot)
+        }
+    }
+
+    private func readMainThreadSnapshotFromWorker<T>(_ body: () -> T) -> T {
+        DispatchQueue.main.sync(execute: body)
+    }
+
+    private func notifyDeviceActive(reason: String) {
+        DispatchQueue.main.async { [weak self] in
+            self?.device.markActive(reason: reason)
         }
     }
 
@@ -2095,6 +2203,8 @@ final class LogitechReprogrammableControlsMonitor {
         return MonitorTarget(
             slot: LogitechHIDPPDeviceMetadataProvider.Constants.receiverIndex,
             identity: identity,
+            allowsIdentityFallback: true,
+            notificationDeviceIndices: LogitechHIDPPDeviceMetadataProvider.Constants.directReplyIndices,
             transport: transport,
             featureIndex: featureIndex,
             controls: controls,
@@ -2256,6 +2366,8 @@ final class LogitechReprogrammableControlsMonitor {
         return MonitorTarget(
             slot: slot,
             identity: identity,
+            allowsIdentityFallback: false,
+            notificationDeviceIndices: Set([slot]),
             transport: transport,
             featureIndex: featureIndex,
             controls: controls,
@@ -2338,20 +2450,14 @@ final class LogitechReprogrammableControlsMonitor {
 
     private func desiredDivertedControlIDs(
         availableControls: [ControlInfo],
-        identity: ReceiverLogicalDeviceIdentity?
+        identity: ReceiverLogicalDeviceIdentity?,
+        allowsIdentityFallback: Bool,
+        isRecording: Bool,
+        scheme: Scheme
     ) -> Set<UInt16> {
-        if SettingsState.shared.recording {
+        if isRecording {
             return Set(availableControls.map(\.controlID))
         }
-
-        let mouseLocation = CGEvent(source: nil)?.location ?? .zero
-        let mouseLocationPid = mouseLocation.topmostWindowOwnerPid
-            ?? NSWorkspace.shared.frontmostApplication?.processIdentifier
-        let scheme = ConfigurationState.shared.configuration.matchScheme(
-            withDevice: device,
-            withPid: mouseLocationPid,
-            withDisplay: ScreenManager.shared.currentScreenNameSnapshot
-        )
 
         let directMappings: [UInt16] = (scheme.buttons.mappings ?? [])
             .compactMap { (mapping: Scheme.Buttons.Mapping) -> UInt16? in
@@ -2359,7 +2465,11 @@ final class LogitechReprogrammableControlsMonitor {
                     return nil
                 }
 
-                guard Self.matches(logiButton: logiButton, identity: identity) else {
+                guard Self.matches(
+                    logiButton: logiButton,
+                    identity: identity,
+                    allowsIdentityFallback: allowsIdentityFallback
+                ) else {
                     return nil
                 }
 
@@ -2369,7 +2479,11 @@ final class LogitechReprogrammableControlsMonitor {
         let autoScrollControlID: UInt16? = {
             guard scheme.buttons.autoScroll.enabled ?? false,
                   let logiButton = scheme.buttons.autoScroll.trigger?.button?.logitechControl,
-                  Self.matches(logiButton: logiButton, identity: identity) else {
+                  Self.matches(
+                      logiButton: logiButton,
+                      identity: identity,
+                      allowsIdentityFallback: allowsIdentityFallback
+                  ) else {
                 return nil
             }
             return logiButton.controlIDValue
@@ -2378,7 +2492,11 @@ final class LogitechReprogrammableControlsMonitor {
         let gestureControlID: UInt16? = {
             guard scheme.buttons.gesture.enabled ?? false,
                   let logiButton = scheme.buttons.gesture.trigger?.button?.logitechControl,
-                  Self.matches(logiButton: logiButton, identity: identity) else {
+                  Self.matches(
+                      logiButton: logiButton,
+                      identity: identity,
+                      allowsIdentityFallback: allowsIdentityFallback
+                  ) else {
                 return nil
             }
             return logiButton.controlIDValue
@@ -2388,22 +2506,17 @@ final class LogitechReprogrammableControlsMonitor {
             .intersection(availableControls.map(\.controlID))
     }
 
-    private static func matches(logiButton: LogitechControlIdentity, identity: ReceiverLogicalDeviceIdentity?) -> Bool {
-        if let configuredSerialNumber = logiButton.serialNumber {
-            guard let serialNumber = identity?.serialNumber else {
-                return false
-            }
-            return configuredSerialNumber.caseInsensitiveCompare(serialNumber) == .orderedSame
-        }
-
-        if let configuredProductID = logiButton.productID {
-            guard let productID = identity?.productID else {
-                return false
-            }
-            return configuredProductID == productID
-        }
-
-        return logiButton.serialNumber == nil && logiButton.productID == nil
+    private static func matches(
+        logiButton: LogitechControlIdentity,
+        identity: ReceiverLogicalDeviceIdentity?,
+        allowsIdentityFallback: Bool = false
+    ) -> Bool {
+        LogitechControlIdentity(
+            controlID: logiButton.controlID,
+            productID: identity?.productID,
+            serialNumber: identity?.serialNumber
+        )
+        .matches(logiButton, allowingIdentityFallback: allowsIdentityFallback)
     }
 
     private func fetchControls(using transport: LogitechHIDPPTransport, featureIndex: UInt8) -> [ControlInfo] {
@@ -2651,11 +2764,15 @@ final class LogitechReprogrammableControlsMonitor {
         }
     }
 
-    static func isDivertedButtonsNotification(_ report: [UInt8], featureIndex: UInt8, slot: UInt8) -> Bool {
+    static func isDivertedButtonsNotification(
+        _ report: [UInt8],
+        featureIndex: UInt8,
+        deviceIndices: Set<UInt8>
+    ) -> Bool {
         guard report.count >= 4,
               [LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
                LogitechHIDPPDeviceMetadataProvider.Constants.longReportID].contains(report[0]),
-              report[1] == slot,
+              deviceIndices.contains(report[1]),
               report[2] == featureIndex
         else {
             return false
@@ -2885,16 +3002,17 @@ private final class LogitechReprogrammableControlsMonitorState {
         }
     }
 
-    func waitForReconfigurationOrStop(timeout: TimeInterval) -> Bool {
+    func waitForReconfigurationOrStop(timeout: TimeInterval) -> (shouldContinue: Bool, forced: Bool) {
         while shouldContinueRunning {
-            if consumeReconfigurationRequest().needed {
-                return true
+            let request = consumeReconfigurationRequest()
+            if request.needed {
+                return (true, request.forced)
             }
 
             _ = reconfigurationSemaphore.wait(timeout: .now() + timeout)
         }
 
-        return false
+        return (false, false)
     }
 
     func setActiveNotificationEndpoint(_ endpoint: HIDPPNotificationHandling?) {

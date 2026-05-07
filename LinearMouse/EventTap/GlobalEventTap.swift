@@ -14,6 +14,7 @@ class GlobalEventTap {
     private var observationToken: ObservationToken?
     private lazy var watchdog = GlobalEventTapWatchdog()
     private let eventThread = EventThread.shared
+    private var shouldRun = false
 
     init() {}
 
@@ -45,6 +46,12 @@ class GlobalEventTap {
     }
 
     func start() {
+        shouldRun = true
+
+        startObservation()
+    }
+
+    private func startObservation() {
         guard observationToken == nil else {
             return
         }
@@ -74,7 +81,11 @@ class GlobalEventTap {
 
         guard let observationResult = eventThread.performAndWait({
             Result {
-                try EventTap.observe(eventTypes) { [weak self] in self?.callback($1) }
+                try EventTap.observe(eventTypes, onInvalidated: { [weak self] in
+                    DispatchQueue.main.async {
+                        self?.restartIfNeeded(reason: "event tap invalidated")
+                    }
+                }) { [weak self] in self?.callback($1) }
             }
         }) else {
             eventThread.stop()
@@ -94,6 +105,11 @@ class GlobalEventTap {
     }
 
     func stop() {
+        shouldRun = false
+        stopObservation()
+    }
+
+    private func stopObservation() {
         // Release the observation token, which dispatches timer invalidation
         // to the event RunLoop (see EventTap.observe).
         observationToken = nil
@@ -103,5 +119,15 @@ class GlobalEventTap {
         eventThread.stop()
 
         watchdog.stop()
+    }
+
+    private func restartIfNeeded(reason: StaticString) {
+        guard shouldRun else {
+            return
+        }
+
+        os_log("Restart GlobalEventTap: %{public}@", log: Self.log, type: .info, String(describing: reason))
+        stopObservation()
+        startObservation()
     }
 }

@@ -104,7 +104,7 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
             return inventoryLevel
         }
 
-        guard Self.isDirectLogitechBluetoothDevice(device) else {
+        guard Self.isDirectLogitechBluetoothDevice(device, pairedDevices: pairedDevices) else {
             return nil
         }
 
@@ -112,7 +112,8 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
     }
 
     func refreshDirectLogitechBluetoothBatteryIfNeeded(for device: Device) {
-        guard Self.isDirectLogitechBluetoothDevice(device) else {
+        let pairedDevices = DeviceManager.shared.pairedReceiverDevices(for: device)
+        guard Self.isDirectLogitechBluetoothDevice(device, pairedDevices: pairedDevices) else {
             return
         }
 
@@ -169,28 +170,26 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
                 return
             }
 
-            let receiverPairedBatteries = DeviceManager.shared.devices.flatMap { device in
-                DeviceManager.shared
-                    .pairedReceiverDevices(for: device)
-                    .compactMap { identity -> ConnectedBatteryDeviceInfo? in
-                        guard let batteryLevel = identity.batteryLevel else {
-                            return nil
-                        }
-
-                        return ConnectedBatteryDeviceInfo(
-                            id: ConnectedBatteryDeviceInfo.receiverIdentity(
-                                receiverLocationID: identity.receiverLocationID,
-                                slot: identity.slot
-                            ),
-                            name: identity.name,
-                            batteryLevel: batteryLevel
-                        )
+            let deviceInfos = self.deviceBatteryMonitoringInfos()
+            let receiverPairedBatteries = deviceInfos.flatMap { _, pairedDevices in
+                pairedDevices.compactMap { identity -> ConnectedBatteryDeviceInfo? in
+                    guard let batteryLevel = identity.batteryLevel else {
+                        return nil
                     }
+
+                    return ConnectedBatteryDeviceInfo(
+                        id: ConnectedBatteryDeviceInfo.receiverIdentity(
+                            receiverLocationID: identity.receiverLocationID,
+                            slot: identity.slot
+                        ),
+                        name: identity.name,
+                        batteryLevel: batteryLevel
+                    )
+                }
             }
-            let visibleDeviceBatteries = DeviceManager.shared
-                .devices
-                .compactMap { device -> ConnectedBatteryDeviceInfo? in
-                    guard DeviceManager.shared.pairedReceiverDevices(for: device).isEmpty,
+            let visibleDeviceBatteries = deviceInfos
+                .compactMap { device, pairedDevices -> ConnectedBatteryDeviceInfo? in
+                    guard pairedDevices.isEmpty,
                           let batteryLevel = device.batteryLevel
                     else {
                         return nil
@@ -210,8 +209,8 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
                     )
                 }
             let propertyBackedDevices = ConnectedBatteryDeviceInventory.devices()
-            let directlyAddressableLogitechDevices = DeviceManager.shared.devices.filter {
-                DeviceManager.shared.pairedReceiverDevices(for: $0).isEmpty
+            let directlyAddressableLogitechDevices = deviceInfos.compactMap { device, pairedDevices in
+                pairedDevices.isEmpty ? device : nil
             }
             guard self.shouldContinueRefreshing else {
                 self.finishRefreshCycle()
@@ -250,6 +249,14 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
             }
 
             self.finishRefreshCycle()
+        }
+    }
+
+    private func deviceBatteryMonitoringInfos() -> [(device: Device, pairedDevices: [ReceiverLogicalDeviceIdentity])] {
+        DispatchQueue.main.sync {
+            DeviceManager.shared.devices.map { device in
+                (device, DeviceManager.shared.pairedReceiverDevices(for: device))
+            }
         }
     }
 
@@ -391,10 +398,13 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
         }
     }
 
-    private static func isDirectLogitechBluetoothDevice(_ device: Device) -> Bool {
+    private static func isDirectLogitechBluetoothDevice(
+        _ device: Device,
+        pairedDevices: [ReceiverLogicalDeviceIdentity]
+    ) -> Bool {
         device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID
             && device.pointerDevice.transport == PointerDeviceTransportName.bluetoothLowEnergy
-            && DeviceManager.shared.pairedReceiverDevices(for: device).isEmpty
+            && pairedDevices.isEmpty
     }
 
     private static func directIdentity(for device: Device) -> String {

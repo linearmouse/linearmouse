@@ -144,6 +144,55 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         )
     }
 
+    func testLogitechControlsMonitorCanFallbackToProductWhenDirectBluetoothSerialIsMissing() {
+        var mapping = Scheme.Buttons.Mapping()
+        mapping.button = .logitechControl(.init(controlID: 0x00D0, productID: 0xB015, serialNumber: "ABC"))
+        var buttons = Scheme.Buttons()
+        buttons.mappings = [mapping]
+        var configuration = Configuration()
+        configuration.schemes = [Scheme(buttons: buttons)]
+
+        let identityWithoutSerial = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 1,
+            slot: 0,
+            kind: .mouse,
+            name: "M720",
+            serialNumber: nil,
+            productID: 0xB015,
+            batteryLevel: nil
+        )
+        let identityWithoutProduct = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 1,
+            slot: 0,
+            kind: .mouse,
+            name: "M720",
+            serialNumber: nil,
+            productID: nil,
+            batteryLevel: nil
+        )
+
+        XCTAssertFalse(
+            LogitechReprogrammableControlsMonitor.isNeeded(
+                configuration: configuration,
+                identity: identityWithoutSerial
+            )
+        )
+        XCTAssertTrue(
+            LogitechReprogrammableControlsMonitor.isNeeded(
+                configuration: configuration,
+                identity: identityWithoutSerial,
+                allowsIdentityFallback: true
+            )
+        )
+        XCTAssertFalse(
+            LogitechReprogrammableControlsMonitor.isNeeded(
+                configuration: configuration,
+                identity: identityWithoutProduct,
+                allowsIdentityFallback: true
+            )
+        )
+    }
+
     func testReceiverLogicalDeviceIdentityUsesAllFieldsForEquality() {
         let lhs = ReceiverLogicalDeviceIdentity(
             receiverLocationID: 0x1234,
@@ -211,9 +260,21 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             LogitechReprogrammableControlsMonitor.isDivertedButtonsNotification(
                 [0x10, 0x02, 0x05, 0x08, 0x00, 0xC3, 0x00],
                 featureIndex: 0x05,
-                slot: 0x02
+                deviceIndices: Set([0x02])
             )
         )
+    }
+
+    func testLogitechDivertedButtonsNotificationAcceptsDirectBluetoothIndices() {
+        for deviceIndex in LogitechHIDPPDeviceMetadataProvider.Constants.directReplyIndices {
+            XCTAssertTrue(
+                LogitechReprogrammableControlsMonitor.isDivertedButtonsNotification(
+                    [0x10, deviceIndex, 0x05, 0x08, 0x00, 0xD0, 0x00],
+                    featureIndex: 0x05,
+                    deviceIndices: LogitechHIDPPDeviceMetadataProvider.Constants.directReplyIndices
+                )
+            )
+        }
     }
 
     func testLogitechDivertedButtonsNotificationParsesPressedControls() {
@@ -237,7 +298,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             LogitechReprogrammableControlsMonitor.isDivertedButtonsNotification(
                 [0x10, 0x03, 0x05, 0x08, 0x00, 0xC3, 0x00],
                 featureIndex: 0x05,
-                slot: 0x02
+                deviceIndices: Set([0x02])
             )
         )
     }
@@ -268,6 +329,23 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             LogitechControlIdentity(controlID: 0x1234, productID: nil, serialNumber: nil)
                 .userVisibleName,
             "Logitech Control 0x1234"
+        )
+    }
+
+    func testLogitechControlIdentityFallbackOnlyUsesProductWhenSerialIsMissing() {
+        let configured = LogitechControlIdentity(controlID: 0x00D0, productID: 0xB015, serialNumber: "ABC")
+
+        XCTAssertTrue(
+            LogitechControlIdentity(controlID: 0x00D0, productID: 0xB015, serialNumber: nil)
+                .matches(configured, allowingIdentityFallback: true)
+        )
+        XCTAssertFalse(
+            LogitechControlIdentity(controlID: 0x00D0, productID: 0xB02A, serialNumber: nil)
+                .matches(configured, allowingIdentityFallback: true)
+        )
+        XCTAssertFalse(
+            LogitechControlIdentity(controlID: 0x00D0, productID: nil, serialNumber: nil)
+                .matches(configured, allowingIdentityFallback: true)
         )
     }
 
