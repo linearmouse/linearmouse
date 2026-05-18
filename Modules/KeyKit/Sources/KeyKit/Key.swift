@@ -37,6 +37,14 @@ public enum Key: String, Codable {
     case f10
     case f11
     case f12
+    case f13
+    case f14
+    case f15
+    case f16
+    case f17
+    case f18
+    case f19
+    case f20
     case a
     case b
     case c
