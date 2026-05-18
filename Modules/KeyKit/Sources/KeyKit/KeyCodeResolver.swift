@@ -101,6 +101,14 @@ public class KeyCodeResolver {
         newMapping[Key.f10.rawValue] = 0x6D
         newMapping[Key.f11.rawValue] = 0x67
         newMapping[Key.f12.rawValue] = 0x6F
+        newMapping[Key.f13.rawValue] = 0x69
+        newMapping[Key.f14.rawValue] = 0x6B
+        newMapping[Key.f15.rawValue] = 0x71
+        newMapping[Key.f16.rawValue] = 0x6A
+        newMapping[Key.f17.rawValue] = 0x40
+        newMapping[Key.f18.rawValue] = 0x4F
+        newMapping[Key.f19.rawValue] = 0x50
+        newMapping[Key.f20.rawValue] = 0x5A
         newMapping[Key.numpadPlus.rawValue] = 0x45
         newMapping[Key.numpadMinus.rawValue] = 0x4E
         newMapping[Key.numpadMultiply.rawValue] = 0x43
