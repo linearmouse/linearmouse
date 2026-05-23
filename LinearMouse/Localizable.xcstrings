@@ -902,7 +902,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%#@value@"
+            "value" : "%.1f ピクセル"
           },
           "substitutions" : {
             "value" : {
