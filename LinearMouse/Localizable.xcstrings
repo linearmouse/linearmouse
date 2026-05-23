@@ -902,7 +902,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%.1f ピクセル"
+            "value" : "%#@value@"
           },
           "substitutions" : {
             "value" : {
@@ -20449,6 +20449,214 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "可編輯"
+          }
+        }
+      }
+    },
+    "Enable" : {
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktiveer"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تمكين"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Omogući"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Habilita"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Povolit"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktivér"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktivieren"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ενεργοποίηση"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activar"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ota käyttöön"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activer"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשר"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Engedélyezés"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktifkan"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abilita"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有効にする"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "활성화"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ဖွင့်ပါ"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktiver"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inschakelen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Włącz"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ativar"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ativar"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activează"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Включить"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Povoliť"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Омогући"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktivera"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkinleştir"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Увімкнути"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bật"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启用"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "啟用"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "啟用"
           }
         }
       }
@@ -55246,6 +55454,214 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "臨界值"
+          }
+        }
+      }
+    },
+    "To enable horizontal scrolling with Shift, set Shift to Alter orientation in Modifier Keys." : {
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Om horisontale blaai met Shift te aktiveer, stel Shift op Verander oriëntasie in Wysigingsleutels."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لتمكين التمرير الأفقي مع Shift، اضبط Shift على تغيير الاتجاه في مفاتيح التعديل."
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Da omogućite horizontalno pomicanje uz Shift, postavite Shift na Promjeni orijentaciju u Modifikatorske tipke."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per habilitar el desplaçament horitzontal amb Shift, configura Shift com a Alterar orientació a Tecles modificadores."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chcete-li povolit vodorovné posouvání se Shiftem, nastavte Shift na Změna oriantace v Modifikačních klávesách."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For at aktivere vandret rulning med Shift skal du indstille Shift til Skift retning i Kombitaster."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um horizontales Scrollen mit Shift zu aktivieren, stelle Shift unter Sondertasten auf Scrollorientierung ändern."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Για να ενεργοποιήσετε την οριζόντια κύλιση με Shift, ορίστε το Shift σε Τροποποίηση προσανατολισμού στα Τροποποιητικά πλήκτρα."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para activar el desplazamiento horizontal con Shift, configura Shift como Cambiar orientación en Teclas modificadoras."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ota vaakavieritys käyttöön Shiftillä asettamalla Shift tilaan Muuta suuntaa kohdassa Muokkausnäppäimet."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour activer le défilement horizontal avec Shift, définissez Shift sur Altérer l'orientation dans Modificateur de touches."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כדי לאפשר גלילה אופקית עם Shift, הגדר את Shift ל־שנה כיוון גלילה בקיצורי מקלדת."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Shift billentyűvel történő vízszintes görgetés engedélyezéséhez állítsa a Shiftet Orientáció módosítása értékre a Módosító Billentyűk alatt."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Untuk mengaktifkan gulir horizontal dengan Shift, atur Shift ke Ubah orientasi di Tombol Pengubah."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per abilitare lo scorrimento orizzontale con Shift, imposta Shift su Cambia direzione in Tasti modificatori."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shift で横方向スクロールを有効にするには、修飾キーで Shift を「方向を変更する」に設定してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shift로 가로 스크롤을 활성화하려면 보조 키에서 Shift를 방향 변경으로 설정하세요."
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shift ဖြင့် အလျားလိုက် scroll ကို ဖွင့်ရန် Modifier ခလုတ်များ တွင် Shift ကို လမ်းကြောင်းပြောင်းရန် ဟု သတ်မှတ်ပါ။"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For å aktivere horisontal rulling med Shift, sett Shift til Endre orientering i Modifikasjonstaster."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Om horizontaal scrollen met Shift in te schakelen, stel je Shift in op Wijzig oriëntatie bij Toetsaanpassingen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aby włączyć przewijanie poziome z klawiszem Shift, ustaw Shift na Zmień orientację w Klawisze modyfikujące."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para ativar a deslocação horizontal com Shift, defina Shift como Alterar orientação em Teclas modificadoras."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para ativar a rolagem horizontal com Shift, defina Shift como Mudar orientação em Teclas Modificadoras."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pentru a activa derularea orizontală cu Shift, setează Shift la Modifică orientarea în Modificator de taste."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чтобы включить горизонтальную прокрутку с Shift, задайте для Shift действие Изменить направление прокрутки в разделе Клавиши модификаторы."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ak chcete povoliť vodorovné posúvanie so Shiftom, nastavte Shift na Zmeniť orientáciu v Modifikačných klávesoch."
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Да бисте омогућили хоризонтално померање са Shift, подесите Shift на Промени оријентацију у Модификаторске тастере."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "För att aktivera horisontell rullning med Shift, ställ in Shift på Ändra orientering under Modifieringstangent."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shift ile yatay kaydırmayı etkinleştirmek için Niteleme Tuşları bölümünde Shift’i Yönlendirmeyi değiştir olarak ayarlayın."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Щоб увімкнути горизонтальне прокручування з Shift, установіть для Shift дію Змінити орієнтацію в розділі Клавіші-модифікатори."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Để bật cuộn ngang bằng Shift, hãy đặt Shift thành Hoán đổi hướng cuộn trong Phím bổ trợ."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "要使用 Shift 启用横向滚动，请在修饰键中将 Shift 设置为改变方向。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "若要使用 Shift 啟用橫向捲動，請在變更鍵中將 Shift 設定為改變方向。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "若要使用 Shift 啟用橫向捲動，請在變更鍵中將 Shift 設定為改變方向。"
           }
         }
       }

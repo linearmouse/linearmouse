@@ -6,15 +6,56 @@ import SwiftUI
 extension ScrollingSettings {
     struct ScrollingModeSection: View {
         @ObservedObject private var state = ScrollingSettingsState.shared
+        @State private var isContinuousScrollTipPresented = false
 
         var body: some View {
             Section {
-                Picker("Scrolling mode", selection: $state.scrollingMode) {
-                    ForEach(ScrollingSettingsState.ScrollingMode.allCases) { scrollingMode in
-                        Text(scrollingMode.label).tag(scrollingMode)
+                HStack(spacing: 8) {
+                    Picker("Scrolling mode", selection: $state.scrollingMode) {
+                        ForEach(ScrollingSettingsState.ScrollingMode.allCases) { scrollingMode in
+                            Text(scrollingMode.label).tag(scrollingMode)
+                        }
+                    }
+                    .modifier(PickerViewModifier())
+
+                    if state.showsContinuousScrollShiftTip {
+                        Button {
+                            isContinuousScrollTipPresented.toggle()
+                        } label: {
+                            Text(verbatim: "ⓘ")
+                                .font(.system(size: 14, weight: .medium))
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundColor(.secondary)
+                        .popover(isPresented: $isContinuousScrollTipPresented, arrowEdge: .top) {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text(
+                                    "To enable horizontal scrolling with Shift, set Shift to Alter orientation in Modifier Keys."
+                                )
+                                .fixedSize(horizontal: false, vertical: true)
+
+                                HStack(alignment: .firstTextBaseline) {
+                                    HyperLink(
+                                        URL(
+                                            string: "https://github.com/linearmouse/linearmouse/issues/1180#issuecomment-4461761262"
+                                        )!
+                                    ) {
+                                        Text("Learn more")
+                                    }
+
+                                    Spacer()
+
+                                    Button("Enable") {
+                                        state.setShiftModifierToAlterOrientation()
+                                        isContinuousScrollTipPresented = false
+                                    }
+                                }
+                            }
+                            .padding()
+                            .frame(width: 280, alignment: .leading)
+                        }
                     }
                 }
-                .modifier(PickerViewModifier())
 
                 switch state.scrollingMode {
                 case .accelerated:

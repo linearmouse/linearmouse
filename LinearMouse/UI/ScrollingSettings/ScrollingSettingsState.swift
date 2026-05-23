@@ -48,6 +48,15 @@ extension ScrollingSettingsState {
             case .byPixels: "By Pixels"
             }
         }
+
+        var sendsContinuousScrollEvents: Bool {
+            switch self {
+            case .smoothed, .byPixels:
+                true
+            case .accelerated, .byLines:
+                false
+            }
+        }
     }
 
     var scrollingMode: ScrollingMode {
@@ -222,6 +231,18 @@ extension ScrollingSettingsState {
         set {
             scheme.scrolling.modifiers[direction] = newValue
         }
+    }
+
+    var showsContinuousScrollShiftTip: Bool {
+        direction == .vertical
+            && scrollingMode.sendsContinuousScrollEvents
+            && (modifiers.shift?.kind ?? .defaultAction) != .alterOrientation
+    }
+
+    func setShiftModifierToAlterOrientation() {
+        var modifiers = modifiers
+        modifiers.shift = .alterOrientation
+        self.modifiers = modifiers
     }
 
     private var currentSmoothedConfiguration: Scheme.Scrolling.Smoothed? {
