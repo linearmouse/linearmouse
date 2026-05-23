@@ -14,7 +14,18 @@ enum ProcessEnvironment {
 
     static var isRunningTest: Bool {
         #if DEBUG
-            return ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+            let environment = ProcessInfo.processInfo.environment
+            let testEnvironmentKeys = [
+                "XCTestConfigurationFilePath",
+                "XCTestSessionIdentifier",
+                "XCInjectBundle",
+                "XCInjectBundleInto"
+            ]
+
+            return testEnvironmentKeys.contains { environment[$0] != nil } ||
+                Bundle.allBundles.contains { $0.bundlePath.hasSuffix(".xctest") } ||
+                NSClassFromString("XCTestCase") != nil ||
+                NSClassFromString("XCTest.XCTestCase") != nil
         #else
             return false
         #endif
