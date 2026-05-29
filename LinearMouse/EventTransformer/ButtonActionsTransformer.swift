@@ -38,15 +38,19 @@ class ButtonActionsTransformer {
 
     private func timer(for slot: TimerSlot) -> EventThreadTimer? {
         switch slot {
-        case .standard: repeatTimer
-        case .logitech: logitechRepeatTimer
+        case .standard:
+            repeatTimer
+        case .logitech:
+            logitechRepeatTimer
         }
     }
 
     private func setTimer(_ slot: TimerSlot, _ timer: EventThreadTimer?) {
         switch slot {
-        case .standard: repeatTimer = timer
-        case .logitech: logitechRepeatTimer = timer
+        case .standard:
+            repeatTimer = timer
+        case .logitech:
+            logitechRepeatTimer = timer
         }
     }
 }
@@ -201,13 +205,13 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
         return (mapping, action)
     }
 
-    func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
+    func handleLogitechControlEvent(_ context: LogitechEventContext) -> LogitechControlEventHandlingResult {
         guard let (mapping, action) = findLogitechMapping(for: context) else {
-            return false
+            return .notHandled
         }
 
         if handleLogitechKeyPressHold(mapping: mapping, action: action, context: context) {
-            return true
+            return .handled
         }
 
         logitechRepeatTimer?.invalidate()
@@ -219,7 +223,7 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
         let shouldExecute = keyRepeatEnabled ? context.isPressed : !context.isPressed
 
         guard shouldExecute else {
-            return true
+            return .handled
         }
 
         queueLogitechActions(
@@ -230,7 +234,7 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
             keyRepeatDelay: keyRepeatDelay,
             keyRepeatInterval: keyRepeatInterval
         )
-        return true
+        return .handled
     }
 
     private func shouldHoldKeys(

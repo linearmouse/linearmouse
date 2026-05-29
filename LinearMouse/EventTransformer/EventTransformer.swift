@@ -9,8 +9,18 @@ protocol EventTransformer {
     func transform(_ event: CGEvent) -> CGEvent?
 }
 
+enum LogitechControlEventHandlingResult {
+    case notHandled
+    case handled
+    case handledAllowingSyntheticFallback
+
+    var suppressesSyntheticFallback: Bool {
+        self == .handled
+    }
+}
+
 protocol LogitechControlEventHandling {
-    func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool
+    func handleLogitechControlEvent(_ context: LogitechEventContext) -> LogitechControlEventHandlingResult
 }
 
 extension [EventTransformer]: EventTransformer {
@@ -26,10 +36,16 @@ extension [EventTransformer]: EventTransformer {
 }
 
 extension [EventTransformer]: LogitechControlEventHandling {
-    func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
-        contains { eventTransformer in
-            (eventTransformer as? LogitechControlEventHandling)?.handleLogitechControlEvent(context) == true
+    func handleLogitechControlEvent(_ context: LogitechEventContext) -> LogitechControlEventHandlingResult {
+        for eventTransformer in self {
+            let result = (eventTransformer as? LogitechControlEventHandling)?.handleLogitechControlEvent(context)
+                ?? .notHandled
+            if result != .notHandled {
+                return result
+            }
         }
+
+        return .notHandled
     }
 }
 
