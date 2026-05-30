@@ -1142,6 +1142,12 @@
           "title": "Disable pointer acceleration",
           "type": "boolean"
         },
+        "hardwareDPI": {
+          "description": "A device-specific hardware DPI value for supported devices. If omitted, no hardware DPI will be applied.",
+          "minimum": 100,
+          "title": "Hardware DPI",
+          "type": "number"
+        },
         "redirectsToScroll": {
           "default": false,
           "description": "If the value is true, pointer movements will be redirected to scroll events.",

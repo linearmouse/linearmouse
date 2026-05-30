@@ -108,6 +108,10 @@ struct PointerSettings: View {
                             .frame(width: 80)
                         }
 
+                        if state.showsPointerHardwareDPIControl {
+                            pointerHardwareDPIControl
+                        }
+
                         if #available(macOS 11.0, *) {
                             Button("Revert to system defaults") {
                                 revertPointerSpeed()
@@ -144,6 +148,10 @@ struct PointerSettings: View {
                             .frame(width: 80)
                         }
 
+                        if state.showsPointerHardwareDPIControl {
+                            pointerHardwareDPIControl
+                        }
+
                         Button("Revert to system defaults") {
                             revertPointerSpeed()
                         }
@@ -152,15 +160,93 @@ struct PointerSettings: View {
                         Text("You may also press ⌃⇧⌘Z to revert to system defaults.")
                             .controlSize(.small)
                             .foregroundColor(.secondary)
+                    } else {
+                        if state.showsPointerHardwareDPIControl {
+                            pointerHardwareDPIControl
+                        }
                     }
                 }
                 .modifier(SectionViewModifier())
             }
             .modifier(FormViewModifier())
         }
+        .onAppear {
+            state.refreshPointerHardwareDPIInfo()
+        }
     }
 
     private func revertPointerSpeed() {
         state.revertPointerSpeed()
+    }
+
+    private var pointerHardwareDPIControl: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Hardware DPI")
+                .fontWeight(.semibold)
+
+            if state.pointerHardwareDPIBusy {
+                Text(state.pointerHardwareDPIApplying ? "Applying..." : "Refreshing...")
+                    .foregroundColor(.secondary)
+            } else if let info = state.pointerHardwareDPIInfo {
+                pointerHardwareDPIRow("DPI range", formatDPIRange(info.dpiRange))
+                pointerHardwareDPISetter
+
+                if let message = state.pointerHardwareDPIStatusMessage {
+                    Text(message)
+                        .foregroundColor(.secondary)
+                }
+            } else {
+                Text(state.pointerHardwareDPIStatusMessage ?? "Reading hardware DPI from the selected device.")
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+
+    private var pointerHardwareDPISetter: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("DPI")
+                    .foregroundColor(.secondary)
+                    .frame(width: 110, alignment: .leading)
+
+                TextField(
+                    String(""),
+                    value: Binding(
+                        get: { state.pointerHardwareDPITargetDPI },
+                        set: { state.updatePointerHardwareDPITargetDPI($0) }
+                    ),
+                    formatter: state.pointerDPIFormatter
+                )
+                .labelsHidden()
+                .textFieldStyle(.roundedBorder)
+                .multilineTextAlignment(.trailing)
+                .frame(width: 80)
+
+                Button("Apply") {
+                    state.applyPointerHardwareDPITargetDPI()
+                }
+                .disabled(state.pointerHardwareDPIBusy)
+            }
+        }
+    }
+
+    private func pointerHardwareDPIRow(_ label: String, _ value: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Text(label)
+                .foregroundColor(.secondary)
+                .frame(width: 110, alignment: .leading)
+
+            Text(verbatim: value)
+                .font(.system(.body, design: .monospaced))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func formatDPIRange(_ range: ClosedRange<Int>?) -> String {
+        guard let range else {
+            return "(unavailable)"
+        }
+
+        return "\(range.lowerBound)-\(range.upperBound)"
     }
 }

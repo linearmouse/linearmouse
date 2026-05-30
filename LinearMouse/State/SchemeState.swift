@@ -159,6 +159,43 @@ extension SchemeState {
         }
     }
 
+    var deviceScheme: Scheme {
+        get {
+            guard let device else {
+                return Scheme()
+            }
+
+            if case let .at(index) = schemes.schemeIndex(
+                ofDevice: device,
+                ofApp: nil,
+                ofProcessPath: nil,
+                ofDisplay: nil
+            ) {
+                return schemes[index]
+            }
+
+            return Scheme(if: [Scheme.If(device: .init(of: device))])
+        }
+
+        set {
+            guard let device else {
+                return
+            }
+
+            switch schemes.schemeIndex(
+                ofDevice: device,
+                ofApp: nil,
+                ofProcessPath: nil,
+                ofDisplay: nil
+            ) {
+            case let .at(index):
+                schemes[index] = newValue
+            case let .insertAt(index):
+                schemes.insert(newValue, at: index)
+            }
+        }
+    }
+
     private func extractAppComponents(from target: AppTarget?) -> (app: String?, processPath: String?) {
         switch target {
         case .none:

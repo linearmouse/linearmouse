@@ -101,6 +101,7 @@ class DeviceManager: ObservableObject {
                 }
                 DispatchQueue.main.async {
                     self.updatePointerSpeed()
+                    self.updateHardwareDPI()
                 }
             }
             .store(in: &subscriptions)
@@ -149,6 +150,7 @@ class DeviceManager: ObservableObject {
         )
 
         updatePointerSpeed(for: device)
+        updateHardwareDPI(for: device)
 
         if shouldMonitorReceiver(device) {
             receiverMonitor.startMonitoring(device: device)
@@ -316,6 +318,36 @@ class DeviceManager: ObservableObject {
         } else {
             device.restorePointerAcceleration()
         }
+    }
+
+    func updateHardwareDPI() {
+        guard state == .running else {
+            return
+        }
+
+        for device in devices {
+            updateHardwareDPI(for: device)
+        }
+    }
+
+    func updateHardwareDPI(for device: Device) {
+        guard state == .running else {
+            return
+        }
+
+        let schemes = ConfigurationState.shared.configuration.schemes
+        guard case let .at(index) = schemes.schemeIndex(
+            ofDevice: device,
+            ofApp: nil,
+            ofProcessPath: nil,
+            ofDisplay: nil
+        ),
+            let hardwareDPI = schemes[index].pointer.hardwareDPI
+        else {
+            return
+        }
+
+        device.applyConfiguredHardwareDPI(hardwareDPI)
     }
 
     func restorePointerSpeedToInitialValue() {
