@@ -837,28 +837,28 @@ private struct ActivationProbe {
 }
 
 extension AutoScrollTransformer: LogitechControlEventHandling {
-    func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
+    func handleLogitechControlEvent(_ context: LogitechEventContext) -> LogitechControlEventHandlingResult {
         guard let triggerLogitechControl = trigger.button?.logitechControl,
               context.matches(triggerLogitechControl) else {
-            return false
+            return .notHandled
         }
 
         if context.isPressed {
             // If already active in toggle mode, deactivate on re-press
             if case let .active(_, _, session) = state, session == .toggle {
                 guard hasToggleMode else {
-                    return true
+                    return .handled
                 }
                 deactivate()
-                return true
+                return .handled
             }
 
             guard trigger.matches(modifierFlags: context.modifierFlags) else {
-                return true
+                return .handled
             }
 
             activate(at: context.mouseLocation, session: activationSession)
-            return true
+            return .handled
         }
 
         switch state {
@@ -879,7 +879,7 @@ extension AutoScrollTransformer: LogitechControlEventHandling {
             break
         }
 
-        return true
+        return .handled
     }
 }
 

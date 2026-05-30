@@ -2133,11 +2133,11 @@ final class LogitechReprogrammableControlsMonitor {
                             modifierFlags: modifierFlags
                         )
 
-                        let handledInternally = EventThread.shared.performAndWait {
+                        let handlingResult = EventThread.shared.performAndWait {
                             EventTransformerManager.shared.handleLogitechControlEvent(logitechContext)
-                        } ?? false
+                        } ?? .notHandled
 
-                        guard !handledInternally else {
+                        guard !handlingResult.suppressesSyntheticFallback else {
                             continue
                         }
 

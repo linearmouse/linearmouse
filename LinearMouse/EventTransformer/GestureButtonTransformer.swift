@@ -285,37 +285,41 @@ extension GestureButtonTransformer: EventTransformer {
 }
 
 extension GestureButtonTransformer: LogitechControlEventHandling {
-    func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
+    func handleLogitechControlEvent(_ context: LogitechEventContext) -> LogitechControlEventHandlingResult {
         guard let triggerLogitechControl = trigger.button?.logitechControl,
               context.matches(triggerLogitechControl) else {
-            return false
+            return .notHandled
         }
 
-        if case let .cooldown(until, _) = state {
+        if case let .cooldown(until, released) = state {
             if DispatchTime.now().uptimeNanoseconds < until {
-                return true
+                if context.isPressed || released {
+                    return .handled
+                }
+
+                state = .cooldown(until: until, released: true)
+                return .handledAllowingSyntheticFallback
             }
             state = .idle
         }
 
         if context.isPressed {
             guard trigger.matches(modifierFlags: context.modifierFlags) else {
-                return true
+                return .notHandled
             }
             state = .tracking(startTime: DispatchTime.now().uptimeNanoseconds, deltaX: 0, deltaY: 0)
             os_log("Started tracking gesture (Logitech control)", log: Self.log, type: .info)
-        } else {
-            switch state {
-            case .tracking:
-                state = .idle
-            case .cooldown:
-                break
-            default:
-                break
-            }
+            return .handledAllowingSyntheticFallback
         }
 
-        return true
+        switch state {
+        case .tracking:
+            state = .idle
+        default:
+            break
+        }
+
+        return .notHandled
     }
 }
 

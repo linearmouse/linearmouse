@@ -143,24 +143,26 @@ class EventTransformerManager {
         get(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: false)
     }
 
-    func handleLogitechControlEvent(_ context: LogitechEventContext) -> Bool {
+    func handleLogitechControlEvent(_ context: LogitechEventContext) -> LogitechControlEventHandlingResult {
         if EventThread.shared.isCurrent {
             return handleLogitechControlEventOnCurrentThread(context)
         }
 
-        if let handled = EventThread.shared.performAndWait({
+        if let result = EventThread.shared.performAndWait({
             self.handleLogitechControlEventOnCurrentThread(context)
         }) {
-            return handled
+            return result
         }
 
         return handleLogitechControlEventOnCurrentThread(context)
     }
 
-    private func handleLogitechControlEventOnCurrentThread(_ context: LogitechEventContext) -> Bool {
+    private func handleLogitechControlEventOnCurrentThread(
+        _ context: LogitechEventContext
+    ) -> LogitechControlEventHandlingResult {
         let pid = ConfigurationState.shared.configuration.usesProcessConditions ? context.pid : nil
         let transformer = get(withDevice: context.device, withPid: pid, withDisplay: context.display)
-        return (transformer as? LogitechControlEventHandling)?.handleLogitechControlEvent(context) ?? false
+        return (transformer as? LogitechControlEventHandling)?.handleLogitechControlEvent(context) ?? .notHandled
     }
 
     private func get(

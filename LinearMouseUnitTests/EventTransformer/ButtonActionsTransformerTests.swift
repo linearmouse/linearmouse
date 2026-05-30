@@ -164,8 +164,14 @@ final class ButtonActionsTransformerTests: XCTestCase {
             keySimulator: simulator
         )
 
-        XCTAssertTrue(transformer.handleLogitechControlEvent(logitechContext(0x0001, pressed: true)))
-        XCTAssertTrue(transformer.handleLogitechControlEvent(logitechContext(0x0001, pressed: false)))
+        XCTAssertEqual(
+            transformer.handleLogitechControlEvent(logitechContext(0x0001, pressed: true)),
+            .handled
+        )
+        XCTAssertEqual(
+            transformer.handleLogitechControlEvent(logitechContext(0x0001, pressed: false)),
+            .handled
+        )
 
         XCTAssertEqual(simulator.events, [.down([.a]), .up([.a]), .reset])
     }
