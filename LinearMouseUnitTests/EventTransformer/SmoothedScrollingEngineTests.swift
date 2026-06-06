@@ -121,7 +121,7 @@ final class SmoothedScrollingEngineTests: XCTestCase {
         XCTAssertLessThan(abs(reengagedEmission.deltaY), abs(baseline.deltaY) * 2.6)
     }
 
-    func testMomentumReengagementInOppositeDirectionFirstCancelsCarryThenScrolls() throws {
+    func testWeakMomentumReengagementInOppositeDirectionFirstCancelsCarryThenScrolls() throws {
         let engine = SmoothedScrollingEngine(smoothed: .init(
             vertical: Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
         ))
@@ -145,7 +145,7 @@ final class SmoothedScrollingEngineTests: XCTestCase {
         XCTAssertGreaterThan(baseline.deltaY, 0)
 
         let reengagementTimestamp = 25.0 / 120.0
-        engine.feed(deltaX: 0, deltaY: -36, timestamp: reengagementTimestamp)
+        engine.feed(deltaX: 0, deltaY: -1, timestamp: reengagementTimestamp)
         let cancellationEmission = try XCTUnwrap(engine.advance(to: reengagementTimestamp + 1.0 / 120.0))
 
         XCTAssertEqual(cancellationEmission.phase, .momentumEnded)
@@ -156,6 +156,46 @@ final class SmoothedScrollingEngineTests: XCTestCase {
 
         XCTAssertEqual(reengagedEmission.phase, .touchBegan)
         XCTAssertLessThan(reengagedEmission.deltaY, 0)
+    }
+
+    func testMomentumTailReverseInputCanStartImmediatelyWhenItOvercomesRemainingMomentum() throws {
+        let configuration = Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
+        let engine = SmoothedScrollingEngine(smoothed: .init(vertical: configuration))
+        let freshEngine = SmoothedScrollingEngine(smoothed: .init(vertical: configuration))
+
+        var tailEmission: SmoothedScrollingEngine.Emission?
+        var tailTimestamp: TimeInterval?
+
+        for step in 0 ..< 6 {
+            let timestamp = Double(step) / 120
+            engine.feed(deltaX: 0, deltaY: 40, timestamp: timestamp)
+            _ = engine.advance(to: timestamp + 1.0 / 120)
+        }
+
+        for step in 6 ..< 240 {
+            let timestamp = Double(step + 1) / 120
+            if let emission = engine.advance(to: timestamp),
+               emission.phase == .momentumChanged,
+               abs(emission.deltaY) < 0.2 {
+                tailEmission = emission
+                tailTimestamp = timestamp
+                break
+            }
+        }
+
+        let baselineTail = try XCTUnwrap(tailEmission)
+        let reengagementTimestamp = try XCTUnwrap(tailTimestamp)
+        XCTAssertGreaterThan(baselineTail.deltaY, 0)
+
+        freshEngine.feed(deltaX: 0, deltaY: -36, timestamp: 0)
+        let freshReversePickup = try XCTUnwrap(freshEngine.advance(to: 1.0 / 120.0))
+
+        engine.feed(deltaX: 0, deltaY: -36, timestamp: reengagementTimestamp)
+        let reengagedEmission = try XCTUnwrap(engine.advance(to: reengagementTimestamp + 1.0 / 120.0))
+
+        XCTAssertEqual(reengagedEmission.phase, .touchBegan)
+        XCTAssertLessThan(reengagedEmission.deltaY, 0)
+        XCTAssertLessThan(abs(reengagedEmission.deltaY), abs(freshReversePickup.deltaY))
     }
 
     func testMomentumTailReengagementRecoversTowardFreshPickup() throws {
