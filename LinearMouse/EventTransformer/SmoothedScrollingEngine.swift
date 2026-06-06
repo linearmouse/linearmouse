@@ -126,6 +126,19 @@ final class SmoothedScrollingEngine {
             return currentVelocity + (inputVelocity - currentVelocity) * brakingBlend
         }
 
+        func residualInputAfterCancellingMomentum(input: Double, currentVelocity: Double) -> Double {
+            let inputVelocity = desiredVelocity(for: input)
+            let inputMagnitude = abs(inputVelocity)
+            let currentMagnitude = abs(currentVelocity)
+
+            guard inputMagnitude > currentMagnitude else {
+                return 0
+            }
+
+            let residualFraction = ((inputMagnitude - currentMagnitude) / inputMagnitude).clamped(to: 0 ... 1)
+            return input * residualFraction
+        }
+
         func blendFactor(for dt: TimeInterval) -> Double {
             let scaled = presetProfile.response * 0.75 + response * 0.8
             return (scaled * dt * 60).clamped(to: 0.0 ... 1.0)
@@ -277,17 +290,41 @@ final class SmoothedScrollingEngine {
     }
 
     private func cancelOpposingMomentum(deltaX: inout Double, deltaY: inout Double) {
-        if opposesMomentum(input: deltaX, velocity: velocityX) {
-            desiredVelocityX = 0
-            velocityX = 0
-            deltaX = 0
+        cancelOpposingMomentum(
+            delta: &deltaX,
+            behavior: horizontalBehavior,
+            desiredVelocity: &desiredVelocityX,
+            velocity: &velocityX
+        )
+        cancelOpposingMomentum(
+            delta: &deltaY,
+            behavior: verticalBehavior,
+            desiredVelocity: &desiredVelocityY,
+            velocity: &velocityY
+        )
+    }
+
+    private func cancelOpposingMomentum(
+        delta: inout Double,
+        behavior: AxisBehavior,
+        desiredVelocity: inout Double,
+        velocity: inout Double
+    ) {
+        guard opposesMomentum(input: delta, velocity: velocity) else {
+            return
         }
 
-        if opposesMomentum(input: deltaY, velocity: velocityY) {
-            desiredVelocityY = 0
-            velocityY = 0
-            deltaY = 0
+        let residualInput: Double
+        switch behavior {
+        case .passthrough:
+            residualInput = delta
+        case let .smoothed(tuning):
+            residualInput = tuning.residualInputAfterCancellingMomentum(input: delta, currentVelocity: velocity)
         }
+
+        desiredVelocity = 0
+        velocity = 0
+        delta = residualInput
     }
 
     private func opposesMomentum(input: Double, velocity: Double) -> Bool {
