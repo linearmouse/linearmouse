@@ -121,6 +121,43 @@ final class SmoothedScrollingEngineTests: XCTestCase {
         XCTAssertLessThan(abs(reengagedEmission.deltaY), abs(baseline.deltaY) * 2.6)
     }
 
+    func testMomentumReengagementInOppositeDirectionFirstCancelsCarryThenScrolls() throws {
+        let engine = SmoothedScrollingEngine(smoothed: .init(
+            vertical: Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
+        ))
+
+        var latestMomentumEmission: SmoothedScrollingEngine.Emission?
+
+        for step in 0 ..< 6 {
+            let timestamp = Double(step) / 120
+            engine.feed(deltaX: 0, deltaY: 40, timestamp: timestamp)
+            _ = engine.advance(to: timestamp + 1.0 / 120)
+        }
+
+        for step in 6 ..< 24 {
+            let timestamp = Double(step + 1) / 120
+            if let emission = engine.advance(to: timestamp), emission.phase == .momentumChanged {
+                latestMomentumEmission = emission
+            }
+        }
+
+        let baseline = try XCTUnwrap(latestMomentumEmission)
+        XCTAssertGreaterThan(baseline.deltaY, 0)
+
+        let reengagementTimestamp = 25.0 / 120.0
+        engine.feed(deltaX: 0, deltaY: -36, timestamp: reengagementTimestamp)
+        let cancellationEmission = try XCTUnwrap(engine.advance(to: reengagementTimestamp + 1.0 / 120.0))
+
+        XCTAssertEqual(cancellationEmission.phase, .momentumEnded)
+        XCTAssertEqual(cancellationEmission.deltaY, 0, accuracy: 0.001)
+
+        engine.feed(deltaX: 0, deltaY: -36, timestamp: reengagementTimestamp + 2.0 / 120.0)
+        let reengagedEmission = try XCTUnwrap(engine.advance(to: reengagementTimestamp + 3.0 / 120.0))
+
+        XCTAssertEqual(reengagedEmission.phase, .touchBegan)
+        XCTAssertLessThan(reengagedEmission.deltaY, 0)
+    }
+
     func testMomentumTailReengagementRecoversTowardFreshPickup() throws {
         let configuration = Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
         let engine = SmoothedScrollingEngine(smoothed: .init(vertical: configuration))
