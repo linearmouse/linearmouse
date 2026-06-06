@@ -2,6 +2,7 @@
 // Copyright (c) 2021-2026 LinearMouse
 
 import Foundation
+import GestureKit
 import os.log
 
 final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
@@ -17,6 +18,7 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
     private var engine: SmoothedScrollingEngine
     private var timer: EventThreadTimer?
     private var lastFlags: CGEventFlags = []
+    private var syntheticGestureScrollSeriesActive = false
 
     init(
         smoothed: Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Smoothed>,
@@ -96,6 +98,7 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
     }
 
     func deactivate() {
+        endSyntheticGestureScrollSeriesIfNeeded(phase: .cancelled)
         stopTimer()
         engine = SmoothedScrollingEngine(smoothed: smoothed)
         lastFlags = []
@@ -212,16 +215,19 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
         view.continuous = true
         delivery.setHorizontal(emission.deltaX, on: view)
         delivery.setVertical(emission.deltaY, on: view)
-        delivery.apply(
-            phases: delivery.phasesFor(emission.phase, appliesPhases: allowsBouncingForConfiguredAxes()),
-            to: view
-        )
+        let phases = delivery.phasesFor(emission.phase, appliesPhases: allowsBouncingForConfiguredAxes())
+        delivery.apply(phases: phases, to: view)
         guard view.scrollPhase != nil || view.momentumPhase != .none || emission.deltaX != 0 || emission.deltaY != 0
         else {
             return
         }
         event.isLinearMouseSyntheticEvent = true
         event.flags = lastFlags
+        postGestureScrollCompanionsIfNeeded(
+            scrollPhase: phases.scrollPhase,
+            deltaX: emission.deltaX,
+            deltaY: emission.deltaY
+        )
         eventSink(event)
 
         os_log(
@@ -235,6 +241,69 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
         )
     }
 
+    private func postGestureScrollCompanionsIfNeeded(
+        scrollPhase: CGScrollPhase?,
+        deltaX: Double,
+        deltaY: Double
+    ) {
+        guard let scrollPhase, let gesturePhase = CGSGesturePhase(scrollPhase: scrollPhase) else {
+            return
+        }
+
+        if scrollPhase == .began, !syntheticGestureScrollSeriesActive {
+            GestureEvent(
+                scrollSource: nil,
+                phase: .mayBegin,
+                deltaX: 0,
+                deltaY: 0,
+                flags: lastFlags
+            )?.send(to: eventSink)
+            GestureEvent(
+                scrollSeriesSource: nil,
+                started: true,
+                flags: lastFlags
+            )?.send(to: eventSink)
+            syntheticGestureScrollSeriesActive = true
+        }
+
+        GestureEvent(
+            scrollSource: nil,
+            phase: gesturePhase,
+            deltaX: deltaX,
+            deltaY: deltaY,
+            flags: lastFlags
+        )?.send(to: eventSink)
+
+        if scrollPhase == .ended || scrollPhase == .cancelled {
+            GestureEvent(
+                scrollSeriesSource: nil,
+                started: false,
+                flags: lastFlags
+            )?.send(to: eventSink)
+            syntheticGestureScrollSeriesActive = false
+        }
+    }
+
+    private func endSyntheticGestureScrollSeriesIfNeeded(phase: CGSGesturePhase) {
+        guard syntheticGestureScrollSeriesActive else {
+            return
+        }
+
+        GestureEvent(
+            scrollSource: nil,
+            phase: phase,
+            deltaX: 0,
+            deltaY: 0,
+            flags: lastFlags
+        )?.send(to: eventSink)
+        GestureEvent(
+            scrollSeriesSource: nil,
+            started: false,
+            flags: lastFlags
+        )?.send(to: eventSink)
+        syntheticGestureScrollSeriesActive = false
+    }
+
     private func allowsBouncingForConfiguredAxes(
         interceptsX: Bool = true,
         interceptsY: Bool = true
@@ -246,6 +315,15 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
             return false
         }
         return true
+    }
+}
+
+private extension CGSGesturePhase {
+    init?(scrollPhase: CGScrollPhase) {
+        guard let rawValue = UInt8(exactly: scrollPhase.rawValue) else {
+            return nil
+        }
+        self.init(rawValue: rawValue)
     }
 }
 

@@ -1,8 +1,13 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
+@testable import GestureKit
 @testable import LinearMouse
 import XCTest
+
+private let gestureHIDTypeField = CGEventField(rawValue: 110)!
+private let gestureStartEndSeriesTypeField = CGEventField(rawValue: 117)!
+private let gesturePhaseField = CGEventField(rawValue: 132)!
 
 final class SmoothedScrollingTransformerTests: XCTestCase {
     func testModifierAlterOrientationAppliesBeforeDiscreteSmoothedScrolling() throws {
@@ -91,8 +96,8 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         baselineTransformer.tick()
         scaledTransformer.tick()
 
-        let baselineView = try ScrollWheelEventView(XCTUnwrap(baselineEmittedEvents.first))
-        let scaledView = try ScrollWheelEventView(XCTUnwrap(scaledEmittedEvents.first))
+        let baselineView = try ScrollWheelEventView(XCTUnwrap(baselineEmittedEvents.firstScrollWheelEvent))
+        let scaledView = try ScrollWheelEventView(XCTUnwrap(scaledEmittedEvents.firstScrollWheelEvent))
         XCTAssertGreaterThan(abs(scaledView.deltaYPt), abs(baselineView.deltaYPt))
     }
 
@@ -132,7 +137,7 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         for _ in 0 ..< 30 {
             now += 1.0 / 120.0
             smoothedTransformer.tick()
-            if let view = emittedEvents.last.map(ScrollWheelEventView.init), abs(view.deltaYPt) > 0.01 {
+            if let view = emittedEvents.lastScrollWheelEvent.map(ScrollWheelEventView.init), abs(view.deltaYPt) > 0.01 {
                 sawVerticalMomentum = true
             }
         }
@@ -152,7 +157,7 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         now += 1.0 / 120.0
         smoothedTransformer.tick()
 
-        let switchedView = try ScrollWheelEventView(XCTUnwrap(emittedEvents.last))
+        let switchedView = try ScrollWheelEventView(XCTUnwrap(emittedEvents.lastScrollWheelEvent))
         XCTAssertGreaterThan(abs(switchedView.deltaXPt), 0.01)
         XCTAssertEqual(switchedView.deltaYPt, 0, accuracy: 0.001)
     }
@@ -193,7 +198,7 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         now = 1.0 / 120.0
         transformer.tick()
 
-        let emittedEvent = try XCTUnwrap(emittedEvents.first)
+        let emittedEvent = try XCTUnwrap(emittedEvents.firstScrollWheelEvent)
         let emittedView = ScrollWheelEventView(emittedEvent)
         XCTAssertTrue(emittedEvent.isLinearMouseSyntheticEvent)
         XCTAssertEqual(emittedView.deltaX, 0)
@@ -201,6 +206,26 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         XCTAssertEqual(emittedView.momentumPhase, .none)
         XCTAssertGreaterThan(abs(emittedView.deltaYPt), 0)
         XCTAssertEqual(emittedEvent.flags, [.maskAlternate])
+
+        let gestureEventType = try XCTUnwrap(CGEventType(nsEventType: .gesture))
+        let gestureEvents = emittedEvents.filter { $0.type == gestureEventType }
+        XCTAssertEqual(gestureEvents.count, 3)
+        XCTAssertEqual(gestureEvents[0].getIntegerValueField(gestureHIDTypeField), 6)
+        XCTAssertEqual(
+            gestureEvents[0].getIntegerValueField(gesturePhaseField),
+            Int64(CGSGesturePhase.mayBegin.rawValue)
+        )
+        XCTAssertEqual(gestureEvents[1].getIntegerValueField(gestureHIDTypeField), 61)
+        XCTAssertEqual(
+            gestureEvents[1].getIntegerValueField(gestureStartEndSeriesTypeField),
+            6
+        )
+        XCTAssertEqual(gestureEvents[2].getIntegerValueField(gestureHIDTypeField), 6)
+        XCTAssertEqual(
+            gestureEvents[2].getIntegerValueField(gesturePhaseField),
+            Int64(CGSGesturePhase.began.rawValue)
+        )
+        XCTAssertTrue(gestureEvents[2].flags.contains(.maskAlternate))
     }
 
     func testDiscreteWheelInputUsesLineDeltaForStartupEvenWhenPointDeltaExists() throws {
@@ -232,7 +257,7 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         now = 1.0 / 120.0
         transformer.tick()
 
-        let emittedEvent = try XCTUnwrap(emittedEvents.first)
+        let emittedEvent = try XCTUnwrap(emittedEvents.firstScrollWheelEvent)
         let emittedView = ScrollWheelEventView(emittedEvent)
         XCTAssertGreaterThan(abs(emittedView.deltaYPt), 3)
         XCTAssertEqual(emittedView.scrollPhase, .began)
@@ -295,12 +320,14 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         now = 1.0 / 120.0
         transformer.tick()
 
-        let emittedEvent = try XCTUnwrap(emittedEvents.first)
+        let emittedEvent = try XCTUnwrap(emittedEvents.firstScrollWheelEvent)
         let emittedView = ScrollWheelEventView(emittedEvent)
         XCTAssertTrue(emittedEvent.isLinearMouseSyntheticEvent)
         XCTAssertGreaterThan(abs(emittedView.deltaYPt), 0)
-        XCTAssertEqual(emittedView.scrollPhase, nil)
+        XCTAssertNil(emittedView.scrollPhase)
         XCTAssertEqual(emittedView.momentumPhase, .none)
+        let gestureEventType = try XCTUnwrap(CGEventType(nsEventType: .gesture))
+        XCTAssertFalse(emittedEvents.contains { $0.type == gestureEventType })
     }
 
     func testContinuousTrackpadInputCanSuppressBouncingPhases() throws {
@@ -329,7 +356,7 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         let transformedView = ScrollWheelEventView(transformedEvent)
         XCTAssertGreaterThan(transformedView.deltaYFixedPt, 0)
         XCTAssertLessThan(transformedView.deltaYFixedPt, 9)
-        XCTAssertEqual(transformedView.scrollPhase, nil)
+        XCTAssertNil(transformedView.scrollPhase)
         XCTAssertEqual(transformedView.momentumPhase, .none)
     }
 
@@ -408,6 +435,16 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         now = 1.0 / 120.0
         transformer.tick()
 
-        return try ScrollWheelEventView(XCTUnwrap(emittedEvents.first))
+        return try ScrollWheelEventView(XCTUnwrap(emittedEvents.firstScrollWheelEvent))
+    }
+}
+
+private extension [CGEvent] {
+    var firstScrollWheelEvent: CGEvent? {
+        first { $0.type == .scrollWheel }
+    }
+
+    var lastScrollWheelEvent: CGEvent? {
+        last { $0.type == .scrollWheel }
     }
 }
