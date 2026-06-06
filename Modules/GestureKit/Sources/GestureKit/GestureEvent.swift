@@ -16,4 +16,10 @@ public class GestureEvent {
             cgEvent.post(tap: tap)
         }
     }
+
+    public func send(to sink: (CGEvent) -> Void) {
+        for cgEvent in cgEvents {
+            sink(cgEvent)
+        }
+    }
 }

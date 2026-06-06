@@ -9,7 +9,11 @@ extension CGEventField {
     static let gestureHIDType = Self(rawValue: 110)!
     static let gestureZoomValue = Self(rawValue: 113)!
     static let gestureSwipeValue = Self(rawValue: 115)!
+    static let gestureStartEndSeriesType = Self(rawValue: 117)!
+    static let gestureScrollX = Self(rawValue: 118)!
+    static let gestureScrollY = Self(rawValue: 119)!
     static let gesturePhase = Self(rawValue: 132)!
+    static let scrollGestureFlagBits = Self(rawValue: 135)!
 }
 
 /// - SeeAlso:
@@ -36,6 +40,8 @@ enum IOHIDEventType: UInt32 {
     case navigationSwipe = 16
     case zoomToggle = 22
     case force = 32
+    case gestureStarted = 61
+    case gestureEnded = 62
 }
 
 /// - SeeAlso:
