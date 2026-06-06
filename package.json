@@ -6,7 +6,7 @@
     "translate:xcstrings": "node Scripts/translate-xcstrings.mjs"
   },
   "dependencies": {
-    "@xmldom/xmldom": "^0.8.10",
+    "@xmldom/xmldom": "^0.8.13",
     "openai": "^4.104.0"
   },
   "overrides": {
