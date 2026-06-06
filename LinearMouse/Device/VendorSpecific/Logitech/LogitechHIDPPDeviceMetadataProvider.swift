@@ -1667,7 +1667,8 @@ final class LogitechReprogrammableControlsMonitor {
 
     private enum Constants {
         static let notificationTimeout: TimeInterval = 0.25
-        static let initializationRetryTimeout: TimeInterval = 1
+        static let initializationRetryInitialTimeout: TimeInterval = 2
+        static let initializationRetryMaxTimeout: TimeInterval = 60
     }
 
     private struct ControlInfo {
@@ -1710,12 +1711,30 @@ final class LogitechReprogrammableControlsMonitor {
     }
 
     static func supports(device: Device) -> Bool {
-        supports(vendorID: device.vendorID, transport: device.pointerDevice.transport)
+        supports(
+            vendorID: device.vendorID,
+            productID: device.productID,
+            transport: device.pointerDevice.transport
+        )
     }
 
-    static func supports(vendorID: Int?, transport: String?) -> Bool {
-        vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID
-            && [PointerDeviceTransportName.usb, PointerDeviceTransportName.bluetoothLowEnergy].contains(transport)
+    static func supports(vendorID: Int?, productID: Int?, transport: String?) -> Bool {
+        guard vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID else {
+            return false
+        }
+
+        switch transport {
+        case PointerDeviceTransportName.bluetoothLowEnergy:
+            return true
+        case PointerDeviceTransportName.usb:
+            return LogitechHIDPPDeviceMetadataProvider.supportsReceiverMonitoring(
+                vendorID: vendorID,
+                productID: productID,
+                transport: transport
+            )
+        default:
+            return false
+        }
     }
 
     static func isNeeded(configuration: Configuration = ConfigurationState.shared.configuration) -> Bool {
@@ -1809,6 +1828,8 @@ final class LogitechReprogrammableControlsMonitor {
             )
         }
 
+        var initializationRetryTimeout = Constants.initializationRetryInitialTimeout
+
         targetLoop: while shouldContinueRunning() {
             guard let monitorTarget = resolveMonitorTarget() else {
                 finishVirtualButtonRecordingPreparationIfNeeded(
@@ -1817,19 +1838,25 @@ final class LogitechReprogrammableControlsMonitor {
                     }
                 )
                 os_log(
-                    "Retry Logitech controls monitor initialization because device is not ready: device=%{public}@",
+                    "Retry Logitech controls monitor initialization because device is not ready: retryTimeout=%{public}.1f device=%{public}@",
                     log: Self.log,
                     type: .info,
+                    initializationRetryTimeout,
                     String(describing: device)
                 )
 
-                let waitResult = state.waitForReconfigurationOrStop(timeout: Constants.initializationRetryTimeout)
+                let waitResult = state.waitForReconfigurationOrRetryTimeout(timeout: initializationRetryTimeout)
                 guard waitResult.shouldContinue else {
                     return
                 }
 
+                initializationRetryTimeout = waitResult.timedOut
+                    ? min(initializationRetryTimeout * 2, Constants.initializationRetryMaxTimeout)
+                    : Constants.initializationRetryInitialTimeout
                 continue
             }
+
+            initializationRetryTimeout = Constants.initializationRetryInitialTimeout
 
             let locationID = device.pointerDevice.locationID ?? 0
             let slot = monitorTarget.slot
@@ -3090,16 +3117,30 @@ private final class LogitechReprogrammableControlsMonitorState {
     }
 
     func waitForReconfigurationOrStop(timeout: TimeInterval) -> (shouldContinue: Bool, forced: Bool) {
+        let result = waitForReconfigurationOrStop(timeout: timeout, returnsOnTimeout: false)
+        return (result.shouldContinue, result.forced)
+    }
+
+    func waitForReconfigurationOrRetryTimeout(timeout: TimeInterval) -> (shouldContinue: Bool, timedOut: Bool) {
+        let result = waitForReconfigurationOrStop(timeout: timeout, returnsOnTimeout: true)
+        return (result.shouldContinue, result.timedOut)
+    }
+
+    private func waitForReconfigurationOrStop(timeout: TimeInterval, returnsOnTimeout: Bool)
+        -> (shouldContinue: Bool, forced: Bool, timedOut: Bool) {
         while shouldContinueRunning {
             let request = consumeReconfigurationRequest()
             if request.needed {
-                return (true, request.forced)
+                return (true, request.forced, false)
             }
 
-            _ = reconfigurationSemaphore.wait(timeout: .now() + timeout)
+            let waitResult = reconfigurationSemaphore.wait(timeout: .now() + timeout)
+            if returnsOnTimeout, waitResult == .timedOut {
+                return (true, false, true)
+            }
         }
 
-        return (false, false)
+        return (false, false, false)
     }
 
     func setActiveNotificationEndpoint(_ endpoint: HIDPPNotificationHandling?) {

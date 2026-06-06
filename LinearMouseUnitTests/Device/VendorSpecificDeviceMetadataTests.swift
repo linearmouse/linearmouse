@@ -168,22 +168,39 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertEqual(device.outputReportRequestCount, 0)
     }
 
-    func testLogitechControlsMonitorSupportsUsbAndBluetoothLowEnergyLogitechDevices() {
+    func testLogitechControlsMonitorUsesReceiverWhitelistForUsbDevices() {
         XCTAssertTrue(
             LogitechReprogrammableControlsMonitor.supports(
                 vendorID: 0x046D,
+                productID: 0xC52B,
+                transport: PointerDeviceTransportName.usb
+            )
+        )
+        XCTAssertFalse(
+            LogitechReprogrammableControlsMonitor.supports(
+                vendorID: 0x046D,
+                productID: 0xC539,
+                transport: PointerDeviceTransportName.usb
+            )
+        )
+        XCTAssertFalse(
+            LogitechReprogrammableControlsMonitor.supports(
+                vendorID: 0x046D,
+                productID: 0xB015,
                 transport: PointerDeviceTransportName.usb
             )
         )
         XCTAssertTrue(
             LogitechReprogrammableControlsMonitor.supports(
                 vendorID: 0x046D,
+                productID: 0xB015,
                 transport: PointerDeviceTransportName.bluetoothLowEnergy
             )
         )
         XCTAssertFalse(
             LogitechReprogrammableControlsMonitor.supports(
                 vendorID: 0x3554,
+                productID: 0xC52B,
                 transport: PointerDeviceTransportName.usb
             )
         )
