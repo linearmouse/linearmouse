@@ -2,6 +2,7 @@
 // Copyright (c) 2021-2026 LinearMouse
 
 import CoreGraphics
+import Foundation
 import KeyKit
 @testable import LinearMouse
 import XCTest
@@ -54,6 +55,39 @@ private func logitechContext(
 }
 
 final class ButtonActionsTransformerTests: XCTestCase {
+    func testSharedRuntimeStateLetsScrollMappingsCancelButtonRepeatTimer() throws {
+        let runtimeState = ButtonActionsTransformer.RuntimeState()
+        let scrollTransformer = ButtonActionsTransformer(
+            mappings: [
+                .init(scroll: .up, action: .arg0(.none))
+            ],
+            runtimeState: runtimeState
+        )
+        let buttonTransformer = ButtonActionsTransformer(
+            mappings: [
+                .init(button: .mouse(4), repeat: true, action: .arg0(.none))
+            ],
+            runtimeState: runtimeState
+        )
+        buttonTransformer.repeatTimer = EventThreadTimer(
+            timer: Timer(timeInterval: 60, repeats: false) { _ in },
+            eventThread: .shared
+        )
+
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: 1,
+            wheel2: 0,
+            wheel3: 0
+        ))
+
+        XCTAssertNotNil(buttonTransformer.repeatTimer)
+        XCTAssertNil(scrollTransformer.transform(event))
+        XCTAssertNil(buttonTransformer.repeatTimer)
+    }
+
     func testLogitechControlEventMatchesGenericCommandMappingWithRightCommandFlag() {
         let transformer = ButtonActionsTransformer(mappings: [
             .init(

@@ -8,14 +8,16 @@ import SwiftUI
 class SettingsState: ObservableObject {
     static let shared = SettingsState()
 
-    struct RecordedVirtualButtonEvent {
-        let button: Scheme.Buttons.Mapping.Button
+    struct RecordedButtonMappingEvent {
+        let recordingSessionID: UUID
+        let button: Scheme.Buttons.Mapping.Button?
+        let scroll: Scheme.Buttons.Mapping.ScrollDirection?
         let modifierFlags: CGEventFlags
     }
 
-    struct VirtualButtonRecordingPreparation: Equatable {
-        let sessionID: UUID
-        var pendingDeviceIDs: Set<Int32>
+    struct ButtonMappingRecordingSession: Equatable {
+        let id: UUID
+        var pendingVirtualButtonDeviceIDs: Set<Int32>
     }
 
     enum Navigation: String, CaseIterable, Hashable {
@@ -50,48 +52,65 @@ class SettingsState: ObservableObject {
 
     @Published var navigation: Navigation? = .pointer
 
+    @Published private(set) var buttonMappingRecordingSession: ButtonMappingRecordingSession?
+
+    /// Set by event sources when a button mapping input is recorded.
+    @Published var recordedButtonMappingEvent: RecordedButtonMappingEvent?
+
+    /// `@Published` emits before storing the new value, so session guards use this reentrancy-safe storage.
+    private var currentButtonMappingRecordingSession: ButtonMappingRecordingSession?
+
     /// When `recording` is true, `ButtonActionsTransformer` should be temporarily disabled.
-    @Published var recording = false
+    var recording: Bool {
+        currentButtonMappingRecordingSession != nil
+    }
 
-    /// A short-lived preparation phase used while Logitech monitors temporarily divert all controls
-    /// for recording. Standard CGEvents can still be recorded immediately.
-    @Published private(set) var virtualButtonRecordingPreparation: VirtualButtonRecordingPreparation?
-
-    /// Set by protocol-backed button monitors when a virtual button is pressed during recording.
-    /// The recorder uses the event-time modifier snapshot to avoid races with later key-up events.
-    @Published var recordedVirtualButtonEvent: RecordedVirtualButtonEvent?
+    var buttonMappingRecordingSessionID: UUID? {
+        currentButtonMappingRecordingSession?.id
+    }
 
     var isPreparingVirtualButtonRecording: Bool {
-        virtualButtonRecordingPreparation != nil
+        currentButtonMappingRecordingSession?.pendingVirtualButtonDeviceIDs.isEmpty == false
     }
 
-    var virtualButtonRecordingSessionID: UUID? {
-        virtualButtonRecordingPreparation?.sessionID
+    func beginButtonMappingRecording(
+        sessionID: UUID,
+        pendingVirtualButtonDeviceIDs: Set<Int32> = []
+    ) {
+        let session = ButtonMappingRecordingSession(
+            id: sessionID,
+            pendingVirtualButtonDeviceIDs: pendingVirtualButtonDeviceIDs
+        )
+        currentButtonMappingRecordingSession = session
+        buttonMappingRecordingSession = session
+        recordedButtonMappingEvent = nil
     }
 
-    func beginVirtualButtonRecordingPreparation(for deviceIDs: Set<Int32>) {
-        guard !deviceIDs.isEmpty else {
-            virtualButtonRecordingPreparation = nil
+    func endButtonMappingRecording(sessionID: UUID? = nil) {
+        guard sessionID == nil || currentButtonMappingRecordingSession?.id == sessionID else {
             return
         }
 
-        virtualButtonRecordingPreparation = .init(
-            sessionID: UUID(),
-            pendingDeviceIDs: deviceIDs
-        )
+        currentButtonMappingRecordingSession = nil
+        buttonMappingRecordingSession = nil
+        recordedButtonMappingEvent = nil
+    }
+
+    func isCurrentButtonMappingRecordingSession(_ sessionID: UUID) -> Bool {
+        currentButtonMappingRecordingSession?.id == sessionID
     }
 
     func finishVirtualButtonRecordingPreparation(for deviceID: Int32, sessionID: UUID) {
-        guard var preparation = virtualButtonRecordingPreparation,
-              preparation.sessionID == sessionID else {
+        guard var session = currentButtonMappingRecordingSession,
+              session.id == sessionID else {
             return
         }
 
-        preparation.pendingDeviceIDs.remove(deviceID)
-        virtualButtonRecordingPreparation = preparation.pendingDeviceIDs.isEmpty ? nil : preparation
-    }
+        guard session.pendingVirtualButtonDeviceIDs.remove(deviceID) != nil else {
+            return
+        }
 
-    func endVirtualButtonRecordingPreparation() {
-        virtualButtonRecordingPreparation = nil
+        currentButtonMappingRecordingSession = session
+        buttonMappingRecordingSession = session
     }
 }

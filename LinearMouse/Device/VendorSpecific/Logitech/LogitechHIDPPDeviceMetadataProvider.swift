@@ -1813,7 +1813,7 @@ final class LogitechReprogrammableControlsMonitor {
             guard let monitorTarget = resolveMonitorTarget() else {
                 finishVirtualButtonRecordingPreparationIfNeeded(
                     sessionID: readMainThreadSnapshotFromWorker {
-                        SettingsState.shared.virtualButtonRecordingSessionID
+                        SettingsState.shared.buttonMappingRecordingSessionID
                     }
                 )
                 os_log(
@@ -2054,7 +2054,8 @@ final class LogitechReprogrammableControlsMonitor {
                         )
 
                         if newControlSnapshot.desiredControlIDs != desiredControlIDs
-                            || newControlSnapshot.isRecording != isRecording {
+                            || newControlSnapshot.isRecording != isRecording
+                            || newControlSnapshot.recordingSessionID != recordingSessionID {
                             os_log(
                                 "Restart Logitech control monitor to refresh diverted controls: locationID=%{public}d slot=%{public}u device=%{public}@",
                                 log: Self.log,
@@ -2110,10 +2111,17 @@ final class LogitechReprogrammableControlsMonitor {
                         )
 
                         if isRecording {
-                            if isPressed {
+                            if isPressed, let recordingSessionID {
                                 DispatchQueue.main.async {
-                                    SettingsState.shared.recordedVirtualButtonEvent = .init(
+                                    guard SettingsState.shared
+                                        .isCurrentButtonMappingRecordingSession(recordingSessionID) else {
+                                        return
+                                    }
+
+                                    SettingsState.shared.recordedButtonMappingEvent = .init(
+                                        recordingSessionID: recordingSessionID,
                                         button: .logitechControl(controlIdentity),
+                                        scroll: nil,
                                         modifierFlags: modifierFlags
                                     )
                                 }
@@ -2170,7 +2178,7 @@ final class LogitechReprogrammableControlsMonitor {
     ) -> (desiredControlIDs: Set<UInt16>, isRecording: Bool, recordingSessionID: UUID?) {
         readMainThreadSnapshotFromWorker {
             let isRecording = SettingsState.shared.recording
-            let recordingSessionID = isRecording ? SettingsState.shared.virtualButtonRecordingSessionID : nil
+            let recordingSessionID = SettingsState.shared.buttonMappingRecordingSessionID
             let mouseLocation = CGEvent(source: nil)?.location ?? .zero
             let pid = mouseLocation.topmostWindowOwnerPid
                 ?? NSWorkspace.shared.frontmostApplication?.processIdentifier
@@ -2495,7 +2503,7 @@ final class LogitechReprogrammableControlsMonitor {
             .store(in: &subscriptions)
 
         SettingsState.shared
-            .$recording
+            .$buttonMappingRecordingSession
             .dropFirst()
             .sink { [weak self] _ in
                 self?.requestReconfiguration()
