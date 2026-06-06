@@ -236,6 +236,7 @@ class EventTransformerManager {
         let buttonMappings = scheme.buttons.mappings ?? []
         let scrollButtonMappings = buttonMappings.filter { $0.scroll != nil }
         let otherButtonMappings = buttonMappings.filter { $0.scroll == nil }
+        let buttonActionsRuntimeState = ButtonActionsTransformer.RuntimeState()
 
         func appendScrollButtonMappings() {
             guard !scrollButtonMappings.isEmpty else {
@@ -245,7 +246,8 @@ class EventTransformerManager {
             eventTransformer.append(ButtonActionsTransformer(
                 mappings: scrollButtonMappings,
                 universalBackForward: scheme.buttons.universalBackForward,
-                ignoresLinearMouseSyntheticScrollEvents: true
+                ignoresLinearMouseSyntheticScrollEvents: true,
+                runtimeState: buttonActionsRuntimeState
             ))
         }
 
@@ -339,7 +341,8 @@ class EventTransformerManager {
         if !otherButtonMappings.isEmpty {
             eventTransformer.append(ButtonActionsTransformer(
                 mappings: otherButtonMappings,
-                universalBackForward: scheme.buttons.universalBackForward
+                universalBackForward: scheme.buttons.universalBackForward,
+                runtimeState: buttonActionsRuntimeState
             ))
         }
 
@@ -478,6 +481,7 @@ class EventTransformerManager {
 final class ButtonMappingScrollRecordingTransformer: EventTransformer {
     func transform(_ event: CGEvent) -> CGEvent? {
         guard SettingsState.shared.recording,
+              let recordingSessionID = SettingsState.shared.buttonMappingRecordingSessionID,
               event.type == .scrollWheel,
               !event.isLinearMouseSyntheticEvent,
               let scroll = Self.scrollDirection(of: event) else {
@@ -486,11 +490,12 @@ final class ButtonMappingScrollRecordingTransformer: EventTransformer {
 
         let modifierFlags = event.flags
         DispatchQueue.main.async {
-            guard SettingsState.shared.recording else {
+            guard SettingsState.shared.isCurrentButtonMappingRecordingSession(recordingSessionID) else {
                 return
             }
 
             SettingsState.shared.recordedButtonMappingEvent = .init(
+                recordingSessionID: recordingSessionID,
                 button: nil,
                 scroll: scroll,
                 modifierFlags: modifierFlags

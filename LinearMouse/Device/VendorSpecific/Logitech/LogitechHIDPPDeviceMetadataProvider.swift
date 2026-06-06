@@ -2110,9 +2110,15 @@ final class LogitechReprogrammableControlsMonitor {
                         )
 
                         if isRecording {
-                            if isPressed {
+                            if isPressed, let recordingSessionID {
                                 DispatchQueue.main.async {
+                                    guard SettingsState.shared
+                                        .isCurrentButtonMappingRecordingSession(recordingSessionID) else {
+                                        return
+                                    }
+
                                     SettingsState.shared.recordedVirtualButtonEvent = .init(
+                                        recordingSessionID: recordingSessionID,
                                         button: .logitechControl(controlIdentity),
                                         modifierFlags: modifierFlags
                                     )

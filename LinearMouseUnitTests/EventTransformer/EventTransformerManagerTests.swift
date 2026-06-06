@@ -8,7 +8,8 @@ final class EventTransformerManagerTests: XCTestCase {
     override func tearDown() {
         super.tearDown()
         ConfigurationState.shared.configuration = .init()
-        SettingsState.shared.recording = false
+        SettingsState.shared.endButtonMappingRecording()
+        SettingsState.shared.endVirtualButtonRecordingPreparation()
         SettingsState.shared.recordedButtonMappingEvent = nil
         SettingsState.shared.recordedVirtualButtonEvent = nil
     }
@@ -208,6 +209,7 @@ final class EventTransformerManagerTests: XCTestCase {
         XCTAssertEqual(lateButtonActionsTransformer.mappings, [buttonMapping])
         XCTAssertEqual(lateButtonActionsTransformer.universalBackForward, .both)
         XCTAssertFalse(lateButtonActionsTransformer.ignoresLinearMouseSyntheticScrollEvents)
+        XCTAssertIdentical(earlyButtonActionsTransformer.runtimeState, lateButtonActionsTransformer.runtimeState)
     }
 
     func testScrollButtonMappingsUseScrollPipelineWithoutSmoothing() throws {
@@ -242,6 +244,7 @@ final class EventTransformerManagerTests: XCTestCase {
         XCTAssertEqual(buttonActionsTransformers.map(\.mappings), [[scrollMapping], [buttonMapping]])
         XCTAssertEqual(buttonActionsTransformers.map(\.universalBackForward), [.both, .both])
         XCTAssertEqual(buttonActionsTransformers.map(\.ignoresLinearMouseSyntheticScrollEvents), [true, false])
+        XCTAssertIdentical(buttonActionsTransformers[0].runtimeState, buttonActionsTransformers[1].runtimeState)
     }
 
     func testSmoothedScrollingDoesNotApplyScrollButtonMappingsToSyntheticEvents() throws {
@@ -288,7 +291,8 @@ final class EventTransformerManagerTests: XCTestCase {
                 )
             )
         ])
-        SettingsState.shared.recording = true
+        let recordingSessionID = UUID()
+        SettingsState.shared.beginButtonMappingRecording(sessionID: recordingSessionID)
 
         let event = try XCTUnwrap(CGEvent(
             scrollWheelEvent2Source: nil,
@@ -313,11 +317,56 @@ final class EventTransformerManagerTests: XCTestCase {
         let recordedExpectation = expectation(description: "Recorded transformed scroll mapping")
         DispatchQueue.main.async {
             let recordedEvent = SettingsState.shared.recordedButtonMappingEvent
+            XCTAssertEqual(recordedEvent?.recordingSessionID, recordingSessionID)
             XCTAssertNil(recordedEvent?.button)
             XCTAssertEqual(recordedEvent?.scroll, .down)
             XCTAssertEqual(recordedEvent?.modifierFlags, [.maskControl])
             recordedExpectation.fulfill()
         }
         wait(for: [recordedExpectation], timeout: 1)
+    }
+
+    func testEndingStaleButtonMappingRecordingSessionDoesNotStopCurrentSession() {
+        let staleSessionID = UUID()
+        let currentSessionID = UUID()
+
+        SettingsState.shared.beginButtonMappingRecording(sessionID: staleSessionID)
+        SettingsState.shared.beginButtonMappingRecording(sessionID: currentSessionID)
+        SettingsState.shared.endButtonMappingRecording(sessionID: staleSessionID)
+
+        XCTAssertTrue(SettingsState.shared.recording)
+        XCTAssertEqual(SettingsState.shared.buttonMappingRecordingSessionID, currentSessionID)
+
+        SettingsState.shared.endButtonMappingRecording(sessionID: currentSessionID)
+
+        XCTAssertFalse(SettingsState.shared.recording)
+        XCTAssertNil(SettingsState.shared.buttonMappingRecordingSessionID)
+    }
+
+    func testScrollButtonRecordingIgnoresStaleAsyncEventAfterSessionChanges() throws {
+        let staleSessionID = UUID()
+        let currentSessionID = UUID()
+        let transformer = ButtonMappingScrollRecordingTransformer()
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: 1,
+            wheel2: 0,
+            wheel3: 0
+        ))
+
+        SettingsState.shared.beginButtonMappingRecording(sessionID: staleSessionID)
+        XCTAssertNil(transformer.transform(event))
+        SettingsState.shared.endButtonMappingRecording(sessionID: staleSessionID)
+        SettingsState.shared.beginButtonMappingRecording(sessionID: currentSessionID)
+
+        let staleEventExpectation = expectation(description: "Stale scroll recording is ignored")
+        DispatchQueue.main.async {
+            XCTAssertNil(SettingsState.shared.recordedButtonMappingEvent)
+            XCTAssertEqual(SettingsState.shared.buttonMappingRecordingSessionID, currentSessionID)
+            staleEventExpectation.fulfill()
+        }
+        wait(for: [staleEventExpectation], timeout: 1)
     }
 }

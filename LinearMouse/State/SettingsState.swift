@@ -9,11 +9,13 @@ class SettingsState: ObservableObject {
     static let shared = SettingsState()
 
     struct RecordedVirtualButtonEvent {
+        let recordingSessionID: UUID
         let button: Scheme.Buttons.Mapping.Button
         let modifierFlags: CGEventFlags
     }
 
     struct RecordedButtonMappingEvent {
+        let recordingSessionID: UUID
         let button: Scheme.Buttons.Mapping.Button?
         let scroll: Scheme.Buttons.Mapping.ScrollDirection?
         let modifierFlags: CGEventFlags
@@ -57,7 +59,9 @@ class SettingsState: ObservableObject {
     @Published var navigation: Navigation? = .pointer
 
     /// When `recording` is true, `ButtonActionsTransformer` should be temporarily disabled.
-    @Published var recording = false
+    @Published private(set) var recording = false
+
+    @Published private(set) var buttonMappingRecordingSessionID: UUID?
 
     /// A short-lived preparation phase used while Logitech monitors temporarily divert all controls
     /// for recording. Standard CGEvents can still be recorded immediately.
@@ -78,14 +82,34 @@ class SettingsState: ObservableObject {
         virtualButtonRecordingPreparation?.sessionID
     }
 
-    func beginVirtualButtonRecordingPreparation(for deviceIDs: Set<Int32>) {
+    func beginButtonMappingRecording(sessionID: UUID) {
+        buttonMappingRecordingSessionID = sessionID
+        recording = true
+    }
+
+    func endButtonMappingRecording(sessionID: UUID? = nil) {
+        guard sessionID == nil || buttonMappingRecordingSessionID == sessionID else {
+            return
+        }
+
+        buttonMappingRecordingSessionID = nil
+        recording = false
+        recordedButtonMappingEvent = nil
+        recordedVirtualButtonEvent = nil
+    }
+
+    func isCurrentButtonMappingRecordingSession(_ sessionID: UUID) -> Bool {
+        recording && buttonMappingRecordingSessionID == sessionID
+    }
+
+    func beginVirtualButtonRecordingPreparation(for deviceIDs: Set<Int32>, sessionID: UUID = UUID()) {
         guard !deviceIDs.isEmpty else {
             virtualButtonRecordingPreparation = nil
             return
         }
 
         virtualButtonRecordingPreparation = .init(
-            sessionID: UUID(),
+            sessionID: sessionID,
             pendingDeviceIDs: deviceIDs
         )
     }
@@ -100,7 +124,11 @@ class SettingsState: ObservableObject {
         virtualButtonRecordingPreparation = preparation.pendingDeviceIDs.isEmpty ? nil : preparation
     }
 
-    func endVirtualButtonRecordingPreparation() {
+    func endVirtualButtonRecordingPreparation(sessionID: UUID? = nil) {
+        guard sessionID == nil || virtualButtonRecordingPreparation?.sessionID == sessionID else {
+            return
+        }
+
         virtualButtonRecordingPreparation = nil
     }
 }

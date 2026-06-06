@@ -11,18 +11,30 @@ import os.log
 class ButtonActionsTransformer {
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ButtonActions")
 
+    final class RuntimeState {
+        var repeatTimer: EventThreadTimer?
+        var logitechRepeatTimer: EventThreadTimer?
+        var heldKeysByButton = [Scheme.Buttons.Mapping.Button: [Key]]()
+    }
+
     let mappings: [Scheme.Buttons.Mapping]
     let universalBackForward: Scheme.Buttons.UniversalBackForward?
     let ignoresLinearMouseSyntheticScrollEvents: Bool
+    let runtimeState: RuntimeState
 
     private enum TimerSlot {
         case standard
         case logitech
     }
 
-    var repeatTimer: EventThreadTimer?
-    private var logitechRepeatTimer: EventThreadTimer?
-    private var heldKeysByButton = [Scheme.Buttons.Mapping.Button: [Key]]()
+    var repeatTimer: EventThreadTimer? {
+        get {
+            runtimeState.repeatTimer
+        }
+        set {
+            runtimeState.repeatTimer = newValue
+        }
+    }
 
     private static let defaultKeySimulator = KeySimulator()
     let keySimulator: KeySimulating
@@ -31,29 +43,31 @@ class ButtonActionsTransformer {
         mappings: [Scheme.Buttons.Mapping],
         universalBackForward: Scheme.Buttons.UniversalBackForward? = nil,
         ignoresLinearMouseSyntheticScrollEvents: Bool = false,
+        runtimeState: RuntimeState = .init(),
         keySimulator: KeySimulating? = nil
     ) {
         self.mappings = mappings
         self.universalBackForward = universalBackForward
         self.ignoresLinearMouseSyntheticScrollEvents = ignoresLinearMouseSyntheticScrollEvents
+        self.runtimeState = runtimeState
         self.keySimulator = keySimulator ?? Self.defaultKeySimulator
     }
 
     private func timer(for slot: TimerSlot) -> EventThreadTimer? {
         switch slot {
         case .standard:
-            repeatTimer
+            runtimeState.repeatTimer
         case .logitech:
-            logitechRepeatTimer
+            runtimeState.logitechRepeatTimer
         }
     }
 
     private func setTimer(_ slot: TimerSlot, _ timer: EventThreadTimer?) {
         switch slot {
         case .standard:
-            repeatTimer = timer
+            runtimeState.repeatTimer = timer
         case .logitech:
-            logitechRepeatTimer = timer
+            runtimeState.logitechRepeatTimer = timer
         }
     }
 }
@@ -110,8 +124,8 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
 
         // FIXME: Temporary fix for "repeat on hold"
         if !mouseDraggedEventTypes.contains(event.type) {
-            repeatTimer?.invalidate()
-            repeatTimer = nil
+            runtimeState.repeatTimer?.invalidate()
+            runtimeState.repeatTimer = nil
         }
 
         if ignoresLinearMouseSyntheticScrollEvents,
@@ -223,8 +237,8 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
             return .handled
         }
 
-        logitechRepeatTimer?.invalidate()
-        logitechRepeatTimer = nil
+        runtimeState.logitechRepeatTimer?.invalidate()
+        runtimeState.logitechRepeatTimer = nil
 
         let keyRepeatDelay = mapping.repeat == true ? KeyboardSettingsSnapshot.shared.keyRepeatDelay : 0
         let keyRepeatInterval = mapping.repeat == true ? KeyboardSettingsSnapshot.shared.keyRepeatInterval : 0
@@ -683,18 +697,18 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
         // to a different mapping (e.g. modifier flags changed mid-hold and matched another rule)
         // would overwrite `heldKeysByButton[button]` without releasing the originally pressed
         // keys, leaving them stuck until something else clears them.
-        if heldKeysByButton[button] != nil {
+        if runtimeState.heldKeysByButton[button] != nil {
             return
         }
 
-        heldKeysByButton[button] = keys
+        runtimeState.heldKeysByButton[button] = keys
 
         os_log("Down keys: %{public}@", log: Self.log, type: .info, String(describing: keys))
         try? keySimulator.down(keys: keys, tap: .cgSessionEventTap)
     }
 
     private func releaseHeldKeys(for button: Scheme.Buttons.Mapping.Button, fallbackKeys: [Key]) {
-        let keys = heldKeysByButton.removeValue(forKey: button) ?? fallbackKeys
+        let keys = runtimeState.heldKeysByButton.removeValue(forKey: button) ?? fallbackKeys
 
         os_log("Up keys: %{public}@", log: Self.log, type: .info, String(describing: keys))
         try? keySimulator.up(keys: keys.reversed(), tap: .cgSessionEventTap)
@@ -703,7 +717,7 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
         // overlapping hold on another button would have its modifier state forgotten, which then
         // leaks into the next synthetic event we emit (event.flags would be missing the still-held
         // modifier and the OS would interpret it as released).
-        if heldKeysByButton.isEmpty {
+        if runtimeState.heldKeysByButton.isEmpty {
             keySimulator.reset()
         }
     }
@@ -742,19 +756,19 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
 
 extension ButtonActionsTransformer: Deactivatable {
     func deactivate() {
-        if let repeatTimer {
+        if let repeatTimer = runtimeState.repeatTimer {
             os_log("ButtonActionsTransformer is inactive, invalidate the repeat timer", log: Self.log, type: .info)
             repeatTimer.invalidate()
-            self.repeatTimer = nil
+            runtimeState.repeatTimer = nil
         }
 
-        if let logitechRepeatTimer {
+        if let logitechRepeatTimer = runtimeState.logitechRepeatTimer {
             logitechRepeatTimer.invalidate()
-            self.logitechRepeatTimer = nil
+            runtimeState.logitechRepeatTimer = nil
         }
 
-        let heldKeys = heldKeysByButton.values
-        heldKeysByButton.removeAll()
+        let heldKeys = runtimeState.heldKeysByButton.values
+        runtimeState.heldKeysByButton.removeAll()
         for keys in heldKeys {
             try? keySimulator.up(keys: keys.reversed(), tap: .cgSessionEventTap)
         }
