@@ -248,7 +248,14 @@ final class SmoothedScrollingEngine {
         }
     }
 
-    func feed(deltaX: Double, deltaY: Double, timestamp: TimeInterval) {
+    func feed(deltaX rawDeltaX: Double, deltaY rawDeltaY: Double, timestamp: TimeInterval) {
+        var deltaX = rawDeltaX
+        var deltaY = rawDeltaY
+
+        if sessionState == .momentum {
+            cancelOpposingMomentum(deltaX: &deltaX, deltaY: &deltaY)
+        }
+
         pendingInputX += deltaX
         pendingInputY += deltaY
         lastInputTimestamp = timestamp
@@ -267,6 +274,24 @@ final class SmoothedScrollingEngine {
         if lastTickTimestamp == nil {
             lastTickTimestamp = timestamp
         }
+    }
+
+    private func cancelOpposingMomentum(deltaX: inout Double, deltaY: inout Double) {
+        if opposesMomentum(input: deltaX, velocity: velocityX) {
+            desiredVelocityX = 0
+            velocityX = 0
+            deltaX = 0
+        }
+
+        if opposesMomentum(input: deltaY, velocity: velocityY) {
+            desiredVelocityY = 0
+            velocityY = 0
+            deltaY = 0
+        }
+    }
+
+    private func opposesMomentum(input: Double, velocity: Double) -> Bool {
+        input != 0 && velocity != 0 && input.sign != velocity.sign
     }
 
     func advance(to timestamp: TimeInterval) -> Emission? {
