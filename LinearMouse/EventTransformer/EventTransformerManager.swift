@@ -233,6 +233,26 @@ class EventTransformerManager {
                 .horizontal : nil
         )
         let hasSmoothedScrolling = smoothed.vertical != nil || smoothed.horizontal != nil
+        let buttonMappings = scheme.buttons.mappings ?? []
+        let scrollButtonMappings = buttonMappings.filter { $0.scroll != nil }
+        let otherButtonMappings = buttonMappings.filter { $0.scroll == nil }
+
+        func appendScrollButtonMappings() {
+            guard !scrollButtonMappings.isEmpty else {
+                return
+            }
+
+            eventTransformer.append(ButtonActionsTransformer(
+                mappings: scrollButtonMappings,
+                universalBackForward: scheme.buttons.universalBackForward,
+                ignoresLinearMouseSyntheticScrollEvents: true
+            ))
+        }
+
+        func appendScrollRecordingAndButtonMappings() {
+            eventTransformer.append(ButtonMappingScrollRecordingTransformer())
+            appendScrollButtonMappings()
+        }
 
         if let modifiers = scheme.scrolling.$modifiers,
            hasSmoothedScrolling {
@@ -240,6 +260,7 @@ class EventTransformerManager {
         }
 
         if hasSmoothedScrolling {
+            appendScrollRecordingAndButtonMappings()
             eventTransformer.append(SmoothedScrollingTransformer(smoothed: smoothed))
         }
 
@@ -290,6 +311,10 @@ class EventTransformerManager {
             eventTransformer.append(ModifierActionsTransformer(modifiers: modifiers))
         }
 
+        if !hasSmoothedScrolling {
+            appendScrollRecordingAndButtonMappings()
+        }
+
         if scheme.buttons.switchPrimaryButtonAndSecondaryButtons == true {
             eventTransformer.append(SwitchPrimaryAndSecondaryButtonsTransformer())
         }
@@ -311,9 +336,9 @@ class EventTransformerManager {
             ))
         }
 
-        if let mappings = scheme.buttons.mappings {
+        if !otherButtonMappings.isEmpty {
             eventTransformer.append(ButtonActionsTransformer(
-                mappings: mappings,
+                mappings: otherButtonMappings,
                 universalBackForward: scheme.buttons.universalBackForward
             ))
         }
@@ -447,5 +472,48 @@ class EventTransformerManager {
         }
 
         (transformer as? Deactivatable)?.reactivate()
+    }
+}
+
+final class ButtonMappingScrollRecordingTransformer: EventTransformer {
+    func transform(_ event: CGEvent) -> CGEvent? {
+        guard SettingsState.shared.recording,
+              event.type == .scrollWheel,
+              !event.isLinearMouseSyntheticEvent,
+              let scroll = Self.scrollDirection(of: event) else {
+            return event
+        }
+
+        let modifierFlags = event.flags
+        DispatchQueue.main.async {
+            guard SettingsState.shared.recording else {
+                return
+            }
+
+            SettingsState.shared.recordedButtonMappingEvent = .init(
+                button: nil,
+                scroll: scroll,
+                modifierFlags: modifierFlags
+            )
+        }
+
+        return nil
+    }
+
+    private static func scrollDirection(of event: CGEvent) -> Scheme.Buttons.Mapping.ScrollDirection? {
+        let view = ScrollWheelEventView(event)
+        if view.deltaYSignum < 0 {
+            return .down
+        }
+        if view.deltaYSignum > 0 {
+            return .up
+        }
+        if view.deltaXSignum < 0 {
+            return .right
+        }
+        if view.deltaXSignum > 0 {
+            return .left
+        }
+        return nil
     }
 }

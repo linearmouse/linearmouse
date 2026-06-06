@@ -13,6 +13,12 @@ class SettingsState: ObservableObject {
         let modifierFlags: CGEventFlags
     }
 
+    struct RecordedButtonMappingEvent {
+        let button: Scheme.Buttons.Mapping.Button?
+        let scroll: Scheme.Buttons.Mapping.ScrollDirection?
+        let modifierFlags: CGEventFlags
+    }
+
     struct VirtualButtonRecordingPreparation: Equatable {
         let sessionID: UUID
         var pendingDeviceIDs: Set<Int32>
@@ -60,6 +66,9 @@ class SettingsState: ObservableObject {
     /// Set by protocol-backed button monitors when a virtual button is pressed during recording.
     /// The recorder uses the event-time modifier snapshot to avoid races with later key-up events.
     @Published var recordedVirtualButtonEvent: RecordedVirtualButtonEvent?
+
+    /// Set by the event transformer pipeline when a transformed scroll gesture is recorded.
+    @Published var recordedButtonMappingEvent: RecordedButtonMappingEvent?
 
     var isPreparingVirtualButtonRecording: Bool {
         virtualButtonRecordingPreparation != nil

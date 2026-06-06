@@ -13,6 +13,7 @@ class ButtonActionsTransformer {
 
     let mappings: [Scheme.Buttons.Mapping]
     let universalBackForward: Scheme.Buttons.UniversalBackForward?
+    let ignoresLinearMouseSyntheticScrollEvents: Bool
 
     private enum TimerSlot {
         case standard
@@ -29,10 +30,12 @@ class ButtonActionsTransformer {
     init(
         mappings: [Scheme.Buttons.Mapping],
         universalBackForward: Scheme.Buttons.UniversalBackForward? = nil,
+        ignoresLinearMouseSyntheticScrollEvents: Bool = false,
         keySimulator: KeySimulating? = nil
     ) {
         self.mappings = mappings
         self.universalBackForward = universalBackForward
+        self.ignoresLinearMouseSyntheticScrollEvents = ignoresLinearMouseSyntheticScrollEvents
         self.keySimulator = keySimulator ?? Self.defaultKeySimulator
     }
 
@@ -109,6 +112,12 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
         if !mouseDraggedEventTypes.contains(event.type) {
             repeatTimer?.invalidate()
             repeatTimer = nil
+        }
+
+        if ignoresLinearMouseSyntheticScrollEvents,
+           event.type == .scrollWheel,
+           event.isLinearMouseSyntheticEvent {
+            return event
         }
 
         guard let mapping = findMapping(of: event) else {

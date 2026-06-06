@@ -24,6 +24,7 @@ struct ButtonMappingButtonRecorder: View {
 
     @State private var recordingObservationToken: ObservationToken?
     @State private var recordedButtonCancellable: AnyCancellable?
+    @State private var recordedMappingCancellable: AnyCancellable?
 
     var body: some View {
         Button {
@@ -76,6 +77,8 @@ struct ButtonMappingButtonRecorder: View {
         }
         recordedButtonCancellable?.cancel()
         recordedButtonCancellable = nil
+        recordedMappingCancellable?.cancel()
+        recordedMappingCancellable = nil
 
         if recording {
             mapping.modifierFlags = []
@@ -90,7 +93,6 @@ struct ButtonMappingButtonRecorder: View {
     private func startEventObservation() {
         recordingObservationToken = try? EventTap.observe([
             .flagsChanged,
-            .scrollWheel,
             .leftMouseDown, .leftMouseUp,
             .rightMouseDown, .rightMouseUp,
             .otherMouseDown, .otherMouseUp
@@ -104,6 +106,7 @@ struct ButtonMappingButtonRecorder: View {
         }
 
         settingsState.recordedVirtualButtonEvent = nil
+        settingsState.recordedButtonMappingEvent = nil
 
         // Observe Logitech control presses communicated via SettingsState
         // (no synthetic CGEvent needed — the HID++ protocol detects presses directly)
@@ -114,11 +117,21 @@ struct ButtonMappingButtonRecorder: View {
             .sink { event in
                 virtualButtonReceived(event)
             }
+
+        recordedMappingCancellable = settingsState
+            .$recordedButtonMappingEvent
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { event in
+                recordedMappingReceived(event)
+            }
     }
 
     private func cancelObservation() {
         recordedButtonCancellable?.cancel()
         recordedButtonCancellable = nil
+        recordedMappingCancellable?.cancel()
+        recordedMappingCancellable = nil
     }
 
     private func logitechMonitorDevices() -> [Device] {
@@ -137,39 +150,47 @@ struct ButtonMappingButtonRecorder: View {
         recording = false
     }
 
+    private func recordedMappingReceived(_ event: SettingsState.RecordedButtonMappingEvent) {
+        mapping.button = event.button
+        mapping.scroll = event.scroll
+        mapping.modifierFlags = event.modifierFlags
+        settingsState.recordedButtonMappingEvent = nil
+        recording = false
+    }
+
     private func eventReceived(_ event: CGEvent) -> CGEvent? {
+        let result = ButtonMappingButtonRecordingEventHandler.record(event, into: &mapping)
+        if result.stopsRecording {
+            recording = false
+        }
+
+        return result.event
+    }
+}
+
+enum ButtonMappingButtonRecordingEventHandler {
+    struct Result {
+        var event: CGEvent?
+        var stopsRecording: Bool
+    }
+
+    static func record(_ event: CGEvent, into mapping: inout Scheme.Buttons.Mapping) -> Result {
         mapping.button = nil
         mapping.scroll = nil
         mapping.modifierFlags = event.flags
 
         switch event.type {
         case .flagsChanged:
-            return nil
-
+            return .init(event: nil, stopsRecording: false)
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
             mapping.button = .mouse(Int(event.getIntegerValueField(.mouseEventButtonNumber)))
-            return nil
-
+            return .init(event: nil, stopsRecording: false)
         case .leftMouseUp, .rightMouseUp, .otherMouseUp:
             mapping.button = .mouse(Int(event.getIntegerValueField(.mouseEventButtonNumber)))
-
-        case .scrollWheel:
-            let scrollWheelEventView = ScrollWheelEventView(event)
-            if scrollWheelEventView.deltaYSignum < 0 {
-                mapping.scroll = .down
-            } else if scrollWheelEventView.deltaYSignum > 0 {
-                mapping.scroll = .up
-            } else if scrollWheelEventView.deltaXSignum < 0 {
-                mapping.scroll = .right
-            } else if scrollWheelEventView.deltaXSignum > 0 {
-                mapping.scroll = .left
-            }
-
         default:
             break
         }
 
-        recording = false
-        return nil
+        return .init(event: nil, stopsRecording: true)
     }
 }

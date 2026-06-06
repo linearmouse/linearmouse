@@ -8,6 +8,9 @@ final class EventTransformerManagerTests: XCTestCase {
     override func tearDown() {
         super.tearDown()
         ConfigurationState.shared.configuration = .init()
+        SettingsState.shared.recording = false
+        SettingsState.shared.recordedButtonMappingEvent = nil
+        SettingsState.shared.recordedVirtualButtonEvent = nil
     }
 
     func testSyntheticSmoothedEventStillGetsModifierActions() throws {
@@ -84,7 +87,7 @@ final class EventTransformerManagerTests: XCTestCase {
         let view = ScrollWheelEventView(transformedEvent)
 
         XCTAssertEqual(view.deltaY, 3)
-        XCTAssertEqual(view.scrollPhase, nil)
+        XCTAssertNil(view.scrollPhase)
         XCTAssertEqual(view.momentumPhase, .none)
     }
 
@@ -157,5 +160,164 @@ final class EventTransformerManagerTests: XCTestCase {
             .first)
 
         XCTAssertEqual(buttonActionsTransformer.universalBackForward, .both)
+    }
+
+    func testSmoothedScrollingRoutesScrollButtonMappingsBeforeSmoothing() throws {
+        let scrollMapping = Scheme.Buttons.Mapping(scroll: .up, control: true, action: .arg0(.none))
+        let buttonMapping = Scheme.Buttons.Mapping(button: .mouse(4), action: .arg0(.none))
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(
+                scrolling: .init(smoothed: .init(vertical: .init(enabled: true, preset: .smooth))),
+                buttons: .init(mappings: [scrollMapping, buttonMapping], universalBackForward: .both)
+            )
+        ])
+
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: 1,
+            wheel2: 0,
+            wheel3: 0
+        ))
+        event.flags = [.maskControl]
+
+        let transformer = EventTransformerManager.shared.get(
+            withCGEvent: event,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: nil
+        )
+        let transformers = try XCTUnwrap(transformer as? [EventTransformer])
+        let smoothedIndex = try XCTUnwrap(transformers.firstIndex { $0 is SmoothedScrollingTransformer })
+        let buttonActionsTransformers = transformers.enumerated().compactMap { index, transformer in
+            (transformer as? ButtonActionsTransformer).map { (index, $0) }
+        }
+
+        let earlyButtonActionsTransformer = try XCTUnwrap(buttonActionsTransformers
+            .first { index, _ in index < smoothedIndex }?
+            .1)
+        let lateButtonActionsTransformer = try XCTUnwrap(buttonActionsTransformers
+            .first { index, _ in index > smoothedIndex }?
+            .1)
+
+        XCTAssertEqual(earlyButtonActionsTransformer.mappings, [scrollMapping])
+        XCTAssertEqual(earlyButtonActionsTransformer.universalBackForward, .both)
+        XCTAssertTrue(earlyButtonActionsTransformer.ignoresLinearMouseSyntheticScrollEvents)
+        XCTAssertEqual(lateButtonActionsTransformer.mappings, [buttonMapping])
+        XCTAssertEqual(lateButtonActionsTransformer.universalBackForward, .both)
+        XCTAssertFalse(lateButtonActionsTransformer.ignoresLinearMouseSyntheticScrollEvents)
+    }
+
+    func testScrollButtonMappingsUseScrollPipelineWithoutSmoothing() throws {
+        let scrollMapping = Scheme.Buttons.Mapping(scroll: .up, control: true, action: .arg0(.none))
+        let buttonMapping = Scheme.Buttons.Mapping(button: .mouse(4), action: .arg0(.none))
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(
+                buttons: .init(mappings: [scrollMapping, buttonMapping], universalBackForward: .both)
+            )
+        ])
+
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: 1,
+            wheel2: 0,
+            wheel3: 0
+        ))
+        event.flags = [.maskControl]
+
+        let transformer = EventTransformerManager.shared.get(
+            withCGEvent: event,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: nil
+        )
+        let buttonActionsTransformers = try XCTUnwrap(transformer as? [EventTransformer])
+            .compactMap { $0 as? ButtonActionsTransformer }
+
+        XCTAssertEqual(buttonActionsTransformers.map(\.mappings), [[scrollMapping], [buttonMapping]])
+        XCTAssertEqual(buttonActionsTransformers.map(\.universalBackForward), [.both, .both])
+        XCTAssertEqual(buttonActionsTransformers.map(\.ignoresLinearMouseSyntheticScrollEvents), [true, false])
+    }
+
+    func testSmoothedScrollingDoesNotApplyScrollButtonMappingsToSyntheticEvents() throws {
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(
+                scrolling: .init(smoothed: .init(vertical: .init(enabled: true, preset: .smooth))),
+                buttons: .init(mappings: [
+                    .init(scroll: .up, control: true, action: .arg0(.none))
+                ])
+            )
+        ])
+
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .pixel,
+            wheelCount: 2,
+            wheel1: 0,
+            wheel2: 0,
+            wheel3: 0
+        ))
+        let view = ScrollWheelEventView(event)
+        view.deltaYPt = 12
+        view.deltaYFixedPt = 12
+        event.flags = [.maskControl]
+        event.isLinearMouseSyntheticEvent = true
+
+        let transformer = EventTransformerManager.shared.get(
+            withCGEvent: event,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: nil
+        )
+
+        XCTAssertNotNil(transformer.transform(event))
+    }
+
+    func testScrollButtonRecordingUsesReversedDirectionBeforeSmoothing() throws {
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(
+                scrolling: .init(
+                    reverse: .init(vertical: true),
+                    smoothed: .init(vertical: .init(enabled: true, preset: .smooth))
+                )
+            )
+        ])
+        SettingsState.shared.recording = true
+
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: 1,
+            wheel2: 0,
+            wheel3: 0
+        ))
+        event.flags = [.maskControl]
+
+        let transformer = EventTransformerManager.shared.get(
+            withCGEvent: event,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: nil
+        )
+
+        XCTAssertNil(transformer.transform(event))
+
+        let recordedExpectation = expectation(description: "Recorded transformed scroll mapping")
+        DispatchQueue.main.async {
+            let recordedEvent = SettingsState.shared.recordedButtonMappingEvent
+            XCTAssertNil(recordedEvent?.button)
+            XCTAssertEqual(recordedEvent?.scroll, .down)
+            XCTAssertEqual(recordedEvent?.modifierFlags, [.maskControl])
+            recordedExpectation.fulfill()
+        }
+        wait(for: [recordedExpectation], timeout: 1)
     }
 }
