@@ -23,7 +23,6 @@ struct ButtonMappingButtonRecorder: View {
     }
 
     @State private var recordingObservationToken: ObservationToken?
-    @State private var recordedButtonCancellable: AnyCancellable?
     @State private var recordedMappingCancellable: AnyCancellable?
     @State private var recordingSessionID: UUID?
 
@@ -56,10 +55,10 @@ struct ButtonMappingButtonRecorder: View {
             recording = false
             updateSharedRecordingState(force: false)
         }
-        .onReceive(settingsState.$buttonMappingRecordingSessionID) { sessionID in
+        .onReceive(settingsState.$buttonMappingRecordingSession) { session in
             guard recording,
                   let recordingSessionID,
-                  sessionID != recordingSessionID else {
+                  session?.id != recordingSessionID else {
                 return
             }
 
@@ -72,18 +71,16 @@ struct ButtonMappingButtonRecorder: View {
         if shouldRecord {
             let sessionID = currentRecordingSessionID()
             let monitorDevices = logitechMonitorDevices()
-            settingsState.beginVirtualButtonRecordingPreparation(
-                for: Set(monitorDevices.map(\.id)),
-                sessionID: sessionID
+            settingsState.beginButtonMappingRecording(
+                sessionID: sessionID,
+                pendingVirtualButtonDeviceIDs: Set(monitorDevices.map(\.id))
             )
-            settingsState.beginButtonMappingRecording(sessionID: sessionID)
             monitorDevices.forEach { $0.prepareLogitechControlsRecording() }
         } else {
             guard let recordingSessionID else {
                 return
             }
 
-            settingsState.endVirtualButtonRecordingPreparation(sessionID: recordingSessionID)
             settingsState.endButtonMappingRecording(sessionID: recordingSessionID)
             self.recordingSessionID = nil
         }
@@ -104,8 +101,6 @@ struct ButtonMappingButtonRecorder: View {
             recordingObservationToken.cancel()
             self.recordingObservationToken = nil
         }
-        recordedButtonCancellable?.cancel()
-        recordedButtonCancellable = nil
         recordedMappingCancellable?.cancel()
         recordedMappingCancellable = nil
 
@@ -134,24 +129,12 @@ struct ButtonMappingButtonRecorder: View {
             return
         }
 
-        settingsState.recordedVirtualButtonEvent = nil
-        settingsState.recordedButtonMappingEvent = nil
-        let recordingSessionID = recordingSessionID
+        guard let recordingSessionID else {
+            recording = false
+            return
+        }
 
-        // Observe Logitech control presses communicated via SettingsState
-        // (no synthetic CGEvent needed — the HID++ protocol detects presses directly)
-        recordedButtonCancellable = settingsState
-            .$recordedVirtualButtonEvent
-            .compactMap { event in
-                guard event?.recordingSessionID == recordingSessionID else {
-                    return nil
-                }
-                return event
-            }
-            .receive(on: DispatchQueue.main)
-            .sink { event in
-                virtualButtonReceived(event)
-            }
+        settingsState.recordedButtonMappingEvent = nil
 
         recordedMappingCancellable = settingsState
             .$recordedButtonMappingEvent
@@ -168,8 +151,6 @@ struct ButtonMappingButtonRecorder: View {
     }
 
     private func cancelObservation() {
-        recordedButtonCancellable?.cancel()
-        recordedButtonCancellable = nil
         recordedMappingCancellable?.cancel()
         recordedMappingCancellable = nil
     }
@@ -181,13 +162,6 @@ struct ButtonMappingButtonRecorder: View {
         }
 
         return [currentDevice]
-    }
-
-    private func virtualButtonReceived(_ event: SettingsState.RecordedVirtualButtonEvent) {
-        mapping.button = event.button
-        mapping.modifierFlags = event.modifierFlags
-        settingsState.recordedVirtualButtonEvent = nil
-        recording = false
     }
 
     private func recordedMappingReceived(_ event: SettingsState.RecordedButtonMappingEvent) {

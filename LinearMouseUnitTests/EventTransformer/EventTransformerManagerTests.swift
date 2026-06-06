@@ -1,6 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
+import Combine
 @testable import LinearMouse
 import XCTest
 
@@ -9,9 +10,7 @@ final class EventTransformerManagerTests: XCTestCase {
         super.tearDown()
         ConfigurationState.shared.configuration = .init()
         SettingsState.shared.endButtonMappingRecording()
-        SettingsState.shared.endVirtualButtonRecordingPreparation()
         SettingsState.shared.recordedButtonMappingEvent = nil
-        SettingsState.shared.recordedVirtualButtonEvent = nil
     }
 
     func testSyntheticSmoothedEventStillGetsModifierActions() throws {
@@ -341,6 +340,90 @@ final class EventTransformerManagerTests: XCTestCase {
 
         XCTAssertFalse(SettingsState.shared.recording)
         XCTAssertNil(SettingsState.shared.buttonMappingRecordingSessionID)
+    }
+
+    func testVirtualButtonPreparationIsPartOfButtonMappingRecordingSession() {
+        let recordingSessionID = UUID()
+        let deviceID: Int32 = 42
+
+        SettingsState.shared.beginButtonMappingRecording(
+            sessionID: recordingSessionID,
+            pendingVirtualButtonDeviceIDs: [deviceID]
+        )
+
+        XCTAssertTrue(SettingsState.shared.recording)
+        XCTAssertEqual(SettingsState.shared.buttonMappingRecordingSessionID, recordingSessionID)
+        XCTAssertTrue(SettingsState.shared.isPreparingVirtualButtonRecording)
+
+        SettingsState.shared.finishVirtualButtonRecordingPreparation(
+            for: deviceID,
+            sessionID: recordingSessionID
+        )
+
+        XCTAssertTrue(SettingsState.shared.recording)
+        XCTAssertEqual(SettingsState.shared.buttonMappingRecordingSessionID, recordingSessionID)
+        XCTAssertFalse(SettingsState.shared.isPreparingVirtualButtonRecording)
+    }
+
+    func testFinishingCompletedVirtualButtonPreparationDoesNotRepublishSession() {
+        let recordingSessionID = UUID()
+        let deviceID: Int32 = 42
+        var publishedSessions = [SettingsState.ButtonMappingRecordingSession?]()
+
+        SettingsState.shared.beginButtonMappingRecording(
+            sessionID: recordingSessionID,
+            pendingVirtualButtonDeviceIDs: [deviceID]
+        )
+
+        let cancellable = SettingsState.shared
+            .$buttonMappingRecordingSession
+            .dropFirst()
+            .sink { session in
+                publishedSessions.append(session)
+            }
+
+        SettingsState.shared.finishVirtualButtonRecordingPreparation(
+            for: deviceID,
+            sessionID: recordingSessionID
+        )
+        SettingsState.shared.finishVirtualButtonRecordingPreparation(
+            for: deviceID,
+            sessionID: recordingSessionID
+        )
+
+        XCTAssertEqual(publishedSessions.count, 1)
+        XCTAssertEqual(publishedSessions.first??.pendingVirtualButtonDeviceIDs, [])
+
+        cancellable.cancel()
+    }
+
+    func testEndingPreviousRecordingSessionDuringNewSessionPublishDoesNotClearNewSession() {
+        let previousSessionID = UUID()
+        let currentSessionID = UUID()
+        var publishedSessionIDs = [UUID?]()
+
+        SettingsState.shared.beginButtonMappingRecording(sessionID: previousSessionID)
+
+        let cancellable = SettingsState.shared
+            .$buttonMappingRecordingSession
+            .dropFirst()
+            .sink { session in
+                publishedSessionIDs.append(session?.id)
+
+                guard session?.id == currentSessionID else {
+                    return
+                }
+
+                SettingsState.shared.endButtonMappingRecording(sessionID: previousSessionID)
+            }
+
+        SettingsState.shared.beginButtonMappingRecording(sessionID: currentSessionID)
+
+        XCTAssertEqual(SettingsState.shared.buttonMappingRecordingSessionID, currentSessionID)
+        XCTAssertEqual(SettingsState.shared.buttonMappingRecordingSession?.id, currentSessionID)
+        XCTAssertEqual(publishedSessionIDs, [currentSessionID])
+
+        cancellable.cancel()
     }
 
     func testScrollButtonRecordingIgnoresStaleAsyncEventAfterSessionChanges() throws {

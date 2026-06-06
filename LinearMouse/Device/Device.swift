@@ -185,7 +185,7 @@ class Device {
             .store(in: &logitechControlsMonitorSubscriptions)
 
         SettingsState.shared
-            .$recording
+            .$buttonMappingRecordingSession
             .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
