@@ -35,6 +35,7 @@ class Device {
     private weak var manager: DeviceManager?
     private var inputReportHandlers: [InputReportHandler] = []
     private var logitechReprogrammableControlsMonitor: LogitechReprogrammableControlsMonitor?
+    lazy var logitechDPIController = LogitechHIDPPDeviceDPIController(device: device)
     private var logitechControlsMonitorSubscriptions = Set<AnyCancellable>()
     private let device: PointerDevice
 
@@ -47,6 +48,14 @@ class Device {
     private var verbosedLoggingOn = Defaults[.verbosedLoggingOn]
 
     private let initialPointerResolution: Double
+    let hardwareDPILock = NSLock()
+    var cachedHardwareDPI: Int?
+
+    var isRemoved: Bool {
+        hardwareDPILock.lock()
+        defer { hardwareDPILock.unlock() }
+        return removed
+    }
 
     private var inputObservationToken: ObservationToken?
     private var reportObservationToken: ObservationToken?
@@ -126,7 +135,10 @@ class Device {
     }
 
     func markRemoved() {
+        hardwareDPILock.lock()
         removed = true
+        cachedHardwareDPI = nil
+        hardwareDPILock.unlock()
 
         inputObservationToken = nil
         reportObservationToken = nil
@@ -136,7 +148,7 @@ class Device {
     }
 
     func markActive(reason: String) {
-        guard !removed else {
+        guard !isRemoved else {
             return
         }
 
@@ -183,7 +195,7 @@ class Device {
     }
 
     private func updateLogitechControlsMonitorRunning() {
-        guard !removed else {
+        guard !isRemoved else {
             return
         }
 
@@ -342,6 +354,7 @@ extension Device {
     }
 
     func restorePointerAccelerationAndPointerSpeed() {
+        restoreHardwareDPI()
         restorePointerSpeed()
         restorePointerAcceleration()
     }

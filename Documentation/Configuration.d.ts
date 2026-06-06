@@ -419,6 +419,13 @@ declare namespace Scheme {
     speed?: number | Unset;
 
     /**
+     * @title Hardware DPI
+     * @description A device-specific hardware DPI value for supported devices. If omitted, no hardware DPI will be applied.
+     * @minimum 100
+     */
+    hardwareDPI?: number;
+
+    /**
      * @title Disable pointer acceleration
      * @description If the value is true, the pointer acceleration will be disabled and acceleration and speed will not take effect.
      * @default false

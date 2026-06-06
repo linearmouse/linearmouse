@@ -47,6 +47,8 @@ extension Scheme {
 
         @Clamp<Speed> var speed: Unsettable<Decimal>?
 
+        var hardwareDPI: Int?
+
         var disableAcceleration: Bool?
         var redirectsToScroll: Bool?
     }
@@ -60,6 +62,10 @@ extension Scheme.Pointer {
 
         if let speed {
             pointer.speed = speed
+        }
+
+        if let hardwareDPI {
+            pointer.hardwareDPI = hardwareDPI
         }
 
         if let disableAcceleration {
