@@ -35,6 +35,66 @@ struct Scheme: Codable, Equatable {
 }
 
 extension Scheme {
+    struct MatchContext {
+        var device: DeviceMatcher?
+        var app: String?
+        var parentApp: String?
+        var groupApp: String?
+        var display: String?
+        var processName: String?
+        var processPath: String?
+
+        init(
+            deviceMatcher: DeviceMatcher? = nil,
+            app: String? = nil,
+            parentApp: String? = nil,
+            groupApp: String? = nil,
+            display: String? = nil,
+            processName: String? = nil,
+            processPath: String? = nil
+        ) {
+            device = deviceMatcher
+            self.app = app
+            self.parentApp = parentApp
+            self.groupApp = groupApp
+            self.display = display
+            self.processName = processName
+            self.processPath = processPath
+        }
+
+        init(
+            device: Device?,
+            app: String? = nil,
+            parentApp: String? = nil,
+            groupApp: String? = nil,
+            display: String? = nil,
+            processName: String? = nil,
+            processPath: String? = nil
+        ) {
+            self.init(
+                deviceMatcher: device.map { DeviceMatcher(of: $0) },
+                app: app,
+                parentApp: parentApp,
+                groupApp: groupApp,
+                display: display,
+                processName: processName,
+                processPath: processPath
+            )
+        }
+    }
+}
+
+extension Scheme {
+    func isActive(in context: MatchContext) -> Bool {
+        guard let `if` else {
+            return true
+        }
+
+        return `if`.contains {
+            $0.isSatisfied(in: context)
+        }
+    }
+
     func isActive(
         withDevice device: Device? = nil,
         withApp app: String? = nil,
@@ -44,21 +104,17 @@ extension Scheme {
         withProcessName processName: String? = nil,
         withProcessPath processPath: String? = nil
     ) -> Bool {
-        guard let `if` else {
-            return true
-        }
-
-        return `if`.contains {
-            $0.isSatisfied(
-                withDevice: device,
-                withApp: app,
-                withParentApp: parentApp,
-                withGroupApp: groupApp,
-                withDisplay: display,
-                withProcessName: processName,
-                withProcessPath: processPath
+        isActive(
+            in: MatchContext(
+                device: device,
+                app: app,
+                parentApp: parentApp,
+                groupApp: groupApp,
+                display: display,
+                processName: processName,
+                processPath: processPath
             )
-        }
+        )
     }
 
     func isActive(
@@ -70,21 +126,17 @@ extension Scheme {
         withProcessName processName: String? = nil,
         withProcessPath processPath: String? = nil
     ) -> Bool {
-        guard let `if` else {
-            return true
-        }
-
-        return `if`.contains {
-            $0.isSatisfied(
-                withDeviceMatcher: deviceMatcher,
-                withApp: app,
-                withParentApp: parentApp,
-                withGroupApp: groupApp,
-                withDisplay: display,
-                withProcessName: processName,
-                withProcessPath: processPath
+        isActive(
+            in: MatchContext(
+                deviceMatcher: deviceMatcher,
+                app: app,
+                parentApp: parentApp,
+                groupApp: groupApp,
+                display: display,
+                processName: processName,
+                processPath: processPath
             )
-        }
+        )
     }
 
     /// A scheme is device-specific if and only if a) it has only one `if` and
@@ -151,18 +203,7 @@ extension Scheme: CustomStringConvertible {
 
 extension [Scheme] {
     func allDeviceSpecficSchemes(of device: Device) -> [EnumeratedSequence<[Scheme]>.Element] {
-        self.enumerated().filter { _, scheme in
-            guard scheme.isDeviceSpecific else {
-                return false
-            }
-            guard scheme.if?.count == 1, let `if` = scheme.if?.first else {
-                return false
-            }
-            guard `if`.device?.match(with: device) == true else {
-                return false
-            }
-            return true
-        }
+        allDeviceMatcherSpecificSchemes(of: DeviceMatcher(of: device))
     }
 
     func allDeviceMatcherSpecificSchemes(of matcher: DeviceMatcher) -> [EnumeratedSequence<[Scheme]>.Element] {
@@ -173,7 +214,7 @@ extension [Scheme] {
             guard scheme.if?.count == 1, let `if` = scheme.if?.first else {
                 return false
             }
-            guard `if`.device?.match(with: matcher) == true else {
+            guard `if`.device?.isSatisfied(by: matcher) == true else {
                 return false
             }
             return true

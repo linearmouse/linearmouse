@@ -55,6 +55,25 @@ final class ConfigurationTests: XCTestCase {
         XCTAssertEqual(matchedScheme.pointer.disableAcceleration, true)
     }
 
+    func testMatchSchemeWithSpecificDeviceMatcherMergesDeviceCategorySchemes() {
+        var categoryScheme = Scheme(if: [.init(device: DeviceMatcher(category: .mouse))])
+        categoryScheme.pointer.disableAcceleration = true
+        categoryScheme.scrolling.reverse.vertical = true
+
+        var specificMatcher = DeviceMatcher(category: .mouse)
+        specificMatcher.vendorID = 1
+        specificMatcher.productID = 2
+
+        var deviceSpecificScheme = Scheme(if: [.init(device: specificMatcher)])
+        deviceSpecificScheme.pointer.disableAcceleration = false
+
+        let configuration = Configuration(schemes: [categoryScheme, deviceSpecificScheme])
+        let matchedScheme = configuration.matchScheme(withDeviceMatcher: specificMatcher)
+
+        XCTAssertEqual(matchedScheme.pointer.disableAcceleration, false)
+        XCTAssertEqual(matchedScheme.scrolling.reverse.vertical, true)
+    }
+
     func testDeviceCategorySchemeInsertsBeforeDeviceSpecificSchemes() {
         var specificMatcher = DeviceMatcher(category: .mouse)
         specificMatcher.vendorID = 1

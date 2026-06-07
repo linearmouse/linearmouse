@@ -35,47 +35,29 @@ extension DeviceMatcher {
     }
 
     func match(with device: Device) -> Bool {
-        func matchValue<T: Equatable>(_ destination: T?, _ source: T) -> Bool {
-            destination == nil || source == destination
-        }
-
-        func matchValue<T: Equatable>(_ destination: T?, _ source: T?) -> Bool {
-            destination == nil || source == destination
-        }
-
-        guard matchValue(vendorID, device.vendorID),
-              matchValue(productID, device.productID),
-              matchValue(productName, device.productName),
-              matchValue(serialNumber, device.serialNumber)
-        else {
-            return false
-        }
-
-        if let category {
-            guard category.contains(where: { $0.deviceCategory == device.category }) else {
-                return false
-            }
-        }
-
-        return true
+        isSatisfied(by: DeviceMatcher(of: device))
     }
 
     func match(with matcher: DeviceMatcher) -> Bool {
+        isSatisfied(by: matcher)
+    }
+
+    func isSatisfied(by candidate: DeviceMatcher) -> Bool {
         func matchValue<T: Equatable>(_ destination: T?, _ source: T?) -> Bool {
             destination == nil || source == destination
         }
 
-        guard matchValue(vendorID, matcher.vendorID),
-              matchValue(productID, matcher.productID),
-              matchValue(productName, matcher.productName),
-              matchValue(serialNumber, matcher.serialNumber)
+        guard matchValue(vendorID, candidate.vendorID),
+              matchValue(productID, candidate.productID),
+              matchValue(productName, candidate.productName),
+              matchValue(serialNumber, candidate.serialNumber)
         else {
             return false
         }
 
         if let category {
-            guard let matcherCategory = matcher.category,
-                  category.contains(where: { matcherCategory.contains($0) })
+            guard let candidateCategory = candidate.category,
+                  category.contains(where: { candidateCategory.contains($0) })
             else {
                 return false
             }

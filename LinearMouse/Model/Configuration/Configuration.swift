@@ -110,6 +110,20 @@ extension Configuration {
         try dump().write(to: url.resolvingSymlinksInPath(), options: .atomic)
     }
 
+    func matchScheme(in context: Scheme.MatchContext) -> Scheme {
+        // TODO: Backtrace the merge path
+        // TODO: Optimize the algorithm
+
+        var mergedScheme = Scheme()
+        mergedScheme.if = [Scheme.If(matchContext: context)]
+
+        for scheme in schemes where scheme.isActive(in: context) {
+            scheme.merge(into: &mergedScheme)
+        }
+
+        return mergedScheme
+    }
+
     func matchScheme(
         withDevice device: Device? = nil,
         withApp app: String? = nil,
@@ -119,36 +133,17 @@ extension Configuration {
         withProcessName processName: String? = nil,
         withProcessPath processPath: String? = nil
     ) -> Scheme {
-        // TODO: Backtrace the merge path
-        // TODO: Optimize the algorithm
-
-        var mergedScheme = Scheme()
-
-        let `if` = Scheme.If(
-            device: device.map { DeviceMatcher(of: $0) },
-            app: app,
-            parentApp: parentApp,
-            groupApp: groupApp,
-            processName: processName,
-            processPath: processPath,
-            display: display
+        matchScheme(
+            in: Scheme.MatchContext(
+                device: device,
+                app: app,
+                parentApp: parentApp,
+                groupApp: groupApp,
+                display: display,
+                processName: processName,
+                processPath: processPath
+            )
         )
-
-        mergedScheme.if = [`if`]
-
-        for scheme in schemes where scheme.isActive(
-            withDevice: device,
-            withApp: app,
-            withParentApp: parentApp,
-            withGroupApp: groupApp,
-            withDisplay: display,
-            withProcessName: processName,
-            withProcessPath: processPath
-        ) {
-            scheme.merge(into: &mergedScheme)
-        }
-
-        return mergedScheme
     }
 
     func matchScheme(
@@ -160,33 +155,17 @@ extension Configuration {
         withProcessName processName: String? = nil,
         withProcessPath processPath: String? = nil
     ) -> Scheme {
-        var mergedScheme = Scheme()
-
-        let `if` = Scheme.If(
-            device: deviceMatcher,
-            app: app,
-            parentApp: parentApp,
-            groupApp: groupApp,
-            processName: processName,
-            processPath: processPath,
-            display: display
+        matchScheme(
+            in: Scheme.MatchContext(
+                deviceMatcher: deviceMatcher,
+                app: app,
+                parentApp: parentApp,
+                groupApp: groupApp,
+                display: display,
+                processName: processName,
+                processPath: processPath
+            )
         )
-
-        mergedScheme.if = [`if`]
-
-        for scheme in schemes where scheme.isActive(
-            withDeviceMatcher: deviceMatcher,
-            withApp: app,
-            withParentApp: parentApp,
-            withGroupApp: groupApp,
-            withDisplay: display,
-            withProcessName: processName,
-            withProcessPath: processPath
-        ) {
-            scheme.merge(into: &mergedScheme)
-        }
-
-        return mergedScheme
     }
 
     func matchScheme(
