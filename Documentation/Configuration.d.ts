@@ -406,7 +406,7 @@ declare namespace Scheme {
      * @title Pointer acceleration
      * @description A number to set acceleration, or "unset" to restore system default. If omitted, the previous/merged value applies.
      * @minimum 0
-     * @maximum 20
+     * @maximum 40
      */
     acceleration?: number | Unset;
 

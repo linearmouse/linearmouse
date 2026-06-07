@@ -35,11 +35,11 @@ struct PointerSettings: View {
                         HStack(alignment: .firstTextBaseline) {
                             Slider(
                                 value: $state.pointerAcceleration,
-                                in: 0.0 ... 20.0
+                                in: 0.0 ... 40.0
                             ) {
                                 labelWithDescription {
                                     Text("Pointer acceleration")
-                                    Text(verbatim: "(0–20)")
+                                    Text(verbatim: "(0–40)")
                                 }
                             }
                             TextField(
@@ -130,11 +130,11 @@ struct PointerSettings: View {
                         HStack(alignment: .firstTextBaseline) {
                             Slider(
                                 value: $state.pointerAcceleration,
-                                in: 0.0 ... 20.0
+                                in: 0.0 ... 40.0
                             ) {
                                 labelWithDescription {
                                     Text("Tracking speed")
-                                    Text(verbatim: "(0–20)")
+                                    Text(verbatim: "(0–40)")
                                 }
                             }
                             TextField(

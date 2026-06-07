@@ -347,7 +347,7 @@ public extension PointerDevice {
     /**
      Indicates the pointer acceleration.
 
-     This value is in the range [0, 20] ∪ { -1 }. -1 means acceleration and sensitivity are disabled.
+     This value is in the range [0, 40] ∪ { -1 }. -1 means acceleration and sensitivity are disabled.
      */
     var pointerAcceleration: Double? {
         get {
@@ -359,7 +359,7 @@ public extension PointerDevice {
 
         set {
             setDynamicPropertyIOFixed(
-                newValue.map { $0 == -1 ? $0 : $0.clamp(0, 20) },
+                newValue.map { $0 == -1 ? $0 : $0.clamp(0, 40) },
                 forKey: pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey
             )
         }
