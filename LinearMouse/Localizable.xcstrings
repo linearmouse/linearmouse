@@ -7147,6 +7147,12 @@
             "value" : "تطبيق"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Apply"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7205,6 +7211,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alkalmaz"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Apply"
           }
         },
         "it" : {
@@ -7343,6 +7355,12 @@
             "value" : "جارٍ التطبيق..."
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Applying..."
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7401,6 +7419,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alkalmazás folyamatban..."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Applying..."
           }
         },
         "it" : {
@@ -18353,55 +18377,61 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "ar" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
+            "value" : "DPI"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "el" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "es" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "fi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
@@ -18413,133 +18443,139 @@
         },
         "he" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "hu" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
+            "value" : "DPI"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "it" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "ja" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "ko" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "nb-NO" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "vi" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "DPI"
           }
         }
@@ -26880,6 +26916,12 @@
             "value" : "دقة الأجهزة (DPI)"
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Hardware DPI"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26894,7 +26936,7 @@
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Hardware DPI"
           }
         },
@@ -26938,6 +26980,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hardver DPI"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Hardware DPI"
           }
         },
         "it" : {
@@ -42086,6 +42134,12 @@
             "value" : "جارٍ التحديث..."
           }
         },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Refreshing..."
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -42144,6 +42198,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Frissítés folyamatban..."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Refreshing..."
           }
         },
         "it" : {
