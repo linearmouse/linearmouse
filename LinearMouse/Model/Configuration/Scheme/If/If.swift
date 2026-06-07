@@ -21,57 +21,61 @@ extension Scheme {
 }
 
 extension Scheme.If {
-    func isSatisfied(
-        withDevice targetDevice: Device? = nil,
-        withApp targetApp: String? = nil,
-        withParentApp targetParentApp: String?,
-        withGroupApp targetGroupApp: String?,
-        withDisplay targetDisplay: String? = nil,
-        withProcessName targetProcessName: String? = nil,
-        withProcessPath targetProcessPath: String? = nil
-    ) -> Bool {
+    init(matchContext context: Scheme.MatchContext) {
+        self.init(
+            device: context.device,
+            app: context.app,
+            parentApp: context.parentApp,
+            groupApp: context.groupApp,
+            processName: context.processName,
+            processPath: context.processPath,
+            display: context.display
+        )
+    }
+
+    func isSatisfied(in context: Scheme.MatchContext) -> Bool {
         if let device {
-            guard let targetDevice else {
+            guard let targetDevice = context.device else {
                 return false
             }
 
-            guard device.match(with: targetDevice) else {
+            guard device.isSatisfied(by: targetDevice) else {
                 return false
             }
         }
 
         if let app {
-            guard app == targetApp else {
+            guard app == context.app else {
                 return false
             }
         }
 
         if let parentApp {
-            guard parentApp == targetParentApp else {
+            guard parentApp == context.parentApp else {
                 return false
             }
         }
 
         if let groupApp {
-            guard groupApp == targetGroupApp else {
+            guard groupApp == context.groupApp else {
                 return false
             }
         }
 
         if let processName {
-            guard processName == targetProcessName else {
+            guard processName == context.processName else {
                 return false
             }
         }
 
         if let processPath {
-            guard processPath == targetProcessPath else {
+            guard processPath == context.processPath else {
                 return false
             }
         }
 
         if let display {
-            guard let targetDisplay else {
+            guard let targetDisplay = context.display else {
                 return false
             }
 
@@ -81,5 +85,49 @@ extension Scheme.If {
         }
 
         return true
+    }
+
+    func isSatisfied(
+        withDevice targetDevice: Device? = nil,
+        withApp targetApp: String? = nil,
+        withParentApp targetParentApp: String?,
+        withGroupApp targetGroupApp: String?,
+        withDisplay targetDisplay: String? = nil,
+        withProcessName targetProcessName: String? = nil,
+        withProcessPath targetProcessPath: String? = nil
+    ) -> Bool {
+        isSatisfied(
+            in: Scheme.MatchContext(
+                device: targetDevice,
+                app: targetApp,
+                parentApp: targetParentApp,
+                groupApp: targetGroupApp,
+                display: targetDisplay,
+                processName: targetProcessName,
+                processPath: targetProcessPath
+            )
+        )
+    }
+
+    func isSatisfied(
+        withDeviceMatcher targetDeviceMatcher: DeviceMatcher? = nil,
+        withApp targetApp: String? = nil,
+        withParentApp targetParentApp: String?,
+        withGroupApp targetGroupApp: String?,
+        withDisplay targetDisplay: String? = nil,
+        withProcessName targetProcessName: String? = nil,
+        withProcessPath targetProcessPath: String? = nil
+    ) -> Bool {
+        isSatisfied(
+            in: Scheme.MatchContext(
+                deviceMatcher: targetDeviceMatcher,
+                app: targetApp,
+                parentApp: targetParentApp,
+                groupApp: targetGroupApp,
+                display: targetDisplay,
+                processName: targetProcessName,
+                processPath: targetProcessPath
+            )
+        )
     }
 }

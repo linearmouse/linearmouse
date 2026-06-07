@@ -4,10 +4,12 @@
 import SwiftUI
 
 struct DevicePickerSection: View {
-    @Binding var selectedDeviceRef: WeakRef<Device>?
+    @Binding var selection: DevicePickerSelection?
 
+    var category: DeviceMatcher.Category
     var title: LocalizedStringKey
     var devices: [DeviceModel]
+    var onSelectCategory: (DeviceMatcher.Category) -> Void
     var onSelectDevice: (WeakRef<Device>) -> Void
 
     var body: some View {
@@ -17,12 +19,20 @@ struct DevicePickerSection: View {
                 .foregroundColor(.secondary)
 
             VStack(spacing: 8) {
+                DevicePickerCategoryItem(
+                    category: category,
+                    isSelected: isCategorySelected
+                ) {
+                    selection = .category(category)
+                    onSelectCategory(category)
+                }
+
                 ForEach(devices) { deviceModel in
                     DevicePickerSectionItem(
                         deviceModel: deviceModel,
                         isSelected: isSelected(deviceModel)
                     ) {
-                        selectedDeviceRef = deviceModel.deviceRef
+                        selection = .device(deviceModel.deviceRef)
                         onSelectDevice(deviceModel.deviceRef)
                     }
                 }
@@ -31,8 +41,17 @@ struct DevicePickerSection: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    private var isCategorySelected: Bool {
+        guard case let .category(selectedCategory) = selection else {
+            return false
+        }
+
+        return selectedCategory == category
+    }
+
     private func isSelected(_ deviceModel: DeviceModel) -> Bool {
-        guard let selectedDevice = selectedDeviceRef?.value else {
+        guard case let .device(selectedDeviceRef) = selection,
+              let selectedDevice = selectedDeviceRef.value else {
             return false
         }
 

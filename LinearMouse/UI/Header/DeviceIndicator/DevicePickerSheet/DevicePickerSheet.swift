@@ -7,26 +7,27 @@ import SwiftUI
 struct DevicePickerSheet: View {
     @Binding var isPresented: Bool
     @State private var autoSwitchToActiveDevice = Defaults[.autoSwitchToActiveDevice]
-    @State private var selectedDeviceRef: WeakRef<Device>?
+    @State private var selection: DevicePickerSelection?
     @State private var showDeleteAlert = false
 
     @ObservedObject private var schemeState: SchemeState = .shared
     @ObservedObject private var deviceState: DeviceState = .shared
+    @ObservedObject private var deviceManager: DeviceManager = .shared
 
-    private var selectedDevice: Device? {
-        selectedDeviceRef?.value
+    private var selectedDeviceMatcher: DeviceMatcher? {
+        selection?.deviceMatcher
     }
 
     private var shouldShowDeleteButton: Bool {
         schemeState.hasMatchingSchemes(
-            for: selectedDevice,
+            for: selectedDeviceMatcher,
             forApp: schemeState.currentApp,
             forDisplay: schemeState.currentDisplay
         )
     }
 
     private var canConfirm: Bool {
-        autoSwitchToActiveDevice || selectedDeviceRef?.value != nil
+        autoSwitchToActiveDevice || selectedDeviceMatcher != nil
     }
 
     private var autoSwitchBinding: Binding<Bool> {
@@ -35,7 +36,7 @@ struct DevicePickerSheet: View {
             set: { newValue in
                 autoSwitchToActiveDevice = newValue
                 if newValue {
-                    syncSelectionWithCurrentDevice()
+                    syncSelectionWithActiveDevice()
                 }
             }
         )
@@ -61,9 +62,11 @@ struct DevicePickerSheet: View {
             .padding(.horizontal, 18)
             .padding(.top, 18)
 
-            DevicePicker(selectedDeviceRef: $selectedDeviceRef) { deviceRef in
-                handleDeviceSelection(deviceRef)
-            }
+            DevicePicker(
+                selection: $selection,
+                onSelectCategory: handleCategorySelection,
+                onSelectDevice: handleDeviceSelection
+            )
             .frame(minHeight: 248, maxHeight: 320)
 
             HStack(spacing: 8) {
@@ -94,11 +97,17 @@ struct DevicePickerSheet: View {
         }
         .onAppear {
             autoSwitchToActiveDevice = Defaults[.autoSwitchToActiveDevice]
-            syncSelectionWithCurrentDevice()
-        }
-        .onReceive(deviceState.$currentDeviceRef.receive(on: RunLoop.main)) { currentDeviceRef in
             if autoSwitchToActiveDevice {
-                selectedDeviceRef = currentDeviceRef
+                syncSelectionWithActiveDevice()
+            } else if let selectedDevice = Defaults[.selectedDevice] {
+                selection = selection(for: selectedDevice)
+            } else {
+                syncSelectionWithCurrentDevice()
+            }
+        }
+        .onReceive(deviceManager.$lastActiveDeviceRef.receive(on: RunLoop.main)) { lastActiveDeviceRef in
+            if autoSwitchToActiveDevice {
+                selection = lastActiveDeviceRef.map { .device($0) }
             }
         }
         .alert(isPresented: $showDeleteAlert) {
@@ -117,27 +126,53 @@ struct DevicePickerSheet: View {
         showDeleteAlert = true
     }
 
+    private func handleCategorySelection(_ category: DeviceMatcher.Category) {
+        selection = .category(category)
+        autoSwitchToActiveDevice = false
+    }
+
     private func handleDeviceSelection(_ deviceRef: WeakRef<Device>) {
-        selectedDeviceRef = deviceRef
+        selection = .device(deviceRef)
 
         let isSelectingActiveDevice = deviceRef.value === DeviceManager.shared.lastActiveDeviceRef?.value
         if isSelectingActiveDevice {
             autoSwitchToActiveDevice = true
-            syncSelectionWithCurrentDevice()
+            syncSelectionWithActiveDevice()
         } else if autoSwitchToActiveDevice {
             autoSwitchToActiveDevice = false
         }
     }
 
+    private func syncSelectionWithActiveDevice() {
+        selection = deviceManager.lastActiveDeviceRef.map { .device($0) }
+    }
+
     private func syncSelectionWithCurrentDevice() {
-        selectedDeviceRef = deviceState.currentDeviceRef
+        selection = deviceState.currentDeviceRef.map { .device($0) }
+    }
+
+    private func selection(for matcher: DeviceMatcher) -> DevicePickerSelection? {
+        if let category = matcher.categoryOnlyValue {
+            return .category(category)
+        }
+
+        return DevicePickerState.shared
+            .devices
+            .first { deviceModel in
+                guard let device = deviceModel.deviceRef.value else {
+                    return false
+                }
+
+                return matcher.match(with: device)
+            }
+            .map { .device($0.deviceRef) }
     }
 
     private func onOK() {
         Defaults[.autoSwitchToActiveDevice] = autoSwitchToActiveDevice
 
         if !autoSwitchToActiveDevice {
-            deviceState.currentDeviceRef = selectedDeviceRef
+            Defaults[.selectedDevice] = selectedDeviceMatcher
         }
 
         isPresented = false
@@ -145,7 +180,7 @@ struct DevicePickerSheet: View {
 
     private func confirmDelete() {
         schemeState.deleteMatchingSchemes(
-            for: selectedDevice,
+            for: selectedDeviceMatcher,
             forApp: schemeState.currentApp,
             forDisplay: schemeState.currentDisplay
         )

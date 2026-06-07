@@ -16,6 +16,14 @@ struct DeviceMatcher: Codable, Equatable, Hashable, Defaults.Serializable {
 }
 
 extension DeviceMatcher {
+    init(category: Category) {
+        vendorID = nil
+        productID = nil
+        productName = nil
+        serialNumber = nil
+        self.category = [category]
+    }
+
     init(of device: Device) {
         self.init(
             vendorID: device.vendorID,
@@ -27,29 +35,49 @@ extension DeviceMatcher {
     }
 
     func match(with device: Device) -> Bool {
-        func matchValue<T: Equatable>(_ destination: T?, _ source: T) -> Bool {
-            destination == nil || source == destination
-        }
+        isSatisfied(by: DeviceMatcher(of: device))
+    }
 
+    func match(with matcher: DeviceMatcher) -> Bool {
+        isSatisfied(by: matcher)
+    }
+
+    func isSatisfied(by candidate: DeviceMatcher) -> Bool {
         func matchValue<T: Equatable>(_ destination: T?, _ source: T?) -> Bool {
             destination == nil || source == destination
         }
 
-        guard matchValue(vendorID, device.vendorID),
-              matchValue(productID, device.productID),
-              matchValue(productName, device.productName),
-              matchValue(serialNumber, device.serialNumber)
+        guard matchValue(vendorID, candidate.vendorID),
+              matchValue(productID, candidate.productID),
+              matchValue(productName, candidate.productName),
+              matchValue(serialNumber, candidate.serialNumber)
         else {
             return false
         }
 
         if let category {
-            guard category.contains(where: { $0.deviceCategory == device.category }) else {
+            guard let candidateCategory = candidate.category,
+                  category.contains(where: { candidateCategory.contains($0) })
+            else {
                 return false
             }
         }
 
         return true
+    }
+
+    var categoryOnlyValue: Category? {
+        guard vendorID == nil,
+              productID == nil,
+              productName == nil,
+              serialNumber == nil,
+              let category,
+              category.count == 1
+        else {
+            return nil
+        }
+
+        return category.first
     }
 }
 

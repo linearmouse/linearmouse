@@ -15,9 +15,16 @@ class DeviceState: ObservableObject {
     static let shared = DeviceState()
 
     private var subscriptions = Set<AnyCancellable>()
+    private var isUpdatingCurrentDeviceRef = false
+
+    @Published var currentDeviceMatcher: DeviceMatcher?
 
     @Published var currentDeviceRef: WeakRef<Device>? {
         didSet {
+            guard !isUpdatingCurrentDeviceRef else {
+                return
+            }
+
             guard !Defaults[.autoSwitchToActiveDevice] else {
                 return
             }
@@ -66,14 +73,26 @@ extension DeviceState {
         DeviceManager.shared
     }
 
+    private func setCurrentDeviceRef(_ deviceRef: WeakRef<Device>?) {
+        isUpdatingCurrentDeviceRef = true
+        currentDeviceRef = deviceRef
+        isUpdatingCurrentDeviceRef = false
+    }
+
+    private func exactMatcher(of deviceRef: WeakRef<Device>?) -> DeviceMatcher? {
+        deviceRef?.value.map { DeviceMatcher(of: $0) }
+    }
+
     private func updateCurrentDeviceRef(lastActiveDeviceRef: WeakRef<Device>?) {
         guard !Defaults[.autoSwitchToActiveDevice] else {
-            currentDeviceRef = lastActiveDeviceRef
+            setCurrentDeviceRef(lastActiveDeviceRef)
+            currentDeviceMatcher = exactMatcher(of: lastActiveDeviceRef)
             return
         }
 
         guard let userSelectedDevice = Defaults[.selectedDevice] else {
-            currentDeviceRef = lastActiveDeviceRef
+            setCurrentDeviceRef(lastActiveDeviceRef)
+            currentDeviceMatcher = exactMatcher(of: lastActiveDeviceRef)
             return
         }
 
@@ -81,7 +100,8 @@ extension DeviceState {
             .first { userSelectedDevice.match(with: $0) }
             .map { WeakRef($0) }
 
-        currentDeviceRef = matchedDeviceRef ?? lastActiveDeviceRef
+        setCurrentDeviceRef(matchedDeviceRef ?? lastActiveDeviceRef)
+        currentDeviceMatcher = userSelectedDevice
     }
 
     private func updateCurrentDevice() {

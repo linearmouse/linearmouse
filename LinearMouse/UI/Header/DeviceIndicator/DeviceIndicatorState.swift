@@ -20,6 +20,14 @@ class DeviceIndicatorState: ObservableObject {
             }
             .store(in: &subscriptions)
 
+        deviceState.$currentDeviceMatcher
+            .debounce(for: 0.1, scheduler: RunLoop.main)
+            .removeDuplicates()
+            .sink { [weak self] _ in
+                self?.refreshActiveDeviceName()
+            }
+            .store(in: &subscriptions)
+
         DeviceManager.shared
             .$receiverPairedDeviceIdentities
             .receive(on: RunLoop.main)
@@ -44,6 +52,11 @@ extension DeviceIndicatorState {
     }
 
     private func refreshActiveDeviceName() {
+        if let category = deviceState.currentDeviceMatcher?.categoryOnlyValue {
+            activeDeviceName = displayName(for: category)
+            return
+        }
+
         guard let device = deviceState.currentDeviceRef?.value else {
             activeDeviceName = nil
             return
@@ -55,5 +68,14 @@ extension DeviceIndicatorState {
         }
 
         activeDeviceName = DeviceManager.shared.displayName(for: device)
+    }
+
+    private func displayName(for category: DeviceMatcher.Category) -> String {
+        switch category {
+        case .mouse:
+            return NSLocalizedString("All Mice", comment: "")
+        case .trackpad:
+            return NSLocalizedString("All Trackpads", comment: "")
+        }
     }
 }

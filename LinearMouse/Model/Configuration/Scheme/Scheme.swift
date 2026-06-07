@@ -35,6 +35,66 @@ struct Scheme: Codable, Equatable {
 }
 
 extension Scheme {
+    struct MatchContext {
+        var device: DeviceMatcher?
+        var app: String?
+        var parentApp: String?
+        var groupApp: String?
+        var display: String?
+        var processName: String?
+        var processPath: String?
+
+        init(
+            deviceMatcher: DeviceMatcher? = nil,
+            app: String? = nil,
+            parentApp: String? = nil,
+            groupApp: String? = nil,
+            display: String? = nil,
+            processName: String? = nil,
+            processPath: String? = nil
+        ) {
+            device = deviceMatcher
+            self.app = app
+            self.parentApp = parentApp
+            self.groupApp = groupApp
+            self.display = display
+            self.processName = processName
+            self.processPath = processPath
+        }
+
+        init(
+            device: Device?,
+            app: String? = nil,
+            parentApp: String? = nil,
+            groupApp: String? = nil,
+            display: String? = nil,
+            processName: String? = nil,
+            processPath: String? = nil
+        ) {
+            self.init(
+                deviceMatcher: device.map { DeviceMatcher(of: $0) },
+                app: app,
+                parentApp: parentApp,
+                groupApp: groupApp,
+                display: display,
+                processName: processName,
+                processPath: processPath
+            )
+        }
+    }
+}
+
+extension Scheme {
+    func isActive(in context: MatchContext) -> Bool {
+        guard let `if` else {
+            return true
+        }
+
+        return `if`.contains {
+            $0.isSatisfied(in: context)
+        }
+    }
+
     func isActive(
         withDevice device: Device? = nil,
         withApp app: String? = nil,
@@ -44,21 +104,39 @@ extension Scheme {
         withProcessName processName: String? = nil,
         withProcessPath processPath: String? = nil
     ) -> Bool {
-        guard let `if` else {
-            return true
-        }
-
-        return `if`.contains {
-            $0.isSatisfied(
-                withDevice: device,
-                withApp: app,
-                withParentApp: parentApp,
-                withGroupApp: groupApp,
-                withDisplay: display,
-                withProcessName: processName,
-                withProcessPath: processPath
+        isActive(
+            in: MatchContext(
+                device: device,
+                app: app,
+                parentApp: parentApp,
+                groupApp: groupApp,
+                display: display,
+                processName: processName,
+                processPath: processPath
             )
-        }
+        )
+    }
+
+    func isActive(
+        withDeviceMatcher deviceMatcher: DeviceMatcher? = nil,
+        withApp app: String? = nil,
+        withParentApp parentApp: String? = nil,
+        withGroupApp groupApp: String? = nil,
+        withDisplay display: String? = nil,
+        withProcessName processName: String? = nil,
+        withProcessPath processPath: String? = nil
+    ) -> Bool {
+        isActive(
+            in: MatchContext(
+                deviceMatcher: deviceMatcher,
+                app: app,
+                parentApp: parentApp,
+                groupApp: groupApp,
+                display: display,
+                processName: processName,
+                processPath: processPath
+            )
+        )
     }
 
     /// A scheme is device-specific if and only if a) it has only one `if` and
@@ -79,6 +157,19 @@ extension Scheme {
         }
 
         return true
+    }
+
+    var isDeviceCategorySpecific: Bool {
+        guard let conditions = `if` else {
+            return false
+        }
+
+        guard conditions.count == 1,
+              let condition = conditions.first else {
+            return false
+        }
+
+        return condition.device?.categoryOnlyValue != nil
     }
 
     var isDisplaySpecific: Bool {
@@ -112,6 +203,10 @@ extension Scheme: CustomStringConvertible {
 
 extension [Scheme] {
     func allDeviceSpecficSchemes(of device: Device) -> [EnumeratedSequence<[Scheme]>.Element] {
+        allDeviceMatcherSpecificSchemes(of: DeviceMatcher(of: device))
+    }
+
+    func allDeviceMatcherSpecificSchemes(of matcher: DeviceMatcher) -> [EnumeratedSequence<[Scheme]>.Element] {
         self.enumerated().filter { _, scheme in
             guard scheme.isDeviceSpecific else {
                 return false
@@ -119,7 +214,21 @@ extension [Scheme] {
             guard scheme.if?.count == 1, let `if` = scheme.if?.first else {
                 return false
             }
-            guard `if`.device?.match(with: device) == true else {
+            guard `if`.device?.isSatisfied(by: matcher) == true else {
+                return false
+            }
+            return true
+        }
+    }
+
+    func allDeviceCategorySpecificSchemes(
+        of category: DeviceMatcher.Category
+    ) -> [EnumeratedSequence<[Scheme]>.Element] {
+        self.enumerated().filter { _, scheme in
+            guard scheme.isDeviceCategorySpecific else {
+                return false
+            }
+            guard scheme.if?.first?.device?.categoryOnlyValue == category else {
                 return false
             }
             return true
@@ -137,14 +246,67 @@ extension [Scheme] {
         ofProcessPath processPath: String?,
         ofDisplay display: String?
     ) -> SchemeIndex {
-        let allDeviceSpecificSchemes = allDeviceSpecficSchemes(of: device)
+        schemeIndex(
+            among: allDeviceSpecficSchemes(of: device),
+            emptyInsertionIndex: endIndex,
+            ofApp: app,
+            ofProcessPath: processPath,
+            ofDisplay: display
+        )
+    }
 
-        guard let first = allDeviceSpecificSchemes.first,
-              let last = allDeviceSpecificSchemes.last else {
-            return .insertAt(self.endIndex)
+    func schemeIndex(
+        ofDeviceMatcher matcher: DeviceMatcher,
+        ofApp app: String?,
+        ofProcessPath processPath: String?,
+        ofDisplay display: String?
+    ) -> SchemeIndex {
+        if let category = matcher.categoryOnlyValue {
+            return schemeIndex(
+                ofDeviceCategory: category,
+                ofApp: app,
+                ofProcessPath: processPath,
+                ofDisplay: display
+            )
         }
 
-        if let (index, _) = allDeviceSpecificSchemes
+        return schemeIndex(
+            among: allDeviceMatcherSpecificSchemes(of: matcher),
+            emptyInsertionIndex: endIndex,
+            ofApp: app,
+            ofProcessPath: processPath,
+            ofDisplay: display
+        )
+    }
+
+    func schemeIndex(
+        ofDeviceCategory category: DeviceMatcher.Category,
+        ofApp app: String?,
+        ofProcessPath processPath: String?,
+        ofDisplay display: String?
+    ) -> SchemeIndex {
+        schemeIndex(
+            among: allDeviceCategorySpecificSchemes(of: category),
+            emptyInsertionIndex: firstDeviceSpecificSchemeIndex(of: category) ?? endIndex,
+            ofApp: app,
+            ofProcessPath: processPath,
+            ofDisplay: display
+        )
+    }
+
+    private func schemeIndex(
+        among matchingSchemes: [EnumeratedSequence<[Scheme]>.Element],
+        emptyInsertionIndex: Int,
+        ofApp app: String?,
+        ofProcessPath processPath: String?,
+        ofDisplay display: String?
+    ) -> SchemeIndex {
+        guard let first = matchingSchemes.first,
+              let last = matchingSchemes.last else {
+            return .insertAt(emptyInsertionIndex)
+        }
+
+        if let (index, _) = matchingSchemes
             .first(where: { _, scheme in
                 scheme.if?.first?.app == app &&
                     scheme.if?.first?.processPath == processPath &&
@@ -162,26 +324,43 @@ extension [Scheme] {
         }
 
         if app != nil {
-            if let (index, _) = allDeviceSpecificSchemes
+            if let (index, _) = matchingSchemes
                 .first(where: { _, scheme in scheme.if?.first?.app == app }) {
                 return .insertAt(index)
             }
         }
 
         if processPath != nil {
-            if let (index, _) = allDeviceSpecificSchemes
+            if let (index, _) = matchingSchemes
                 .first(where: { _, scheme in scheme.if?.first?.processPath == processPath }) {
                 return .insertAt(index)
             }
         }
 
         if display != nil {
-            if let (index, _) = allDeviceSpecificSchemes
+            if let (index, _) = matchingSchemes
                 .first(where: { _, scheme in scheme.if?.first?.display == display }) {
                 return .insertAt(index)
             }
         }
 
         return .insertAt(last.offset + 1)
+    }
+
+    private func firstDeviceSpecificSchemeIndex(of category: DeviceMatcher.Category) -> Int? {
+        enumerated()
+            .first { _, scheme in
+                guard scheme.isDeviceSpecific,
+                      let matcher = scheme.if?.first?.device else {
+                    return false
+                }
+
+                if matcher.category?.contains(category) == true {
+                    return true
+                }
+
+                return scheme.matchedDevices.contains { $0.category == category.deviceCategory }
+            }?
+            .offset
     }
 }
