@@ -8,7 +8,7 @@ extension Scheme {
         typealias Value = Unsettable<Decimal>
         typealias RangeValue = Decimal
 
-        static var range: ClosedRange<RangeValue> = 0 ... 20
+        static var range: ClosedRange<RangeValue> = 0 ... 40
 
         static func clamp(_ value: Value?) -> Value? {
             guard let value else {

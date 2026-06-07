@@ -1132,7 +1132,7 @@
             }
           ],
           "description": "A number to set acceleration, or \"unset\" to restore system default. If omitted, the previous/merged value applies.",
-          "maximum": 20,
+          "maximum": 40,
           "minimum": 0,
           "title": "Pointer acceleration"
         },
