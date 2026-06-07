@@ -16,6 +16,14 @@ struct DeviceMatcher: Codable, Equatable, Hashable, Defaults.Serializable {
 }
 
 extension DeviceMatcher {
+    init(category: Category) {
+        vendorID = nil
+        productID = nil
+        productName = nil
+        serialNumber = nil
+        self.category = [category]
+    }
+
     init(of device: Device) {
         self.init(
             vendorID: device.vendorID,
@@ -50,6 +58,44 @@ extension DeviceMatcher {
         }
 
         return true
+    }
+
+    func match(with matcher: DeviceMatcher) -> Bool {
+        func matchValue<T: Equatable>(_ destination: T?, _ source: T?) -> Bool {
+            destination == nil || source == destination
+        }
+
+        guard matchValue(vendorID, matcher.vendorID),
+              matchValue(productID, matcher.productID),
+              matchValue(productName, matcher.productName),
+              matchValue(serialNumber, matcher.serialNumber)
+        else {
+            return false
+        }
+
+        if let category {
+            guard let matcherCategory = matcher.category,
+                  category.contains(where: { matcherCategory.contains($0) })
+            else {
+                return false
+            }
+        }
+
+        return true
+    }
+
+    var categoryOnlyValue: Category? {
+        guard vendorID == nil,
+              productID == nil,
+              productName == nil,
+              serialNumber == nil,
+              let category,
+              category.count == 1
+        else {
+            return nil
+        }
+
+        return category.first
     }
 }
 

@@ -38,6 +38,44 @@ final class ConfigurationTests: XCTestCase {
         XCTAssertEqual(scheme.scrolling.reverse.horizontal, true)
     }
 
+    func testMatchSchemeWithDeviceCategoryDoesNotMergeDeviceSpecificSchemes() {
+        var categoryScheme = Scheme(if: [.init(device: DeviceMatcher(category: .mouse))])
+        categoryScheme.pointer.disableAcceleration = true
+
+        var specificMatcher = DeviceMatcher(category: .mouse)
+        specificMatcher.vendorID = 1
+        specificMatcher.productID = 2
+
+        var deviceSpecificScheme = Scheme(if: [.init(device: specificMatcher)])
+        deviceSpecificScheme.pointer.disableAcceleration = false
+
+        let configuration = Configuration(schemes: [categoryScheme, deviceSpecificScheme])
+        let matchedScheme = configuration.matchScheme(withDeviceMatcher: DeviceMatcher(category: .mouse))
+
+        XCTAssertEqual(matchedScheme.pointer.disableAcceleration, true)
+    }
+
+    func testDeviceCategorySchemeInsertsBeforeDeviceSpecificSchemes() {
+        var specificMatcher = DeviceMatcher(category: .mouse)
+        specificMatcher.vendorID = 1
+        specificMatcher.productID = 2
+
+        let schemes = [Scheme(if: [.init(device: specificMatcher)])]
+        let index = schemes.schemeIndex(
+            ofDeviceCategory: .mouse,
+            ofApp: nil,
+            ofProcessPath: nil,
+            ofDisplay: nil
+        )
+
+        guard case let .insertAt(insertIndex) = index else {
+            XCTFail("Expected insertion index")
+            return
+        }
+
+        XCTAssertEqual(insertIndex, 0)
+    }
+
     func testMergeAutoScroll() {
         var scheme = Scheme()
         scheme.buttons.autoScroll.enabled = true

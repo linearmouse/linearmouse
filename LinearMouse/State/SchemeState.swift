@@ -29,6 +29,14 @@ class SchemeState: ObservableObject {
                 self?.objectWillChange.send()
             }
             .store(in: &subscriptions)
+
+        deviceState.$currentDeviceMatcher
+            .debounce(for: 0.1, scheduler: RunLoop.main)
+            .removeDuplicates()
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &subscriptions)
     }
 }
 
@@ -37,11 +45,40 @@ extension SchemeState {
         deviceState.currentDeviceRef?.value
     }
 
-    private func hasMatchingSchemes(for device: Device?, app: AppTarget?, display: String?) -> Bool {
-        guard let device else {
+    private var deviceMatcher: DeviceMatcher? {
+        deviceState.currentDeviceMatcher
+    }
+
+    private func deviceConditionMatches(
+        _ conditionDeviceMatcher: DeviceMatcher,
+        targetMatcher: DeviceMatcher?,
+        targetDevice: Device?
+    ) -> Bool {
+        if let targetCategory = targetMatcher?.categoryOnlyValue {
+            return conditionDeviceMatcher == DeviceMatcher(category: targetCategory)
+        }
+
+        if conditionDeviceMatcher.categoryOnlyValue != nil {
             return false
         }
 
+        if let targetDevice {
+            return conditionDeviceMatcher.match(with: targetDevice)
+        }
+
+        guard let targetMatcher else {
+            return false
+        }
+
+        return conditionDeviceMatcher.match(with: targetMatcher)
+    }
+
+    private func hasMatchingSchemes(
+        for matcher: DeviceMatcher?,
+        device: Device?,
+        app: AppTarget?,
+        display: String?
+    ) -> Bool {
         let (appId, processPath) = extractAppComponents(from: app)
 
         return schemes.contains { scheme in
@@ -51,7 +88,7 @@ extension SchemeState {
 
             return conditions.contains { condition in
                 guard let deviceMatcher = condition.device,
-                      deviceMatcher.match(with: device) else {
+                      deviceConditionMatches(deviceMatcher, targetMatcher: matcher, targetDevice: device) else {
                     return false
                 }
 
@@ -63,11 +100,12 @@ extension SchemeState {
         }
     }
 
-    private func deleteMatchingSchemes(for device: Device?, app: AppTarget?, display: String?) {
-        guard let device else {
-            return
-        }
-
+    private func deleteMatchingSchemes(
+        for matcher: DeviceMatcher?,
+        device: Device?,
+        app: AppTarget?,
+        display: String?
+    ) {
         let (appId, processPath) = extractAppComponents(from: app)
 
         schemes.removeAll { scheme in
@@ -77,7 +115,7 @@ extension SchemeState {
 
             return conditions.contains { condition in
                 guard let deviceMatcher = condition.device,
-                      deviceMatcher.match(with: device) else {
+                      deviceConditionMatches(deviceMatcher, targetMatcher: matcher, targetDevice: device) else {
                     return false
                 }
 
@@ -90,7 +128,7 @@ extension SchemeState {
     }
 
     var isSchemeValid: Bool {
-        guard device != nil else {
+        guard deviceMatcher != nil else {
             return false
         }
 
@@ -113,16 +151,28 @@ extension SchemeState {
         }
     }
 
+    var targetSpecificSchemes: [EnumeratedSequence<[Scheme]>.Element] {
+        guard let deviceMatcher else {
+            return []
+        }
+
+        if let category = deviceMatcher.categoryOnlyValue {
+            return schemes.allDeviceCategorySpecificSchemes(of: category)
+        }
+
+        return schemes.allDeviceMatcherSpecificSchemes(of: deviceMatcher)
+    }
+
     var scheme: Scheme {
         get {
-            guard let device else {
+            guard let deviceMatcher else {
                 return Scheme()
             }
 
             let (app, processPath) = extractAppComponents(from: currentApp)
 
             if case let .at(index) = schemes.schemeIndex(
-                ofDevice: device,
+                ofDeviceMatcher: deviceMatcher,
                 ofApp: app,
                 ofProcessPath: processPath,
                 ofDisplay: currentDisplay
@@ -130,7 +180,7 @@ extension SchemeState {
                 return schemes[index]
             }
 
-            var ifCondition = Scheme.If(device: .init(of: device))
+            var ifCondition = Scheme.If(device: deviceMatcher)
             ifCondition.app = app
             ifCondition.processPath = processPath
             ifCondition.display = currentDisplay
@@ -139,14 +189,14 @@ extension SchemeState {
         }
 
         set {
-            guard let device else {
+            guard let deviceMatcher else {
                 return
             }
 
             let (app, processPath) = extractAppComponents(from: currentApp)
 
             switch schemes.schemeIndex(
-                ofDevice: device,
+                ofDeviceMatcher: deviceMatcher,
                 ofApp: app,
                 ofProcessPath: processPath,
                 ofDisplay: currentDisplay
@@ -208,14 +258,14 @@ extension SchemeState {
     }
 
     var mergedScheme: Scheme {
-        guard let device else {
+        guard let deviceMatcher else {
             return Scheme()
         }
 
         let (app, processPath) = extractAppComponents(from: currentApp)
 
         return configurationState.configuration.matchScheme(
-            withDevice: device,
+            withDeviceMatcher: deviceMatcher,
             withApp: app,
             withDisplay: currentDisplay,
             withProcessPath: processPath
@@ -226,23 +276,31 @@ extension SchemeState {
         hasMatchingSchemes(forApp: currentApp, forDisplay: currentDisplay)
     }
 
+    func hasMatchingSchemes(for matcher: DeviceMatcher?, forApp app: AppTarget?, forDisplay display: String?) -> Bool {
+        hasMatchingSchemes(for: matcher, device: nil, app: app, display: display)
+    }
+
     func hasMatchingSchemes(for device: Device?, forApp app: AppTarget?, forDisplay display: String?) -> Bool {
-        hasMatchingSchemes(for: device, app: app, display: display)
+        hasMatchingSchemes(for: device.map { DeviceMatcher(of: $0) }, device: device, app: app, display: display)
     }
 
     func hasMatchingSchemes(forApp app: AppTarget?, forDisplay display: String?) -> Bool {
-        hasMatchingSchemes(for: device, app: app, display: display)
+        hasMatchingSchemes(for: deviceMatcher, device: nil, app: app, display: display)
     }
 
     func deleteMatchingSchemes() {
         deleteMatchingSchemes(forApp: currentApp, forDisplay: currentDisplay)
     }
 
+    func deleteMatchingSchemes(for matcher: DeviceMatcher?, forApp app: AppTarget?, forDisplay display: String?) {
+        deleteMatchingSchemes(for: matcher, device: nil, app: app, display: display)
+    }
+
     func deleteMatchingSchemes(for device: Device?, forApp app: AppTarget?, forDisplay display: String?) {
-        deleteMatchingSchemes(for: device, app: app, display: display)
+        deleteMatchingSchemes(for: device.map { DeviceMatcher(of: $0) }, device: device, app: app, display: display)
     }
 
     func deleteMatchingSchemes(forApp app: AppTarget?, forDisplay display: String?) {
-        deleteMatchingSchemes(for: device, app: app, display: display)
+        deleteMatchingSchemes(for: deviceMatcher, device: nil, app: app, display: display)
     }
 }

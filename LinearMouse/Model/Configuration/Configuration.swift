@@ -152,6 +152,44 @@ extension Configuration {
     }
 
     func matchScheme(
+        withDeviceMatcher deviceMatcher: DeviceMatcher? = nil,
+        withApp app: String? = nil,
+        withParentApp parentApp: String? = nil,
+        withGroupApp groupApp: String? = nil,
+        withDisplay display: String? = nil,
+        withProcessName processName: String? = nil,
+        withProcessPath processPath: String? = nil
+    ) -> Scheme {
+        var mergedScheme = Scheme()
+
+        let `if` = Scheme.If(
+            device: deviceMatcher,
+            app: app,
+            parentApp: parentApp,
+            groupApp: groupApp,
+            processName: processName,
+            processPath: processPath,
+            display: display
+        )
+
+        mergedScheme.if = [`if`]
+
+        for scheme in schemes where scheme.isActive(
+            withDeviceMatcher: deviceMatcher,
+            withApp: app,
+            withParentApp: parentApp,
+            withGroupApp: groupApp,
+            withDisplay: display,
+            withProcessName: processName,
+            withProcessPath: processPath
+        ) {
+            scheme.merge(into: &mergedScheme)
+        }
+
+        return mergedScheme
+    }
+
+    func matchScheme(
         withDevice device: Device? = nil,
         withPid pid: pid_t? = nil,
         withDisplay display: String? = nil

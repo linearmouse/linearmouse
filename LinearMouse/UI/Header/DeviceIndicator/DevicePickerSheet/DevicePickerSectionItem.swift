@@ -80,6 +80,56 @@ struct DevicePickerSectionItem: View {
     }
 }
 
+struct DevicePickerCategoryItem: View {
+    var category: DeviceMatcher.Category
+    var isSelected: Bool
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(category.devicePickerTitle)
+                        .font(.body)
+                    Text(category.devicePickerDescription)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                if isSelected, #available(macOS 11.0, *) {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.accentColor)
+                        .accessibilityHidden(true)
+                }
+            }
+            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+        }
+        .buttonStyle(DeviceButtonStyle(isSelected: isSelected))
+    }
+}
+
+private extension DeviceMatcher.Category {
+    var devicePickerTitle: LocalizedStringKey {
+        switch self {
+        case .mouse:
+            return "All Mice"
+        case .trackpad:
+            return "All Trackpads"
+        }
+    }
+
+    var devicePickerDescription: LocalizedStringKey {
+        switch self {
+        case .mouse:
+            return "Applies to every mouse."
+        case .trackpad:
+            return "Applies to every trackpad."
+        }
+    }
+}
+
 private struct BatteryLevelIndicator: View {
     let level: Int
     var compact = false

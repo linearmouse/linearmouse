@@ -61,6 +61,32 @@ extension Scheme {
         }
     }
 
+    func isActive(
+        withDeviceMatcher deviceMatcher: DeviceMatcher? = nil,
+        withApp app: String? = nil,
+        withParentApp parentApp: String? = nil,
+        withGroupApp groupApp: String? = nil,
+        withDisplay display: String? = nil,
+        withProcessName processName: String? = nil,
+        withProcessPath processPath: String? = nil
+    ) -> Bool {
+        guard let `if` else {
+            return true
+        }
+
+        return `if`.contains {
+            $0.isSatisfied(
+                withDeviceMatcher: deviceMatcher,
+                withApp: app,
+                withParentApp: parentApp,
+                withGroupApp: groupApp,
+                withDisplay: display,
+                withProcessName: processName,
+                withProcessPath: processPath
+            )
+        }
+    }
+
     /// A scheme is device-specific if and only if a) it has only one `if` and
     /// b) the `if` contains conditions that specifies both vendorID and productID.
     var isDeviceSpecific: Bool {
@@ -79,6 +105,19 @@ extension Scheme {
         }
 
         return true
+    }
+
+    var isDeviceCategorySpecific: Bool {
+        guard let conditions = `if` else {
+            return false
+        }
+
+        guard conditions.count == 1,
+              let condition = conditions.first else {
+            return false
+        }
+
+        return condition.device?.categoryOnlyValue != nil
     }
 
     var isDisplaySpecific: Bool {
@@ -126,6 +165,35 @@ extension [Scheme] {
         }
     }
 
+    func allDeviceMatcherSpecificSchemes(of matcher: DeviceMatcher) -> [EnumeratedSequence<[Scheme]>.Element] {
+        self.enumerated().filter { _, scheme in
+            guard scheme.isDeviceSpecific else {
+                return false
+            }
+            guard scheme.if?.count == 1, let `if` = scheme.if?.first else {
+                return false
+            }
+            guard `if`.device?.match(with: matcher) == true else {
+                return false
+            }
+            return true
+        }
+    }
+
+    func allDeviceCategorySpecificSchemes(
+        of category: DeviceMatcher.Category
+    ) -> [EnumeratedSequence<[Scheme]>.Element] {
+        self.enumerated().filter { _, scheme in
+            guard scheme.isDeviceCategorySpecific else {
+                return false
+            }
+            guard scheme.if?.first?.device?.categoryOnlyValue == category else {
+                return false
+            }
+            return true
+        }
+    }
+
     enum SchemeIndex {
         case at(Int)
         case insertAt(Int)
@@ -137,14 +205,67 @@ extension [Scheme] {
         ofProcessPath processPath: String?,
         ofDisplay display: String?
     ) -> SchemeIndex {
-        let allDeviceSpecificSchemes = allDeviceSpecficSchemes(of: device)
+        schemeIndex(
+            among: allDeviceSpecficSchemes(of: device),
+            emptyInsertionIndex: endIndex,
+            ofApp: app,
+            ofProcessPath: processPath,
+            ofDisplay: display
+        )
+    }
 
-        guard let first = allDeviceSpecificSchemes.first,
-              let last = allDeviceSpecificSchemes.last else {
-            return .insertAt(self.endIndex)
+    func schemeIndex(
+        ofDeviceMatcher matcher: DeviceMatcher,
+        ofApp app: String?,
+        ofProcessPath processPath: String?,
+        ofDisplay display: String?
+    ) -> SchemeIndex {
+        if let category = matcher.categoryOnlyValue {
+            return schemeIndex(
+                ofDeviceCategory: category,
+                ofApp: app,
+                ofProcessPath: processPath,
+                ofDisplay: display
+            )
         }
 
-        if let (index, _) = allDeviceSpecificSchemes
+        return schemeIndex(
+            among: allDeviceMatcherSpecificSchemes(of: matcher),
+            emptyInsertionIndex: endIndex,
+            ofApp: app,
+            ofProcessPath: processPath,
+            ofDisplay: display
+        )
+    }
+
+    func schemeIndex(
+        ofDeviceCategory category: DeviceMatcher.Category,
+        ofApp app: String?,
+        ofProcessPath processPath: String?,
+        ofDisplay display: String?
+    ) -> SchemeIndex {
+        schemeIndex(
+            among: allDeviceCategorySpecificSchemes(of: category),
+            emptyInsertionIndex: firstDeviceSpecificSchemeIndex(of: category) ?? endIndex,
+            ofApp: app,
+            ofProcessPath: processPath,
+            ofDisplay: display
+        )
+    }
+
+    private func schemeIndex(
+        among matchingSchemes: [EnumeratedSequence<[Scheme]>.Element],
+        emptyInsertionIndex: Int,
+        ofApp app: String?,
+        ofProcessPath processPath: String?,
+        ofDisplay display: String?
+    ) -> SchemeIndex {
+        guard let first = matchingSchemes.first,
+              let last = matchingSchemes.last else {
+            return .insertAt(emptyInsertionIndex)
+        }
+
+        if let (index, _) = matchingSchemes
             .first(where: { _, scheme in
                 scheme.if?.first?.app == app &&
                     scheme.if?.first?.processPath == processPath &&
@@ -162,26 +283,43 @@ extension [Scheme] {
         }
 
         if app != nil {
-            if let (index, _) = allDeviceSpecificSchemes
+            if let (index, _) = matchingSchemes
                 .first(where: { _, scheme in scheme.if?.first?.app == app }) {
                 return .insertAt(index)
             }
         }
 
         if processPath != nil {
-            if let (index, _) = allDeviceSpecificSchemes
+            if let (index, _) = matchingSchemes
                 .first(where: { _, scheme in scheme.if?.first?.processPath == processPath }) {
                 return .insertAt(index)
             }
         }
 
         if display != nil {
-            if let (index, _) = allDeviceSpecificSchemes
+            if let (index, _) = matchingSchemes
                 .first(where: { _, scheme in scheme.if?.first?.display == display }) {
                 return .insertAt(index)
             }
         }
 
         return .insertAt(last.offset + 1)
+    }
+
+    private func firstDeviceSpecificSchemeIndex(of category: DeviceMatcher.Category) -> Int? {
+        enumerated()
+            .first { _, scheme in
+                guard scheme.isDeviceSpecific,
+                      let matcher = scheme.if?.first?.device else {
+                    return false
+                }
+
+                if matcher.category?.contains(category) == true {
+                    return true
+                }
+
+                return scheme.matchedDevices.contains { $0.category == category.deviceCategory }
+            }?
+            .offset
     }
 }

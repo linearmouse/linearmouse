@@ -82,4 +82,66 @@ extension Scheme.If {
 
         return true
     }
+
+    func isSatisfied(
+        withDeviceMatcher targetDeviceMatcher: DeviceMatcher? = nil,
+        withApp targetApp: String? = nil,
+        withParentApp targetParentApp: String?,
+        withGroupApp targetGroupApp: String?,
+        withDisplay targetDisplay: String? = nil,
+        withProcessName targetProcessName: String? = nil,
+        withProcessPath targetProcessPath: String? = nil
+    ) -> Bool {
+        if let device {
+            guard let targetDeviceMatcher else {
+                return false
+            }
+
+            guard device.match(with: targetDeviceMatcher) else {
+                return false
+            }
+        }
+
+        if let app {
+            guard app == targetApp else {
+                return false
+            }
+        }
+
+        if let parentApp {
+            guard parentApp == targetParentApp else {
+                return false
+            }
+        }
+
+        if let groupApp {
+            guard groupApp == targetGroupApp else {
+                return false
+            }
+        }
+
+        if let processName {
+            guard processName == targetProcessName else {
+                return false
+            }
+        }
+
+        if let processPath {
+            guard processPath == targetProcessPath else {
+                return false
+            }
+        }
+
+        if let display {
+            guard let targetDisplay else {
+                return false
+            }
+
+            guard display == targetDisplay else {
+                return false
+            }
+        }
+
+        return true
+    }
 }

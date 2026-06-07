@@ -9,7 +9,6 @@ class AppPickerState: ObservableObject {
     static let shared: AppPickerState = .init()
 
     private let schemeState: SchemeState = .shared
-    private let deviceState: DeviceState = .shared
 
     @Published var installedApps: [InstalledApp] = []
 
@@ -18,11 +17,7 @@ class AppPickerState: ObservableObject {
     }
 
     private var configuredAppSet: Set<String> {
-        guard let device = deviceState.currentDeviceRef?.value else {
-            return []
-        }
-
-        return Set(schemeState.schemes.allDeviceSpecficSchemes(of: device).reduce([String]()) { acc, element in
+        Set(schemeState.targetSpecificSchemes.reduce([String]()) { acc, element in
             guard let app = element.element.if?.first?.app else {
                 return acc
             }
@@ -31,11 +26,7 @@ class AppPickerState: ObservableObject {
     }
 
     private var configuredExecutableSet: Set<String> {
-        guard let device = deviceState.currentDeviceRef?.value else {
-            return []
-        }
-
-        return Set(schemeState.schemes.allDeviceSpecficSchemes(of: device).reduce([String]()) { acc, element in
+        Set(schemeState.targetSpecificSchemes.reduce([String]()) { acc, element in
             guard let processPath = element.element.if?.first?.processPath else {
                 return acc
             }
