@@ -43,6 +43,9 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             0xC52B, // Unifying receiver
             0xC532 // Unifying receiver
         ]
+        static let monitorableBoltReceiverProductIDs: Set<Int> = [
+            0xC548 // Bolt receiver
+        ]
         /// These are recognized as receiver dongles, but receiver monitoring is
         /// intentionally disabled until their protocol/transport path is implemented.
         static let knownReceiverProductIDsWithoutMonitoringSupport: Set<Int> = [
@@ -74,12 +77,11 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             0xC543,
             0xC545,
             0xC547,
-            0xC54D,
-            // Bolt receivers are a different receiver family.
-            0xC548
+            0xC54D
         ]
         static let knownReceiverProductIDs: Set<Int> = [
             monitorableReceiverProductIDs,
+            monitorableBoltReceiverProductIDs,
             knownReceiverProductIDsWithoutMonitoringSupport
         ].reduce(into: []) { result, productIDs in
             result.formUnion(productIDs)
@@ -222,15 +224,36 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         transports: [PointerDeviceTransportName.bluetoothLowEnergy, PointerDeviceTransportName.usb]
     )
 
-    static func supportsReceiverMonitoring(vendorID: Int?, productID: Int?, transport: String?) -> Bool {
+    enum ReceiverProtocolFamily {
+        case classic
+        case bolt
+    }
+
+    static func receiverProtocolFamily(vendorID: Int?, productID: Int?, transport: String?) -> ReceiverProtocolFamily? {
         guard vendorID == Constants.vendorID,
               transport == PointerDeviceTransportName.usb,
               let productID
         else {
-            return false
+            return nil
         }
 
-        return Constants.monitorableReceiverProductIDs.contains(productID)
+        if Constants.monitorableReceiverProductIDs.contains(productID) {
+            return .classic
+        }
+
+        if Constants.monitorableBoltReceiverProductIDs.contains(productID) {
+            return .bolt
+        }
+
+        return nil
+    }
+
+    static func supportsClassicReceiverMonitoring(vendorID: Int?, productID: Int?, transport: String?) -> Bool {
+        receiverProtocolFamily(vendorID: vendorID, productID: productID, transport: transport) == .classic
+    }
+
+    static func supportsReceiverMonitoring(vendorID: Int?, productID: Int?, transport: String?) -> Bool {
+        receiverProtocolFamily(vendorID: vendorID, productID: productID, transport: transport) != nil
     }
 
     static func isKnownReceiver(vendorID: Int?, productID: Int?) -> Bool {
@@ -356,7 +379,15 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         for device: VendorSpecificDeviceContext,
         using receiverChannel: LogitechReceiverChannel
     ) -> ReceiverPointingDeviceDiscovery {
-        receiverChannel.discoverPointingDeviceDiscovery(baseName: device.product ?? device.name)
+        if Self.receiverProtocolFamily(
+            vendorID: device.vendorID,
+            productID: device.productID,
+            transport: device.transport
+        ) == .bolt {
+            return receiverChannel.discoverBoltPointingDeviceDiscovery(baseName: device.product ?? device.name)
+        }
+
+        return receiverChannel.discoverPointingDeviceDiscovery(baseName: device.product ?? device.name)
     }
 
     func receiverSlotIdentity(
@@ -369,7 +400,18 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             return nil
         }
 
-        guard let slotInfo = receiverChannel.discoverSlotInfo(slot, connectionSnapshot: connectionSnapshot) else {
+        let slotInfo: ReceiverSlotInfo?
+        if Self.receiverProtocolFamily(
+            vendorID: device.vendorID,
+            productID: device.productID,
+            transport: device.transport
+        ) == .bolt {
+            slotInfo = receiverChannel.discoverBoltSlotInfo(slot, connectionSnapshot: connectionSnapshot)
+        } else {
+            slotInfo = receiverChannel.discoverSlotInfo(slot, connectionSnapshot: connectionSnapshot)
+        }
+
+        guard let slotInfo else {
             return nil
         }
 
@@ -413,17 +455,51 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             return [:]
         }
 
-        receiverChannel.enableWirelessNotifications()
-        return receiverChannel.waitForConnectionSnapshots(timeout: timeout, until: shouldContinue)
+        return waitForReceiverConnectionChange(
+            for: device,
+            using: receiverChannel,
+            timeout: timeout,
+            until: shouldContinue
+        )
     }
 
     func waitForReceiverConnectionChange(
+        for device: VendorSpecificDeviceContext,
         using receiverChannel: LogitechReceiverChannel,
         timeout: TimeInterval,
         until shouldContinue: @escaping () -> Bool
     ) -> [UInt8: ReceiverConnectionSnapshot] {
-        receiverChannel.enableWirelessNotifications()
-        return receiverChannel.waitForConnectionSnapshots(timeout: timeout, until: shouldContinue)
+        switch Self.receiverProtocolFamily(
+            vendorID: device.vendorID,
+            productID: device.productID,
+            transport: device.transport
+        ) {
+        case .classic:
+            receiverChannel.enableWirelessNotifications()
+            return receiverChannel.waitForConnectionSnapshots(timeout: timeout, until: shouldContinue)
+        case .bolt:
+            return receiverChannel.waitForBoltConnectionSnapshots(timeout: timeout, until: shouldContinue)
+        case nil:
+            return [:]
+        }
+    }
+
+    func receiverChannelIsReachable(
+        for device: VendorSpecificDeviceContext,
+        using receiverChannel: LogitechReceiverChannel
+    ) -> Bool {
+        switch Self.receiverProtocolFamily(
+            vendorID: device.vendorID,
+            productID: device.productID,
+            transport: device.transport
+        ) {
+        case .classic:
+            return receiverChannel.readNotificationFlags() != nil
+        case .bolt:
+            return receiverChannel.isBoltReceiverReachable()
+        case nil:
+            return false
+        }
     }
 
     private func metadata(using transport: LogitechHIDPPTransport) -> VendorSpecificDeviceMetadata? {
@@ -542,7 +618,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         }
     }
 
-    fileprivate func readFriendlyName(using transport: LogitechHIDPPTransport) -> String? {
+    func readFriendlyName(using transport: LogitechHIDPPTransport) -> String? {
         guard let featureIndex = transport.featureIndex(for: .deviceFriendlyName),
               let lengthResponse = transport.request(featureIndex: featureIndex, function: 0x00, parameters: []),
               let length = lengthResponse.payload.first,
@@ -559,7 +635,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         )
     }
 
-    fileprivate func readName(using transport: LogitechHIDPPTransport) -> String? {
+    func readName(using transport: LogitechHIDPPTransport) -> String? {
         guard let featureIndex = transport.featureIndex(for: .deviceName),
               let lengthResponse = transport.request(featureIndex: featureIndex, function: 0x00, parameters: []),
               let length = lengthResponse.payload.first,
@@ -649,7 +725,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         return nil
     }
 
-    fileprivate func readReceiverBatteryLevel(using transport: LogitechHIDPPTransport) -> Int? {
+    func readReceiverBatteryLevel(using transport: LogitechHIDPPTransport) -> Int? {
         readBatteryLevel(using: transport)
     }
 
@@ -1727,7 +1803,7 @@ final class LogitechReprogrammableControlsMonitor {
         case PointerDeviceTransportName.bluetoothLowEnergy:
             return true
         case PointerDeviceTransportName.usb:
-            return LogitechHIDPPDeviceMetadataProvider.supportsReceiverMonitoring(
+            return LogitechHIDPPDeviceMetadataProvider.supportsClassicReceiverMonitoring(
                 vendorID: vendorID,
                 productID: productID,
                 transport: transport

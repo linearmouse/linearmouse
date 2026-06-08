@@ -82,6 +82,23 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         )
     }
 
+    func testLogitechReceiverMonitoringAllowsSupportedBoltReceiverProductIDs() {
+        XCTAssertTrue(
+            LogitechHIDPPDeviceMetadataProvider.supportsReceiverMonitoring(
+                vendorID: 0x046D,
+                productID: 0xC548,
+                transport: PointerDeviceTransportName.usb
+            )
+        )
+        XCTAssertFalse(
+            LogitechHIDPPDeviceMetadataProvider.supportsClassicReceiverMonitoring(
+                vendorID: 0x046D,
+                productID: 0xC548,
+                transport: PointerDeviceTransportName.usb
+            )
+        )
+    }
+
     func testLogitechReceiverMonitoringRejectsReceiversWithoutImplementedProtocolSupport() {
         XCTAssertFalse(
             LogitechHIDPPDeviceMetadataProvider.supportsReceiverMonitoring(
@@ -100,7 +117,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertFalse(
             LogitechHIDPPDeviceMetadataProvider.supportsReceiverMonitoring(
                 vendorID: 0x046D,
-                productID: 0xC548,
+                productID: 0xC541,
                 transport: PointerDeviceTransportName.usb
             )
         )
@@ -168,7 +185,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertEqual(device.outputReportRequestCount, 0)
     }
 
-    func testLogitechControlsMonitorUsesReceiverWhitelistForUsbDevices() {
+    func testLogitechControlsMonitorUsesReceiverAllowlistForUsbDevices() {
         XCTAssertTrue(
             LogitechReprogrammableControlsMonitor.supports(
                 vendorID: 0x046D,
@@ -180,6 +197,13 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             LogitechReprogrammableControlsMonitor.supports(
                 vendorID: 0x046D,
                 productID: 0xC539,
+                transport: PointerDeviceTransportName.usb
+            )
+        )
+        XCTAssertFalse(
+            LogitechReprogrammableControlsMonitor.supports(
+                vendorID: 0x046D,
+                productID: 0xC548,
                 transport: PointerDeviceTransportName.usb
             )
         )
@@ -204,6 +228,33 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
                 transport: PointerDeviceTransportName.usb
             )
         )
+    }
+
+    func testBoltReceiverPairingInfoParserUsesBoltRegisterLayout() {
+        let response: [UInt8] = [
+            0x11, 0xFF, 0x83, 0xB5, 0x52, 0x02, 0x3E, 0xB0, 0xEF, 0x0F,
+            0x42, 0x5B, 0x02, 0x01, 0x80, 0x14, 0x01, 0x00, 0x00, 0x00
+        ]
+
+        XCTAssertEqual(LogitechReceiverChannel.parseBoltReceiverKind(response), 0x02)
+        XCTAssertEqual(LogitechReceiverChannel.parseBoltReceiverProductID(response), 0xB03E)
+        XCTAssertEqual(LogitechReceiverChannel.parseBoltReceiverSerialNumber(response), "EF0F425B")
+    }
+
+    func testBoltReceiverNameParserUsesAvailableNameFragment() {
+        let response: [UInt8] = [
+            0x11, 0xFF, 0x83, 0xB5, 0x62, 0x01, 0x0E, 0x4D, 0x58, 0x20,
+            0x45, 0x72, 0x67, 0x6F, 0x20, 0x53, 0x20, 0x50, 0x6C, 0x75
+        ]
+
+        XCTAssertEqual(LogitechReceiverChannel.parseBoltReceiverName(response), "MX Ergo S Plu")
+    }
+
+    func testBoltReceiverParsersRejectShortResponses() {
+        XCTAssertNil(LogitechReceiverChannel.parseBoltReceiverKind([0x11, 0xFF, 0x83]))
+        XCTAssertNil(LogitechReceiverChannel.parseBoltReceiverProductID([0x11, 0xFF, 0x83]))
+        XCTAssertNil(LogitechReceiverChannel.parseBoltReceiverSerialNumber([0x11, 0xFF, 0x83]))
+        XCTAssertNil(LogitechReceiverChannel.parseBoltReceiverName([0x11, 0xFF, 0x83]))
     }
 
     func testLogitechControlsMonitorNeedsMatchingDirectBluetoothLowEnergyConfiguration() {
