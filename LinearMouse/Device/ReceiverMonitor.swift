@@ -315,6 +315,7 @@ private final class ReceiverContext {
 
             // Wait for connection events (event-driven, no periodic rescan)
             let connectionSnapshots = provider.waitForReceiverConnectionChange(
+                for: device.pointerDevice,
                 using: receiverChannel,
                 timeout: ReceiverMonitor.refreshInterval
             ) { [weak self] in
@@ -327,7 +328,7 @@ private final class ReceiverContext {
 
             guard !connectionSnapshots.isEmpty else {
                 // Timeout with no events — verify channel is still alive
-                if receiverChannel.readNotificationFlags() == nil {
+                if !provider.receiverChannelIsReachable(for: device.pointerDevice, using: receiverChannel) {
                     os_log(
                         "Receiver channel appears dead, will reopen: locationID=%{public}d device=%{public}@",
                         log: ReceiverMonitor.log,
