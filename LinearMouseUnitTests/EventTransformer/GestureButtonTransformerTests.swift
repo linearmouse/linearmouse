@@ -57,7 +57,7 @@ final class GestureButtonTransformerTests: XCTestCase {
 
         XCTAssertEqual(
             transformer.handleLogitechControlEvent(logitechContext(pressed: true)),
-            .handledAllowingSyntheticFallback
+            .handledDeferringSyntheticFallback
         )
         XCTAssertEqual(
             transformer.handleLogitechControlEvent(logitechContext(pressed: false)),
@@ -77,18 +77,18 @@ final class GestureButtonTransformerTests: XCTestCase {
         )
     }
 
-    func testLogitechControlGestureAllowsSyntheticFallbackForCleanupRelease() throws {
+    func testLogitechControlGestureSuppressesSyntheticFallbackForCleanupRelease() throws {
         let transformer = makeLogitechGestureTransformer()
 
         XCTAssertEqual(
             transformer.handleLogitechControlEvent(logitechContext(pressed: true)),
-            .handledAllowingSyntheticFallback
+            .handledDeferringSyntheticFallback
         )
 
         XCTAssertNil(try transformer.transform(makeMouseMovedEvent(deltaX: testGestureThreshold)))
         XCTAssertEqual(
             transformer.handleLogitechControlEvent(logitechContext(pressed: false)),
-            .handledAllowingSyntheticFallback
+            .handled
         )
     }
 
@@ -97,12 +97,12 @@ final class GestureButtonTransformerTests: XCTestCase {
 
         XCTAssertEqual(
             transformer.handleLogitechControlEvent(logitechContext(pressed: true)),
-            .handledAllowingSyntheticFallback
+            .handledDeferringSyntheticFallback
         )
         XCTAssertNil(try transformer.transform(makeMouseMovedEvent(deltaX: testGestureThreshold)))
         XCTAssertEqual(
             transformer.handleLogitechControlEvent(logitechContext(pressed: false)),
-            .handledAllowingSyntheticFallback
+            .handled
         )
         XCTAssertEqual(
             transformer.handleLogitechControlEvent(logitechContext(pressed: true)),

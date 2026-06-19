@@ -13,9 +13,10 @@ enum LogitechControlEventHandlingResult {
     case notHandled
     case handled
     case handledAllowingSyntheticFallback
+    case handledDeferringSyntheticFallback
 
     var suppressesSyntheticFallback: Bool {
-        self == .handled
+        self == .handled || self == .handledDeferringSyntheticFallback
     }
 }
 
