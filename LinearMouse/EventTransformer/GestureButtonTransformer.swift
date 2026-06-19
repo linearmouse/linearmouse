@@ -298,7 +298,7 @@ extension GestureButtonTransformer: LogitechControlEventHandling {
                 }
 
                 state = .cooldown(until: until, released: true)
-                return .handledAllowingSyntheticFallback
+                return .handled
             }
             state = .idle
         }
@@ -309,7 +309,7 @@ extension GestureButtonTransformer: LogitechControlEventHandling {
             }
             state = .tracking(startTime: DispatchTime.now().uptimeNanoseconds, deltaX: 0, deltaY: 0)
             os_log("Started tracking gesture (Logitech control)", log: Self.log, type: .info)
-            return .handledAllowingSyntheticFallback
+            return .handledDeferringSyntheticFallback
         }
 
         switch state {

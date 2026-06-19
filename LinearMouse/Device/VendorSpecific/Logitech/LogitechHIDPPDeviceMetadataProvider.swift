@@ -2249,25 +2249,39 @@ final class LogitechReprogrammableControlsMonitor {
                             EventTransformerManager.shared.handleLogitechControlEvent(logitechContext)
                         } ?? .notHandled
 
-                        guard !handlingResult.suppressesSyntheticFallback else {
+                        let fallbackAction = state.syntheticFallbackAction(
+                            for: controlIdentity,
+                            isPressed: isPressed,
+                            handlingResult: handlingResult
+                        )
+
+                        guard fallbackAction != .suppress else {
                             continue
                         }
 
                         os_log(
-                            "Logitech control event was not handled internally; posting synthetic fallback: locationID=%{public}d slot=%{public}u device=%{public}@ cid=0x%{public}04X identityFallback=%{public}@",
+                            "Posting Logitech synthetic fallback: locationID=%{public}d slot=%{public}u device=%{public}@ cid=0x%{public}04X action=%{public}@ identityFallback=%{public}@",
                             log: Self.log,
                             type: .info,
                             locationID,
                             slot,
                             targetName,
                             controlID,
+                            String(describing: fallbackAction),
                             monitorTarget.allowsIdentityFallback ? "true" : "false"
                         )
 
-                        postSyntheticButton(
-                            button: reservedVirtualButtonNumber,
-                            down: isPressed
-                        )
+                        switch fallbackAction {
+                        case .suppress:
+                            break
+                        case .postCurrentEvent:
+                            postSyntheticButton(
+                                button: reservedVirtualButtonNumber,
+                                down: isPressed
+                            )
+                        case .postClick:
+                            postSyntheticClick(button: reservedVirtualButtonNumber)
+                        }
                     }
                 }
             }
@@ -2946,6 +2960,11 @@ final class LogitechReprogrammableControlsMonitor {
         SyntheticMouseButtonEventEmitter.post(button: button, down: down)
     }
 
+    private func postSyntheticClick(button: Int) {
+        postSyntheticButton(button: button, down: true)
+        postSyntheticButton(button: button, down: false)
+    }
+
     private func releaseButtonIfNeeded() {
         let buttonsToRelease = state.takePressedButtons()
 
@@ -3082,6 +3101,48 @@ final class LogitechReprogrammableControlsMonitor {
     }
 }
 
+enum LogitechSyntheticFallbackAction: Equatable {
+    case suppress
+    case postCurrentEvent
+    case postClick
+}
+
+struct LogitechSyntheticFallbackCoordinator {
+    private var deferredControls = Set<LogitechControlIdentity>()
+
+    mutating func action(
+        for controlIdentity: LogitechControlIdentity,
+        isPressed: Bool,
+        handlingResult: LogitechControlEventHandlingResult
+    ) -> LogitechSyntheticFallbackAction {
+        if isPressed {
+            switch handlingResult {
+            case .handledDeferringSyntheticFallback:
+                deferredControls.insert(controlIdentity)
+                return .suppress
+            case .handled:
+                deferredControls.remove(controlIdentity)
+                return .suppress
+            case .handledAllowingSyntheticFallback, .notHandled:
+                deferredControls.remove(controlIdentity)
+                return .postCurrentEvent
+            }
+        }
+
+        let wasDeferred = deferredControls.remove(controlIdentity) != nil
+
+        if handlingResult.suppressesSyntheticFallback {
+            return .suppress
+        }
+
+        return wasDeferred ? .postClick : .postCurrentEvent
+    }
+
+    mutating func reset() {
+        deferredControls.removeAll()
+    }
+}
+
 private final class LogitechReprogrammableControlsMonitorState {
     private typealias WorkerResources = (Thread?, HIDPPNotificationHandling?, ObservationToken?)
 
@@ -3095,6 +3156,7 @@ private final class LogitechReprogrammableControlsMonitorState {
     private var needsReconfiguration = false
     private var needsForcedReconfiguration = false
     private var pressedButtons = Set<Int>()
+    private var syntheticFallbackCoordinator = LogitechSyntheticFallbackCoordinator()
 
     var shouldContinueRunning: Bool {
         queue.sync { isEnabled } && !Thread.current.isCancelled
@@ -3245,9 +3307,26 @@ private final class LogitechReprogrammableControlsMonitorState {
         queue.sync { down ? pressedButtons.insert(button).inserted : pressedButtons.remove(button) != nil }
     }
 
+    func syntheticFallbackAction(
+        for controlIdentity: LogitechControlIdentity,
+        isPressed: Bool,
+        handlingResult: LogitechControlEventHandlingResult
+    ) -> LogitechSyntheticFallbackAction {
+        queue.sync {
+            syntheticFallbackCoordinator.action(
+                for: controlIdentity,
+                isPressed: isPressed,
+                handlingResult: handlingResult
+            )
+        }
+    }
+
     func takePressedButtons() -> Set<Int> {
         queue.sync {
-            defer { pressedButtons.removeAll() }
+            defer {
+                pressedButtons.removeAll()
+                syntheticFallbackCoordinator.reset()
+            }
             return pressedButtons
         }
     }

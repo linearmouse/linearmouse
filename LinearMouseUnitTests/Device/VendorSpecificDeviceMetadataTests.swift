@@ -473,6 +473,65 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         )
     }
 
+    func testLogitechSyntheticFallbackDefersGestureClickUntilRelease() {
+        var coordinator = LogitechSyntheticFallbackCoordinator()
+        let controlIdentity = LogitechControlIdentity(controlID: 0x00D0, productID: 0xB015, serialNumber: "ABC")
+
+        XCTAssertEqual(
+            coordinator.action(
+                for: controlIdentity,
+                isPressed: true,
+                handlingResult: .handledDeferringSyntheticFallback
+            ),
+            .suppress
+        )
+        XCTAssertEqual(
+            coordinator.action(for: controlIdentity, isPressed: false, handlingResult: .notHandled),
+            .postClick
+        )
+    }
+
+    func testLogitechSyntheticFallbackCancelsDeferredClickWhenGestureHandlesRelease() {
+        var coordinator = LogitechSyntheticFallbackCoordinator()
+        let controlIdentity = LogitechControlIdentity(controlID: 0x00D0, productID: 0xB015, serialNumber: "ABC")
+
+        _ = coordinator.action(
+            for: controlIdentity,
+            isPressed: true,
+            handlingResult: .handledDeferringSyntheticFallback
+        )
+
+        XCTAssertEqual(
+            coordinator.action(for: controlIdentity, isPressed: false, handlingResult: .handled),
+            .suppress
+        )
+    }
+
+    func testLogitechSyntheticFallbackSeparatesDeferredClicksByIdentity() {
+        var coordinator = LogitechSyntheticFallbackCoordinator()
+        let firstControl = LogitechControlIdentity(controlID: 0x00D0, productID: 0xB015, serialNumber: "ABC")
+        let secondControl = LogitechControlIdentity(controlID: 0x00D0, productID: 0xB015, serialNumber: "DEF")
+
+        _ = coordinator.action(
+            for: firstControl,
+            isPressed: true,
+            handlingResult: .handledDeferringSyntheticFallback
+        )
+
+        XCTAssertEqual(
+            coordinator.action(for: secondControl, isPressed: true, handlingResult: .notHandled),
+            .postCurrentEvent
+        )
+        XCTAssertEqual(
+            coordinator.action(for: secondControl, isPressed: false, handlingResult: .notHandled),
+            .postCurrentEvent
+        )
+        XCTAssertEqual(
+            coordinator.action(for: firstControl, isPressed: false, handlingResult: .notHandled),
+            .postClick
+        )
+    }
+
     func testLogitechControlIdentityProvidesFriendlyUserVisibleName() {
         XCTAssertEqual(
             LogitechControlIdentity(controlID: 0x00D0, productID: nil, serialNumber: nil)
