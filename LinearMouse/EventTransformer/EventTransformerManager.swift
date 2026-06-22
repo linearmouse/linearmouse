@@ -217,6 +217,9 @@ class EventTransformerManager {
         )
 
         var eventTransformer: [EventTransformer] = []
+        let highResolutionWheelMultiplier = { [weak device] in
+            device?.highResolutionWheelNormalizationMultiplier
+        }
 
         if let reverse = scheme.scrolling.$reverse {
             let vertical = reverse.vertical ?? false
@@ -237,6 +240,22 @@ class EventTransformerManager {
         let scrollButtonMappings = buttonMappings.filter { $0.scroll != nil }
         let otherButtonMappings = buttonMappings.filter { $0.scroll == nil }
         let buttonActionsRuntimeState = ButtonActionsTransformer.RuntimeState()
+        if device != nil {
+            let highResolutionWheelNormalizer = LogitechHighResolutionWheelNormalizer(
+                verticalMode: highResolutionWheelNormalizerMode(
+                    distance: scheme.scrolling.distance.vertical,
+                    smoothed: smoothed.vertical
+                ),
+                horizontalMode: highResolutionWheelNormalizerMode(
+                    distance: scheme.scrolling.distance.horizontal,
+                    smoothed: smoothed.horizontal
+                ),
+                multiplier: highResolutionWheelMultiplier
+            )
+            if highResolutionWheelNormalizer.normalizesAnyAxis {
+                eventTransformer.append(highResolutionWheelNormalizer)
+            }
+        }
 
         func appendScrollButtonMappings() {
             guard !scrollButtonMappings.isEmpty else {
@@ -268,13 +287,19 @@ class EventTransformerManager {
 
         if let distance = scheme.scrolling.distance.horizontal {
             if smoothed.horizontal == nil {
-                eventTransformer.append(LinearScrollingHorizontalTransformer(distance: distance))
+                eventTransformer.append(LinearScrollingHorizontalTransformer(
+                    distance: distance,
+                    highResolutionWheelMultiplier: highResolutionWheelMultiplier
+                ))
             }
         }
 
         if let distance = scheme.scrolling.distance.vertical {
             if smoothed.vertical == nil {
-                eventTransformer.append(LinearScrollingVerticalTransformer(distance: distance))
+                eventTransformer.append(LinearScrollingVerticalTransformer(
+                    distance: distance,
+                    highResolutionWheelMultiplier: highResolutionWheelMultiplier
+                ))
             }
         }
 
@@ -358,6 +383,22 @@ class EventTransformerManager {
         eventTransformerCache.setValue(eventTransformer, forKey: cacheKey)
 
         return eventTransformer
+    }
+
+    private func highResolutionWheelNormalizerMode(
+        distance: Scheme.Scrolling.Distance?,
+        smoothed: Scheme.Scrolling.Smoothed?
+    ) -> LogitechHighResolutionWheelNormalizer.AxisMode {
+        if smoothed != nil {
+            return .smoothed
+        }
+
+        switch distance {
+        case .some(.line), .some(.pixel):
+            return .passthrough
+        case .some(.auto), nil:
+            return .lowResolution
+        }
     }
 
     private func autoScrollTransformer(for autoScroll: Scheme.Buttons.AutoScroll?) -> AutoScrollTransformer? {

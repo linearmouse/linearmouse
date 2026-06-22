@@ -8,9 +8,18 @@ class LinearScrollingHorizontalTransformer: EventTransformer {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "LinearScrollingHorizontal")
 
     private let distance: Scheme.Scrolling.Distance
+    private let highResolutionWheelMultiplier: () -> Int?
+    private let now: () -> TimeInterval
+    private var highResolutionWheelCounter = LogitechHighResolutionWheelScrollCounter()
 
-    init(distance: Scheme.Scrolling.Distance) {
+    init(
+        distance: Scheme.Scrolling.Distance,
+        highResolutionWheelMultiplier: @escaping () -> Int? = { nil },
+        now: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime }
+    ) {
         self.distance = distance
+        self.highResolutionWheelMultiplier = highResolutionWheelMultiplier
+        self.now = now
     }
 
     func transform(_ event: CGEvent) -> CGEvent? {
@@ -37,21 +46,26 @@ class LinearScrollingHorizontalTransformer: EventTransformer {
         }
 
         let (continuous, oldValue) = (view.continuous, view.matrixValue)
-        let deltaXSignum = view.deltaXSignum
 
         switch distance {
         case .auto:
             return event
 
         case let .line(value):
+            guard let normalizedUnits = lowResolutionUnits(from: view) else {
+                return nil
+            }
+
             view.continuous = false
-            view.deltaX = deltaXSignum * Int64(value)
+            view.deltaX = Int64(normalizedUnits * value)
             view.deltaY = 0
 
         case let .pixel(value):
+            let pixelValue = highResolutionPixelUnits(from: view) * value.asTruncatedDouble
+
             view.continuous = true
-            view.deltaXPt = Double(deltaXSignum) * value.asTruncatedDouble
-            view.deltaXFixedPt = Double(deltaXSignum) * value.asTruncatedDouble
+            view.deltaXPt = pixelValue
+            view.deltaXFixedPt = pixelValue
             view.deltaYPt = 0
             view.deltaYFixedPt = 0
         }
@@ -66,5 +80,29 @@ class LinearScrollingHorizontalTransformer: EventTransformer {
         )
 
         return event
+    }
+
+    private func lowResolutionUnits(from view: ScrollWheelEventView) -> Int? {
+        guard let multiplier = highResolutionWheelMultiplier(),
+              multiplier > 1,
+              view.deltaX != 0 else {
+            return Int(view.deltaXSignum)
+        }
+
+        return highResolutionWheelCounter.consume(
+            units: Int(view.deltaX),
+            multiplier: multiplier,
+            now: now()
+        )
+    }
+
+    private func highResolutionPixelUnits(from view: ScrollWheelEventView) -> Double {
+        guard let multiplier = highResolutionWheelMultiplier(),
+              multiplier > 1,
+              view.deltaX != 0 else {
+            return Double(view.deltaXSignum)
+        }
+
+        return Double(view.deltaX) / Double(multiplier)
     }
 }

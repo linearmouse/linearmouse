@@ -97,6 +97,11 @@
           "description": "This value can be a single condition or an array. A scheme is activated if at least one of the conditions is met.",
           "title": "Scheme activation conditions"
         },
+        "logitech": {
+          "$ref": "#/definitions/Scheme.Logitech",
+          "description": "Customize supported Logitech HID++ device behavior.",
+          "title": "Logitech settings"
+        },
         "pointer": {
           "$ref": "#/definitions/Scheme.Pointer",
           "description": "Customize the pointer acceleration and speed.",
@@ -1118,6 +1123,17 @@
       "description": "Match trackpad devices.",
       "title": "Trackpad",
       "type": "string"
+    },
+    "Scheme.Logitech": {
+      "additionalProperties": false,
+      "properties": {
+        "highResolutionWheel": {
+          "description": "Enable finer vertical wheel steps on supported Logitech HID++ mice.",
+          "title": "High resolution wheel",
+          "type": "boolean"
+        }
+      },
+      "type": "object"
     },
     "Scheme.Pointer": {
       "additionalProperties": false,

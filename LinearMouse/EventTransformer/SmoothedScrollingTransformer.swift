@@ -375,11 +375,11 @@ private struct SmoothedScrollEventDelivery {
                 return view.deltaXFixedPt * Self.inputLineStepInPoints * 10
             }
         }
-        if view.deltaXPt != 0 {
-            return view.deltaXPt
-        }
         if view.deltaXFixedPt != 0 {
             return view.deltaXFixedPt
+        }
+        if view.deltaXPt != 0 {
+            return view.deltaXPt
         }
         return Double(view.deltaX) * Self.inputLineStepInPoints
     }
@@ -396,11 +396,11 @@ private struct SmoothedScrollEventDelivery {
                 return view.deltaYFixedPt * Self.inputLineStepInPoints * 10
             }
         }
-        if view.deltaYPt != 0 {
-            return view.deltaYPt
-        }
         if view.deltaYFixedPt != 0 {
             return view.deltaYFixedPt
+        }
+        if view.deltaYPt != 0 {
+            return view.deltaYPt
         }
         return Double(view.deltaY) * Self.inputLineStepInPoints
     }

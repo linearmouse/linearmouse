@@ -40,4 +40,51 @@ final class LinearScrollingTransformerTests: XCTestCase {
         XCTAssertEqual(view.deltaXFixedPt, 0)
         XCTAssertEqual(view.deltaYFixedPt, 36)
     }
+
+    func testHighResolutionWheelLineScrollingUsesMultiplier() throws {
+        let transformer = LinearScrollingVerticalTransformer(
+            distance: .line(3),
+            highResolutionWheelMultiplier: { 8 },
+            now: { 0 }
+        )
+
+        for _ in 0 ..< 3 {
+            XCTAssertNil(try transformer.transform(makeVerticalScrollEvent()))
+        }
+
+        let transformedEvent = try XCTUnwrap(try transformer.transform(makeVerticalScrollEvent()))
+        let view = ScrollWheelEventView(transformedEvent)
+
+        XCTAssertFalse(view.continuous)
+        XCTAssertEqual(view.deltaX, 0)
+        XCTAssertEqual(view.deltaY, 3)
+    }
+
+    func testHighResolutionWheelPixelScrollingUsesMultiplier() throws {
+        let transformer = LinearScrollingVerticalTransformer(
+            distance: .pixel(36),
+            highResolutionWheelMultiplier: { 8 },
+            now: { 0 }
+        )
+
+        let transformedEvent = try XCTUnwrap(try transformer.transform(makeVerticalScrollEvent()))
+        let view = ScrollWheelEventView(transformedEvent)
+
+        XCTAssertTrue(view.continuous)
+        XCTAssertEqual(view.deltaXFixedPt, 0)
+        XCTAssertGreaterThan(view.deltaYPt, 0)
+        XCTAssertLessThan(view.deltaYPt, 36)
+        XCTAssertEqual(view.deltaYFixedPt, 4.5, accuracy: 0.001)
+    }
+
+    private func makeVerticalScrollEvent() throws -> CGEvent {
+        try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: 1,
+            wheel2: 0,
+            wheel3: 0
+        ))
+    }
 }

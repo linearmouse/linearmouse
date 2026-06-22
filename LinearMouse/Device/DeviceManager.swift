@@ -102,6 +102,7 @@ class DeviceManager: ObservableObject {
                 DispatchQueue.main.async {
                     self.updatePointerSpeed()
                     self.updateHardwareDPI()
+                    self.updateHighResolutionWheel()
                 }
             }
             .store(in: &subscriptions)
@@ -151,6 +152,7 @@ class DeviceManager: ObservableObject {
 
         updatePointerSpeed(for: device)
         updateHardwareDPI(for: device)
+        updateHighResolutionWheel(for: device)
 
         if shouldMonitorReceiver(device) {
             receiverMonitor.startMonitoring(device: device)
@@ -348,6 +350,36 @@ class DeviceManager: ObservableObject {
         }
 
         device.applyConfiguredHardwareDPI(hardwareDPI)
+    }
+
+    func updateHighResolutionWheel() {
+        guard state == .running else {
+            return
+        }
+
+        for device in devices {
+            updateHighResolutionWheel(for: device)
+        }
+    }
+
+    func updateHighResolutionWheel(for device: Device) {
+        guard state == .running else {
+            return
+        }
+
+        let schemes = ConfigurationState.shared.configuration.schemes
+        guard case let .at(index) = schemes.schemeIndex(
+            ofDevice: device,
+            ofApp: nil,
+            ofProcessPath: nil,
+            ofDisplay: nil
+        ),
+            let highResolutionWheel = schemes[index].logitech.highResolutionWheel
+        else {
+            return
+        }
+
+        device.applyConfiguredHighResolutionWheel(highResolutionWheel)
     }
 
     func restorePointerSpeedToInitialValue() {
