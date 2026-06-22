@@ -410,6 +410,21 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         XCTAssertGreaterThan(abs(extended.deltaYPt), abs(baseline.deltaYPt) * 1.25)
     }
 
+    func testSmoothedPointDeltaAccumulatorCarriesFractionalPixels() {
+        var accumulator = SmoothedScrollPointDeltaAccumulator()
+
+        XCTAssertEqual(accumulator.verticalPointDelta(for: 0.4), 0)
+        XCTAssertEqual(accumulator.verticalPointDelta(for: 0.4), 0)
+        XCTAssertEqual(accumulator.verticalPointDelta(for: 0.4), 1)
+        XCTAssertEqual(accumulator.verticalPointDelta(for: -0.2), 0)
+
+        XCTAssertEqual(accumulator.horizontalPointDelta(for: -0.6), 0)
+        XCTAssertEqual(accumulator.horizontalPointDelta(for: -0.6), -1)
+
+        accumulator.reset()
+        XCTAssertEqual(accumulator.verticalPointDelta(for: 0.6), 0)
+    }
+
     private func firstDiscreteEmission(
         configuration: Scheme.Scrolling.Smoothed
     ) throws -> ScrollWheelEventView {
