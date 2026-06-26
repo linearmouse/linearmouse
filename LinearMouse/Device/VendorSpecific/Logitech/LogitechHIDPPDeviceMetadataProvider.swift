@@ -350,6 +350,36 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         receiverPointingDeviceDiscovery(for: device).identities
     }
 
+    func receiverSlot(
+        for device: VendorSpecificDeviceContext,
+        identities: [ReceiverLogicalDeviceIdentity]
+    ) -> UInt8? {
+        let normalizedSerial = normalizeSerial(device.serialNumber)
+        if let serialMatch = uniqueIdentityMatch(identities, matching: {
+            normalizedSerial != nil && normalizeSerial($0.serialNumber) == normalizedSerial
+        }) {
+            return serialMatch.slot
+        }
+
+        if let productID = device.productID,
+           let productIDMatch = uniqueIdentityMatch(identities, matching: { $0.productID == productID }) {
+            return productIDMatch.slot
+        }
+
+        let normalizedName = normalizeName(device.product ?? device.name)
+        if let nameMatch = uniqueIdentityMatch(identities, matching: {
+            normalizeName($0.name) == normalizedName
+        }) {
+            return nameMatch.slot
+        }
+
+        guard identities.count == 1 else {
+            return nil
+        }
+
+        return identities[0].slot
+    }
+
     func openReceiverChannel(for device: VendorSpecificDeviceContext) -> LogitechReceiverChannel? {
         guard device.transport == PointerDeviceTransportName.usb,
               let locationID = device.locationID
@@ -746,12 +776,29 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    private func normalizeName(_ name: String?) -> String? {
+        guard let name else {
+            return nil
+        }
+
+        let normalized = normalizeName(name)
+        return normalized.isEmpty ? nil : normalized
+    }
+
     private func normalizeSerial(_ serialNumber: String?) -> String? {
         guard let serialNumber, !serialNumber.isEmpty else {
             return nil
         }
 
         return serialNumber.uppercased().replacingOccurrences(of: ":", with: "")
+    }
+
+    private func uniqueIdentityMatch(
+        _ identities: [ReceiverLogicalDeviceIdentity],
+        matching matches: (ReceiverLogicalDeviceIdentity) -> Bool
+    ) -> ReceiverLogicalDeviceIdentity? {
+        let matchingIdentities = identities.filter(matches)
+        return matchingIdentities.count == 1 ? matchingIdentities[0] : nil
     }
 
     static func parseReceiverConnectionNotification(

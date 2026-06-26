@@ -101,7 +101,11 @@ struct LogitechHIDPPDeviceDPIController {
             function: Constants.setSensorDPIFunction,
             parameters: [0x00, UInt8((targetDPI >> 8) & 0xFF), UInt8(targetDPI & 0xFF)]
         )
-        return response == nil ? nil : targetDPI
+        if response != nil || currentDPI() == targetDPI {
+            return targetDPI
+        }
+
+        return nil
     }
 
     func supportedDPI(nearestTo dpi: Int) -> Int {
@@ -143,7 +147,7 @@ struct LogitechHIDPPDeviceDPIController {
     ) -> Self? {
         guard device.transport == PointerDeviceTransportName.usb,
               let receiverChannel = provider.openReceiverChannel(for: device),
-              let slot = provider.receiverSlot(for: device, using: receiverChannel),
+              let slot = receiverSlot(for: device, using: receiverChannel, provider: provider),
               let transport = LogitechHIDPPTransport(device: receiverChannel, deviceIndex: slot),
               let featureIndex = transport.featureIndex(for: .adjustableDPI)
         else {
@@ -156,6 +160,26 @@ struct LogitechHIDPPDeviceDPIController {
             featureIndex: featureIndex,
             supportedDPI: supportedDPI
         )
+    }
+
+    private static func receiverSlot(
+        for device: VendorSpecificDeviceContext,
+        using receiverChannel: LogitechReceiverChannel,
+        provider: LogitechHIDPPDeviceMetadataProvider
+    ) -> UInt8? {
+        switch LogitechHIDPPDeviceMetadataProvider.receiverProtocolFamily(
+            vendorID: device.vendorID,
+            productID: device.productID,
+            transport: device.transport
+        ) {
+        case .classic:
+            return provider.receiverSlot(for: device, using: receiverChannel)
+        case .bolt:
+            let discovery = provider.receiverPointingDeviceDiscovery(for: device, using: receiverChannel)
+            return provider.receiverSlot(for: device, identities: discovery.identities)
+        case nil:
+            return provider.receiverSlot(for: device, using: receiverChannel)
+        }
     }
 
     private static func readSupportedDPI(transport: LogitechHIDPPTransport, featureIndex: UInt8) -> [Int] {
