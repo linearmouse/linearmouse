@@ -84,13 +84,12 @@ class LinearScrollingHorizontalTransformer: EventTransformer {
 
     private func lowResolutionUnits(from view: ScrollWheelEventView) -> Int? {
         guard let multiplier = highResolutionWheelMultiplier(),
-              multiplier > 1,
-              view.deltaX != 0 else {
+              multiplier > 1 else {
             return Int(view.deltaXSignum)
         }
 
         return highResolutionWheelCounter.consume(
-            units: Int(view.deltaX),
+            units: LogitechHighResolutionWheelUnitReader.horizontalUnits(from: view, multiplier: multiplier),
             multiplier: multiplier,
             now: now()
         )
@@ -98,11 +97,11 @@ class LinearScrollingHorizontalTransformer: EventTransformer {
 
     private func highResolutionPixelUnits(from view: ScrollWheelEventView) -> Double {
         guard let multiplier = highResolutionWheelMultiplier(),
-              multiplier > 1,
-              view.deltaX != 0 else {
+              multiplier > 1 else {
             return Double(view.deltaXSignum)
         }
 
-        return Double(view.deltaX) / Double(multiplier)
+        return LogitechHighResolutionWheelUnitReader.horizontalUnits(from: view, multiplier: multiplier)
+            / Double(multiplier)
     }
 }

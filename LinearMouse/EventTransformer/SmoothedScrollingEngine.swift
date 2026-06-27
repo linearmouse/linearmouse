@@ -19,6 +19,11 @@ final class SmoothedScrollingEngine {
         case vertical
     }
 
+    enum InputKind {
+        case wheel
+        case continuousGesture
+    }
+
     struct Emission {
         var deltaX: Double
         var deltaY: Double
@@ -183,6 +188,8 @@ final class SmoothedScrollingEngine {
     private var lastInputTimestamp: TimeInterval?
     private var pendingInputX = 0.0
     private var pendingInputY = 0.0
+    private var wheelInputVelocityEstimatorX = WheelInputVelocityEstimator()
+    private var wheelInputVelocityEstimatorY = WheelInputVelocityEstimator()
     private var desiredVelocityX = 0.0
     private var desiredVelocityY = 0.0
     private var velocityX = 0.0
@@ -240,10 +247,12 @@ final class SmoothedScrollingEngine {
         switch activeAxis {
         case .horizontal:
             pendingInputX = 0
+            wheelInputVelocityEstimatorX.reset()
             desiredVelocityX = 0
             velocityX = 0
         case .vertical:
             pendingInputY = 0
+            wheelInputVelocityEstimatorY.reset()
             desiredVelocityY = 0
             velocityY = 0
         }
@@ -261,7 +270,12 @@ final class SmoothedScrollingEngine {
         }
     }
 
-    func feed(deltaX rawDeltaX: Double, deltaY rawDeltaY: Double, timestamp: TimeInterval) {
+    func feed(
+        deltaX rawDeltaX: Double,
+        deltaY rawDeltaY: Double,
+        timestamp: TimeInterval,
+        inputKind: InputKind = .wheel
+    ) {
         var deltaX = rawDeltaX
         var deltaY = rawDeltaY
 
@@ -271,6 +285,7 @@ final class SmoothedScrollingEngine {
 
         pendingInputX += deltaX
         pendingInputY += deltaY
+        updateWheelInputVelocityEstimator(deltaX: deltaX, deltaY: deltaY, timestamp: timestamp, inputKind: inputKind)
         lastInputTimestamp = timestamp
 
         if sessionState == .idle, deltaX != 0 || deltaY != 0 {
@@ -331,6 +346,26 @@ final class SmoothedScrollingEngine {
         input != 0 && velocity != 0 && input.sign != velocity.sign
     }
 
+    private func updateWheelInputVelocityEstimator(
+        deltaX: Double,
+        deltaY: Double,
+        timestamp: TimeInterval,
+        inputKind: InputKind
+    ) {
+        switch inputKind {
+        case .wheel:
+            wheelInputVelocityEstimatorX.add(deltaX, timestamp: timestamp)
+            wheelInputVelocityEstimatorY.add(deltaY, timestamp: timestamp)
+        case .continuousGesture:
+            if deltaX != 0 {
+                wheelInputVelocityEstimatorX.reset()
+            }
+            if deltaY != 0 {
+                wheelInputVelocityEstimatorY.reset()
+            }
+        }
+    }
+
     func advance(to timestamp: TimeInterval) -> Emission? {
         let previousTick = lastTickTimestamp ?? timestamp
         let dt = (timestamp - previousTick).clamped(to: 1.0 / 240.0 ... 1.0 / 24.0)
@@ -339,10 +374,13 @@ final class SmoothedScrollingEngine {
         let hasPendingInput = pendingInputX != 0 || pendingInputY != 0
         let hasFreshInput = lastInputTimestamp.map { timestamp - $0 <= inputGrace } ?? false
         let shouldBlendMomentumReengagement = reengagedFromMomentum && hasPendingInput
+        let effectiveInputX = wheelInputVelocityEstimatorX.projectedInput(for: pendingInputX, at: timestamp)
+        let effectiveInputY = wheelInputVelocityEstimatorY.projectedInput(for: pendingInputY, at: timestamp)
 
         let emissionX = advanceAxis(
             behavior: horizontalBehavior,
             pendingInput: &pendingInputX,
+            effectiveInput: effectiveInputX,
             desiredVelocity: &desiredVelocityX,
             velocity: &velocityX,
             hasPendingInput: hasPendingInput,
@@ -353,6 +391,7 @@ final class SmoothedScrollingEngine {
         let emissionY = advanceAxis(
             behavior: verticalBehavior,
             pendingInput: &pendingInputY,
+            effectiveInput: effectiveInputY,
             desiredVelocity: &desiredVelocityY,
             velocity: &velocityY,
             hasPendingInput: hasPendingInput,
@@ -388,10 +427,14 @@ final class SmoothedScrollingEngine {
                 sessionState = .momentum
                 pendingMomentumBegin = true
                 touchHasBegun = false
+                wheelInputVelocityEstimatorX.reset()
+                wheelInputVelocityEstimatorY.reset()
                 return .init(deltaX: 0, deltaY: 0, phase: .touchEnded)
             }
 
             sessionState = .idle
+            wheelInputVelocityEstimatorX.reset()
+            wheelInputVelocityEstimatorY.reset()
             velocityX = 0
             velocityY = 0
             desiredVelocityX = 0
@@ -402,6 +445,8 @@ final class SmoothedScrollingEngine {
         case .momentum:
             guard hasMovement || shouldContinueMomentum else {
                 sessionState = .idle
+                wheelInputVelocityEstimatorX.reset()
+                wheelInputVelocityEstimatorY.reset()
                 velocityX = 0
                 velocityY = 0
                 desiredVelocityX = 0
@@ -423,6 +468,7 @@ final class SmoothedScrollingEngine {
     private func advanceAxis(
         behavior: AxisBehavior,
         pendingInput: inout Double,
+        effectiveInput: Double,
         desiredVelocity: inout Double,
         velocity: inout Double,
         hasPendingInput: Bool,
@@ -440,8 +486,8 @@ final class SmoothedScrollingEngine {
         case let .smoothed(tuning):
             if pendingInput != 0 {
                 desiredVelocity = reengagedFromMomentum
-                    ? tuning.reengagedDesiredVelocity(for: pendingInput, currentVelocity: velocity)
-                    : tuning.desiredVelocity(for: pendingInput)
+                    ? tuning.reengagedDesiredVelocity(for: effectiveInput, currentVelocity: velocity)
+                    : tuning.desiredVelocity(for: effectiveInput)
                 if reengagedFromMomentum {
                     let kick = tuning.reengagementKickFactor(
                         desiredVelocity: desiredVelocity,
@@ -473,5 +519,75 @@ final class SmoothedScrollingEngine {
         abs(pendingInput) >= axisActivityThreshold
             || abs(desiredVelocity) >= axisActivityThreshold
             || abs(velocity) >= axisActivityThreshold
+    }
+}
+
+private struct WheelInputVelocityEstimator {
+    private static let resetInterval: TimeInterval = 1.0 / 25.0
+    private static let inputTimeConstant: TimeInterval = 1.0 / 20.0
+    private static let referenceInterval: TimeInterval = 1.0 / 45.0
+
+    private var rateAdjustedInput = 0.0
+    private var direction = 0
+    private var lastTimestamp: TimeInterval?
+
+    mutating func add(_ delta: Double, timestamp: TimeInterval) {
+        guard delta != 0 else {
+            return
+        }
+
+        advance(to: timestamp)
+        let currentDirection = delta > 0 ? 1 : -1
+        if direction != 0, currentDirection != direction {
+            rateAdjustedInput = 0
+        }
+
+        direction = currentDirection
+        rateAdjustedInput += delta * Self.referenceInterval / Self.inputTimeConstant
+    }
+
+    mutating func projectedInput(for pendingInput: Double, at timestamp: TimeInterval) -> Double {
+        guard pendingInput != 0 else {
+            advance(to: timestamp)
+            return 0
+        }
+
+        advance(to: timestamp)
+
+        guard rateAdjustedInput != 0,
+              rateAdjustedInput.sign == pendingInput.sign,
+              abs(rateAdjustedInput) > abs(pendingInput) else {
+            return pendingInput
+        }
+        return rateAdjustedInput
+    }
+
+    mutating func reset() {
+        rateAdjustedInput = 0
+        direction = 0
+        lastTimestamp = nil
+    }
+
+    private mutating func advance(to timestamp: TimeInterval) {
+        guard let lastTimestamp else {
+            lastTimestamp = timestamp
+            return
+        }
+
+        let dt = max(timestamp - lastTimestamp, 0)
+        defer {
+            self.lastTimestamp = timestamp
+        }
+
+        guard dt <= Self.resetInterval else {
+            rateAdjustedInput = 0
+            direction = 0
+            return
+        }
+
+        rateAdjustedInput *= exp(-dt / Self.inputTimeConstant)
+        if abs(rateAdjustedInput) < 0.001 {
+            rateAdjustedInput = 0
+        }
     }
 }

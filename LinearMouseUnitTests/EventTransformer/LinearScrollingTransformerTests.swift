@@ -49,10 +49,10 @@ final class LinearScrollingTransformerTests: XCTestCase {
         )
 
         for _ in 0 ..< 3 {
-            XCTAssertNil(try transformer.transform(makeVerticalScrollEvent()))
+            XCTAssertNil(try transformer.transform(makeVerticalHighResolutionScrollEvent()))
         }
 
-        let transformedEvent = try XCTUnwrap(try transformer.transform(makeVerticalScrollEvent()))
+        let transformedEvent = try XCTUnwrap(try transformer.transform(makeVerticalHighResolutionScrollEvent()))
         let view = ScrollWheelEventView(transformedEvent)
 
         XCTAssertFalse(view.continuous)
@@ -67,7 +67,7 @@ final class LinearScrollingTransformerTests: XCTestCase {
             now: { 0 }
         )
 
-        let transformedEvent = try XCTUnwrap(try transformer.transform(makeVerticalScrollEvent()))
+        let transformedEvent = try XCTUnwrap(try transformer.transform(makeVerticalHighResolutionScrollEvent()))
         let view = ScrollWheelEventView(transformedEvent)
 
         XCTAssertTrue(view.continuous)
@@ -77,14 +77,39 @@ final class LinearScrollingTransformerTests: XCTestCase {
         XCTAssertEqual(view.deltaYFixedPt, 4.5, accuracy: 0.001)
     }
 
-    private func makeVerticalScrollEvent() throws -> CGEvent {
-        try XCTUnwrap(CGEvent(
+    func testHighResolutionWheelPixelScrollingUsesFixedPointUnitsWhenIntegerDeltaIsCoalesced() throws {
+        let transformer = LinearScrollingVerticalTransformer(
+            distance: .pixel(36),
+            highResolutionWheelMultiplier: { 10 },
+            now: { 0 }
+        )
+
+        let transformedEvent = try XCTUnwrap(try transformer.transform(
+            makeVerticalHighResolutionScrollEvent(multiplier: 10, units: 17.390899658203125)
+        ))
+        let view = ScrollWheelEventView(transformedEvent)
+
+        XCTAssertTrue(view.continuous)
+        XCTAssertEqual(view.deltaXFixedPt, 0)
+        XCTAssertEqual(view.deltaYPt, 62, accuracy: 0.001)
+        XCTAssertEqual(view.deltaYFixedPt, 62.60723876953125, accuracy: 0.001)
+    }
+
+    private func makeVerticalHighResolutionScrollEvent(
+        multiplier: Int = 8,
+        units: Double = 1
+    ) throws -> CGEvent {
+        let event = try XCTUnwrap(CGEvent(
             scrollWheelEvent2Source: nil,
             units: .line,
             wheelCount: 2,
-            wheel1: 1,
+            wheel1: Int32(units.sign == .minus ? -1 : 1),
             wheel2: 0,
             wheel3: 0
         ))
+        let view = ScrollWheelEventView(event)
+        view.deltaYFixedPt = units / Double(multiplier)
+        view.deltaYPt = units * 10 / Double(multiplier)
+        return event
     }
 }

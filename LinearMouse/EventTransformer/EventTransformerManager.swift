@@ -282,7 +282,10 @@ class EventTransformerManager {
 
         if hasSmoothedScrolling {
             appendScrollRecordingAndButtonMappings()
-            eventTransformer.append(SmoothedScrollingTransformer(smoothed: smoothed))
+            eventTransformer.append(SmoothedScrollingTransformer(
+                smoothed: smoothed,
+                highResolutionWheelMultiplier: highResolutionWheelMultiplier
+            ))
         }
 
         if let distance = scheme.scrolling.distance.horizontal {
@@ -390,7 +393,7 @@ class EventTransformerManager {
         smoothed: Scheme.Scrolling.Smoothed?
     ) -> LogitechHighResolutionWheelNormalizer.AxisMode {
         if smoothed != nil {
-            return .smoothed
+            return .passthrough
         }
 
         switch distance {

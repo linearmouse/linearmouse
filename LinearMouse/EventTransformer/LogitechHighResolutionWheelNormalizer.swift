@@ -7,10 +7,7 @@ final class LogitechHighResolutionWheelNormalizer: EventTransformer {
     enum AxisMode {
         case passthrough
         case lowResolution
-        case smoothed
     }
-
-    private static let lineStepInPixels = 36.0
 
     private let verticalMode: AxisMode
     private let horizontalMode: AxisMode
@@ -52,7 +49,11 @@ final class LogitechHighResolutionWheelNormalizer: EventTransformer {
     }
 
     private func normalizeVertical(on view: ScrollWheelEventView, multiplier: Int) {
-        let units = signedVerticalUnits(from: view)
+        let unitResolution = LogitechHighResolutionWheelUnitReader.verticalUnitResolution(
+            from: view,
+            multiplier: multiplier
+        )
+        let units = unitResolution.units
         guard units != 0 else {
             return
         }
@@ -67,14 +68,15 @@ final class LogitechHighResolutionWheelNormalizer: EventTransformer {
                 return
             }
             setLowResolutionVertical(steps, on: view)
-
-        case .smoothed:
-            setContinuousVertical(Double(units) * Self.lineStepInPixels / Double(multiplier), on: view)
         }
     }
 
     private func normalizeHorizontal(on view: ScrollWheelEventView, multiplier: Int) {
-        let units = signedHorizontalUnits(from: view)
+        let unitResolution = LogitechHighResolutionWheelUnitReader.horizontalUnitResolution(
+            from: view,
+            multiplier: multiplier
+        )
+        let units = unitResolution.units
         guard units != 0 else {
             return
         }
@@ -89,26 +91,7 @@ final class LogitechHighResolutionWheelNormalizer: EventTransformer {
                 return
             }
             setLowResolutionHorizontal(steps, on: view)
-
-        case .smoothed:
-            setContinuousHorizontal(Double(units) * Self.lineStepInPixels / Double(multiplier), on: view)
         }
-    }
-
-    private func signedVerticalUnits(from view: ScrollWheelEventView) -> Int {
-        if view.deltaY != 0 {
-            return Int(view.deltaY)
-        }
-
-        return Int(view.deltaYSignum)
-    }
-
-    private func signedHorizontalUnits(from view: ScrollWheelEventView) -> Int {
-        if view.deltaX != 0 {
-            return Int(view.deltaX)
-        }
-
-        return Int(view.deltaXSignum)
     }
 
     private func setLowResolutionVertical(_ steps: Int, on view: ScrollWheelEventView) {
@@ -123,22 +106,6 @@ final class LogitechHighResolutionWheelNormalizer: EventTransformer {
         view.deltaXPt = Double(steps) * 10
         view.deltaXFixedPt = Double(steps)
         view.ioHidScrollX = Double(steps)
-    }
-
-    private func setContinuousVertical(_ pixels: Double, on view: ScrollWheelEventView) {
-        view.continuous = true
-        view.deltaY = Int64((pixels / Self.lineStepInPixels).rounded(.towardZero))
-        view.deltaYPt = pixels
-        view.deltaYFixedPt = pixels
-        view.ioHidScrollY = pixels
-    }
-
-    private func setContinuousHorizontal(_ pixels: Double, on view: ScrollWheelEventView) {
-        view.continuous = true
-        view.deltaX = Int64((pixels / Self.lineStepInPixels).rounded(.towardZero))
-        view.deltaXPt = pixels
-        view.deltaXFixedPt = pixels
-        view.ioHidScrollX = pixels
     }
 
     private func zeroVertical(on view: ScrollWheelEventView) {
@@ -166,16 +133,16 @@ final class LogitechHighResolutionWheelNormalizer: EventTransformer {
 struct LogitechHighResolutionWheelScrollCounter {
     private static let resetInterval: TimeInterval = 1
 
-    private var remainder = 0
+    private var remainder = 0.0
     private var direction = 0
     private var lastTime: TimeInterval?
 
-    mutating func consume(units: Int, multiplier: Int, now: TimeInterval) -> Int? {
+    mutating func consume(units: Double, multiplier: Int, now: TimeInterval) -> Int? {
         guard units != 0, multiplier > 1 else {
-            return units == 0 ? nil : units
+            return units == 0 ? nil : Int(units.rounded(.toNearestOrAwayFromZero))
         }
 
-        let currentDirection = units.signum()
+        let currentDirection = units > 0 ? 1 : -1
         if let lastTime, now - lastTime > Self.resetInterval {
             remainder = 0
         }
@@ -187,16 +154,184 @@ struct LogitechHighResolutionWheelScrollCounter {
         lastTime = now
         remainder += units
 
+        let multiplier = Double(multiplier)
         guard abs(remainder) * 2 >= multiplier else {
             return nil
         }
 
-        var steps = remainder / multiplier
-        if steps == 0 {
-            steps = currentDirection
-        }
-        remainder -= steps * multiplier
+        let steps = Int((remainder / multiplier).rounded(.toNearestOrAwayFromZero))
+        remainder -= Double(steps) * multiplier
 
         return steps
+    }
+}
+
+enum LogitechHighResolutionWheelUnitReader {
+    struct UnitResolution {
+        var rawUnits: Double
+        var acceleratedUnits: Double
+        var units: Double
+    }
+
+    static func verticalUnits(from view: ScrollWheelEventView, multiplier: Int) -> Double {
+        verticalUnitResolution(from: view, multiplier: multiplier).units
+    }
+
+    static func verticalUnitResolution(from view: ScrollWheelEventView, multiplier: Int) -> UnitResolution {
+        units(
+            integerDelta: view.deltaY,
+            pointDelta: view.deltaYPt,
+            fixedPointDelta: view.deltaYFixedPt,
+            ioHidDelta: view.ioHidScrollY,
+            signum: view.deltaYSignum,
+            multiplier: multiplier
+        )
+    }
+
+    static func horizontalUnits(from view: ScrollWheelEventView, multiplier: Int) -> Double {
+        horizontalUnitResolution(from: view, multiplier: multiplier).units
+    }
+
+    static func horizontalUnitResolution(from view: ScrollWheelEventView, multiplier: Int) -> UnitResolution {
+        units(
+            integerDelta: view.deltaX,
+            pointDelta: view.deltaXPt,
+            fixedPointDelta: view.deltaXFixedPt,
+            ioHidDelta: view.ioHidScrollX,
+            signum: view.deltaXSignum,
+            multiplier: multiplier
+        )
+    }
+
+    static func units(
+        integerDelta: Int64,
+        pointDelta: Double,
+        fixedPointDelta: Double,
+        ioHidDelta: Double,
+        signum: Int64,
+        multiplier: Int
+    ) -> UnitResolution {
+        let direction = eventDirection(
+            integerDelta: integerDelta,
+            pointDelta: pointDelta,
+            fixedPointDelta: fixedPointDelta,
+            signum: signum,
+            fallbackDelta: ioHidDelta
+        )
+        guard direction != 0 else {
+            return .init(rawUnits: 0, acceleratedUnits: 0, units: 0)
+        }
+
+        let rawUnitMagnitude = rawUnits(
+            ioHidDelta: ioHidDelta,
+            integerDelta: integerDelta,
+            pointDelta: pointDelta,
+            fixedPointDelta: fixedPointDelta,
+            signum: signum,
+            multiplier: multiplier
+        )
+        let accelerationMagnitude = accelerationMagnitude(
+            integerDelta: integerDelta,
+            pointDelta: pointDelta,
+            fixedPointDelta: fixedPointDelta,
+            usesIOHIDRawUnits: abs(ioHidDelta) >= 0.5
+        )
+
+        return .init(
+            rawUnits: direction * rawUnitMagnitude,
+            acceleratedUnits: direction * accelerationMagnitude,
+            units: direction * max(rawUnitMagnitude, accelerationMagnitude)
+        )
+    }
+
+    private static func rawUnits(
+        ioHidDelta: Double,
+        integerDelta: Int64,
+        pointDelta: Double,
+        fixedPointDelta: Double,
+        signum: Int64,
+        multiplier: Int
+    ) -> Double {
+        let ioHidUnits = abs(ioHidDelta)
+        if ioHidUnits >= 0.5 {
+            return ioHidUnits
+        }
+
+        return rawFallbackUnits(
+            integerDelta: integerDelta,
+            pointDelta: pointDelta,
+            fixedPointDelta: fixedPointDelta,
+            signum: signum,
+            multiplier: multiplier
+        )
+    }
+
+    private static func rawFallbackUnits(
+        integerDelta: Int64,
+        pointDelta: Double,
+        fixedPointDelta: Double,
+        signum: Int64,
+        multiplier: Int
+    ) -> Double {
+        let multiplier = Double(multiplier)
+
+        let fixedPointUnits = fixedPointDelta * multiplier
+        if abs(fixedPointUnits) >= 0.5 {
+            return abs(fixedPointUnits)
+        }
+
+        let pointUnits = pointDelta * multiplier / 10.0
+        if abs(pointUnits) >= 0.5 {
+            return abs(pointUnits)
+        }
+
+        if integerDelta != 0 {
+            return abs(Double(integerDelta))
+        }
+
+        return abs(Double(signum))
+    }
+
+    private static func accelerationMagnitude(
+        integerDelta: Int64,
+        pointDelta: Double,
+        fixedPointDelta: Double,
+        usesIOHIDRawUnits: Bool
+    ) -> Double {
+        guard usesIOHIDRawUnits else {
+            return 1
+        }
+
+        return max(
+            1,
+            abs(Double(integerDelta)),
+            abs(pointDelta) / 10.0,
+            abs(fixedPointDelta)
+        )
+    }
+
+    private static func eventDirection(
+        integerDelta: Int64,
+        pointDelta: Double,
+        fixedPointDelta: Double,
+        signum: Int64,
+        fallbackDelta: Double
+    ) -> Double {
+        if signum != 0 {
+            return Double(signum)
+        }
+        if fixedPointDelta != 0 {
+            return fixedPointDelta.sign == .minus ? -1 : 1
+        }
+        if pointDelta != 0 {
+            return pointDelta.sign == .minus ? -1 : 1
+        }
+        if integerDelta != 0 {
+            return Double(integerDelta.signum())
+        }
+        if fallbackDelta != 0 {
+            return fallbackDelta.sign == .minus ? -1 : 1
+        }
+        return 0
     }
 }
