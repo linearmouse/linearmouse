@@ -77,6 +77,12 @@ type Scheme = {
    * @description Customize the buttons behavior.
    */
   buttons?: Scheme.Buttons;
+
+  /**
+   * @title Logitech settings
+   * @description Customize supported Logitech HID++ device behavior.
+   */
+  logitech?: Scheme.Logitech;
 };
 
 declare namespace Scheme {
@@ -438,6 +444,14 @@ declare namespace Scheme {
      * @default false
      */
     redirectsToScroll?: boolean;
+  };
+
+  type Logitech = {
+    /**
+     * @title High resolution wheel
+     * @description Enable finer vertical wheel steps on supported Logitech HID++ mice.
+     */
+    highResolutionWheel?: boolean;
   };
 
   type Buttons = {

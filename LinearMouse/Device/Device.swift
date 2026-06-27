@@ -49,6 +49,7 @@ class Device {
         return controller
     }
 
+    lazy var logitechHighResolutionWheelController = LogitechHIDPPHighResolutionWheelController(device: device)
     private var logitechControlsMonitorSubscriptions = Set<AnyCancellable>()
     private let device: PointerDevice
 
@@ -63,6 +64,10 @@ class Device {
     private let initialPointerResolution: Double
     let hardwareDPILock = NSLock()
     var cachedHardwareDPI: Int?
+    let highResolutionWheelLock = NSLock()
+    var cachedHighResolutionWheelEnabled: Bool?
+    var cachedHighResolutionWheelMultiplier: Int?
+    var initialHighResolutionWheelEnabled: Bool?
 
     var isRemoved: Bool {
         hardwareDPILock.lock()
@@ -152,6 +157,11 @@ class Device {
         removed = true
         cachedHardwareDPI = nil
         hardwareDPILock.unlock()
+        highResolutionWheelLock.lock()
+        cachedHighResolutionWheelEnabled = nil
+        cachedHighResolutionWheelMultiplier = nil
+        initialHighResolutionWheelEnabled = nil
+        highResolutionWheelLock.unlock()
 
         inputObservationToken = nil
         reportObservationToken = nil
@@ -368,6 +378,7 @@ extension Device {
 
     func restorePointerAccelerationAndPointerSpeed() {
         restoreHardwareDPI()
+        restoreHighResolutionWheel()
         restorePointerSpeed()
         restorePointerAcceleration()
     }

@@ -40,4 +40,92 @@ final class LinearScrollingTransformerTests: XCTestCase {
         XCTAssertEqual(view.deltaXFixedPt, 0)
         XCTAssertEqual(view.deltaYFixedPt, 36)
     }
+
+    func testHighResolutionWheelLineScrollingUsesMultiplier() throws {
+        let transformer = LinearScrollingVerticalTransformer(
+            distance: .line(3),
+            highResolutionWheelMultiplier: { 8 },
+            now: { 0 }
+        )
+
+        for _ in 0 ..< 3 {
+            XCTAssertNil(try transformer.transform(makeVerticalHighResolutionScrollEvent()))
+        }
+
+        let transformedEvent = try XCTUnwrap(try transformer.transform(makeVerticalHighResolutionScrollEvent()))
+        let view = ScrollWheelEventView(transformedEvent)
+
+        XCTAssertFalse(view.continuous)
+        XCTAssertEqual(view.deltaX, 0)
+        XCTAssertEqual(view.deltaY, 3)
+    }
+
+    func testHighResolutionWheelPixelScrollingUsesMultiplier() throws {
+        let transformer = LinearScrollingVerticalTransformer(
+            distance: .pixel(36),
+            highResolutionWheelMultiplier: { 8 },
+            now: { 0 }
+        )
+
+        let transformedEvent = try XCTUnwrap(try transformer.transform(makeVerticalHighResolutionScrollEvent()))
+        let view = ScrollWheelEventView(transformedEvent)
+
+        XCTAssertTrue(view.continuous)
+        XCTAssertEqual(view.deltaXFixedPt, 0)
+        XCTAssertGreaterThan(view.deltaYPt, 0)
+        XCTAssertLessThan(view.deltaYPt, 36)
+        XCTAssertEqual(view.deltaYFixedPt, 4.5, accuracy: 0.001)
+    }
+
+    func testHighResolutionWheelPixelScrollingUsesFixedPointUnitsWhenIntegerDeltaIsCoalesced() throws {
+        let transformer = LinearScrollingVerticalTransformer(
+            distance: .pixel(36),
+            highResolutionWheelMultiplier: { 10 },
+            now: { 0 }
+        )
+
+        let transformedEvent = try XCTUnwrap(try transformer.transform(
+            makeVerticalHighResolutionScrollEvent(multiplier: 10, units: 17.390899658203125)
+        ))
+        let view = ScrollWheelEventView(transformedEvent)
+
+        XCTAssertTrue(view.continuous)
+        XCTAssertEqual(view.deltaXFixedPt, 0)
+        XCTAssertEqual(view.deltaYPt, 62, accuracy: 0.001)
+        XCTAssertEqual(view.deltaYFixedPt, 62.60723876953125, accuracy: 0.001)
+    }
+
+    func testHighResolutionWheelLinearDistanceShouldUseRawUnitsWhenAccelerationIsPresent() {
+        let resolution = LogitechHighResolutionWheelUnitReader.units(
+            integerDelta: 14,
+            pointDelta: 140,
+            fixedPointDelta: 13.943,
+            ioHidDelta: -1,
+            signum: 1,
+            multiplier: 8
+        )
+        let pixelDistance = abs(resolution.rawUnits) * 36 / 8
+
+        XCTAssertEqual(resolution.rawUnits, 1, accuracy: 0.001)
+        XCTAssertEqual(resolution.units, 14, accuracy: 0.001)
+        XCTAssertEqual(pixelDistance, 4.5, accuracy: 0.001)
+    }
+
+    private func makeVerticalHighResolutionScrollEvent(
+        multiplier: Int = 8,
+        units: Double = 1
+    ) throws -> CGEvent {
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: Int32(units.sign == .minus ? -1 : 1),
+            wheel2: 0,
+            wheel3: 0
+        ))
+        let view = ScrollWheelEventView(event)
+        view.deltaYFixedPt = units / Double(multiplier)
+        view.deltaYPt = units * 10 / Double(multiplier)
+        return event
+    }
 }

@@ -4,6 +4,8 @@
 import SwiftUI
 
 struct ScrollingSettings: View {
+    @ObservedObject private var state = ScrollingSettingsState.shared
+
     var body: some View {
         DetailView {
             VStack(alignment: .leading) {
@@ -12,12 +14,19 @@ struct ScrollingSettings: View {
                 Form {
                     ReverseScrollingSection()
 
+                    if state.showsHighResolutionWheelControl {
+                        LogitechHighResolutionWheelSection()
+                    }
+
                     ScrollingModeSection()
 
                     ModifierKeysSection()
                 }
                 .modifier(FormViewModifier())
             }
+        }
+        .onAppear {
+            state.refreshHighResolutionWheelInfo()
         }
     }
 }

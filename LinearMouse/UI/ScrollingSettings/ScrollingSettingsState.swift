@@ -10,7 +10,23 @@ class ScrollingSettingsState: ObservableObject {
     static let shared: ScrollingSettingsState = .init()
 
     @PublishedObject private var schemeState = SchemeState.shared
+    private let deviceState = DeviceState.shared
+    private var subscriptions = Set<AnyCancellable>()
     private var smoothedCache = Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Smoothed>()
+
+    @Published private(set) var highResolutionWheelInfo: Device.HighResolutionWheelInfo?
+    @Published private(set) var highResolutionWheelInfoRefreshing = false
+
+    private init() {
+        deviceState.$currentDeviceRef
+            .debounce(for: 0.1, scheduler: RunLoop.main)
+            .removeDuplicates()
+            .sink { [weak self] _ in
+                self?.resetHighResolutionWheelInfo()
+                self?.refreshHighResolutionWheelInfo()
+            }
+            .store(in: &subscriptions)
+    }
 
     var scheme: Scheme {
         get { schemeState.scheme }
@@ -22,12 +38,70 @@ class ScrollingSettingsState: ObservableObject {
     }
 
     @Published var direction: Scheme.Scrolling.BidirectionalDirection = .vertical
+
+    private var currentDevice: Device? {
+        deviceState.currentDeviceRef?.value
+    }
 }
 
 extension ScrollingSettingsState {
     var reverseScrolling: Bool {
         get { mergedScheme.scrolling.reverse[direction] ?? false }
         set { scheme.scrolling.reverse[direction] = newValue }
+    }
+
+    var showsHighResolutionWheelControl: Bool {
+        highResolutionWheelInfo?.supportsHighResolutionWheel == true
+    }
+
+    var highResolutionWheel: Bool {
+        get {
+            schemeState.deviceScheme.logitech.highResolutionWheel
+                ?? highResolutionWheelInfo?.enabled
+                ?? false
+        }
+        set {
+            var deviceScheme = schemeState.deviceScheme
+            deviceScheme.logitech.highResolutionWheel = newValue
+            schemeState.deviceScheme = deviceScheme
+
+            if let currentDevice {
+                DeviceManager.shared.updateHighResolutionWheel(for: currentDevice)
+            }
+        }
+    }
+
+    func refreshHighResolutionWheelInfo() {
+        guard !highResolutionWheelInfoRefreshing else {
+            return
+        }
+
+        guard let device = currentDevice else {
+            resetHighResolutionWheelInfo()
+            return
+        }
+
+        highResolutionWheelInfoRefreshing = true
+        device.refreshHighResolutionWheelInfo { [weak self] info in
+            guard let self else {
+                return
+            }
+
+            guard self.currentDevice === device else {
+                self.highResolutionWheelInfoRefreshing = false
+                self.resetHighResolutionWheelInfo()
+                self.refreshHighResolutionWheelInfo()
+                return
+            }
+
+            self.highResolutionWheelInfo = info
+            self.highResolutionWheelInfoRefreshing = false
+        }
+    }
+
+    private func resetHighResolutionWheelInfo() {
+        highResolutionWheelInfo = nil
+        highResolutionWheelInfoRefreshing = false
     }
 
     enum ScrollingMode: String, Identifiable, CaseIterable {
