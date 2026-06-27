@@ -266,11 +266,13 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
 
     func testContinuousTrackpadInputWithNativePhaseIsSmoothedInPlace() throws {
         let now = 0.0
+        let currentTime: () -> TimeInterval = { now }
         let transformer = SmoothedScrollingTransformer(
             smoothed: .init(
                 vertical: Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
-            )
-        )            { now }
+            ),
+            now: currentTime
+        )
 
         let originalEvent = try XCTUnwrap(CGEvent(
             scrollWheelEvent2Source: nil,
@@ -331,11 +333,13 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
 
     func testContinuousTrackpadInputCanSuppressBouncingPhases() throws {
         let now = 0.0
+        let currentTime: () -> TimeInterval = { now }
         var configuration = Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
         configuration.bouncing = false
         let transformer = SmoothedScrollingTransformer(
-            smoothed: .init(vertical: configuration)
-        )            { now }
+            smoothed: .init(vertical: configuration),
+            now: currentTime
+        )
 
         let originalEvent = try XCTUnwrap(CGEvent(
             scrollWheelEvent2Source: nil,
