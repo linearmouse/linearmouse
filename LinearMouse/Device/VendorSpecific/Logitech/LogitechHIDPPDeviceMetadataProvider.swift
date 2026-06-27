@@ -97,6 +97,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         case unifiedBattery = 0x1004
         case reprogControlsV4 = 0x1B04
         case adcMeasurement = 0x1F20
+        case hiresWheel = 0x2121
         case adjustableDPI = 0x2201
     }
 

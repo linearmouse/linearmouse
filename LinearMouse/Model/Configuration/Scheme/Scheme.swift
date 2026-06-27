@@ -21,16 +21,20 @@ struct Scheme: Codable, Equatable {
 
     @ImplicitOptional var buttons: Buttons
 
+    @ImplicitOptional var logitech: Logitech
+
     init(
         if: [If]? = nil,
         scrolling: Scrolling? = nil,
         pointer: Pointer? = nil,
-        buttons: Buttons? = nil
+        buttons: Buttons? = nil,
+        logitech: Logitech? = nil
     ) {
         self.if = `if`
         $scrolling = scrolling
         $pointer = pointer
         $buttons = buttons
+        $logitech = logitech
     }
 }
 
@@ -188,6 +192,7 @@ extension Scheme {
         $scrolling?.merge(into: &scheme.scrolling)
         $pointer?.merge(into: &scheme.pointer)
         $buttons?.merge(into: &scheme.buttons)
+        $logitech?.merge(into: &scheme.logitech)
     }
 }
 

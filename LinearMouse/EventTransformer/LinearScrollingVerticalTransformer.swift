@@ -8,9 +8,18 @@ class LinearScrollingVerticalTransformer: EventTransformer {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "LinearScrollingVertical")
 
     private let distance: Scheme.Scrolling.Distance
+    private let highResolutionWheelMultiplier: () -> Int?
+    private let now: () -> TimeInterval
+    private var highResolutionWheelCounter = LogitechHighResolutionWheelScrollCounter()
 
-    init(distance: Scheme.Scrolling.Distance) {
+    init(
+        distance: Scheme.Scrolling.Distance,
+        highResolutionWheelMultiplier: @escaping () -> Int? = { nil },
+        now: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime }
+    ) {
         self.distance = distance
+        self.highResolutionWheelMultiplier = highResolutionWheelMultiplier
+        self.now = now
     }
 
     func transform(_ event: CGEvent) -> CGEvent? {
@@ -37,21 +46,25 @@ class LinearScrollingVerticalTransformer: EventTransformer {
         }
 
         let (continuous, oldValue) = (view.continuous, view.matrixValue)
-        let deltaYSignum = view.deltaYSignum
-
         switch distance {
         case .auto:
             return event
 
         case let .line(value):
+            guard let normalizedUnits = lowResolutionUnits(from: view) else {
+                return nil
+            }
+
             view.continuous = false
-            view.deltaY = deltaYSignum * Int64(value)
+            view.deltaY = Int64(normalizedUnits * value)
             view.deltaX = 0
 
         case let .pixel(value):
+            let pixelValue = highResolutionPixelUnits(from: view) * value.asTruncatedDouble
+
             view.continuous = true
-            view.deltaYPt = Double(deltaYSignum) * value.asTruncatedDouble
-            view.deltaYFixedPt = Double(deltaYSignum) * value.asTruncatedDouble
+            view.deltaYPt = pixelValue
+            view.deltaYFixedPt = pixelValue
             view.deltaXPt = 0
             view.deltaXFixedPt = 0
         }
@@ -66,5 +79,36 @@ class LinearScrollingVerticalTransformer: EventTransformer {
         )
 
         return event
+    }
+
+    private func lowResolutionUnits(from view: ScrollWheelEventView) -> Int? {
+        guard let multiplier = highResolutionWheelMultiplier(),
+              multiplier > 1 else {
+            return Int(view.deltaYSignum)
+        }
+
+        return highResolutionWheelCounter.consume(
+            units: LogitechHighResolutionWheelUnitReader.verticalUnitResolution(
+                from: view,
+                multiplier: multiplier
+            )
+            .rawUnits,
+            multiplier: multiplier,
+            now: now()
+        )
+    }
+
+    private func highResolutionPixelUnits(from view: ScrollWheelEventView) -> Double {
+        guard let multiplier = highResolutionWheelMultiplier(),
+              multiplier > 1 else {
+            return Double(view.deltaYSignum)
+        }
+
+        return LogitechHighResolutionWheelUnitReader.verticalUnitResolution(
+            from: view,
+            multiplier: multiplier
+        )
+        .rawUnits
+        / Double(multiplier)
     }
 }

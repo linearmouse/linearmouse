@@ -38,6 +38,24 @@ final class ConfigurationTests: XCTestCase {
         XCTAssertEqual(scheme.scrolling.reverse.horizontal, true)
     }
 
+    func testMergeLogitechSettings() {
+        var scheme = Scheme()
+
+        XCTAssertNil(scheme.$logitech)
+
+        var base = Scheme()
+        base.logitech.highResolutionWheel = true
+        base.merge(into: &scheme)
+
+        XCTAssertEqual(scheme.logitech.highResolutionWheel, true)
+
+        var override = Scheme()
+        override.logitech.highResolutionWheel = false
+        override.merge(into: &scheme)
+
+        XCTAssertEqual(scheme.logitech.highResolutionWheel, false)
+    }
+
     func testMatchSchemeWithDeviceCategoryDoesNotMergeDeviceSpecificSchemes() {
         var categoryScheme = Scheme(if: [.init(device: DeviceMatcher(category: .mouse))])
         categoryScheme.pointer.disableAcceleration = true

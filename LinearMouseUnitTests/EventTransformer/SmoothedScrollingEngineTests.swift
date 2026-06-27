@@ -29,7 +29,7 @@ final class SmoothedScrollingEngineTests: XCTestCase {
             }
         }
 
-        for step in 6 ..< 240 {
+        for step in 6 ..< 480 {
             let timestamp = Double(step + 1) / 120
             if let emission = engine.advance(to: timestamp) {
                 emissions.append(emission)
@@ -89,6 +89,161 @@ final class SmoothedScrollingEngineTests: XCTestCase {
         XCTAssertNotNil(easeInEmission)
         XCTAssertNotNil(easeOutEmission)
         XCTAssertLessThan(abs(easeInEmission?.deltaY ?? 0), abs(easeOutEmission?.deltaY ?? 0))
+    }
+
+    func testNewWheelSessionDoesNotUseStaleIdleTickTimestamp() throws {
+        let configuration = Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
+        let reusedEngine = SmoothedScrollingEngine(smoothed: .init(vertical: configuration))
+        let freshEngine = SmoothedScrollingEngine(smoothed: .init(vertical: configuration))
+
+        reusedEngine.feed(deltaX: 0, deltaY: 36, timestamp: 0)
+        for tick in 1 ... 600 {
+            _ = reusedEngine.advance(to: Double(tick) / 120)
+            if !reusedEngine.isRunning {
+                break
+            }
+        }
+        XCTAssertFalse(reusedEngine.isRunning)
+
+        let nextInputTimestamp = 10.0
+        reusedEngine.feed(deltaX: 0, deltaY: 36, timestamp: nextInputTimestamp)
+        freshEngine.feed(deltaX: 0, deltaY: 36, timestamp: nextInputTimestamp)
+
+        let reusedEmission = try XCTUnwrap(reusedEngine.advance(to: nextInputTimestamp + 1.0 / 120.0))
+        let freshEmission = try XCTUnwrap(freshEngine.advance(to: nextInputTimestamp + 1.0 / 120.0))
+
+        XCTAssertEqual(reusedEmission.phase, .touchBegan)
+        XCTAssertEqual(freshEmission.phase, .touchBegan)
+        XCTAssertEqual(abs(reusedEmission.deltaY), abs(freshEmission.deltaY), accuracy: 0.001)
+    }
+
+    func testDenseSplitInputMatchesAggregatedInputAtSameOutputTick() throws {
+        let configuration = Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
+        let aggregatedEngine = SmoothedScrollingEngine(smoothed: .init(vertical: configuration))
+        let splitEngine = SmoothedScrollingEngine(smoothed: .init(vertical: configuration))
+
+        aggregatedEngine.feed(deltaX: 0, deltaY: 36, timestamp: 0)
+
+        for step in 0 ..< 8 {
+            let timestamp = Double(step) / 960.0
+            splitEngine.feed(deltaX: 0, deltaY: 4.5, timestamp: timestamp)
+        }
+
+        let aggregatedEmission = try XCTUnwrap(aggregatedEngine.advance(to: 1.0 / 120.0))
+        let splitEmission = try XCTUnwrap(splitEngine.advance(to: 1.0 / 120.0))
+
+        XCTAssertEqual(abs(splitEmission.deltaY), abs(aggregatedEmission.deltaY), accuracy: 0.001)
+    }
+
+    func testLargeCoalescedInputIsNotCappedToSingleDetentSpeed() {
+        let singleDetentPeak = touchPeakDeltaY(for: [TimedScrollInput(timestamp: 0, deltaY: 36)])
+        let coalescedPeak = touchPeakDeltaY(for: [TimedScrollInput(timestamp: 0, deltaY: 144)])
+
+        XCTAssertGreaterThan(coalescedPeak, singleDetentPeak * 3.0)
+    }
+
+    func testSameRawTickDistanceHasHigherPeakWhenItArrivesDensely() {
+        let slowPeak = touchPeakDeltaY(for: splitDetentInputs(count: 4, detentInterval: 0.16))
+        let mediumPeak = touchPeakDeltaY(for: splitDetentInputs(count: 4, detentInterval: 0.08))
+        let fastPeak = touchPeakDeltaY(for: splitDetentInputs(count: 4, detentInterval: 1.0 / 55.0))
+
+        XCTAssertGreaterThan(mediumPeak, slowPeak)
+        XCTAssertGreaterThan(fastPeak, mediumPeak)
+        XCTAssertGreaterThan(fastPeak, slowPeak * 2.0)
+    }
+
+    func testSameRawTickDistanceHasHigherTotalOutputWhenItArrivesDensely() {
+        let slowOutput = totalDeltaY(for: splitDetentInputs(count: 4, detentInterval: 0.16))
+        let mediumOutput = totalDeltaY(for: splitDetentInputs(count: 4, detentInterval: 0.08))
+        let fastOutput = totalDeltaY(for: splitDetentInputs(count: 4, detentInterval: 1.0 / 55.0))
+
+        XCTAssertGreaterThan(slowOutput, 0)
+        XCTAssertGreaterThan(mediumOutput, slowOutput)
+        XCTAssertGreaterThan(fastOutput, mediumOutput)
+    }
+
+    func testSingleDetentTimingChangesPeakWithoutGlobalScaling() {
+        let aggregatedPeak = touchPeakDeltaY(for: [TimedScrollInput(timestamp: 0, deltaY: 36)])
+        let slowSplitPeak = touchPeakDeltaY(for: splitDetentInputs(count: 1, detentInterval: 0.16))
+        let mediumSplitPeak = touchPeakDeltaY(for: splitDetentInputs(count: 1, detentInterval: 0.08))
+        let fastSplitPeak = touchPeakDeltaY(for: splitDetentInputs(count: 1, detentInterval: 1.0 / 55.0))
+
+        XCTAssertLessThan(slowSplitPeak, aggregatedPeak)
+        XCTAssertGreaterThan(mediumSplitPeak, slowSplitPeak)
+        XCTAssertGreaterThan(fastSplitPeak, mediumSplitPeak)
+        XCTAssertGreaterThan(fastSplitPeak, slowSplitPeak * 2.0)
+        XCTAssertLessThan(fastSplitPeak, aggregatedPeak * 1.05)
+    }
+
+    func testSlowSplitDetentKeepsMeaningfulPickup() {
+        let aggregatedPeak = touchPeakDeltaY(for: [TimedScrollInput(timestamp: 0, deltaY: 36)])
+        let slowSplitPeak = touchPeakDeltaY(for: splitDetentInputs(count: 1, detentInterval: 0.16))
+
+        XCTAssertGreaterThan(slowSplitPeak, aggregatedPeak * 0.25)
+        XCTAssertLessThan(slowSplitPeak, aggregatedPeak * 0.75)
+    }
+
+    func testSplitInputDirectionChangeDoesNotCarryPreviousRateProjection() {
+        let detentInterval = 1.0 / 55.0
+        let reverseStart = 0.02
+        let forwardInputs = splitDetentInputs(count: 1, detentInterval: detentInterval)
+        let reverseInputs = splitDetentInputs(count: 1, detentInterval: detentInterval)
+            .map {
+                TimedScrollInput(timestamp: $0.timestamp + reverseStart, deltaY: -$0.deltaY)
+            }
+        let freshReverseInputs = splitDetentInputs(count: 1, detentInterval: detentInterval)
+            .map {
+                TimedScrollInput(timestamp: $0.timestamp, deltaY: -$0.deltaY)
+            }
+
+        let reversePeak = touchPeakDeltaY(
+            for: forwardInputs + reverseInputs,
+            after: reverseStart,
+            direction: -1
+        )
+        let freshReversePeak = touchPeakDeltaY(for: freshReverseInputs)
+
+        XCTAssertGreaterThan(reversePeak, freshReversePeak * 0.25)
+        XCTAssertLessThan(reversePeak, freshReversePeak * 1.05)
+    }
+
+    func testHighResolutionTraceUsesAcceleratedDistanceWithoutSkippingMultiplier() {
+        let rawPeak = touchPeakDeltaY(for: highResolutionTraceInputs(mode: .raw))
+        let normalizedPeak = touchPeakDeltaY(for: highResolutionTraceInputs(mode: .normalized))
+        let unscaledPeak = touchPeakDeltaY(for: highResolutionTraceInputs(mode: .unscaledAccelerated))
+
+        XCTAssertGreaterThan(normalizedPeak, rawPeak * 2.0)
+        XCTAssertLessThan(normalizedPeak, unscaledPeak * 0.60)
+    }
+
+    func testLoggedFastHighResolutionTicksUseAcceleratedDistanceWithoutSkippingMultiplier() {
+        let slowPeak = touchPeakDeltaY(for: splitDetentInputs(count: 1, detentInterval: 0.16))
+        let loggedNormalizedPeak = touchPeakDeltaY(for: loggedFastHighResolutionTickInputs(mode: .normalized))
+        let acceleratedPeak = touchPeakDeltaY(for: loggedFastHighResolutionTickInputs(mode: .unscaledAccelerated))
+
+        XCTAssertGreaterThan(loggedNormalizedPeak, slowPeak * 2.5)
+        XCTAssertLessThan(loggedNormalizedPeak, acceleratedPeak * 0.60)
+    }
+
+    func testPausedHighResolutionFastBurstEmitsMovementAfterTinyScroll() throws {
+        let fastStart = 0.18
+        let tinyPeak = touchPeakDeltaY(for: [TimedScrollInput(timestamp: 0, deltaY: -4.5)])
+        let fastBurstInputs = loggedFastHighResolutionTickInputs(mode: .normalized)
+            .map { TimedScrollInput(timestamp: $0.timestamp + fastStart, deltaY: $0.deltaY) }
+        let emissions = timedEmissions(
+            for: [TimedScrollInput(timestamp: 0, deltaY: -4.5)] + fastBurstInputs,
+            configuration: Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
+        )
+
+        let burstTouchEmissions = emissions.filter {
+            $0.timestamp >= fastStart
+                && ($0.emission.phase == .touchBegan || $0.emission.phase == .touchChanged)
+        }
+        let firstBurstEmission = try XCTUnwrap(burstTouchEmissions.first)
+        let burstPeak = burstTouchEmissions.map { abs($0.emission.deltaY) }.max() ?? 0
+
+        XCTAssertGreaterThan(abs(firstBurstEmission.emission.deltaY), 0.01)
+        XCTAssertGreaterThan(burstPeak, tinyPeak * 4.0)
     }
 
     func testMomentumReengagementBlendsAdditionalInputWithoutSharpJump() throws {
@@ -267,5 +422,169 @@ final class SmoothedScrollingEngineTests: XCTestCase {
         XCTAssertEqual(switchedEmission.phase, .touchBegan)
         XCTAssertGreaterThan(abs(switchedEmission.deltaX), 0.01)
         XCTAssertEqual(switchedEmission.deltaY, 0, accuracy: 0.001)
+    }
+
+    private struct TimedScrollInput {
+        var timestamp: TimeInterval
+        var deltaY: Double
+    }
+
+    private struct TimedEmission {
+        var timestamp: TimeInterval
+        var emission: SmoothedScrollingEngine.Emission
+    }
+
+    private enum HighResolutionTraceMode {
+        case raw
+        case normalized
+        case unscaledAccelerated
+    }
+
+    private func touchPeakDeltaY(
+        for inputs: [TimedScrollInput],
+        configuration: Scheme.Scrolling.Smoothed = Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
+    ) -> Double {
+        timedEmissions(for: inputs, configuration: configuration)
+            .filter { $0.emission.phase == .touchBegan || $0.emission.phase == .touchChanged }
+            .map { abs($0.emission.deltaY) }
+            .max() ?? 0
+    }
+
+    private func touchPeakDeltaY(
+        for inputs: [TimedScrollInput],
+        after timestamp: TimeInterval,
+        direction: Int,
+        configuration: Scheme.Scrolling.Smoothed = Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
+    ) -> Double {
+        timedEmissions(for: inputs, configuration: configuration)
+            .filter {
+                $0.timestamp >= timestamp
+                    && ($0.emission.phase == .touchBegan || $0.emission.phase == .touchChanged)
+                    && (direction < 0 ? $0.emission.deltaY < 0 : $0.emission.deltaY > 0)
+            }
+            .map { abs($0.emission.deltaY) }
+            .max() ?? 0
+    }
+
+    private func totalDeltaY(
+        for inputs: [TimedScrollInput],
+        configuration: Scheme.Scrolling.Smoothed = Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
+    ) -> Double {
+        timedEmissions(for: inputs, configuration: configuration)
+            .map { abs($0.emission.deltaY) }
+            .reduce(0, +)
+    }
+
+    private func emissions(
+        for inputs: [TimedScrollInput],
+        configuration: Scheme.Scrolling.Smoothed
+    ) -> [SmoothedScrollingEngine.Emission] {
+        timedEmissions(for: inputs, configuration: configuration).map(\.emission)
+    }
+
+    private func timedEmissions(
+        for inputs: [TimedScrollInput],
+        configuration: Scheme.Scrolling.Smoothed
+    ) -> [TimedEmission] {
+        let engine = SmoothedScrollingEngine(smoothed: .init(vertical: configuration))
+        let sortedInputs = inputs.sorted { $0.timestamp < $1.timestamp }
+        let tickInterval = 1.0 / 120.0
+        let finalTimestamp = (sortedInputs.last?.timestamp ?? 0) + 0.5
+        let tickCount = Int((finalTimestamp / tickInterval).rounded(.up))
+
+        var emissions: [TimedEmission] = []
+        var nextInputIndex = 0
+
+        for tick in 1 ... tickCount {
+            let timestamp = Double(tick) * tickInterval
+
+            while nextInputIndex < sortedInputs.count,
+                  sortedInputs[nextInputIndex].timestamp <= timestamp {
+                let input = sortedInputs[nextInputIndex]
+                engine.feed(deltaX: 0, deltaY: input.deltaY, timestamp: input.timestamp)
+                nextInputIndex += 1
+            }
+
+            if let emission = engine.advance(to: timestamp) {
+                emissions.append(.init(timestamp: timestamp, emission: emission))
+            }
+        }
+
+        return emissions
+    }
+
+    private func splitDetentInputs(
+        count: Int,
+        detentInterval: TimeInterval,
+        multiplier: Int = 8
+    ) -> [TimedScrollInput] {
+        let unitInterval = detentInterval / Double(multiplier)
+        let unitDelta = 36.0 / Double(multiplier)
+
+        return (0 ..< count * multiplier).map { unit in
+            TimedScrollInput(timestamp: Double(unit) * unitInterval, deltaY: unitDelta)
+        }
+    }
+
+    private func highResolutionTraceInputs(mode: HighResolutionTraceMode) -> [TimedScrollInput] {
+        let multiplier = 8
+        let interval = 1.0 / 240.0
+        let integerDeltas = [1.0, 1, 1, 3, 4, 6, 6, 7]
+        let pointDeltas = [1.0, 3, 11, 32, 50, 61, 68, 75]
+        let rawUnits = Array(repeating: 1.0, count: integerDeltas.count)
+
+        return integerDeltas.indices.map { index in
+            let deltaY: Double
+            switch mode {
+            case .raw:
+                deltaY = rawUnits[index] * 36 / Double(multiplier)
+            case .normalized:
+                deltaY = max(rawUnits[index], integerDeltas[index], pointDeltas[index] / 10)
+                    * 36 / Double(multiplier)
+            case .unscaledAccelerated:
+                deltaY = max(rawUnits[index], integerDeltas[index], pointDeltas[index] / 10) * 36
+            }
+
+            return TimedScrollInput(
+                timestamp: Double(index) * interval,
+                deltaY: -deltaY
+            )
+        }
+    }
+
+    private func loggedFastHighResolutionTickInputs(mode: HighResolutionTraceMode) -> [TimedScrollInput] {
+        let multiplier = 8
+        let timestamps = [
+            899_937_042_327,
+            899_937_940_863,
+            899_939_561_641,
+            899_940_281_411,
+            899_940_480_800,
+            899_940_822_651,
+            899_941_188_304,
+            899_942_074_311
+        ]
+        let integerDeltas = [1.0, 1, 2, 3, 5, 6, 7, 7]
+        let pointDeltas = [1.0, 8, 23, 39, 56, 64, 71, 75]
+        let rawUnits = Array(repeating: 1.0, count: timestamps.count)
+        let startTimestamp = timestamps[0]
+
+        return timestamps.indices.map { index in
+            let deltaY: Double
+            switch mode {
+            case .raw:
+                deltaY = rawUnits[index] * 36 / Double(multiplier)
+            case .normalized:
+                deltaY = max(rawUnits[index], integerDeltas[index], pointDeltas[index] / 10)
+                    * 36 / Double(multiplier)
+            case .unscaledAccelerated:
+                deltaY = max(rawUnits[index], integerDeltas[index], pointDeltas[index] / 10) * 36
+            }
+
+            return TimedScrollInput(
+                timestamp: Double(timestamps[index] - startTimestamp) / 1_000_000_000.0,
+                deltaY: -deltaY
+            )
+        }
     }
 }

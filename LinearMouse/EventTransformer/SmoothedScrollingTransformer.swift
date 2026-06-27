@@ -11,6 +11,7 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
     )
     private static let timerInterval: TimeInterval = 1.0 / 120.0
     private let smoothed: Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Smoothed>
+    private let highResolutionWheelMultiplier: () -> Int?
     private let now: () -> TimeInterval
     private let eventSink: (CGEvent) -> Void
     private let delivery = SmoothedScrollEventDelivery()
@@ -19,13 +20,16 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
     private var timer: EventThreadTimer?
     private var lastFlags: CGEventFlags = []
     private var syntheticGestureScrollSeriesActive = false
+    private var syntheticMomentumScrollActive = false
 
     init(
         smoothed: Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Smoothed>,
+        highResolutionWheelMultiplier: @escaping () -> Int? = { nil },
         now: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime },
         eventSink: @escaping (CGEvent) -> Void = { $0.post(tap: .cgSessionEventTap) }
     ) {
         self.smoothed = smoothed
+        self.highResolutionWheelMultiplier = highResolutionWheelMultiplier
         self.now = now
         self.eventSink = eventSink
         engine = SmoothedScrollingEngine(smoothed: smoothed)
@@ -42,8 +46,8 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
             return event
         }
 
-        let deltaX = delivery.deltaXInPixels(from: view)
-        let deltaY = delivery.deltaYInPixels(from: view)
+        let deltaX = deltaXInPixels(from: view)
+        let deltaY = deltaYInPixels(from: view)
         let hasNativePhase = view.scrollPhase != nil
         let hasNativeMomentum = view.momentumPhase != .none
 
@@ -77,7 +81,8 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
             engine.feed(
                 deltaX: handlesX ? deltaX : 0,
                 deltaY: handlesY ? deltaY : 0,
-                timestamp: now()
+                timestamp: now(),
+                inputKind: .wheel
             )
             startTimerIfNeeded()
         }
@@ -101,7 +106,9 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
         endSyntheticGestureScrollSeriesIfNeeded(phase: .cancelled)
         stopTimer()
         engine = SmoothedScrollingEngine(smoothed: smoothed)
+        delivery.resetPointDeltaRemainders()
         lastFlags = []
+        syntheticMomentumScrollActive = false
     }
 
     private func startTimerIfNeeded() {
@@ -141,7 +148,8 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
             engine.feed(
                 deltaX: handlesX ? deltaX : 0,
                 deltaY: handlesY ? deltaY : 0,
-                timestamp: now()
+                timestamp: now(),
+                inputKind: .continuousGesture
             )
         }
 
@@ -172,9 +180,58 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
         if shouldResetAfterNativePhase {
             engine = SmoothedScrollingEngine(smoothed: smoothed)
             stopTimer()
+            delivery.resetPointDeltaRemainders()
         }
 
         return event
+    }
+
+    private func deltaXInPixels(from view: ScrollWheelEventView) -> Double {
+        guard let multiplier = highResolutionWheelMultiplier(),
+              multiplier > 1,
+              !view.continuous else {
+            return delivery.deltaXInPixels(from: view)
+        }
+
+        let unitResolution = LogitechHighResolutionWheelUnitReader.horizontalUnitResolution(
+            from: view,
+            multiplier: multiplier
+        )
+        let smoothedUnits = Self.smoothedHighResolutionUnits(from: unitResolution)
+        return smoothedUnits
+            * SmoothedScrollEventDelivery.inputLineStepInPoints
+            / Double(multiplier)
+    }
+
+    private func deltaYInPixels(from view: ScrollWheelEventView) -> Double {
+        guard let multiplier = highResolutionWheelMultiplier(),
+              multiplier > 1,
+              !view.continuous else {
+            return delivery.deltaYInPixels(from: view)
+        }
+
+        let unitResolution = LogitechHighResolutionWheelUnitReader.verticalUnitResolution(
+            from: view,
+            multiplier: multiplier
+        )
+        let smoothedUnits = Self.smoothedHighResolutionUnits(from: unitResolution)
+        return smoothedUnits
+            * SmoothedScrollEventDelivery.inputLineStepInPoints
+            / Double(multiplier)
+    }
+
+    static func smoothedHighResolutionUnits(
+        from unitResolution: LogitechHighResolutionWheelUnitReader.UnitResolution
+    ) -> Double {
+        let rawMagnitude = abs(unitResolution.rawUnits)
+        guard rawMagnitude > 1 else {
+            return unitResolution.rawUnits
+        }
+
+        let acceleratedMagnitude = abs(unitResolution.units)
+        let accelerationConfidence = 1 - 1 / rawMagnitude
+        let magnitude = rawMagnitude + (acceleratedMagnitude - rawMagnitude) * accelerationConfidence
+        return unitResolution.rawUnits.sign == .minus ? -magnitude : magnitude
     }
 
     private func stopTimer() {
@@ -186,6 +243,7 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
         guard let emission = engine.advance(to: now()) else {
             if !engine.isRunning {
                 stopTimer()
+                delivery.resetPointDeltaRemainders()
             }
             return
         }
@@ -194,6 +252,7 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
 
         if !engine.isRunning {
             stopTimer()
+            delivery.resetPointDeltaRemainders()
         }
     }
 
@@ -213,32 +272,86 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
 
         let view = ScrollWheelEventView(event)
         view.continuous = true
-        delivery.setHorizontal(emission.deltaX, on: view)
-        delivery.setVertical(emission.deltaY, on: view)
-        let phases = delivery.phasesFor(emission.phase, appliesPhases: allowsBouncingForConfiguredAxes())
+        let accumulatesSubpixelDelta = emission.phase.accumulatesSyntheticSubpixelDelta
+        delivery.setSyntheticHorizontal(
+            emission.deltaX,
+            on: view,
+            accumulatesSubpixelDelta: accumulatesSubpixelDelta
+        )
+        delivery.setSyntheticVertical(
+            emission.deltaY,
+            on: view,
+            accumulatesSubpixelDelta: accumulatesSubpixelDelta
+        )
+
+        guard let phase = syntheticPhase(for: emission.phase, hasDelta: delivery.hasDelta(on: view)) else {
+            return
+        }
+
+        let phases = delivery.phasesFor(phase, appliesPhases: allowsBouncingForConfiguredAxes())
         delivery.apply(phases: phases, to: view)
-        guard view.scrollPhase != nil || view.momentumPhase != .none || emission.deltaX != 0 || emission.deltaY != 0
+        guard view.scrollPhase != nil || view.momentumPhase != .none || delivery.hasDelta(on: view)
         else {
             return
         }
         event.isLinearMouseSyntheticEvent = true
         event.flags = lastFlags
+        let postedDeltaX = view.deltaXFixedPt
+        let postedDeltaY = view.deltaYFixedPt
         postGestureScrollCompanionsIfNeeded(
             scrollPhase: phases.scrollPhase,
-            deltaX: emission.deltaX,
-            deltaY: emission.deltaY
+            deltaX: postedDeltaX,
+            deltaY: postedDeltaY
         )
         eventSink(event)
+        updateSyntheticMomentumState(afterPosting: phase)
 
         os_log(
             "post smoothed scroll deltaX=%{public}.3f deltaY=%{public}.3f phase=%{public}@ momentum=%{public}@",
             log: Self.log,
             type: .info,
-            emission.deltaX,
-            emission.deltaY,
+            postedDeltaX,
+            postedDeltaY,
             String(describing: view.scrollPhase),
             String(describing: view.momentumPhase)
         )
+    }
+
+    private func syntheticPhase(
+        for phase: SmoothedScrollingEngine.Phase,
+        hasDelta: Bool
+    ) -> SmoothedScrollingEngine.Phase? {
+        switch phase {
+        case .touchBegan:
+            return hasDelta ? .touchBegan : nil
+        case .touchChanged:
+            guard hasDelta else {
+                return nil
+            }
+            return syntheticGestureScrollSeriesActive ? .touchChanged : .touchBegan
+        case .touchEnded:
+            return syntheticGestureScrollSeriesActive ? .touchEnded : nil
+        case .momentumBegan:
+            return hasDelta ? .momentumBegan : nil
+        case .momentumChanged:
+            guard hasDelta else {
+                return nil
+            }
+            return syntheticMomentumScrollActive ? .momentumChanged : .momentumBegan
+        case .momentumEnded:
+            return syntheticMomentumScrollActive ? .momentumEnded : nil
+        }
+    }
+
+    private func updateSyntheticMomentumState(afterPosting phase: SmoothedScrollingEngine.Phase) {
+        switch phase {
+        case .momentumBegan:
+            syntheticMomentumScrollActive = true
+        case .momentumEnded:
+            syntheticMomentumScrollActive = false
+        case .touchBegan, .touchChanged, .touchEnded, .momentumChanged:
+            break
+        }
     }
 
     private func postGestureScrollCompanionsIfNeeded(
@@ -327,9 +440,25 @@ private extension CGSGesturePhase {
     }
 }
 
-private struct SmoothedScrollEventDelivery {
-    private static let inputLineStepInPoints = 36.0
+private extension SmoothedScrollingEngine.Phase {
+    var accumulatesSyntheticSubpixelDelta: Bool {
+        switch self {
+        case .touchBegan, .touchChanged, .touchEnded:
+            return true
+        case .momentumBegan, .momentumChanged, .momentumEnded:
+            return false
+        }
+    }
+}
+
+private final class SmoothedScrollEventDelivery {
+    static let inputLineStepInPoints = 36.0
     private static let outputLineStepInPoints = 12.0
+    private var pointDeltaAccumulator = SmoothedScrollPointDeltaAccumulator()
+
+    func resetPointDeltaRemainders() {
+        pointDeltaAccumulator.reset()
+    }
 
     func apply(
         phases: (scrollPhase: CGScrollPhase?, momentumPhase: CGMomentumScrollPhase),
@@ -375,11 +504,11 @@ private struct SmoothedScrollEventDelivery {
                 return view.deltaXFixedPt * Self.inputLineStepInPoints * 10
             }
         }
-        if view.deltaXPt != 0 {
-            return view.deltaXPt
-        }
         if view.deltaXFixedPt != 0 {
             return view.deltaXFixedPt
+        }
+        if view.deltaXPt != 0 {
+            return view.deltaXPt
         }
         return Double(view.deltaX) * Self.inputLineStepInPoints
     }
@@ -396,46 +525,128 @@ private struct SmoothedScrollEventDelivery {
                 return view.deltaYFixedPt * Self.inputLineStepInPoints * 10
             }
         }
-        if view.deltaYPt != 0 {
-            return view.deltaYPt
-        }
         if view.deltaYFixedPt != 0 {
             return view.deltaYFixedPt
+        }
+        if view.deltaYPt != 0 {
+            return view.deltaYPt
         }
         return Double(view.deltaY) * Self.inputLineStepInPoints
     }
 
     func setHorizontal(_ value: Double, on view: ScrollWheelEventView) {
         view.deltaX = integerDelta(for: value)
-        view.deltaXPt = pointDelta(for: value)
+        view.deltaXPt = pointDeltaAccumulator.horizontalPointDelta(for: value)
         view.deltaXFixedPt = value
         view.ioHidScrollX = value
     }
 
     func setVertical(_ value: Double, on view: ScrollWheelEventView) {
         view.deltaY = integerDelta(for: value)
-        view.deltaYPt = pointDelta(for: value)
+        view.deltaYPt = pointDeltaAccumulator.verticalPointDelta(for: value)
         view.deltaYFixedPt = value
         view.ioHidScrollY = value
     }
 
+    func setSyntheticHorizontal(
+        _ value: Double,
+        on view: ScrollWheelEventView,
+        accumulatesSubpixelDelta: Bool
+    ) {
+        setSyntheticHorizontalOutput(
+            pointDeltaAccumulator.horizontalPointDelta(
+                for: value,
+                accumulates: accumulatesSubpixelDelta
+            ),
+            on: view
+        )
+    }
+
+    func setSyntheticVertical(
+        _ value: Double,
+        on view: ScrollWheelEventView,
+        accumulatesSubpixelDelta: Bool
+    ) {
+        setSyntheticVerticalOutput(
+            pointDeltaAccumulator.verticalPointDelta(
+                for: value,
+                accumulates: accumulatesSubpixelDelta
+            ),
+            on: view
+        )
+    }
+
     func zeroHorizontal(on view: ScrollWheelEventView) {
-        setHorizontal(0, on: view)
+        view.deltaX = 0
+        view.deltaXPt = 0
+        view.deltaXFixedPt = 0
+        view.ioHidScrollX = 0
     }
 
     func zeroVertical(on view: ScrollWheelEventView) {
-        setVertical(0, on: view)
+        view.deltaY = 0
+        view.deltaYPt = 0
+        view.deltaYFixedPt = 0
+        view.ioHidScrollY = 0
+    }
+
+    func hasDelta(on view: ScrollWheelEventView) -> Bool {
+        view.deltaX != 0 || view.deltaY != 0 ||
+            view.deltaXPt != 0 || view.deltaYPt != 0 ||
+            view.deltaXFixedPt != 0 || view.deltaYFixedPt != 0 ||
+            view.ioHidScrollX != 0 || view.ioHidScrollY != 0
+    }
+
+    private func setSyntheticHorizontalOutput(_ value: Double, on view: ScrollWheelEventView) {
+        view.deltaX = integerDelta(for: value)
+        view.deltaXPt = value
+        view.deltaXFixedPt = value
+        view.ioHidScrollX = value
+    }
+
+    private func setSyntheticVerticalOutput(_ value: Double, on view: ScrollWheelEventView) {
+        view.deltaY = integerDelta(for: value)
+        view.deltaYPt = value
+        view.deltaYFixedPt = value
+        view.ioHidScrollY = value
     }
 
     private func integerDelta(for value: Double) -> Int64 {
         Int64((value / Self.outputLineStepInPoints).rounded(.towardZero))
     }
+}
 
-    private func pointDelta(for value: Double) -> Double {
-        guard value != 0 else {
-            return 0
+struct SmoothedScrollPointDeltaAccumulator {
+    private var horizontalRemainder = 0.0
+    private var verticalRemainder = 0.0
+
+    mutating func reset() {
+        horizontalRemainder = 0
+        verticalRemainder = 0
+    }
+
+    mutating func horizontalPointDelta(for value: Double, accumulates: Bool = true) -> Double {
+        pointDelta(for: value, remainder: &horizontalRemainder, accumulates: accumulates)
+    }
+
+    mutating func verticalPointDelta(for value: Double, accumulates: Bool = true) -> Double {
+        pointDelta(for: value, remainder: &verticalRemainder, accumulates: accumulates)
+    }
+
+    private func pointDelta(for value: Double, remainder: inout Double, accumulates: Bool) -> Double {
+        guard accumulates else {
+            remainder = 0
+            return truncatedPointDelta(for: value)
         }
 
-        return Double(Int64(value.rounded(.towardZero)))
+        let combinedValue = value + remainder
+        let pointDelta = truncatedPointDelta(for: combinedValue)
+        remainder = combinedValue - pointDelta
+
+        return pointDelta
+    }
+
+    private func truncatedPointDelta(for value: Double) -> Double {
+        Double(Int64(value.rounded(.towardZero)))
     }
 }
