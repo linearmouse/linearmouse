@@ -193,7 +193,12 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
             return delivery.deltaXInPixels(from: view)
         }
 
-        return LogitechHighResolutionWheelUnitReader.horizontalUnits(from: view, multiplier: multiplier)
+        let unitResolution = LogitechHighResolutionWheelUnitReader.horizontalUnitResolution(
+            from: view,
+            multiplier: multiplier
+        )
+        let smoothedUnits = Self.smoothedHighResolutionUnits(from: unitResolution)
+        return smoothedUnits
             * SmoothedScrollEventDelivery.inputLineStepInPoints
             / Double(multiplier)
     }
@@ -205,9 +210,28 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
             return delivery.deltaYInPixels(from: view)
         }
 
-        return LogitechHighResolutionWheelUnitReader.verticalUnits(from: view, multiplier: multiplier)
+        let unitResolution = LogitechHighResolutionWheelUnitReader.verticalUnitResolution(
+            from: view,
+            multiplier: multiplier
+        )
+        let smoothedUnits = Self.smoothedHighResolutionUnits(from: unitResolution)
+        return smoothedUnits
             * SmoothedScrollEventDelivery.inputLineStepInPoints
             / Double(multiplier)
+    }
+
+    static func smoothedHighResolutionUnits(
+        from unitResolution: LogitechHighResolutionWheelUnitReader.UnitResolution
+    ) -> Double {
+        let rawMagnitude = abs(unitResolution.rawUnits)
+        guard rawMagnitude > 1 else {
+            return unitResolution.rawUnits
+        }
+
+        let acceleratedMagnitude = abs(unitResolution.units)
+        let accelerationConfidence = 1 - 1 / rawMagnitude
+        let magnitude = rawMagnitude + (acceleratedMagnitude - rawMagnitude) * accelerationConfidence
+        return unitResolution.rawUnits.sign == .minus ? -magnitude : magnitude
     }
 
     private func stopTimer() {

@@ -269,9 +269,8 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         let transformer = SmoothedScrollingTransformer(
             smoothed: .init(
                 vertical: Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
-            ),
-            now: { now }
-        )
+            )
+        )            { now }
 
         let originalEvent = try XCTUnwrap(CGEvent(
             scrollWheelEvent2Source: nil,
@@ -335,9 +334,8 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         var configuration = Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
         configuration.bouncing = false
         let transformer = SmoothedScrollingTransformer(
-            smoothed: .init(vertical: configuration),
-            now: { now }
-        )
+            smoothed: .init(vertical: configuration)
+        )            { now }
 
         let originalEvent = try XCTUnwrap(CGEvent(
             scrollWheelEvent2Source: nil,
@@ -509,10 +507,14 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         let slowPeak = try highResolutionTouchPeak(
             for: highResolutionRawDetentInputs(detentInterval: 0.16)
         )
+        let normalPeak = try highResolutionTouchPeak(
+            for: highResolutionRawDetentInputs(detentInterval: 1.0 / 55.0)
+        )
         let fastPeak = try highResolutionTouchPeak(for: loggedFastHighResolutionInputs())
 
         XCTAssertGreaterThan(slowPeak, 0)
-        XCTAssertGreaterThan(fastPeak, slowPeak * 3.0)
+        XCTAssertGreaterThan(normalPeak, slowPeak * 2.0)
+        XCTAssertGreaterThan(fastPeak, normalPeak)
     }
 
     func testSmoothedNormalHighResolutionDetentDoesNotOvershootLowResolutionDetentThroughTransformer() throws {
@@ -525,8 +527,58 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         )
 
         XCTAssertGreaterThan(lowResolutionPeak, 0)
+        XCTAssertGreaterThan(slowHighResolutionPeak, lowResolutionPeak * 0.25)
+        XCTAssertLessThan(slowHighResolutionPeak, lowResolutionPeak * 0.75)
         XCTAssertGreaterThan(normalHighResolutionPeak, slowHighResolutionPeak * 2.0)
         XCTAssertLessThan(normalHighResolutionPeak, lowResolutionPeak * 1.05)
+    }
+
+    func testSmoothedHighResolutionSingleDetentTotalOutputStaysCloseToLowResolutionThroughTransformer() throws {
+        let lowResolutionOutput = try lowResolutionSingleDetentTotalDelta()
+        let slowHighResolutionOutput = try highResolutionTotalDelta(
+            for: highResolutionRawDetentInputs(detentInterval: 0.16)
+        )
+        let normalHighResolutionOutput = try highResolutionTotalDelta(
+            for: highResolutionRawDetentInputs(detentInterval: 1.0 / 55.0)
+        )
+
+        XCTAssertGreaterThan(lowResolutionOutput, 0)
+        XCTAssertGreaterThan(slowHighResolutionOutput, lowResolutionOutput * 0.25)
+        XCTAssertLessThan(slowHighResolutionOutput, lowResolutionOutput * 0.75)
+        XCTAssertGreaterThan(normalHighResolutionOutput, slowHighResolutionOutput * 2.0)
+        XCTAssertLessThan(normalHighResolutionOutput, lowResolutionOutput * 1.25)
+    }
+
+    func testSmoothedHighResolutionWheelTotalOutputTracksInputDensityThroughTransformer() throws {
+        let slowOutput = try highResolutionTotalDelta(
+            for: highResolutionRawDetentInputs(detentInterval: 0.16, count: 4)
+        )
+        let normalOutput = try highResolutionTotalDelta(
+            for: highResolutionRawDetentInputs(detentInterval: 0.08, count: 4)
+        )
+        let fastOutput = try highResolutionTotalDelta(
+            for: highResolutionRawDetentInputs(detentInterval: 1.0 / 55.0, count: 4)
+        )
+
+        XCTAssertGreaterThan(slowOutput, 0)
+        XCTAssertGreaterThan(normalOutput, slowOutput)
+        XCTAssertGreaterThan(fastOutput, normalOutput)
+    }
+
+    func testSmoothedHighResolutionSingleRawTickIgnoresNativeAccelerationHint() {
+        let units = SmoothedScrollingTransformer.smoothedHighResolutionUnits(
+            from: .init(rawUnits: 1, acceleratedUnits: 14, units: 14)
+        )
+
+        XCTAssertEqual(units, 1, accuracy: 0.001)
+    }
+
+    func testSmoothedHighResolutionCoalescedRawTicksUseNativeAccelerationHint() {
+        let units = SmoothedScrollingTransformer.smoothedHighResolutionUnits(
+            from: .init(rawUnits: 4, acceleratedUnits: 14, units: 14)
+        )
+
+        XCTAssertEqual(units, 11.5, accuracy: 0.001)
     }
 
     private func firstDiscreteEmission(
@@ -587,6 +639,18 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
     private func highResolutionTouchPeak(
         for inputs: [TimedHighResolutionScrollInput]
     ) throws -> Double {
+        try touchPeak(in: highResolutionEvents(for: inputs))
+    }
+
+    private func highResolutionTotalDelta(
+        for inputs: [TimedHighResolutionScrollInput]
+    ) throws -> Double {
+        try totalDelta(in: highResolutionEvents(for: inputs))
+    }
+
+    private func highResolutionEvents(
+        for inputs: [TimedHighResolutionScrollInput]
+    ) throws -> [CGEvent] {
         var emittedEvents: [CGEvent] = []
         var now = 0.0
         let transformer = SmoothedScrollingTransformer(
@@ -622,10 +686,18 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
             transformer.tick()
         }
 
-        return touchPeak(in: emittedEvents)
+        return emittedEvents
     }
 
     private func lowResolutionSingleDetentTouchPeak() throws -> Double {
+        try touchPeak(in: lowResolutionSingleDetentEvents())
+    }
+
+    private func lowResolutionSingleDetentTotalDelta() throws -> Double {
+        try totalDelta(in: lowResolutionSingleDetentEvents())
+    }
+
+    private func lowResolutionSingleDetentEvents() throws -> [CGEvent] {
         var emittedEvents: [CGEvent] = []
         var now = 0.0
         let transformer = SmoothedScrollingTransformer(
@@ -648,7 +720,7 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
             transformer.tick()
         }
 
-        return touchPeak(in: emittedEvents)
+        return emittedEvents
     }
 
     private func touchPeak(in emittedEvents: [CGEvent]) -> Double {
@@ -660,6 +732,13 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         let touchDeltas = touchViews.map { abs($0.deltaYPt) }
 
         return touchDeltas.max() ?? 0
+    }
+
+    private func totalDelta(in emittedEvents: [CGEvent]) -> Double {
+        emittedEvents
+            .filter { $0.type == .scrollWheel }
+            .map { abs(ScrollWheelEventView($0).deltaYPt) }
+            .reduce(0, +)
     }
 
     private func slowHighResolutionRawTickInputs(
@@ -679,16 +758,19 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
 
     private func highResolutionRawDetentInputs(
         detentInterval: TimeInterval,
+        count: Int = 1,
         multiplier: Int = 8
     ) -> [TimedHighResolutionScrollInput] {
         let unitInterval = detentInterval / Double(multiplier)
+        let fixedPointDelta = 1.0 / Double(multiplier)
+        let pointDelta = 10.0 / Double(multiplier)
 
-        return (0 ..< multiplier).map { index in
+        return (0 ..< count * multiplier).map { index in
             TimedHighResolutionScrollInput(
                 timestamp: Double(index) * unitInterval,
                 integerDelta: 1,
-                fixedPointDelta: 0.100006103515625,
-                pointDelta: 1,
+                fixedPointDelta: fixedPointDelta,
+                pointDelta: pointDelta,
                 ioHidDelta: 1
             )
         }

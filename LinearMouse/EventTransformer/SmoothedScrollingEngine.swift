@@ -292,6 +292,7 @@ final class SmoothedScrollingEngine {
             sessionState = .touching
             touchHasBegun = false
             pendingMomentumBegin = false
+            lastTickTimestamp = timestamp
         } else if sessionState == .momentum, deltaX != 0 || deltaY != 0 {
             sessionState = .touching
             touchHasBegun = false
@@ -523,13 +524,22 @@ final class SmoothedScrollingEngine {
 }
 
 private struct WheelInputVelocityEstimator {
-    private static let resetInterval: TimeInterval = 1.0 / 25.0
-    private static let inputTimeConstant: TimeInterval = 1.0 / 20.0
-    private static let referenceInterval: TimeInterval = 1.0 / 45.0
+    // Estimate the distance represented by a short wheel gesture while capping
+    // the projection to the signed input that was actually received.
+    private static let inputGapResetInterval: TimeInterval = 1.0 / 25.0
+    private static let rateSmoothingTimeConstant: TimeInterval = 1.0 / 20.0
+    private static let projectedGestureInterval: TimeInterval = 1.0 / 15.0
+    private static let recentInputLimitInterval = inputGapResetInterval * 4
+
+    private struct InputSample {
+        var delta: Double
+        var timestamp: TimeInterval
+    }
 
     private var rateAdjustedInput = 0.0
     private var direction = 0
     private var lastTimestamp: TimeInterval?
+    private var recentInputs: [InputSample] = []
 
     mutating func add(_ delta: Double, timestamp: TimeInterval) {
         guard delta != 0 else {
@@ -540,10 +550,12 @@ private struct WheelInputVelocityEstimator {
         let currentDirection = delta > 0 ? 1 : -1
         if direction != 0, currentDirection != direction {
             rateAdjustedInput = 0
+            recentInputs.removeAll(keepingCapacity: true)
         }
 
         direction = currentDirection
-        rateAdjustedInput += delta * Self.referenceInterval / Self.inputTimeConstant
+        rateAdjustedInput += delta * Self.projectedGestureInterval / Self.rateSmoothingTimeConstant
+        recentInputs.append(.init(delta: delta, timestamp: timestamp))
     }
 
     mutating func projectedInput(for pendingInput: Double, at timestamp: TimeInterval) -> Double {
@@ -554,18 +566,37 @@ private struct WheelInputVelocityEstimator {
 
         advance(to: timestamp)
 
-        guard rateAdjustedInput != 0,
-              rateAdjustedInput.sign == pendingInput.sign,
-              abs(rateAdjustedInput) > abs(pendingInput) else {
-            return pendingInput
+        var projectedInput = pendingInput
+        if rateAdjustedInput != 0,
+           rateAdjustedInput.sign == pendingInput.sign,
+           abs(rateAdjustedInput) > abs(projectedInput) {
+            projectedInput = rateAdjustedInput
         }
-        return rateAdjustedInput
+
+        // The rate projection restores wheel input split across high-frequency ticks,
+        // but it must not exceed the real signed distance received recently.
+        let recentInput = recentInputs.reduce(0) { $0 + $1.delta }
+        guard recentInput != 0,
+              recentInput.sign == projectedInput.sign else {
+            return projectedInput
+        }
+
+        let projectedMagnitude = abs(projectedInput)
+        let inputMagnitude = abs(pendingInput)
+        let recentMagnitude = abs(recentInput)
+        if projectedMagnitude > recentMagnitude {
+            let cappedMagnitude = max(inputMagnitude, recentMagnitude)
+            projectedInput = projectedInput.sign == .minus ? -cappedMagnitude : cappedMagnitude
+        }
+
+        return projectedInput
     }
 
     mutating func reset() {
         rateAdjustedInput = 0
         direction = 0
         lastTimestamp = nil
+        recentInputs.removeAll(keepingCapacity: true)
     }
 
     private mutating func advance(to timestamp: TimeInterval) {
@@ -579,15 +610,17 @@ private struct WheelInputVelocityEstimator {
             self.lastTimestamp = timestamp
         }
 
-        guard dt <= Self.resetInterval else {
+        guard dt <= Self.inputGapResetInterval else {
             rateAdjustedInput = 0
             direction = 0
+            recentInputs.removeAll(keepingCapacity: true)
             return
         }
 
-        rateAdjustedInput *= exp(-dt / Self.inputTimeConstant)
+        rateAdjustedInput *= exp(-dt / Self.rateSmoothingTimeConstant)
         if abs(rateAdjustedInput) < 0.001 {
             rateAdjustedInput = 0
         }
+        recentInputs.removeAll { timestamp - $0.timestamp > Self.recentInputLimitInterval }
     }
 }

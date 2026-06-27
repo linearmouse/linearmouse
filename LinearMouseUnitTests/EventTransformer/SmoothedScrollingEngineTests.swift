@@ -91,6 +91,32 @@ final class SmoothedScrollingEngineTests: XCTestCase {
         XCTAssertLessThan(abs(easeInEmission?.deltaY ?? 0), abs(easeOutEmission?.deltaY ?? 0))
     }
 
+    func testNewWheelSessionDoesNotUseStaleIdleTickTimestamp() throws {
+        let configuration = Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
+        let reusedEngine = SmoothedScrollingEngine(smoothed: .init(vertical: configuration))
+        let freshEngine = SmoothedScrollingEngine(smoothed: .init(vertical: configuration))
+
+        reusedEngine.feed(deltaX: 0, deltaY: 36, timestamp: 0)
+        for tick in 1 ... 600 {
+            _ = reusedEngine.advance(to: Double(tick) / 120)
+            if !reusedEngine.isRunning {
+                break
+            }
+        }
+        XCTAssertFalse(reusedEngine.isRunning)
+
+        let nextInputTimestamp = 10.0
+        reusedEngine.feed(deltaX: 0, deltaY: 36, timestamp: nextInputTimestamp)
+        freshEngine.feed(deltaX: 0, deltaY: 36, timestamp: nextInputTimestamp)
+
+        let reusedEmission = try XCTUnwrap(reusedEngine.advance(to: nextInputTimestamp + 1.0 / 120.0))
+        let freshEmission = try XCTUnwrap(freshEngine.advance(to: nextInputTimestamp + 1.0 / 120.0))
+
+        XCTAssertEqual(reusedEmission.phase, .touchBegan)
+        XCTAssertEqual(freshEmission.phase, .touchBegan)
+        XCTAssertEqual(abs(reusedEmission.deltaY), abs(freshEmission.deltaY), accuracy: 0.001)
+    }
+
     func testDenseSplitInputMatchesAggregatedInputAtSameOutputTick() throws {
         let configuration = Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
         let aggregatedEngine = SmoothedScrollingEngine(smoothed: .init(vertical: configuration))
@@ -118,19 +144,67 @@ final class SmoothedScrollingEngineTests: XCTestCase {
 
     func testSameRawTickDistanceHasHigherPeakWhenItArrivesDensely() {
         let slowPeak = touchPeakDeltaY(for: splitDetentInputs(count: 4, detentInterval: 0.16))
+        let mediumPeak = touchPeakDeltaY(for: splitDetentInputs(count: 4, detentInterval: 0.08))
         let fastPeak = touchPeakDeltaY(for: splitDetentInputs(count: 4, detentInterval: 1.0 / 55.0))
 
+        XCTAssertGreaterThan(mediumPeak, slowPeak)
+        XCTAssertGreaterThan(fastPeak, mediumPeak)
         XCTAssertGreaterThan(fastPeak, slowPeak * 2.0)
+    }
+
+    func testSameRawTickDistanceHasHigherTotalOutputWhenItArrivesDensely() {
+        let slowOutput = totalDeltaY(for: splitDetentInputs(count: 4, detentInterval: 0.16))
+        let mediumOutput = totalDeltaY(for: splitDetentInputs(count: 4, detentInterval: 0.08))
+        let fastOutput = totalDeltaY(for: splitDetentInputs(count: 4, detentInterval: 1.0 / 55.0))
+
+        XCTAssertGreaterThan(slowOutput, 0)
+        XCTAssertGreaterThan(mediumOutput, slowOutput)
+        XCTAssertGreaterThan(fastOutput, mediumOutput)
     }
 
     func testSingleDetentTimingChangesPeakWithoutGlobalScaling() {
         let aggregatedPeak = touchPeakDeltaY(for: [TimedScrollInput(timestamp: 0, deltaY: 36)])
         let slowSplitPeak = touchPeakDeltaY(for: splitDetentInputs(count: 1, detentInterval: 0.16))
+        let mediumSplitPeak = touchPeakDeltaY(for: splitDetentInputs(count: 1, detentInterval: 0.08))
         let fastSplitPeak = touchPeakDeltaY(for: splitDetentInputs(count: 1, detentInterval: 1.0 / 55.0))
 
         XCTAssertLessThan(slowSplitPeak, aggregatedPeak)
+        XCTAssertGreaterThan(mediumSplitPeak, slowSplitPeak)
+        XCTAssertGreaterThan(fastSplitPeak, mediumSplitPeak)
         XCTAssertGreaterThan(fastSplitPeak, slowSplitPeak * 2.0)
         XCTAssertLessThan(fastSplitPeak, aggregatedPeak * 1.05)
+    }
+
+    func testSlowSplitDetentKeepsMeaningfulPickup() {
+        let aggregatedPeak = touchPeakDeltaY(for: [TimedScrollInput(timestamp: 0, deltaY: 36)])
+        let slowSplitPeak = touchPeakDeltaY(for: splitDetentInputs(count: 1, detentInterval: 0.16))
+
+        XCTAssertGreaterThan(slowSplitPeak, aggregatedPeak * 0.25)
+        XCTAssertLessThan(slowSplitPeak, aggregatedPeak * 0.75)
+    }
+
+    func testSplitInputDirectionChangeDoesNotCarryPreviousRateProjection() {
+        let detentInterval = 1.0 / 55.0
+        let reverseStart = 0.02
+        let forwardInputs = splitDetentInputs(count: 1, detentInterval: detentInterval)
+        let reverseInputs = splitDetentInputs(count: 1, detentInterval: detentInterval)
+            .map {
+                TimedScrollInput(timestamp: $0.timestamp + reverseStart, deltaY: -$0.deltaY)
+            }
+        let freshReverseInputs = splitDetentInputs(count: 1, detentInterval: detentInterval)
+            .map {
+                TimedScrollInput(timestamp: $0.timestamp, deltaY: -$0.deltaY)
+            }
+
+        let reversePeak = touchPeakDeltaY(
+            for: forwardInputs + reverseInputs,
+            after: reverseStart,
+            direction: -1
+        )
+        let freshReversePeak = touchPeakDeltaY(for: freshReverseInputs)
+
+        XCTAssertGreaterThan(reversePeak, freshReversePeak * 0.25)
+        XCTAssertLessThan(reversePeak, freshReversePeak * 1.05)
     }
 
     func testHighResolutionTraceUsesAcceleratedDistanceWithoutSkippingMultiplier() {
@@ -374,6 +448,31 @@ final class SmoothedScrollingEngineTests: XCTestCase {
             .filter { $0.emission.phase == .touchBegan || $0.emission.phase == .touchChanged }
             .map { abs($0.emission.deltaY) }
             .max() ?? 0
+    }
+
+    private func touchPeakDeltaY(
+        for inputs: [TimedScrollInput],
+        after timestamp: TimeInterval,
+        direction: Int,
+        configuration: Scheme.Scrolling.Smoothed = Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
+    ) -> Double {
+        timedEmissions(for: inputs, configuration: configuration)
+            .filter {
+                $0.timestamp >= timestamp
+                    && ($0.emission.phase == .touchBegan || $0.emission.phase == .touchChanged)
+                    && (direction < 0 ? $0.emission.deltaY < 0 : $0.emission.deltaY > 0)
+            }
+            .map { abs($0.emission.deltaY) }
+            .max() ?? 0
+    }
+
+    private func totalDeltaY(
+        for inputs: [TimedScrollInput],
+        configuration: Scheme.Scrolling.Smoothed = Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration
+    ) -> Double {
+        timedEmissions(for: inputs, configuration: configuration)
+            .map { abs($0.emission.deltaY) }
+            .reduce(0, +)
     }
 
     private func emissions(
