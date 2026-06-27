@@ -89,7 +89,11 @@ class LinearScrollingHorizontalTransformer: EventTransformer {
         }
 
         return highResolutionWheelCounter.consume(
-            units: LogitechHighResolutionWheelUnitReader.horizontalUnits(from: view, multiplier: multiplier),
+            units: LogitechHighResolutionWheelUnitReader.horizontalUnitResolution(
+                from: view,
+                multiplier: multiplier
+            )
+            .rawUnits,
             multiplier: multiplier,
             now: now()
         )
@@ -101,7 +105,11 @@ class LinearScrollingHorizontalTransformer: EventTransformer {
             return Double(view.deltaXSignum)
         }
 
-        return LogitechHighResolutionWheelUnitReader.horizontalUnits(from: view, multiplier: multiplier)
-            / Double(multiplier)
+        return LogitechHighResolutionWheelUnitReader.horizontalUnitResolution(
+            from: view,
+            multiplier: multiplier
+        )
+        .rawUnits
+        / Double(multiplier)
     }
 }

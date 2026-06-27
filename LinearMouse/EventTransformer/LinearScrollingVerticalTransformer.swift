@@ -88,7 +88,11 @@ class LinearScrollingVerticalTransformer: EventTransformer {
         }
 
         return highResolutionWheelCounter.consume(
-            units: LogitechHighResolutionWheelUnitReader.verticalUnits(from: view, multiplier: multiplier),
+            units: LogitechHighResolutionWheelUnitReader.verticalUnitResolution(
+                from: view,
+                multiplier: multiplier
+            )
+            .rawUnits,
             multiplier: multiplier,
             now: now()
         )
@@ -100,7 +104,11 @@ class LinearScrollingVerticalTransformer: EventTransformer {
             return Double(view.deltaYSignum)
         }
 
-        return LogitechHighResolutionWheelUnitReader.verticalUnits(from: view, multiplier: multiplier)
-            / Double(multiplier)
+        return LogitechHighResolutionWheelUnitReader.verticalUnitResolution(
+            from: view,
+            multiplier: multiplier
+        )
+        .rawUnits
+        / Double(multiplier)
     }
 }

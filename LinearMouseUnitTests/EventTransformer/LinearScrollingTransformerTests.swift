@@ -95,6 +95,22 @@ final class LinearScrollingTransformerTests: XCTestCase {
         XCTAssertEqual(view.deltaYFixedPt, 62.60723876953125, accuracy: 0.001)
     }
 
+    func testHighResolutionWheelLinearDistanceShouldUseRawUnitsWhenAccelerationIsPresent() {
+        let resolution = LogitechHighResolutionWheelUnitReader.units(
+            integerDelta: 14,
+            pointDelta: 140,
+            fixedPointDelta: 13.943,
+            ioHidDelta: -1,
+            signum: 1,
+            multiplier: 8
+        )
+        let pixelDistance = abs(resolution.rawUnits) * 36 / 8
+
+        XCTAssertEqual(resolution.rawUnits, 1, accuracy: 0.001)
+        XCTAssertEqual(resolution.units, 14, accuracy: 0.001)
+        XCTAssertEqual(pixelDistance, 4.5, accuracy: 0.001)
+    }
+
     private func makeVerticalHighResolutionScrollEvent(
         multiplier: Int = 8,
         units: Double = 1
