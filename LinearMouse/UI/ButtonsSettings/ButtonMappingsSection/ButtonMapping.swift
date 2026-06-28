@@ -5,11 +5,9 @@ import SwiftUI
 
 struct ButtonMappingListItem: View {
     @Binding var mapping: Scheme.Buttons.Mapping
+    var onEdit: (Scheme.Buttons.Mapping) -> Void
 
     @State private var hover = false
-
-    @State private var showEditSheet = false
-    @State private var mappingToEdit: Scheme.Buttons.Mapping = .init()
 
     var body: some View {
         HStack {
@@ -21,17 +19,11 @@ struct ButtonMappingListItem: View {
             Spacer()
 
             Button("Edit") {
-                mappingToEdit = mapping
-                showEditSheet.toggle()
+                onEdit(mapping)
             }
             .opacity(hover ? 1 : 0)
         }
         .padding(.vertical, 4)
-        .sheet(isPresented: $showEditSheet) {
-            ButtonMappingEditSheet(isPresented: $showEditSheet, mapping: $mappingToEdit) { mapping in
-                self.mapping = mapping
-            }
-        }
         .onHover {
             hover = $0
         }

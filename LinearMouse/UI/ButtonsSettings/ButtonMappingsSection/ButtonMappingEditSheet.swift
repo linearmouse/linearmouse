@@ -11,7 +11,7 @@ struct ButtonMappingEditSheet: View {
     @Binding var mapping: Scheme.Buttons.Mapping
     let completion: ((Scheme.Buttons.Mapping) -> Void)?
 
-    @State private var mode: Mode
+    let mode: Mode
 
     init(
         isPresented: Binding<Bool>,
@@ -84,9 +84,8 @@ struct ButtonMappingEditSheet: View {
                 }
 
                 Button(mode == .create ? "Create" : "OK") {
-                    isPresented = false
-                    mode = .edit
                     completion?(mapping)
+                    isPresented = false
                 }
                 .disabled(!valid)
                 .asDefaultAction()
