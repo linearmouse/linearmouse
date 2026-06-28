@@ -74,6 +74,10 @@ extension DeviceState {
     }
 
     private func setCurrentDeviceRef(_ deviceRef: WeakRef<Device>?) {
+        if currentDeviceRef?.value !== deviceRef?.value {
+            SettingsState.shared.endButtonMappingRecording()
+        }
+
         isUpdatingCurrentDeviceRef = true
         currentDeviceRef = deviceRef
         isUpdatingCurrentDeviceRef = false
