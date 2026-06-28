@@ -27,7 +27,7 @@ class ClickDebouncingTransformer: EventTransformer {
 
     private var lastClickedAtInNanoseconds: UInt64 = 0
 
-    func transform(_ event: CGEvent) -> CGEvent? {
+    func transform(_ event: CGEvent, in _: EventTransformerContext) -> CGEvent? {
         guard [mouseDownEventType, mouseUpEventType].contains(event.type) else {
             return event
         }

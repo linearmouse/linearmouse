@@ -98,7 +98,7 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
             .flatMap(\.self)
     }
 
-    func transform(_ event: CGEvent) -> CGEvent? {
+    func transform(_ event: CGEvent, in _: EventTransformerContext) -> CGEvent? {
         guard allEventTypesOfInterest.contains(event.type) else {
             return event
         }

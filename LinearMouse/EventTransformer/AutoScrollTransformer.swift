@@ -56,7 +56,7 @@ final class AutoScrollTransformer {
 }
 
 extension AutoScrollTransformer: EventTransformer {
-    func transform(_ event: CGEvent) -> CGEvent? {
+    func transform(_ event: CGEvent, in _: EventTransformerContext) -> CGEvent? {
         if case let .active(_, _, session) = state,
            session == .toggle,
            isAnyMouseDownEvent(event),

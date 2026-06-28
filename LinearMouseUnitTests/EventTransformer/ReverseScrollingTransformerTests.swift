@@ -15,7 +15,7 @@ final class ReverseScrollingTransformerTests: XCTestCase {
             wheel2: 2,
             wheel3: 0
         ))
-        event = try XCTUnwrap(transformer.transform(event))
+        event = try XCTUnwrap(transformer.transform(event, in: EventTransformerContext(device: nil)))
         let view = ScrollWheelEventView(event)
         XCTAssertEqual(view.deltaX, 2)
         XCTAssertEqual(view.deltaY, -1)
@@ -31,7 +31,7 @@ final class ReverseScrollingTransformerTests: XCTestCase {
             wheel2: 2,
             wheel3: 0
         ))
-        event = try XCTUnwrap(transformer.transform(event))
+        event = try XCTUnwrap(transformer.transform(event, in: EventTransformerContext(device: nil)))
         let view = ScrollWheelEventView(event)
         XCTAssertEqual(view.deltaX, -2)
         XCTAssertEqual(view.deltaY, 1)

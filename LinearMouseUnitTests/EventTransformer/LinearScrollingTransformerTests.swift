@@ -15,7 +15,7 @@ final class LinearScrollingTransformerTests: XCTestCase {
             wheel2: 42,
             wheel3: 0
         ))
-        event = try XCTUnwrap(transformer.transform(event))
+        event = try XCTUnwrap(transformer.transform(event, in: .init(device: nil)))
         let view = ScrollWheelEventView(event)
         XCTAssertFalse(view.continuous)
         XCTAssertEqual(view.deltaX, 0)
@@ -32,7 +32,7 @@ final class LinearScrollingTransformerTests: XCTestCase {
             wheel2: 42,
             wheel3: 0
         ))
-        event = try XCTUnwrap(transformer.transform(event))
+        event = try XCTUnwrap(transformer.transform(event, in: .init(device: nil)))
         let view = ScrollWheelEventView(event)
         XCTAssertTrue(view.continuous)
         XCTAssertEqual(view.deltaXPt, 0)
@@ -44,15 +44,19 @@ final class LinearScrollingTransformerTests: XCTestCase {
     func testHighResolutionWheelLineScrollingUsesMultiplier() throws {
         let transformer = LinearScrollingVerticalTransformer(
             distance: .line(3),
-            highResolutionWheelMultiplier: { 8 },
+            highResolutionWheelMultiplier: { _ in 8 },
             now: { 0 }
         )
+        let context = EventTransformerContext(device: nil)
 
         for _ in 0 ..< 3 {
-            XCTAssertNil(try transformer.transform(makeVerticalHighResolutionScrollEvent()))
+            XCTAssertNil(try transformer.transform(makeVerticalHighResolutionScrollEvent(), in: context))
         }
 
-        let transformedEvent = try XCTUnwrap(try transformer.transform(makeVerticalHighResolutionScrollEvent()))
+        let transformedEvent = try XCTUnwrap(try transformer.transform(
+            makeVerticalHighResolutionScrollEvent(),
+            in: context
+        ))
         let view = ScrollWheelEventView(transformedEvent)
 
         XCTAssertFalse(view.continuous)
@@ -63,11 +67,15 @@ final class LinearScrollingTransformerTests: XCTestCase {
     func testHighResolutionWheelPixelScrollingUsesMultiplier() throws {
         let transformer = LinearScrollingVerticalTransformer(
             distance: .pixel(36),
-            highResolutionWheelMultiplier: { 8 },
+            highResolutionWheelMultiplier: { _ in 8 },
             now: { 0 }
         )
+        let context = EventTransformerContext(device: nil)
 
-        let transformedEvent = try XCTUnwrap(try transformer.transform(makeVerticalHighResolutionScrollEvent()))
+        let transformedEvent = try XCTUnwrap(try transformer.transform(
+            makeVerticalHighResolutionScrollEvent(),
+            in: context
+        ))
         let view = ScrollWheelEventView(transformedEvent)
 
         XCTAssertTrue(view.continuous)
@@ -77,15 +85,40 @@ final class LinearScrollingTransformerTests: XCTestCase {
         XCTAssertEqual(view.deltaYFixedPt, 4.5, accuracy: 0.001)
     }
 
+    func testHighResolutionWheelMultiplierIsResolvedAtTransformTime() throws {
+        var multiplier = 8
+        let transformer = LinearScrollingVerticalTransformer(
+            distance: .pixel(36),
+            highResolutionWheelMultiplier: { _ in multiplier },
+            now: { 0 }
+        )
+        let context = EventTransformerContext(device: nil)
+
+        let multiplier8Event = try XCTUnwrap(try transformer.transform(
+            makeVerticalHighResolutionScrollEvent(multiplier: 8),
+            in: context
+        ))
+        multiplier = 4
+        let multiplier4Event = try XCTUnwrap(try transformer.transform(
+            makeVerticalHighResolutionScrollEvent(multiplier: 4),
+            in: context
+        ))
+
+        XCTAssertEqual(ScrollWheelEventView(multiplier8Event).deltaYFixedPt, 4.5, accuracy: 0.001)
+        XCTAssertEqual(ScrollWheelEventView(multiplier4Event).deltaYFixedPt, 9, accuracy: 0.001)
+    }
+
     func testHighResolutionWheelPixelScrollingUsesFixedPointUnitsWhenIntegerDeltaIsCoalesced() throws {
         let transformer = LinearScrollingVerticalTransformer(
             distance: .pixel(36),
-            highResolutionWheelMultiplier: { 10 },
+            highResolutionWheelMultiplier: { _ in 10 },
             now: { 0 }
         )
+        let context = EventTransformerContext(device: nil)
 
         let transformedEvent = try XCTUnwrap(try transformer.transform(
-            makeVerticalHighResolutionScrollEvent(multiplier: 10, units: 17.390899658203125)
+            makeVerticalHighResolutionScrollEvent(multiplier: 10, units: 17.390899658203125),
+            in: context
         ))
         let view = ScrollWheelEventView(transformedEvent)
 

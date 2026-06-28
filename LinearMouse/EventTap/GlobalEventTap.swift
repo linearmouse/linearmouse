@@ -23,14 +23,14 @@ class GlobalEventTap {
 
         let mouseEventView = MouseEventView(event)
         let usesProcessConditions = ConfigurationState.shared.configuration.usesProcessConditions
-        let eventTransformer = EventTransformerManager.shared.get(
+        let eventTransformerResolution = EventTransformerManager.shared.resolve(
             withCGEvent: event,
             withSourcePid: mouseEventView.sourcePid,
             withTargetPid: usesProcessConditions ? mouseEventView.targetPid : nil,
             withMouseLocationPid: usesProcessConditions ? mouseEventView.mouseLocationOwnerPid : nil,
             withDisplay: ScreenManager.shared.currentScreenNameSnapshot
         )
-        let transformedEvent = eventTransformer.transform(event)
+        let transformedEvent = eventTransformerResolution.transform(event)
         invalidateWindowInfoCacheIfNeeded(for: event)
         return transformedEvent
     }

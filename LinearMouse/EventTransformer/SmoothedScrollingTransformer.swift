@@ -11,7 +11,7 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
     )
     private static let timerInterval: TimeInterval = 1.0 / 120.0
     private let smoothed: Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Smoothed>
-    private let highResolutionWheelMultiplier: () -> Int?
+    private let highResolutionWheelMultiplier: (EventTransformerContext) -> Int?
     private let now: () -> TimeInterval
     private let eventSink: (CGEvent) -> Void
     private let delivery = SmoothedScrollEventDelivery()
@@ -24,7 +24,9 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
 
     init(
         smoothed: Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Smoothed>,
-        highResolutionWheelMultiplier: @escaping () -> Int? = { nil },
+        highResolutionWheelMultiplier: @escaping (EventTransformerContext) -> Int? = {
+            $0.device?.highResolutionWheelNormalizationMultiplier
+        },
         now: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime },
         eventSink: @escaping (CGEvent) -> Void = { $0.post(tap: .cgSessionEventTap) }
     ) {
@@ -35,7 +37,7 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
         engine = SmoothedScrollingEngine(smoothed: smoothed)
     }
 
-    func transform(_ event: CGEvent) -> CGEvent? {
+    func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent? {
         guard event.type == .scrollWheel else {
             return event
         }
@@ -46,8 +48,8 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
             return event
         }
 
-        let deltaX = deltaXInPixels(from: view)
-        let deltaY = deltaYInPixels(from: view)
+        let deltaX = deltaXInPixels(from: view, in: context)
+        let deltaY = deltaYInPixels(from: view, in: context)
         let hasNativePhase = view.scrollPhase != nil
         let hasNativeMomentum = view.momentumPhase != .none
 
@@ -186,8 +188,8 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
         return event
     }
 
-    private func deltaXInPixels(from view: ScrollWheelEventView) -> Double {
-        guard let multiplier = highResolutionWheelMultiplier(),
+    private func deltaXInPixels(from view: ScrollWheelEventView, in context: EventTransformerContext) -> Double {
+        guard let multiplier = highResolutionWheelMultiplier(context),
               multiplier > 1,
               !view.continuous else {
             return delivery.deltaXInPixels(from: view)
@@ -203,8 +205,8 @@ final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
             / Double(multiplier)
     }
 
-    private func deltaYInPixels(from view: ScrollWheelEventView) -> Double {
-        guard let multiplier = highResolutionWheelMultiplier(),
+    private func deltaYInPixels(from view: ScrollWheelEventView, in context: EventTransformerContext) -> Double {
+        guard let multiplier = highResolutionWheelMultiplier(context),
               multiplier > 1,
               !view.continuous else {
             return delivery.deltaYInPixels(from: view)

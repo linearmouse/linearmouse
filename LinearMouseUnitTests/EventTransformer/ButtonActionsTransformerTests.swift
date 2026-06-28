@@ -84,7 +84,7 @@ final class ButtonActionsTransformerTests: XCTestCase {
         ))
 
         XCTAssertNotNil(buttonTransformer.repeatTimer)
-        XCTAssertNil(scrollTransformer.transform(event))
+        XCTAssertNil(scrollTransformer.transform(event, in: EventTransformerContext(device: nil)))
         XCTAssertNil(buttonTransformer.repeatTimer)
     }
 

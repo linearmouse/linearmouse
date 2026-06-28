@@ -9,15 +9,19 @@ final class LogitechHighResolutionWheelNormalizerTests: XCTestCase {
         let transformer = LogitechHighResolutionWheelNormalizer(
             verticalMode: .lowResolution,
             horizontalMode: .passthrough,
-            multiplier: { 8 },
+            highResolutionWheelMultiplier: { _ in 8 },
             now: { 0 }
         )
+        let context = EventTransformerContext(device: nil)
 
         for _ in 0 ..< 3 {
-            XCTAssertNil(try transformer.transform(makeVerticalHighResolutionScrollEvent()))
+            XCTAssertNil(try transformer.transform(makeVerticalHighResolutionScrollEvent(), in: context))
         }
 
-        let transformedEvent = try XCTUnwrap(try transformer.transform(makeVerticalHighResolutionScrollEvent()))
+        let transformedEvent = try XCTUnwrap(try transformer.transform(
+            makeVerticalHighResolutionScrollEvent(),
+            in: context
+        ))
         let view = ScrollWheelEventView(transformedEvent)
 
         XCTAssertFalse(view.continuous)
@@ -26,7 +30,7 @@ final class LogitechHighResolutionWheelNormalizerTests: XCTestCase {
         XCTAssertEqual(view.deltaYFixedPt, 1)
 
         for _ in 0 ..< 4 {
-            XCTAssertNil(try transformer.transform(makeVerticalHighResolutionScrollEvent()))
+            XCTAssertNil(try transformer.transform(makeVerticalHighResolutionScrollEvent(), in: context))
         }
     }
 
@@ -34,12 +38,14 @@ final class LogitechHighResolutionWheelNormalizerTests: XCTestCase {
         let transformer = LogitechHighResolutionWheelNormalizer(
             verticalMode: .lowResolution,
             horizontalMode: .passthrough,
-            multiplier: { 10 },
+            highResolutionWheelMultiplier: { _ in 10 },
             now: { 0 }
         )
+        let context = EventTransformerContext(device: nil)
 
         let transformedEvent = try XCTUnwrap(try transformer.transform(
-            makeVerticalHighResolutionScrollEvent(multiplier: 10, units: 17.390899658203125)
+            makeVerticalHighResolutionScrollEvent(multiplier: 10, units: 17.390899658203125),
+            in: context
         ))
         let view = ScrollWheelEventView(transformedEvent)
 
