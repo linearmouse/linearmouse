@@ -35,7 +35,20 @@ class Device {
     private weak var manager: DeviceManager?
     private var inputReportHandlers: [InputReportHandler] = []
     private var logitechReprogrammableControlsMonitor: LogitechReprogrammableControlsMonitor?
-    lazy var logitechDPIController = LogitechHIDPPDeviceDPIController(device: device)
+    private var cachedLogitechDPIController: LogitechHIDPPDeviceDPIController?
+    var logitechDPIController: LogitechHIDPPDeviceDPIController? {
+        if let cachedLogitechDPIController {
+            return cachedLogitechDPIController
+        }
+
+        guard let controller = LogitechHIDPPDeviceDPIController(device: device) else {
+            return nil
+        }
+
+        cachedLogitechDPIController = controller
+        return controller
+    }
+
     lazy var logitechHighResolutionWheelController = LogitechHIDPPHighResolutionWheelController(device: device)
     private var logitechControlsMonitorSubscriptions = Set<AnyCancellable>()
     private let device: PointerDevice

@@ -19,6 +19,64 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
         )
     }
 
+    func testBoltReceiverSlotFallsBackToOnlyDiscoveredPointingDevice() {
+        let device = Self.boltReceiver()
+        let identities = [Self.receiverIdentity(slot: 2, name: "MX Master 3S")]
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+
+        XCTAssertEqual(
+            provider.receiverSlot(for: device, identities: identities),
+            2
+        )
+    }
+
+    func testBoltReceiverSlotUsesSerialMatchWhenMultipleDevicesArePaired() {
+        let device = Self.boltReceiver(product: "MX Master 3S", serialNumber: "AB:CD:EF:01")
+        let identities = [
+            Self.receiverIdentity(slot: 1, name: "MX Master 3S", serialNumber: "12345678", productID: 0xB03E),
+            Self.receiverIdentity(slot: 3, name: "MX Master 3S", serialNumber: "ABCDEF01", productID: 0xB034)
+        ]
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+
+        XCTAssertEqual(
+            provider.receiverSlot(for: device, identities: identities),
+            3
+        )
+    }
+
+    func testBoltReceiverSlotRejectsAmbiguousPairedDevices() {
+        let device = Self.boltReceiver()
+        let identities = [
+            Self.receiverIdentity(slot: 1, name: "MX Ergo S"),
+            Self.receiverIdentity(slot: 3, name: "MX Master 3S")
+        ]
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+
+        XCTAssertNil(provider.receiverSlot(for: device, identities: identities))
+    }
+
+    func testBoltReceiverSlotRejectsDuplicateProductIDMatches() {
+        let device = Self.boltReceiver()
+        let identities = [
+            Self.receiverIdentity(slot: 1, name: "MX Ergo S", productID: 0xC548),
+            Self.receiverIdentity(slot: 3, name: "MX Master 3S", productID: 0xC548)
+        ]
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+
+        XCTAssertNil(provider.receiverSlot(for: device, identities: identities))
+    }
+
+    func testBoltReceiverSlotRejectsDuplicateNameMatches() {
+        let device = Self.boltReceiver(product: "MX Master 3S")
+        let identities = [
+            Self.receiverIdentity(slot: 1, name: "MX Master 3S"),
+            Self.receiverIdentity(slot: 3, name: "MX Master 3S")
+        ]
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+
+        XCTAssertNil(provider.receiverSlot(for: device, identities: identities))
+    }
+
     func testReadsAndWritesAdjustableDPI() {
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,
@@ -147,6 +205,49 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
         XCTAssertEqual(controller?.canRepresentDPI(260), false)
     }
 
+    func testSetDPISucceedsWhenDeviceAppliesWithoutAcknowledgingWrite() {
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xB015,
+            transport: PointerDeviceTransportName.bluetoothLowEnergy,
+            maxInputReportSize: 20,
+            maxOutputReportSize: 20
+        )
+        var currentDPI = 800
+        device.responseProvider = { report in
+            let bytes = [UInt8](report)
+            guard bytes.count >= 4 else {
+                return nil
+            }
+
+            switch (bytes[2], bytes[3]) {
+            case (0x00, 0x08):
+                return Self.hidppLongReply(featureIndex: 0x00, address: 0x08, payload: [0x05])
+            case (0x05, 0x18):
+                return Self.hidppLongReply(
+                    featureIndex: 0x05,
+                    address: 0x18,
+                    payload: [0x00, 0x03, 0x20, 0x06, 0x40, 0x00, 0x00]
+                )
+            case (0x05, 0x28):
+                return Self.hidppLongReply(
+                    featureIndex: 0x05,
+                    address: 0x28,
+                    payload: [0x00, UInt8((currentDPI >> 8) & 0xFF), UInt8(currentDPI & 0xFF), 0x00, 0x00]
+                )
+            case (0x05, 0x38):
+                currentDPI = Int(bytes[5]) << 8 | Int(bytes[6])
+                return nil
+            default:
+                return nil
+            }
+        }
+
+        let controller = LogitechHIDPPDeviceDPIController(device: device)
+
+        XCTAssertEqual(controller?.setDPI(1600), 1600)
+    }
+
     func testCurrentDPIUsesSupportedDefaultWhenCurrentBytesAreNotSupported() {
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,
@@ -184,6 +285,40 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
         let controller = LogitechHIDPPDeviceDPIController(device: device)
 
         XCTAssertEqual(controller?.currentDPI(), 1000)
+    }
+
+    private static func boltReceiver(
+        product: String? = nil,
+        serialNumber: String? = nil
+    ) -> MockVendorSpecificDeviceContext {
+        MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xC548,
+            product: product,
+            name: product ?? "Logi Bolt Receiver",
+            serialNumber: serialNumber,
+            transport: PointerDeviceTransportName.usb,
+            locationID: 1,
+            maxInputReportSize: 20,
+            maxOutputReportSize: 20
+        )
+    }
+
+    private static func receiverIdentity(
+        slot: UInt8,
+        name: String,
+        serialNumber: String? = nil,
+        productID: Int? = nil
+    ) -> ReceiverLogicalDeviceIdentity {
+        ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 1,
+            slot: slot,
+            kind: .mouse,
+            name: name,
+            serialNumber: serialNumber,
+            productID: productID,
+            batteryLevel: nil
+        )
     }
 
     private static func hidppLongReply(featureIndex: UInt8, address: UInt8, payload: [UInt8]) -> Data {

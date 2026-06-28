@@ -194,17 +194,15 @@ extension PointerSettingsState {
 
             if !result.info.supportsAdjustableDPI {
                 self.pointerHardwareDPIStatusMessage = "Unsupported device"
-            } else if result.targetDPI == nil {
-                self.pointerHardwareDPIStatusMessage = "Unable to apply DPI"
-            } else if let currentDPI = result.info.currentDPI {
-                self.pointerHardwareDPITargetDPI = currentDPI
+            } else if let targetDPI = result.targetDPI {
+                self.pointerHardwareDPITargetDPI = targetDPI
                 self.pointerHardwareDPITargetDPIEdited = false
                 var deviceScheme = self.schemeState.deviceScheme
-                deviceScheme.pointer.hardwareDPI = currentDPI
+                deviceScheme.pointer.hardwareDPI = targetDPI
                 self.schemeState.deviceScheme = deviceScheme
                 self.pointerHardwareDPIStatusMessage = nil
             } else {
-                self.pointerHardwareDPIStatusMessage = "Unable to read DPI after apply"
+                self.pointerHardwareDPIStatusMessage = "Unable to apply DPI"
             }
 
             self.pointerHardwareDPIInfo = result.info
