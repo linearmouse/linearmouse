@@ -19,6 +19,7 @@ class EventTransformerManager {
 
     struct CacheKey: Hashable {
         var deviceMatcher: DeviceMatcher?
+        var deviceID: Int32?
         var pid: pid_t?
         var screen: String?
     }
@@ -188,6 +189,7 @@ class EventTransformerManager {
 
         let cacheKey = CacheKey(
             deviceMatcher: device.map { DeviceMatcher(of: $0) },
+            deviceID: device?.id,
             pid: pid,
             screen: display
         )

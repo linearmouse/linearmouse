@@ -13,6 +13,24 @@ final class EventTransformerManagerTests: XCTestCase {
         SettingsState.shared.recordedButtonMappingEvent = nil
     }
 
+    func testCacheKeyIncludesDeviceIdentity() {
+        let matcher = DeviceMatcher(category: .mouse)
+        let oldDeviceKey = EventTransformerManager.CacheKey(
+            deviceMatcher: matcher,
+            deviceID: 1,
+            pid: nil,
+            screen: nil
+        )
+        let reconnectedDeviceKey = EventTransformerManager.CacheKey(
+            deviceMatcher: matcher,
+            deviceID: 2,
+            pid: nil,
+            screen: nil
+        )
+
+        XCTAssertNotEqual(oldDeviceKey, reconnectedDeviceKey)
+    }
+
     func testSyntheticSmoothedEventStillGetsModifierActions() throws {
         let modifiers = Scheme.Scrolling.Modifiers(option: .changeSpeed(scale: 2))
         ConfigurationState.shared.configuration = .init(schemes: [
