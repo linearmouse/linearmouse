@@ -133,6 +133,10 @@ class DeviceManager: ObservableObject {
             )
             self?.updatePointerSpeed()
         }
+
+        updatePointerSpeed()
+        updateHardwareDPI()
+        updateHighResolutionWheel()
     }
 
     private func deviceAdded(_: PointerDeviceManager, _ pointerDevice: PointerDevice) {

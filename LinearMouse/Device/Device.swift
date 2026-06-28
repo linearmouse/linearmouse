@@ -36,6 +36,7 @@ class Device {
     private var inputReportHandlers: [InputReportHandler] = []
     private var logitechReprogrammableControlsMonitor: LogitechReprogrammableControlsMonitor?
     private var cachedLogitechDPIController: LogitechHIDPPDeviceDPIController?
+    private var cachedLogitechHighResolutionWheelController: LogitechHIDPPHighResolutionWheelController?
     var logitechDPIController: LogitechHIDPPDeviceDPIController? {
         if let cachedLogitechDPIController {
             return cachedLogitechDPIController
@@ -49,7 +50,23 @@ class Device {
         return controller
     }
 
-    lazy var logitechHighResolutionWheelController = LogitechHIDPPHighResolutionWheelController(device: device)
+    var logitechHighResolutionWheelController: LogitechHIDPPHighResolutionWheelController? {
+        if let cachedLogitechHighResolutionWheelController {
+            return cachedLogitechHighResolutionWheelController
+        }
+
+        guard let controller = LogitechHIDPPHighResolutionWheelController(device: device) else {
+            return nil
+        }
+
+        cachedLogitechHighResolutionWheelController = controller
+        return controller
+    }
+
+    func invalidateLogitechHighResolutionWheelController() {
+        cachedLogitechHighResolutionWheelController = nil
+    }
+
     private var logitechControlsMonitorSubscriptions = Set<AnyCancellable>()
     private let device: PointerDevice
 
@@ -68,6 +85,7 @@ class Device {
     var cachedHighResolutionWheelEnabled: Bool?
     var cachedHighResolutionWheelMultiplier: Int?
     var initialHighResolutionWheelEnabled: Bool?
+    var highResolutionWheelApplyRequestID = UUID()
 
     var isRemoved: Bool {
         hardwareDPILock.lock()
@@ -157,6 +175,7 @@ class Device {
         removed = true
         cachedHardwareDPI = nil
         hardwareDPILock.unlock()
+        invalidateLogitechHighResolutionWheelController()
         highResolutionWheelLock.lock()
         cachedHighResolutionWheelEnabled = nil
         cachedHighResolutionWheelMultiplier = nil

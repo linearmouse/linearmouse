@@ -1,6 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
+import AppKit
 import Combine
 import Foundation
 import PublishedObject
@@ -21,6 +22,16 @@ class ScrollingSettingsState: ObservableObject {
         deviceState.$currentDeviceRef
             .debounce(for: 0.1, scheduler: RunLoop.main)
             .removeDuplicates()
+            .sink { [weak self] _ in
+                self?.resetHighResolutionWheelInfo()
+                self?.refreshHighResolutionWheelInfo()
+            }
+            .store(in: &subscriptions)
+
+        NSWorkspace.shared
+            .notificationCenter
+            .publisher(for: NSWorkspace.didWakeNotification)
+            .delay(for: .seconds(2), scheduler: RunLoop.main)
             .sink { [weak self] _ in
                 self?.resetHighResolutionWheelInfo()
                 self?.refreshHighResolutionWheelInfo()
@@ -96,12 +107,23 @@ extension ScrollingSettingsState {
 
             self.highResolutionWheelInfo = info
             self.highResolutionWheelInfoRefreshing = false
+            self.applyConfiguredHighResolutionWheelIfNeeded(info: info, device: device)
         }
     }
 
     private func resetHighResolutionWheelInfo() {
         highResolutionWheelInfo = nil
         highResolutionWheelInfoRefreshing = false
+    }
+
+    private func applyConfiguredHighResolutionWheelIfNeeded(info: Device.HighResolutionWheelInfo, device: Device) {
+        guard info.supportsHighResolutionWheel,
+              let configuredHighResolutionWheel = schemeState.deviceScheme.logitech.highResolutionWheel,
+              info.enabled != configuredHighResolutionWheel else {
+            return
+        }
+
+        DeviceManager.shared.updateHighResolutionWheel(for: device)
     }
 
     enum ScrollingMode: String, Identifiable, CaseIterable {
