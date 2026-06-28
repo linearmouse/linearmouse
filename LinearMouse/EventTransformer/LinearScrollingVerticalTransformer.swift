@@ -8,13 +8,15 @@ class LinearScrollingVerticalTransformer: EventTransformer {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "LinearScrollingVertical")
 
     private let distance: Scheme.Scrolling.Distance
-    private let highResolutionWheelMultiplier: () -> Int?
+    private let highResolutionWheelMultiplier: (EventTransformerContext) -> Int?
     private let now: () -> TimeInterval
     private var highResolutionWheelCounter = LogitechHighResolutionWheelScrollCounter()
 
     init(
         distance: Scheme.Scrolling.Distance,
-        highResolutionWheelMultiplier: @escaping () -> Int? = { nil },
+        highResolutionWheelMultiplier: @escaping (EventTransformerContext) -> Int? = {
+            $0.device?.highResolutionWheelNormalizationMultiplier
+        },
         now: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime }
     ) {
         self.distance = distance
@@ -22,7 +24,7 @@ class LinearScrollingVerticalTransformer: EventTransformer {
         self.now = now
     }
 
-    func transform(_ event: CGEvent) -> CGEvent? {
+    func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent? {
         guard event.type == .scrollWheel else {
             return event
         }
@@ -51,7 +53,7 @@ class LinearScrollingVerticalTransformer: EventTransformer {
             return event
 
         case let .line(value):
-            guard let normalizedUnits = lowResolutionUnits(from: view) else {
+            guard let normalizedUnits = lowResolutionUnits(from: view, in: context) else {
                 return nil
             }
 
@@ -60,7 +62,7 @@ class LinearScrollingVerticalTransformer: EventTransformer {
             view.deltaX = 0
 
         case let .pixel(value):
-            let pixelValue = highResolutionPixelUnits(from: view) * value.asTruncatedDouble
+            let pixelValue = highResolutionPixelUnits(from: view, in: context) * value.asTruncatedDouble
 
             view.continuous = true
             view.deltaYPt = pixelValue
@@ -81,8 +83,8 @@ class LinearScrollingVerticalTransformer: EventTransformer {
         return event
     }
 
-    private func lowResolutionUnits(from view: ScrollWheelEventView) -> Int? {
-        guard let multiplier = highResolutionWheelMultiplier(),
+    private func lowResolutionUnits(from view: ScrollWheelEventView, in context: EventTransformerContext) -> Int? {
+        guard let multiplier = highResolutionWheelMultiplier(context),
               multiplier > 1 else {
             return Int(view.deltaYSignum)
         }
@@ -98,8 +100,11 @@ class LinearScrollingVerticalTransformer: EventTransformer {
         )
     }
 
-    private func highResolutionPixelUnits(from view: ScrollWheelEventView) -> Double {
-        guard let multiplier = highResolutionWheelMultiplier(),
+    private func highResolutionPixelUnits(
+        from view: ScrollWheelEventView,
+        in context: EventTransformerContext
+    ) -> Double {
+        guard let multiplier = highResolutionWheelMultiplier(context),
               multiplier > 1 else {
             return Double(view.deltaYSignum)
         }

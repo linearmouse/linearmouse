@@ -11,7 +11,7 @@ final class LogitechHighResolutionWheelNormalizer: EventTransformer {
 
     private let verticalMode: AxisMode
     private let horizontalMode: AxisMode
-    private let multiplier: () -> Int?
+    private let highResolutionWheelMultiplier: (EventTransformerContext) -> Int?
     private let now: () -> TimeInterval
 
     private var verticalCounter = LogitechHighResolutionWheelScrollCounter()
@@ -20,12 +20,14 @@ final class LogitechHighResolutionWheelNormalizer: EventTransformer {
     init(
         verticalMode: AxisMode,
         horizontalMode: AxisMode,
-        multiplier: @escaping () -> Int?,
+        highResolutionWheelMultiplier: @escaping (EventTransformerContext) -> Int? = {
+            $0.device?.highResolutionWheelNormalizationMultiplier
+        },
         now: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime }
     ) {
         self.verticalMode = verticalMode
         self.horizontalMode = horizontalMode
-        self.multiplier = multiplier
+        self.highResolutionWheelMultiplier = highResolutionWheelMultiplier
         self.now = now
     }
 
@@ -33,10 +35,10 @@ final class LogitechHighResolutionWheelNormalizer: EventTransformer {
         verticalMode != .passthrough || horizontalMode != .passthrough
     }
 
-    func transform(_ event: CGEvent) -> CGEvent? {
+    func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent? {
         guard event.type == .scrollWheel,
               !event.isLinearMouseSyntheticEvent,
-              let multiplier = multiplier(),
+              let multiplier = highResolutionWheelMultiplier(context),
               multiplier > 1 else {
             return event
         }

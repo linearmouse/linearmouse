@@ -5,7 +5,7 @@ import CoreGraphics
 import Foundation
 
 class PointerRedirectsToScrollTransformer: EventTransformer {
-    func transform(_ event: CGEvent) -> CGEvent? {
+    func transform(_ event: CGEvent, in _: EventTransformerContext) -> CGEvent? {
         guard event.type == .mouseMoved else {
             return event
         }

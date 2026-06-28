@@ -5,8 +5,21 @@ import Foundation
 import LRUCache
 import os.log
 
+struct EventTransformerContext {
+    var device: Device?
+}
+
+struct EventTransformerResolution {
+    var transformer: EventTransformer
+    var context: EventTransformerContext
+
+    func transform(_ event: CGEvent) -> CGEvent? {
+        transformer.transform(event, in: context)
+    }
+}
+
 protocol EventTransformer {
-    func transform(_ event: CGEvent) -> CGEvent?
+    func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent?
 }
 
 enum LogitechControlEventHandlingResult {
@@ -25,11 +38,11 @@ protocol LogitechControlEventHandling {
 }
 
 extension [EventTransformer]: EventTransformer {
-    func transform(_ event: CGEvent) -> CGEvent? {
+    func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent? {
         var event: CGEvent? = event
 
         for eventTransformer in self {
-            event = event.flatMap { eventTransformer.transform($0) }
+            event = event.flatMap { eventTransformer.transform($0, in: context) }
         }
 
         return event

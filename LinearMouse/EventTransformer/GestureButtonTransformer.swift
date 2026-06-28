@@ -47,7 +47,7 @@ class GestureButtonTransformer {
 }
 
 extension GestureButtonTransformer: EventTransformer {
-    func transform(_ event: CGEvent) -> CGEvent? {
+    func transform(_ event: CGEvent, in _: EventTransformerContext) -> CGEvent? {
         // Check if we're in cooldown
         if case let .cooldown(until, released) = state {
             if DispatchTime.now().uptimeNanoseconds < until {

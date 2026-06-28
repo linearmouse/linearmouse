@@ -50,15 +50,15 @@ class EventTransformerManager {
         "cc.ffitch.shottr"
     ]
 
-    func get(
+    func resolve(
         withCGEvent cgEvent: CGEvent,
         withSourcePid sourcePid: pid_t?,
         withTargetPid targetPid: pid_t?,
         withMouseLocationPid mouseLocationPid: pid_t?,
         withDisplay display: String?
-    ) -> EventTransformer {
+    ) -> EventTransformerResolution {
         if EventThread.shared.isCurrent {
-            return getOnCurrentThread(
+            return resolveOnCurrentThread(
                 withCGEvent: cgEvent,
                 withSourcePid: sourcePid,
                 withTargetPid: targetPid,
@@ -67,8 +67,8 @@ class EventTransformerManager {
             )
         }
 
-        if let transformer = EventThread.shared.performAndWait({
-            self.getOnCurrentThread(
+        if let resolution = EventThread.shared.performAndWait({
+            self.resolveOnCurrentThread(
                 withCGEvent: cgEvent,
                 withSourcePid: sourcePid,
                 withTargetPid: targetPid,
@@ -76,10 +76,10 @@ class EventTransformerManager {
                 withDisplay: display
             )
         }) {
-            return transformer
+            return resolution
         }
 
-        return getOnCurrentThread(
+        return resolveOnCurrentThread(
             withCGEvent: cgEvent,
             withSourcePid: sourcePid,
             withTargetPid: targetPid,
@@ -88,13 +88,30 @@ class EventTransformerManager {
         )
     }
 
-    private func getOnCurrentThread(
+    func get(
         withCGEvent cgEvent: CGEvent,
         withSourcePid sourcePid: pid_t?,
         withTargetPid targetPid: pid_t?,
         withMouseLocationPid mouseLocationPid: pid_t?,
         withDisplay display: String?
     ) -> EventTransformer {
+        resolve(
+            withCGEvent: cgEvent,
+            withSourcePid: sourcePid,
+            withTargetPid: targetPid,
+            withMouseLocationPid: mouseLocationPid,
+            withDisplay: display
+        )
+        .transformer
+    }
+
+    private func resolveOnCurrentThread(
+        withCGEvent cgEvent: CGEvent,
+        withSourcePid sourcePid: pid_t?,
+        withTargetPid targetPid: pid_t?,
+        withMouseLocationPid mouseLocationPid: pid_t?,
+        withDisplay display: String?
+    ) -> EventTransformerResolution {
         if sourcePid != nil, bypassEventsFromOtherApplications, !cgEvent.isLinearMouseSyntheticEvent {
             os_log(
                 "Return noop transformer because this event is sent by %{public}s",
@@ -102,7 +119,7 @@ class EventTransformerManager {
                 type: .info,
                 sourcePid?.bundleIdentifier ?? "(unknown)"
             )
-            return []
+            return .init(transformer: [], context: .init(device: nil))
         }
         if let sourceBundleIdentifier = sourcePid?.bundleIdentifier,
            sourceBundleIdentifierBypassSet.contains(sourceBundleIdentifier) {
@@ -112,13 +129,16 @@ class EventTransformerManager {
                 type: .info,
                 sourceBundleIdentifier
             )
-            return []
+            return .init(transformer: [], context: .init(device: nil))
         }
 
         let pid = mouseLocationPid ?? targetPid
         let device = DeviceManager.shared.deviceFromCGEvent(cgEvent)
 
-        return get(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: true)
+        return .init(
+            transformer: get(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: true),
+            context: .init(device: device)
+        )
     }
 
     func get(withDevice device: Device?, withPid pid: pid_t?, withDisplay display: String?) -> EventTransformer {
@@ -217,9 +237,6 @@ class EventTransformerManager {
         )
 
         var eventTransformer: [EventTransformer] = []
-        let highResolutionWheelMultiplier = { [weak device] in
-            device?.highResolutionWheelNormalizationMultiplier
-        }
 
         if let reverse = scheme.scrolling.$reverse {
             let vertical = reverse.vertical ?? false
@@ -249,8 +266,7 @@ class EventTransformerManager {
                 horizontalMode: highResolutionWheelNormalizerMode(
                     distance: scheme.scrolling.distance.horizontal,
                     smoothed: smoothed.horizontal
-                ),
-                multiplier: highResolutionWheelMultiplier
+                )
             )
             if highResolutionWheelNormalizer.normalizesAnyAxis {
                 eventTransformer.append(highResolutionWheelNormalizer)
@@ -283,16 +299,14 @@ class EventTransformerManager {
         if hasSmoothedScrolling {
             appendScrollRecordingAndButtonMappings()
             eventTransformer.append(SmoothedScrollingTransformer(
-                smoothed: smoothed,
-                highResolutionWheelMultiplier: highResolutionWheelMultiplier
+                smoothed: smoothed
             ))
         }
 
         if let distance = scheme.scrolling.distance.horizontal {
             if smoothed.horizontal == nil {
                 eventTransformer.append(LinearScrollingHorizontalTransformer(
-                    distance: distance,
-                    highResolutionWheelMultiplier: highResolutionWheelMultiplier
+                    distance: distance
                 ))
             }
         }
@@ -300,8 +314,7 @@ class EventTransformerManager {
         if let distance = scheme.scrolling.distance.vertical {
             if smoothed.vertical == nil {
                 eventTransformer.append(LinearScrollingVerticalTransformer(
-                    distance: distance,
-                    highResolutionWheelMultiplier: highResolutionWheelMultiplier
+                    distance: distance
                 ))
             }
         }
@@ -523,7 +536,7 @@ class EventTransformerManager {
 }
 
 final class ButtonMappingScrollRecordingTransformer: EventTransformer {
-    func transform(_ event: CGEvent) -> CGEvent? {
+    func transform(_ event: CGEvent, in _: EventTransformerContext) -> CGEvent? {
         guard SettingsState.shared.recording,
               let recordingSessionID = SettingsState.shared.buttonMappingRecordingSessionID,
               event.type == .scrollWheel,

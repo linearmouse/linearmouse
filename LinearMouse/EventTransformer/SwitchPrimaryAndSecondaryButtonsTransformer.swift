@@ -14,7 +14,7 @@ class SwitchPrimaryAndSecondaryButtonsTransformer {
 }
 
 extension SwitchPrimaryAndSecondaryButtonsTransformer: EventTransformer {
-    func transform(_ event: CGEvent) -> CGEvent? {
+    func transform(_ event: CGEvent, in _: EventTransformerContext) -> CGEvent? {
         let mouseEventView = MouseEventView(event)
 
         guard var mouseButton = mouseEventView.mouseButton else {

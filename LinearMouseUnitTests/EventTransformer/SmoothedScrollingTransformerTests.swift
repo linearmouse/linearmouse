@@ -35,7 +35,10 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         ))
         originalEvent.flags = [.maskShift]
 
-        let transformedEvent = try XCTUnwrap(transformer.transform(originalEvent))
+        let transformedEvent = try XCTUnwrap(transformer.transform(
+            originalEvent,
+            in: EventTransformerContext(device: nil)
+        ))
         let transformedView = ScrollWheelEventView(transformedEvent)
         XCTAssertEqual(transformedView.deltaX, 1)
         XCTAssertEqual(transformedView.deltaY, 0)
@@ -90,8 +93,8 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         ))
         scaledEvent.flags = [.maskAlternate]
 
-        XCTAssertNil(baselineChain.transform(baselineEvent))
-        XCTAssertNil(scaledChain.transform(scaledEvent))
+        XCTAssertNil(baselineChain.transform(baselineEvent, in: EventTransformerContext(device: nil)))
+        XCTAssertNil(scaledChain.transform(scaledEvent, in: EventTransformerContext(device: nil)))
 
         now = 1.0 / 120.0
         baselineTransformer.tick()
@@ -129,7 +132,7 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
                 wheel3: 0
             ))
             now = Double(step) / 120
-            XCTAssertNil(transformer.transform(event))
+            XCTAssertNil(transformer.transform(event, in: EventTransformerContext(device: nil)))
             now += 1.0 / 120.0
             smoothedTransformer.tick()
         }
@@ -153,7 +156,7 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
             wheel3: 0
         ))
         shiftedEvent.flags = [.maskShift]
-        XCTAssertNil(transformer.transform(shiftedEvent))
+        XCTAssertNil(transformer.transform(shiftedEvent, in: EventTransformerContext(device: nil)))
 
         now += 1.0 / 120.0
         smoothedTransformer.tick()
@@ -191,7 +194,10 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         ))
         originalEvent.flags = [.maskAlternate]
 
-        let passthroughEvent = try XCTUnwrap(transformer.transform(originalEvent))
+        let passthroughEvent = try XCTUnwrap(transformer.transform(
+            originalEvent,
+            in: EventTransformerContext(device: nil)
+        ))
         let passthroughView = ScrollWheelEventView(passthroughEvent)
         XCTAssertEqual(passthroughView.deltaX, 3)
         XCTAssertEqual(passthroughView.deltaY, 0)
@@ -253,7 +259,7 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         originalView.deltaYFixedPt = 0.1
         XCTAssertFalse(originalView.continuous)
 
-        XCTAssertNil(transformer.transform(originalEvent))
+        XCTAssertNil(transformer.transform(originalEvent, in: EventTransformerContext(device: nil)))
 
         now = 1.0 / 120.0
         transformer.tick()
@@ -288,7 +294,10 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         originalView.deltaYFixedPt = 9
         originalView.scrollPhase = .began
 
-        let transformedEvent = try XCTUnwrap(transformer.transform(originalEvent))
+        let transformedEvent = try XCTUnwrap(transformer.transform(
+            originalEvent,
+            in: EventTransformerContext(device: nil)
+        ))
         let transformedView = ScrollWheelEventView(transformedEvent)
         XCTAssertEqual(transformedView.deltaYPt, 0, accuracy: 0.001)
         XCTAssertGreaterThan(transformedView.deltaYFixedPt, 0)
@@ -316,7 +325,7 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
             wheel3: 0
         ))
 
-        XCTAssertNil(transformer.transform(originalEvent))
+        XCTAssertNil(transformer.transform(originalEvent, in: EventTransformerContext(device: nil)))
 
         now = 1.0 / 120.0
         transformer.tick()
@@ -355,7 +364,10 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         originalView.deltaYFixedPt = 9
         originalView.scrollPhase = .began
 
-        let transformedEvent = try XCTUnwrap(transformer.transform(originalEvent))
+        let transformedEvent = try XCTUnwrap(transformer.transform(
+            originalEvent,
+            in: EventTransformerContext(device: nil)
+        ))
         let transformedView = ScrollWheelEventView(transformedEvent)
         XCTAssertGreaterThan(transformedView.deltaYFixedPt, 0)
         XCTAssertLessThan(transformedView.deltaYFixedPt, 9)
@@ -443,15 +455,16 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         var now = 0.0
         let transformer = SmoothedScrollingTransformer(
             smoothed: .init(vertical: Scheme.Scrolling.Smoothed.Preset.smooth.defaultConfiguration),
-            highResolutionWheelMultiplier: { 8 },
+            highResolutionWheelMultiplier: { _ in 8 },
             now: { now },
             eventSink: { emittedEvents.append($0.copy() ?? $0) }
         )
+        let context = EventTransformerContext(device: nil)
 
         for step in 0 ..< 8 {
             now = Double(step) / 120.0
             let rawEvent = try makeVerticalHighResolutionScrollEvent()
-            XCTAssertNil(transformer.transform(rawEvent))
+            XCTAssertNil(transformer.transform(rawEvent, in: context))
 
             now += 1.0 / 120.0
             transformer.tick()
@@ -493,12 +506,16 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         var now = 0.0
         let highResolutionTransformer = SmoothedScrollingTransformer(
             smoothed: .init(vertical: Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration),
-            highResolutionWheelMultiplier: { 8 },
+            highResolutionWheelMultiplier: { _ in 8 },
             now: { now },
             eventSink: { highResolutionEvents.append($0.copy() ?? $0) }
         )
+        let context = EventTransformerContext(device: nil)
 
-        XCTAssertNil(try highResolutionTransformer.transform(makeVerticalHighResolutionScrollEvent()))
+        XCTAssertNil(try highResolutionTransformer.transform(
+            makeVerticalHighResolutionScrollEvent(),
+            in: context
+        ))
         for _ in 0 ..< 10 {
             now += 1.0 / 120.0
             highResolutionTransformer.tick()
@@ -605,7 +622,7 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
             wheel3: 0
         ))
 
-        XCTAssertNil(transformer.transform(event))
+        XCTAssertNil(transformer.transform(event, in: EventTransformerContext(device: nil)))
 
         now = 1.0 / 120.0
         transformer.tick()
@@ -659,10 +676,11 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
         var now = 0.0
         let transformer = SmoothedScrollingTransformer(
             smoothed: .init(vertical: Scheme.Scrolling.Smoothed.Preset.easeInOut.defaultConfiguration),
-            highResolutionWheelMultiplier: { 8 },
+            highResolutionWheelMultiplier: { _ in 8 },
             now: { now },
             eventSink: { emittedEvents.append($0.copy() ?? $0) }
         )
+        let context = EventTransformerContext(device: nil)
         let sortedInputs = inputs.sorted { $0.timestamp < $1.timestamp }
         let tickInterval = 1.0 / 120.0
         let finalTimestamp = (sortedInputs.last?.timestamp ?? 0) + 0.5
@@ -682,7 +700,7 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
                     pointDelta: input.pointDelta,
                     ioHidDelta: input.ioHidDelta
                 )
-                XCTAssertNil(transformer.transform(event))
+                XCTAssertNil(transformer.transform(event, in: context))
                 nextInputIndex += 1
             }
 
@@ -718,7 +736,7 @@ final class SmoothedScrollingTransformerTests: XCTestCase {
             wheel3: 0
         ))
 
-        XCTAssertNil(transformer.transform(event))
+        XCTAssertNil(transformer.transform(event, in: EventTransformerContext(device: nil)))
         for tick in 1 ... 60 {
             now = Double(tick) / 120.0
             transformer.tick()

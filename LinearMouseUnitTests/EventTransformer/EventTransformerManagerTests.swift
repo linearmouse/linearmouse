@@ -13,6 +13,22 @@ final class EventTransformerManagerTests: XCTestCase {
         SettingsState.shared.recordedButtonMappingEvent = nil
     }
 
+    func testCacheKeyIsConfigurationScoped() {
+        let matcher = DeviceMatcher(category: .mouse)
+        let firstKey = EventTransformerManager.CacheKey(
+            deviceMatcher: matcher,
+            pid: nil,
+            screen: nil
+        )
+        let secondKey = EventTransformerManager.CacheKey(
+            deviceMatcher: matcher,
+            pid: nil,
+            screen: nil
+        )
+
+        XCTAssertEqual(firstKey, secondKey)
+    }
+
     func testSyntheticSmoothedEventStillGetsModifierActions() throws {
         let modifiers = Scheme.Scrolling.Modifiers(option: .changeSpeed(scale: 2))
         ConfigurationState.shared.configuration = .init(schemes: [
@@ -48,7 +64,7 @@ final class EventTransformerManagerTests: XCTestCase {
             withMouseLocationPid: nil,
             withDisplay: nil
         )
-        let transformedEvent = try XCTUnwrap(transformer.transform(event))
+        let transformedEvent = try XCTUnwrap(transformer.transform(event, in: EventTransformerContext(device: nil)))
         let transformedView = ScrollWheelEventView(transformedEvent)
 
         XCTAssertEqual(transformedView.deltaYPt, 24, accuracy: 0.001)
@@ -83,7 +99,7 @@ final class EventTransformerManagerTests: XCTestCase {
             withMouseLocationPid: nil,
             withDisplay: nil
         )
-        let transformedEvent = try XCTUnwrap(transformer.transform(event))
+        let transformedEvent = try XCTUnwrap(transformer.transform(event, in: EventTransformerContext(device: nil)))
         let view = ScrollWheelEventView(transformedEvent)
 
         XCTAssertEqual(view.deltaY, 3)
@@ -122,7 +138,7 @@ final class EventTransformerManagerTests: XCTestCase {
             withMouseLocationPid: nil,
             withDisplay: nil
         )
-        let transformedEvent = try XCTUnwrap(transformer.transform(event))
+        let transformedEvent = try XCTUnwrap(transformer.transform(event, in: EventTransformerContext(device: nil)))
         let transformedView = ScrollWheelEventView(transformedEvent)
 
         XCTAssertEqual(transformedView.deltaYPt, 0, accuracy: 0.001)
@@ -278,7 +294,7 @@ final class EventTransformerManagerTests: XCTestCase {
             withDisplay: nil
         )
 
-        XCTAssertNotNil(transformer.transform(event))
+        XCTAssertNotNil(transformer.transform(event, in: EventTransformerContext(device: nil)))
     }
 
     func testScrollButtonRecordingUsesReversedDirectionBeforeSmoothing() throws {
@@ -311,7 +327,7 @@ final class EventTransformerManagerTests: XCTestCase {
             withDisplay: nil
         )
 
-        XCTAssertNil(transformer.transform(event))
+        XCTAssertNil(transformer.transform(event, in: EventTransformerContext(device: nil)))
 
         let recordedExpectation = expectation(description: "Recorded transformed scroll mapping")
         DispatchQueue.main.async {
@@ -440,7 +456,7 @@ final class EventTransformerManagerTests: XCTestCase {
         ))
 
         SettingsState.shared.beginButtonMappingRecording(sessionID: staleSessionID)
-        XCTAssertNil(transformer.transform(event))
+        XCTAssertNil(transformer.transform(event, in: EventTransformerContext(device: nil)))
         SettingsState.shared.endButtonMappingRecording(sessionID: staleSessionID)
         SettingsState.shared.beginButtonMappingRecording(sessionID: currentSessionID)
 

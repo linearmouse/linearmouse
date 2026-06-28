@@ -85,7 +85,10 @@ final class GestureButtonTransformerTests: XCTestCase {
             .handledDeferringSyntheticFallback
         )
 
-        XCTAssertNil(try transformer.transform(makeMouseMovedEvent(deltaX: testGestureThreshold)))
+        XCTAssertNil(try transformer.transform(
+            makeMouseMovedEvent(deltaX: testGestureThreshold),
+            in: EventTransformerContext(device: nil)
+        ))
         XCTAssertEqual(
             transformer.handleLogitechControlEvent(logitechContext(pressed: false)),
             .handled
@@ -99,7 +102,10 @@ final class GestureButtonTransformerTests: XCTestCase {
             transformer.handleLogitechControlEvent(logitechContext(pressed: true)),
             .handledDeferringSyntheticFallback
         )
-        XCTAssertNil(try transformer.transform(makeMouseMovedEvent(deltaX: testGestureThreshold)))
+        XCTAssertNil(try transformer.transform(
+            makeMouseMovedEvent(deltaX: testGestureThreshold),
+            in: EventTransformerContext(device: nil)
+        ))
         XCTAssertEqual(
             transformer.handleLogitechControlEvent(logitechContext(pressed: false)),
             .handled
