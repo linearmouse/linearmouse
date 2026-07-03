@@ -2,6 +2,7 @@
 // Copyright (c) 2021-2026 LinearMouse
 
 import AppKit
+import os
 
 public enum KeySimulatorError: Error {
     case unsupportedKey
@@ -116,10 +117,18 @@ public extension KeySimulator {
     func press(keys: [Key], tap: CGEventTapLocation? = nil) throws {
         try lock.withLock {
             for key in keys {
-                try postKeyLocked(key, keyDown: true, tap: tap)
+                do {
+                    try postKeyLocked(key, keyDown: true, tap: tap)
+                } catch {
+                    os_log(.error, "KeySimulator: keyDown failed for %{public}@: %{public}@", "\(key)", "\(error)")
+                }
             }
             for key in keys.reversed() {
-                try postKeyLocked(key, keyDown: false, tap: tap)
+                do {
+                    try postKeyLocked(key, keyDown: false, tap: tap)
+                } catch {
+                    os_log(.error, "KeySimulator: keyUp failed for %{public}@: %{public}@", "\(key)", "\(error)")
+                }
             }
         }
     }
