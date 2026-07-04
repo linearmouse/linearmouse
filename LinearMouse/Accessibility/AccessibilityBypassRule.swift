@@ -34,6 +34,19 @@ extension AccessibilityBypassRule {
                 .parentRole("AXWindow"),
                 .frameMatchesParent
             ]
+        ),
+        AccessibilityBypassRule(
+            name: "braveTabStripGroupHitTestHole",
+            bundleIdentifiers: ["com.brave.Browser"],
+            conditions: [
+                .depth(0),
+                .role("AXGroup"),
+                .subrole(nil),
+                .actionsEmpty,
+                .noScrollabilitySignal,
+                .noChildContainingPoint,
+                .domClassListContains("TabStrip::TabDragContextImpl")
+            ]
         )
     ]
 }
@@ -47,6 +60,7 @@ enum AccessibilityBypassCondition {
     case noChildContainingPoint
     case parentRole(String)
     case frameMatchesParent
+    case domClassListContains(String)
 }
 
 struct AccessibilityBypassRuleContext {
@@ -65,6 +79,7 @@ struct AccessibilityBypassElementSnapshot {
     let children: [AccessibilityBypassChildSnapshot]
     let hasVerticalScrollBar: Bool
     let hasHorizontalScrollBar: Bool
+    let domClassList: [String]
 
     init(
         depth: Int,
@@ -76,7 +91,8 @@ struct AccessibilityBypassElementSnapshot {
         parentFrame: CGRect? = nil,
         children: [AccessibilityBypassChildSnapshot] = [],
         hasVerticalScrollBar: Bool = false,
-        hasHorizontalScrollBar: Bool = false
+        hasHorizontalScrollBar: Bool = false,
+        domClassList: [String] = []
     ) {
         self.depth = depth
         self.role = role
@@ -88,6 +104,7 @@ struct AccessibilityBypassElementSnapshot {
         self.children = children
         self.hasVerticalScrollBar = hasVerticalScrollBar
         self.hasHorizontalScrollBar = hasHorizontalScrollBar
+        self.domClassList = domClassList
     }
 }
 
@@ -160,6 +177,8 @@ struct AccessibilityBypassRuleMatcher {
             }
 
             return framesApproximatelyMatch(frame, parentFrame)
+        case let .domClassListContains(expectedClass):
+            return element.domClassList.contains(expectedClass)
         }
     }
 
