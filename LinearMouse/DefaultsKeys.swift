@@ -31,6 +31,12 @@ enum MenuBarBatteryDisplayMode: String, Codable, Defaults.Serializable {
     }
 }
 
+enum MenuBarVisibilityMode: String, Codable, Defaults.Serializable {
+    case always
+    case whenAttentionNeeded
+    case never
+}
+
 enum PointerLocationTriggerModifier: String, CaseIterable, Codable, Defaults.Serializable, Identifiable {
     case control
     case option
@@ -70,6 +76,11 @@ enum PointerLocationTriggerModifier: String, CaseIterable, Codable, Defaults.Ser
 
 extension Defaults.Keys {
     static let showInMenuBar = Key<Bool>("showInMenuBar", default: true)
+    static let menuBarVisibilityMode = Key<MenuBarVisibilityMode>("menuBarVisibilityMode", default: .always)
+    static let menuBarVisibilityModeMigrationCompleted = Key<Bool>(
+        "menuBarVisibilityModeMigrationCompleted",
+        default: false
+    )
     static let menuBarBatteryDisplayMode = Key<MenuBarBatteryDisplayMode>("menuBarBatteryDisplayMode", default: .off)
 
     static let showInDock = Key<Bool>("showInDock", default: true)
