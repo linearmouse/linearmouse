@@ -66,6 +66,33 @@ final class AccessibilityBypassRuleTests: XCTestCase {
         XCTAssertNil(rule)
     }
 
+    func testBraveTabStripRuleMatchesDomClassListHitTestHole() {
+        let rule = matcher.firstMatchingRule(
+            for: braveTabStripGroupSnapshot(),
+            in: braveContext()
+        )
+
+        XCTAssertEqual(rule?.name, "braveTabStripGroupHitTestHole")
+    }
+
+    func testBraveTabStripRuleRequiresBraveBundle() {
+        let rule = matcher.firstMatchingRule(
+            for: braveTabStripGroupSnapshot(),
+            in: chromeContext()
+        )
+
+        XCTAssertNil(rule)
+    }
+
+    func testBraveTabStripRuleRequiresTabStripDomClass() {
+        let rule = matcher.firstMatchingRule(
+            for: braveTabStripGroupSnapshot(domClassList: []),
+            in: braveContext()
+        )
+
+        XCTAssertNil(rule)
+    }
+
     private var testPoint: CGPoint {
         CGPoint(x: 1067, y: 59)
     }
@@ -77,6 +104,13 @@ final class AccessibilityBypassRuleTests: XCTestCase {
     private func chromeContext() -> AccessibilityBypassRuleContext {
         AccessibilityBypassRuleContext(
             bundleIdentifier: "com.google.Chrome",
+            point: testPoint
+        )
+    }
+
+    private func braveContext() -> AccessibilityBypassRuleContext {
+        AccessibilityBypassRuleContext(
+            bundleIdentifier: "com.brave.Browser",
             point: testPoint
         )
     }
@@ -101,6 +135,22 @@ final class AccessibilityBypassRuleTests: XCTestCase {
             parentFrame: parentFrame ?? fullWindowFrame,
             children: children,
             hasVerticalScrollBar: hasVerticalScrollBar
+        )
+    }
+
+    private func braveTabStripGroupSnapshot(
+        domClassList: [String] = ["TabStrip::TabDragContextImpl"]
+    ) -> AccessibilityBypassElementSnapshot {
+        AccessibilityBypassElementSnapshot(
+            depth: 0,
+            role: "AXGroup",
+            subrole: nil,
+            actions: [],
+            frame: CGRect(x: 166, y: 52, width: 494, height: 41),
+            parentRole: "AXGroup",
+            parentFrame: CGRect(x: 166, y: 52, width: 494, height: 41),
+            children: [],
+            domClassList: domClassList
         )
     }
 }

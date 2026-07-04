@@ -5,6 +5,7 @@ import ApplicationServices
 import CoreGraphics
 
 struct AutoScrollAccessibilityActivationClassifier {
+    private static let domClassListAttribute = "AXDOMClassList" as CFString
     private static let maxParentDepth = 20
     private static let probeRadius: CGFloat = 4
     private static let excludedRoles: Set<String> = [
@@ -252,8 +253,20 @@ struct AutoScrollAccessibilityActivationClassifier {
             parentFrame: parent.flatMap { frame(of: $0) },
             children: immediateChildren(of: element).map(childSnapshot),
             hasVerticalScrollBar: hasAttributeValue(kAXVerticalScrollBarAttribute as CFString, on: element),
-            hasHorizontalScrollBar: hasAttributeValue(kAXHorizontalScrollBarAttribute as CFString, on: element)
+            hasHorizontalScrollBar: hasAttributeValue(kAXHorizontalScrollBarAttribute as CFString, on: element),
+            domClassList: domClassList(of: element)
         )
+    }
+
+    private func domClassList(of element: AXUIElement) -> [String] {
+        guard case let .success(value) = elementQuery.optionalAttributeValue(
+            of: Self.domClassListAttribute,
+            on: element
+        ) else {
+            return []
+        }
+
+        return value as? [String] ?? []
     }
 
     private func hasAttributeValue(_ attribute: CFString, on element: AXUIElement) -> Bool {
