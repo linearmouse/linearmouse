@@ -54,6 +54,18 @@ private func logitechContext(
     )
 }
 
+private func mouseDraggedEvent(button: CGMouseButton, deltaX: Double, deltaY: Double = 0) throws -> CGEvent {
+    let event = try XCTUnwrap(CGEvent(
+        mouseEventSource: nil,
+        mouseType: button.fixedCGEventType(of: .otherMouseDragged),
+        mouseCursorPosition: .zero,
+        mouseButton: button
+    ))
+    event.setDoubleValueField(.mouseEventDeltaX, value: deltaX)
+    event.setDoubleValueField(.mouseEventDeltaY, value: deltaY)
+    return event
+}
+
 final class ButtonActionsTransformerTests: XCTestCase {
     func testSharedRuntimeStateLetsScrollMappingsCancelButtonRepeatTimer() throws {
         let runtimeState = ButtonActionsTransformer.RuntimeState()
@@ -86,6 +98,52 @@ final class ButtonActionsTransformerTests: XCTestCase {
         XCTAssertNotNil(buttonTransformer.repeatTimer)
         XCTAssertNil(scrollTransformer.transform(event, in: EventTransformerContext(device: nil)))
         XCTAssertNil(buttonTransformer.repeatTimer)
+    }
+
+    func testRepeatMouseClickMappingPassesDraggedMovementAsMouseMoved() throws {
+        let transformer = ButtonActionsTransformer(
+            mappings: [
+                .init(button: .mouse(4), repeat: true, action: .arg0(.mouseButtonLeftDouble))
+            ]
+        )
+        let button = try XCTUnwrap(CGMouseButton(rawValue: 4))
+        let event = try mouseDraggedEvent(button: button, deltaX: 7, deltaY: -3)
+
+        let transformed = try XCTUnwrap(transformer.transform(event, in: EventTransformerContext(device: nil)))
+
+        XCTAssertEqual(transformed.type, .mouseMoved)
+        XCTAssertEqual(transformed.getDoubleValueField(.mouseEventDeltaX), 7)
+        XCTAssertEqual(transformed.getDoubleValueField(.mouseEventDeltaY), -3)
+    }
+
+    func testRepeatMouseClickMappingDoesNotCancelRepeatTimerOnDraggedMovement() throws {
+        let transformer = ButtonActionsTransformer(
+            mappings: [
+                .init(button: .mouse(4), repeat: true, action: .arg0(.mouseButtonLeftDouble))
+            ]
+        )
+        transformer.repeatTimer = EventThreadTimer(
+            timer: Timer(timeInterval: 60, repeats: false) { _ in },
+            eventThread: .shared
+        )
+        let button = try XCTUnwrap(CGMouseButton(rawValue: 4))
+        let event = try mouseDraggedEvent(button: button, deltaX: 1)
+
+        XCTAssertNotNil(transformer.repeatTimer)
+        XCTAssertNotNil(transformer.transform(event, in: EventTransformerContext(device: nil)))
+        XCTAssertNotNil(transformer.repeatTimer)
+    }
+
+    func testNonRepeatMouseClickMappingKeepsConsumingDraggedMovement() throws {
+        let transformer = ButtonActionsTransformer(
+            mappings: [
+                .init(button: .mouse(4), action: .arg0(.mouseButtonLeftDouble))
+            ]
+        )
+        let button = try XCTUnwrap(CGMouseButton(rawValue: 4))
+        let event = try mouseDraggedEvent(button: button, deltaX: 7, deltaY: -3)
+
+        XCTAssertNil(transformer.transform(event, in: EventTransformerContext(device: nil)))
     }
 
     func testLogitechControlEventMatchesGenericCommandMappingWithRightCommandFlag() {

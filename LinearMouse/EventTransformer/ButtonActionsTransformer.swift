@@ -150,7 +150,7 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
             queueActions(event: event.copy(), action: action)
         } else {
             if handleKeyPressHold(event: event, mapping: mapping, action: action) {
-                return nil
+                return mouseMovedEventIfDragging(event)
             }
 
             // FIXME: `NSEvent.keyRepeatDelay` and `NSEvent.keyRepeatInterval` are not kept up to date
@@ -163,6 +163,10 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
                 if handleButtonSwaps(event: event, action: action) {
                     return event
                 }
+            }
+
+            if mapping.repeat == true, let mouseMovedEvent = mouseMovedEventIfDragging(event) {
+                return mouseMovedEvent
             }
 
             // Actions are executed when button is down if key repeat is enabled; otherwise, actions are
@@ -720,6 +724,15 @@ extension ButtonActionsTransformer: EventTransformer, LogitechControlEventHandli
         if runtimeState.heldKeysByButton.isEmpty {
             keySimulator.reset()
         }
+    }
+
+    private func mouseMovedEventIfDragging(_ event: CGEvent) -> CGEvent? {
+        guard mouseDraggedEventTypes.contains(event.type) else {
+            return nil
+        }
+
+        event.type = .mouseMoved
+        return event
     }
 
     private func postClickEvent(mouseButton: CGMouseButton, clickState: Int64? = nil) {
