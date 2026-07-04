@@ -9,6 +9,8 @@ struct GeneralSettings: View {
     @Default(.showInMenuBar) var showInMenuBar
     @Default(.menuBarBatteryDisplayMode) var menuBarBatteryDisplayMode
     @Default(.showInDock) var showInDock
+    @Default(.showPointerLocation) var showPointerLocation
+    @Default(.pointerLocationTriggerModifier) var pointerLocationTriggerModifier
     @Default(.bypassEventsFromOtherApplications) var bypassEventsFromOtherApplications
 
     var body: some View {
@@ -46,6 +48,26 @@ struct GeneralSettings: View {
                 Section {
                     LaunchAtLogin.Toggle {
                         Text("Start at login")
+                    }
+                }
+                .modifier(SectionViewModifier())
+
+                Section {
+                    Toggle(isOn: $showPointerLocation.animation()) {
+                        withDescription {
+                            Text("Show pointer location")
+                            Text("Press \(pointerLocationTriggerModifier.label) twice to reveal the pointer.")
+                        }
+                    }
+
+                    if showPointerLocation {
+                        Picker("Trigger", selection: $pointerLocationTriggerModifier.animation()) {
+                            ForEach(PointerLocationTriggerModifier.allCases) { modifier in
+                                Text(modifier.label).tag(modifier)
+                            }
+                        }
+                        .padding(.leading, 20)
+                        .modifier(PickerViewModifier())
                     }
                 }
                 .modifier(SectionViewModifier())
