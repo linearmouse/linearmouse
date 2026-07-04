@@ -23,6 +23,70 @@ final class StatusItemBatteryIndicatorTests: XCTestCase {
         XCTAssertEqual(StatusItem.menuBarBatteryTitle(currentBatteryLevel: 100, mode: .always), "100%")
     }
 
+    func testMenuBarVisibilityAlwaysShowsWithoutBatteryLevel() {
+        XCTAssertTrue(StatusItem.menuBarIsVisible(
+            currentBatteryLevel: nil,
+            visibilityMode: .always,
+            batteryDisplayMode: .off
+        ))
+    }
+
+    func testMenuBarVisibilityNeverHidesEvenWithLowBattery() {
+        XCTAssertFalse(StatusItem.menuBarIsVisible(
+            currentBatteryLevel: 5,
+            visibilityMode: .never,
+            batteryDisplayMode: .below20
+        ))
+    }
+
+    func testMenuBarVisibilityAttentionModeHidesWithoutBatteryLevel() {
+        XCTAssertFalse(StatusItem.menuBarIsVisible(
+            currentBatteryLevel: nil,
+            visibilityMode: .whenAttentionNeeded,
+            batteryDisplayMode: .below20
+        ))
+    }
+
+    func testMenuBarVisibilityAttentionModeHidesWhenBatteryDisplayModeIsOff() {
+        XCTAssertFalse(StatusItem.menuBarIsVisible(
+            currentBatteryLevel: 5,
+            visibilityMode: .whenAttentionNeeded,
+            batteryDisplayMode: .off
+        ))
+    }
+
+    func testMenuBarVisibilityAttentionModeShowsAtThreshold() {
+        XCTAssertTrue(StatusItem.menuBarIsVisible(
+            currentBatteryLevel: 20,
+            visibilityMode: .whenAttentionNeeded,
+            batteryDisplayMode: .below20
+        ))
+    }
+
+    func testMenuBarVisibilityAttentionModeHidesAboveThreshold() {
+        XCTAssertFalse(StatusItem.menuBarIsVisible(
+            currentBatteryLevel: 21,
+            visibilityMode: .whenAttentionNeeded,
+            batteryDisplayMode: .below20
+        ))
+    }
+
+    func testMenuBarVisibilityAttentionModeUsesBatteryDisplayModeThreshold() {
+        XCTAssertFalse(StatusItem.menuBarIsVisible(
+            currentBatteryLevel: 15,
+            visibilityMode: .whenAttentionNeeded,
+            batteryDisplayMode: .below10
+        ))
+    }
+
+    func testMenuBarVisibilityAttentionModeShowsWhenBatteryDisplayModeAlwaysShows() {
+        XCTAssertTrue(StatusItem.menuBarIsVisible(
+            currentBatteryLevel: 100,
+            visibilityMode: .whenAttentionNeeded,
+            batteryDisplayMode: .always
+        ))
+    }
+
     func testMenuBarBatteryDevicePrefersActiveDeviceOverSelectedDevice() {
         let activeDevice = NSObject()
         let selectedDevice = NSObject()
