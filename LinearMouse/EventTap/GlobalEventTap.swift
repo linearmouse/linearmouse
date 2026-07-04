@@ -19,6 +19,7 @@ class GlobalEventTap {
     init() {}
 
     private func callback(_ event: CGEvent) -> CGEvent? {
+        PointerLocationTriggerController.shared.handle(event)
         ModifierState.shared.update(with: event)
 
         let mouseEventView = MouseEventView(event)
