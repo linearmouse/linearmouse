@@ -172,7 +172,7 @@ struct LogitechHIDPPDeviceDPIController {
             productID: device.productID,
             transport: device.transport
         ) {
-        case .classic:
+        case .classic, .lightspeed:
             return provider.receiverSlot(for: device, using: receiverChannel)
         case .bolt:
             let discovery = provider.receiverPointingDeviceDiscovery(for: device, using: receiverChannel)

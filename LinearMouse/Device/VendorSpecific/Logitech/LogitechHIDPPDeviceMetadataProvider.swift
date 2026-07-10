@@ -35,13 +35,23 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         /// - Solaar receiver catalog: https://pwr-solaar.github.io/Solaar/devices/
         /// - Linux receiver driver IDs: https://codebrowser.dev/linux/linux/drivers/hid/hid-logitech-dj.c.html
         ///
-        /// Receiver monitoring currently uses the classic Unifying/DJ HID++ path:
-        /// vendor HID application 0xFF000001, receiver index 0xFF, and HID++ 1.0
-        /// receiver registers 0x00/0x02/0xB5. Keep this whitelist limited to
-        /// receiver kinds covered by that implementation.
-        static let monitorableReceiverProductIDs: Set<Int> = [
+        /// Classic and Lightspeed receiver monitoring use the same receiver-level
+        /// HID++ path: vendor HID application 0xFF000001, receiver index 0xFF,
+        /// and HID++ 1.0 receiver registers 0x00/0x02/0xB5.
+        static let monitorableClassicReceiverProductIDs: Set<Int> = [
             0xC52B, // Unifying receiver
             0xC532 // Unifying receiver
+        ]
+        static let monitorableLightspeedReceiverProductIDs: Set<Int> = [
+            0xC539,
+            0xC53A,
+            0xC53D,
+            0xC53F,
+            0xC541,
+            0xC543,
+            0xC545,
+            0xC547,
+            0xC54D
         ]
         static let monitorableBoltReceiverProductIDs: Set<Int> = [
             0xC548 // Bolt receiver
@@ -65,22 +75,13 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             0xC534,
             0xC535,
             0xC542,
-            // Gaming / Lightspeed receiver kinds use different Linux driver data
-            // and have not been validated against this monitor path.
+            // Early gaming receivers need Nano-specific handling.
             0xC531,
-            0xC537,
-            0xC539,
-            0xC53A,
-            0xC53D,
-            0xC53F,
-            0xC541,
-            0xC543,
-            0xC545,
-            0xC547,
-            0xC54D
+            0xC537
         ]
         static let knownReceiverProductIDs: Set<Int> = [
-            monitorableReceiverProductIDs,
+            monitorableClassicReceiverProductIDs,
+            monitorableLightspeedReceiverProductIDs,
             monitorableBoltReceiverProductIDs,
             knownReceiverProductIDsWithoutMonitoringSupport
         ].reduce(into: []) { result, productIDs in
@@ -225,8 +226,9 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         transports: [PointerDeviceTransportName.bluetoothLowEnergy, PointerDeviceTransportName.usb]
     )
 
-    enum ReceiverProtocolFamily {
+    enum ReceiverProtocolFamily: Equatable {
         case classic
+        case lightspeed
         case bolt
     }
 
@@ -238,8 +240,12 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             return nil
         }
 
-        if Constants.monitorableReceiverProductIDs.contains(productID) {
+        if Constants.monitorableClassicReceiverProductIDs.contains(productID) {
             return .classic
+        }
+
+        if Constants.monitorableLightspeedReceiverProductIDs.contains(productID) {
+            return .lightspeed
         }
 
         if Constants.monitorableBoltReceiverProductIDs.contains(productID) {
@@ -505,7 +511,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             productID: device.productID,
             transport: device.transport
         ) {
-        case .classic:
+        case .classic, .lightspeed:
             receiverChannel.enableWirelessNotifications()
             return receiverChannel.waitForConnectionSnapshots(timeout: timeout, until: shouldContinue)
         case .bolt:
@@ -524,7 +530,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             productID: device.productID,
             transport: device.transport
         ) {
-        case .classic:
+        case .classic, .lightspeed:
             return receiverChannel.readNotificationFlags() != nil
         case .bolt:
             return receiverChannel.isBoltReceiverReachable()

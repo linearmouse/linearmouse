@@ -266,6 +266,27 @@ private final class ReceiverContext {
                 continue
             }
             hasLoggedMissingChannel = false
+
+            if LogitechHIDPPDeviceMetadataProvider.receiverProtocolFamily(
+                vendorID: device.pointerDevice.vendorID,
+                productID: device.pointerDevice.productID,
+                transport: device.pointerDevice.transport
+            ) == .lightspeed,
+                !provider.receiverChannelIsReachable(for: device.pointerDevice, using: receiverChannel) {
+                os_log(
+                    "Lightspeed receiver did not respond to the HID++ capability probe, stopping monitor: locationID=%{public}d device=%{public}@",
+                    log: ReceiverMonitor.log,
+                    type: .info,
+                    locationID,
+                    String(describing: device)
+                )
+                setCurrentChannel(nil)
+                DispatchQueue.main.async { [weak self] in
+                    self?.onDiscoveryTimedOut?()
+                }
+                break
+            }
+
             hasOpenedChannel = true
 
             // Full discovery only once per channel open
