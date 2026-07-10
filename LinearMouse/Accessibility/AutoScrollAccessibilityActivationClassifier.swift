@@ -78,21 +78,16 @@ struct AutoScrollAccessibilityActivationClassifier {
         }
 
         // Browser accessibility trees can return a generic container chain for a point that
-        // is visually still inside a link. Probe a few nearby points and trust any result
-        // that clearly says "do not start autoscroll".
-        var bestProbe = initialProbe
+        // is visually still inside a pressable element. Probe nearby points and preserve the
+        // native event if any sample resolves as pressable.
         for point in accessibilityProbePoints(around: initialProbe.point) {
             let sampledProbe = AutoScrollActivationProbe(point: point, hit: hitAccessibilityElement(at: point))
-            if sampledProbe.hit.suppressesAutoscroll {
+            if sampledProbe.hit.isPressable {
                 return sampledProbe
-            }
-
-            if sampledProbe.hit.priority > bestProbe.hit.priority {
-                bestProbe = sampledProbe
             }
         }
 
-        return bestProbe
+        return initialProbe
     }
 
     private func accessibilityProbePoints(around point: CGPoint) -> [CGPoint] {
@@ -119,11 +114,11 @@ struct AutoScrollAccessibilityActivationClassifier {
         case let .success(value):
             hitElement = value
         case let .failure(error):
-            return .unknown(reason: "hitTest.\(error.linearMouseDescription)", path: [])
+            return .nonPressable(diagnostic: "hitTest.\(error.linearMouseDescription)", path: [])
         }
 
         guard let hitElement else {
-            return .nonPressable(path: [])
+            return .nonPressable(diagnostic: nil, path: [])
         }
 
         var currentElement: AXUIElement? = hitElement
@@ -131,7 +126,7 @@ struct AutoScrollAccessibilityActivationClassifier {
         var isInsideWebContent = false
         for depth in 0 ..< Self.maxParentDepth {
             guard let element = currentElement else {
-                return .nonPressable(path: path)
+                return .nonPressable(diagnostic: nil, path: path)
             }
 
             let role: String?
@@ -139,7 +134,7 @@ struct AutoScrollAccessibilityActivationClassifier {
             case let .success(value):
                 role = value
             case let .failure(error):
-                return .unknown(reason: "role.\(error.linearMouseDescription)", path: path)
+                return .nonPressable(diagnostic: "role.\(error.linearMouseDescription)", path: path)
             }
 
             let subrole: String?
@@ -147,7 +142,7 @@ struct AutoScrollAccessibilityActivationClassifier {
             case let .success(value):
                 subrole = value
             case let .failure(error):
-                return .unknown(reason: "subrole.\(error.linearMouseDescription)", path: path)
+                return .nonPressable(diagnostic: "subrole.\(error.linearMouseDescription)", path: path)
             }
 
             let actions: [String]
@@ -155,7 +150,7 @@ struct AutoScrollAccessibilityActivationClassifier {
             case let .success(value):
                 actions = value
             case let .failure(error):
-                return .unknown(reason: "actions.\(error.linearMouseDescription)", path: path)
+                return .nonPressable(diagnostic: "actions.\(error.linearMouseDescription)", path: path)
             }
 
             path.append(Self.pathEntry(role: role, subrole: subrole, actions: actions))
@@ -168,7 +163,7 @@ struct AutoScrollAccessibilityActivationClassifier {
                 actions: actions,
                 at: point
             ) != nil {
-                return .excludedChrome(path: path)
+                return .pressable(path: path)
             }
 
             if let role, Self.webContentRoles.contains(role) {
@@ -181,7 +176,7 @@ struct AutoScrollAccessibilityActivationClassifier {
             // normal page clicks.
             if !isInsideWebContent,
                Self.isExcludedActivationElement(role: role, subrole: subrole) {
-                return .excludedChrome(path: path)
+                return .pressable(path: path)
             }
 
             if Self.isPressableActivationElement(role: role, actions: actions) {
@@ -192,11 +187,11 @@ struct AutoScrollAccessibilityActivationClassifier {
             case let .success(value):
                 currentElement = value
             case let .failure(error):
-                return .unknown(reason: "parent.\(error.linearMouseDescription)", path: path)
+                return .nonPressable(diagnostic: "parent.\(error.linearMouseDescription)", path: path)
             }
         }
 
-        return .unknown(reason: "depthLimit", path: path)
+        return .nonPressable(diagnostic: "depthLimit", path: path)
     }
 
     private static func isExcludedActivationElement(role: String?, subrole: String?) -> Bool {
@@ -352,19 +347,13 @@ struct AutoScrollActivationProbe {
 
 enum AutoScrollActivationHit {
     case pressable(path: [String])
-    case excludedChrome(path: [String])
-    case nonPressable(path: [String])
-    case unknown(reason: String, path: [String])
+    case nonPressable(diagnostic: String?, path: [String])
 
     var path: [String] {
         switch self {
         case let .pressable(path):
             path
-        case let .excludedChrome(path):
-            path
-        case let .nonPressable(path):
-            path
-        case let .unknown(_, path):
+        case let .nonPressable(_, path):
             path
         }
     }
@@ -373,41 +362,19 @@ enum AutoScrollActivationHit {
         switch self {
         case .pressable:
             "pressable"
-        case .excludedChrome:
-            "excludedChrome"
-        case .nonPressable:
-            "nonPressable"
-        case let .unknown(reason, _):
-            "unknown.\(reason)"
+        case let .nonPressable(diagnostic, _):
+            diagnostic.map { "nonPressable.\($0)" } ?? "nonPressable"
         }
     }
 
-    var suppressesAutoscroll: Bool {
-        switch self {
-        case .pressable, .excludedChrome:
-            true
-        case .nonPressable, .unknown:
-            false
+    var isPressable: Bool {
+        if case .pressable = self {
+            return true
         }
+        return false
     }
 
     var requiresAdditionalSampling: Bool {
-        switch self {
-        case .nonPressable, .unknown:
-            true
-        case .pressable, .excludedChrome:
-            false
-        }
-    }
-
-    var priority: Int {
-        switch self {
-        case .pressable, .excludedChrome:
-            3
-        case .nonPressable:
-            2
-        case .unknown:
-            1
-        }
+        !isPressable
     }
 }

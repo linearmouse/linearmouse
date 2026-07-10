@@ -15,7 +15,6 @@ final class AutoScrollTransformer {
     private let trigger: Scheme.Buttons.Mapping
     private let modes: [Scheme.Buttons.AutoScroll.Mode]
     private let speed: Double
-    private let preserveNativeMiddleClick: Bool
 
     private enum Session {
         case toggle
@@ -25,7 +24,6 @@ final class AutoScrollTransformer {
 
     private enum State {
         case idle
-        case pendingPreservedClick(anchor: CGPoint, current: CGPoint, downEvent: CGEvent)
         case active(anchor: CGPoint, current: CGPoint, session: Session)
     }
 
@@ -36,16 +34,18 @@ final class AutoScrollTransformer {
     private let indicatorController = AutoScrollIndicatorWindowController()
     private let accessibilityActivationClassifier = AutoScrollAccessibilityActivationClassifier()
 
+    static func shouldStartAutoScroll(for hit: AutoScrollActivationHit?) -> Bool {
+        hit?.isPressable != true
+    }
+
     init(
         trigger: Scheme.Buttons.Mapping,
         modes: [Scheme.Buttons.AutoScroll.Mode],
-        speed: Double,
-        preserveNativeMiddleClick: Bool
+        speed: Double
     ) {
         self.trigger = trigger
         self.modes = modes
         self.speed = speed
-        self.preserveNativeMiddleClick = preserveNativeMiddleClick
     }
 
     deinit {
@@ -126,25 +126,8 @@ extension AutoScrollTransformer: EventTransformer {
         }
 
         let activationHit = activationHit(for: event)
-        switch activationHit {
-        case .excludedChrome:
+        guard Self.shouldStartAutoScroll(for: activationHit) else {
             return event
-        case .pressable:
-            guard shouldPreserveNativeMiddleClick else {
-                break
-            }
-
-            if hasHoldMode {
-                let point = pointerLocation(for: event)
-                let downEvent = event.copy() ?? event
-                state = .pendingPreservedClick(anchor: point, current: point, downEvent: downEvent)
-                suppressTriggerUp = true
-                return nil
-            }
-
-            return event
-        case .nonPressable, .unknown, nil:
-            break
         }
 
         activate(at: pointerLocation(for: event), session: activationSession)
@@ -162,11 +145,6 @@ extension AutoScrollTransformer: EventTransformer {
         }
 
         switch state {
-        case let .pendingPreservedClick(anchor, current, downEvent):
-            if !exceedsDeadZone(from: anchor, to: current) {
-                postDeferredNativeClick(from: downEvent)
-            }
-            state = .idle
         case let .active(anchor, current, session):
             switch session {
             case .hold:
@@ -190,27 +168,6 @@ extension AutoScrollTransformer: EventTransformer {
 
     private func handlePointerMoved(_ event: CGEvent) -> CGEvent? {
         switch state {
-        case let .pendingPreservedClick(anchor, _, downEvent):
-            let point = pointerLocation(for: event)
-
-            if event.type == triggerMouseDraggedEventType,
-               exceedsDeadZone(from: anchor, to: point) {
-                activate(at: anchor, session: .hold)
-                state = .active(anchor: anchor, current: point, session: .hold)
-                let delta = CGVector(dx: point.x - anchor.x, dy: point.y - anchor.y)
-                DispatchQueue.main.async { [indicatorController] in
-                    indicatorController.update(delta: delta)
-                }
-                return nil
-            }
-
-            state = .pendingPreservedClick(anchor: anchor, current: point, downEvent: downEvent)
-
-            if event.type == triggerMouseDraggedEventType, suppressTriggerUp {
-                return nil
-            }
-
-            return event
         case let .active(anchor, _, session):
             let point = pointerLocation(for: event)
             let resolvedSession: Session
@@ -391,17 +348,6 @@ extension AutoScrollTransformer: EventTransformer {
         abs(point.x - anchor.x) > Self.deadZone || abs(point.y - anchor.y) > Self.deadZone
     }
 
-    private var shouldPreserveNativeMiddleClick: Bool {
-        guard preserveNativeMiddleClick,
-              hasToggleMode,
-              triggerMouseButton == .center,
-              trigger.modifierFlags.isEmpty else {
-            return false
-        }
-
-        return true
-    }
-
     private func hitTestPoint(for event: CGEvent) -> CGPoint {
         event.location
     }
@@ -453,38 +399,6 @@ extension AutoScrollTransformer: EventTransformer {
             resolvedPointDescription,
             resolvedPathDescription
         )
-    }
-
-    private func postDeferredNativeClick(from downEvent: CGEvent) {
-        guard let eventButton = MouseEventView(downEvent).mouseButton else {
-            return
-        }
-
-        let location = downEvent.location
-        let flags = downEvent.flags
-
-        guard let mouseDownEvent = CGEvent(
-            mouseEventSource: nil,
-            mouseType: eventButton.fixedCGEventType(of: .leftMouseDown),
-            mouseCursorPosition: location,
-            mouseButton: eventButton
-        ) else {
-            return
-        }
-
-        guard let mouseUpEvent = CGEvent(
-            mouseEventSource: nil,
-            mouseType: eventButton.fixedCGEventType(of: .leftMouseUp),
-            mouseCursorPosition: location,
-            mouseButton: eventButton
-        ) else {
-            return
-        }
-
-        mouseDownEvent.flags = flags
-        mouseUpEvent.flags = flags
-        mouseDownEvent.post(tap: .cgSessionEventTap)
-        mouseUpEvent.post(tap: .cgSessionEventTap)
     }
 }
 
@@ -556,12 +470,10 @@ extension AutoScrollTransformer {
     func matchesConfiguration(
         trigger: Scheme.Buttons.Mapping,
         modes: [Scheme.Buttons.AutoScroll.Mode],
-        speed: Double,
-        preserveNativeMiddleClick: Bool
+        speed: Double
     ) -> Bool {
         self.trigger == trigger &&
             self.modes == modes &&
-            abs(self.speed - speed) < 0.0001 &&
-            self.preserveNativeMiddleClick == preserveNativeMiddleClick
+            abs(self.speed - speed) < 0.0001
     }
 }

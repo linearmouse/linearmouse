@@ -35,16 +35,10 @@ extension AccessibilityBypassRule {
                 .frameMatchesParent
             ]
         ),
+        // Chromium can expose this drag-only overlay instead of the underlying tab during AX hit testing.
         AccessibilityBypassRule(
-            name: "braveTabStripGroupHitTestHole",
-            bundleIdentifiers: ["com.brave.Browser"],
+            name: "chromiumTabStripDragContextHitTestHole",
             conditions: [
-                .depth(0),
-                .role("AXGroup"),
-                .subrole(nil),
-                .actionsEmpty,
-                .noScrollabilitySignal,
-                .noChildContainingPoint,
                 .domClassListContains("TabStrip::TabDragContextImpl")
             ]
         )

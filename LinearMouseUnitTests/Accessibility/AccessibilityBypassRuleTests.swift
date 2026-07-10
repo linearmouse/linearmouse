@@ -66,27 +66,59 @@ final class AccessibilityBypassRuleTests: XCTestCase {
         XCTAssertNil(rule)
     }
 
-    func testBraveTabStripRuleMatchesDomClassListHitTestHole() {
+    func testChromiumTabStripRuleMatchesBraveHitTestHole() {
         let rule = matcher.firstMatchingRule(
-            for: braveTabStripGroupSnapshot(),
+            for: chromiumTabStripGroupSnapshot(),
             in: braveContext()
         )
 
-        XCTAssertEqual(rule?.name, "braveTabStripGroupHitTestHole")
+        XCTAssertEqual(rule?.name, "chromiumTabStripDragContextHitTestHole")
     }
 
-    func testBraveTabStripRuleRequiresBraveBundle() {
+    func testChromiumTabStripRuleMatchesChromeHitTestHole() {
         let rule = matcher.firstMatchingRule(
-            for: braveTabStripGroupSnapshot(),
+            for: chromiumTabStripGroupSnapshot(),
             in: chromeContext()
         )
 
-        XCTAssertNil(rule)
+        XCTAssertEqual(rule?.name, "chromiumTabStripDragContextHitTestHole")
     }
 
-    func testBraveTabStripRuleRequiresTabStripDomClass() {
+    func testChromiumTabStripRuleDoesNotDependOnBrowserBundle() {
         let rule = matcher.firstMatchingRule(
-            for: braveTabStripGroupSnapshot(domClassList: []),
+            for: chromiumTabStripGroupSnapshot(),
+            in: AccessibilityBypassRuleContext(
+                bundleIdentifier: "com.example.ChromiumDerivative",
+                point: testPoint
+            )
+        )
+
+        XCTAssertEqual(rule?.name, "chromiumTabStripDragContextHitTestHole")
+    }
+
+    func testChromiumTabStripRuleDependsOnlyOnTabStripDomClass() {
+        let snapshot = AccessibilityBypassElementSnapshot(
+            depth: 8,
+            role: "AXWebArea",
+            subrole: "AXUnexpectedSubrole",
+            actions: ["AXPress"],
+            frame: nil,
+            parentRole: nil,
+            parentFrame: nil,
+            children: [AccessibilityBypassChildSnapshot(role: "AXScrollBar")],
+            hasVerticalScrollBar: true,
+            hasHorizontalScrollBar: true,
+            domClassList: ["unrelated", "TabStrip::TabDragContextImpl"]
+        )
+
+        let rule = matcher.firstMatchingRule(for: snapshot, in: braveContext())
+
+        XCTAssertEqual(rule?.name, "chromiumTabStripDragContextHitTestHole")
+    }
+
+    func testChromiumTabStripRuleRequiresExactTabStripDomClass() {
+        let rule = matcher.firstMatchingRule(
+            for: chromiumTabStripGroupSnapshot(domClassList: ["TabStrip::TabDragContext"]),
             in: braveContext()
         )
 
@@ -138,7 +170,7 @@ final class AccessibilityBypassRuleTests: XCTestCase {
         )
     }
 
-    private func braveTabStripGroupSnapshot(
+    private func chromiumTabStripGroupSnapshot(
         domClassList: [String] = ["TabStrip::TabDragContextImpl"]
     ) -> AccessibilityBypassElementSnapshot {
         AccessibilityBypassElementSnapshot(

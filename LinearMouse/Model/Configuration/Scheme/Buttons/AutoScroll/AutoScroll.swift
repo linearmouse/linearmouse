@@ -17,7 +17,6 @@ extension Scheme.Buttons {
         var enabled: Bool?
         var modes: [Mode]?
         var speed: Decimal?
-        var preserveNativeMiddleClick: Bool?
         var trigger: Mapping?
 
         init() {}
@@ -29,7 +28,6 @@ extension Scheme.Buttons.AutoScroll: Codable {
         case enabled
         case mode
         case speed
-        case preserveNativeMiddleClick
         case trigger
     }
 
@@ -39,7 +37,6 @@ extension Scheme.Buttons.AutoScroll: Codable {
         enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled)
         modes = try container.decodeIfPresent(SingleValueOrArray<Mode>.self, forKey: .mode)?.wrappedValue
         speed = try container.decodeIfPresent(Decimal.self, forKey: .speed)
-        preserveNativeMiddleClick = try container.decodeIfPresent(Bool.self, forKey: .preserveNativeMiddleClick)
         trigger = try container.decodeIfPresent(Scheme.Buttons.Mapping.self, forKey: .trigger)
     }
 
@@ -49,7 +46,6 @@ extension Scheme.Buttons.AutoScroll: Codable {
         try container.encodeIfPresent(enabled, forKey: .enabled)
         try container.encode(SingleValueOrArray(wrappedValue: modes), forKey: .mode)
         try container.encodeIfPresent(speed, forKey: .speed)
-        try container.encodeIfPresent(preserveNativeMiddleClick, forKey: .preserveNativeMiddleClick)
         try container.encodeIfPresent(trigger, forKey: .trigger)
     }
 }
@@ -79,10 +75,6 @@ extension Scheme.Buttons.AutoScroll {
 
         if let speed {
             autoScroll.speed = speed
-        }
-
-        if let preserveNativeMiddleClick {
-            autoScroll.preserveNativeMiddleClick = preserveNativeMiddleClick
         }
 
         if let trigger {
