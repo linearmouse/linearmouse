@@ -99,25 +99,50 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         )
     }
 
+    func testLogitechReceiverMonitoringAllowsSupportedLightspeedReceiverProductIDs() {
+        let productIDs = [
+            0xC539,
+            0xC53A,
+            0xC53D,
+            0xC53F,
+            0xC541,
+            0xC543,
+            0xC545,
+            0xC547,
+            0xC54D
+        ]
+
+        for productID in productIDs {
+            XCTAssertTrue(
+                LogitechHIDPPDeviceMetadataProvider.supportsReceiverMonitoring(
+                    vendorID: 0x046D,
+                    productID: productID,
+                    transport: PointerDeviceTransportName.usb
+                )
+            )
+            XCTAssertEqual(
+                LogitechHIDPPDeviceMetadataProvider.receiverProtocolFamily(
+                    vendorID: 0x046D,
+                    productID: productID,
+                    transport: PointerDeviceTransportName.usb
+                ),
+                .lightspeed
+            )
+            XCTAssertFalse(
+                LogitechHIDPPDeviceMetadataProvider.supportsClassicReceiverMonitoring(
+                    vendorID: 0x046D,
+                    productID: productID,
+                    transport: PointerDeviceTransportName.usb
+                )
+            )
+        }
+    }
+
     func testLogitechReceiverMonitoringRejectsReceiversWithoutImplementedProtocolSupport() {
         XCTAssertFalse(
             LogitechHIDPPDeviceMetadataProvider.supportsReceiverMonitoring(
                 vendorID: 0x046D,
                 productID: 0xC52F,
-                transport: PointerDeviceTransportName.usb
-            )
-        )
-        XCTAssertFalse(
-            LogitechHIDPPDeviceMetadataProvider.supportsReceiverMonitoring(
-                vendorID: 0x046D,
-                productID: 0xC539,
-                transport: PointerDeviceTransportName.usb
-            )
-        )
-        XCTAssertFalse(
-            LogitechHIDPPDeviceMetadataProvider.supportsReceiverMonitoring(
-                vendorID: 0x046D,
-                productID: 0xC541,
                 transport: PointerDeviceTransportName.usb
             )
         )
