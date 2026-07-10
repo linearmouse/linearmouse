@@ -11,56 +11,80 @@ final class AccessibilityBypassRuleTests: XCTestCase {
         scrollableRoles: ["AXWebArea", "AXScrollArea"]
     )
 
-    func testChromeFullWindowGroupRuleMatchesHitTestHole() {
+    func testChromiumFullWindowGroupRuleMatchesChromeHitTestHole() {
         let rule = matcher.firstMatchingRule(
-            for: chromeFullWindowGroupSnapshot(),
-            in: chromeContext()
+            for: chromiumFullWindowGroupSnapshot(),
+            in: testContext()
         )
 
-        XCTAssertEqual(rule?.name, "chromeFullWindowGroupHitTestHole")
+        XCTAssertEqual(rule?.name, "chromiumFullWindowGroupHitTestHole")
     }
 
-    func testChromeFullWindowGroupRuleRequiresChromeBundle() {
+    func testChromiumFullWindowGroupRuleMatchesBraveHitTestHole() {
         let rule = matcher.firstMatchingRule(
-            for: chromeFullWindowGroupSnapshot(),
-            in: AccessibilityBypassRuleContext(
-                bundleIdentifier: "com.apple.Safari",
-                point: testPoint
-            )
+            for: chromiumFullWindowGroupSnapshot(domClassList: ["BraveBrowserRootView"]),
+            in: testContext()
+        )
+
+        XCTAssertEqual(rule?.name, "chromiumFullWindowGroupHitTestHole")
+    }
+
+    func testChromiumFullWindowGroupRuleMatchesDerivedBrowserRootView() {
+        let rule = matcher.firstMatchingRule(
+            for: chromiumFullWindowGroupSnapshot(domClassList: ["ExampleBrowserRootView"]),
+            in: testContext()
+        )
+
+        XCTAssertEqual(rule?.name, "chromiumFullWindowGroupHitTestHole")
+    }
+
+    func testChromiumFullWindowGroupRuleRequiresBrowserRootViewClass() {
+        let rule = matcher.firstMatchingRule(
+            for: chromiumFullWindowGroupSnapshot(domClassList: ["RootView"]),
+            in: testContext()
         )
 
         XCTAssertNil(rule)
     }
 
-    func testChromeFullWindowGroupRuleDoesNotMatchWhenChildContainsPoint() {
+    func testChromiumFullWindowGroupRuleDoesNotMatchWebContentContainer() {
         let rule = matcher.firstMatchingRule(
-            for: chromeFullWindowGroupSnapshot(children: [
+            for: chromiumFullWindowGroupSnapshot(parentRole: "AXWebArea"),
+            in: testContext()
+        )
+
+        XCTAssertNil(rule)
+    }
+
+    func testChromiumFullWindowGroupRuleDoesNotMatchWhenChildContainsPoint() {
+        let rule = matcher.firstMatchingRule(
+            for: chromiumFullWindowGroupSnapshot(children: [
                 AccessibilityBypassChildSnapshot(
                     role: "AXGroup",
                     frame: CGRect(x: 1000, y: 40, width: 120, height: 40)
                 )
             ]),
-            in: chromeContext()
+            in: testContext()
         )
 
         XCTAssertNil(rule)
     }
 
-    func testChromeFullWindowGroupRuleDoesNotMatchScrollableElement() {
+    func testChromiumFullWindowGroupRuleDoesNotMatchScrollableElement() {
         let rule = matcher.firstMatchingRule(
-            for: chromeFullWindowGroupSnapshot(hasVerticalScrollBar: true),
-            in: chromeContext()
+            for: chromiumFullWindowGroupSnapshot(hasVerticalScrollBar: true),
+            in: testContext()
         )
 
         XCTAssertNil(rule)
     }
 
-    func testChromeFullWindowGroupRuleRequiresMatchingParentFrame() {
+    func testChromiumFullWindowGroupRuleRequiresMatchingParentFrame() {
         let rule = matcher.firstMatchingRule(
-            for: chromeFullWindowGroupSnapshot(
+            for: chromiumFullWindowGroupSnapshot(
                 parentFrame: CGRect(x: 63, y: 30, width: 1600, height: 900)
             ),
-            in: chromeContext()
+            in: testContext()
         )
 
         XCTAssertNil(rule)
@@ -69,7 +93,7 @@ final class AccessibilityBypassRuleTests: XCTestCase {
     func testChromiumTabStripRuleMatchesBraveHitTestHole() {
         let rule = matcher.firstMatchingRule(
             for: chromiumTabStripGroupSnapshot(),
-            in: braveContext()
+            in: testContext()
         )
 
         XCTAssertEqual(rule?.name, "chromiumTabStripDragContextHitTestHole")
@@ -78,19 +102,7 @@ final class AccessibilityBypassRuleTests: XCTestCase {
     func testChromiumTabStripRuleMatchesChromeHitTestHole() {
         let rule = matcher.firstMatchingRule(
             for: chromiumTabStripGroupSnapshot(),
-            in: chromeContext()
-        )
-
-        XCTAssertEqual(rule?.name, "chromiumTabStripDragContextHitTestHole")
-    }
-
-    func testChromiumTabStripRuleDoesNotDependOnBrowserBundle() {
-        let rule = matcher.firstMatchingRule(
-            for: chromiumTabStripGroupSnapshot(),
-            in: AccessibilityBypassRuleContext(
-                bundleIdentifier: "com.example.ChromiumDerivative",
-                point: testPoint
-            )
+            in: testContext()
         )
 
         XCTAssertEqual(rule?.name, "chromiumTabStripDragContextHitTestHole")
@@ -111,7 +123,7 @@ final class AccessibilityBypassRuleTests: XCTestCase {
             domClassList: ["unrelated", "TabStrip::TabDragContextImpl"]
         )
 
-        let rule = matcher.firstMatchingRule(for: snapshot, in: braveContext())
+        let rule = matcher.firstMatchingRule(for: snapshot, in: testContext())
 
         XCTAssertEqual(rule?.name, "chromiumTabStripDragContextHitTestHole")
     }
@@ -119,7 +131,7 @@ final class AccessibilityBypassRuleTests: XCTestCase {
     func testChromiumTabStripRuleRequiresExactTabStripDomClass() {
         let rule = matcher.firstMatchingRule(
             for: chromiumTabStripGroupSnapshot(domClassList: ["TabStrip::TabDragContext"]),
-            in: braveContext()
+            in: testContext()
         )
 
         XCTAssertNil(rule)
@@ -133,21 +145,12 @@ final class AccessibilityBypassRuleTests: XCTestCase {
         CGRect(x: 63, y: 30, width: 1857, height: 1050)
     }
 
-    private func chromeContext() -> AccessibilityBypassRuleContext {
-        AccessibilityBypassRuleContext(
-            bundleIdentifier: "com.google.Chrome",
-            point: testPoint
-        )
+    private func testContext() -> AccessibilityBypassRuleContext {
+        AccessibilityBypassRuleContext(point: testPoint)
     }
 
-    private func braveContext() -> AccessibilityBypassRuleContext {
-        AccessibilityBypassRuleContext(
-            bundleIdentifier: "com.brave.Browser",
-            point: testPoint
-        )
-    }
-
-    private func chromeFullWindowGroupSnapshot(
+    private func chromiumFullWindowGroupSnapshot(
+        parentRole: String? = "AXWindow",
         parentFrame: CGRect? = nil,
         children: [AccessibilityBypassChildSnapshot] = [
             AccessibilityBypassChildSnapshot(
@@ -155,7 +158,8 @@ final class AccessibilityBypassRuleTests: XCTestCase {
                 frame: CGRect(x: 1322, y: 102, width: 403, height: 84)
             )
         ],
-        hasVerticalScrollBar: Bool = false
+        hasVerticalScrollBar: Bool = false,
+        domClassList: [String] = ["BrowserRootView"]
     ) -> AccessibilityBypassElementSnapshot {
         AccessibilityBypassElementSnapshot(
             depth: 0,
@@ -163,10 +167,11 @@ final class AccessibilityBypassRuleTests: XCTestCase {
             subrole: nil,
             actions: [],
             frame: fullWindowFrame,
-            parentRole: "AXWindow",
+            parentRole: parentRole,
             parentFrame: parentFrame ?? fullWindowFrame,
             children: children,
-            hasVerticalScrollBar: hasVerticalScrollBar
+            hasVerticalScrollBar: hasVerticalScrollBar,
+            domClassList: domClassList
         )
     }
 

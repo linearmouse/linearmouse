@@ -223,7 +223,6 @@ struct AutoScrollAccessibilityActivationClassifier {
                 actions: actions
             ),
             in: AccessibilityBypassRuleContext(
-                bundleIdentifier: point.topmostWindowOwnerPid?.bundleIdentifier,
                 point: point
             )
         )
