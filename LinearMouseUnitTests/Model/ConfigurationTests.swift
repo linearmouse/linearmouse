@@ -285,6 +285,21 @@ final class ConfigurationTests: XCTestCase {
         XCTAssertEqual(autoScroll.normalizedModes, [.toggle, .hold])
     }
 
+    func testDecodeAutoScrollIgnoresRemovedPreserveNativeMiddleClickOption() throws {
+        let autoScroll = try JSONDecoder().decode(
+            Scheme.Buttons.AutoScroll.self,
+            from: XCTUnwrap(
+                #"{"enabled":true,"preserveNativeMiddleClick":false}"#.data(using: .utf8)
+            )
+        )
+
+        XCTAssertEqual(autoScroll.enabled, true)
+
+        let encoded = try JSONEncoder().encode(autoScroll)
+        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        XCTAssertNil(object["preserveNativeMiddleClick"])
+    }
+
     func testMergeSmoothedScrollingPreservesInheritedFields() {
         var scheme = Scheme(
             scrolling: .init(

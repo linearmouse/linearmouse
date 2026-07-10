@@ -132,9 +132,6 @@ extension ButtonsSettingsState {
                 if scheme.buttons.autoScroll.speed == nil {
                     scheme.buttons.autoScroll.speed = 1
                 }
-                if scheme.buttons.autoScroll.preserveNativeMiddleClick == nil {
-                    scheme.buttons.autoScroll.preserveNativeMiddleClick = true
-                }
             } else {
                 scheme.buttons.autoScroll.enabled = false
             }
@@ -197,15 +194,6 @@ extension ButtonsSettingsState {
         String(format: "%.1fx", autoScrollSpeed)
     }
 
-    var autoScrollPreserveNativeMiddleClick: Bool {
-        get {
-            mergedScheme.buttons.autoScroll.preserveNativeMiddleClick ?? true
-        }
-        set {
-            scheme.buttons.autoScroll.preserveNativeMiddleClick = newValue
-        }
-    }
-
     var autoScrollTrigger: Scheme.Buttons.Mapping {
         get {
             mergedScheme.buttons.autoScroll.trigger ?? defaultAutoScrollTrigger
@@ -233,15 +221,6 @@ extension ButtonsSettingsState {
 
     var autoScrollTriggerValid: Bool {
         autoScrollTrigger.valid
-    }
-
-    var autoScrollUsesPlainMiddleClick: Bool {
-        let trigger = autoScrollTrigger
-        return trigger.button == .mouse(Int(CGMouseButton.center.rawValue)) && trigger.modifierFlags.isEmpty
-    }
-
-    var autoScrollPreserveNativeMiddleClickAvailable: Bool {
-        autoScrollUsesPlainMiddleClick && autoScrollToggleModeEnabled
     }
 
     var mappings: [Scheme.Buttons.Mapping] {

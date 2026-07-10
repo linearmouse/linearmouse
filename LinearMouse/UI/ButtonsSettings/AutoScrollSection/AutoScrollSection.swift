@@ -56,30 +56,6 @@ struct AutoScrollSection: View {
                     Slider(value: $state.autoScrollSpeed, in: 0.3 ... 3.0, step: 0.1)
                 }
 
-                Toggle(isOn: $state.autoScrollPreserveNativeMiddleClick.animation()) {
-                    withDescription {
-                        Text("Preserve native middle-click on links and buttons")
-                        Text(
-                            "When using plain middle click, keep browser-style middle-click behavior on pressable elements instead of entering autoscroll."
-                        )
-                    }
-                }
-                .disabled(!state.autoScrollPreserveNativeMiddleClickAvailable)
-
-                if !state.autoScrollUsesPlainMiddleClick {
-                    Text(
-                        "The native middle-click check only applies when the trigger is middle click without modifier keys."
-                    )
-                    .foregroundColor(.secondary)
-                    .controlSize(.small)
-                    .fixedSize(horizontal: false, vertical: true)
-                } else if !state.autoScrollToggleModeEnabled {
-                    Text("The native middle-click check only applies when click once to toggle is enabled.")
-                        .foregroundColor(.secondary)
-                        .controlSize(.small)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
                 Text(modeDescription)
                     .font(.caption)
                     .foregroundColor(.secondary)

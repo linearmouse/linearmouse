@@ -6,6 +6,34 @@ import ApplicationServices
 import XCTest
 
 final class AutoScrollAccessibilityActivationClassifierTests: XCTestCase {
+    func testPressableHitPreservesNativeEventWithoutAdditionalSampling() {
+        let hit = AutoScrollActivationHit.pressable(path: ["AXButton[press]"])
+
+        XCTAssertTrue(hit.isPressable)
+        XCTAssertFalse(hit.requiresAdditionalSampling)
+        XCTAssertEqual(hit.summary, "pressable")
+    }
+
+    func testAccessibilityFailureIsNonPressableWithDiagnostic() {
+        let hit = AutoScrollActivationHit.nonPressable(
+            diagnostic: "role.cannotComplete",
+            path: ["AXGroup"]
+        )
+
+        XCTAssertFalse(hit.isPressable)
+        XCTAssertTrue(hit.requiresAdditionalSampling)
+        XCTAssertEqual(hit.summary, "nonPressable.role.cannotComplete")
+    }
+
+    func testAutoScrollStartsOnlyForNonPressableOrUnavailableHit() {
+        XCTAssertFalse(AutoScrollTransformer.shouldStartAutoScroll(for: .pressable(path: [])))
+        XCTAssertTrue(AutoScrollTransformer.shouldStartAutoScroll(for: .nonPressable(
+            diagnostic: nil,
+            path: []
+        )))
+        XCTAssertTrue(AutoScrollTransformer.shouldStartAutoScroll(for: nil))
+    }
+
     func testPressableActivationElementAcceptsExplicitControls() {
         XCTAssertTrue(AutoScrollAccessibilityActivationClassifier.isPressableActivationElement(
             role: "AXLink",

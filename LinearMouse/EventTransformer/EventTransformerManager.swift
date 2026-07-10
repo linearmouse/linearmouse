@@ -433,14 +433,12 @@ class EventTransformerManager {
 
         let modes = autoScroll.normalizedModes
         let speed = autoScroll.speed?.asTruncatedDouble ?? 1
-        let preserveNativeMiddleClick = autoScroll.preserveNativeMiddleClick ?? true
 
         if let sharedAutoScrollTransformer,
            sharedAutoScrollTransformer.matchesConfiguration(
                trigger: trigger,
                modes: modes,
-               speed: speed,
-               preserveNativeMiddleClick: preserveNativeMiddleClick
+               speed: speed
            ) {
             return sharedAutoScrollTransformer
         }
@@ -450,8 +448,7 @@ class EventTransformerManager {
         let transformer = AutoScrollTransformer(
             trigger: trigger,
             modes: modes,
-            speed: speed,
-            preserveNativeMiddleClick: preserveNativeMiddleClick
+            speed: speed
         )
         sharedAutoScrollTransformer = transformer
         return transformer

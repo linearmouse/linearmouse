@@ -5,25 +5,13 @@ import CoreGraphics
 
 struct AccessibilityBypassRule {
     let name: String
-    let bundleIdentifiers: Set<String>?
     let conditions: [AccessibilityBypassCondition]
-
-    init(
-        name: String,
-        bundleIdentifiers: Set<String>? = nil,
-        conditions: [AccessibilityBypassCondition]
-    ) {
-        self.name = name
-        self.bundleIdentifiers = bundleIdentifiers
-        self.conditions = conditions
-    }
 }
 
 extension AccessibilityBypassRule {
     static let autoScrollRules: [AccessibilityBypassRule] = [
         AccessibilityBypassRule(
-            name: "chromeFullWindowGroupHitTestHole",
-            bundleIdentifiers: ["com.google.Chrome"],
+            name: "chromiumFullWindowGroupHitTestHole",
             conditions: [
                 .depth(0),
                 .role("AXGroup"),
@@ -32,19 +20,14 @@ extension AccessibilityBypassRule {
                 .noScrollabilitySignal,
                 .noChildContainingPoint,
                 .parentRole("AXWindow"),
-                .frameMatchesParent
+                .frameMatchesParent,
+                .domClassListContainsSuffix("BrowserRootView")
             ]
         ),
+        // Chromium can expose this drag-only overlay instead of the underlying tab during AX hit testing.
         AccessibilityBypassRule(
-            name: "braveTabStripGroupHitTestHole",
-            bundleIdentifiers: ["com.brave.Browser"],
+            name: "chromiumTabStripDragContextHitTestHole",
             conditions: [
-                .depth(0),
-                .role("AXGroup"),
-                .subrole(nil),
-                .actionsEmpty,
-                .noScrollabilitySignal,
-                .noChildContainingPoint,
                 .domClassListContains("TabStrip::TabDragContextImpl")
             ]
         )
@@ -61,10 +44,10 @@ enum AccessibilityBypassCondition {
     case parentRole(String)
     case frameMatchesParent
     case domClassListContains(String)
+    case domClassListContainsSuffix(String)
 }
 
 struct AccessibilityBypassRuleContext {
-    let bundleIdentifier: String?
     let point: CGPoint
 }
 
@@ -136,14 +119,7 @@ struct AccessibilityBypassRuleMatcher {
         element: AccessibilityBypassElementSnapshot,
         context: AccessibilityBypassRuleContext
     ) -> Bool {
-        if let bundleIdentifiers = rule.bundleIdentifiers {
-            guard let bundleIdentifier = context.bundleIdentifier,
-                  bundleIdentifiers.contains(bundleIdentifier) else {
-                return false
-            }
-        }
-
-        return rule.conditions.allSatisfy { condition in
+        rule.conditions.allSatisfy { condition in
             matches(condition, element: element, context: context)
         }
     }
@@ -179,6 +155,8 @@ struct AccessibilityBypassRuleMatcher {
             return framesApproximatelyMatch(frame, parentFrame)
         case let .domClassListContains(expectedClass):
             return element.domClassList.contains(expectedClass)
+        case let .domClassListContainsSuffix(expectedSuffix):
+            return element.domClassList.contains { $0.hasSuffix(expectedSuffix) }
         }
     }
 

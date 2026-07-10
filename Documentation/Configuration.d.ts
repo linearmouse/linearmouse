@@ -515,12 +515,6 @@ declare namespace Scheme {
       speed?: number;
 
       /**
-       * @description If true, a plain middle click on a pressable element such as a link will keep its native behavior when possible.
-       * @default false
-       */
-      preserveNativeMiddleClick?: boolean;
-
-      /**
        * @title Trigger
        * @description Choose the mouse button and modifier keys used to activate auto scroll.
        */
