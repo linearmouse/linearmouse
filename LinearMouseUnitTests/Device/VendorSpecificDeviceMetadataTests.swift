@@ -282,6 +282,68 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertNil(LogitechReceiverChannel.parseBoltReceiverName([0x11, 0xFF, 0x83]))
     }
 
+    func testBoltReceiverDiscoveryEnablesNotificationsAndTriggersOneInitialSnapshot() {
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xC548,
+            transport: PointerDeviceTransportName.usb,
+            locationID: 1
+        )
+        device.responseProvider = { report in
+            let bytes = [UInt8](report)
+            guard bytes.count >= 4 else {
+                return nil
+            }
+
+            switch (bytes[2], bytes[3]) {
+            case (0x83, 0xFB):
+                return Data([0x10, 0xFF, 0x83, 0xFB, 0x00, 0x00, 0x00])
+            case (0x81, 0x02):
+                return Data([0x10, 0xFF, 0x81, 0x02, 0x00, 0x00, 0x00])
+            case (0x80, 0x02):
+                return Data([0x10, 0xFF, 0x80, 0x02, 0x02, 0x00, 0x00])
+            default:
+                return nil
+            }
+        }
+
+        XCTAssertNil(device.discoverBoltSlots())
+        XCTAssertEqual(device.wirelessNotificationEnableCount, 1)
+        XCTAssertEqual(
+            device.sentReports
+                .filter { report in
+                    let bytes = [UInt8](report)
+                    return bytes.count >= 5
+                        && bytes[2] == 0x80
+                        && bytes[3] == 0x02
+                        && bytes[4] == 0x02
+                }
+                .count,
+            1
+        )
+    }
+
+    func testBoltReceiverConnectionWaitRetriesNotificationEnableWithoutTriggeringSnapshot() {
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xC548,
+            transport: PointerDeviceTransportName.usb,
+            locationID: 1
+        )
+        device.queuedHIDPPNotifications = [
+            [0x10, 0x01, 0x41, 0x00, 0x02, 0x00, 0x00]
+        ]
+
+        let snapshots = device.waitForBoltConnectionSnapshots(timeout: 0.1)
+        let secondSnapshots = device.waitForBoltConnectionSnapshots(timeout: 0)
+
+        XCTAssertEqual(snapshots[1], .init(isConnected: true, kind: 0x02))
+        XCTAssertTrue(secondSnapshots.isEmpty)
+        XCTAssertEqual(device.wirelessNotificationEnableCount, 2)
+        XCTAssertEqual(device.outputReportRequestCount, 0)
+        XCTAssertTrue(device.sentReports.isEmpty)
+    }
+
     func testLogitechControlsMonitorNeedsMatchingDirectBluetoothLowEnergyConfiguration() {
         var mapping = Scheme.Buttons.Mapping()
         mapping.button = .logitechControl(.init(controlID: 0x00D0, productID: 0xB015, serialNumber: "ABC"))

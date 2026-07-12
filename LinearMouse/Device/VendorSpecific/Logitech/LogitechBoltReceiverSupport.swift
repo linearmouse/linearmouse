@@ -8,8 +8,39 @@ private struct BoltHIDPP10Report {
     let bytes: [UInt8]
 }
 
-extension LogitechReceiverChannel {
+protocol LogitechReceiverMonitoringChannel: VendorSpecificDeviceContext {
+    func enableWirelessNotifications()
+    func waitForReceiverConnectionNotification(
+        timeout: TimeInterval,
+        until shouldContinue: (() -> Bool)?
+    ) -> (slot: UInt8, snapshot: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot)?
+}
+
+extension LogitechReceiverChannel: LogitechReceiverMonitoringChannel {
+    func waitForReceiverConnectionNotification(
+        timeout: TimeInterval,
+        until shouldContinue: (() -> Bool)?
+    ) -> (slot: UInt8, snapshot: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot)? {
+        guard let report = waitForHIDPPNotification(
+            timeout: timeout,
+            matching: { response in
+                LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(response) != nil
+            },
+            until: shouldContinue
+        ) else {
+            return nil
+        }
+
+        return LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(report)
+    }
+}
+
+extension LogitechReceiverMonitoringChannel {
     func discoverBoltSlots() -> LogitechHIDPPDeviceMetadataProvider.ReceiverSlotDiscovery? {
+        // Enable connection notifications before requesting the initial snapshot.
+        // Ongoing monitoring revalidates the flags before each passive wait.
+        enableWirelessNotifications()
+
         guard readBoltUniqueID() != nil else {
             os_log(
                 "Bolt receiver unique ID is unavailable: locationID=%{public}@",
@@ -136,11 +167,11 @@ extension LogitechReceiverChannel {
         timeout: TimeInterval,
         until shouldContinue: (() -> Bool)? = nil
     ) -> [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot] {
-        guard triggerBoltConnectionNotifications() else {
-            return [:]
-        }
+        // Retrying this idempotent setup recovers from a transient failure without
+        // triggering a connection snapshot or short-circuiting the bounded wait.
+        enableWirelessNotifications()
 
-        guard let initialNotification = waitForBoltConnectionNotification(
+        guard let initialNotification = waitForReceiverConnectionNotification(
             timeout: timeout,
             until: shouldContinue
         ) else {
@@ -150,7 +181,7 @@ extension LogitechReceiverChannel {
         var snapshots = [initialNotification.slot: initialNotification.snapshot]
         let deadline = Date().addingTimeInterval(0.1)
         while Date() < deadline, shouldContinue?() ?? true {
-            guard let notification = waitForBoltConnectionNotification(timeout: 0.02, until: shouldContinue) else {
+            guard let notification = waitForReceiverConnectionNotification(timeout: 0.02, until: shouldContinue) else {
                 continue
             }
 
@@ -172,22 +203,14 @@ extension LogitechReceiverChannel {
         var snapshots = [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot]()
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline, shouldContinue?() ?? true {
-            guard let report = waitForHIDPPNotification(
+            guard let notification = waitForReceiverConnectionNotification(
                 timeout: 0.05,
-                matching: { response in
-                    LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(response) != nil
-                },
                 until: shouldContinue
             ) else {
                 if let expectedCount,
                    snapshots.values.filter(\.isConnected).count >= expectedCount {
                     break
                 }
-                continue
-            }
-
-            guard let notification = LogitechHIDPPDeviceMetadataProvider
-                .parseReceiverConnectionNotification(report) else {
                 continue
             }
 
@@ -199,23 +222,6 @@ extension LogitechReceiverChannel {
         }
 
         return snapshots
-    }
-
-    private func waitForBoltConnectionNotification(
-        timeout: TimeInterval,
-        until shouldContinue: (() -> Bool)?
-    ) -> (slot: UInt8, snapshot: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot)? {
-        guard let report = waitForHIDPPNotification(
-            timeout: timeout,
-            matching: { response in
-                LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(response) != nil
-            },
-            until: shouldContinue
-        ) else {
-            return nil
-        }
-
-        return LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(report)
     }
 
     private func boltReceiverInfoRequest(
