@@ -4,7 +4,7 @@
 import Foundation
 @testable import LinearMouse
 
-final class MockVendorSpecificDeviceContext: VendorSpecificDeviceContext {
+final class MockVendorSpecificDeviceContext: LogitechReceiverMonitoringChannel {
     var vendorID: Int?
     var productID: Int?
     var product: String?
@@ -20,6 +20,8 @@ final class MockVendorSpecificDeviceContext: VendorSpecificDeviceContext {
     var outputReportRequestCount = 0
     var sentReports = [Data]()
     var responseProvider: ((Data) -> Data?)?
+    var wirelessNotificationEnableCount = 0
+    var queuedHIDPPNotifications = [[UInt8]]()
 
     init(
         vendorID: Int?,
@@ -61,5 +63,30 @@ final class MockVendorSpecificDeviceContext: VendorSpecificDeviceContext {
             return nil
         }
         return response
+    }
+
+    func enableWirelessNotifications() {
+        wirelessNotificationEnableCount += 1
+    }
+
+    func waitForReceiverConnectionNotification(
+        timeout: TimeInterval,
+        until shouldContinue: (() -> Bool)?
+    ) -> (slot: UInt8, snapshot: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot)? {
+        guard shouldContinue?() ?? true else {
+            return nil
+        }
+
+        if let index = queuedHIDPPNotifications.firstIndex(where: {
+            LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification($0) != nil
+        }) {
+            let report = queuedHIDPPNotifications.remove(at: index)
+            return LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(report)
+        }
+
+        if timeout > 0 {
+            Thread.sleep(forTimeInterval: timeout)
+        }
+        return nil
     }
 }
