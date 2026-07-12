@@ -37,9 +37,8 @@ extension LogitechReceiverChannel: LogitechReceiverMonitoringChannel {
 
 extension LogitechReceiverMonitoringChannel {
     func discoverBoltSlots() -> LogitechHIDPPDeviceMetadataProvider.ReceiverSlotDiscovery? {
-        // Connection notifications are persistent receiver state. Enable them once
-        // when establishing the monitoring session, then request one initial
-        // snapshot below. Subsequent monitoring must remain passive.
+        // Enable connection notifications before requesting the initial snapshot.
+        // Ongoing monitoring revalidates the flags before each passive wait.
         enableWirelessNotifications()
 
         guard readBoltUniqueID() != nil else {
@@ -168,6 +167,10 @@ extension LogitechReceiverMonitoringChannel {
         timeout: TimeInterval,
         until shouldContinue: (() -> Bool)? = nil
     ) -> [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot] {
+        // Retrying this idempotent setup recovers from a transient failure without
+        // triggering a connection snapshot or short-circuiting the bounded wait.
+        enableWirelessNotifications()
+
         guard let initialNotification = waitForReceiverConnectionNotification(
             timeout: timeout,
             until: shouldContinue

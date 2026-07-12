@@ -323,7 +323,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         )
     }
 
-    func testBoltReceiverConnectionWaitIsPassive() {
+    func testBoltReceiverConnectionWaitRetriesNotificationEnableWithoutTriggeringSnapshot() {
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,
             productID: 0xC548,
@@ -335,9 +335,11 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         ]
 
         let snapshots = device.waitForBoltConnectionSnapshots(timeout: 0.1)
+        let secondSnapshots = device.waitForBoltConnectionSnapshots(timeout: 0)
 
         XCTAssertEqual(snapshots[1], .init(isConnected: true, kind: 0x02))
-        XCTAssertEqual(device.wirelessNotificationEnableCount, 0)
+        XCTAssertTrue(secondSnapshots.isEmpty)
+        XCTAssertEqual(device.wirelessNotificationEnableCount, 2)
         XCTAssertEqual(device.outputReportRequestCount, 0)
         XCTAssertTrue(device.sentReports.isEmpty)
     }
