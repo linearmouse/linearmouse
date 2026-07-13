@@ -259,6 +259,19 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         receiverProtocolFamily(vendorID: vendorID, productID: productID, transport: transport) == .classic
     }
 
+    static func supportsReprogrammableControlsMonitoring(
+        vendorID: Int?,
+        productID: Int?,
+        transport: String?
+    ) -> Bool {
+        switch receiverProtocolFamily(vendorID: vendorID, productID: productID, transport: transport) {
+        case .classic, .bolt:
+            return true
+        case .lightspeed, nil:
+            return false
+        }
+    }
+
     static func supportsReceiverMonitoring(vendorID: Int?, productID: Int?, transport: String?) -> Bool {
         receiverProtocolFamily(vendorID: vendorID, productID: productID, transport: transport) != nil
     }
@@ -881,38 +894,81 @@ struct LogitechHIDPPTransport {
         return featureIndex
     }
 
-    func request(featureIndex: UInt8, function: UInt8, parameters: [UInt8]) -> LogitechHIDPPDeviceMetadataProvider
-        .Response? {
-        let address = (function << 4) | LogitechHIDPPDeviceMetadataProvider.Constants.softwareID
-        var bytes = [UInt8](repeating: 0, count: reportLength)
-        bytes[0] = reportID
-        bytes[1] = deviceIndex
-        bytes[2] = featureIndex
-        bytes[3] = address
-        for (index, parameter) in parameters.enumerated() where index + 4 < bytes.count {
-            bytes[index + 4] = parameter
+    func request(
+        featureIndex: UInt8,
+        function: UInt8,
+        parameters: [UInt8]
+    ) -> LogitechHIDPPDeviceMetadataProvider.Response? {
+        response(
+            featureIndex: featureIndex,
+            function: function,
+            parameters: parameters,
+            usesShortReport: false,
+            performsSingleTransaction: false
+        )
+    }
+
+    func shortRequestOnce(
+        featureIndex: UInt8,
+        function: UInt8,
+        parameters: [UInt8]
+    ) -> LogitechHIDPPDeviceMetadataProvider.Response? {
+        response(
+            featureIndex: featureIndex,
+            function: function,
+            parameters: parameters,
+            usesShortReport: true,
+            performsSingleTransaction: true
+        )
+    }
+
+    private func response(
+        featureIndex: UInt8,
+        function: UInt8,
+        parameters: [UInt8],
+        usesShortReport: Bool,
+        performsSingleTransaction: Bool
+    ) -> LogitechHIDPPDeviceMetadataProvider.Response? {
+        let address = address(for: function)
+        let report = makeReport(
+            featureIndex: featureIndex,
+            address: address,
+            parameters: parameters,
+            usesShortReport: usesShortReport
+        )
+        let matching: (Data) -> Bool = { response in
+            let reply = [UInt8](response)
+            guard reply.count >= LogitechHIDPPDeviceMetadataProvider.Constants.shortReportLength,
+                  [
+                      LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
+                      LogitechHIDPPDeviceMetadataProvider.Constants.longReportID
+                  ].contains(reply[0]),
+                  acceptedReplyIndices.contains(reply[1])
+            else {
+                return false
+            }
+
+            if reply[2] == 0xFF {
+                return reply.count >= 6 && reply[3] == featureIndex && reply[4] == address
+            }
+
+            return reply[2] == featureIndex && reply[3] == address
+        }
+        let response = if performsSingleTransaction {
+            device.performSynchronousOutputReportRequestOnce(
+                report,
+                timeout: LogitechHIDPPDeviceMetadataProvider.Constants.timeout,
+                matching: matching
+            )
+        } else {
+            device.performSynchronousOutputReportRequest(
+                report,
+                timeout: LogitechHIDPPDeviceMetadataProvider.Constants.timeout,
+                matching: matching
+            )
         }
 
-        guard let response = device.performSynchronousOutputReportRequest(
-            Data(bytes),
-            timeout: LogitechHIDPPDeviceMetadataProvider.Constants.timeout,
-            matching: { response in
-                let reply = [UInt8](response)
-                guard reply.count >= LogitechHIDPPDeviceMetadataProvider.Constants.shortReportLength,
-                      [LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
-                       LogitechHIDPPDeviceMetadataProvider.Constants.longReportID].contains(reply[0]),
-                      acceptedReplyIndices.contains(reply[1])
-                else {
-                    return false
-                }
-
-                if reply[2] == 0xFF {
-                    return reply.count >= 6 && reply[3] == featureIndex && reply[4] == address
-                }
-
-                return reply[2] == featureIndex && reply[3] == address
-            }
-        ) else {
+        guard let response else {
             return nil
         }
 
@@ -923,9 +979,55 @@ struct LogitechHIDPPTransport {
 
         return .init(payload: Array(reply.dropFirst(4)))
     }
+
+    private func address(for function: UInt8) -> UInt8 {
+        (function << 4) | LogitechHIDPPDeviceMetadataProvider.Constants.softwareID
+    }
+
+    private func makeReport(
+        featureIndex: UInt8,
+        address: UInt8,
+        parameters: [UInt8],
+        usesShortReport: Bool
+    ) -> Data {
+        let requestReportID = usesShortReport
+            ? LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID
+            : reportID
+        let requestReportLength = usesShortReport
+            ? LogitechHIDPPDeviceMetadataProvider.Constants.shortReportLength
+            : reportLength
+        var bytes = [UInt8](repeating: 0, count: requestReportLength)
+        bytes[0] = requestReportID
+        bytes[1] = deviceIndex
+        bytes[2] = featureIndex
+        bytes[3] = address
+        for (index, parameter) in parameters.enumerated() where index + 4 < bytes.count {
+            bytes[index + 4] = parameter
+        }
+        return Data(bytes)
+    }
 }
 
 final class LogitechReceiverChannel: VendorSpecificDeviceContext {
+    private final class WeakChannelReference {
+        weak var channel: LogitechReceiverChannel?
+
+        init(_ channel: LogitechReceiverChannel) {
+            self.channel = channel
+        }
+    }
+
+    private final class InputReportWaiter {
+        let id = UUID()
+        let matching: (Data) -> Bool
+        let semaphore = DispatchSemaphore(value: 0)
+        var response: Data?
+
+        init(matching: @escaping (Data) -> Bool) {
+            self.matching = matching
+        }
+    }
+
     private enum RequestStrategy: CaseIterable {
         case outputCallback
         case featureCallback
@@ -970,7 +1072,9 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
 
     private let manager: IOHIDManager
     private let device: IOHIDDevice
-    private let runLoop: CFRunLoop
+    private let ioQueue: DispatchQueue
+    private let ioQueueKey = DispatchSpecificKey<Void>()
+    private let cancellationSemaphore = DispatchSemaphore(value: 0)
     private let inputReportBufferLength: Int
     private var inputReportBuffer: UnsafeMutablePointer<UInt8>?
     private let pendingLock = NSLock()
@@ -980,6 +1084,14 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
     private var pendingResponse: Data?
     private var pendingSemaphore: DispatchSemaphore?
     private var requestStrategy: RequestStrategy?
+    /// Passive notification consumers are independent of the single synchronous
+    /// request slot, so one input report can be fanned out without blocking commands.
+    private var inputReportWaiters = [UUID: InputReportWaiter]()
+
+    // Keep one I/O reader per physical receiver. Opening the same macOS HID
+    // interface more than once can route a command response to another callback.
+    private static var sharedChannels = [Int: WeakChannelReference]()
+    private static let sharedChannelsLock = NSLock()
 
     private static let inputReportCallback: IOHIDReportCallback = { context, _, _, _, _, report, reportLength in
         guard let context else {
@@ -991,6 +1103,13 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
     }
 
     static func open(locationID: Int) -> LogitechReceiverChannel? {
+        sharedChannelsLock.lock()
+        defer { sharedChannelsLock.unlock() }
+
+        if let channel = sharedChannels[locationID]?.channel {
+            return channel
+        }
+
         let manager = IOHIDManagerCreate(kCFAllocatorDefault, IOOptionBits(kIOHIDOptionsTypeNone))
 
         let matching: [String: Any] = [
@@ -1002,24 +1121,26 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         ]
 
         IOHIDManagerSetDeviceMatching(manager, matching as CFDictionary)
-        IOHIDManagerScheduleWithRunLoop(manager, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
         IOHIDManagerOpen(manager, IOOptionBits(kIOHIDOptionsTypeNone))
 
         guard let devices = IOHIDManagerCopyDevices(manager) as? Set<IOHIDDevice>,
               let hidDevice = devices.first
         else {
-            IOHIDManagerUnscheduleFromRunLoop(manager, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
             IOHIDManagerClose(manager, IOOptionBits(kIOHIDOptionsTypeNone))
             return nil
         }
 
-        return LogitechReceiverChannel(manager: manager, device: hidDevice)
+        guard let channel = LogitechReceiverChannel(manager: manager, device: hidDevice) else {
+            return nil
+        }
+
+        sharedChannels[locationID] = WeakChannelReference(channel)
+        return channel
     }
 
     init?(manager: IOHIDManager, device: IOHIDDevice) {
         self.manager = manager
         self.device = device
-        runLoop = CFRunLoopGetCurrent()
         vendorID = Self.getProperty(kIOHIDVendorIDKey, from: device)
         productID = Self.getProperty(kIOHIDProductIDKey, from: device)
         product = Self.getProperty(kIOHIDProductKey, from: device)
@@ -1032,6 +1153,9 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         maxInputReportSize = Self.getProperty("MaxInputReportSize", from: device)
         maxOutputReportSize = Self.getProperty("MaxOutputReportSize", from: device)
         maxFeatureReportSize = Self.getProperty("MaxFeatureReportSize", from: device)
+        ioQueue = DispatchQueue(
+            label: "com.lujjjh.dev.LinearMouse.LogitechReceiverChannel.\(locationID ?? 0)"
+        )
         inputReportBufferLength = max(
             maxInputReportSize ?? LogitechHIDPPDeviceMetadataProvider.Constants.longReportLength,
             LogitechHIDPPDeviceMetadataProvider.Constants.longReportLength
@@ -1039,7 +1163,6 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
 
         let openStatus = IOHIDDeviceOpen(device, IOOptionBits(kIOHIDOptionsTypeNone))
         guard openStatus == kIOReturnSuccess else {
-            IOHIDManagerUnscheduleFromRunLoop(manager, runLoop, CFRunLoopMode.defaultMode.rawValue)
             IOHIDManagerClose(manager, IOOptionBits(kIOHIDOptionsTypeNone))
             return nil
         }
@@ -1047,7 +1170,8 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         let inputReportBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: inputReportBufferLength)
         self.inputReportBuffer = inputReportBuffer
 
-        IOHIDDeviceScheduleWithRunLoop(device, runLoop, CFRunLoopMode.defaultMode.rawValue)
+        ioQueue.setSpecific(key: ioQueueKey, value: ())
+        IOHIDDeviceSetDispatchQueue(device, ioQueue)
         IOHIDDeviceRegisterInputReportCallback(
             device,
             inputReportBuffer,
@@ -1055,23 +1179,21 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
             Self.inputReportCallback,
             Unmanaged.passUnretained(self).toOpaque()
         )
+        IOHIDDeviceSetCancelHandler(device) { [cancellationSemaphore, device, inputReportBuffer, manager] in
+            IOHIDDeviceClose(device, IOOptionBits(kIOHIDOptionsTypeNone))
+            IOHIDManagerClose(manager, IOOptionBits(kIOHIDOptionsTypeNone))
+            inputReportBuffer.deallocate()
+            cancellationSemaphore.signal()
+        }
+        IOHIDDeviceActivate(device)
     }
 
     deinit {
-        if let inputReportBuffer {
-            IOHIDDeviceRegisterInputReportCallback(
-                device,
-                inputReportBuffer,
-                inputReportBufferLength,
-                nil,
-                nil
-            )
+        IOHIDDeviceCancel(device)
+        if DispatchQueue.getSpecific(key: ioQueueKey) == nil {
+            cancellationSemaphore.wait()
         }
-        IOHIDDeviceUnscheduleFromRunLoop(device, runLoop, CFRunLoopMode.defaultMode.rawValue)
-        IOHIDDeviceClose(device, IOOptionBits(kIOHIDOptionsTypeNone))
-        IOHIDManagerUnscheduleFromRunLoop(manager, runLoop, CFRunLoopMode.defaultMode.rawValue)
-        IOHIDManagerClose(manager, IOOptionBits(kIOHIDOptionsTypeNone))
-        inputReportBuffer?.deallocate()
+        inputReportBuffer = nil
     }
 
     func discoverSlots() -> LogitechHIDPPDeviceMetadataProvider.ReceiverSlotDiscovery? {
@@ -1405,6 +1527,19 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         return nil
     }
 
+    func performSynchronousOutputReportRequestOnce(
+        _ report: Data,
+        timeout: TimeInterval,
+        matching: @escaping (Data) -> Bool
+    ) -> Data? {
+        performCallbackRequest(
+            report,
+            timeout: timeout,
+            matching: matching,
+            reportType: kIOHIDReportTypeOutput
+        )
+    }
+
     private func performRequest(
         _ report: Data,
         timeout: TimeInterval,
@@ -1558,33 +1693,59 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         matching: @escaping (Data) -> Bool,
         until shouldContinue: (() -> Bool)? = nil
     ) -> Data? {
-        requestLock.lock()
-        defer { requestLock.unlock() }
-
-        let semaphore = DispatchSemaphore(value: 0)
+        let waiter = InputReportWaiter(matching: matching)
         pendingLock.lock()
-        pendingMatcher = matching
-        pendingResponse = nil
-        pendingSemaphore = semaphore
+        inputReportWaiters[waiter.id] = waiter
         pendingLock.unlock()
+        defer {
+            pendingLock.lock()
+            inputReportWaiters.removeValue(forKey: waiter.id)
+            pendingLock.unlock()
+        }
 
-        return waitForPendingResponse(timeout: timeout, until: shouldContinue)
+        return waitForResponse(
+            timeout: timeout,
+            until: shouldContinue,
+            semaphore: waiter.semaphore
+        ) {
+            self.pendingLock.lock()
+            let response = waiter.response
+            self.pendingLock.unlock()
+            return response
+        }
     }
 
     private func waitForPendingResponse(timeout: TimeInterval, until shouldContinue: (() -> Bool)? = nil) -> Data? {
+        pendingLock.lock()
+        let semaphore = pendingSemaphore
+        pendingLock.unlock()
+        guard let semaphore else {
+            return nil
+        }
+
+        defer { clearPendingRequest() }
+
+        return waitForResponse(timeout: timeout, until: shouldContinue, semaphore: semaphore) {
+            self.pendingLock.lock()
+            let response = self.pendingResponse
+            self.pendingLock.unlock()
+            return response
+        }
+    }
+
+    private func waitForResponse(
+        timeout: TimeInterval,
+        until shouldContinue: (() -> Bool)?,
+        semaphore: DispatchSemaphore,
+        response: () -> Data?
+    ) -> Data? {
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
             if let shouldContinue, !shouldContinue() {
-                clearPendingRequest()
                 return nil
             }
 
-            pendingLock.lock()
-            let response = pendingResponse
-            pendingLock.unlock()
-
-            if let response {
-                clearPendingRequest()
+            if let response = response() {
                 return response
             }
 
@@ -1593,28 +1754,33 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
                 break
             }
 
-            // Pump the HID++ channel run loop; semaphore-only waiting would block input-report delivery.
-            let result = CFRunLoopRunInMode(.defaultMode, remaining, true)
-            if result == .finished {
-                break
-            }
+            _ = semaphore.wait(timeout: .now() + min(remaining, 0.05))
         }
 
-        clearPendingRequest()
-        return nil
+        return response()
     }
 
     private func handleInputReport(_ report: Data) {
         pendingLock.lock()
-        defer { pendingLock.unlock() }
+        var semaphores = [DispatchSemaphore]()
 
-        guard let reportMatcher = pendingMatcher, reportMatcher(report) else {
-            return
+        if let reportMatcher = pendingMatcher, reportMatcher(report) {
+            pendingResponse = report
+            pendingMatcher = nil
+            if let pendingSemaphore {
+                semaphores.append(pendingSemaphore)
+            }
         }
 
-        pendingResponse = report
-        pendingMatcher = nil
-        pendingSemaphore?.signal()
+        let matchingWaiters = inputReportWaiters.values.filter { $0.matching(report) }
+        for waiter in matchingWaiters {
+            waiter.response = report
+            inputReportWaiters.removeValue(forKey: waiter.id)
+            semaphores.append(waiter.semaphore)
+        }
+
+        pendingLock.unlock()
+        semaphores.forEach { $0.signal() }
     }
 
     private func clearPendingRequest() {
@@ -1626,12 +1792,10 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
     }
 
     func wake() {
-        CFRunLoopWakeUp(runLoop)
-
         pendingLock.lock()
-        let semaphore = pendingSemaphore
+        let semaphores = [pendingSemaphore].compactMap(\.self) + inputReportWaiters.values.map(\.semaphore)
         pendingLock.unlock()
-        semaphore?.signal()
+        semaphores.forEach { $0.signal() }
     }
 
     private func readConnectionState() -> [UInt8]? {
@@ -1857,7 +2021,7 @@ final class LogitechReprogrammableControlsMonitor {
         case PointerDeviceTransportName.bluetoothLowEnergy:
             return true
         case PointerDeviceTransportName.usb:
-            return LogitechHIDPPDeviceMetadataProvider.supportsClassicReceiverMonitoring(
+            return LogitechHIDPPDeviceMetadataProvider.supportsReprogrammableControlsMonitoring(
                 vendorID: vendorID,
                 productID: productID,
                 transport: transport
@@ -2485,43 +2649,23 @@ final class LogitechReprogrammableControlsMonitor {
         using receiverChannel: LogitechReceiverChannel,
         discovery: LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery
     ) -> TargetDevice? {
-        let desiredProductID = device.pointerDevice.productID
-        let desiredSerial = device.pointerDevice
-            .serialNumber?
-            .lowercased()
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        let desiredName = (device.pointerDevice.product ?? device.pointerDevice.name)
-            .lowercased()
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-
-        // Try to match device to a slot using discovery results directly,
-        // avoiding a second full slot scan.
-        let matched: ReceiverLogicalDeviceIdentity? =
-            // Match by serial number
-            discovery.identities.first {
-                guard let serial = $0.serialNumber?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines),
-                      let desired = desiredSerial, !desired.isEmpty else {
-                    return false
-                }
-                return serial == desired
-            }
-            // Match by product ID
-            ?? discovery.identities.first {
-                guard let pid = $0.productID, let desired = desiredProductID else {
-                    return false
-                }
-                return pid == desired
-            }
-            // Match by name
-            ?? discovery.identities.first {
-                $0.name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) == desiredName
-            }
-
-        if let matched {
-            return TargetDevice(slot: matched.slot, identity: matched)
+        if let slot = provider.receiverSlot(for: device.pointerDevice, identities: discovery.identities) {
+            return TargetDevice(
+                slot: slot,
+                identity: discovery.identities.first { $0.slot == slot }
+            )
         }
 
-        // Fallback: use the original slot matching via HID++ pairing info
+        // Classic receivers can fall back to their pairing-information query.
+        // Bolt slot matching must use the Bolt discovery path above.
+        guard LogitechHIDPPDeviceMetadataProvider.receiverProtocolFamily(
+            vendorID: device.vendorID,
+            productID: device.productID,
+            transport: device.pointerDevice.transport
+        ) == .classic else {
+            return nil
+        }
+
         if let slot = provider.receiverSlot(for: device.pointerDevice, using: receiverChannel) {
             let identity = discovery.identities.first { $0.slot == slot }
             return TargetDevice(slot: slot, identity: identity)

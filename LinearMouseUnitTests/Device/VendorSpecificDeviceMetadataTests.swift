@@ -225,7 +225,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
                 transport: PointerDeviceTransportName.usb
             )
         )
-        XCTAssertFalse(
+        XCTAssertTrue(
             LogitechReprogrammableControlsMonitor.supports(
                 vendorID: 0x046D,
                 productID: 0xC548,

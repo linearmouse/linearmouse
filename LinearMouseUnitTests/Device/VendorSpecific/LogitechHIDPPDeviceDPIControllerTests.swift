@@ -121,8 +121,8 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
         XCTAssertEqual(controller?.dpiStep, 800)
         XCTAssertEqual(controller?.setDPI(1500), 1600)
         XCTAssertEqual(
-            device.sentReports.last.map { Array($0.prefix(7)) },
-            Optional([0x11, 0xFF, 0x05, 0x38, 0x00, 0x06, 0x40] as [UInt8])
+            device.sentReports.last.map(Array.init),
+            Optional([0x10, 0xFF, 0x05, 0x38, 0x00, 0x06, 0x40] as [UInt8])
         )
     }
 
@@ -205,7 +205,7 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
         XCTAssertEqual(controller?.canRepresentDPI(260), false)
     }
 
-    func testSetDPISucceedsWhenDeviceAppliesWithoutAcknowledgingWrite() {
+    func testSetDPIFailsWithoutAcknowledgementAndDoesNotReadBack() {
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,
             productID: 0xB015,
@@ -245,7 +245,98 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
 
         let controller = LogitechHIDPPDeviceDPIController(device: device)
 
+        let requestCount = device.sentReports.count
+
+        XCTAssertNil(controller?.setDPI(1600))
+        XCTAssertEqual(device.sentReports.count, requestCount + 1)
+        XCTAssertEqual(device.sentReports.last.map(Array.init), [0x10, 0xFF, 0x05, 0x38, 0x00, 0x06, 0x40])
+    }
+
+    func testSetDPISendsOneShortRequestAndWaitsForAcknowledgement() {
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xC548,
+            transport: PointerDeviceTransportName.usb,
+            maxInputReportSize: 20,
+            maxOutputReportSize: 20
+        )
+
+        device.responseProvider = { report in
+            let bytes = [UInt8](report)
+            return Self.hidppShortReply(
+                deviceIndex: bytes[1],
+                featureIndex: bytes[2],
+                address: bytes[3],
+                payload: [0x00, 0x06, 0x40]
+            )
+        }
+
+        let transport = LogitechHIDPPTransport(device: device, deviceIndex: 2)
+        let controller = transport.map {
+            LogitechHIDPPDeviceDPIController(
+                transport: $0,
+                featureIndex: 0x05,
+                supportedDPI: [800, 1600]
+            )
+        }
+
         XCTAssertEqual(controller?.setDPI(1600), 1600)
+        XCTAssertEqual(device.outputReportRequestOnceCount, 1)
+        XCTAssertEqual(device.outputReportRequestCount, 0)
+        XCTAssertEqual(device.sentReports.map(Array.init), [[0x10, 0x02, 0x05, 0x38, 0x00, 0x06, 0x40]])
+    }
+
+    func testSetDPIFailsWhenAcknowledgementIsMissing() {
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xC548,
+            transport: PointerDeviceTransportName.usb,
+            maxInputReportSize: 20,
+            maxOutputReportSize: 20
+        )
+        let transport = LogitechHIDPPTransport(device: device, deviceIndex: 2)
+        let controller = transport.map {
+            LogitechHIDPPDeviceDPIController(
+                transport: $0,
+                featureIndex: 0x05,
+                supportedDPI: [800, 1600]
+            )
+        }
+
+        XCTAssertNil(controller?.setDPI(1600))
+        XCTAssertEqual(device.outputReportRequestOnceCount, 1)
+        XCTAssertEqual(device.outputReportRequestCount, 0)
+    }
+
+    func testSetDPIFailsWhenAcknowledgementEchoesDifferentDPI() {
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xC548,
+            transport: PointerDeviceTransportName.usb,
+            maxInputReportSize: 20,
+            maxOutputReportSize: 20
+        )
+        device.responseProvider = { report in
+            let bytes = [UInt8](report)
+            return Self.hidppShortReply(
+                deviceIndex: bytes[1],
+                featureIndex: bytes[2],
+                address: bytes[3],
+                payload: [0x00, 0x03, 0x20]
+            )
+        }
+
+        let transport = LogitechHIDPPTransport(device: device, deviceIndex: 2)
+        let controller = transport.map {
+            LogitechHIDPPDeviceDPIController(
+                transport: $0,
+                featureIndex: 0x05,
+                supportedDPI: [800, 1600]
+            )
+        }
+
+        XCTAssertNil(controller?.setDPI(1600))
+        XCTAssertEqual(device.outputReportRequestOnceCount, 1)
     }
 
     func testCurrentDPIUsesSupportedDefaultWhenCurrentBytesAreNotSupported() {
@@ -328,6 +419,23 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
         bytes[2] = featureIndex
         bytes[3] = address
         for (index, byte) in payload.enumerated() where index + 4 < bytes.count {
+            bytes[index + 4] = byte
+        }
+        return Data(bytes)
+    }
+
+    private static func hidppShortReply(
+        deviceIndex: UInt8,
+        featureIndex: UInt8,
+        address: UInt8,
+        payload: [UInt8]
+    ) -> Data {
+        var bytes = [UInt8](repeating: 0, count: 7)
+        bytes[0] = 0x10
+        bytes[1] = deviceIndex
+        bytes[2] = featureIndex
+        bytes[3] = address
+        for (index, byte) in payload.prefix(3).enumerated() {
             bytes[index + 4] = byte
         }
         return Data(bytes)

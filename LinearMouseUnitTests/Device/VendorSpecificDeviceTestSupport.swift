@@ -18,6 +18,7 @@ final class MockVendorSpecificDeviceContext: LogitechReceiverMonitoringChannel {
     var maxOutputReportSize: Int?
     var maxFeatureReportSize: Int?
     var outputReportRequestCount = 0
+    var outputReportRequestOnceCount = 0
     var sentReports = [Data]()
     var responseProvider: ((Data) -> Data?)?
     var wirelessNotificationEnableCount = 0
@@ -57,6 +58,20 @@ final class MockVendorSpecificDeviceContext: LogitechReceiverMonitoringChannel {
         matching: @escaping (Data) -> Bool
     ) -> Data? {
         outputReportRequestCount += 1
+        sentReports.append(report)
+        guard let response = responseProvider?(report),
+              matching(response) else {
+            return nil
+        }
+        return response
+    }
+
+    func performSynchronousOutputReportRequestOnce(
+        _ report: Data,
+        timeout _: TimeInterval,
+        matching: @escaping (Data) -> Bool
+    ) -> Data? {
+        outputReportRequestOnceCount += 1
         sentReports.append(report)
         guard let response = responseProvider?(report),
               matching(response) else {
