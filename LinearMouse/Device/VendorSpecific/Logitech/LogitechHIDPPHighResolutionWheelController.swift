@@ -2,7 +2,6 @@
 // Copyright (c) 2021-2026 LinearMouse
 
 import Foundation
-import PointerKit
 
 struct LogitechHIDPPHighResolutionWheelController {
     private enum Constants {
@@ -21,14 +20,15 @@ struct LogitechHIDPPHighResolutionWheelController {
     private let featureIndex: UInt8
 
     init?(device: VendorSpecificDeviceContext) {
-        guard device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID,
-              device.transport == PointerDeviceTransportName.bluetoothLowEnergy,
-              let transport = LogitechHIDPPTransport(device: device, deviceIndex: nil),
-              let featureIndex = transport.featureIndex(for: .hiresWheel)
+        guard let target = LogitechHIDPPFeatureTargetResolver.resolve(.hiresWheel, for: device)
         else {
             return nil
         }
 
+        self.init(transport: target.transport, featureIndex: target.featureIndex)
+    }
+
+    init(transport: LogitechHIDPPTransport, featureIndex: UInt8) {
         self.transport = transport
         self.featureIndex = featureIndex
     }

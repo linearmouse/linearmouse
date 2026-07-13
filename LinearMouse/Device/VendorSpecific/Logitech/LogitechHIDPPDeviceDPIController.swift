@@ -2,7 +2,6 @@
 // Copyright (c) 2021-2026 LinearMouse
 
 import Foundation
-import PointerKit
 
 struct LogitechHIDPPDeviceDPIController {
     private enum Constants {
@@ -19,29 +18,19 @@ struct LogitechHIDPPDeviceDPIController {
     private let featureIndex: UInt8
 
     init?(device: VendorSpecificDeviceContext) {
-        guard device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID,
-              [PointerDeviceTransportName.usb, PointerDeviceTransportName.bluetoothLowEnergy].contains(device.transport)
+        guard let target = LogitechHIDPPFeatureTargetResolver.resolve(.adjustableDPI, for: device)
         else {
             return nil
         }
 
-        let provider = LogitechHIDPPDeviceMetadataProvider()
-        if !LogitechHIDPPDeviceMetadataProvider.isKnownReceiver(vendorID: device.vendorID, productID: device.productID),
-           let directTarget = Self.makeTarget(device: device) {
-            self = directTarget
-            return
-        }
-
-        if let receiverTarget = Self.makeReceiverTarget(device: device, provider: provider) {
-            self = receiverTarget
-            return
-        }
-
-        guard let directTarget = Self.makeTarget(device: device) else {
-            return nil
-        }
-
-        self = directTarget
+        self.init(
+            transport: target.transport,
+            featureIndex: target.featureIndex,
+            supportedDPI: Self.readSupportedDPI(
+                transport: target.transport,
+                featureIndex: target.featureIndex
+            )
+        )
     }
 
     init(
@@ -128,62 +117,6 @@ struct LogitechHIDPPDeviceDPIController {
         }
 
         return supportedDPI.contains(dpi)
-    }
-
-    private static func makeTarget(device: VendorSpecificDeviceContext) -> Self? {
-        guard let transport = LogitechHIDPPTransport(device: device, deviceIndex: nil),
-              let featureIndex = transport.featureIndex(for: .adjustableDPI)
-        else {
-            return nil
-        }
-
-        let supportedDPI = readSupportedDPI(transport: transport, featureIndex: featureIndex)
-        return .init(
-            transport: transport,
-            featureIndex: featureIndex,
-            supportedDPI: supportedDPI
-        )
-    }
-
-    private static func makeReceiverTarget(
-        device: VendorSpecificDeviceContext,
-        provider: LogitechHIDPPDeviceMetadataProvider
-    ) -> Self? {
-        guard device.transport == PointerDeviceTransportName.usb,
-              let receiverChannel = provider.openReceiverChannel(for: device),
-              let slot = receiverSlot(for: device, using: receiverChannel, provider: provider),
-              let transport = LogitechHIDPPTransport(device: receiverChannel, deviceIndex: slot),
-              let featureIndex = transport.featureIndex(for: .adjustableDPI)
-        else {
-            return nil
-        }
-
-        let supportedDPI = readSupportedDPI(transport: transport, featureIndex: featureIndex)
-        return .init(
-            transport: transport,
-            featureIndex: featureIndex,
-            supportedDPI: supportedDPI
-        )
-    }
-
-    private static func receiverSlot(
-        for device: VendorSpecificDeviceContext,
-        using receiverChannel: LogitechReceiverChannel,
-        provider: LogitechHIDPPDeviceMetadataProvider
-    ) -> UInt8? {
-        switch LogitechHIDPPDeviceMetadataProvider.receiverProtocolFamily(
-            vendorID: device.vendorID,
-            productID: device.productID,
-            transport: device.transport
-        ) {
-        case .classic, .lightspeed:
-            return provider.receiverSlot(for: device, using: receiverChannel)
-        case .bolt:
-            let discovery = provider.receiverPointingDeviceDiscovery(for: device, using: receiverChannel)
-            return provider.receiverSlot(for: device, identities: discovery.identities)
-        case nil:
-            return provider.receiverSlot(for: device, using: receiverChannel)
-        }
     }
 
     private static func readSupportedDPI(transport: LogitechHIDPPTransport, featureIndex: UInt8) -> [Int] {
