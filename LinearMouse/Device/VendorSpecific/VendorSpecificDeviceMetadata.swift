@@ -22,6 +22,22 @@ protocol VendorSpecificDeviceContext {
         timeout: TimeInterval,
         matching: @escaping (Data) -> Bool
     ) -> Data?
+
+    func performSynchronousOutputReportRequestOnce(
+        _ report: Data,
+        timeout: TimeInterval,
+        matching: @escaping (Data) -> Bool
+    ) -> Data?
+}
+
+extension VendorSpecificDeviceContext {
+    func performSynchronousOutputReportRequestOnce(
+        _ report: Data,
+        timeout: TimeInterval,
+        matching: @escaping (Data) -> Bool
+    ) -> Data? {
+        performSynchronousOutputReportRequest(report, timeout: timeout, matching: matching)
+    }
 }
 
 struct VendorSpecificDeviceMatcher {

@@ -44,7 +44,7 @@ struct LogitechHIDPPDeviceDPIController {
         self = directTarget
     }
 
-    private init(
+    init(
         transport: LogitechHIDPPTransport,
         featureIndex: UInt8,
         supportedDPI: [Int]
@@ -96,16 +96,20 @@ struct LogitechHIDPPDeviceDPIController {
 
     func setDPI(_ dpi: Int) -> Int? {
         let targetDPI = supportedDPI(nearestTo: dpi)
-        let response = transport.request(
+        let parameters = [0x00, UInt8((targetDPI >> 8) & 0xFF), UInt8(targetDPI & 0xFF)]
+
+        guard let response = transport.shortRequestOnce(
             featureIndex: featureIndex,
             function: Constants.setSensorDPIFunction,
-            parameters: [0x00, UInt8((targetDPI >> 8) & 0xFF), UInt8(targetDPI & 0xFF)]
-        )
-        if response != nil || currentDPI() == targetDPI {
-            return targetDPI
+            parameters: parameters
+        ) else {
+            return nil
         }
 
-        return nil
+        let echoedDPI = response.payload.count >= 3
+            ? Int(response.payload[1]) << 8 | Int(response.payload[2])
+            : 0
+        return echoedDPI == 0 || echoedDPI == targetDPI ? targetDPI : nil
     }
 
     func supportedDPI(nearestTo dpi: Int) -> Int {
