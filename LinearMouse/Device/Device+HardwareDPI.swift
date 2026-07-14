@@ -6,7 +6,7 @@ import Foundation
 extension Device {
     private static let hardwareDPIQueue = DispatchQueue(
         label: "app.linearmouse.hardware-dpi",
-        qos: .userInitiated
+        qos: .default
     )
 
     struct HardwareDPIInfo: Equatable {
