@@ -2106,8 +2106,8 @@ final class LogitechReprogrammableControlsMonitor {
         observeConfigurationChangesIfNeeded()
     }
 
-    func disable() {
-        state.disable()
+    func disable(completion: (() -> Void)? = nil) {
+        state.disable(completion: completion)
         releaseButtonIfNeeded()
         subscriptions.removeAll()
     }
@@ -2159,16 +2159,16 @@ final class LogitechReprogrammableControlsMonitor {
             let allControls = monitorTarget.controls
             let targetIdentity = monitorTarget.identity
             let targetName = targetIdentity?.name ?? device.productName ?? device.name
-            var pendingReportingRestoreByControlID = [UInt16: ReportingInfo]()
+            var pendingNativeReportingRestoreControlIDs = Set<UInt16>()
 
             state.setActiveNotificationEndpoint(monitorTarget.notificationEndpoint)
             monitorTarget.notificationEndpoint.enableNotifications()
             logAvailableControls(transport: transport, featureIndex: featureIndex, slot: slot, locationID: locationID)
 
             while shouldContinueRunning() {
-                if !pendingReportingRestoreByControlID.isEmpty {
-                    pendingReportingRestoreByControlID = restoreReportingState(
-                        pendingReportingRestoreByControlID,
+                if !pendingNativeReportingRestoreControlIDs.isEmpty {
+                    pendingNativeReportingRestoreControlIDs = Self.restoreNativeReporting(
+                        for: pendingNativeReportingRestoreControlIDs,
                         using: transport,
                         featureIndex: featureIndex,
                         locationID: locationID,
@@ -2193,11 +2193,11 @@ final class LogitechReprogrammableControlsMonitor {
                     LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.reservedVirtualButtonNumber
 
                 if !isRecording {
-                    let controlsToRestore = pendingReportingRestoreByControlID
-                        .filter { !desiredControlIDs.contains($0.key) }
+                    let controlsToRestore = pendingNativeReportingRestoreControlIDs
+                        .filter { !desiredControlIDs.contains($0) }
                     if !controlsToRestore.isEmpty {
-                        let failedRestoreByControlID = restoreReportingState(
-                            controlsToRestore,
+                        let failedRestoreControlIDs = Self.restoreNativeReporting(
+                            for: Set(controlsToRestore),
                             using: transport,
                             featureIndex: featureIndex,
                             locationID: locationID,
@@ -2205,11 +2205,8 @@ final class LogitechReprogrammableControlsMonitor {
                             reason: "apply native reporting to unmonitored controls"
                         )
 
-                        for controlID in Set(controlsToRestore.keys).subtracting(failedRestoreByControlID.keys) {
-                            pendingReportingRestoreByControlID.removeValue(forKey: controlID)
-                        }
-
-                        pendingReportingRestoreByControlID.merge(failedRestoreByControlID) { _, new in new }
+                        pendingNativeReportingRestoreControlIDs.subtract(controlsToRestore)
+                        pendingNativeReportingRestoreControlIDs.formUnion(failedRestoreControlIDs)
                     }
                 }
 
@@ -2239,7 +2236,7 @@ final class LogitechReprogrammableControlsMonitor {
 
                 let originalReportingByControlID = monitoredControls
                     .reduce(into: [UInt16: ReportingInfo]()) { result, control in
-                        guard let reportingInfo = readReportingInfo(
+                        guard let reportingInfo = Self.readReportingInfo(
                             for: control.controlID,
                             using: transport,
                             featureIndex: featureIndex
@@ -2296,7 +2293,7 @@ final class LogitechReprogrammableControlsMonitor {
 
                 let activeReportingByControlID = activeControlIDs
                     .reduce(into: [UInt16: ReportingInfo]()) { result, controlID in
-                        guard let reportingInfo = readReportingInfo(
+                        guard let reportingInfo = Self.readReportingInfo(
                             for: controlID,
                             using: transport,
                             featureIndex: featureIndex
@@ -2316,7 +2313,7 @@ final class LogitechReprogrammableControlsMonitor {
                         reservedVirtualButtonNumber,
                         control.taskID,
                         describeControlFlags(control.flags),
-                        describeReportingFlags(activeReporting?.flags ?? originalReporting?.flags ?? []),
+                        Self.describeReportingFlags(activeReporting?.flags ?? originalReporting?.flags ?? []),
                         activeReporting?.mappedControlID ?? originalReporting?.mappedControlID ?? control.controlID
                     )
                 }
@@ -2338,19 +2335,18 @@ final class LogitechReprogrammableControlsMonitor {
                 defer {
                     releaseButtonIfNeeded()
 
-                    let failedRestoreByControlID = restoreReportingState(
-                        originalReportingByControlID,
+                    let activeControlIDs = Set(activeControlIDs)
+                    let failedRestoreControlIDs = Self.restoreNativeReporting(
+                        for: activeControlIDs,
                         using: transport,
                         featureIndex: featureIndex,
                         locationID: locationID,
                         slot: slot,
-                        reason: "restore original reporting"
+                        reason: "restore native reporting"
                     )
 
-                    pendingReportingRestoreByControlID.merge(failedRestoreByControlID) { _, new in new }
-                    for controlID in Set(originalReportingByControlID.keys).subtracting(failedRestoreByControlID.keys) {
-                        pendingReportingRestoreByControlID.removeValue(forKey: controlID)
-                    }
+                    pendingNativeReportingRestoreControlIDs.subtract(activeControlIDs)
+                    pendingNativeReportingRestoreControlIDs.formUnion(failedRestoreControlIDs)
                 }
 
                 while shouldContinueRunning() {
@@ -2965,7 +2961,7 @@ final class LogitechReprogrammableControlsMonitor {
         )
     }
 
-    private func readReportingInfo(
+    private static func readReportingInfo(
         for controlID: UInt16,
         using transport: LogitechHIDPPTransport,
         featureIndex: UInt8
@@ -2994,7 +2990,7 @@ final class LogitechReprogrammableControlsMonitor {
         )
     }
 
-    private func setDiverted(
+    private static func setDiverted(
         _ enabled: Bool,
         for controlID: UInt16,
         using transport: LogitechHIDPPTransport,
@@ -3025,7 +3021,7 @@ final class LogitechReprogrammableControlsMonitor {
             )
 
             // Read back the reporting state to verify diversion actually took effect
-            guard let verifyReporting = readReportingInfo(
+            guard let verifyReporting = Self.readReportingInfo(
                 for: controlID, using: transport, featureIndex: featureIndex
             ) else {
                 os_log(
@@ -3061,7 +3057,7 @@ final class LogitechReprogrammableControlsMonitor {
             return false
         }
         for attempt in 1 ... maxAttempts {
-            if setDiverted(enabled, for: controlID, using: transport, featureIndex: featureIndex) {
+            if Self.setDiverted(enabled, for: controlID, using: transport, featureIndex: featureIndex) {
                 return true
             }
 
@@ -3079,30 +3075,26 @@ final class LogitechReprogrammableControlsMonitor {
         return false
     }
 
-    private func restoreReportingState(
-        _ reportingByControlID: [UInt16: ReportingInfo],
+    static func restoreNativeReporting(
+        for controlIDs: Set<UInt16>,
         using transport: LogitechHIDPPTransport,
         featureIndex: UInt8,
         locationID: Int,
         slot: UInt8,
         reason: StaticString
-    ) -> [UInt16: ReportingInfo] {
-        reportingByControlID.reduce(into: [UInt16: ReportingInfo]()) { result, entry in
-            let (controlID, reportingInfo) = entry
-            let shouldBeDiverted = reportingInfo.flags.contains(.diverted)
-
-            guard setDiverted(shouldBeDiverted, for: controlID, using: transport, featureIndex: featureIndex) else {
+    ) -> Set<UInt16> {
+        controlIDs.reduce(into: Set<UInt16>()) { result, controlID in
+            guard Self.setDiverted(false, for: controlID, using: transport, featureIndex: featureIndex) else {
                 os_log(
-                    "%{public}s failed: locationID=%{public}d slot=%{public}u cid=0x%{public}04X target=%{public}@",
+                    "%{public}s failed: locationID=%{public}d slot=%{public}u cid=0x%{public}04X",
                     log: Self.log,
                     type: .error,
                     String(describing: reason),
                     locationID,
                     slot,
-                    controlID,
-                    shouldBeDiverted ? "diverted" : "native"
+                    controlID
                 )
-                result[controlID] = reportingInfo
+                result.insert(controlID)
                 return
             }
 
@@ -3120,27 +3112,36 @@ final class LogitechReprogrammableControlsMonitor {
                     slot,
                     controlID
                 )
-                result[controlID] = reportingInfo
+                result.insert(controlID)
                 return
             }
 
             let isDiverted = currentReportingInfo.flags.contains(.diverted)
-            guard isDiverted == shouldBeDiverted else {
+            guard !isDiverted else {
                 os_log(
-                    "%{public}s verification mismatch: locationID=%{public}d slot=%{public}u cid=0x%{public}04X target=%{public}@ actual=%{public}@ reporting=%{public}@",
+                    "%{public}s verification mismatch: locationID=%{public}d slot=%{public}u cid=0x%{public}04X actual=diverted reporting=%{public}@",
                     log: Self.log,
                     type: .error,
                     String(describing: reason),
                     locationID,
                     slot,
                     controlID,
-                    shouldBeDiverted ? "diverted" : "native",
-                    isDiverted ? "diverted" : "native",
-                    describeReportingFlags(currentReportingInfo.flags)
+                    Self.describeReportingFlags(currentReportingInfo.flags)
                 )
-                result[controlID] = reportingInfo
+                result.insert(controlID)
                 return
             }
+
+            os_log(
+                "%{public}s succeeded: locationID=%{public}d slot=%{public}u cid=0x%{public}04X reporting=%{public}@",
+                log: Self.log,
+                type: .info,
+                String(describing: reason),
+                locationID,
+                slot,
+                controlID,
+                Self.describeReportingFlags(currentReportingInfo.flags)
+            )
         }
     }
 
@@ -3228,7 +3229,11 @@ final class LogitechReprogrammableControlsMonitor {
         }
 
         let summary = controls.map { control -> String in
-            let reporting = readReportingInfo(for: control.controlID, using: transport, featureIndex: featureIndex)
+            let reporting = Self.readReportingInfo(
+                for: control.controlID,
+                using: transport,
+                featureIndex: featureIndex
+            )
             return String(
                 format: "cid=0x%04X tid=0x%04X pos=%u group=%u mask=0x%02X flags=%@ reporting=%@ mapped=0x%04X",
                 control.controlID,
@@ -3237,7 +3242,7 @@ final class LogitechReprogrammableControlsMonitor {
                 control.group,
                 control.groupMask,
                 describeControlFlags(control.flags),
-                describeReportingFlags(reporting?.flags ?? []),
+                Self.describeReportingFlags(reporting?.flags ?? []),
                 reporting?.mappedControlID ?? control.controlID
             )
         }
@@ -3280,7 +3285,7 @@ final class LogitechReprogrammableControlsMonitor {
         return parts.isEmpty ? "none" : parts.joined(separator: ",")
     }
 
-    private func describeReportingFlags(_ flags: LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4
+    private static func describeReportingFlags(_ flags: LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4
         .ReportingFlags) -> String {
         var parts = [String]()
         if flags.contains(.diverted) {
@@ -3341,8 +3346,19 @@ struct LogitechSyntheticFallbackCoordinator {
     }
 }
 
-private final class LogitechReprogrammableControlsMonitorState {
+final class LogitechReprogrammableControlsMonitorState {
     private typealias WorkerResources = (Thread?, HIDPPNotificationHandling?, ObservationToken?)
+
+    private struct DisableResult {
+        let resources: WorkerResources
+        let immediateCompletion: (() -> Void)?
+    }
+
+    private struct WorkerStopResult {
+        let nextThread: Thread?
+        let reportObservationToken: ObservationToken?
+        let completions: [() -> Void]
+    }
 
     private let queue = DispatchQueue(label: "linearmouse.logitech-controls.state")
     private let reconfigurationSemaphore = DispatchSemaphore(value: 0)
@@ -3355,6 +3371,7 @@ private final class LogitechReprogrammableControlsMonitorState {
     private var needsForcedReconfiguration = false
     private var pressedButtons = Set<Int>()
     private var syntheticFallbackCoordinator = LogitechSyntheticFallbackCoordinator()
+    private var disableCompletions = [() -> Void]()
 
     var shouldContinueRunning: Bool {
         queue.sync { isEnabled } && !Thread.current.isCancelled
@@ -3379,25 +3396,35 @@ private final class LogitechReprogrammableControlsMonitorState {
         thread?.start()
     }
 
-    func disable() {
-        let (thread, endpoint, token) = queue.sync { () -> WorkerResources in
-            let resources = (workerThread, activeNotificationEndpoint, directDeviceReportObservationToken)
+    func disable(completion: (() -> Void)? = nil) {
+        let result = queue.sync { () -> DisableResult in
+            let hasWorker = workerThread != nil
+            if hasWorker, let completion {
+                disableCompletions.append(completion)
+            }
+
+            let result = DisableResult(
+                resources: (workerThread, activeNotificationEndpoint, directDeviceReportObservationToken),
+                immediateCompletion: hasWorker ? nil : completion
+            )
             isEnabled = false
             needsReconfiguration = false
             needsForcedReconfiguration = false
             activeNotificationEndpoint = nil
             directDeviceReportObservationToken = nil
-            return resources
+            return result
         }
 
         reconfigurationSemaphore.signal()
+        let (thread, endpoint, token) = result.resources
         endpoint?.wake()
         thread?.cancel()
         token?.cancel()
+        result.immediateCompletion?()
     }
 
     func workerDidStop(restartIfEnabled: Bool, makeWorkerThread: () -> Thread) {
-        let (thread, _, token) = queue.sync { () -> WorkerResources in
+        let result = queue.sync { () -> WorkerStopResult in
             workerThread = nil
             activeNotificationEndpoint = nil
             let reportObservationToken = directDeviceReportObservationToken
@@ -3407,18 +3434,29 @@ private final class LogitechReprogrammableControlsMonitorState {
                 isEnabled = false
                 needsReconfiguration = false
                 needsForcedReconfiguration = false
-                return (nil, nil, reportObservationToken)
+                let completions = disableCompletions
+                disableCompletions.removeAll()
+                return WorkerStopResult(
+                    nextThread: nil,
+                    reportObservationToken: reportObservationToken,
+                    completions: completions
+                )
             }
 
             needsReconfiguration = false
             needsForcedReconfiguration = false
             let nextThread = makeWorkerThread()
             workerThread = nextThread
-            return (nextThread, nil, reportObservationToken)
+            return WorkerStopResult(
+                nextThread: nextThread,
+                reportObservationToken: reportObservationToken,
+                completions: []
+            )
         }
 
-        token?.cancel()
-        thread?.start()
+        result.reportObservationToken?.cancel()
+        result.nextThread?.start()
+        result.completions.forEach { $0() }
     }
 
     func requestReconfiguration(forced: Bool = false) {
@@ -3479,7 +3517,7 @@ private final class LogitechReprogrammableControlsMonitorState {
         return (false, false, false)
     }
 
-    func setActiveNotificationEndpoint(_ endpoint: HIDPPNotificationHandling?) {
+    fileprivate func setActiveNotificationEndpoint(_ endpoint: HIDPPNotificationHandling?) {
         queue.sync {
             guard isEnabled else {
                 return

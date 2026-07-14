@@ -70,18 +70,52 @@ class DeviceManager: ObservableObject {
     private var activateApplicationObserver: Any?
 
     func stop() {
-        guard state == .running else {
+        guard beginStop() else {
             return
         }
-        state = .stopped
 
-        restorePointerSpeedToInitialValue()
-        manager.stopObservation()
+        finishStop()
+    }
+
+    func stopAfterRestoringLogitechControls(completion: @escaping () -> Void) {
+        guard beginStop() else {
+            DispatchQueue.main.async(execute: completion)
+            return
+        }
+
+        let group = DispatchGroup()
+        for device in pointerDeviceToDevice.values {
+            group.enter()
+            device.disableLogitechControlsMonitoring {
+                group.leave()
+            }
+        }
+
+        group.notify(queue: .main) { [self] in
+            finishStop()
+            completion()
+        }
+    }
+
+    private func beginStop() -> Bool {
+        guard state == .running else {
+            return false
+        }
+
+        state = .stopped
         subscriptions.removeAll()
 
         if let activateApplicationObserver {
             NSWorkspace.shared.notificationCenter.removeObserver(activateApplicationObserver)
+            self.activateApplicationObserver = nil
         }
+
+        return true
+    }
+
+    private func finishStop() {
+        restorePointerSpeedToInitialValue()
+        manager.stopObservation()
     }
 
     func start() {

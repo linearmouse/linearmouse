@@ -207,6 +207,17 @@ class Device {
         logitechReprogrammableControlsMonitor?.requestForcedReconfiguration()
     }
 
+    func disableLogitechControlsMonitoring(completion: @escaping () -> Void) {
+        logitechControlsMonitorSubscriptions.removeAll()
+
+        guard let logitechReprogrammableControlsMonitor else {
+            completion()
+            return
+        }
+
+        logitechReprogrammableControlsMonitor.disable(completion: completion)
+    }
+
     func prepareLogitechControlsRecording() {
         guard let logitechReprogrammableControlsMonitor else {
             return

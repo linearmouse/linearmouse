@@ -16,6 +16,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var subscriptions = Set<AnyCancellable>()
     private var sessionActive = true
     private var sleeping = false
+    private var terminationCleanupStarted = false
 
     func applicationDidFinishLaunching(_: Notification) {
         guard ProcessEnvironment.isRunningApp else {
@@ -54,8 +55,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return false
     }
 
-    func applicationWillTerminate(_: Notification) {
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         guard ProcessEnvironment.isRunningApp else {
+            return .terminateNow
+        }
+
+        guard !terminationCleanupStarted else {
+            return .terminateLater
+        }
+
+        terminationCleanupStarted = true
+        stopForApplicationTermination {
+            sender.reply(toApplicationShouldTerminate: true)
+        }
+        return .terminateLater
+    }
+
+    func applicationWillTerminate(_: Notification) {
+        guard ProcessEnvironment.isRunningApp, !terminationCleanupStarted else {
             return
         }
 
@@ -156,5 +173,11 @@ extension AppDelegate {
         BatteryDeviceMonitor.shared.disable()
         DeviceManager.shared.stop()
         GlobalEventTap.shared.stop()
+    }
+
+    func stopForApplicationTermination(completion: @escaping () -> Void) {
+        BatteryDeviceMonitor.shared.disable()
+        GlobalEventTap.shared.stop()
+        DeviceManager.shared.stopAfterRestoringLogitechControls(completion: completion)
     }
 }
