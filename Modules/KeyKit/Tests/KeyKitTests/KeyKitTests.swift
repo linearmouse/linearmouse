@@ -6,6 +6,35 @@ import Carbon
 import XCTest
 
 final class KeyKitTests: XCTestCase {
+    private static let commonShortcutKeys: [(Key, CGKeyCode)] = [
+        (.a, CGKeyCode(kVK_ANSI_A)),
+        (.c, CGKeyCode(kVK_ANSI_C)),
+        (.e, CGKeyCode(kVK_ANSI_E)),
+        (.k, CGKeyCode(kVK_ANSI_K)),
+        (.u, CGKeyCode(kVK_ANSI_U)),
+        (.v, CGKeyCode(kVK_ANSI_V)),
+        (.w, CGKeyCode(kVK_ANSI_W)),
+        (.x, CGKeyCode(kVK_ANSI_X)),
+        (.z, CGKeyCode(kVK_ANSI_Z))
+    ]
+
+    private static let nonCommandModifierSets: [CGEventFlags] = [
+        .maskShift,
+        .maskAlternate,
+        .maskControl,
+        [.maskControl, .maskShift],
+        [.maskAlternate, .maskShift],
+        [.maskControl, .maskAlternate]
+    ]
+
+    private static let commandModifierSets: [CGEventFlags] = [
+        .maskCommand,
+        [.maskCommand, .maskShift],
+        [.maskCommand, .maskAlternate],
+        [.maskCommand, .maskControl],
+        [.maskCommand, .maskShift, .maskAlternate, .maskControl]
+    ]
+
     private func characterMapping(
         inputSourceID: String,
         modifierKeyState: UInt32 = 0
@@ -43,11 +72,15 @@ final class KeyKitTests: XCTestCase {
         wait(for: [expectation], timeout: 5)
     }
 
-    func testKeyCodeResolverUsesCommandLayerForRussianLayout() throws {
+    func testKeyCodeResolverSupportsCommonModifierShortcutsInRussianLayout() throws {
         let russianMapping = try characterMapping(inputSourceID: "com.apple.keylayout.Russian")
         let russianCommandMapping = try characterMapping(
             inputSourceID: "com.apple.keylayout.Russian",
             modifierKeyState: UInt32(cmdKey >> 8)
+        )
+        let russianControlMapping = try characterMapping(
+            inputSourceID: "com.apple.keylayout.Russian",
+            modifierKeyState: UInt32(controlKey >> 8)
         )
 
         XCTAssertNil(russianMapping[Key.c.rawValue])
@@ -61,10 +94,29 @@ final class KeyKitTests: XCTestCase {
             commandModified ? [russianCommandMapping, russianMapping] : [russianMapping]
         }
 
-        XCTAssertNil(resolver.keyCode(for: .c))
-        XCTAssertNil(resolver.keyCode(for: .v))
-        XCTAssertEqual(resolver.keyCode(for: .c, modifiers: .maskCommand), 0x08)
-        XCTAssertEqual(resolver.keyCode(for: .v, modifiers: .maskCommand), 0x09)
+        for (key, ansiKeyCode) in Self.commonShortcutKeys {
+            XCTAssertEqual(resolver.key(from: ansiKeyCode), key)
+
+            for modifiers in Self.nonCommandModifierSets {
+                XCTAssertEqual(resolver.keyCode(for: key, modifiers: modifiers), ansiKeyCode)
+            }
+            for modifiers in Self.commandModifierSets {
+                XCTAssertEqual(resolver.keyCode(for: key, modifiers: modifiers), ansiKeyCode)
+            }
+
+            let asciiValue = try XCTUnwrap(key.rawValue.utf8.first)
+            let controlCharacter = String(UnicodeScalar(asciiValue & 0x1F))
+            XCTAssertEqual(russianControlMapping[controlCharacter], ansiKeyCode)
+        }
+    }
+
+    func testANSICharacterMappingMatchesBuiltInUSLayout() throws {
+        let usMapping = try characterMapping(inputSourceID: "com.apple.keylayout.US")
+
+        XCTAssertEqual(KeyCodeResolver.ansiCharacterMapping.count, 47)
+        for (character, keyCode) in KeyCodeResolver.ansiCharacterMapping {
+            XCTAssertEqual(usMapping[character], keyCode)
+        }
     }
 
     func testKeyCodeResolverDoesNotForceANSIPositionForDvorak() throws {
@@ -73,13 +125,25 @@ final class KeyKitTests: XCTestCase {
             inputSourceID: "com.apple.keylayout.Dvorak",
             modifierKeyState: UInt32(cmdKey >> 8)
         )
-        let ansiFallback = [Key.v.rawValue: CGKeyCode(kVK_ANSI_V)]
         let resolver = KeyCodeResolver { commandModified in
-            commandModified ? [dvorakCommandMapping, dvorakMapping, ansiFallback] : [dvorakMapping]
+            commandModified ? [dvorakCommandMapping, dvorakMapping] : [dvorakMapping]
         }
 
-        XCTAssertEqual(resolver.keyCode(for: .v, modifiers: .maskCommand), 0x2F)
-        XCTAssertNotEqual(resolver.keyCode(for: .v, modifiers: .maskCommand), CGKeyCode(kVK_ANSI_V))
+        let modifierSets: [CGEventFlags] = [
+            .maskShift,
+            .maskAlternate,
+            .maskControl,
+            .maskCommand,
+            [.maskCommand, .maskShift],
+            [.maskCommand, .maskAlternate],
+            [.maskCommand, .maskControl]
+        ]
+
+        for modifiers in modifierSets {
+            XCTAssertEqual(resolver.keyCode(for: .v, modifiers: modifiers), 0x2F)
+            XCTAssertNotEqual(resolver.keyCode(for: .v, modifiers: modifiers), CGKeyCode(kVK_ANSI_V))
+        }
+        XCTAssertEqual(resolver.key(from: 0x2F), .v)
     }
 
     func testPressKey() throws {

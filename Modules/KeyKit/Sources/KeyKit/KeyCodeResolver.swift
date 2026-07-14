@@ -63,8 +63,12 @@ public class KeyCodeResolver {
     }
 
     private func updateMapping() {
-        var newMapping = Self.mergeCharacterMappings(characterMappingsProvider(false))
-        var newCommandMapping = Self.mergeCharacterMappings(characterMappingsProvider(true))
+        var newMapping = Self.mergeCharacterMappings(
+            characterMappingsProvider(false) + [Self.ansiCharacterMapping]
+        )
+        var newCommandMapping = Self.mergeCharacterMappings(
+            characterMappingsProvider(true) + [Self.ansiCharacterMapping]
+        )
         var newReversedMapping: [CGKeyCode: Key] = [:]
 
         newMapping[Key.enter.rawValue] = 0x24
@@ -162,13 +166,7 @@ public class KeyCodeResolver {
             for: currentInputSource,
             modifierKeyState: commandModifierState
         )
-        var mappings = [currentCommandMapping, currentMapping]
-
-        if let asciiInputSource = TISCopyCurrentASCIICapableKeyboardLayoutInputSource()?.takeRetainedValue() {
-            mappings.append(characterMapping(for: asciiInputSource))
-        }
-
-        return mappings
+        return [currentCommandMapping, currentMapping]
     }
 
     static func characterMapping(
@@ -244,4 +242,58 @@ public class KeyCodeResolver {
     public func key(from keyCode: CGKeyCode) -> Key? {
         mappingLock.withLock { reversedMapping[keyCode] }
     }
+}
+
+extension KeyCodeResolver {
+    /// Keep Latin shortcuts usable when the active layout has no Latin representation.
+    /// Active-layout mappings are merged first so they always keep their own key positions.
+    static let ansiCharacterMapping: CharacterMapping = [
+        Key.a.rawValue: CGKeyCode(kVK_ANSI_A),
+        Key.b.rawValue: CGKeyCode(kVK_ANSI_B),
+        Key.c.rawValue: CGKeyCode(kVK_ANSI_C),
+        Key.d.rawValue: CGKeyCode(kVK_ANSI_D),
+        Key.e.rawValue: CGKeyCode(kVK_ANSI_E),
+        Key.f.rawValue: CGKeyCode(kVK_ANSI_F),
+        Key.g.rawValue: CGKeyCode(kVK_ANSI_G),
+        Key.h.rawValue: CGKeyCode(kVK_ANSI_H),
+        Key.i.rawValue: CGKeyCode(kVK_ANSI_I),
+        Key.j.rawValue: CGKeyCode(kVK_ANSI_J),
+        Key.k.rawValue: CGKeyCode(kVK_ANSI_K),
+        Key.l.rawValue: CGKeyCode(kVK_ANSI_L),
+        Key.m.rawValue: CGKeyCode(kVK_ANSI_M),
+        Key.n.rawValue: CGKeyCode(kVK_ANSI_N),
+        Key.o.rawValue: CGKeyCode(kVK_ANSI_O),
+        Key.p.rawValue: CGKeyCode(kVK_ANSI_P),
+        Key.q.rawValue: CGKeyCode(kVK_ANSI_Q),
+        Key.r.rawValue: CGKeyCode(kVK_ANSI_R),
+        Key.s.rawValue: CGKeyCode(kVK_ANSI_S),
+        Key.t.rawValue: CGKeyCode(kVK_ANSI_T),
+        Key.u.rawValue: CGKeyCode(kVK_ANSI_U),
+        Key.v.rawValue: CGKeyCode(kVK_ANSI_V),
+        Key.w.rawValue: CGKeyCode(kVK_ANSI_W),
+        Key.x.rawValue: CGKeyCode(kVK_ANSI_X),
+        Key.y.rawValue: CGKeyCode(kVK_ANSI_Y),
+        Key.z.rawValue: CGKeyCode(kVK_ANSI_Z),
+        Key.zero.rawValue: CGKeyCode(kVK_ANSI_0),
+        Key.one.rawValue: CGKeyCode(kVK_ANSI_1),
+        Key.two.rawValue: CGKeyCode(kVK_ANSI_2),
+        Key.three.rawValue: CGKeyCode(kVK_ANSI_3),
+        Key.four.rawValue: CGKeyCode(kVK_ANSI_4),
+        Key.five.rawValue: CGKeyCode(kVK_ANSI_5),
+        Key.six.rawValue: CGKeyCode(kVK_ANSI_6),
+        Key.seven.rawValue: CGKeyCode(kVK_ANSI_7),
+        Key.eight.rawValue: CGKeyCode(kVK_ANSI_8),
+        Key.nine.rawValue: CGKeyCode(kVK_ANSI_9),
+        Key.equal.rawValue: CGKeyCode(kVK_ANSI_Equal),
+        Key.minus.rawValue: CGKeyCode(kVK_ANSI_Minus),
+        Key.semicolon.rawValue: CGKeyCode(kVK_ANSI_Semicolon),
+        Key.quote.rawValue: CGKeyCode(kVK_ANSI_Quote),
+        Key.comma.rawValue: CGKeyCode(kVK_ANSI_Comma),
+        Key.period.rawValue: CGKeyCode(kVK_ANSI_Period),
+        Key.slash.rawValue: CGKeyCode(kVK_ANSI_Slash),
+        Key.backslash.rawValue: CGKeyCode(kVK_ANSI_Backslash),
+        Key.backquote.rawValue: CGKeyCode(kVK_ANSI_Grave),
+        Key.backetLeft.rawValue: CGKeyCode(kVK_ANSI_LeftBracket),
+        Key.backetRight.rawValue: CGKeyCode(kVK_ANSI_RightBracket)
+    ]
 }
