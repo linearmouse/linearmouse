@@ -1,19 +1,37 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
-import AppKit
 import Carbon
 import Combine
+import CoreGraphics
 import Foundation
 
 /// Keyboard layout-independent key code resolver.
 public class KeyCodeResolver {
+    typealias CharacterMapping = [String: CGKeyCode]
+
     private var subscriptions = Set<AnyCancellable>()
+    private let characterMappingsProvider: (_ commandModified: Bool) -> [CharacterMapping]
     private let mappingLock = NSLock()
-    private var mapping: [String: CGKeyCode] = [:]
+    private var mapping: CharacterMapping = [:]
+    private var commandMapping: CharacterMapping = [:]
     private var reversedMapping: [CGKeyCode: Key] = [:]
 
     public init() {
+        characterMappingsProvider = { commandModified in
+            Self.currentCharacterMappings(commandModified: commandModified)
+        }
+
+        startObservingInputSourceChanges()
+        initializeMapping()
+    }
+
+    init(characterMappingsProvider: @escaping (_ commandModified: Bool) -> [CharacterMapping]) {
+        self.characterMappingsProvider = characterMappingsProvider
+        initializeMapping()
+    }
+
+    private func startObservingInputSourceChanges() {
         DistributedNotificationCenter.default
             .publisher(for: .init(kTISNotifyEnabledKeyboardInputSourcesChanged as String))
             .sink { [weak self] _ in
@@ -27,8 +45,10 @@ public class KeyCodeResolver {
                 self?.scheduleMappingUpdate(after: 0.1)
             }
             .store(in: &subscriptions)
+    }
 
-        // `NSEvent.characters` below asserts on the main thread.
+    private func initializeMapping() {
+        // Text Input Source Services is not thread-safe.
         if Thread.isMainThread {
             updateMapping()
         } else {
@@ -43,28 +63,9 @@ public class KeyCodeResolver {
     }
 
     private func updateMapping() {
-        var newMapping: [String: CGKeyCode] = [:]
+        var newMapping = Self.mergeCharacterMappings(characterMappingsProvider(false))
+        var newCommandMapping = Self.mergeCharacterMappings(characterMappingsProvider(true))
         var newReversedMapping: [CGKeyCode: Key] = [:]
-
-        for keyCode: CGKeyCode in 0 ..< 128 {
-            guard let cgEvent = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: true) else {
-                continue
-            }
-            cgEvent.flags = []
-            guard let nsEvent = NSEvent(cgEvent: cgEvent) else {
-                continue
-            }
-            guard nsEvent.type == .keyDown else {
-                continue
-            }
-            guard let characters = nsEvent.characters, characters.count == 1 else {
-                continue
-            }
-            guard newMapping[characters] == nil else {
-                continue
-            }
-            newMapping[characters] = keyCode
-        }
 
         newMapping[Key.enter.rawValue] = 0x24
         newMapping[Key.tab.rawValue] = 0x30
@@ -127,6 +128,11 @@ public class KeyCodeResolver {
         newMapping[Key.numpad7.rawValue] = 0x59
         newMapping[Key.numpad8.rawValue] = 0x5B
         newMapping[Key.numpad9.rawValue] = 0x5C
+
+        // Command-modified characters from the active layout take priority. The regular
+        // mapping fills layout-independent keys and any characters without a Command variant.
+        newCommandMapping = Self.mergeCharacterMappings([newCommandMapping, newMapping])
+
         for (keyString, keyCode) in newMapping {
             guard let key = Key(rawValue: keyString) else {
                 continue
@@ -136,12 +142,103 @@ public class KeyCodeResolver {
 
         mappingLock.withLock {
             mapping = newMapping
+            commandMapping = newCommandMapping
             reversedMapping = newReversedMapping
         }
     }
 
-    public func keyCode(for key: Key) -> CGKeyCode? {
-        mappingLock.withLock { mapping[key.rawValue] }
+    private static func currentCharacterMappings(commandModified: Bool) -> [CharacterMapping] {
+        guard let currentInputSource = TISCopyCurrentKeyboardLayoutInputSource()?.takeRetainedValue() else {
+            return []
+        }
+
+        let currentMapping = characterMapping(for: currentInputSource)
+        guard commandModified else {
+            return [currentMapping]
+        }
+
+        let commandModifierState = UInt32(cmdKey >> 8)
+        let currentCommandMapping = characterMapping(
+            for: currentInputSource,
+            modifierKeyState: commandModifierState
+        )
+        var mappings = [currentCommandMapping, currentMapping]
+
+        if let asciiInputSource = TISCopyCurrentASCIICapableKeyboardLayoutInputSource()?.takeRetainedValue() {
+            mappings.append(characterMapping(for: asciiInputSource))
+        }
+
+        return mappings
+    }
+
+    static func characterMapping(
+        for inputSource: TISInputSource,
+        modifierKeyState: UInt32 = 0
+    ) -> CharacterMapping {
+        guard let layoutDataPointer = TISGetInputSourceProperty(inputSource, kTISPropertyUnicodeKeyLayoutData) else {
+            return [:]
+        }
+
+        let layoutData = unsafeBitCast(layoutDataPointer, to: CFData.self)
+        guard let layoutBytes = CFDataGetBytePtr(layoutData) else {
+            return [:]
+        }
+
+        let keyboardType = UInt32(LMGetKbdType())
+        var mapping: CharacterMapping = [:]
+
+        for keyCode: CGKeyCode in 0 ..< 128 {
+            var deadKeyState: UInt32 = 0
+            var length = 0
+            var characters = [UniChar](repeating: 0, count: 4)
+
+            let status = layoutBytes.withMemoryRebound(to: UCKeyboardLayout.self, capacity: 1) { keyboardLayout in
+                UCKeyTranslate(
+                    keyboardLayout,
+                    keyCode,
+                    UInt16(kUCKeyActionDown),
+                    modifierKeyState,
+                    keyboardType,
+                    OptionBits(kUCKeyTranslateNoDeadKeysBit),
+                    &deadKeyState,
+                    characters.count,
+                    &length,
+                    &characters
+                )
+            }
+
+            guard status == noErr, length == 1 else {
+                continue
+            }
+
+            let character = String(utf16CodeUnits: characters, count: length)
+            if mapping[character] == nil {
+                mapping[character] = keyCode
+            }
+        }
+
+        return mapping
+    }
+
+    static func mergeCharacterMappings(_ mappings: [CharacterMapping]) -> CharacterMapping {
+        var result: CharacterMapping = [:]
+
+        for mapping in mappings {
+            for (character, keyCode) in mapping where result[character] == nil {
+                result[character] = keyCode
+            }
+        }
+
+        return result
+    }
+
+    public func keyCode(for key: Key, modifiers: CGEventFlags = []) -> CGKeyCode? {
+        mappingLock.withLock {
+            if modifiers.contains(.maskCommand) {
+                return commandMapping[key.rawValue]
+            }
+            return mapping[key.rawValue]
+        }
     }
 
     public func key(from keyCode: CGKeyCode) -> Key? {
