@@ -1154,7 +1154,8 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         maxOutputReportSize = Self.getProperty("MaxOutputReportSize", from: device)
         maxFeatureReportSize = Self.getProperty("MaxFeatureReportSize", from: device)
         ioQueue = DispatchQueue(
-            label: "com.lujjjh.dev.LinearMouse.LogitechReceiverChannel.\(locationID ?? 0)"
+            label: "app.linearmouse.logitech-receiver.\(locationID ?? 0)",
+            qos: .default
         )
         inputReportBufferLength = max(
             maxInputReportSize ?? LogitechHIDPPDeviceMetadataProvider.Constants.longReportLength,

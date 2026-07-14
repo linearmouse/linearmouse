@@ -11,7 +11,7 @@ extension Device {
 
     private static let highResolutionWheelQueue = DispatchQueue(
         label: "app.linearmouse.high-resolution-wheel",
-        qos: .userInitiated
+        qos: .default
     )
 
     struct HighResolutionWheelInfo: Equatable {
