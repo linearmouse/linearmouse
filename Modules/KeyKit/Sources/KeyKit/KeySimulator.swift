@@ -63,7 +63,7 @@ public class KeySimulator: KeySimulating {
             break
         }
 
-        guard let keyCode = keyCodeResolver.keyCode(for: key) else {
+        guard let keyCode = keyCodeResolver.keyCode(for: key, modifiers: flags) else {
             throw KeySimulatorError.unsupportedKey
         }
 
