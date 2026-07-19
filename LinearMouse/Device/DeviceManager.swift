@@ -519,6 +519,7 @@ class DeviceManager: ObservableObject {
         if hasReconnectedDevice {
             for (_, device) in pointerDeviceToDevice where device.pointerDevice.locationID == locationID {
                 device.requestLogitechControlsForcedReconfiguration()
+                updateHardwareDPI(for: device)
             }
         }
     }
