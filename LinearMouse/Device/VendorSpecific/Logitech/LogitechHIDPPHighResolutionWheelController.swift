@@ -16,6 +16,11 @@ struct LogitechHIDPPHighResolutionWheelController {
         let flags: UInt8
     }
 
+    struct ApplyResult: Equatable {
+        let previousEnabled: Bool
+        let appliedEnabled: Bool
+    }
+
     private let transport: LogitechHIDPPTransport
     private let featureIndex: UInt8
 
@@ -52,13 +57,17 @@ struct LogitechHIDPPHighResolutionWheelController {
     }
 
     func setHighResolutionWheelEnabled(_ enabled: Bool) -> Bool? {
+        applyHighResolutionWheelEnabled(enabled)?.appliedEnabled
+    }
+
+    func applyHighResolutionWheelEnabled(_ enabled: Bool) -> ApplyResult? {
         guard var mode = readMode() else {
             return nil
         }
 
         let currentlyEnabled = mode & Constants.highResolutionModeBit != 0
         guard currentlyEnabled != enabled else {
-            return enabled
+            return ApplyResult(previousEnabled: currentlyEnabled, appliedEnabled: enabled)
         }
 
         if enabled {
@@ -75,7 +84,7 @@ struct LogitechHIDPPHighResolutionWheelController {
             return nil
         }
 
-        return enabled
+        return ApplyResult(previousEnabled: currentlyEnabled, appliedEnabled: enabled)
     }
 
     private func readMode() -> UInt8? {

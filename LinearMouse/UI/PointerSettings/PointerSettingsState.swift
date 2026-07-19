@@ -195,6 +195,14 @@ extension PointerSettingsState {
                 return
             }
 
+            guard self.pointerHardwareDPITargetDPI == requestedDPI else {
+                self.pointerHardwareDPIApplying = false
+                if self.pointerHardwareDPIApplyWorkItem == nil {
+                    self.applyPointerHardwareDPITargetDPI()
+                }
+                return
+            }
+
             if !result.info.supportsAdjustableDPI {
                 self.pointerHardwareDPIStatusMessage = "Unsupported device"
             } else if let targetDPI = result.targetDPI {

@@ -4,11 +4,6 @@
 import Foundation
 
 extension Device {
-    private enum HardwareDPIApplyRetry {
-        static let maxAttempts = 8
-        static let delay: TimeInterval = 5
-    }
-
     private static let hardwareDPIQueue = DispatchQueue(
         label: "app.linearmouse.hardware-dpi",
         qos: .default
@@ -41,12 +36,12 @@ extension Device {
             return
         }
 
-        guard attempt < HardwareDPIApplyRetry.maxAttempts else {
+        guard let retryDelay = LogitechDeviceConfigurationRetryPolicy.delay(afterAttempt: attempt) else {
             return
         }
 
         Self.hardwareDPIQueue
-            .asyncAfter(deadline: .now() + HardwareDPIApplyRetry.delay) { [weak self] in
+            .asyncAfter(deadline: .now() + retryDelay) { [weak self] in
                 self?.applyConfiguredHardwareDPI(dpi, requestID: requestID, attempt: attempt + 1)
             }
     }
@@ -64,14 +59,29 @@ extension Device {
     func applyHardwareDPI(_ dpi: Int, completion: @escaping (HardwareDPIApplyResult) -> Void) {
         cancelHardwareDPIApplyRequests()
         Self.hardwareDPIQueue.async {
-            let targetDPI = self.applyHardwareDPISynchronously(dpi)
-            let info = self.hardwareDPIInfo
+            let result: HardwareDPIApplyResult
+            if !self.isRemoved, let controller = self.logitechDPIController {
+                let targetDPI = self.applyHardwareDPISynchronously(dpi, controller: controller)
+                self.hardwareDPILock.lock()
+                let currentDPI = targetDPI ?? self.cachedHardwareDPI
+                self.hardwareDPILock.unlock()
+                result = HardwareDPIApplyResult(
+                    targetDPI: targetDPI,
+                    info: HardwareDPIInfo(
+                        supportsAdjustableDPI: true,
+                        currentDPI: currentDPI,
+                        dpiRange: controller.dpiRange
+                    )
+                )
+            } else {
+                result = HardwareDPIApplyResult(
+                    targetDPI: nil,
+                    info: self.unsupportedHardwareDPIInfo
+                )
+            }
 
             DispatchQueue.main.async {
-                completion(HardwareDPIApplyResult(
-                    targetDPI: targetDPI,
-                    info: info
-                ))
+                completion(result)
             }
         }
     }
@@ -89,9 +99,16 @@ extension Device {
             return unsupportedHardwareDPIInfo
         }
 
+        let currentDPI = controller.currentDPI()
+        if let currentDPI {
+            hardwareDPILock.lock()
+            cachedHardwareDPI = currentDPI
+            hardwareDPILock.unlock()
+        }
+
         return HardwareDPIInfo(
             supportsAdjustableDPI: true,
-            currentDPI: controller.currentDPI(),
+            currentDPI: currentDPI,
             dpiRange: controller.dpiRange
         )
     }
@@ -102,6 +119,13 @@ extension Device {
             return nil
         }
 
+        return applyHardwareDPISynchronously(dpi, controller: controller)
+    }
+
+    private func applyHardwareDPISynchronously(
+        _ dpi: Int,
+        controller: LogitechHIDPPDeviceDPIController
+    ) -> Int? {
         let targetDPI = controller.supportedDPI(nearestTo: dpi)
         guard controller.canRepresentDPI(targetDPI) else {
             return nil
@@ -111,13 +135,11 @@ extension Device {
         let cachedDPI = cachedHardwareDPI
         hardwareDPILock.unlock()
 
-        if cachedDPI == targetDPI,
-           controller.currentDPI() == targetDPI {
+        if cachedDPI == targetDPI {
             return targetDPI
         }
 
         guard let appliedDPI = controller.setDPI(targetDPI) else {
-            invalidateLogitechDPIController()
             return nil
         }
 
@@ -133,6 +155,20 @@ extension Device {
         hardwareDPILock.lock()
         cachedHardwareDPI = nil
         hardwareDPILock.unlock()
+    }
+
+    func prepareHardwareDPIForReconnect() {
+        cancelHardwareDPIApplyRequests()
+        Self.hardwareDPIQueue.async { [weak self] in
+            guard let self else {
+                return
+            }
+
+            hardwareDPILock.lock()
+            cachedHardwareDPI = nil
+            hardwareDPILock.unlock()
+            invalidateLogitechDPIController()
+        }
     }
 
     private func nextHardwareDPIApplyRequestID() -> UUID {

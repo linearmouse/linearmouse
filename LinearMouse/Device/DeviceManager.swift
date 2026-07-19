@@ -519,7 +519,10 @@ class DeviceManager: ObservableObject {
         if hasReconnectedDevice {
             for (_, device) in pointerDeviceToDevice where device.pointerDevice.locationID == locationID {
                 device.requestLogitechControlsForcedReconfiguration()
+                device.prepareHardwareDPIForReconnect()
+                device.prepareHighResolutionWheelForReconnect()
                 updateHardwareDPI(for: device)
+                updateHighResolutionWheel(for: device)
             }
         }
     }

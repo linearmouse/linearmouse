@@ -119,10 +119,13 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
         XCTAssertEqual(controller?.currentDPI(), 800)
         XCTAssertEqual(controller?.dpiRange, 800 ... 1600)
         XCTAssertEqual(controller?.dpiStep, 800)
+        let requestCount = device.outputReportRequestCount
         XCTAssertEqual(controller?.setDPI(1500), 1600)
+        XCTAssertEqual(device.outputReportRequestCount, requestCount + 1)
+        XCTAssertEqual(device.outputReportRequestOnceCount, 0)
         XCTAssertEqual(
-            device.sentReports.last.map(Array.init),
-            Optional([0x10, 0xFF, 0x05, 0x38, 0x00, 0x06, 0x40] as [UInt8])
+            device.sentReports.last.map { Array($0.prefix(7)) },
+            Optional([0x11, 0xFF, 0x05, 0x38, 0x00, 0x06, 0x40] as [UInt8])
         )
     }
 
@@ -249,7 +252,11 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
 
         XCTAssertNil(controller?.setDPI(1600))
         XCTAssertEqual(device.sentReports.count, requestCount + 1)
-        XCTAssertEqual(device.sentReports.last.map(Array.init), [0x10, 0xFF, 0x05, 0x38, 0x00, 0x06, 0x40])
+        XCTAssertEqual(device.outputReportRequestOnceCount, 0)
+        XCTAssertEqual(
+            device.sentReports.last.map { Array($0.prefix(7)) },
+            [0x11, 0xFF, 0x05, 0x38, 0x00, 0x06, 0x40]
+        )
     }
 
     func testSetDPISendsOneShortRequestAndWaitsForAcknowledgement() {
