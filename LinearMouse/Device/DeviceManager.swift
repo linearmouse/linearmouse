@@ -435,7 +435,14 @@ class DeviceManager: ObservableObject {
             reason
         )
 
+        // A Logitech mouse can retain hardware settings while switching between receiver and
+        // Bluetooth connections. Discard connection-local caches before applying the newly active
+        // connection's configuration.
+        device.prepareHardwareDPIForReconnect()
+        device.prepareHighResolutionWheelForReconnect()
         updatePointerSpeed()
+        updateHardwareDPI(for: device)
+        updateHighResolutionWheel(for: device)
     }
 
     func requestLogitechControlsForcedReconfiguration() {

@@ -315,7 +315,7 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
         XCTAssertEqual(device.outputReportRequestCount, 0)
     }
 
-    func testSetDPIFailsWhenAcknowledgementEchoesDifferentDPI() {
+    func testSetDPIAcceptsValidAcknowledgementWithoutAssumingPayloadShape() {
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,
             productID: 0xC548,
@@ -342,8 +342,90 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
             )
         }
 
-        XCTAssertNil(controller?.setDPI(1600))
+        XCTAssertEqual(controller?.setDPI(1600), 1600)
         XCTAssertEqual(device.outputReportRequestOnceCount, 1)
+    }
+
+    func testTransportRetriesOnlyExplicitHIDPP20BusyResponses() {
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xB015,
+            transport: PointerDeviceTransportName.bluetoothLowEnergy,
+            maxInputReportSize: 20,
+            maxOutputReportSize: 20
+        )
+        var attempts = 0
+        device.responseProvider = { report in
+            attempts += 1
+            let bytes = [UInt8](report)
+            if attempts < 3 {
+                return Self.hidpp20ErrorReply(
+                    deviceIndex: bytes[1],
+                    featureIndex: bytes[2],
+                    address: bytes[3],
+                    error: 0x08
+                )
+            }
+
+            return Self.hidppLongReply(featureIndex: bytes[2], address: bytes[3], payload: [0x00])
+        }
+
+        let response = LogitechHIDPPTransport(device: device, deviceIndex: nil)?.request(
+            featureIndex: 0x05,
+            function: 0x03,
+            parameters: [0x00, 0x06, 0x40]
+        )
+
+        XCTAssertNotNil(response)
+        XCTAssertEqual(attempts, 3)
+        XCTAssertEqual(device.outputReportRequestCount, 3)
+    }
+
+    func testTransportDoesNotRetryTimeout() {
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xB015,
+            transport: PointerDeviceTransportName.bluetoothLowEnergy,
+            maxInputReportSize: 20,
+            maxOutputReportSize: 20
+        )
+
+        let response = LogitechHIDPPTransport(device: device, deviceIndex: nil)?.request(
+            featureIndex: 0x05,
+            function: 0x03,
+            parameters: [0x00, 0x06, 0x40]
+        )
+
+        XCTAssertNil(response)
+        XCTAssertEqual(device.outputReportRequestCount, 1)
+    }
+
+    func testTransportDoesNotRetryNonBusyProtocolError() {
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xB015,
+            transport: PointerDeviceTransportName.bluetoothLowEnergy,
+            maxInputReportSize: 20,
+            maxOutputReportSize: 20
+        )
+        device.responseProvider = { report in
+            let bytes = [UInt8](report)
+            return Self.hidpp20ErrorReply(
+                deviceIndex: bytes[1],
+                featureIndex: bytes[2],
+                address: bytes[3],
+                error: 0x01
+            )
+        }
+
+        let response = LogitechHIDPPTransport(device: device, deviceIndex: nil)?.request(
+            featureIndex: 0x05,
+            function: 0x03,
+            parameters: [0x00, 0x06, 0x40]
+        )
+
+        XCTAssertNil(response)
+        XCTAssertEqual(device.outputReportRequestCount, 1)
     }
 
     func testCurrentDPIUsesSupportedDefaultWhenCurrentBytesAreNotSupported() {
@@ -445,6 +527,22 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
         for (index, byte) in payload.prefix(3).enumerated() {
             bytes[index + 4] = byte
         }
+        return Data(bytes)
+    }
+
+    private static func hidpp20ErrorReply(
+        deviceIndex: UInt8,
+        featureIndex: UInt8,
+        address: UInt8,
+        error: UInt8
+    ) -> Data {
+        var bytes = [UInt8](repeating: 0, count: 20)
+        bytes[0] = 0x11
+        bytes[1] = deviceIndex
+        bytes[2] = 0xFF
+        bytes[3] = featureIndex
+        bytes[4] = address
+        bytes[5] = error
         return Data(bytes)
     }
 }

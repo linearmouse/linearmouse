@@ -84,9 +84,17 @@ class Device {
 
     private let initialPointerResolution: Double
     let hardwareDPILock = NSLock()
+    lazy var hardwareDPIQueue = DispatchQueue(
+        label: "app.linearmouse.hardware-dpi.\(id)",
+        qos: .default
+    )
     var cachedHardwareDPI: Int?
     var hardwareDPIApplyRequestID = UUID()
     let highResolutionWheelLock = NSLock()
+    lazy var highResolutionWheelQueue = DispatchQueue(
+        label: "app.linearmouse.high-resolution-wheel.\(id)",
+        qos: .default
+    )
     var cachedHighResolutionWheelEnabled: Bool?
     var cachedHighResolutionWheelMultiplier: Int?
     var initialHighResolutionWheelEnabled: Bool?

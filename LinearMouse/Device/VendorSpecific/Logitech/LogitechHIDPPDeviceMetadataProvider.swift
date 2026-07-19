@@ -857,6 +857,14 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
 }
 
 struct LogitechHIDPPTransport {
+    private enum ResponseResult {
+        case response(LogitechHIDPPDeviceMetadataProvider.Response)
+        case busy
+        case failure
+    }
+
+    private static let maximumBusyAttempts = 3
+
     private let device: VendorSpecificDeviceContext
     private let reportID: UInt8
     private let reportLength: Int
@@ -899,7 +907,7 @@ struct LogitechHIDPPTransport {
         function: UInt8,
         parameters: [UInt8]
     ) -> LogitechHIDPPDeviceMetadataProvider.Response? {
-        response(
+        request(
             featureIndex: featureIndex,
             function: function,
             parameters: parameters,
@@ -908,12 +916,12 @@ struct LogitechHIDPPTransport {
         )
     }
 
-    func shortRequestOnce(
+    func shortRequest(
         featureIndex: UInt8,
         function: UInt8,
         parameters: [UInt8]
     ) -> LogitechHIDPPDeviceMetadataProvider.Response? {
-        response(
+        request(
             featureIndex: featureIndex,
             function: function,
             parameters: parameters,
@@ -922,13 +930,40 @@ struct LogitechHIDPPTransport {
         )
     }
 
-    private func response(
+    private func request(
         featureIndex: UInt8,
         function: UInt8,
         parameters: [UInt8],
         usesShortReport: Bool,
         performsSingleTransaction: Bool
     ) -> LogitechHIDPPDeviceMetadataProvider.Response? {
+        for attempt in 1 ... Self.maximumBusyAttempts {
+            switch response(
+                featureIndex: featureIndex,
+                function: function,
+                parameters: parameters,
+                usesShortReport: usesShortReport,
+                performsSingleTransaction: performsSingleTransaction
+            ) {
+            case let .response(response):
+                return response
+            case .busy where attempt < Self.maximumBusyAttempts:
+                continue
+            case .busy, .failure:
+                return nil
+            }
+        }
+
+        return nil
+    }
+
+    private func response(
+        featureIndex: UInt8,
+        function: UInt8,
+        parameters: [UInt8],
+        usesShortReport: Bool,
+        performsSingleTransaction: Bool
+    ) -> ResponseResult {
         let address = address(for: function)
         let report = makeReport(
             featureIndex: featureIndex,
@@ -969,15 +1004,20 @@ struct LogitechHIDPPTransport {
         }
 
         guard let response else {
-            return nil
+            return .failure
         }
 
         let reply = [UInt8](response)
-        guard reply.count >= 4, reply[2] != 0xFF else {
-            return nil
+        guard reply.count >= 4 else {
+            return .failure
         }
 
-        return .init(payload: Array(reply.dropFirst(4)))
+        if reply[2] == 0xFF {
+            let hidpp20BusyError: UInt8 = 0x08
+            return reply.count >= 6 && reply[5] == hidpp20BusyError ? .busy : .failure
+        }
+
+        return .response(.init(payload: Array(reply.dropFirst(4))))
     }
 
     private func address(for function: UInt8) -> UInt8 {

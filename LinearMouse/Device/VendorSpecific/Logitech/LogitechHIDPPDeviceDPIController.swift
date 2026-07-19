@@ -88,7 +88,7 @@ struct LogitechHIDPPDeviceDPIController {
         let parameters = [0x00, UInt8((targetDPI >> 8) & 0xFF), UInt8(targetDPI & 0xFF)]
 
         let response = if transport.isReceiverRoutedDevice {
-            transport.shortRequestOnce(
+            transport.shortRequest(
                 featureIndex: featureIndex,
                 function: Constants.setSensorDPIFunction,
                 parameters: parameters
@@ -101,14 +101,7 @@ struct LogitechHIDPPDeviceDPIController {
             )
         }
 
-        guard let response else {
-            return nil
-        }
-
-        let echoedDPI = response.payload.count >= 3
-            ? Int(response.payload[1]) << 8 | Int(response.payload[2])
-            : 0
-        return echoedDPI == 0 || echoedDPI == targetDPI ? targetDPI : nil
+        return response == nil ? nil : targetDPI
     }
 
     func supportedDPI(nearestTo dpi: Int) -> Int {

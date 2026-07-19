@@ -213,12 +213,20 @@ extension PointerSettingsState {
                 self.schemeState.deviceScheme = deviceScheme
                 self.pointerHardwareDPIStatusMessage = nil
             } else {
+                if let currentDPI = Self.displayedHardwareDPI(after: result) {
+                    self.pointerHardwareDPITargetDPI = currentDPI
+                }
+                self.pointerHardwareDPITargetDPIEdited = false
                 self.pointerHardwareDPIStatusMessage = "Unable to apply DPI"
             }
 
             self.pointerHardwareDPIInfo = result.info
             self.pointerHardwareDPIApplying = false
         }
+    }
+
+    static func displayedHardwareDPI(after result: Device.HardwareDPIApplyResult) -> Int? {
+        result.targetDPI ?? result.info.currentDPI
     }
 
     private func resetPointerHardwareDPIState() {
@@ -230,6 +238,17 @@ extension PointerSettingsState {
     }
 
     func updatePointerHardwareDPITargetDPI(_ dpi: Int) {
+        updatePointerHardwareDPITargetDPI(
+            dpi,
+            applyDelay: Self.pointerHardwareDPIApplyDebounceInterval
+        )
+    }
+
+    func commitPointerHardwareDPITargetDPI(_ dpi: Int) {
+        updatePointerHardwareDPITargetDPI(dpi, applyDelay: 0)
+    }
+
+    private func updatePointerHardwareDPITargetDPI(_ dpi: Int, applyDelay: TimeInterval) {
         pointerHardwareDPITargetDPI = dpi
         pointerHardwareDPITargetDPIEdited = true
         pointerHardwareDPIStatusMessage = nil
@@ -249,7 +268,7 @@ extension PointerSettingsState {
         }
         pointerHardwareDPIApplyWorkItem = workItem
         DispatchQueue.main.asyncAfter(
-            deadline: .now() + Self.pointerHardwareDPIApplyDebounceInterval,
+            deadline: .now() + applyDelay,
             execute: workItem
         )
     }

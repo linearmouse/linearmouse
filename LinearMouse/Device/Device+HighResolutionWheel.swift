@@ -4,11 +4,6 @@
 import Foundation
 
 extension Device {
-    private static let highResolutionWheelQueue = DispatchQueue(
-        label: "app.linearmouse.high-resolution-wheel",
-        qos: .default
-    )
-
     struct HighResolutionWheelInfo: Equatable {
         let supportsHighResolutionWheel: Bool
         let enabled: Bool?
@@ -17,32 +12,17 @@ extension Device {
 
     func applyConfiguredHighResolutionWheel(_ enabled: Bool) {
         let requestID = nextHighResolutionWheelApplyRequestID()
-        Self.highResolutionWheelQueue.async {
-            self.applyHighResolutionWheel(enabled, requestID: requestID, attempt: 1)
-        }
-    }
-
-    private func applyHighResolutionWheel(_ enabled: Bool, requestID: UUID, attempt: Int) {
-        guard isCurrentHighResolutionWheelApplyRequest(requestID), !isRemoved else {
-            return
-        }
-
-        guard applyHighResolutionWheelSynchronously(enabled) == nil else {
-            return
-        }
-
-        guard let retryDelay = LogitechDeviceConfigurationRetryPolicy.delay(afterAttempt: attempt) else {
-            return
-        }
-
-        Self.highResolutionWheelQueue
-            .asyncAfter(deadline: .now() + retryDelay) { [weak self] in
-                self?.applyHighResolutionWheel(enabled, requestID: requestID, attempt: attempt + 1)
+        highResolutionWheelQueue.async {
+            guard self.isCurrentHighResolutionWheelApplyRequest(requestID), !self.isRemoved else {
+                return
             }
+
+            _ = self.applyHighResolutionWheelSynchronously(enabled)
+        }
     }
 
     func refreshHighResolutionWheelInfo(completion: @escaping (HighResolutionWheelInfo) -> Void) {
-        Self.highResolutionWheelQueue.async {
+        highResolutionWheelQueue.async {
             let info = self.highResolutionWheelInfo
 
             DispatchQueue.main.async {
@@ -123,14 +103,14 @@ extension Device {
 
     func restoreHighResolutionWheel() {
         cancelHighResolutionWheelApplyRequests()
-        Self.highResolutionWheelQueue.async { [weak self] in
+        highResolutionWheelQueue.async { [weak self] in
             self?.restoreHighResolutionWheelSynchronously()
         }
     }
 
     func prepareHighResolutionWheelForReconnect() {
         cancelHighResolutionWheelApplyRequests()
-        Self.highResolutionWheelQueue.async { [weak self] in
+        highResolutionWheelQueue.async { [weak self] in
             guard let self else {
                 return
             }
