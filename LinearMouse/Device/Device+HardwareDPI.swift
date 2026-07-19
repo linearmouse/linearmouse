@@ -18,7 +18,6 @@ extension Device {
         let supportsAdjustableDPI: Bool
         let currentDPI: Int?
         let dpiRange: ClosedRange<Int>?
-        let dpiStep: Int?
     }
 
     struct HardwareDPIApplyResult: Equatable {
@@ -81,8 +80,7 @@ extension Device {
         HardwareDPIInfo(
             supportsAdjustableDPI: false,
             currentDPI: nil,
-            dpiRange: nil,
-            dpiStep: nil
+            dpiRange: nil
         )
     }
 
@@ -94,8 +92,7 @@ extension Device {
         return HardwareDPIInfo(
             supportsAdjustableDPI: true,
             currentDPI: controller.currentDPI(),
-            dpiRange: controller.dpiRange,
-            dpiStep: controller.dpiStep
+            dpiRange: controller.dpiRange
         )
     }
 

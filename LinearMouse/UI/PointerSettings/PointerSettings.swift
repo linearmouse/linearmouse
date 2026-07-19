@@ -183,13 +183,12 @@ struct PointerSettings: View {
         VStack(alignment: .leading, spacing: 8) {
             if let info = state.pointerHardwareDPIInfo,
                info.currentDPI != nil,
-               let range = info.dpiRange,
-               let step = info.dpiStep {
-                pointerHardwareDPISetter(range: range, step: step)
+               let range = info.dpiRange {
+                pointerHardwareDPISetter(range: range)
                     .disabled(state.pointerHardwareDPIBusy)
 
-                if state.pointerHardwareDPIBusy {
-                    Text(state.pointerHardwareDPIApplying ? "Applying..." : "Refreshing...")
+                if let message = state.pointerHardwareDPIStatusMessage {
+                    Text(message)
                         .foregroundColor(.secondary)
                 }
             } else if state.pointerHardwareDPIBusy {
@@ -202,7 +201,7 @@ struct PointerSettings: View {
         }
     }
 
-    private func pointerHardwareDPISetter(range: ClosedRange<Int>, step: Int) -> some View {
+    private func pointerHardwareDPISetter(range: ClosedRange<Int>) -> some View {
         HStack(alignment: .firstTextBaseline) {
             if range.lowerBound < range.upperBound {
                 Slider(
@@ -210,8 +209,7 @@ struct PointerSettings: View {
                         get: { Double(state.pointerHardwareDPITargetDPI) },
                         set: { state.updatePointerHardwareDPITargetDPI(Int($0.rounded())) }
                     ),
-                    in: Double(range.lowerBound) ... Double(range.upperBound),
-                    step: Double(max(step, 1))
+                    in: Double(range.lowerBound) ... Double(range.upperBound)
                 ) {
                     labelWithDescription {
                         Text("Hardware DPI")
@@ -238,11 +236,6 @@ struct PointerSettings: View {
             .textFieldStyle(.roundedBorder)
             .multilineTextAlignment(.trailing)
             .frame(width: 80)
-
-            Button("Apply") {
-                state.applyPointerHardwareDPITargetDPI()
-            }
-            .disabled(state.pointerHardwareDPIBusy)
         }
     }
 }

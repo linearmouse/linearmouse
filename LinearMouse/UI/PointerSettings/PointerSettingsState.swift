@@ -18,6 +18,9 @@ class PointerSettingsState: ObservableObject {
     @Published private(set) var pointerHardwareDPIApplying = false
     @Published private(set) var pointerHardwareDPIStatusMessage: String?
     private var pointerHardwareDPITargetDPIEdited = false
+    private var pointerHardwareDPIApplyWorkItem: DispatchWorkItem?
+
+    private static let pointerHardwareDPIApplyDebounceInterval: TimeInterval = 0.25
 
     private init() {
         deviceState.$currentDeviceRef
@@ -211,6 +214,8 @@ extension PointerSettingsState {
     }
 
     private func resetPointerHardwareDPIState() {
+        pointerHardwareDPIApplyWorkItem?.cancel()
+        pointerHardwareDPIApplyWorkItem = nil
         pointerHardwareDPIInfo = nil
         pointerHardwareDPIStatusMessage = nil
         pointerHardwareDPITargetDPIEdited = false
@@ -220,6 +225,25 @@ extension PointerSettingsState {
         pointerHardwareDPITargetDPI = dpi
         pointerHardwareDPITargetDPIEdited = true
         pointerHardwareDPIStatusMessage = nil
+
+        pointerHardwareDPIApplyWorkItem?.cancel()
+        guard let device = currentDevice else {
+            return
+        }
+
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self, self.currentDevice === device else {
+                return
+            }
+
+            self.pointerHardwareDPIApplyWorkItem = nil
+            self.applyPointerHardwareDPITargetDPI()
+        }
+        pointerHardwareDPIApplyWorkItem = workItem
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + Self.pointerHardwareDPIApplyDebounceInterval,
+            execute: workItem
+        )
     }
 
     private func pointerHardwareDPIStatusMessage(for info: Device.HardwareDPIInfo) -> String? {
