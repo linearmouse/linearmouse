@@ -6622,7 +6622,7 @@
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App Exposé"
+            "value" : "App Eksponering"
           }
         },
         "nl" : {
@@ -22230,7 +22230,7 @@
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aktiver gestknapp"
+            "value" : "Aktiver bevegelsesknapp"
           }
         },
         "nl" : {
@@ -25142,7 +25142,7 @@
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rask første respons som roer seg raskt."
+            "value" : "Rask førsterespons som raskt stabiliserer seg."
           }
         },
         "nl" : {
@@ -26391,7 +26391,7 @@
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gesthandlinger"
+            "value" : "Bevegelseshandlinger"
           }
         },
         "nl" : {
@@ -27431,7 +27431,7 @@
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hold knappen inne og dra for å utløse gester. Dra minst %lld piksler i én retning."
+            "value" : "Hold knappen inne og dra for å utløse bevegelser. Dra minst %lld piksler i én retning."
           }
         },
         "nl" : {
@@ -34522,7 +34522,7 @@
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Modi"
+            "value" : "Moduser"
           }
         },
         "nl" : {
