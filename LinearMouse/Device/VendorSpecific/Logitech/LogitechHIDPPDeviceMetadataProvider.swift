@@ -911,12 +911,11 @@ struct LogitechHIDPPTransport {
             featureIndex: featureIndex,
             function: function,
             parameters: parameters,
-            usesShortReport: false,
             performsSingleTransaction: false
         )
     }
 
-    func shortRequest(
+    func requestOnce(
         featureIndex: UInt8,
         function: UInt8,
         parameters: [UInt8]
@@ -925,7 +924,6 @@ struct LogitechHIDPPTransport {
             featureIndex: featureIndex,
             function: function,
             parameters: parameters,
-            usesShortReport: true,
             performsSingleTransaction: true
         )
     }
@@ -934,7 +932,6 @@ struct LogitechHIDPPTransport {
         featureIndex: UInt8,
         function: UInt8,
         parameters: [UInt8],
-        usesShortReport: Bool,
         performsSingleTransaction: Bool
     ) -> LogitechHIDPPDeviceMetadataProvider.Response? {
         for attempt in 1 ... Self.maximumBusyAttempts {
@@ -942,7 +939,6 @@ struct LogitechHIDPPTransport {
                 featureIndex: featureIndex,
                 function: function,
                 parameters: parameters,
-                usesShortReport: usesShortReport,
                 performsSingleTransaction: performsSingleTransaction
             ) {
             case let .response(response):
@@ -961,15 +957,13 @@ struct LogitechHIDPPTransport {
         featureIndex: UInt8,
         function: UInt8,
         parameters: [UInt8],
-        usesShortReport: Bool,
         performsSingleTransaction: Bool
     ) -> ResponseResult {
         let address = address(for: function)
         let report = makeReport(
             featureIndex: featureIndex,
             address: address,
-            parameters: parameters,
-            usesShortReport: usesShortReport
+            parameters: parameters
         )
         let matching: (Data) -> Bool = { response in
             let reply = [UInt8](response)
@@ -1027,17 +1021,10 @@ struct LogitechHIDPPTransport {
     private func makeReport(
         featureIndex: UInt8,
         address: UInt8,
-        parameters: [UInt8],
-        usesShortReport: Bool
+        parameters: [UInt8]
     ) -> Data {
-        let requestReportID = usesShortReport
-            ? LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID
-            : reportID
-        let requestReportLength = usesShortReport
-            ? LogitechHIDPPDeviceMetadataProvider.Constants.shortReportLength
-            : reportLength
-        var bytes = [UInt8](repeating: 0, count: requestReportLength)
-        bytes[0] = requestReportID
+        var bytes = [UInt8](repeating: 0, count: reportLength)
+        bytes[0] = reportID
         bytes[1] = deviceIndex
         bytes[2] = featureIndex
         bytes[3] = address

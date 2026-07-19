@@ -87,19 +87,11 @@ struct LogitechHIDPPDeviceDPIController {
         let targetDPI = supportedDPI(nearestTo: dpi)
         let parameters = [0x00, UInt8((targetDPI >> 8) & 0xFF), UInt8(targetDPI & 0xFF)]
 
-        let response = if transport.isReceiverRoutedDevice {
-            transport.shortRequest(
-                featureIndex: featureIndex,
-                function: Constants.setSensorDPIFunction,
-                parameters: parameters
-            )
-        } else {
-            transport.request(
-                featureIndex: featureIndex,
-                function: Constants.setSensorDPIFunction,
-                parameters: parameters
-            )
-        }
+        let response = transport.requestOnce(
+            featureIndex: featureIndex,
+            function: Constants.setSensorDPIFunction,
+            parameters: parameters
+        )
 
         return response == nil ? nil : targetDPI
     }

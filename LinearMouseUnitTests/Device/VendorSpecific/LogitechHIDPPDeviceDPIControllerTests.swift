@@ -120,9 +120,10 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
         XCTAssertEqual(controller?.dpiRange, 800 ... 1600)
         XCTAssertEqual(controller?.dpiStep, 800)
         let requestCount = device.outputReportRequestCount
+        let requestOnceCount = device.outputReportRequestOnceCount
         XCTAssertEqual(controller?.setDPI(1500), 1600)
-        XCTAssertEqual(device.outputReportRequestCount, requestCount + 1)
-        XCTAssertEqual(device.outputReportRequestOnceCount, 0)
+        XCTAssertEqual(device.outputReportRequestCount, requestCount)
+        XCTAssertEqual(device.outputReportRequestOnceCount, requestOnceCount + 1)
         XCTAssertEqual(
             device.sentReports.last.map { Array($0.prefix(7)) },
             Optional([0x11, 0xFF, 0x05, 0x38, 0x00, 0x06, 0x40] as [UInt8])
@@ -249,17 +250,18 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
         let controller = LogitechHIDPPDeviceDPIController(device: device)
 
         let requestCount = device.sentReports.count
+        let requestOnceCount = device.outputReportRequestOnceCount
 
         XCTAssertNil(controller?.setDPI(1600))
         XCTAssertEqual(device.sentReports.count, requestCount + 1)
-        XCTAssertEqual(device.outputReportRequestOnceCount, 0)
+        XCTAssertEqual(device.outputReportRequestOnceCount, requestOnceCount + 1)
         XCTAssertEqual(
             device.sentReports.last.map { Array($0.prefix(7)) },
             [0x11, 0xFF, 0x05, 0x38, 0x00, 0x06, 0x40]
         )
     }
 
-    func testSetDPISendsOneShortRequestAndWaitsForAcknowledgement() {
+    func testSetDPISendsOneLongRequestAndWaitsForAcknowledgement() {
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,
             productID: 0xC548,
@@ -270,7 +272,7 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
 
         device.responseProvider = { report in
             let bytes = [UInt8](report)
-            return Self.hidppShortReply(
+            return Self.hidppLongReply(
                 deviceIndex: bytes[1],
                 featureIndex: bytes[2],
                 address: bytes[3],
@@ -290,7 +292,9 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
         XCTAssertEqual(controller?.setDPI(1600), 1600)
         XCTAssertEqual(device.outputReportRequestOnceCount, 1)
         XCTAssertEqual(device.outputReportRequestCount, 0)
-        XCTAssertEqual(device.sentReports.map(Array.init), [[0x10, 0x02, 0x05, 0x38, 0x00, 0x06, 0x40]])
+        XCTAssertEqual(device.sentReports.count, 1)
+        XCTAssertEqual(device.sentReports.first?.count, 20)
+        XCTAssertEqual(device.sentReports.first.map { Array($0.prefix(7)) }, [0x11, 0x02, 0x05, 0x38, 0x00, 0x06, 0x40])
     }
 
     func testSetDPIFailsWhenAcknowledgementIsMissing() {
@@ -325,7 +329,7 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
         )
         device.responseProvider = { report in
             let bytes = [UInt8](report)
-            return Self.hidppShortReply(
+            return Self.hidppLongReply(
                 deviceIndex: bytes[1],
                 featureIndex: bytes[2],
                 address: bytes[3],
@@ -501,10 +505,15 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
         )
     }
 
-    private static func hidppLongReply(featureIndex: UInt8, address: UInt8, payload: [UInt8]) -> Data {
+    private static func hidppLongReply(
+        deviceIndex: UInt8 = 0xFF,
+        featureIndex: UInt8,
+        address: UInt8,
+        payload: [UInt8]
+    ) -> Data {
         var bytes = [UInt8](repeating: 0, count: 20)
         bytes[0] = 0x11
-        bytes[1] = 0xFF
+        bytes[1] = deviceIndex
         bytes[2] = featureIndex
         bytes[3] = address
         for (index, byte) in payload.enumerated() where index + 4 < bytes.count {
