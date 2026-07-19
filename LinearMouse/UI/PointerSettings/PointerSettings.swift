@@ -185,7 +185,6 @@ struct PointerSettings: View {
                info.currentDPI != nil,
                let range = info.dpiRange {
                 pointerHardwareDPISetter(range: range)
-                    .disabled(state.pointerHardwareDPIBusy)
 
                 if let message = state.pointerHardwareDPIStatusMessage {
                     Text(message)
@@ -224,18 +223,16 @@ struct PointerSettings: View {
                 Spacer()
             }
 
-            TextField(
-                "Hardware DPI",
+            DeferredNumberField(
                 value: Binding(
-                    get: { state.pointerHardwareDPITargetDPI },
-                    set: { state.updatePointerHardwareDPITargetDPI($0) }
+                    get: { Double(state.pointerHardwareDPITargetDPI) },
+                    set: { state.commitPointerHardwareDPITargetDPI(Int($0.rounded())) }
                 ),
-                formatter: state.pointerDPIFormatter
+                formatter: state.pointerDPIFormatter,
+                range: Double(range.lowerBound) ... Double(range.upperBound)
             )
-            .labelsHidden()
-            .textFieldStyle(.roundedBorder)
-            .multilineTextAlignment(.trailing)
             .frame(width: 80)
+            .accessibility(label: Text("Hardware DPI"))
         }
     }
 }

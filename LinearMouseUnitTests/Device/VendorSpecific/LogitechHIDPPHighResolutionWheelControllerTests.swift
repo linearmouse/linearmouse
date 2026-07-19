@@ -83,6 +83,42 @@ final class LogitechHIDPPHighResolutionWheelControllerTests: XCTestCase {
         )
     }
 
+    func testApplyReturnsPreviousModeUsingOneReadAndOneWrite() {
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xB015,
+            transport: PointerDeviceTransportName.bluetoothLowEnergy,
+            maxInputReportSize: 20,
+            maxOutputReportSize: 20
+        )
+        device.responseProvider = { report in
+            let bytes = [UInt8](report)
+            guard bytes.count >= 4 else {
+                return nil
+            }
+
+            switch (bytes[2], bytes[3]) {
+            case (0x00, 0x08):
+                return Self.hidppLongReply(featureIndex: 0x00, address: 0x08, payload: [0x1E])
+            case (0x1E, 0x18):
+                return Self.hidppLongReply(featureIndex: 0x1E, address: 0x18, payload: [0x04, 0x00])
+            case (0x1E, 0x28):
+                return Self.hidppLongReply(featureIndex: 0x1E, address: 0x28, payload: [])
+            default:
+                return nil
+            }
+        }
+
+        let controller = LogitechHIDPPHighResolutionWheelController(device: device)
+        let requestCount = device.outputReportRequestCount
+
+        XCTAssertEqual(
+            controller?.applyHighResolutionWheelEnabled(true),
+            .init(previousEnabled: false, appliedEnabled: true)
+        )
+        XCTAssertEqual(device.outputReportRequestCount, requestCount + 2)
+    }
+
     func testRejectsDeviceWithoutHiresWheelFeature() {
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,

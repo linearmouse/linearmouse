@@ -4,16 +4,6 @@
 import Foundation
 
 extension Device {
-    private enum HighResolutionWheelApplyRetry {
-        static let maxAttempts = 8
-        static let delay: TimeInterval = 5
-    }
-
-    private static let highResolutionWheelQueue = DispatchQueue(
-        label: "app.linearmouse.high-resolution-wheel",
-        qos: .default
-    )
-
     struct HighResolutionWheelInfo: Equatable {
         let supportsHighResolutionWheel: Bool
         let enabled: Bool?
@@ -22,32 +12,17 @@ extension Device {
 
     func applyConfiguredHighResolutionWheel(_ enabled: Bool) {
         let requestID = nextHighResolutionWheelApplyRequestID()
-        Self.highResolutionWheelQueue.async {
-            self.applyHighResolutionWheel(enabled, requestID: requestID, attempt: 1)
-        }
-    }
-
-    private func applyHighResolutionWheel(_ enabled: Bool, requestID: UUID, attempt: Int) {
-        guard isCurrentHighResolutionWheelApplyRequest(requestID), !isRemoved else {
-            return
-        }
-
-        guard applyHighResolutionWheelSynchronously(enabled) == nil else {
-            return
-        }
-
-        guard attempt < HighResolutionWheelApplyRetry.maxAttempts else {
-            return
-        }
-
-        Self.highResolutionWheelQueue
-            .asyncAfter(deadline: .now() + HighResolutionWheelApplyRetry.delay) { [weak self] in
-                self?.applyHighResolutionWheel(enabled, requestID: requestID, attempt: attempt + 1)
+        highResolutionWheelQueue.async {
+            guard self.isCurrentHighResolutionWheelApplyRequest(requestID), !self.isRemoved else {
+                return
             }
+
+            _ = self.applyHighResolutionWheelSynchronously(enabled)
+        }
     }
 
     func refreshHighResolutionWheelInfo(completion: @escaping (HighResolutionWheelInfo) -> Void) {
-        Self.highResolutionWheelQueue.async {
+        highResolutionWheelQueue.async {
             let info = self.highResolutionWheelInfo
 
             DispatchQueue.main.async {
@@ -87,31 +62,30 @@ extension Device {
             return nil
         }
 
-        let capabilities = controller.capabilities()
-        let currentEnabled = controller.isHighResolutionWheelEnabled()
-
         highResolutionWheelLock.lock()
-        if initialHighResolutionWheelEnabled == nil {
-            initialHighResolutionWheelEnabled = currentEnabled
-        }
         if cachedHighResolutionWheelEnabled == enabled {
-            cachedHighResolutionWheelMultiplier = enabled ? capabilities.map { Int($0.multiplier) } : nil
             highResolutionWheelLock.unlock()
             return enabled
         }
         highResolutionWheelLock.unlock()
 
-        guard let applied = controller.setHighResolutionWheelEnabled(enabled) else {
-            invalidateLogitechHighResolutionWheelController()
+        let capabilities = controller.capabilities()
+        guard let result = controller.applyHighResolutionWheelEnabled(enabled) else {
             return nil
         }
 
+        highResolutionWheelLock.lock()
+        if initialHighResolutionWheelEnabled == nil {
+            initialHighResolutionWheelEnabled = result.previousEnabled
+        }
+        highResolutionWheelLock.unlock()
+
         updateHighResolutionWheelCache(
-            enabled: applied,
-            multiplier: applied ? capabilities.map { Int($0.multiplier) } : nil
+            enabled: result.appliedEnabled,
+            multiplier: result.appliedEnabled ? capabilities.map { Int($0.multiplier) } : nil
         )
 
-        return applied
+        return result.appliedEnabled
     }
 
     var highResolutionWheelNormalizationMultiplier: Int? {
@@ -129,8 +103,23 @@ extension Device {
 
     func restoreHighResolutionWheel() {
         cancelHighResolutionWheelApplyRequests()
-        Self.highResolutionWheelQueue.sync {
-            self.restoreHighResolutionWheelSynchronously()
+        highResolutionWheelQueue.async { [weak self] in
+            self?.restoreHighResolutionWheelSynchronously()
+        }
+    }
+
+    func prepareHighResolutionWheelForReconnect() {
+        cancelHighResolutionWheelApplyRequests()
+        highResolutionWheelQueue.async { [weak self] in
+            guard let self else {
+                return
+            }
+
+            invalidateLogitechHighResolutionWheelController()
+            highResolutionWheelLock.lock()
+            cachedHighResolutionWheelEnabled = nil
+            cachedHighResolutionWheelMultiplier = nil
+            highResolutionWheelLock.unlock()
         }
     }
 
