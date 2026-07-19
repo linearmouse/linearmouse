@@ -50,6 +50,10 @@ class Device {
         return controller
     }
 
+    func invalidateLogitechDPIController() {
+        cachedLogitechDPIController = nil
+    }
+
     var logitechHighResolutionWheelController: LogitechHIDPPHighResolutionWheelController? {
         if let cachedLogitechHighResolutionWheelController {
             return cachedLogitechHighResolutionWheelController
@@ -81,6 +85,7 @@ class Device {
     private let initialPointerResolution: Double
     let hardwareDPILock = NSLock()
     var cachedHardwareDPI: Int?
+    var hardwareDPIApplyRequestID = UUID()
     let highResolutionWheelLock = NSLock()
     var cachedHighResolutionWheelEnabled: Bool?
     var cachedHighResolutionWheelMultiplier: Int?
@@ -174,6 +179,7 @@ class Device {
         hardwareDPILock.lock()
         removed = true
         cachedHardwareDPI = nil
+        hardwareDPIApplyRequestID = UUID()
         hardwareDPILock.unlock()
         invalidateLogitechHighResolutionWheelController()
         highResolutionWheelLock.lock()

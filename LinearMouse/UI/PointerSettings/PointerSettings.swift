@@ -181,20 +181,20 @@ struct PointerSettings: View {
 
     private var pointerHardwareDPIControl: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Hardware DPI")
-                .fontWeight(.semibold)
+            if let info = state.pointerHardwareDPIInfo,
+               info.currentDPI != nil,
+               let range = info.dpiRange,
+               let step = info.dpiStep {
+                pointerHardwareDPISetter(range: range, step: step)
+                    .disabled(state.pointerHardwareDPIBusy)
 
-            if state.pointerHardwareDPIBusy {
-                Text(state.pointerHardwareDPIApplying ? "Applying..." : "Refreshing...")
-                    .foregroundColor(.secondary)
-            } else if let info = state.pointerHardwareDPIInfo {
-                pointerHardwareDPIRow("DPI range", formatDPIRange(info.dpiRange))
-                pointerHardwareDPISetter
-
-                if let message = state.pointerHardwareDPIStatusMessage {
-                    Text(message)
+                if state.pointerHardwareDPIBusy {
+                    Text(state.pointerHardwareDPIApplying ? "Applying..." : "Refreshing...")
                         .foregroundColor(.secondary)
                 }
+            } else if state.pointerHardwareDPIBusy {
+                Text(state.pointerHardwareDPIApplying ? "Applying..." : "Refreshing...")
+                    .foregroundColor(.secondary)
             } else {
                 Text(state.pointerHardwareDPIStatusMessage ?? "Reading hardware DPI from the selected device.")
                     .foregroundColor(.secondary)
@@ -202,51 +202,47 @@ struct PointerSettings: View {
         }
     }
 
-    private var pointerHardwareDPISetter: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .firstTextBaseline) {
-                Text("DPI")
-                    .foregroundColor(.secondary)
-                    .frame(width: 110, alignment: .leading)
-
-                TextField(
-                    String(""),
+    private func pointerHardwareDPISetter(range: ClosedRange<Int>, step: Int) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            if range.lowerBound < range.upperBound {
+                Slider(
                     value: Binding(
-                        get: { state.pointerHardwareDPITargetDPI },
-                        set: { state.updatePointerHardwareDPITargetDPI($0) }
+                        get: { Double(state.pointerHardwareDPITargetDPI) },
+                        set: { state.updatePointerHardwareDPITargetDPI(Int($0.rounded())) }
                     ),
-                    formatter: state.pointerDPIFormatter
-                )
-                .labelsHidden()
-                .textFieldStyle(.roundedBorder)
-                .multilineTextAlignment(.trailing)
-                .frame(width: 80)
-
-                Button("Apply") {
-                    state.applyPointerHardwareDPITargetDPI()
+                    in: Double(range.lowerBound) ... Double(range.upperBound),
+                    step: Double(max(step, 1))
+                ) {
+                    labelWithDescription {
+                        Text("Hardware DPI")
+                        Text(verbatim: "(\(range.lowerBound)–\(range.upperBound))")
+                    }
                 }
-                .disabled(state.pointerHardwareDPIBusy)
+            } else {
+                labelWithDescription {
+                    Text("Hardware DPI")
+                    Text(verbatim: "(\(range.lowerBound))")
+                }
+                Spacer()
             }
+
+            TextField(
+                "Hardware DPI",
+                value: Binding(
+                    get: { state.pointerHardwareDPITargetDPI },
+                    set: { state.updatePointerHardwareDPITargetDPI($0) }
+                ),
+                formatter: state.pointerDPIFormatter
+            )
+            .labelsHidden()
+            .textFieldStyle(.roundedBorder)
+            .multilineTextAlignment(.trailing)
+            .frame(width: 80)
+
+            Button("Apply") {
+                state.applyPointerHardwareDPITargetDPI()
+            }
+            .disabled(state.pointerHardwareDPIBusy)
         }
-    }
-
-    private func pointerHardwareDPIRow(_ label: String, _ value: String) -> some View {
-        HStack(alignment: .top, spacing: 8) {
-            Text(label)
-                .foregroundColor(.secondary)
-                .frame(width: 110, alignment: .leading)
-
-            Text(verbatim: value)
-                .font(.system(.body, design: .monospaced))
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-
-    private func formatDPIRange(_ range: ClosedRange<Int>?) -> String {
-        guard let range else {
-            return "(unavailable)"
-        }
-
-        return "\(range.lowerBound)-\(range.upperBound)"
     }
 }
