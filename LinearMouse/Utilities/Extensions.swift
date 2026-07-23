@@ -80,43 +80,70 @@ func formattedPercent<Value: BinaryInteger>(_ value: Value) -> String {
         ?? "\(value)%"
 }
 
-extension pid_t {
-    private static var bundleIdentifierCache = LRUCache<Self, String>(countLimit: 16)
-    private static var processPathCache = LRUCache<Self, String>(countLimit: 16)
-    private static var processNameCache = LRUCache<Self, String>(countLimit: 16)
+struct ProcessCacheKey: Hashable {
+    let pid: pid_t
+    let startTimeSeconds: UInt64
+    let startTimeMicroseconds: UInt64
+}
 
-    var bundleIdentifier: String? {
-        guard let bundleIdentifier = Self.bundleIdentifierCache.value(forKey: self)
-            ?? NSRunningApplication(processIdentifier: self)?.bundleIdentifier
-        else {
+final class ProcessMetadataCache<Value> {
+    private let cache: LRUCache<ProcessCacheKey, Value>
+
+    init(countLimit: Int) {
+        cache = LRUCache(countLimit: countLimit)
+    }
+
+    func value(for key: ProcessCacheKey?, load: () -> Value?) -> Value? {
+        if let key, let cached = cache.value(forKey: key) {
+            return cached
+        }
+
+        guard let value = load() else {
             return nil
         }
 
-        Self.bundleIdentifierCache.setValue(bundleIdentifier, forKey: self)
+        if let key {
+            cache.setValue(value, forKey: key)
+        }
 
-        return bundleIdentifier
+        return value
+    }
+}
+
+extension pid_t {
+    private static let bundleIdentifierCache = ProcessMetadataCache<String>(countLimit: 16)
+    private static let processPathCache = ProcessMetadataCache<String>(countLimit: 16)
+    private static let processNameCache = ProcessMetadataCache<String>(countLimit: 16)
+
+    private var cacheKey: ProcessCacheKey? {
+        let info = getProcessInfo(self)
+        guard info.startTimeSeconds > 0 else {
+            return nil
+        }
+
+        return ProcessCacheKey(
+            pid: self,
+            startTimeSeconds: info.startTimeSeconds,
+            startTimeMicroseconds: info.startTimeMicroseconds
+        )
+    }
+
+    var bundleIdentifier: String? {
+        Self.bundleIdentifierCache.value(for: cacheKey) {
+            NSRunningApplication(processIdentifier: self)?.bundleIdentifier
+        }
     }
 
     var processPath: String? {
-        if let cached = Self.processPathCache.value(forKey: self) {
-            return cached
+        Self.processPathCache.value(for: cacheKey) {
+            NSRunningApplication(processIdentifier: self)?.executableURL?.path
         }
-        guard let path = NSRunningApplication(processIdentifier: self)?.executableURL?.path else {
-            return nil
-        }
-        Self.processPathCache.setValue(path, forKey: self)
-        return path
     }
 
     var processName: String? {
-        if let cached = Self.processNameCache.value(forKey: self) {
-            return cached
+        Self.processNameCache.value(for: cacheKey) {
+            NSRunningApplication(processIdentifier: self)?.executableURL?.lastPathComponent
         }
-        guard let name = NSRunningApplication(processIdentifier: self)?.executableURL?.lastPathComponent else {
-            return nil
-        }
-        Self.processNameCache.setValue(name, forKey: self)
-        return name
     }
 
     var parent: pid_t? {

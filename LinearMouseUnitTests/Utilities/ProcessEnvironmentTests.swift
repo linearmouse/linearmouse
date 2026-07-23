@@ -8,4 +8,13 @@ final class ProcessEnvironmentTests: XCTestCase {
     func testUnitTestHostIsDetectedAsRunningTest() {
         XCTAssertTrue(ProcessEnvironment.isRunningTest)
     }
+
+    func testProcessMetadataCacheDoesNotReuseValueForNewProcess() {
+        let cache = ProcessMetadataCache<String>(countLimit: 16)
+        let firstProcess = ProcessCacheKey(pid: 42, startTimeSeconds: 100, startTimeMicroseconds: 1)
+        let secondProcess = ProcessCacheKey(pid: 42, startTimeSeconds: 200, startTimeMicroseconds: 2)
+
+        XCTAssertEqual(cache.value(for: firstProcess) { "First" }, "First")
+        XCTAssertEqual(cache.value(for: secondProcess) { "Second" }, "Second")
+    }
 }
