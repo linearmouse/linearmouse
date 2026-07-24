@@ -80,20 +80,59 @@ func formattedPercent<Value: BinaryInteger>(_ value: Value) -> String {
         ?? "\(value)%"
 }
 
-struct ProcessCacheKey: Hashable {
+struct ProcessIdentity: Hashable {
     let pid: pid_t
     let startTimeSeconds: UInt64
     let startTimeMicroseconds: UInt64
+
+    init(pid: pid_t, startTimeSeconds: UInt64, startTimeMicroseconds: UInt64) {
+        self.pid = pid
+        self.startTimeSeconds = startTimeSeconds
+        self.startTimeMicroseconds = startTimeMicroseconds
+    }
+
+    init?(pid: pid_t) {
+        let info = getProcessInfo(pid)
+        guard info.startTimeSeconds > 0 else {
+            return nil
+        }
+
+        self.init(
+            pid: pid,
+            startTimeSeconds: info.startTimeSeconds,
+            startTimeMicroseconds: info.startTimeMicroseconds
+        )
+    }
+
+    var bundleIdentifier: String? {
+        pid.bundleIdentifier(for: self)
+    }
+
+    var processPath: String? {
+        pid.processPath(for: self)
+    }
+
+    var processName: String? {
+        pid.processName(for: self)
+    }
+
+    var parent: Self? {
+        pid.parent.flatMap { Self(pid: $0) }
+    }
+
+    var group: Self? {
+        pid.group.flatMap { Self(pid: $0) }
+    }
 }
 
 final class ProcessMetadataCache<Value> {
-    private let cache: LRUCache<ProcessCacheKey, Value>
+    private let cache: LRUCache<ProcessIdentity, Value>
 
     init(countLimit: Int) {
         cache = LRUCache(countLimit: countLimit)
     }
 
-    func value(for key: ProcessCacheKey?, load: () -> Value?) -> Value? {
+    func value(for key: ProcessIdentity?, load: () -> Value?) -> Value? {
         if let key, let cached = cache.value(forKey: key) {
             return cached
         }
@@ -115,33 +154,36 @@ extension pid_t {
     private static let processPathCache = ProcessMetadataCache<String>(countLimit: 16)
     private static let processNameCache = ProcessMetadataCache<String>(countLimit: 16)
 
-    private var cacheKey: ProcessCacheKey? {
-        let info = getProcessInfo(self)
-        guard info.startTimeSeconds > 0 else {
-            return nil
-        }
-
-        return ProcessCacheKey(
-            pid: self,
-            startTimeSeconds: info.startTimeSeconds,
-            startTimeMicroseconds: info.startTimeMicroseconds
-        )
+    var processIdentity: ProcessIdentity? {
+        ProcessIdentity(pid: self)
     }
 
     var bundleIdentifier: String? {
-        Self.bundleIdentifierCache.value(for: cacheKey) {
+        bundleIdentifier(for: processIdentity)
+    }
+
+    fileprivate func bundleIdentifier(for processIdentity: ProcessIdentity?) -> String? {
+        Self.bundleIdentifierCache.value(for: processIdentity) {
             NSRunningApplication(processIdentifier: self)?.bundleIdentifier
         }
     }
 
     var processPath: String? {
-        Self.processPathCache.value(for: cacheKey) {
+        processPath(for: processIdentity)
+    }
+
+    fileprivate func processPath(for processIdentity: ProcessIdentity?) -> String? {
+        Self.processPathCache.value(for: processIdentity) {
             NSRunningApplication(processIdentifier: self)?.executableURL?.path
         }
     }
 
     var processName: String? {
-        Self.processNameCache.value(for: cacheKey) {
+        processName(for: processIdentity)
+    }
+
+    fileprivate func processName(for processIdentity: ProcessIdentity?) -> String? {
+        Self.processNameCache.value(for: processIdentity) {
             NSRunningApplication(processIdentifier: self)?.executableURL?.lastPathComponent
         }
     }

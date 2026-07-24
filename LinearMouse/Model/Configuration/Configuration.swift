@@ -175,12 +175,24 @@ extension Configuration {
     ) -> Scheme {
         matchScheme(
             withDevice: device,
-            withApp: pid?.bundleIdentifier,
-            withParentApp: pid?.parent?.bundleIdentifier,
-            withGroupApp: pid?.group?.bundleIdentifier,
+            withProcess: pid?.processIdentity,
+            withDisplay: display
+        )
+    }
+
+    func matchScheme(
+        withDevice device: Device? = nil,
+        withProcess process: ProcessIdentity? = nil,
+        withDisplay display: String? = nil
+    ) -> Scheme {
+        matchScheme(
+            withDevice: device,
+            withApp: process?.bundleIdentifier,
+            withParentApp: process?.parent?.bundleIdentifier,
+            withGroupApp: process?.group?.bundleIdentifier,
             withDisplay: display,
-            withProcessName: pid?.processName,
-            withProcessPath: pid?.processPath
+            withProcessName: process?.processName,
+            withProcessPath: process?.processPath
         )
     }
 }

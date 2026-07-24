@@ -17,16 +17,51 @@ final class EventTransformerManagerTests: XCTestCase {
         let matcher = DeviceMatcher(category: .mouse)
         let firstKey = EventTransformerManager.CacheKey(
             deviceMatcher: matcher,
-            pid: nil,
+            process: nil,
             screen: nil
         )
         let secondKey = EventTransformerManager.CacheKey(
             deviceMatcher: matcher,
-            pid: nil,
+            process: nil,
             screen: nil
         )
 
         XCTAssertEqual(firstKey, secondKey)
+    }
+
+    func testTransformerCacheDoesNotReuseValueForNewProcess() throws {
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(scrolling: .init(reverse: .init(vertical: true)))
+        ])
+        let firstProcess = ProcessIdentity(pid: 42, startTimeSeconds: 100, startTimeMicroseconds: 1)
+        let secondProcess = ProcessIdentity(pid: 42, startTimeSeconds: 200, startTimeMicroseconds: 2)
+        let firstTransformer = EventTransformerManager.shared.get(
+            withDevice: nil,
+            withProcess: firstProcess,
+            withDisplay: nil
+        )
+        let cachedFirstTransformer = EventTransformerManager.shared.get(
+            withDevice: nil,
+            withProcess: firstProcess,
+            withDisplay: nil
+        )
+        let secondTransformer = EventTransformerManager.shared.get(
+            withDevice: nil,
+            withProcess: secondProcess,
+            withDisplay: nil
+        )
+        let firstReverseTransformer = try XCTUnwrap((firstTransformer as? [EventTransformer])?
+            .compactMap { $0 as? ReverseScrollingTransformer }
+            .first)
+        let cachedFirstReverseTransformer = try XCTUnwrap((cachedFirstTransformer as? [EventTransformer])?
+            .compactMap { $0 as? ReverseScrollingTransformer }
+            .first)
+        let secondReverseTransformer = try XCTUnwrap((secondTransformer as? [EventTransformer])?
+            .compactMap { $0 as? ReverseScrollingTransformer }
+            .first)
+
+        XCTAssertIdentical(firstReverseTransformer, cachedFirstReverseTransformer)
+        XCTAssertNotIdentical(firstReverseTransformer, secondReverseTransformer)
     }
 
     func testSyntheticSmoothedEventStillGetsModifierActions() throws {
