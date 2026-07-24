@@ -19,7 +19,7 @@ class EventTransformerManager {
 
     struct CacheKey: Hashable {
         var deviceMatcher: DeviceMatcher?
-        var pid: pid_t?
+        var process: ProcessIdentity?
         var screen: String?
     }
 
@@ -133,34 +133,48 @@ class EventTransformerManager {
         }
 
         let pid = mouseLocationPid ?? targetPid
+        let process = pid?.processIdentity
         let device = DeviceManager.shared.deviceFromCGEvent(cgEvent)
 
         return .init(
-            transformer: get(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: true),
+            transformer: get(
+                withDevice: device,
+                withProcess: process,
+                withDisplay: display,
+                updateActiveCacheKey: true
+            ),
             context: .init(device: device)
         )
     }
 
     func get(withDevice device: Device?, withPid pid: pid_t?, withDisplay display: String?) -> EventTransformer {
+        get(withDevice: device, withProcess: pid?.processIdentity, withDisplay: display)
+    }
+
+    func get(
+        withDevice device: Device?,
+        withProcess process: ProcessIdentity?,
+        withDisplay display: String?
+    ) -> EventTransformer {
         if EventThread.shared.isCurrent {
-            return getOnCurrentThread(withDevice: device, withPid: pid, withDisplay: display)
+            return getOnCurrentThread(withDevice: device, withProcess: process, withDisplay: display)
         }
 
         if let transformer = EventThread.shared.performAndWait({
-            self.getOnCurrentThread(withDevice: device, withPid: pid, withDisplay: display)
+            self.getOnCurrentThread(withDevice: device, withProcess: process, withDisplay: display)
         }) {
             return transformer
         }
 
-        return getOnCurrentThread(withDevice: device, withPid: pid, withDisplay: display)
+        return getOnCurrentThread(withDevice: device, withProcess: process, withDisplay: display)
     }
 
     private func getOnCurrentThread(
         withDevice device: Device?,
-        withPid pid: pid_t?,
+        withProcess process: ProcessIdentity?,
         withDisplay display: String?
     ) -> EventTransformer {
-        get(withDevice: device, withPid: pid, withDisplay: display, updateActiveCacheKey: false)
+        get(withDevice: device, withProcess: process, withDisplay: display, updateActiveCacheKey: false)
     }
 
     func handleLogitechControlEvent(_ context: LogitechEventContext) -> LogitechControlEventHandlingResult {
@@ -187,7 +201,7 @@ class EventTransformerManager {
 
     private func get(
         withDevice device: Device?,
-        withPid pid: pid_t?,
+        withProcess process: ProcessIdentity?,
         withDisplay display: String?,
         updateActiveCacheKey: Bool
     ) -> EventTransformer {
@@ -208,7 +222,7 @@ class EventTransformerManager {
 
         let cacheKey = CacheKey(
             deviceMatcher: device.map { DeviceMatcher(of: $0) },
-            pid: pid,
+            process: process,
             screen: display
         )
         if updateActiveCacheKey {
@@ -220,7 +234,7 @@ class EventTransformerManager {
 
         let scheme = ConfigurationState.shared.configuration.matchScheme(
             withDevice: device,
-            withPid: pid,
+            withProcess: process,
             withDisplay: display
         )
 
@@ -232,7 +246,7 @@ class EventTransformerManager {
             type: .info,
             String(describing: scheme),
             String(describing: device),
-            String(describing: pid),
+            String(describing: process?.pid),
             String(describing: display)
         )
 

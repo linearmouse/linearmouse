@@ -80,43 +80,112 @@ func formattedPercent<Value: BinaryInteger>(_ value: Value) -> String {
         ?? "\(value)%"
 }
 
-extension pid_t {
-    private static var bundleIdentifierCache = LRUCache<Self, String>(countLimit: 16)
-    private static var processPathCache = LRUCache<Self, String>(countLimit: 16)
-    private static var processNameCache = LRUCache<Self, String>(countLimit: 16)
+struct ProcessIdentity: Hashable {
+    let pid: pid_t
+    let startTimeSeconds: UInt64
+    let startTimeMicroseconds: UInt64
 
-    var bundleIdentifier: String? {
-        guard let bundleIdentifier = Self.bundleIdentifierCache.value(forKey: self)
-            ?? NSRunningApplication(processIdentifier: self)?.bundleIdentifier
-        else {
+    init(pid: pid_t, startTimeSeconds: UInt64, startTimeMicroseconds: UInt64) {
+        self.pid = pid
+        self.startTimeSeconds = startTimeSeconds
+        self.startTimeMicroseconds = startTimeMicroseconds
+    }
+
+    init?(pid: pid_t) {
+        let info = getProcessInfo(pid)
+        guard info.startTimeSeconds > 0 else {
             return nil
         }
 
-        Self.bundleIdentifierCache.setValue(bundleIdentifier, forKey: self)
+        self.init(
+            pid: pid,
+            startTimeSeconds: info.startTimeSeconds,
+            startTimeMicroseconds: info.startTimeMicroseconds
+        )
+    }
 
-        return bundleIdentifier
+    var bundleIdentifier: String? {
+        pid.bundleIdentifier(for: self)
     }
 
     var processPath: String? {
-        if let cached = Self.processPathCache.value(forKey: self) {
-            return cached
-        }
-        guard let path = NSRunningApplication(processIdentifier: self)?.executableURL?.path else {
-            return nil
-        }
-        Self.processPathCache.setValue(path, forKey: self)
-        return path
+        pid.processPath(for: self)
     }
 
     var processName: String? {
-        if let cached = Self.processNameCache.value(forKey: self) {
+        pid.processName(for: self)
+    }
+
+    var parent: Self? {
+        pid.parent.flatMap { Self(pid: $0) }
+    }
+
+    var group: Self? {
+        pid.group.flatMap { Self(pid: $0) }
+    }
+}
+
+final class ProcessMetadataCache<Value> {
+    private let cache: LRUCache<ProcessIdentity, Value>
+
+    init(countLimit: Int) {
+        cache = LRUCache(countLimit: countLimit)
+    }
+
+    func value(for key: ProcessIdentity?, load: () -> Value?) -> Value? {
+        if let key, let cached = cache.value(forKey: key) {
             return cached
         }
-        guard let name = NSRunningApplication(processIdentifier: self)?.executableURL?.lastPathComponent else {
+
+        guard let value = load() else {
             return nil
         }
-        Self.processNameCache.setValue(name, forKey: self)
-        return name
+
+        if let key {
+            cache.setValue(value, forKey: key)
+        }
+
+        return value
+    }
+}
+
+extension pid_t {
+    private static let bundleIdentifierCache = ProcessMetadataCache<String>(countLimit: 16)
+    private static let processPathCache = ProcessMetadataCache<String>(countLimit: 16)
+    private static let processNameCache = ProcessMetadataCache<String>(countLimit: 16)
+
+    var processIdentity: ProcessIdentity? {
+        ProcessIdentity(pid: self)
+    }
+
+    var bundleIdentifier: String? {
+        bundleIdentifier(for: processIdentity)
+    }
+
+    fileprivate func bundleIdentifier(for processIdentity: ProcessIdentity?) -> String? {
+        Self.bundleIdentifierCache.value(for: processIdentity) {
+            NSRunningApplication(processIdentifier: self)?.bundleIdentifier
+        }
+    }
+
+    var processPath: String? {
+        processPath(for: processIdentity)
+    }
+
+    fileprivate func processPath(for processIdentity: ProcessIdentity?) -> String? {
+        Self.processPathCache.value(for: processIdentity) {
+            NSRunningApplication(processIdentifier: self)?.executableURL?.path
+        }
+    }
+
+    var processName: String? {
+        processName(for: processIdentity)
+    }
+
+    fileprivate func processName(for processIdentity: ProcessIdentity?) -> String? {
+        Self.processNameCache.value(for: processIdentity) {
+            NSRunningApplication(processIdentifier: self)?.executableURL?.lastPathComponent
+        }
     }
 
     var parent: pid_t? {

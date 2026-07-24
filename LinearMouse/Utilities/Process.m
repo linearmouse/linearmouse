@@ -11,6 +11,8 @@ ProcessInfo getProcessInfo(pid_t pid) {
 
     pi.ppid = info.kp_eproc.e_ppid;
     pi.pgid = info.kp_eproc.e_pgid;
+    pi.startTimeSeconds = info.kp_proc.p_starttime.tv_sec;
+    pi.startTimeMicroseconds = info.kp_proc.p_starttime.tv_usec;
 
     return pi;
 }
