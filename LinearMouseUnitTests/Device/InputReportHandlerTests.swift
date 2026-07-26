@@ -268,6 +268,135 @@ final class InputReportHandlerTests: XCTestCase {
         XCTAssertEqual(recorder.events.map(\.down), [true, true])
     }
 
+    // MARK: - ElecomTrackballHandler Tests
+
+    /// Builds a report in the format observed from an ELECOM HUGE TrackBall:
+    /// byte 0 is the report ID, byte 1 holds the button states.
+    private func elecomReport(buttons: UInt8) -> Data {
+        Data([0x01, buttons, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
+    }
+
+    func testElecomHandlerMatchesHugeTrackball() {
+        let handler = ElecomTrackballHandler()
+
+        XCTAssertTrue(handler.matches(vendorID: 0x056E, productID: 0x010C))
+    }
+
+    func testElecomHandlerDoesNotMatchOtherDevice() {
+        let handler = ElecomTrackballHandler()
+
+        XCTAssertFalse(handler.matches(vendorID: 0x1234, productID: 0x5678))
+    }
+
+    func testElecomHandlerAlwaysNeedsReportObservation() {
+        let handler = ElecomTrackballHandler()
+
+        XCTAssertTrue(handler.alwaysNeedsReportObservation())
+    }
+
+    func testElecomHandlerCallsNext() {
+        let handler = ElecomTrackballHandler { _, _ in }
+        let context = InputReportContext(report: elecomReport(buttons: 0x00), lastButtonStates: 0x00)
+
+        var nextCalled = false
+        handler.handleReport(context) { _ in
+            nextCalled = true
+        }
+
+        XCTAssertTrue(nextCalled)
+    }
+
+    func testElecomHandlerCallsNextEvenWithShortReport() {
+        let handler = ElecomTrackballHandler { _, _ in }
+        let context = InputReportContext(report: Data([0x01]), lastButtonStates: 0x00)
+
+        var nextCalled = false
+        handler.handleReport(context) { _ in
+            nextCalled = true
+        }
+
+        XCTAssertTrue(nextCalled)
+    }
+
+    func testElecomHandlerDetectsFnButtons() {
+        // Bit 5, 6 and 7 are the three buttons the report descriptor declares as padding.
+        for (mask, button) in [(UInt8(0x20), 5), (UInt8(0x40), 6), (UInt8(0x80), 7)] {
+            let recorder = EmissionRecorder()
+            let handler = ElecomTrackballHandler(emit: recorder.emit)
+            let context = InputReportContext(report: elecomReport(buttons: mask), lastButtonStates: 0x00)
+
+            handler.handleReport(context) { _ in }
+
+            XCTAssertEqual(recorder.events.count, 1)
+            XCTAssertEqual(recorder.events.first?.button, button)
+            XCTAssertEqual(recorder.events.first?.down, true)
+            XCTAssertEqual(context.lastButtonStates, mask)
+        }
+    }
+
+    func testElecomHandlerEmitsReleaseOnUp() {
+        let recorder = EmissionRecorder()
+        let handler = ElecomTrackballHandler(emit: recorder.emit)
+        let context = InputReportContext(report: elecomReport(buttons: 0x00), lastButtonStates: 0x20)
+
+        handler.handleReport(context) { _ in }
+
+        XCTAssertEqual(recorder.events.count, 1)
+        XCTAssertEqual(recorder.events.first?.button, 5)
+        XCTAssertEqual(recorder.events.first?.down, false)
+        XCTAssertEqual(context.lastButtonStates, 0x00)
+    }
+
+    func testElecomHandlerDetectsMultipleFnButtonsAtOnce() {
+        let recorder = EmissionRecorder()
+        let handler = ElecomTrackballHandler(emit: recorder.emit)
+        let context = InputReportContext(report: elecomReport(buttons: 0xA0), lastButtonStates: 0x00)
+
+        handler.handleReport(context) { _ in }
+
+        XCTAssertEqual(recorder.events.count, 2)
+        XCTAssertEqual(recorder.events.map(\.button), [5, 7])
+        XCTAssertTrue(recorder.events.allSatisfy(\.down))
+        XCTAssertEqual(context.lastButtonStates, 0xA0)
+    }
+
+    /// Buttons 1 to 5 are declared in the report descriptor and already handled by macOS,
+    /// so the handler must not emit duplicate events for them.
+    func testElecomHandlerIgnoresDeclaredButtons() {
+        let recorder = EmissionRecorder()
+        let handler = ElecomTrackballHandler(emit: recorder.emit)
+        let context = InputReportContext(report: elecomReport(buttons: 0x1F), lastButtonStates: 0x00)
+
+        handler.handleReport(context) { _ in }
+
+        XCTAssertTrue(recorder.events.isEmpty)
+        XCTAssertEqual(context.lastButtonStates, 0x00)
+    }
+
+    func testElecomHandlerEmitsNothingWhenStateUnchanged() {
+        let recorder = EmissionRecorder()
+        let handler = ElecomTrackballHandler(emit: recorder.emit)
+        let context = InputReportContext(report: elecomReport(buttons: 0x20), lastButtonStates: 0x20)
+
+        handler.handleReport(context) { _ in }
+
+        XCTAssertTrue(recorder.events.isEmpty)
+        XCTAssertEqual(context.lastButtonStates, 0x20)
+    }
+
+    /// Only the mouse input report carries button states; the device also sends consumer and
+    /// vendor defined reports that must not be parsed as buttons.
+    func testElecomHandlerIgnoresOtherReportIDs() {
+        let recorder = EmissionRecorder()
+        let handler = ElecomTrackballHandler(emit: recorder.emit)
+        let context = InputReportContext(report: Data([0x05, 0xE0, 0x00]), lastButtonStates: 0x00)
+
+        handler.handleReport(context) { _ in }
+
+        XCTAssertTrue(recorder.events.isEmpty)
+        XCTAssertEqual(context.lastButtonStates, 0x00)
+    }
+
     // MARK: - InputReportHandlerRegistry Tests
 
     func testRegistryFindsMiMouseHandler() {
@@ -282,6 +411,13 @@ final class InputReportHandlerTests: XCTestCase {
 
         XCTAssertEqual(handlers.count, 1)
         XCTAssertTrue(handlers.first is KensingtonSlimbladeHandler)
+    }
+
+    func testRegistryFindsElecomHandler() {
+        let handlers = InputReportHandlerRegistry.handlers(for: 0x056E, productID: 0x010C)
+
+        XCTAssertEqual(handlers.count, 1)
+        XCTAssertTrue(handlers.first is ElecomTrackballHandler)
     }
 
     func testRegistryReturnsEmptyForUnknownDevice() {
