@@ -86,7 +86,9 @@ final class SmoothedScrollingEngine {
             let magnitude = baseMagnitude * curvedMagnitude
             let speedBoost = 0.85 + speed * 0.4
             let accelerationBoost = 1 + acceleration * profile.accelerationGain
-            let velocity = magnitude * profile.velocityScale * speedBoost * accelerationBoost
+            let calculatedVelocity = magnitude * profile.velocityScale * speedBoost * accelerationBoost
+            let minVelocity = baseMagnitude * 2.0 * speedBoost
+            let velocity = max(calculatedVelocity, minVelocity)
 
             return input.sign == .minus ? -velocity : velocity
         }
