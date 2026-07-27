@@ -81,9 +81,14 @@ final class SmoothedScrollingEngine {
 
             let profile = presetProfile
             let baseMagnitude = abs(input)
-            let normalizedMagnitude = (baseMagnitude / (baseMagnitude + 24)).clamped(to: 0 ... 1)
-            let curvedMagnitude = pow(normalizedMagnitude, profile.inputExponent)
-            let magnitude = baseMagnitude * curvedMagnitude
+            let magnitude: Double
+            if acceleration == 0 {
+                magnitude = baseMagnitude
+            } else {
+                let normalizedMagnitude = (baseMagnitude / (baseMagnitude + 24)).clamped(to: 0 ... 1)
+                let curvedMagnitude = pow(normalizedMagnitude, profile.inputExponent)
+                magnitude = baseMagnitude * curvedMagnitude
+            }
             let speedBoost = 0.85 + speed * 0.4
             let accelerationBoost = 1 + acceleration * profile.accelerationGain
             let velocity = magnitude * profile.velocityScale * speedBoost * accelerationBoost
@@ -168,6 +173,9 @@ final class SmoothedScrollingEngine {
         }
 
         func momentumDecay(for dt: TimeInterval) -> Double {
+            if inertia == 0 {
+                return 0
+            }
             let profile = presetProfile
             let legacyInertiaBoost = ((min(inertia, Self.legacyUpperBound) - 0.65) * 0.05)
                 .clamped(to: -0.08 ... 0.10)
