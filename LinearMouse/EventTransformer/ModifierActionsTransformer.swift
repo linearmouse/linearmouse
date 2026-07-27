@@ -133,6 +133,7 @@ extension ModifierActionsTransformer: EventTransformer {
 
 extension ModifierActionsTransformer: Deactivatable {
     func deactivate() {
+        Self.keySimulator.reset()
         if pinchZoomBegan {
             pinchZoomBegan = false
             pinchZoomReversed = false
