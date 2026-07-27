@@ -52,8 +52,9 @@ extension ModifierActionsTransformer: EventTransformer {
         ]
         var event = event
         for case let (flag, action) in actions where event.flags.contains(flag) {
-            if let action, action != .auto {
-                guard let handledEvent = handleModifierKeyAction(for: event, action: action) else {
+            let resolvedAction = (flag == .maskShift && (action == nil || action == .auto)) ? Action.alterOrientation : action
+            if let resolvedAction, resolvedAction != .auto {
+                guard let handledEvent = handleModifierKeyAction(for: event, action: resolvedAction) else {
                     return nil
                 }
                 event = handledEvent
