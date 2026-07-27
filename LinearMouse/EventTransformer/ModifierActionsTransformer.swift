@@ -90,6 +90,7 @@ extension ModifierActionsTransformer: EventTransformer {
             } else {
                 try? Self.keySimulator.press(.command, .numpadMinus, tap: .cgSessionEventTap)
             }
+            Self.keySimulator.reset()
             return nil
         case .pinchZoom:
             pinchZoomReversed = false
