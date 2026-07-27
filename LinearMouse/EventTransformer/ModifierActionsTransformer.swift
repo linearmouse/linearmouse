@@ -72,7 +72,9 @@ extension ModifierActionsTransformer: EventTransformer {
         case .preventDefault:
             return nil
         case .alterOrientation:
-            scrollWheelEventView.swapXY()
+            if scrollWheelEventView.deltaYSignum != 0 {
+                scrollWheelEventView.swapXY()
+            }
         case let .changeSpeed(scale: scale):
             scrollWheelEventView.scale(factor: scale.asTruncatedDouble)
         case .zoom, .zoomReversed:
