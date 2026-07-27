@@ -49,7 +49,7 @@ class DeviceManager: ObservableObject {
             "HIDUseLinearScalingMouseAcceleration"
         ] {
             manager.observePropertyChanged(property: property) { [self] _ in
-                os_log("Property %{public}@ changed", log: Self.log, type: .info, property)
+                os_log("Property %{public}@ changed", log: Self.log, type: .debug, property)
                 updatePointerSpeed()
             }.tieToLifetime(of: self)
         }
