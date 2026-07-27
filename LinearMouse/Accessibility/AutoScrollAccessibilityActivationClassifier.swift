@@ -16,6 +16,7 @@ struct AutoScrollAccessibilityActivationClassifier {
         "AXMenuButton",
         "AXPopUpButton",
         "AXTabGroup",
+        "AXTab",
         "AXToolbar"
     ]
     private static let excludedSubroles: Set<String> = [
@@ -36,7 +37,8 @@ struct AutoScrollAccessibilityActivationClassifier {
         "AXMenuButton",
         "AXComboBox",
         "AXDisclosureTriangle",
-        "AXSwitch"
+        "AXSwitch",
+        "AXTab"
     ]
 
     private let elementQuery: AccessibilityElementQuerying
