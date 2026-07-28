@@ -8,6 +8,12 @@ struct AutoScrollAccessibilityActivationClassifier {
     private static let domClassListAttribute = "AXDOMClassList" as CFString
     private static let maxParentDepth = 20
     private static let probeRadius: CGFloat = 4
+    private static let standardWindowButtonAttributes = [
+        kAXCloseButtonAttribute as CFString,
+        kAXMinimizeButtonAttribute as CFString,
+        kAXZoomButtonAttribute as CFString,
+        kAXFullScreenButtonAttribute as CFString
+    ]
     private static let excludedRoles: Set<String> = [
         "AXMenuBar",
         "AXMenuBarItem",
@@ -248,8 +254,26 @@ struct AutoScrollAccessibilityActivationClassifier {
             children: immediateChildren(of: element).map(childSnapshot),
             hasVerticalScrollBar: hasAttributeValue(kAXVerticalScrollBarAttribute as CFString, on: element),
             hasHorizontalScrollBar: hasAttributeValue(kAXHorizontalScrollBarAttribute as CFString, on: element),
-            domClassList: domClassList(of: element)
+            domClassList: domClassList(of: element),
+            standardWindowButtonFrames: role == "AXWindow" ? standardWindowButtonFrames(of: element) : []
         )
+    }
+
+    private func standardWindowButtonFrames(of window: AXUIElement) -> [CGRect] {
+        for attribute in Self.standardWindowButtonAttributes {
+            guard case let .success(button?) = elementQuery.optionalElementValue(
+                of: attribute,
+                on: window
+            ) else {
+                continue
+            }
+
+            if let frame = frame(of: button) {
+                return [frame]
+            }
+        }
+
+        return []
     }
 
     private func domClassList(of element: AXUIElement) -> [String] {
