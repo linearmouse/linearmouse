@@ -12,6 +12,7 @@ private final class RecordingKeySimulator: KeySimulating {
         case down([Key])
         case up([Key])
         case press([Key])
+        case pressWithModifierFlags([Key], CGEventFlags)
         case reset
     }
 
@@ -27,6 +28,23 @@ private final class RecordingKeySimulator: KeySimulating {
 
     func press(keys: [Key], tap _: CGEventTapLocation?) throws {
         events.append(.press(keys))
+    }
+
+    func press(
+        keys: [Key],
+        modifierFlags: CGEventFlags,
+        tap _: CGEventTapLocation?
+    ) throws {
+        events.append(.pressWithModifierFlags(keys, modifierFlags))
+    }
+
+    func press(
+        keys: [Key],
+        modifierFlags: CGEventFlags,
+        restoringModifierFlags _: CGEventFlags,
+        tap _: CGEventTapLocation?
+    ) throws {
+        events.append(.pressWithModifierFlags(keys, modifierFlags))
     }
 
     func reset() {
