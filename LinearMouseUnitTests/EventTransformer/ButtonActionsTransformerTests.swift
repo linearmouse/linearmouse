@@ -38,6 +38,15 @@ private final class RecordingKeySimulator: KeySimulating {
         events.append(.pressWithModifierFlags(keys, modifierFlags))
     }
 
+    func press(
+        keys: [Key],
+        modifierFlags: CGEventFlags,
+        restoringModifierFlags _: CGEventFlags,
+        tap _: CGEventTapLocation?
+    ) throws {
+        events.append(.pressWithModifierFlags(keys, modifierFlags))
+    }
+
     func reset() {
         events.append(.reset)
     }

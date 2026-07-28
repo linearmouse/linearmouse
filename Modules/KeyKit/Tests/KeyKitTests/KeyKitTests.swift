@@ -103,6 +103,85 @@ final class KeyKitTests: XCTestCase {
         })
     }
 
+    func testReplacingKeyboardModifierFlagsRemovesInheritedSideSpecificModifiers() {
+        let inheritedFlags: CGEventFlags = [
+            .maskAlternate,
+            .maskShift,
+            .maskNumericPad,
+            .init(rawValue: UInt64(NX_DEVICELALTKEYMASK)),
+            .init(rawValue: UInt64(NX_DEVICERSHIFTKEYMASK))
+        ]
+
+        let eventFlags = KeySimulator.replacingKeyboardModifierFlags(
+            in: inheritedFlags,
+            with: .maskCommand
+        )
+
+        XCTAssertEqual(
+            eventFlags.intersection([
+                .maskCommand,
+                .maskShift,
+                .maskAlternate,
+                .maskControl
+            ]),
+            .maskCommand
+        )
+        XCTAssertFalse(eventFlags.contains(.init(rawValue: UInt64(NX_DEVICELALTKEYMASK))))
+        XCTAssertFalse(eventFlags.contains(.init(rawValue: UInt64(NX_DEVICERSHIFTKEYMASK))))
+        XCTAssertTrue(eventFlags.contains(.maskNumericPad))
+    }
+
+    func testPressWithModifierFlagsRestoresDifferentPhysicalModifierState() throws {
+        var postedEvents: [CGEvent] = []
+        let eventSourceUserData: Int64 = 0x1234
+        let keySimulator = KeySimulator(eventSourceUserData: eventSourceUserData) { event, _ in
+            postedEvents.append(event)
+        }
+        let leftOptionFlag = CGEventFlags(rawValue: UInt64(NX_DEVICELALTKEYMASK))
+
+        try keySimulator.press(
+            keys: [.numpadPlus],
+            modifierFlags: .maskCommand,
+            restoringModifierFlags: [.maskAlternate, leftOptionFlag],
+            tap: .cgSessionEventTap
+        )
+
+        XCTAssertEqual(postedEvents.map(\.type), [.keyDown, .keyUp, .flagsChanged])
+        XCTAssertTrue(postedEvents.prefix(2).allSatisfy {
+            $0.flags.contains(.maskCommand) &&
+                !$0.flags.contains(.maskAlternate) &&
+                !$0.flags.contains(leftOptionFlag)
+        })
+        let restorationEvent = try XCTUnwrap(postedEvents.last)
+        XCTAssertEqual(
+            restorationEvent.getIntegerValueField(.keyboardEventKeycode),
+            Int64(kVK_Option)
+        )
+        XCTAssertTrue(restorationEvent.flags.contains(.maskAlternate))
+        XCTAssertTrue(restorationEvent.flags.contains(leftOptionFlag))
+        XCTAssertFalse(restorationEvent.flags.contains(.maskCommand))
+        XCTAssertTrue(postedEvents.allSatisfy {
+            $0.getIntegerValueField(.eventSourceUserData) == eventSourceUserData
+        })
+    }
+
+    func testPressWithModifierFlagsDoesNotRestoreMatchingGenericModifierState() throws {
+        var postedEvents: [CGEvent] = []
+        let keySimulator = KeySimulator { event, _ in
+            postedEvents.append(event)
+        }
+        let leftCommandFlag = CGEventFlags(rawValue: UInt64(NX_DEVICELCMDKEYMASK))
+
+        try keySimulator.press(
+            keys: [.numpadPlus],
+            modifierFlags: .maskCommand,
+            restoringModifierFlags: [.maskCommand, leftCommandFlag],
+            tap: .cgSessionEventTap
+        )
+
+        XCTAssertEqual(postedEvents.map(\.type), [.keyDown, .keyUp])
+    }
+
     func testKeyCodeResolverSupportsCommonModifierShortcutsInRussianLayout() throws {
         let russianMapping = try characterMapping(inputSourceID: "com.apple.keylayout.Russian")
         let russianCommandMapping = try characterMapping(

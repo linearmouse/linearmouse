@@ -9,6 +9,7 @@ private final class RecordingModifierKeySimulator: KeySimulating {
     struct ModifiedPress: Equatable {
         let keys: [Key]
         let modifierFlags: CGEventFlags
+        let restoringModifierFlags: CGEventFlags?
     }
 
     private(set) var unmodifiedPresses: [[Key]] = []
@@ -26,7 +27,24 @@ private final class RecordingModifierKeySimulator: KeySimulating {
         modifierFlags: CGEventFlags,
         tap _: CGEventTapLocation?
     ) throws {
-        modifiedPresses.append(.init(keys: keys, modifierFlags: modifierFlags))
+        modifiedPresses.append(.init(
+            keys: keys,
+            modifierFlags: modifierFlags,
+            restoringModifierFlags: nil
+        ))
+    }
+
+    func press(
+        keys: [Key],
+        modifierFlags: CGEventFlags,
+        restoringModifierFlags: CGEventFlags,
+        tap _: CGEventTapLocation?
+    ) throws {
+        modifiedPresses.append(.init(
+            keys: keys,
+            modifierFlags: modifierFlags,
+            restoringModifierFlags: restoringModifierFlags
+        ))
     }
 
     func reset() {}
@@ -106,8 +124,47 @@ final class ModifierActionsTransformerTests: XCTestCase {
         XCTAssertEqual(
             keySimulator.modifiedPresses,
             [
-                .init(keys: [.numpadPlus], modifierFlags: .maskCommand),
-                .init(keys: [.numpadMinus], modifierFlags: .maskCommand)
+                .init(
+                    keys: [.numpadPlus],
+                    modifierFlags: .maskCommand,
+                    restoringModifierFlags: .maskCommand
+                ),
+                .init(
+                    keys: [.numpadMinus],
+                    modifierFlags: .maskCommand,
+                    restoringModifierFlags: .maskCommand
+                )
+            ]
+        )
+    }
+
+    func testZoomRestoresNonCommandTriggerModifier() throws {
+        let keySimulator = RecordingModifierKeySimulator()
+        let modifiers = Scheme.Scrolling.Modifiers(option: .zoom)
+        let transformer = ModifierActionsTransformer(
+            modifiers: .init(vertical: modifiers, horizontal: modifiers),
+            keySimulator: keySimulator
+        )
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 1,
+            wheel1: 1,
+            wheel2: 0,
+            wheel3: 0
+        ))
+        let leftOptionFlag = CGEventFlags(rawValue: UInt64(NX_DEVICELALTKEYMASK))
+        event.flags = [.maskAlternate, leftOptionFlag]
+
+        XCTAssertNil(transformer.transform(event, in: EventTransformerContext(device: nil)))
+        XCTAssertEqual(
+            keySimulator.modifiedPresses,
+            [
+                .init(
+                    keys: [.numpadPlus],
+                    modifierFlags: .maskCommand,
+                    restoringModifierFlags: [.maskAlternate, leftOptionFlag]
+                )
             ]
         )
     }

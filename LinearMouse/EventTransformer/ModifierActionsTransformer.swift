@@ -89,16 +89,19 @@ extension ModifierActionsTransformer: EventTransformer {
             if deltaSignum == 0 {
                 return event
             }
+            let restoringModifierFlags = ModifierState.normalize(event.flags)
             if deltaSignum > 0 {
                 try? keySimulator.press(
                     keys: [.numpadPlus],
                     modifierFlags: .maskCommand,
+                    restoringModifierFlags: restoringModifierFlags,
                     tap: .cgSessionEventTap
                 )
             } else {
                 try? keySimulator.press(
                     keys: [.numpadMinus],
                     modifierFlags: .maskCommand,
+                    restoringModifierFlags: restoringModifierFlags,
                     tap: .cgSessionEventTap
                 )
             }
