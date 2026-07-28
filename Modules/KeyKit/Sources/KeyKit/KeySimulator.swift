@@ -14,20 +14,42 @@ public protocol KeySimulating: AnyObject {
     func down(keys: [Key], tap: CGEventTapLocation?) throws
     func up(keys: [Key], tap: CGEventTapLocation?) throws
     func press(keys: [Key], tap: CGEventTapLocation?) throws
+    func press(keys: [Key], modifierFlags: CGEventFlags, tap: CGEventTapLocation?) throws
     func reset()
     func modifiedCGEventFlags(of event: CGEvent) -> CGEventFlags?
 }
 
 /// Simulate key presses.
 public class KeySimulator: KeySimulating {
+    typealias EventPoster = (_ event: CGEvent, _ tap: CGEventTapLocation?) -> Void
+
     private let keyCodeResolver = KeyCodeResolver()
+    private let eventSourceUserData: Int64?
+    private let eventPoster: EventPoster
     private let lock = NSLock()
 
     private var flags = CGEventFlags()
 
-    public init() {}
+    public convenience init(eventSourceUserData: Int64? = nil) {
+        self.init(eventSourceUserData: eventSourceUserData) { event, tap in
+            event.post(tap: tap ?? .cghidEventTap)
+        }
+    }
 
-    private func postKeyLocked(_ key: Key, keyDown: Bool, tap: CGEventTapLocation? = nil) throws {
+    init(
+        eventSourceUserData: Int64? = nil,
+        eventPoster: @escaping EventPoster
+    ) {
+        self.eventSourceUserData = eventSourceUserData
+        self.eventPoster = eventPoster
+    }
+
+    private func postKeyLocked(
+        _ key: Key,
+        keyDown: Bool,
+        modifierFlags: CGEventFlags = [],
+        tap: CGEventTapLocation? = nil
+    ) throws {
         var flagsToToggle = CGEventFlags()
         switch key {
         case .command, .commandRight:
@@ -63,7 +85,8 @@ public class KeySimulator: KeySimulating {
             break
         }
 
-        guard let keyCode = keyCodeResolver.keyCode(for: key, modifiers: flags) else {
+        let eventFlags = flags.union(modifierFlags)
+        guard let keyCode = keyCodeResolver.keyCode(for: key, modifiers: eventFlags) else {
             throw KeySimulatorError.unsupportedKey
         }
 
@@ -73,13 +96,48 @@ public class KeySimulator: KeySimulating {
 
         event.flags = event.flags
             .subtracting([.maskCommand, .maskShift, .maskAlternate, .maskControl])
-            .union(flags)
+            .union(eventFlags)
 
         if !flagsToToggle.isEmpty {
             event.type = .flagsChanged
         }
 
-        event.post(tap: tap ?? .cghidEventTap)
+        if let eventSourceUserData {
+            event.setIntegerValueField(.eventSourceUserData, value: eventSourceUserData)
+        }
+
+        eventPoster(event, tap)
+    }
+
+    private func pressLocked(
+        keys: [Key],
+        modifierFlags: CGEventFlags = [],
+        tap: CGEventTapLocation?
+    ) {
+        for key in keys {
+            do {
+                try postKeyLocked(
+                    key,
+                    keyDown: true,
+                    modifierFlags: modifierFlags,
+                    tap: tap
+                )
+            } catch {
+                os_log(.error, "KeySimulator: keyDown failed for %{public}@: %{public}@", "\(key)", "\(error)")
+            }
+        }
+        for key in keys.reversed() {
+            do {
+                try postKeyLocked(
+                    key,
+                    keyDown: false,
+                    modifierFlags: modifierFlags,
+                    tap: tap
+                )
+            } catch {
+                os_log(.error, "KeySimulator: keyUp failed for %{public}@: %{public}@", "\(key)", "\(error)")
+            }
+        }
     }
 }
 
@@ -115,26 +173,33 @@ public extension KeySimulator {
     }
 
     func press(keys: [Key], tap: CGEventTapLocation? = nil) throws {
-        try lock.withLock {
-            for key in keys {
-                do {
-                    try postKeyLocked(key, keyDown: true, tap: tap)
-                } catch {
-                    os_log(.error, "KeySimulator: keyDown failed for %{public}@: %{public}@", "\(key)", "\(error)")
-                }
-            }
-            for key in keys.reversed() {
-                do {
-                    try postKeyLocked(key, keyDown: false, tap: tap)
-                } catch {
-                    os_log(.error, "KeySimulator: keyUp failed for %{public}@: %{public}@", "\(key)", "\(error)")
-                }
-            }
+        lock.withLock {
+            pressLocked(keys: keys, tap: tap)
         }
     }
 
     func press(_ keys: Key..., tap: CGEventTapLocation? = nil) throws {
         try press(keys: keys, tap: tap)
+    }
+
+    /// Presses keys with modifier flags attached to each generated event without synthesizing
+    /// modifier key transitions.
+    func press(
+        keys: [Key],
+        modifierFlags: CGEventFlags,
+        tap: CGEventTapLocation? = nil
+    ) throws {
+        lock.withLock {
+            pressLocked(keys: keys, modifierFlags: modifierFlags, tap: tap)
+        }
+    }
+
+    func press(
+        _ keys: Key...,
+        modifierFlags: CGEventFlags,
+        tap: CGEventTapLocation? = nil
+    ) throws {
+        try press(keys: keys, modifierFlags: modifierFlags, tap: tap)
     }
 
     func modifiedCGEventFlags(of event: CGEvent) -> CGEventFlags? {

@@ -72,6 +72,37 @@ final class KeyKitTests: XCTestCase {
         wait(for: [expectation], timeout: 5)
     }
 
+    func testPressWithModifierFlagsDoesNotPostModifierTransitionsOrPersistFlags() throws {
+        var postedEvents: [CGEvent] = []
+        let eventSourceUserData: Int64 = 0x1234
+        let keySimulator = KeySimulator(eventSourceUserData: eventSourceUserData) { event, _ in
+            postedEvents.append(event)
+        }
+
+        try keySimulator.press(
+            keys: [.numpadPlus],
+            modifierFlags: .maskCommand,
+            tap: .cgSessionEventTap
+        )
+        try keySimulator.press(keys: [.home], tap: .cgSessionEventTap)
+
+        XCTAssertEqual(postedEvents.map(\.type), [.keyDown, .keyUp, .keyDown, .keyUp])
+        XCTAssertEqual(
+            postedEvents.map { $0.getIntegerValueField(.keyboardEventKeycode) },
+            [
+                Int64(kVK_ANSI_KeypadPlus),
+                Int64(kVK_ANSI_KeypadPlus),
+                Int64(kVK_Home),
+                Int64(kVK_Home)
+            ]
+        )
+        XCTAssertTrue(postedEvents.prefix(2).allSatisfy { $0.flags.contains(.maskCommand) })
+        XCTAssertTrue(postedEvents.suffix(2).allSatisfy { !$0.flags.contains(.maskCommand) })
+        XCTAssertTrue(postedEvents.allSatisfy {
+            $0.getIntegerValueField(.eventSourceUserData) == eventSourceUserData
+        })
+    }
+
     func testKeyCodeResolverSupportsCommonModifierShortcutsInRussianLayout() throws {
         let russianMapping = try characterMapping(inputSourceID: "com.apple.keylayout.Russian")
         let russianCommandMapping = try characterMapping(

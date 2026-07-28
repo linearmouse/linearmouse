@@ -12,18 +12,22 @@ class ModifierActionsTransformer {
         category: "ModifierActionsTransformer"
     )
 
-    private static let keySimulator = KeySimulator()
+    private static let defaultKeySimulator = KeySimulator(
+        eventSourceUserData: CGEvent.linearMouseSyntheticEventUserData
+    )
 
     typealias Modifiers = Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Modifiers>
     typealias Action = Scheme.Scrolling.Modifiers.Action
 
     private let modifiers: Modifiers
+    private let keySimulator: KeySimulating
 
     private var pinchZoomBegan = false
     private var pinchZoomReversed = false
 
-    init(modifiers: Modifiers) {
+    init(modifiers: Modifiers, keySimulator: KeySimulating? = nil) {
         self.modifiers = modifiers
+        self.keySimulator = keySimulator ?? Self.defaultKeySimulator
     }
 }
 
@@ -86,9 +90,17 @@ extension ModifierActionsTransformer: EventTransformer {
                 return event
             }
             if deltaSignum > 0 {
-                try? Self.keySimulator.press(.command, .numpadPlus, tap: .cgSessionEventTap)
+                try? keySimulator.press(
+                    keys: [.numpadPlus],
+                    modifierFlags: .maskCommand,
+                    tap: .cgSessionEventTap
+                )
             } else {
-                try? Self.keySimulator.press(.command, .numpadMinus, tap: .cgSessionEventTap)
+                try? keySimulator.press(
+                    keys: [.numpadMinus],
+                    modifierFlags: .maskCommand,
+                    tap: .cgSessionEventTap
+                )
             }
             return nil
         case .pinchZoom:
