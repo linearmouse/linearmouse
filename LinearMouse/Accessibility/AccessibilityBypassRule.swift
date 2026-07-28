@@ -14,18 +14,7 @@ extension AccessibilityBypassRule {
             name: "standardWindowTitleBar",
             conditions: [
                 .role("AXWindow"),
-                .pointInStandardWindowTopRows(1)
-            ]
-        ),
-        // Some custom-rendered apps expose only the window itself during AX hit testing.
-        // Preserve the row immediately below the title bar, where these apps commonly put tabs.
-        AccessibilityBypassRule(
-            name: "windowOnlyTopRows",
-            conditions: [
-                .depth(0),
-                .role("AXWindow"),
-                .subrole("AXStandardWindow"),
-                .pointInStandardWindowTopRows(2)
+                .pointInStandardWindowTitleBar
             ]
         ),
         AccessibilityBypassRule(
@@ -63,7 +52,7 @@ enum AccessibilityBypassCondition {
     case frameMatchesParent
     case domClassListContains(String)
     case domClassListContainsSuffix(String)
-    case pointInStandardWindowTopRows(Int)
+    case pointInStandardWindowTitleBar
 }
 
 struct AccessibilityBypassRuleContext {
@@ -179,18 +168,16 @@ struct AccessibilityBypassRuleMatcher {
             return element.domClassList.contains(expectedClass)
         case let .domClassListContainsSuffix(expectedSuffix):
             return element.domClassList.contains { $0.hasSuffix(expectedSuffix) }
-        case let .pointInStandardWindowTopRows(rowCount):
-            return pointIsInStandardWindowTopRows(rowCount, at: context.point, of: element)
+        case .pointInStandardWindowTitleBar:
+            return pointIsInStandardWindowTitleBar(at: context.point, of: element)
         }
     }
 
-    private func pointIsInStandardWindowTopRows(
-        _ rowCount: Int,
+    private func pointIsInStandardWindowTitleBar(
         at point: CGPoint,
         of element: AccessibilityBypassElementSnapshot
     ) -> Bool {
-        guard rowCount > 0,
-              let windowFrame = element.frame else {
+        guard let windowFrame = element.frame else {
             return false
         }
 
@@ -215,18 +202,13 @@ struct AccessibilityBypassRuleMatcher {
             return false
         }
 
-        let topRegionHeight = titleBarHeight * CGFloat(rowCount)
-        guard topRegionHeight <= windowFrame.height else {
-            return false
-        }
-
-        let topRegionFrame = CGRect(
+        let titleBarFrame = CGRect(
             x: windowFrame.minX,
             y: windowFrame.minY,
             width: windowFrame.width,
-            height: topRegionHeight
+            height: titleBarHeight
         )
-        return topRegionFrame.contains(point)
+        return titleBarFrame.contains(point)
     }
 
     private func hasScrollabilitySignal(_ element: AccessibilityBypassElementSnapshot) -> Bool {

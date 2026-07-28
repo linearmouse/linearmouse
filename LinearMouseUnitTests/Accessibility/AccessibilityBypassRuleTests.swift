@@ -92,29 +92,10 @@ final class AccessibilityBypassRuleTests: XCTestCase {
         XCTAssertNil(rule)
     }
 
-    func testWindowOnlyTopRowsRuleMatchesZedTabStrip() {
-        let rule = matcher.firstMatchingRule(
-            for: zedWindowSnapshot(),
-            in: AccessibilityBypassRuleContext(point: CGPoint(x: 500, y: 80))
-        )
-
-        XCTAssertEqual(rule?.name, "windowOnlyTopRows")
-    }
-
-    func testWindowOnlyTopRowsRuleDoesNotMatchZedEditor() {
-        let rule = matcher.firstMatchingRule(
-            for: zedWindowSnapshot(),
-            in: AccessibilityBypassRuleContext(point: CGPoint(x: 500, y: 120))
-        )
-
-        XCTAssertNil(rule)
-    }
-
-    func testWindowOnlyTopRowsRuleRequiresStandardWindow() {
+    func testStandardWindowTitleBarRuleDoesNotExpandWhenHitTestReturnsWindow() {
         let rule = matcher.firstMatchingRule(
             for: standardWindowSnapshot(
                 depth: 0,
-                subrole: "AXDialog",
                 standardWindowButtonFrames: [
                     CGRect(x: 10, y: 40, width: 12, height: 14)
                 ]
@@ -315,17 +296,6 @@ final class AccessibilityBypassRuleTests: XCTestCase {
         standardWindowSnapshot(
             depth: 6,
             standardWindowButtonFrames: standardWindowButtonFrames
-        )
-    }
-
-    private func zedWindowSnapshot() -> AccessibilityBypassElementSnapshot {
-        standardWindowSnapshot(
-            depth: 0,
-            standardWindowButtonFrames: [
-                CGRect(x: 10, y: 40, width: 12, height: 14),
-                CGRect(x: 30, y: 40, width: 12, height: 14),
-                CGRect(x: 50, y: 40, width: 12, height: 14)
-            ]
         )
     }
 
