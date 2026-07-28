@@ -11,6 +11,101 @@ final class AccessibilityBypassRuleTests: XCTestCase {
         scrollableRoles: ["AXWebArea", "AXScrollArea"]
     )
 
+    func testStandardWindowTitleBarRuleMatchesZoteroTabStrip() {
+        let rule = matcher.firstMatchingRule(
+            for: zoteroWindowSnapshot(),
+            in: AccessibilityBypassRuleContext(point: CGPoint(x: 150, y: 48))
+        )
+
+        XCTAssertEqual(rule?.name, "standardWindowTitleBar")
+    }
+
+    func testStandardWindowTitleBarRuleMatchesChromeTabStrip() {
+        let rule = matcher.firstMatchingRule(
+            for: standardWindowSnapshot(
+                depth: 6,
+                standardWindowButtonFrames: [
+                    CGRect(x: 12, y: 42.5, width: 16, height: 16),
+                    CGRect(x: 35, y: 42.5, width: 16, height: 16),
+                    CGRect(x: 58, y: 42.5, width: 16, height: 16)
+                ]
+            ),
+            in: AccessibilityBypassRuleContext(point: CGPoint(x: 200, y: 50))
+        )
+
+        XCTAssertEqual(rule?.name, "standardWindowTitleBar")
+    }
+
+    func testStandardWindowTitleBarRuleMatchesFirefoxTabStrip() {
+        let rule = matcher.firstMatchingRule(
+            for: standardWindowSnapshot(
+                depth: 6,
+                standardWindowButtonFrames: [
+                    CGRect(x: 11, y: 44, width: 16, height: 16),
+                    CGRect(x: 34, y: 44, width: 16, height: 16),
+                    CGRect(x: 57, y: 44, width: 16, height: 16)
+                ]
+            ),
+            in: AccessibilityBypassRuleContext(point: CGPoint(x: 500, y: 52))
+        )
+
+        XCTAssertEqual(rule?.name, "standardWindowTitleBar")
+    }
+
+    func testStandardWindowTitleBarRuleDoesNotMatchToolbarBelowTitleBar() {
+        let rule = matcher.firstMatchingRule(
+            for: zoteroWindowSnapshot(),
+            in: AccessibilityBypassRuleContext(point: CGPoint(x: 500, y: 80))
+        )
+
+        XCTAssertNil(rule)
+    }
+
+    func testStandardWindowTitleBarRuleRequiresStandardWindowButtonGeometry() {
+        let rule = matcher.firstMatchingRule(
+            for: zoteroWindowSnapshot(standardWindowButtonFrames: []),
+            in: AccessibilityBypassRuleContext(point: CGPoint(x: 150, y: 48))
+        )
+
+        XCTAssertNil(rule)
+    }
+
+    func testStandardWindowTitleBarRuleNeedsOnlyOneWindowButton() {
+        let rule = matcher.firstMatchingRule(
+            for: zoteroWindowSnapshot(
+                standardWindowButtonFrames: [
+                    CGRect(x: 13, y: 41, width: 12, height: 14)
+                ]
+            ),
+            in: AccessibilityBypassRuleContext(point: CGPoint(x: 150, y: 48))
+        )
+
+        XCTAssertEqual(rule?.name, "standardWindowTitleBar")
+    }
+
+    func testStandardWindowTitleBarRuleRejectsPointOutsideWindow() {
+        let rule = matcher.firstMatchingRule(
+            for: zoteroWindowSnapshot(),
+            in: AccessibilityBypassRuleContext(point: CGPoint(x: 1920, y: 48))
+        )
+
+        XCTAssertNil(rule)
+    }
+
+    func testStandardWindowTitleBarRuleDoesNotExpandWhenHitTestReturnsWindow() {
+        let rule = matcher.firstMatchingRule(
+            for: standardWindowSnapshot(
+                depth: 0,
+                standardWindowButtonFrames: [
+                    CGRect(x: 10, y: 40, width: 12, height: 14)
+                ]
+            ),
+            in: AccessibilityBypassRuleContext(point: CGPoint(x: 500, y: 80))
+        )
+
+        XCTAssertNil(rule)
+    }
+
     func testChromiumFullWindowGroupRuleMatchesChromeHitTestHole() {
         let rule = matcher.firstMatchingRule(
             for: chromiumFullWindowGroupSnapshot(),
@@ -188,6 +283,35 @@ final class AccessibilityBypassRuleTests: XCTestCase {
             parentFrame: CGRect(x: 166, y: 52, width: 494, height: 41),
             children: [],
             domClassList: domClassList
+        )
+    }
+
+    private func zoteroWindowSnapshot(
+        standardWindowButtonFrames: [CGRect] = [
+            CGRect(x: 13, y: 41, width: 12, height: 14),
+            CGRect(x: 33, y: 41, width: 12, height: 14),
+            CGRect(x: 53, y: 41, width: 12, height: 14)
+        ]
+    ) -> AccessibilityBypassElementSnapshot {
+        standardWindowSnapshot(
+            depth: 6,
+            standardWindowButtonFrames: standardWindowButtonFrames
+        )
+    }
+
+    private func standardWindowSnapshot(
+        depth: Int,
+        subrole: String = "AXStandardWindow",
+        standardWindowButtonFrames: [CGRect]
+    ) -> AccessibilityBypassElementSnapshot {
+        AccessibilityBypassElementSnapshot(
+            depth: depth,
+            role: "AXWindow",
+            subrole: subrole,
+            actions: ["AXRaise"],
+            frame: CGRect(x: 0, y: 30, width: 1920, height: 971),
+            children: [],
+            standardWindowButtonFrames: standardWindowButtonFrames
         )
     }
 }

@@ -11,6 +11,13 @@ struct AccessibilityBypassRule {
 extension AccessibilityBypassRule {
     static let autoScrollRules: [AccessibilityBypassRule] = [
         AccessibilityBypassRule(
+            name: "standardWindowTitleBar",
+            conditions: [
+                .role("AXWindow"),
+                .pointInStandardWindowTitleBar
+            ]
+        ),
+        AccessibilityBypassRule(
             name: "chromiumFullWindowGroupHitTestHole",
             conditions: [
                 .depth(0),
@@ -45,6 +52,7 @@ enum AccessibilityBypassCondition {
     case frameMatchesParent
     case domClassListContains(String)
     case domClassListContainsSuffix(String)
+    case pointInStandardWindowTitleBar
 }
 
 struct AccessibilityBypassRuleContext {
@@ -63,6 +71,7 @@ struct AccessibilityBypassElementSnapshot {
     let hasVerticalScrollBar: Bool
     let hasHorizontalScrollBar: Bool
     let domClassList: [String]
+    let standardWindowButtonFrames: [CGRect]
 
     init(
         depth: Int,
@@ -75,7 +84,8 @@ struct AccessibilityBypassElementSnapshot {
         children: [AccessibilityBypassChildSnapshot] = [],
         hasVerticalScrollBar: Bool = false,
         hasHorizontalScrollBar: Bool = false,
-        domClassList: [String] = []
+        domClassList: [String] = [],
+        standardWindowButtonFrames: [CGRect] = []
     ) {
         self.depth = depth
         self.role = role
@@ -88,6 +98,7 @@ struct AccessibilityBypassElementSnapshot {
         self.hasVerticalScrollBar = hasVerticalScrollBar
         self.hasHorizontalScrollBar = hasHorizontalScrollBar
         self.domClassList = domClassList
+        self.standardWindowButtonFrames = standardWindowButtonFrames
     }
 }
 
@@ -157,7 +168,47 @@ struct AccessibilityBypassRuleMatcher {
             return element.domClassList.contains(expectedClass)
         case let .domClassListContainsSuffix(expectedSuffix):
             return element.domClassList.contains { $0.hasSuffix(expectedSuffix) }
+        case .pointInStandardWindowTitleBar:
+            return pointIsInStandardWindowTitleBar(at: context.point, of: element)
         }
+    }
+
+    private func pointIsInStandardWindowTitleBar(
+        at point: CGPoint,
+        of element: AccessibilityBypassElementSnapshot
+    ) -> Bool {
+        guard let windowFrame = element.frame else {
+            return false
+        }
+
+        let buttonCenterYs = element.standardWindowButtonFrames.compactMap { buttonFrame -> CGFloat? in
+            guard buttonFrame.width > 0,
+                  buttonFrame.height > 0,
+                  windowFrame.contains(CGPoint(x: buttonFrame.midX, y: buttonFrame.midY)) else {
+                return nil
+            }
+
+            return buttonFrame.midY
+        }
+
+        guard !buttonCenterYs.isEmpty else {
+            return false
+        }
+
+        let titleBarCenterY = buttonCenterYs.reduce(0, +) / CGFloat(buttonCenterYs.count)
+        let titleBarHeight = 2 * (titleBarCenterY - windowFrame.minY)
+        guard titleBarHeight > 0,
+              titleBarHeight <= windowFrame.height else {
+            return false
+        }
+
+        let titleBarFrame = CGRect(
+            x: windowFrame.minX,
+            y: windowFrame.minY,
+            width: windowFrame.width,
+            height: titleBarHeight
+        )
+        return titleBarFrame.contains(point)
     }
 
     private func hasScrollabilitySignal(_ element: AccessibilityBypassElementSnapshot) -> Bool {
