@@ -3,22 +3,23 @@
 
 import Foundation
 
-/// Handles the extra Fn buttons of ELECOM trackballs.
+/// Handles undeclared button bits of supported ELECOM trackballs.
 ///
-/// The HID report descriptor of these devices declares only 5 buttons in its mouse
-/// collection, which are taken up by left, right, middle and the two thumb buttons.
-/// The remaining Fn buttons are still reported in the same input report, but in the
-/// three bits that the descriptor declares as padding, so macOS discards them and no
-/// `otherMouseDown` event is ever generated.
+/// The 0x010C layout was verified in #1302. Passive on-device capture for 0x011C verified
+/// 8-byte reports with report ID 0x01 in byte 0: Fn1 is `01 20 00 00 00 00 00 00`, Fn2 is
+/// `01 40 00 00 00 00 00 00`, and Fn3 is `01 80 00 00 00 00 00 00`; release clears
+/// the corresponding bit. Its descriptor declares only Button usages 1 through 5 (bits 0
+/// through 4) for report ID 0x01, so these upper masks are undeclared and macOS drops
+/// their events.
 ///
-/// This handler reads those undeclared bits out of the raw input report and simulates
-/// the corresponding button events.
+/// This handler synthesizes logical buttons 5, 6, and 7 for those masks so it does not
+/// duplicate the declared button usages that macOS already handles.
 ///
-/// Other ELECOM trackballs share this report layout, so they can be supported by adding
-/// their product IDs below once the layout has been confirmed on the device.
+/// Add other product IDs only after confirming their report layout on-device.
 ///
 /// Supported devices:
 /// - ELECOM HUGE TrackBall (0x056E:0x010C)
+/// - ELECOM trackball (0x056E:0x011C)
 struct ElecomTrackballHandler: InputReportHandler {
     private struct Product: Hashable {
         let vendorID: Int
@@ -26,13 +27,14 @@ struct ElecomTrackballHandler: InputReportHandler {
     }
 
     private static let supportedProducts: Set<Product> = [
-        .init(vendorID: 0x056E, productID: 0x010C) // ELECOM HUGE TrackBall
+        .init(vendorID: 0x056E, productID: 0x010C), // ELECOM HUGE TrackBall
+        .init(vendorID: 0x056E, productID: 0x011C) // ELECOM trackball
     ]
 
-    /// Report format: | Button 0 (1 bit) | ... | Button 4 (1 bit) | Fn buttons (3 bits) |
+    /// Report format: | Bits 0-4 (HID Button usages 1-5) | Undeclared masks (3 bits) |
     ///
-    /// Buttons 0 to 4 are declared in the report descriptor and handled by macOS, so only
-    /// the upper three bits are of interest here.
+    /// Bits 0 to 4 are declared in the report descriptor and handled by macOS, so only the
+    /// upper three bits are of interest here.
     private static let fnButtonsMask: UInt8 = 0xE0
 
     /// Bit 5 to 7 are mapped to button 5 to 7, the first button numbers not already used by
@@ -50,8 +52,8 @@ struct ElecomTrackballHandler: InputReportHandler {
     }
 
     func alwaysNeedsReportObservation() -> Bool {
-        // The device reports 5 buttons, so the button count heuristic would not enable
-        // report observation on its own.
+        // Both supported IDs declare five native buttons and require raw-report observation
+        // to synthesize their undeclared button masks.
         true
     }
 
