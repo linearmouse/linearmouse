@@ -282,7 +282,7 @@ final class InputReportHandlerTests: XCTestCase {
         XCTAssertTrue(handler.matches(vendorID: 0x056E, productID: 0x010C))
     }
 
-    func testElecomHandlerMatchesElecomTrackball011C() {
+    func testElecomHandlerMatchesHugeTrackballWireless011C() {
         let handler = ElecomTrackballHandler()
 
         XCTAssertTrue(handler.matches(vendorID: 0x056E, productID: 0x011C))
@@ -444,7 +444,7 @@ final class InputReportHandlerTests: XCTestCase {
         XCTAssertTrue(handlers.first is ElecomTrackballHandler)
     }
 
-    func testRegistryFindsElecomHandlerForElecomTrackball011C() {
+    func testRegistryFindsElecomHandlerForHugeTrackballWireless011C() {
         let handlers = InputReportHandlerRegistry.handlers(for: 0x056E, productID: 0x011C)
 
         XCTAssertEqual(handlers.count, 1)
