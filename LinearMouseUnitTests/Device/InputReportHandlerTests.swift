@@ -270,22 +270,34 @@ final class InputReportHandlerTests: XCTestCase {
 
     // MARK: - ElecomTrackballHandler Tests
 
-    /// Builds a report in the format observed from an ELECOM HUGE TrackBall:
+    /// Builds a synthetic 8-byte report used by both supported product IDs:
     /// byte 0 is the report ID, byte 1 holds the button states.
     private func elecomReport(buttons: UInt8) -> Data {
         Data([0x01, buttons, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
     }
 
-    func testElecomHandlerMatchesHugeTrackball() {
+    func testElecomHandlerMatchesHugeTrackball010C() {
         let handler = ElecomTrackballHandler()
 
         XCTAssertTrue(handler.matches(vendorID: 0x056E, productID: 0x010C))
+    }
+
+    func testElecomHandlerMatchesHugeTrackballWireless011C() {
+        let handler = ElecomTrackballHandler()
+
+        XCTAssertTrue(handler.matches(vendorID: 0x056E, productID: 0x011C))
     }
 
     func testElecomHandlerDoesNotMatchOtherDevice() {
         let handler = ElecomTrackballHandler()
 
         XCTAssertFalse(handler.matches(vendorID: 0x1234, productID: 0x5678))
+    }
+
+    func testElecomHandlerDoesNotMatchUnsupportedElecomDevice() {
+        let handler = ElecomTrackballHandler()
+
+        XCTAssertFalse(handler.matches(vendorID: 0x056E, productID: 0xFFFF))
     }
 
     func testElecomHandlerAlwaysNeedsReportObservation() {
@@ -319,7 +331,7 @@ final class InputReportHandlerTests: XCTestCase {
     }
 
     func testElecomHandlerDetectsFnButtons() {
-        // Bit 5, 6 and 7 are the three buttons the report descriptor declares as padding.
+        // Bits 5, 6, and 7 are undeclared upper button masks.
         for (mask, button) in [(UInt8(0x20), 5), (UInt8(0x40), 6), (UInt8(0x80), 7)] {
             let recorder = EmissionRecorder()
             let handler = ElecomTrackballHandler(emit: recorder.emit)
@@ -360,8 +372,20 @@ final class InputReportHandlerTests: XCTestCase {
         XCTAssertEqual(context.lastButtonStates, 0xA0)
     }
 
-    /// Buttons 1 to 5 are declared in the report descriptor and already handled by macOS,
-    /// so the handler must not emit duplicate events for them.
+    func testElecomHandlerIgnoresDeclaredBitsInMixedReport() {
+        let recorder = EmissionRecorder()
+        let handler = ElecomTrackballHandler(emit: recorder.emit)
+        let context = InputReportContext(report: elecomReport(buttons: 0xFF), lastButtonStates: 0x00)
+
+        handler.handleReport(context) { _ in }
+
+        XCTAssertEqual(recorder.events.map(\.button), [5, 6, 7])
+        XCTAssertTrue(recorder.events.allSatisfy(\.down))
+        XCTAssertEqual(context.lastButtonStates, 0xE0)
+    }
+
+    /// Bits 0 through 4 (HID Button usages 1 through 5) are already handled by macOS, so
+    /// the handler must not emit duplicate events for them.
     func testElecomHandlerIgnoresDeclaredButtons() {
         let recorder = EmissionRecorder()
         let handler = ElecomTrackballHandler(emit: recorder.emit)
@@ -413,11 +437,24 @@ final class InputReportHandlerTests: XCTestCase {
         XCTAssertTrue(handlers.first is KensingtonSlimbladeHandler)
     }
 
-    func testRegistryFindsElecomHandler() {
+    func testRegistryFindsElecomHandlerForHugeTrackball010C() {
         let handlers = InputReportHandlerRegistry.handlers(for: 0x056E, productID: 0x010C)
 
         XCTAssertEqual(handlers.count, 1)
         XCTAssertTrue(handlers.first is ElecomTrackballHandler)
+    }
+
+    func testRegistryFindsElecomHandlerForHugeTrackballWireless011C() {
+        let handlers = InputReportHandlerRegistry.handlers(for: 0x056E, productID: 0x011C)
+
+        XCTAssertEqual(handlers.count, 1)
+        XCTAssertTrue(handlers.first is ElecomTrackballHandler)
+    }
+
+    func testRegistryReturnsEmptyForUnsupportedElecomDevice() {
+        let handlers = InputReportHandlerRegistry.handlers(for: 0x056E, productID: 0xFFFF)
+
+        XCTAssertTrue(handlers.isEmpty)
     }
 
     func testRegistryReturnsEmptyForUnknownDevice() {
