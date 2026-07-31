@@ -120,6 +120,40 @@ For example, to use a smoother scrolling profile for a mouse:
 If you want different tuning for each direction, provide `vertical` and `horizontal` values under
 `smoothed`.
 
+## Click debouncing
+
+`buttons.clickDebouncing` filters electrical chatter from worn or noisy mouse switches. Existing
+configurations continue to use the `legacy` mode when `mode` is omitted.
+
+The experimental `libinput` mode tracks press and release pairs with a state machine. Like
+libinput, it uses a fixed 25 ms bounce window and a fixed 12 ms spurious-release window. It may
+delay a suspicious release briefly, but it preserves the final release so applications do not
+remain in a stuck dragging or resizing state.
+
+```json
+{
+  "schemes": [
+    {
+      "if": {
+        "device": {
+          "category": "mouse"
+        }
+      },
+      "buttons": {
+        "clickDebouncing": {
+          "mode": "libinput",
+          "timeout": 25
+        }
+      }
+    }
+  ]
+}
+```
+
+`timeout` must be greater than zero to enable the feature. Its numeric value and
+`resetTimerOnMouseUp` apply only to `legacy` mode. The `buttons` list also applies only to
+`legacy` mode; `libinput` mode always uses its fixed windows and covers all standard mouse buttons.
+
 ## Device matching
 
 Vendor ID and product ID can be provided to match a specific device.

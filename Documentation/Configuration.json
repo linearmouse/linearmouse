@@ -236,11 +236,16 @@
       "additionalProperties": false,
       "properties": {
         "buttons": {
-          "description": "Buttons to debounce.",
+          "description": "Buttons to debounce in legacy mode. Libinput mode applies to all standard mouse buttons.",
           "items": {
             "$ref": "#/definitions/PhysicalButton"
           },
           "type": "array"
+        },
+        "mode": {
+          "$ref": "#/definitions/Scheme.Buttons.ClickDebouncing.Mode",
+          "default": "legacy",
+          "description": "Select the existing click filter or the experimental libinput-inspired state machine."
         },
         "resetTimerOnMouseUp": {
           "description": "If the value is true, the timer will be reset on mouse up.",
@@ -248,10 +253,30 @@
         },
         "timeout": {
           "$ref": "#/definitions/Int",
-          "description": "The time period in which rapid clicks are ignored."
+          "description": "Enables click debouncing when greater than zero. The value is the debounce window in milliseconds for legacy mode; libinput mode uses fixed 25 ms and 12 ms windows."
         }
       },
       "type": "object"
+    },
+    "Scheme.Buttons.ClickDebouncing.Legacy": {
+      "const": "legacy",
+      "description": "Use LinearMouse's existing press-only click filter.",
+      "type": "string"
+    },
+    "Scheme.Buttons.ClickDebouncing.Libinput": {
+      "const": "libinput",
+      "description": "Use the experimental libinput press-and-release state machine with its fixed 25 ms bounce and 12 ms spurious-release windows.",
+      "type": "string"
+    },
+    "Scheme.Buttons.ClickDebouncing.Mode": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Scheme.Buttons.ClickDebouncing.Legacy"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.ClickDebouncing.Libinput"
+        }
+      ]
     },
     "Scheme.Buttons.Gesture": {
       "additionalProperties": false,

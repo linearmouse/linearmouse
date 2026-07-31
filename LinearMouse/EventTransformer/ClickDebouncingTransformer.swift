@@ -10,11 +10,18 @@ class ClickDebouncingTransformer: EventTransformer {
     private let button: CGMouseButton
     private let timeout: TimeInterval
     private let resetTimerOnMouseUp: Bool
+    private let nowInNanoseconds: () -> UInt64
 
-    init(for button: CGMouseButton, timeout: TimeInterval, resetTimerOnMouseUp: Bool) {
+    init(
+        for button: CGMouseButton,
+        timeout: TimeInterval,
+        resetTimerOnMouseUp: Bool,
+        nowInNanoseconds: @escaping () -> UInt64 = { DispatchTime.now().uptimeNanoseconds }
+    ) {
         self.button = button
         self.timeout = timeout
         self.resetTimerOnMouseUp = resetTimerOnMouseUp
+        self.nowInNanoseconds = nowInNanoseconds
     }
 
     private var mouseDownEventType: CGEventType {
@@ -64,11 +71,11 @@ class ClickDebouncingTransformer: EventTransformer {
     }
 
     private func touchLastClickedAt() {
-        lastClickedAtInNanoseconds = DispatchTime.now().uptimeNanoseconds
+        lastClickedAtInNanoseconds = nowInNanoseconds()
     }
 
     private var intervalSinceLastClick: TimeInterval {
         let nanosecondsPerSecond = 1e9
-        return Double(DispatchTime.now().uptimeNanoseconds - lastClickedAtInNanoseconds) / nanosecondsPerSecond
+        return Double(nowInNanoseconds() - lastClickedAtInNanoseconds) / nanosecondsPerSecond
     }
 }

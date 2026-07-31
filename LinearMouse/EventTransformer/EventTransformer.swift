@@ -7,6 +7,12 @@ import os.log
 
 struct EventTransformerContext {
     var device: Device?
+    var deferredEventSink: ((CGEvent) -> Void)?
+
+    init(device: Device?, deferredEventSink: ((CGEvent) -> Void)? = nil) {
+        self.device = device
+        self.deferredEventSink = deferredEventSink
+    }
 }
 
 struct EventTransformerResolution {
@@ -14,13 +20,21 @@ struct EventTransformerResolution {
     var context: EventTransformerContext
 
     func transform(_ event: CGEvent) -> CGEvent? {
-        transformer.transform(event, in: context)
+        var context = context
+        context.deferredEventSink = { $0.post(tap: .cgSessionEventTap) }
+        return transformer.transform(event, in: context)
     }
 }
 
 protocol EventTransformer {
     func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent?
 }
+
+/// Adopted by transformers that can emit an event after `transform` returns.
+///
+/// The array transformer provides those events with a continuation through the
+/// remaining transformers before they are posted back to the session.
+protocol DeferredEventTransformer {}
 
 enum LogitechControlEventHandlingResult {
     case notHandled
@@ -41,8 +55,25 @@ extension [EventTransformer]: EventTransformer {
     func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent? {
         var event: CGEvent? = event
 
-        for eventTransformer in self {
-            event = event.flatMap { eventTransformer.transform($0, in: context) }
+        for (index, eventTransformer) in enumerated() {
+            event = event.flatMap {
+                var transformerContext = context
+
+                if eventTransformer is DeferredEventTransformer,
+                   let finalSink = context.deferredEventSink {
+                    // Capture only the tail. A deferred transformer may retain this
+                    // continuation while a timer is active, so capturing the full
+                    // array here would create a temporary retain cycle.
+                    let remainingTransformers = Array(dropFirst(index + 1))
+                    transformerContext.deferredEventSink = { deferredEvent in
+                        if let transformedEvent = remainingTransformers.transform(deferredEvent, in: context) {
+                            finalSink(transformedEvent)
+                        }
+                    }
+                }
+
+                return eventTransformer.transform($0, in: transformerContext)
+            }
         }
 
         return event

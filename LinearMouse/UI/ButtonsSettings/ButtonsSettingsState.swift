@@ -54,7 +54,12 @@ extension ButtonsSettingsState {
             mergedScheme.buttons.clickDebouncing.timeout ?? 0 > 0
         }
         set {
+            let selectedButtons = mergedScheme.buttons.clickDebouncing.buttons ?? []
             scheme.buttons.clickDebouncing.timeout = newValue ? 50 : 0
+
+            if newValue, selectedButtons.isEmpty {
+                scheme.buttons.clickDebouncing.buttons = [.left]
+            }
         }
     }
 
@@ -87,6 +92,15 @@ extension ButtonsSettingsState {
         return formatter
     }
 
+    var clickDebouncingMode: Scheme.Buttons.ClickDebouncing.Mode {
+        get {
+            mergedScheme.buttons.clickDebouncing.mode ?? .legacy
+        }
+        set {
+            scheme.buttons.clickDebouncing.mode = newValue
+        }
+    }
+
     var clickDebouncingResetTimerOnMouseUp: Bool {
         get {
             mergedScheme.buttons.clickDebouncing.resetTimerOnMouseUp ?? false
@@ -94,6 +108,19 @@ extension ButtonsSettingsState {
         set {
             scheme.buttons.clickDebouncing.resetTimerOnMouseUp = newValue
         }
+    }
+
+    var clickDebouncingHasSelectedButtons: Bool {
+        !(mergedScheme.buttons.clickDebouncing.buttons ?? []).isEmpty
+    }
+
+    var clickDebouncingSelectedButtons: [CGMouseButton] {
+        mergedScheme.buttons.clickDebouncing.buttons ?? []
+    }
+
+    func clickDebouncingButtonIsOnlySelection(_ button: CGMouseButton) -> Bool {
+        let buttons = clickDebouncingSelectedButtons
+        return buttons.count == 1 && buttons.contains(button)
     }
 
     func clickDebouncingButtonEnabledBinding(for button: CGMouseButton) -> Binding<Bool> {
@@ -104,7 +131,9 @@ extension ButtonsSettingsState {
             set: { [self] newValue in
                 let buttons = mergedScheme.buttons.clickDebouncing.buttons ?? []
                 if newValue {
-                    scheme.buttons.clickDebouncing.buttons = buttons + [button]
+                    if !buttons.contains(button) {
+                        scheme.buttons.clickDebouncing.buttons = buttons + [button]
+                    }
                 } else {
                     scheme.buttons.clickDebouncing.buttons = buttons.filter { $0 != button }
                 }
