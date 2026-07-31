@@ -1014,7 +1014,13 @@ declare namespace Scheme {
 
     type ClickDebouncing = {
       /**
-       * @description The time period in which rapid clicks are ignored.
+       * @description Select the existing click filter or the experimental libinput-inspired state machine.
+       * @default legacy
+       */
+      mode?: ClickDebouncing.Mode;
+
+      /**
+       * @description Enables click debouncing when greater than zero. The value is the debounce window in milliseconds for legacy mode; libinput mode uses fixed 25 ms and 12 ms windows.
        */
       timeout?: Int;
 
@@ -1024,10 +1030,24 @@ declare namespace Scheme {
       resetTimerOnMouseUp?: boolean;
 
       /**
-       * @description Buttons to debounce.
+       * @description Buttons to debounce in legacy mode. Libinput mode applies to all standard mouse buttons.
        */
       buttons?: PhysicalButton[];
     };
+
+    namespace ClickDebouncing {
+      /**
+       * @description Use LinearMouse's existing press-only click filter.
+       */
+      type Legacy = "legacy";
+
+      /**
+       * @description Use the experimental libinput press-and-release state machine with its fixed 25 ms bounce and 12 ms spurious-release windows.
+       */
+      type Libinput = "libinput";
+
+      type Mode = Legacy | Libinput;
+    }
 
     type Gesture = {
       /**

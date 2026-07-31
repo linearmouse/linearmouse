@@ -29,6 +29,42 @@ final class EventTransformerManagerTests: XCTestCase {
         XCTAssertEqual(firstKey, secondKey)
     }
 
+    func testClickDebouncingWithoutModeUsesLegacyTransformer() throws {
+        var scheme = Scheme()
+        scheme.buttons.clickDebouncing.timeout = 50
+        scheme.buttons.clickDebouncing.buttons = [.left]
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+
+        let transformers = try XCTUnwrap(EventTransformerManager.shared.get(
+            withDevice: nil,
+            withPid: nil,
+            withDisplay: nil
+        ) as? [EventTransformer])
+
+        XCTAssertEqual(transformers.compactMap { $0 as? ClickDebouncingTransformer }.count, 1)
+        XCTAssertTrue(transformers.compactMap { $0 as? LibinputClickDebouncingTransformer }.isEmpty)
+    }
+
+    func testLibinputClickDebouncingModeUsesBetaTransformer() throws {
+        var scheme = Scheme()
+        scheme.buttons.clickDebouncing.mode = .libinput
+        scheme.buttons.clickDebouncing.timeout = 25
+        scheme.buttons.clickDebouncing.buttons = [.left]
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+
+        let transformers = try XCTUnwrap(EventTransformerManager.shared.get(
+            withDevice: nil,
+            withPid: nil,
+            withDisplay: nil
+        ) as? [EventTransformer])
+
+        XCTAssertTrue(transformers.compactMap { $0 as? ClickDebouncingTransformer }.isEmpty)
+        XCTAssertEqual(
+            transformers.compactMap { $0 as? LibinputClickDebouncingTransformer }.count,
+            Scheme.Buttons.ClickDebouncing.standardButtons.count
+        )
+    }
+
     func testTransformerCacheDoesNotReuseValueForNewProcess() throws {
         ConfigurationState.shared.configuration = .init(schemes: [
             Scheme(scrolling: .init(reverse: .init(vertical: true)))

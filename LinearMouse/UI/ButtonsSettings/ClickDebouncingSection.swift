@@ -12,55 +12,137 @@ struct ClickDebouncingSection: View {
                 withDescription {
                     Text("Debounce button clicks")
                     Text(
-                        "Ignore rapid clicks within a certain time period."
+                        "Suppress unintended clicks caused by a worn or noisy mouse switch."
                     )
                 }
             }
 
             if state.clickDebouncingEnabled {
-                HStack(spacing: 5) {
-                    Slider(
-                        value: $state.clickDebouncingTimeoutInDouble,
-                        in: 5 ... 500
-                    )
-                    .labelsHidden()
-                    TextField(
-                        String(""),
-                        value: $state.clickDebouncingTimeout,
-                        formatter: state.clickDebouncingTimeoutFormatter
-                    )
-                    .labelsHidden()
-                    .textFieldStyle(.roundedBorder)
-                    .multilineTextAlignment(.trailing)
-                    .frame(width: 60)
-                    Text("ms")
+                Picker("Debouncing method", selection: $state.clickDebouncingMode.animation()) {
+                    Text("Classic").tag(Scheme.Buttons.ClickDebouncing.Mode.legacy)
+                    Text("libinput (Beta)").tag(Scheme.Buttons.ClickDebouncing.Mode.libinput)
                 }
+                .pickerStyle(.segmented)
 
-                Toggle(isOn: $state.clickDebouncingResetTimerOnMouseUp.animation()) {
-                    Text("Reset timer on mouse up")
-                }
+                if state.clickDebouncingMode == .legacy {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Debounce interval")
 
-                VStack(alignment: .leading) {
-                    HStack(spacing: 16) {
-                        Toggle("Left button", isOn: state.clickDebouncingButtonEnabledBinding(for: .left))
-                            .fixedSize()
-                        Toggle("Right button", isOn: state.clickDebouncingButtonEnabledBinding(for: .right))
-                            .fixedSize()
-                        Toggle("Middle button", isOn: state.clickDebouncingButtonEnabledBinding(for: .center))
-                            .fixedSize()
+                        HStack(spacing: 5) {
+                            Slider(
+                                value: $state.clickDebouncingTimeoutInDouble,
+                                in: 5 ... 500
+                            )
+                            .labelsHidden()
+                            TextField(
+                                String(""),
+                                value: $state.clickDebouncingTimeout,
+                                formatter: state.clickDebouncingTimeoutFormatter
+                            )
+                            .labelsHidden()
+                            .textFieldStyle(.roundedBorder)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 60)
+                            Text("ms")
+                        }
                     }
-                    .toggleStyle(.checkbox)
 
-                    HStack(spacing: 16) {
-                        Toggle("Back button", isOn: state.clickDebouncingButtonEnabledBinding(for: .back))
-                            .fixedSize()
-                        Toggle("Forward button", isOn: state.clickDebouncingButtonEnabledBinding(for: .forward))
-                            .fixedSize()
+                    Toggle(isOn: $state.clickDebouncingResetTimerOnMouseUp.animation()) {
+                        Text("Reset timer on mouse up")
                     }
-                    .toggleStyle(.checkbox)
+
+                    classicButtonPicker
                 }
             }
         }
         .modifier(SectionViewModifier())
+    }
+
+    @ViewBuilder private var classicButtonPicker: some View {
+        if #available(macOS 11.0, *) {
+            HStack {
+                Text("Apply to")
+
+                Spacer()
+
+                Menu {
+                    buttonMenuToggle("Left button", for: .left)
+                    buttonMenuToggle("Right button", for: .right)
+                    buttonMenuToggle("Middle button", for: .center)
+                    buttonMenuToggle("Back button", for: .back)
+                    buttonMenuToggle("Forward button", for: .forward)
+                } label: {
+                    Text(buttonSelectionSummary)
+                }
+                .menuStyle(.borderlessButton)
+                .fixedSize()
+            }
+        } else {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Apply to")
+
+                HStack(spacing: 16) {
+                    buttonCheckbox("Left button", for: .left)
+                    buttonCheckbox("Right button", for: .right)
+                    buttonCheckbox("Middle button", for: .center)
+                }
+
+                HStack(spacing: 16) {
+                    buttonCheckbox("Back button", for: .back)
+                    buttonCheckbox("Forward button", for: .forward)
+                }
+            }
+        }
+
+        if !state.clickDebouncingHasSelectedButtons {
+            Text("Select at least one mouse button.")
+                .foregroundColor(.red)
+                .controlSize(.small)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func buttonMenuToggle(_ title: LocalizedStringKey, for button: CGMouseButton) -> some View {
+        Toggle(title, isOn: state.clickDebouncingButtonEnabledBinding(for: button))
+            .disabled(state.clickDebouncingButtonIsOnlySelection(button))
+    }
+
+    private func buttonCheckbox(_ title: LocalizedStringKey, for button: CGMouseButton) -> some View {
+        Toggle(title, isOn: state.clickDebouncingButtonEnabledBinding(for: button))
+            .toggleStyle(.checkbox)
+            .fixedSize()
+            .disabled(state.clickDebouncingButtonIsOnlySelection(button))
+    }
+
+    private var buttonSelectionSummary: LocalizedStringKey {
+        let buttons = state.clickDebouncingSelectedButtons
+
+        if buttons.isEmpty {
+            return "No buttons"
+        }
+
+        if buttons.count == Scheme.Buttons.ClickDebouncing.standardButtons.count,
+           Scheme.Buttons.ClickDebouncing.standardButtons.allSatisfy(buttons.contains) {
+            return "All buttons"
+        }
+
+        if buttons.count == 1, let button = buttons.first {
+            switch button {
+            case .left:
+                return "Left button"
+            case .right:
+                return "Right button"
+            case .center:
+                return "Middle button"
+            case .back:
+                return "Back button"
+            case .forward:
+                return "Forward button"
+            default:
+                break
+            }
+        }
+
+        return "Multiple buttons"
     }
 }

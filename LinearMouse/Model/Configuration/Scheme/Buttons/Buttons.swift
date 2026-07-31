@@ -41,7 +41,7 @@ extension Scheme.Buttons {
         }
 
         if let clickDebouncing = $clickDebouncing {
-            buttons.clickDebouncing = clickDebouncing
+            clickDebouncing.merge(into: &buttons.$clickDebouncing)
         }
 
         if let autoScroll = $autoScroll {

@@ -351,15 +351,26 @@ class EventTransformerManager {
                 ))
         }
 
-        if let timeout = scheme.buttons.clickDebouncing.timeout, timeout > 0,
-           let buttons = scheme.buttons.clickDebouncing.buttons {
+        if let timeout = scheme.buttons.clickDebouncing.timeout, timeout > 0 {
+            let mode = scheme.buttons.clickDebouncing.mode ?? .legacy
             let resetTimerOnMouseUp = scheme.buttons.clickDebouncing.resetTimerOnMouseUp ?? false
+            let buttons = mode == .libinput
+                ? Scheme.Buttons.ClickDebouncing.standardButtons
+                : scheme.buttons.clickDebouncing.buttons ?? []
+
             for button in buttons {
-                eventTransformer.append(ClickDebouncingTransformer(
-                    for: button,
-                    timeout: TimeInterval(timeout) / 1000,
-                    resetTimerOnMouseUp: resetTimerOnMouseUp
-                ))
+                switch mode {
+                case .legacy:
+                    eventTransformer.append(ClickDebouncingTransformer(
+                        for: button,
+                        timeout: TimeInterval(timeout) / 1000,
+                        resetTimerOnMouseUp: resetTimerOnMouseUp
+                    ))
+                case .libinput:
+                    eventTransformer.append(LibinputClickDebouncingTransformer(
+                        for: button
+                    ))
+                }
             }
         }
 
@@ -478,7 +489,9 @@ class EventTransformerManager {
     }
 
     private func resetState() {
+        let activeEventTransformer = activeCacheKey.flatMap { eventTransformerCache.value(forKey: $0) }
         let oldAutoScroll = sharedAutoScrollTransformer
+        deactivate(activeEventTransformer, excluding: oldAutoScroll)
         sharedAutoScrollTransformer = nil
         activeCacheKey = nil
         eventTransformerCache.removeAllValues()
