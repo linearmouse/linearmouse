@@ -164,11 +164,14 @@ class StatusItem: NSObject, NSMenuDelegate {
     private func updateStatusItemPresentation() {
         let currentBatteryLevel = currentDeviceBatteryLevel()
         let menuBarBatteryDisplayMode = Defaults[.menuBarBatteryDisplayMode]
-        statusItem.isVisible = Self.menuBarIsVisible(
+        let shouldBeVisible = Self.menuBarIsVisible(
             currentBatteryLevel: currentBatteryLevel,
             visibilityMode: Defaults[.menuBarVisibilityMode],
             batteryDisplayMode: menuBarBatteryDisplayMode
         )
+        if statusItem.isVisible != shouldBeVisible {
+            statusItem.isVisible = shouldBeVisible
+        }
         updateStatusItemBatteryIndicator(
             currentBatteryLevel: currentBatteryLevel,
             menuBarBatteryDisplayMode: menuBarBatteryDisplayMode
