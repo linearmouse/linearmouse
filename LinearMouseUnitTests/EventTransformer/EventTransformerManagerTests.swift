@@ -759,6 +759,74 @@ final class EventTransformerManagerTests: XCTestCase {
         XCTAssertNil(releaseResolution.transform(release) { _ in })
     }
 
+    func testSourceBypassIgnoresUnrelatedButtonPairWhileInteractionIsActive() throws {
+        let mapping = Scheme.Buttons.Mapping(
+            trigger: .init(input: .button(.mouse(4))),
+            outcomes: .init(shortPress: .arg0(.none))
+        )
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(buttons: .init(
+                mappings: [mapping],
+                switchPrimaryButtonAndSecondaryButtons: true
+            ))
+        ])
+        let manager = EventTransformerManager()
+        let previousBypassSetting = manager.bypassEventsFromOtherApplications
+        manager.bypassEventsFromOtherApplications = true
+        defer {
+            manager.bypassEventsFromOtherApplications = previousBypassSetting
+        }
+
+        let mappedButton = try XCTUnwrap(CGMouseButton(rawValue: 4))
+        let mappedDown = try mouseEvent(type: .otherMouseDown, button: mappedButton)
+        let mappedDownResolution = manager.resolve(
+            withCGEvent: mappedDown,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: nil
+        )
+        XCTAssertNil(mappedDownResolution.transform(mappedDown) { _ in })
+        let owner = try buttonMappingTransformer(in: mappedDownResolution)
+        XCTAssertTrue(owner.hasActiveInteraction)
+
+        let unrelatedDown = try mouseEvent(type: .leftMouseDown, button: .left)
+        let unrelatedDownResolution = manager.resolve(
+            withCGEvent: unrelatedDown,
+            withSourcePid: getpid(),
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: nil
+        )
+        let transformedDown = try XCTUnwrap(unrelatedDownResolution.transform(unrelatedDown) { _ in })
+        XCTAssertEqual(transformedDown.type, .leftMouseDown)
+        XCTAssertEqual(MouseEventView(transformedDown).mouseButton, .left)
+
+        let unrelatedUp = try mouseEvent(type: .leftMouseUp, button: .left)
+        let unrelatedUpResolution = manager.resolve(
+            withCGEvent: unrelatedUp,
+            withSourcePid: getpid(),
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: nil
+        )
+        let transformedUp = try XCTUnwrap(unrelatedUpResolution.transform(unrelatedUp) { _ in })
+        XCTAssertEqual(transformedUp.type, .leftMouseUp)
+        XCTAssertEqual(MouseEventView(transformedUp).mouseButton, .left)
+        XCTAssertTrue(owner.hasActiveInteraction)
+
+        let mappedUp = try mouseEvent(type: .otherMouseUp, button: mappedButton)
+        let mappedUpResolution = manager.resolve(
+            withCGEvent: mappedUp,
+            withSourcePid: getpid(),
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: nil
+        )
+        XCTAssertNil(mappedUpResolution.transform(mappedUp) { _ in })
+        XCTAssertFalse(owner.hasActiveInteraction)
+    }
+
     func testLogitechReleaseUsesRouteThatHandledPressAcrossDisplayBoundary() throws {
         let identity = LogitechControlIdentity(controlID: 0x00C3)
         let mapping = Scheme.Buttons.Mapping(

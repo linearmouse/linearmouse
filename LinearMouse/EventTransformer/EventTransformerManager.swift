@@ -199,7 +199,8 @@ class EventTransformerManager {
         let mouseButtonTransition = mouseButtonTransition(for: cgEvent)
 
         if sourcePid != nil, bypassEventsFromOtherApplications, !cgEvent.isLinearMouseSyntheticEvent {
-            if let (interactionKey, interaction) = activeInteraction {
+            if let (interactionKey, interaction) = activeInteraction,
+               interactionOwnsContinuation(cgEvent, interaction: interaction) {
                 // The owner must still receive its release even when the event
                 // source would normally bypass LinearMouse. Use its original
                 // route for this exceptional event so its preprocessing stays
@@ -222,7 +223,8 @@ class EventTransformerManager {
         }
         if let sourceBundleIdentifier = sourcePid?.bundleIdentifier,
            sourceBundleIdentifierBypassSet.contains(sourceBundleIdentifier) {
-            if let (interactionKey, interaction) = activeInteraction {
+            if let (interactionKey, interaction) = activeInteraction,
+               interactionOwnsContinuation(cgEvent, interaction: interaction) {
                 return drainingResolution(
                     transformer: interaction.route.transformer,
                     interaction: interaction,
@@ -283,12 +285,17 @@ class EventTransformerManager {
                 interactionKey: interactionKey
             )
         }
-        return resolution(for: route, selection: selection)
+        return resolution(
+            for: route,
+            selection: selection,
+            mouseButtonTransition: mouseButtonTransition
+        )
     }
 
     private func resolution(
         for route: TransformerRoute,
-        selection: RouteSelection
+        selection: RouteSelection,
+        mouseButtonTransition: MouseButtonTransition? = nil
     ) -> EventTransformerResolution {
         EventTransformerResolution(
             transformer: route.transformer,
@@ -297,7 +304,8 @@ class EventTransformerManager {
             self?.didProcessRoute(
                 on: route,
                 selection: selection,
-                interactionKey: selection.interactionKey
+                interactionKey: selection.interactionKey,
+                mouseButtonTransition: mouseButtonTransition
             )
         }
     }
@@ -325,15 +333,21 @@ class EventTransformerManager {
     private func didProcessRoute(
         on route: TransformerRoute,
         selection: RouteSelection,
-        interactionKey: InteractionKey
+        interactionKey: InteractionKey,
+        mouseButtonTransition: MouseButtonTransition? = nil
     ) {
         guard let transformer = activeInteractionTransformers(in: route.transformer).first else {
             return
         }
+        var pinnedMouseButtons = Set<CGMouseButton>()
+        if case let .pressed(button) = mouseButtonTransition {
+            pinnedMouseButtons.insert(button)
+        }
         activeInteractions[interactionKey] = .init(
             route: route,
             transformer: transformer,
-            selection: selection
+            selection: selection,
+            pinnedMouseButtons: pinnedMouseButtons
         )
     }
 
@@ -422,6 +436,17 @@ class EventTransformerManager {
         default:
             return false
         }
+    }
+
+    private func interactionOwnsContinuation(
+        _ event: CGEvent,
+        interaction: ActiveInteraction
+    ) -> Bool {
+        guard isInteractionContinuation(event),
+              let button = MouseEventView(event).mouseButton else {
+            return false
+        }
+        return interaction.pinnedMouseButtons.contains(button)
     }
 
     private func mouseButtonTransition(for event: CGEvent) -> MouseButtonTransition? {
