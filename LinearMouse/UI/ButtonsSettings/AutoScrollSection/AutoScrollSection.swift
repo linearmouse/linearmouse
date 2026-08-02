@@ -57,8 +57,7 @@ struct AutoScrollSection: View {
                 }
 
                 Text(modeDescription)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .settingsDescriptionStyle()
                     .padding(.top, 4)
             }
         }

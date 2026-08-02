@@ -25,9 +25,7 @@ struct LoggingSection: View {
             VStack(alignment: .leading) {
                 Text("Export the logs for the last 5 minutes.")
                 Text("If you are reporting a bug, it would be helpful to attach the logs.")
-                    .controlSize(.small)
-                    .foregroundColor(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .settingsDescriptionStyle()
             }
 
             Button("Export logs") {

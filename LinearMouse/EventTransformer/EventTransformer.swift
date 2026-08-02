@@ -18,16 +18,41 @@ struct EventTransformerContext {
 struct EventTransformerResolution {
     var transformer: EventTransformer
     var context: EventTransformerContext
+    var didTransform: (() -> Void)?
+
+    init(
+        transformer: EventTransformer,
+        context: EventTransformerContext,
+        didTransform: (() -> Void)? = nil
+    ) {
+        self.transformer = transformer
+        self.context = context
+        self.didTransform = didTransform
+    }
 
     func transform(_ event: CGEvent) -> CGEvent? {
+        transform(event) { $0.post(tap: .cgSessionEventTap) }
+    }
+
+    func transform(_ event: CGEvent, deferredEventSink: @escaping (CGEvent) -> Void) -> CGEvent? {
+        defer {
+            didTransform?()
+        }
+
         var context = context
-        context.deferredEventSink = { $0.post(tap: .cgSessionEventTap) }
+        context.deferredEventSink = deferredEventSink
         return transformer.transform(event, in: context)
     }
 }
 
 protocol EventTransformer {
     func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent?
+}
+
+/// Adopted by stateful transformers that must continue receiving events until
+/// the physical interaction they claimed has ended.
+protocol EventTransformerInteractionTracking: AnyObject {
+    var hasActiveInteraction: Bool { get }
 }
 
 /// Adopted by transformers that can emit an event after `transform` returns.
@@ -49,6 +74,13 @@ enum LogitechControlEventHandlingResult {
 
 protocol LogitechControlEventHandling {
     func handleLogitechControlEvent(_ context: LogitechEventContext) -> LogitechControlEventHandlingResult
+}
+
+/// Adopted by stateful transformers that can abandon one Logitech control
+/// stream when its HID++ monitor disappears before reporting the release.
+protocol LogitechControlInteractionCanceling {
+    @discardableResult
+    func cancelLogitechControlInteraction(_ context: LogitechEventContext) -> Bool
 }
 
 extension [EventTransformer]: EventTransformer {

@@ -479,8 +479,12 @@ For example, to open Launchpad when the wheel button is clicked, or to switch sp
       "buttons": {
         "mappings": [
           {
-            "button": 2,
-            "action": "launchpad"
+            "trigger": {
+              "input": { "button": 2 }
+            },
+            "outcomes": {
+              "shortPress": "launchpad"
+            }
           }
         ]
       }
@@ -491,7 +495,7 @@ For example, to open Launchpad when the wheel button is clicked, or to switch sp
 
 In this example, the wheel button is bound to open Launchpad.
 
-`"button": 2` denotes the auxiliary button, which is usually the wheel button.
+`"input": { "button": 2 }` denotes the auxiliary button, which is usually the wheel button.
 
 The following table lists all the buttons:
 
@@ -506,6 +510,100 @@ The following table lists all the buttons:
 
 `{ "action": { "run": "open -a Launchpad" } }` assigns a shell command `open -a LaunchPad` to
 the button. When the button is clicked, the shell command will be executed.
+
+### Advanced triggers
+
+The structured `trigger` format supports chords, long presses, swipes, pressed/released action
+lifecycles, and a wheel gesture while buttons are held. Existing flat `button` and `scroll` mappings
+remain accepted and are migrated to the structured representation when the configuration is loaded.
+
+Timing and movement thresholds are global LinearMouse policy rather than values stored in each
+mapping. The current policy uses an 80 ms chord window, a 500 ms long-press duration, a 50-point
+swipe threshold, and a 40-point perpendicular dead zone. When several structured outcomes share a
+trigger, they belong in the same `outcomes` object:
+
+```json
+{
+  "trigger": {
+    "input": { "button": 4 },
+    "modifiers": ["command"]
+  },
+  "outcomes": {
+    "shortPress": "missionControl",
+    "longPress": "launchpad",
+    "swipe": {
+      "left": "missionControl.spaceLeft",
+      "right": "missionControl.spaceRight"
+    }
+  }
+}
+```
+
+Additional buttons in `simultaneous` form an unordered chord. The most specific completed chord
+wins over a mapping for one of its individual buttons:
+
+```json
+{
+  "trigger": {
+    "input": { "button": 0 },
+    "simultaneous": [1]
+  },
+  "outcomes": {
+    "shortPress": "showDesktop"
+  }
+}
+```
+
+Use `whileHeld` for an ordered combination or for button-plus-wheel. In the recorder, keep the first
+button held until the prompt changes to **Press a button or scroll**, then press the trigger button;
+the result is shown as `Hold A → B`. A wheel is an instantaneous input, so it has one `action` and
+cannot have long-press or swipe outcomes:
+
+```json
+{
+  "trigger": {
+    "input": { "wheel": "up" },
+    "whileHeld": [4],
+    "modifiers": ["option"]
+  },
+  "action": "media.volumeUp"
+}
+```
+
+Use a `press` outcome when an action must begin before release. Its behavior can perform once,
+repeat according to the system keyboard repeat settings, hold keyboard keys, or remap the complete
+down/drag/up stream of a physical mouse button:
+
+```json
+{
+  "trigger": {
+    "input": { "button": 4 }
+  },
+  "outcomes": {
+    "press": {
+      "action": { "keyPress": ["command"] },
+      "behavior": "hold"
+    }
+  }
+}
+```
+
+`press` commits as soon as its trigger resolves, so it cannot be combined with `shortPress`,
+`longPress`, or `swipe` in the same mapping. The GUI exposes the applicable behaviors according to
+the selected action. `remap` is available only for a single physical mouse-button trigger.
+
+If a mapping defines only a long press, swipe, or incomplete chord, an ordinary click is delayed
+briefly and then passed through unchanged when the configured gesture does not match.
+
+Matching is deterministic: exact modifiers and `whileHeld` requirements are filtered first, then
+the most specific completed chord wins. A swipe or long press commits as soon as its global
+threshold is reached; otherwise `shortPress` runs on release. Once one outcome commits, the other
+outcomes for that press are suppressed.
+
+Legacy mappings are normalized during decoding and use the same recognizer and action executor as
+structured mappings. A normal legacy action becomes `shortPress`; `repeat`, keyboard `hold`, and
+physical mouse-button swaps become `press` outcomes with the corresponding behavior; legacy scroll
+mappings become wheel triggers. Saving the configuration writes the migrated structured form.
 
 ### Modifier keys
 
@@ -525,9 +623,13 @@ In this example, <kbd>command + forward</kbd> is bound to open Mission Control.
       "buttons": {
         "mappings": [
           {
-            "button": 4,
-            "command": true,
-            "action": "missionControl"
+            "trigger": {
+              "input": { "button": 4 },
+              "modifiers": ["command"]
+            },
+            "outcomes": {
+              "shortPress": "missionControl"
+            }
           }
         ]
       }
@@ -536,7 +638,7 @@ In this example, <kbd>command + forward</kbd> is bound to open Mission Control.
 }
 ```
 
-`"command": true` denotes that <kbd>command</kbd> should be pressed.
+`"modifiers": ["command"]` denotes that <kbd>command</kbd> should be pressed.
 
 You can specify `shift`, `option` and `control` as well.
 
@@ -558,14 +660,22 @@ You can specify `shift`, `option` and `control` as well.
       "buttons": {
         "mappings": [
           {
-            "button": 3,
-            "command": true,
-            "action": "missionControl.spaceLeft"
+            "trigger": {
+              "input": { "button": 3 },
+              "modifiers": ["command"]
+            },
+            "outcomes": {
+              "shortPress": "missionControl.spaceLeft"
+            }
           },
           {
-            "button": 4,
-            "command": true,
-            "action": "missionControl.spaceRight"
+            "trigger": {
+              "input": { "button": 4 },
+              "modifiers": ["command"]
+            },
+            "outcomes": {
+              "shortPress": "missionControl.spaceRight"
+            }
           }
         ]
       }
@@ -579,7 +689,8 @@ You can specify `shift`, `option` and `control` as well.
 
 ### Key repeat
 
-With `repeat: true`, actions will be repeated until the button is up.
+With a `press` outcome whose behavior is `repeat`, actions are repeated until the trigger is
+released.
 
 In this example, <kbd>option + back</kbd> and <kbd>option + forward</kbd> is bound to volume down
 and volume up.
@@ -587,7 +698,7 @@ and volume up.
 If you hold <kbd>option + back</kbd>, the volume will continue to decrease.
 
 > **Note**  
-> If you disabled key repeat in System Settings, `repeat: true` will not work.
+> If you disabled key repeat in System Settings, the action runs once on release instead.
 > If you change key repeat rate or delay until repeat in System Settings, you have to restart
 > LinearMouse to take effect.
 
@@ -605,16 +716,28 @@ If you hold <kbd>option + back</kbd>, the volume will continue to decrease.
       "buttons": {
         "mappings": [
           {
-            "button": 4,
-            "repeat": true,
-            "option": true,
-            "action": "media.volumeUp"
+            "trigger": {
+              "input": { "button": 4 },
+              "modifiers": ["option"]
+            },
+            "outcomes": {
+              "press": {
+                "action": "media.volumeUp",
+                "behavior": "repeat"
+              }
+            }
           },
           {
-            "button": 3,
-            "repeat": true,
-            "option": true,
-            "action": "media.volumeDown"
+            "trigger": {
+              "input": { "button": 3 },
+              "modifiers": ["option"]
+            },
+            "outcomes": {
+              "press": {
+                "action": "media.volumeDown",
+                "behavior": "repeat"
+              }
+            }
           }
         ]
       }
@@ -625,12 +748,11 @@ If you hold <kbd>option + back</kbd>, the volume will continue to decrease.
 
 ### Hold keyboard shortcuts while pressed
 
-With `hold: true`, keyboard shortcut actions stay pressed for as long as the mouse button is held.
+With a `press` outcome whose behavior is `hold`, keyboard shortcut actions stay pressed for as long
+as the trigger is held.
 
-This is different from `repeat: true`:
-
-- `repeat: true` keeps sending the shortcut over and over.
-- `hold: true` sends key down when the mouse button is pressed, then key up when it is released.
+This is different from `repeat`: `repeat` keeps sending the shortcut, while `hold` sends key down
+when the trigger resolves and key up when it is released.
 
 This is useful for apps that expect a real held key, such as timeline scrubbing or temporary tools.
 
@@ -646,10 +768,16 @@ This is useful for apps that expect a real held key, such as timeline scrubbing 
       "buttons": {
         "mappings": [
           {
-            "button": 3,
-            "hold": true,
-            "action": {
-              "keyPress": ["c"]
+            "trigger": {
+              "input": { "button": 3 }
+            },
+            "outcomes": {
+              "press": {
+                "action": {
+                  "keyPress": ["c"]
+                },
+                "behavior": "hold"
+              }
             }
           }
         ]
@@ -661,7 +789,7 @@ This is useful for apps that expect a real held key, such as timeline scrubbing 
 
 ### Volume up and down with <kbd>option + scrollUp</kbd> and <kbd>option + scrollDown</kbd>
 
-`scroll` can be specified instead of `button` to map scroll events to specific actions.
+Use a wheel trigger to map scroll impulses to specific actions.
 
 ```json
 {
@@ -677,13 +805,17 @@ This is useful for apps that expect a real held key, such as timeline scrubbing 
       "buttons": {
         "mappings": [
           {
-            "scroll": "up",
-            "option": true,
+            "trigger": {
+              "input": { "wheel": "up" },
+              "modifiers": ["option"]
+            },
             "action": "media.volumeUp"
           },
           {
-            "scroll": "down",
-            "option": true,
+            "trigger": {
+              "input": { "wheel": "down" },
+              "modifiers": ["option"]
+            },
             "action": "media.volumeDown"
           }
         ]
@@ -709,12 +841,26 @@ This is useful for apps that expect a real held key, such as timeline scrubbing 
       "buttons": {
         "mappings": [
           {
-            "button": 3,
-            "action": "mouse.button.forward"
+            "trigger": {
+              "input": { "button": 3 }
+            },
+            "outcomes": {
+              "press": {
+                "action": "mouse.button.forward",
+                "behavior": "remap"
+              }
+            }
           },
           {
-            "button": 4,
-            "action": "mouse.button.back"
+            "trigger": {
+              "input": { "button": 4 }
+            },
+            "outcomes": {
+              "press": {
+                "action": "mouse.button.back",
+                "behavior": "remap"
+              }
+            }
           }
         ]
       }

@@ -2,13 +2,20 @@
 // Copyright (c) 2021-2026 LinearMouse
 
 import Combine
+import Foundation
 import ObservationToken
 import SwiftUI
 
 struct ButtonMappingButtonRecorder: View {
+    enum Mode {
+        case simple
+        case advanced
+    }
+
     @Binding var mapping: Scheme.Buttons.Mapping
 
     var autoStartRecording = false
+    var mode: Mode = .simple
 
     @ObservedObject private var settingsState = SettingsState.shared
 
@@ -25,24 +32,19 @@ struct ButtonMappingButtonRecorder: View {
     @State private var recordingObservationToken: ObservationToken?
     @State private var recordedMappingCancellable: AnyCancellable?
     @State private var recordingSessionID: UUID?
+    @State private var advancedEngine = ButtonMappingRecordingEngine()
+    @State private var advancedSnapshot = ButtonMappingRecordingEngine.Snapshot()
+
+    private let recordingTicker = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
 
     var body: some View {
-        Button {
-            recording.toggle()
-        } label: {
-            Group {
-                if recording {
-                    ButtonMappingButtonDescription(mapping: mapping, showPartial: true) {
-                        Text(settingsState.isPreparingVirtualButtonRecording ? "Waiting for device…" : "Recording")
-                    }
-                    .foregroundColor(.orange)
-                } else {
-                    ButtonMappingButtonDescription(mapping: mapping) {
-                        Text("Click to record")
-                    }
-                }
+        Group {
+            switch mode {
+            case .simple:
+                simpleRecorder
+            case .advanced:
+                advancedRecorder
             }
-            .frame(maxWidth: .infinity)
         }
         .onAppear {
             updateSharedRecordingState()
@@ -64,6 +66,54 @@ struct ButtonMappingButtonRecorder: View {
 
             recording = false
         }
+        .onReceive(recordingTicker) { _ in
+            guard recording, mode == .advanced else {
+                return
+            }
+            advancedEngine.advance(to: DispatchTime.now().uptimeNanoseconds)
+            synchronizeAdvancedSnapshot()
+        }
+    }
+
+    private var simpleRecorder: some View {
+        Button {
+            recording.toggle()
+        } label: {
+            Group {
+                if recording {
+                    ButtonMappingButtonDescription(mapping: mapping, showPartial: true) {
+                        Text(settingsState.isPreparingVirtualButtonRecording ? "Waiting for device…" : "Recording")
+                    }
+                } else {
+                    ButtonMappingButtonDescription(mapping: mapping) {
+                        Text("Click to record")
+                    }
+                }
+            }
+            .foregroundColor(.primary)
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    private var advancedRecorder: some View {
+        Button {
+            recording.toggle()
+        } label: {
+            ButtonMappingRecordingPreview(
+                mapping: mapping,
+                snapshot: advancedSnapshot,
+                isRecording: recording,
+                isPreparingDevice: settingsState.isPreparingVirtualButtonRecording
+            )
+            .frame(maxWidth: .infinity, minHeight: 28, maxHeight: 28)
+            .contentShape(Rectangle())
+        }
+        .accessibility(label: recording ? Text("Recording") : Text("Click to record"))
+        .accessibility(
+            hint: recording
+                ? Text("Press, hold, combine buttons, drag, or scroll; the recognized trigger updates live.")
+                : Text("Start recording a button gesture.")
+        )
     }
 
     private func updateSharedRecordingState(force: Bool? = nil) {
@@ -97,30 +147,39 @@ struct ButtonMappingButtonRecorder: View {
     }
 
     private func recordingUpdated() {
-        if let recordingObservationToken {
-            recordingObservationToken.cancel()
-            self.recordingObservationToken = nil
-        }
+        recordingObservationToken?.cancel()
+        recordingObservationToken = nil
         recordedMappingCancellable?.cancel()
         recordedMappingCancellable = nil
 
         if recording {
-            mapping.modifierFlags = []
-            mapping.button = nil
-            mapping.repeat = nil
-            mapping.hold = nil
-            mapping.scroll = nil
+            mapping = .init()
+            advancedEngine.reset()
+            advancedSnapshot = advancedEngine.snapshot
             startEventObservation()
         }
     }
 
     private func startEventObservation() {
-        recordingObservationToken = try? EventTap.observe([
+        var eventTypes: [CGEventType] = [
             .flagsChanged,
             .leftMouseDown, .leftMouseUp,
             .rightMouseDown, .rightMouseUp,
             .otherMouseDown, .otherMouseUp
-        ], place: .tailAppendEventTap) { _, event in
+        ]
+        if mode == .advanced {
+            eventTypes += [
+                .leftMouseDragged,
+                .rightMouseDragged,
+                .otherMouseDragged,
+                .mouseMoved
+            ]
+        }
+
+        recordingObservationToken = try? EventTap.observe(
+            eventTypes,
+            place: .tailAppendEventTap
+        ) { _, event in
             eventReceived(event)
         }
 
@@ -151,6 +210,8 @@ struct ButtonMappingButtonRecorder: View {
     }
 
     private func cancelObservation() {
+        recordingObservationToken?.cancel()
+        recordingObservationToken = nil
         recordedMappingCancellable?.cancel()
         recordedMappingCancellable = nil
     }
@@ -165,20 +226,291 @@ struct ButtonMappingButtonRecorder: View {
     }
 
     private func recordedMappingReceived(_ event: SettingsState.RecordedButtonMappingEvent) {
-        mapping.button = event.button
-        mapping.scroll = event.scroll
-        mapping.modifierFlags = event.modifierFlags
-        settingsState.recordedButtonMappingEvent = nil
-        recording = false
+        defer {
+            settingsState.recordedButtonMappingEvent = nil
+        }
+
+        guard mode == .advanced else {
+            mapping.button = event.button
+            mapping.scroll = event.scroll
+            mapping.modifierFlags = event.modifierFlags
+            recording = false
+            return
+        }
+
+        let now = DispatchTime.now().uptimeNanoseconds
+        if let button = event.button {
+            if event.isPressed == false {
+                advancedEngine.buttonUp(button, at: now)
+            } else {
+                advancedEngine.buttonDown(button, modifierFlags: event.modifierFlags, at: now)
+                if event.isPressed == nil {
+                    advancedEngine.buttonUp(button, at: now)
+                }
+            }
+        } else if let scroll = event.scroll {
+            advancedEngine.wheel(scroll, modifierFlags: event.modifierFlags, at: now)
+        }
+        synchronizeAdvancedSnapshot()
     }
 
     private func eventReceived(_ event: CGEvent) -> CGEvent? {
-        let result = ButtonMappingButtonRecordingEventHandler.record(event, into: &mapping)
-        if result.stopsRecording {
-            recording = false
+        guard mode == .advanced else {
+            let result = ButtonMappingButtonRecordingEventHandler.record(event, into: &mapping)
+            if result.stopsRecording {
+                recording = false
+            }
+            return result.event
         }
 
-        return result.event
+        let now = DispatchTime.now().uptimeNanoseconds
+        switch event.type {
+        case .flagsChanged:
+            advancedEngine.modifierFlagsChanged(event.flags)
+            synchronizeAdvancedSnapshot()
+            return nil
+        case .leftMouseDown, .rightMouseDown, .otherMouseDown:
+            advancedEngine.buttonDown(
+                .mouse(Int(event.getIntegerValueField(.mouseEventButtonNumber))),
+                modifierFlags: event.flags,
+                at: now
+            )
+        case .leftMouseUp, .rightMouseUp, .otherMouseUp:
+            advancedEngine.buttonUp(
+                .mouse(Int(event.getIntegerValueField(.mouseEventButtonNumber))),
+                at: now
+            )
+        case .leftMouseDragged, .rightMouseDragged, .otherMouseDragged, .mouseMoved:
+            advancedEngine.pointerMoved(
+                deltaX: event.getDoubleValueField(.mouseEventDeltaX),
+                deltaY: event.getDoubleValueField(.mouseEventDeltaY),
+                at: now
+            )
+        default:
+            return event
+        }
+
+        synchronizeAdvancedSnapshot()
+        return event.type == .mouseMoved ? event : nil
+    }
+
+    private func synchronizeAdvancedSnapshot() {
+        let snapshot = advancedEngine.snapshot
+        guard snapshot != advancedSnapshot else {
+            return
+        }
+
+        advancedSnapshot = snapshot
+        if let mapping = advancedSnapshot.mapping {
+            self.mapping = mapping
+        }
+        if advancedSnapshot.isComplete {
+            recording = false
+        }
+    }
+}
+
+private struct ButtonMappingRecordingPreview: View {
+    typealias Mapping = Scheme.Buttons.Mapping
+
+    var mapping: Mapping
+    var snapshot: ButtonMappingRecordingEngine.Snapshot
+    var isRecording: Bool
+    var isPreparingDevice: Bool
+
+    var body: some View {
+        HStack(spacing: 8) {
+            if tokens.isEmpty, !isRecording {
+                Text("Click to record")
+                    .allowsHitTesting(false)
+                Spacer(minLength: 0)
+            } else {
+                if tokens.isEmpty {
+                    Group {
+                        if isPreparingDevice {
+                            Text("Waiting for device…")
+                        } else {
+                            Text("Press a button or scroll")
+                        }
+                    }
+                    .foregroundColor(.orange)
+                } else {
+                    if let relationshipDescription {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            relationshipDescriptionView(relationshipDescription)
+                        }
+                        .allowsHitTesting(false)
+                        .frame(height: 18)
+                    } else {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            tokenRow
+                        }
+                        .allowsHitTesting(false)
+                        .frame(height: 18)
+                    }
+                }
+
+                Spacer(minLength: 0)
+            }
+        }
+        .font(.body)
+        .foregroundColor(.primary)
+        .padding(.horizontal, 8)
+    }
+
+    private func relationshipDescriptionView(_ description: String) -> some View {
+        Text(description)
+            .allowsHitTesting(false)
+    }
+
+    private var tokenRow: some View {
+        HStack(spacing: 5) {
+            ForEach(Array(tokens.enumerated()), id: \.offset) { _, token in
+                Text(token.text)
+                    .allowsHitTesting(false)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var displayedMapping: Mapping {
+        isRecording ? snapshot.mapping ?? mapping : mapping
+    }
+
+    private var relationshipDescription: String? {
+        guard let trigger = displayedMapping.trigger,
+              trigger.whileHeld?.isEmpty == false || trigger.simultaneous?.isEmpty == false else {
+            return nil
+        }
+        return ButtonMappingTriggerText.description(for: trigger, buttonDescription: buttonDescription)
+    }
+
+    private var tokens: [Token] {
+        var result = [Token]()
+        let modifierText = modifierDescription(
+            displayedMapping.effectiveTrigger?.modifierFlags ?? snapshot.modifierFlags
+        )
+        if !modifierText.isEmpty {
+            result.append(.init(text: modifierText))
+        }
+
+        guard let trigger = displayedMapping.effectiveTrigger else {
+            return result
+        }
+
+        let swipeDirection: ButtonMappingEngine.SwipeDirection? = switch snapshot.recognition {
+        case let .swipe(direction):
+            direction
+        default:
+            isRecording ? snapshot.movementDirection : nil
+        }
+        if let swipeDirection, case let .button(button) = trigger.input {
+            result.append(.init(
+                text: String(
+                    format: NSLocalizedString(
+                        "Hold %@, then %@",
+                        comment: "Localized swipe trigger"
+                    ),
+                    buttonDescription(button),
+                    swipeDirectionDescription(swipeDirection)
+                )
+            ))
+            return result
+        }
+
+        switch trigger.input {
+        case let .button(button):
+            result.append(.init(text: triggerButtonDescription(button)))
+        case let .wheel(direction):
+            result.append(.init(text: wheelDescription(direction)))
+        }
+        return result
+    }
+
+    private func triggerButtonDescription(_ button: Mapping.Button) -> String {
+        let format: String
+        switch snapshot.recognition {
+        case .longPress:
+            format = NSLocalizedString("Long Press %@", comment: "Recorded gesture token")
+        case .swipe:
+            format = NSLocalizedString("Hold %@", comment: "Recorded gesture token")
+        default:
+            if isRecording, snapshot.movementDirection != nil {
+                format = NSLocalizedString("Hold %@", comment: "Recorded gesture token")
+            } else {
+                format = NSLocalizedString("Press %@", comment: "Recorded gesture token")
+            }
+        }
+        return String(format: format, buttonDescription(button))
+    }
+
+    private func modifierDescription(_ flags: CGEventFlags) -> String {
+        [
+            (flags.contains(.maskControl), "⌃"),
+            (flags.contains(.maskAlternate), "⌥"),
+            (flags.contains(.maskShift), "⇧"),
+            (flags.contains(.maskCommand), "⌘")
+        ]
+        .compactMap { $0.0 ? $0.1 : nil }
+        .joined()
+    }
+
+    private func buttonDescription(_ button: Mapping.Button) -> String {
+        switch button {
+        case let .mouse(number):
+            switch number {
+            case 0:
+                return NSLocalizedString("Primary", comment: "Primary mouse button")
+            case 1:
+                return NSLocalizedString("Secondary", comment: "Secondary mouse button")
+            case 2:
+                return NSLocalizedString("Middle", comment: "Middle mouse button")
+            default:
+                return String(
+                    format: NSLocalizedString("Button %d", comment: "Mouse button token"),
+                    number
+                )
+            }
+        case let .logitechControl(identity):
+            return identity.userVisibleName
+        }
+    }
+
+    private func wheelDescription(_ direction: Mapping.ScrollDirection) -> String {
+        String(
+            format: NSLocalizedString("Scroll %@", comment: "Recorded gesture token"),
+            wheelArrow(direction)
+        )
+    }
+
+    private func wheelArrow(_ direction: Mapping.ScrollDirection) -> String {
+        switch direction {
+        case .up:
+            return "↑"
+        case .down:
+            return "↓"
+        case .left:
+            return "←"
+        case .right:
+            return "→"
+        }
+    }
+
+    private func swipeDirectionDescription(_ direction: ButtonMappingEngine.SwipeDirection) -> String {
+        switch direction {
+        case .up:
+            return NSLocalizedString("Swipe up", comment: "Swipe direction")
+        case .down:
+            return NSLocalizedString("Swipe down", comment: "Swipe direction")
+        case .left:
+            return NSLocalizedString("Swipe left", comment: "Swipe direction")
+        case .right:
+            return NSLocalizedString("Swipe right", comment: "Swipe direction")
+        }
+    }
+
+    private struct Token {
+        var text: String
     }
 }
 

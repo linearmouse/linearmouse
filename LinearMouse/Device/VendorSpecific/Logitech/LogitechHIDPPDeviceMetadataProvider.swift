@@ -2098,7 +2098,12 @@ final class LogitechReprogrammableControlsMonitor {
 
     private static func logitechControls(in scheme: Scheme) -> [LogitechControlIdentity] {
         let buttons = scheme.buttons
-        let mappedControls = (buttons.mappings ?? []).compactMap(\.button?.logitechControl)
+        let mappedControls = (buttons.mappings ?? []).flatMap { mapping in
+            if let trigger = mapping.trigger {
+                return trigger.statefulButtons.compactMap(\.logitechControl)
+            }
+            return [mapping.button?.logitechControl].compactMap(\.self)
+        }
         let autoScrollControl: LogitechControlIdentity? = {
             guard buttons.$autoScroll?.enabled ?? false else {
                 return nil
@@ -2364,6 +2369,14 @@ final class LogitechReprogrammableControlsMonitor {
 
                 var pressedControls = Set<UInt16>()
                 defer {
+                    cancelPressedControlInteractions(
+                        pressedControls,
+                        productID: targetIdentity?.productID,
+                        serialNumber: targetIdentity?.serialNumber,
+                        allowsIdentityFallback: monitorTarget.allowsIdentityFallback,
+                        isRecording: isRecording,
+                        recordingSessionID: recordingSessionID
+                    )
                     releaseButtonIfNeeded()
 
                     let failedRestoreByControlID = restoreReportingState(
@@ -2382,7 +2395,9 @@ final class LogitechReprogrammableControlsMonitor {
                 }
 
                 while shouldContinueRunning() {
-                    let reconfigResult = state.consumeReconfigurationRequest()
+                    let reconfigResult = state.consumeReconfigurationRequest(
+                        deferringWhileControlsArePressed: !pressedControls.isEmpty
+                    )
                     if reconfigResult.needed {
                         if reconfigResult.forced {
                             os_log(
@@ -2460,7 +2475,7 @@ final class LogitechReprogrammableControlsMonitor {
                         )
 
                         if isRecording {
-                            if isPressed, let recordingSessionID {
+                            if let recordingSessionID {
                                 DispatchQueue.main.async {
                                     guard SettingsState.shared
                                         .isCurrentButtonMappingRecordingSession(recordingSessionID) else {
@@ -2471,7 +2486,8 @@ final class LogitechReprogrammableControlsMonitor {
                                         recordingSessionID: recordingSessionID,
                                         button: .logitechControl(controlIdentity),
                                         scroll: nil,
-                                        modifierFlags: modifierFlags
+                                        modifierFlags: modifierFlags,
+                                        isPressed: isPressed
                                     )
                                 }
                             }
@@ -2889,12 +2905,15 @@ final class LogitechReprogrammableControlsMonitor {
             return Set(availableControls.map(\.controlID))
         }
 
-        let directMappings: [UInt16] = (scheme.buttons.mappings ?? [])
-            .compactMap { (mapping: Scheme.Buttons.Mapping) -> UInt16? in
-                guard let logiButton = mapping.button?.logitechControl else {
-                    return nil
-                }
+        let directMappings: [UInt16] = (scheme.buttons.mappings ?? []).flatMap { mapping in
+            let mappedControls: [LogitechControlIdentity]
+            if let trigger = mapping.trigger {
+                mappedControls = trigger.statefulButtons.compactMap(\.logitechControl)
+            } else {
+                mappedControls = [mapping.button?.logitechControl].compactMap(\.self)
+            }
 
+            return mappedControls.compactMap { logiButton -> UInt16? in
                 guard Self.matches(
                     logiButton: logiButton,
                     identity: identity,
@@ -2902,9 +2921,9 @@ final class LogitechReprogrammableControlsMonitor {
                 ) else {
                     return nil
                 }
-
                 return logiButton.controlIDValue
             }
+        }
 
         let autoScrollControlID: UInt16? = {
             guard scheme.buttons.autoScroll.enabled ?? false,
@@ -3199,6 +3218,67 @@ final class LogitechReprogrammableControlsMonitor {
         }
     }
 
+    private func cancelPressedControlInteractions(
+        _ controlIDs: Set<UInt16>,
+        productID: Int?,
+        serialNumber: String?,
+        allowsIdentityFallback: Bool,
+        isRecording: Bool,
+        recordingSessionID: UUID?
+    ) {
+        guard !controlIDs.isEmpty else {
+            return
+        }
+
+        let modifierFlags = ModifierState.shared.currentFlags
+        let identities = controlIDs.sorted().map {
+            LogitechControlIdentity(
+                controlID: Int($0),
+                productID: productID,
+                serialNumber: serialNumber
+            )
+        }
+
+        if isRecording {
+            guard let recordingSessionID else {
+                return
+            }
+            for identity in identities {
+                DispatchQueue.main.async {
+                    guard SettingsState.shared.isCurrentButtonMappingRecordingSession(recordingSessionID) else {
+                        return
+                    }
+
+                    SettingsState.shared.recordedButtonMappingEvent = .init(
+                        recordingSessionID: recordingSessionID,
+                        button: .logitechControl(identity),
+                        scroll: nil,
+                        modifierFlags: modifierFlags,
+                        isPressed: false
+                    )
+                }
+            }
+            return
+        }
+
+        let eventContext = eventContextSnapshot()
+        for identity in identities {
+            let context = LogitechEventContext(
+                device: device,
+                pid: eventContext.pid,
+                display: eventContext.display,
+                mouseLocation: eventContext.mouseLocation,
+                controlIdentity: identity,
+                allowsIdentityFallback: allowsIdentityFallback,
+                isPressed: false,
+                modifierFlags: modifierFlags
+            )
+            _ = EventThread.shared.performAndWait {
+                EventTransformerManager.shared.cancelLogitechControlInteraction(context)
+            }
+        }
+    }
+
     static func isDivertedButtonsNotification(
         _ report: [UInt8],
         featureIndex: UInt8,
@@ -3369,6 +3449,37 @@ struct LogitechSyntheticFallbackCoordinator {
     }
 }
 
+struct LogitechMonitorReconfigurationRequest {
+    private var needed = false
+    private var forced = false
+
+    mutating func request(forced: Bool = false) {
+        needed = true
+        self.forced = self.forced || forced
+    }
+
+    mutating func consume(
+        deferringWhileControlsArePressed: Bool
+    ) -> (needed: Bool, forced: Bool) {
+        guard needed else {
+            return (false, false)
+        }
+
+        if deferringWhileControlsArePressed, !forced {
+            return (false, false)
+        }
+
+        let result = (needed: true, forced: forced)
+        reset()
+        return result
+    }
+
+    mutating func reset() {
+        needed = false
+        forced = false
+    }
+}
+
 private final class LogitechReprogrammableControlsMonitorState {
     private typealias WorkerResources = (Thread?, HIDPPNotificationHandling?, ObservationToken?)
 
@@ -3379,8 +3490,7 @@ private final class LogitechReprogrammableControlsMonitorState {
     private var workerThread: Thread?
     private weak var activeNotificationEndpoint: HIDPPNotificationHandling?
     private var directDeviceReportObservationToken: ObservationToken?
-    private var needsReconfiguration = false
-    private var needsForcedReconfiguration = false
+    private var reconfigurationRequest = LogitechMonitorReconfigurationRequest()
     private var pressedButtons = Set<Int>()
     private var syntheticFallbackCoordinator = LogitechSyntheticFallbackCoordinator()
 
@@ -3411,8 +3521,7 @@ private final class LogitechReprogrammableControlsMonitorState {
         let (thread, endpoint, token) = queue.sync { () -> WorkerResources in
             let resources = (workerThread, activeNotificationEndpoint, directDeviceReportObservationToken)
             isEnabled = false
-            needsReconfiguration = false
-            needsForcedReconfiguration = false
+            reconfigurationRequest.reset()
             activeNotificationEndpoint = nil
             directDeviceReportObservationToken = nil
             return resources
@@ -3433,13 +3542,11 @@ private final class LogitechReprogrammableControlsMonitorState {
 
             guard isEnabled, restartIfEnabled else {
                 isEnabled = false
-                needsReconfiguration = false
-                needsForcedReconfiguration = false
+                reconfigurationRequest.reset()
                 return (nil, nil, reportObservationToken)
             }
 
-            needsReconfiguration = false
-            needsForcedReconfiguration = false
+            reconfigurationRequest.reset()
             let nextThread = makeWorkerThread()
             workerThread = nextThread
             return (nextThread, nil, reportObservationToken)
@@ -3455,8 +3562,7 @@ private final class LogitechReprogrammableControlsMonitorState {
                 return (false, nil)
             }
 
-            needsReconfiguration = true
-            needsForcedReconfiguration = needsForcedReconfiguration || forced
+            reconfigurationRequest.request(forced: forced)
             return (true, activeNotificationEndpoint)
         }
         guard request.accepted else {
@@ -3467,16 +3573,13 @@ private final class LogitechReprogrammableControlsMonitorState {
         request.endpoint?.wake()
     }
 
-    func consumeReconfigurationRequest() -> (needed: Bool, forced: Bool) {
+    func consumeReconfigurationRequest(
+        deferringWhileControlsArePressed: Bool = false
+    ) -> (needed: Bool, forced: Bool) {
         queue.sync {
-            guard needsReconfiguration else {
-                return (false, false)
-            }
-
-            let forced = needsForcedReconfiguration
-            needsReconfiguration = false
-            needsForcedReconfiguration = false
-            return (true, forced)
+            reconfigurationRequest.consume(
+                deferringWhileControlsArePressed: deferringWhileControlsArePressed
+            )
         }
     }
 

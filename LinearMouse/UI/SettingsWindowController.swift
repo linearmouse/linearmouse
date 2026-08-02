@@ -305,15 +305,22 @@ class SettingsDetailViewController: NSViewController {
 
 class SettingsToolbar: NSToolbar, NSToolbarDelegate {
     private weak var splitViewController: SettingsSplitViewController?
+    private let settingsState: SettingsState
     private var cancellables = Set<AnyCancellable>()
+    private var buttonsDestination: SettingsState.ButtonsDestination?
 
+    static let buttonsBackItemIdentifier = NSToolbarItem.Identifier("buttonsBack")
     private static let deviceItemIdentifier = NSToolbarItem.Identifier("device")
     private static let appItemIdentifier = NSToolbarItem.Identifier("app")
     private static let displayItemIdentifier = NSToolbarItem.Identifier("display")
     private static let flexibleSpaceIdentifier = NSToolbarItem.Identifier.flexibleSpace
 
-    init(splitViewController: SettingsSplitViewController) {
+    init(
+        splitViewController: SettingsSplitViewController,
+        settingsState: SettingsState = .shared
+    ) {
         self.splitViewController = splitViewController
+        self.settingsState = settingsState
         super.init(identifier: "SettingsToolbar")
 
         delegate = self
@@ -324,11 +331,19 @@ class SettingsToolbar: NSToolbar, NSToolbarDelegate {
         }
 
         // Observe navigation changes to show/hide toolbar items
-        SettingsState.shared
+        settingsState
             .$navigation
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.validateVisibleItems()
+            }
+            .store(in: &cancellables)
+
+        settingsState
+            .$buttonsNavigationPath
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] path in
+                self?.updateButtonsNavigation(path.last)
             }
             .store(in: &cancellables)
     }
@@ -348,6 +363,8 @@ class SettingsToolbar: NSToolbar, NSToolbarDelegate {
         willBeInsertedIntoToolbar _: Bool
     ) -> NSToolbarItem? {
         switch itemIdentifier {
+        case Self.buttonsBackItemIdentifier:
+            return createButtonsBackItem(identifier: itemIdentifier)
         case Self.deviceItemIdentifier:
             return createIndicatorItem(identifier: itemIdentifier, indicator: DeviceIndicatorButton())
         case Self.appItemIdentifier:
@@ -374,7 +391,24 @@ class SettingsToolbar: NSToolbar, NSToolbarDelegate {
     }
 
     func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-        toolbarDefaultItemIdentifiers(toolbar)
+        toolbarDefaultItemIdentifiers(toolbar) + [Self.buttonsBackItemIdentifier]
+    }
+
+    private func createButtonsBackItem(identifier: NSToolbarItem.Identifier) -> NSToolbarItem {
+        let item = NSToolbarItem(itemIdentifier: identifier)
+        item.label = NSLocalizedString("Buttons", comment: "Buttons settings parent page")
+        item.paletteLabel = item.label
+        item.toolTip = NSLocalizedString("Back", comment: "Navigation action")
+        let imageName = NSApp.userInterfaceLayoutDirection == .rightToLeft
+            ? NSImage.goForwardTemplateName
+            : NSImage.goBackTemplateName
+        item.image = NSImage(named: imageName)
+        item.target = self
+        item.action = #selector(navigateBackFromButtonsDestination)
+        if #available(macOS 11.0, *) {
+            item.isNavigational = true
+        }
+        return item
     }
 
     private func createIndicatorItem(identifier: NSToolbarItem.Identifier, indicator: NSButton) -> NSToolbarItem {
@@ -383,8 +417,32 @@ class SettingsToolbar: NSToolbar, NSToolbarDelegate {
         return item
     }
 
+    private func updateButtonsNavigation(_ destination: SettingsState.ButtonsDestination?) {
+        buttonsDestination = destination
+        let existingIndex = items.firstIndex { $0.itemIdentifier == Self.buttonsBackItemIdentifier }
+
+        if destination != nil, existingIndex == nil {
+            let insertionIndex = items.firstIndex { $0.itemIdentifier == Self.flexibleSpaceIdentifier } ?? items.count
+            insertItem(withItemIdentifier: Self.buttonsBackItemIdentifier, at: insertionIndex)
+        } else if destination == nil, let existingIndex {
+            removeItem(at: existingIndex)
+        }
+
+        splitViewController?.view.window?.title = destination?.localizedTitle ?? LinearMouse.appName
+        validateVisibleItems()
+    }
+
+    @objc private func navigateBackFromButtonsDestination() {
+        guard !settingsState.buttonsNavigationPath.isEmpty else {
+            return
+        }
+        settingsState.buttonsNavigationPath.removeLast()
+    }
+
     func validateToolbarItem(_ item: NSToolbarItem) -> Bool {
         switch item.itemIdentifier {
+        case Self.buttonsBackItemIdentifier:
+            return buttonsDestination != nil
         case Self.deviceItemIdentifier, Self.appItemIdentifier, Self.displayItemIdentifier:
             item.view?.isHidden = !shouldShowSchemeIndicators
             return shouldShowSchemeIndicators

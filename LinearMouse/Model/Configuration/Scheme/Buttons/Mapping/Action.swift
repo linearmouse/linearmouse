@@ -1,6 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
+import CoreGraphics
 import Foundation
 import KeyKit
 
@@ -68,5 +69,34 @@ extension Scheme.Buttons.Mapping.Action {
         case mouseWheelScrollRight(Scheme.Scrolling.Distance)
 
         case keyPress([Key])
+    }
+}
+
+extension Scheme.Buttons.Mapping.Action {
+    func shouldHoldKeys(explicitly: Bool) -> Bool {
+        guard case let .arg1(.keyPress(keys)) = self else {
+            return false
+        }
+        return explicitly || keys.allSatisfy(\.isModifier)
+    }
+
+    var remappedMouseButton: CGMouseButton? {
+        guard case let .arg0(action) = self else {
+            return nil
+        }
+        switch action {
+        case .mouseButtonLeft:
+            return .left
+        case .mouseButtonMiddle:
+            return .center
+        case .mouseButtonRight:
+            return .right
+        case .mouseButtonBack:
+            return .back
+        case .mouseButtonForward:
+            return .forward
+        default:
+            return nil
+        }
     }
 }

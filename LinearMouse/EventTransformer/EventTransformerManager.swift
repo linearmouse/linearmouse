@@ -13,14 +13,85 @@ class EventTransformerManager {
 
     @Default(.bypassEventsFromOtherApplications) var bypassEventsFromOtherApplications
 
-    private var eventTransformerCache = LRUCache<CacheKey, EventTransformer>(countLimit: 16)
-    private var activeCacheKey: CacheKey?
+    private final class TransformerRoute {
+        let id = UUID()
+        let transformer: EventTransformer
+
+        init(transformer: EventTransformer) {
+            self.transformer = transformer
+        }
+    }
+
+    private var eventTransformerCache = LRUCache<CacheKey, TransformerRoute>(countLimit: 16)
+    private var activeRoute: TransformerRoute?
+    private var retiredRoutes = [UUID: TransformerRoute]()
     private var sharedAutoScrollTransformer: AutoScrollTransformer?
 
+    /// A stateful transformer remains alive until the interaction it claimed
+    /// has fully drained. It is injected into the newest matching route so the
+    /// rest of the Scheme can switch immediately without losing the release.
+    private struct ActiveInteraction {
+        var route: TransformerRoute
+        var transformer: EventTransformer
+        var selection: RouteSelection
+        /// Physical buttons whose down event was routed through `route` after
+        /// this owner was established. Keep the route until their matching up
+        /// events use the same preprocessing, even when the owner itself did
+        /// not claim them.
+        var pinnedMouseButtons = Set<CGMouseButton>()
+    }
+
+    private enum MouseButtonTransition {
+        case pressed(CGMouseButton)
+        case released(CGMouseButton)
+    }
+
+    private enum InteractionKey: Hashable {
+        case device(Int32)
+        case unidentified
+    }
+
+    private var activeInteractions = [InteractionKey: ActiveInteraction]()
+
+    private struct RouteSelection {
+        var device: Device?
+        var process: ProcessIdentity?
+        var display: String?
+
+        var interactionKey: InteractionKey {
+            device.map { .device($0.id) } ?? .unidentified
+        }
+
+        func mergingDevice(from previous: Self?) -> Self {
+            guard device == nil, let previousDevice = previous?.device else {
+                return self
+            }
+
+            return .init(
+                device: previousDevice,
+                process: process,
+                display: display
+            )
+        }
+    }
+
     struct CacheKey: Hashable {
+        var deviceID: Int32?
         var deviceMatcher: DeviceMatcher?
         var process: ProcessIdentity?
         var screen: String?
+
+        init(
+            deviceID: Int32? = nil,
+            deviceMatcher: DeviceMatcher?,
+            process: ProcessIdentity?,
+            screen: String?
+        ) {
+            self.deviceID = deviceID
+            self.deviceMatcher = deviceMatcher
+            self.process = process
+            self.screen = screen
+        }
     }
 
     private var subscriptions = Set<AnyCancellable>()
@@ -34,8 +105,8 @@ class EventTransformerManager {
                     return
                 }
 
-                if EventThread.shared.performAndWait({ self.resetState() }) == nil {
-                    self.resetState()
+                if EventThread.shared.performAndWait({ self.invalidateConfigurationState() }) == nil {
+                    self.invalidateConfigurationState()
                 }
             }
             .store(in: &subscriptions)
@@ -43,7 +114,7 @@ class EventTransformerManager {
 
     /// Called from `EventThread.onWillStop` on the event thread.
     func resetForRestart() {
-        resetState()
+        forceResetState()
     }
 
     private let sourceBundleIdentifierBypassSet: Set<String> = [
@@ -112,7 +183,36 @@ class EventTransformerManager {
         withMouseLocationPid mouseLocationPid: pid_t?,
         withDisplay display: String?
     ) -> EventTransformerResolution {
+        let device = DeviceManager.shared.deviceFromCGEvent(cgEvent)
+        let pid = mouseLocationPid ?? targetPid
+        let selection = RouteSelection(
+            device: device,
+            process: pid?.processIdentity,
+            display: display
+        )
+
+        let activeInteraction = activeInteraction(
+            for: selection,
+            allowsUnidentifiedOwnerForIdentifiedSelection: isInteractionContinuation(cgEvent)
+        )
+        let effectiveSelection = selection.mergingDevice(from: activeInteraction?.1.selection)
+        let mouseButtonTransition = mouseButtonTransition(for: cgEvent)
+
         if sourcePid != nil, bypassEventsFromOtherApplications, !cgEvent.isLinearMouseSyntheticEvent {
+            if let (interactionKey, interaction) = activeInteraction,
+               interactionOwnsContinuation(cgEvent, interaction: interaction) {
+                // The owner must still receive its release even when the event
+                // source would normally bypass LinearMouse. Use its original
+                // route for this exceptional event so its preprocessing stays
+                // identical to the accepted press.
+                return drainingResolution(
+                    transformer: interaction.route.transformer,
+                    interaction: interaction,
+                    selection: effectiveSelection,
+                    interactionKey: interactionKey,
+                    mouseButtonTransition: mouseButtonTransition
+                )
+            }
             os_log(
                 "Return noop transformer because this event is sent by %{public}s",
                 log: Self.log,
@@ -123,6 +223,16 @@ class EventTransformerManager {
         }
         if let sourceBundleIdentifier = sourcePid?.bundleIdentifier,
            sourceBundleIdentifierBypassSet.contains(sourceBundleIdentifier) {
+            if let (interactionKey, interaction) = activeInteraction,
+               interactionOwnsContinuation(cgEvent, interaction: interaction) {
+                return drainingResolution(
+                    transformer: interaction.route.transformer,
+                    interaction: interaction,
+                    selection: effectiveSelection,
+                    interactionKey: interactionKey,
+                    mouseButtonTransition: mouseButtonTransition
+                )
+            }
             os_log(
                 "Return noop transformer because the source application %{public}s is in the bypass set",
                 log: Self.log,
@@ -132,19 +242,285 @@ class EventTransformerManager {
             return .init(transformer: [], context: .init(device: nil))
         }
 
-        let pid = mouseLocationPid ?? targetPid
-        let process = pid?.processIdentity
-        let device = DeviceManager.shared.deviceFromCGEvent(cgEvent)
-
-        return .init(
-            transformer: get(
-                withDevice: device,
-                withProcess: process,
-                withDisplay: display,
-                updateActiveCacheKey: true
-            ),
-            context: .init(device: device)
+        let route = getRoute(
+            withDevice: effectiveSelection.device,
+            withProcess: effectiveSelection.process,
+            withDisplay: effectiveSelection.display,
+            updateActiveRoute: true
         )
+        if let (interactionKey, interaction) = activeInteraction {
+            if isMouseButtonInteractionEvent(cgEvent) {
+                // Keep one physical button stream on one preprocessing route.
+                // The latest route is already active for unrelated input, but
+                // changing button-swap policy between a down and its up would
+                // give the stateful owner (and the target app) different logical
+                // button identities. Newly pressed, unclaimed buttons are pinned
+                // here as well so their pass-through down/up pair stays balanced.
+                return drainingResolution(
+                    transformer: interaction.route.transformer,
+                    interaction: interaction,
+                    selection: effectiveSelection,
+                    interactionKey: interactionKey,
+                    mouseButtonTransition: mouseButtonTransition
+                )
+            }
+            if !hasActiveInteraction(in: interaction.transformer) {
+                // Only manager-owned pass-through buttons remain. Keep their
+                // mouse stream pinned, but do not let the now-idle old mapping
+                // recognizer claim unrelated input from the latest Scheme.
+                return drainingResolution(
+                    transformer: transformerWithoutInteractionTrackers(in: route),
+                    interaction: interaction,
+                    selection: effectiveSelection,
+                    interactionKey: interactionKey
+                )
+            }
+            return drainingResolution(
+                transformer: transformer(
+                    in: route,
+                    replacingInteractionTrackersWith: interaction.transformer
+                ),
+                interaction: interaction,
+                selection: effectiveSelection,
+                interactionKey: interactionKey
+            )
+        }
+        return resolution(
+            for: route,
+            selection: selection,
+            mouseButtonTransition: mouseButtonTransition
+        )
+    }
+
+    private func resolution(
+        for route: TransformerRoute,
+        selection: RouteSelection,
+        mouseButtonTransition: MouseButtonTransition? = nil
+    ) -> EventTransformerResolution {
+        EventTransformerResolution(
+            transformer: route.transformer,
+            context: .init(device: selection.device)
+        ) { [weak self] in
+            self?.didProcessRoute(
+                on: route,
+                selection: selection,
+                interactionKey: selection.interactionKey,
+                mouseButtonTransition: mouseButtonTransition
+            )
+        }
+    }
+
+    private func drainingResolution(
+        transformer: EventTransformer,
+        interaction: ActiveInteraction,
+        selection: RouteSelection,
+        interactionKey: InteractionKey,
+        mouseButtonTransition: MouseButtonTransition? = nil
+    ) -> EventTransformerResolution {
+        EventTransformerResolution(
+            transformer: transformer,
+            context: .init(device: selection.device)
+        ) { [weak self] in
+            self?.didProcessOwnedInteraction(
+                interaction,
+                selection: selection,
+                interactionKey: interactionKey,
+                mouseButtonTransition: mouseButtonTransition
+            )
+        }
+    }
+
+    private func didProcessRoute(
+        on route: TransformerRoute,
+        selection: RouteSelection,
+        interactionKey: InteractionKey,
+        mouseButtonTransition: MouseButtonTransition? = nil
+    ) {
+        guard let transformer = activeInteractionTransformers(in: route.transformer).first else {
+            return
+        }
+        var pinnedMouseButtons = Set<CGMouseButton>()
+        if case let .pressed(button) = mouseButtonTransition {
+            pinnedMouseButtons.insert(button)
+        }
+        activeInteractions[interactionKey] = .init(
+            route: route,
+            transformer: transformer,
+            selection: selection,
+            pinnedMouseButtons: pinnedMouseButtons
+        )
+    }
+
+    private func didProcessOwnedInteraction(
+        _ interaction: ActiveInteraction,
+        selection: RouteSelection,
+        interactionKey: InteractionKey,
+        mouseButtonTransition: MouseButtonTransition? = nil
+    ) {
+        guard let current = activeInteractions[interactionKey],
+              sameTransformer(current.transformer, interaction.transformer) else {
+            return
+        }
+
+        var updated = current
+        switch mouseButtonTransition {
+        case let .pressed(button):
+            updated.pinnedMouseButtons.insert(button)
+        case let .released(button):
+            updated.pinnedMouseButtons.remove(button)
+        case nil:
+            break
+        }
+
+        guard hasActiveInteraction(in: interaction.transformer) || !updated.pinnedMouseButtons.isEmpty else {
+            activeInteractions[interactionKey] = nil
+            deactivateRetiredRouteIfIdle(interaction.route)
+            return
+        }
+
+        updated.selection = selection
+        let updatedKey = selection.interactionKey
+        if interactionKey == .unidentified,
+           updatedKey != .unidentified,
+           activeInteractions[updatedKey] == nil {
+            activeInteractions[interactionKey] = nil
+            activeInteractions[updatedKey] = updated
+        } else {
+            activeInteractions[interactionKey] = updated
+        }
+    }
+
+    private func activeInteraction(
+        for selection: RouteSelection,
+        allowsUnidentifiedOwnerForIdentifiedSelection: Bool = false
+    ) -> (InteractionKey, ActiveInteraction)? {
+        let interactionKey = selection.interactionKey
+        if let interaction = activeInteractions[interactionKey] {
+            return (interactionKey, interaction)
+        }
+
+        // Device metadata can be absent on a release or appear only after the
+        // press. Prefer the unidentified lease in the latter case. In the
+        // former, fall back only when exactly one device owns an interaction,
+        // avoiding cross-routing when two mice are active simultaneously.
+        if allowsUnidentifiedOwnerForIdentifiedSelection,
+           interactionKey != .unidentified,
+           let interaction = activeInteractions[.unidentified] {
+            return (.unidentified, interaction)
+        }
+
+        guard interactionKey == .unidentified,
+              activeInteractions.count == 1,
+              let entry = activeInteractions.first else {
+            return nil
+        }
+        return entry
+    }
+
+    private func isMouseButtonInteractionEvent(_ event: CGEvent) -> Bool {
+        switch event.type {
+        case .leftMouseDown, .rightMouseDown, .otherMouseDown,
+             .leftMouseUp, .rightMouseUp, .otherMouseUp,
+             .leftMouseDragged, .rightMouseDragged, .otherMouseDragged:
+            return true
+        default:
+            return false
+        }
+    }
+
+    private func isInteractionContinuation(_ event: CGEvent) -> Bool {
+        switch event.type {
+        case .leftMouseUp, .rightMouseUp, .otherMouseUp,
+             .leftMouseDragged, .rightMouseDragged, .otherMouseDragged:
+            return true
+        default:
+            return false
+        }
+    }
+
+    private func interactionOwnsContinuation(
+        _ event: CGEvent,
+        interaction: ActiveInteraction
+    ) -> Bool {
+        guard isInteractionContinuation(event),
+              let button = MouseEventView(event).mouseButton else {
+            return false
+        }
+        return interaction.pinnedMouseButtons.contains(button)
+    }
+
+    private func mouseButtonTransition(for event: CGEvent) -> MouseButtonTransition? {
+        guard let button = MouseEventView(event).mouseButton else {
+            return nil
+        }
+
+        switch event.type {
+        case .leftMouseDown, .rightMouseDown, .otherMouseDown:
+            return .pressed(button)
+        case .leftMouseUp, .rightMouseUp, .otherMouseUp:
+            return .released(button)
+        default:
+            return nil
+        }
+    }
+
+    private func activeInteractionTransformers(in transformer: EventTransformer) -> [EventTransformer] {
+        if let tracker = transformer as? EventTransformerInteractionTracking,
+           tracker.hasActiveInteraction {
+            return [transformer]
+        }
+
+        return (transformer as? [EventTransformer])?.flatMap {
+            activeInteractionTransformers(in: $0)
+        } ?? []
+    }
+
+    private func sameTransformer(_ lhs: EventTransformer, _ rhs: EventTransformer) -> Bool {
+        (lhs as AnyObject) === (rhs as AnyObject)
+    }
+
+    private func transformer(
+        in route: TransformerRoute,
+        replacingInteractionTrackersWith owner: EventTransformer
+    ) -> EventTransformer {
+        guard let transformers = route.transformer as? [EventTransformer] else {
+            return owner
+        }
+
+        if transformers.contains(where: { sameTransformer($0, owner) }) {
+            return route.transformer
+        }
+
+        var result = [EventTransformer]()
+        var insertedOwner = false
+        for transformer in transformers {
+            if transformer is EventTransformerInteractionTracking {
+                if !insertedOwner {
+                    result.append(owner)
+                    insertedOwner = true
+                }
+                continue
+            }
+            result.append(transformer)
+        }
+
+        if !insertedOwner {
+            let insertionIndex = result.firstIndex { $0 is ButtonMappingScrollRecordingTransformer }
+                ?? result.endIndex
+            result.insert(owner, at: insertionIndex)
+        }
+        return result
+    }
+
+    private func hasActiveInteraction(in transformer: EventTransformer) -> Bool {
+        if let tracker = transformer as? EventTransformerInteractionTracking,
+           tracker.hasActiveInteraction {
+            return true
+        }
+
+        return (transformer as? [EventTransformer])?.contains {
+            hasActiveInteraction(in: $0)
+        } == true
     }
 
     func get(withDevice device: Device?, withPid pid: pid_t?, withDisplay display: String?) -> EventTransformer {
@@ -174,7 +550,12 @@ class EventTransformerManager {
         withProcess process: ProcessIdentity?,
         withDisplay display: String?
     ) -> EventTransformer {
-        get(withDevice: device, withProcess: process, withDisplay: display, updateActiveCacheKey: false)
+        getRoute(
+            withDevice: device,
+            withProcess: process,
+            withDisplay: display,
+            updateActiveRoute: false
+        ).transformer
     }
 
     func handleLogitechControlEvent(_ context: LogitechEventContext) -> LogitechControlEventHandlingResult {
@@ -191,45 +572,161 @@ class EventTransformerManager {
         return handleLogitechControlEventOnCurrentThread(context)
     }
 
+    /// Abandons a diverted Logitech control stream that cannot deliver its
+    /// physical release, such as when a receiver reconnect forces its monitor
+    /// to restart. Cancellation must not resolve a pending short press.
+    @discardableResult
+    func cancelLogitechControlInteraction(_ context: LogitechEventContext) -> Bool {
+        if EventThread.shared.isCurrent {
+            return cancelLogitechControlInteractionOnCurrentThread(context)
+        }
+
+        if let canceled = EventThread.shared.performAndWait({
+            self.cancelLogitechControlInteractionOnCurrentThread(context)
+        }) {
+            return canceled
+        }
+
+        return cancelLogitechControlInteractionOnCurrentThread(context)
+    }
+
+    private func cancelLogitechControlInteractionOnCurrentThread(_ context: LogitechEventContext) -> Bool {
+        let pid = ConfigurationState.shared.configuration.usesProcessConditions ? context.pid : nil
+        let selection = RouteSelection(
+            device: context.device,
+            process: pid?.processIdentity,
+            display: context.display
+        )
+        var canceled = sharedAutoScrollTransformer?.cancelLogitechControlInteraction(context) == true
+
+        guard let (interactionKey, interaction) = activeInteraction(
+            for: selection,
+            allowsUnidentifiedOwnerForIdentifiedSelection: true
+        ),
+            let canceler = interaction.transformer as? LogitechControlInteractionCanceling else {
+            return canceled
+        }
+
+        if canceler.cancelLogitechControlInteraction(context) {
+            canceled = true
+            didProcessOwnedInteraction(
+                interaction,
+                selection: selection.mergingDevice(from: interaction.selection),
+                interactionKey: interactionKey
+            )
+        }
+        return canceled
+    }
+
     private func handleLogitechControlEventOnCurrentThread(
         _ context: LogitechEventContext
     ) -> LogitechControlEventHandlingResult {
         let pid = ConfigurationState.shared.configuration.usesProcessConditions ? context.pid : nil
-        let transformer = get(withDevice: context.device, withPid: pid, withDisplay: context.display)
-        return (transformer as? LogitechControlEventHandling)?.handleLogitechControlEvent(context) ?? .notHandled
+        let selection = RouteSelection(
+            device: context.device,
+            process: pid?.processIdentity,
+            display: context.display
+        )
+        let interaction = activeInteraction(
+            for: selection,
+            allowsUnidentifiedOwnerForIdentifiedSelection: true
+        )
+        let effectiveSelection = selection.mergingDevice(from: interaction?.1.selection)
+        if let (interactionKey, activeInteraction) = interaction {
+            if !context.isPressed {
+                let ownerResult = (activeInteraction.transformer as? LogitechControlEventHandling)?
+                    .handleLogitechControlEvent(context) ?? .notHandled
+                didProcessOwnedInteraction(
+                    activeInteraction,
+                    selection: effectiveSelection,
+                    interactionKey: interactionKey
+                )
+                if ownerResult != .notHandled {
+                    return ownerResult
+                }
+
+                // The release belonged to another high-priority feature (most
+                // notably Auto Scroll) while this device also had a mapping
+                // interaction in flight. Do not offer an unmatched release to
+                // a fresh stateful recognizer.
+                let route = getRoute(
+                    withDevice: effectiveSelection.device,
+                    withProcess: effectiveSelection.process,
+                    withDisplay: effectiveSelection.display,
+                    updateActiveRoute: true
+                )
+                return (transformerWithoutInteractionTrackers(in: route) as? LogitechControlEventHandling)?
+                    .handleLogitechControlEvent(context) ?? .notHandled
+            }
+
+            let route = getRoute(
+                withDevice: effectiveSelection.device,
+                withProcess: effectiveSelection.process,
+                withDisplay: effectiveSelection.display,
+                updateActiveRoute: true
+            )
+            let result = (transformer(
+                in: route,
+                replacingInteractionTrackersWith: activeInteraction.transformer
+            ) as? LogitechControlEventHandling)?.handleLogitechControlEvent(context) ?? .notHandled
+            didProcessOwnedInteraction(
+                activeInteraction,
+                selection: effectiveSelection,
+                interactionKey: interactionKey
+            )
+            return result
+        }
+
+        let route = getRoute(
+            withDevice: effectiveSelection.device,
+            withProcess: effectiveSelection.process,
+            withDisplay: effectiveSelection.display,
+            updateActiveRoute: true
+        )
+        let result = (route.transformer as? LogitechControlEventHandling)?
+            .handleLogitechControlEvent(context) ?? .notHandled
+        didProcessRoute(
+            on: route,
+            selection: effectiveSelection,
+            interactionKey: effectiveSelection.interactionKey
+        )
+        return result
     }
 
-    private func get(
+    private func transformerWithoutInteractionTrackers(in route: TransformerRoute) -> EventTransformer {
+        guard let transformers = route.transformer as? [EventTransformer] else {
+            return route.transformer is EventTransformerInteractionTracking ? [] : route.transformer
+        }
+        return transformers.filter { !($0 is EventTransformerInteractionTracking) }
+    }
+
+    private func getRoute(
         withDevice device: Device?,
         withProcess process: ProcessIdentity?,
         withDisplay display: String?,
-        updateActiveCacheKey: Bool
-    ) -> EventTransformer {
-        let prevActiveCacheKey = activeCacheKey
-        if updateActiveCacheKey {
-            activeCacheKey = nil
+        updateActiveRoute: Bool
+    ) -> TransformerRoute {
+        let previousRoute = activeRoute
+        if updateActiveRoute {
+            activeRoute = nil
         }
         defer {
-            if updateActiveCacheKey,
-               let prevActiveCacheKey,
-               prevActiveCacheKey != activeCacheKey {
-                transition(
-                    from: eventTransformerCache.value(forKey: prevActiveCacheKey),
-                    to: activeCacheKey.flatMap { eventTransformerCache.value(forKey: $0) }
-                )
+            if updateActiveRoute, previousRoute?.id != activeRoute?.id {
+                transition(from: previousRoute, to: activeRoute)
             }
         }
 
         let cacheKey = CacheKey(
+            deviceID: device?.id,
             deviceMatcher: device.map { DeviceMatcher(of: $0) },
             process: process,
             screen: display
         )
-        if updateActiveCacheKey {
-            activeCacheKey = cacheKey
-        }
-        if let eventTransformer = eventTransformerCache.value(forKey: cacheKey) {
-            return eventTransformer
+        if let route = eventTransformerCache.value(forKey: cacheKey) {
+            if updateActiveRoute {
+                activeRoute = route
+            }
+            return route
         }
 
         let scheme = ConfigurationState.shared.configuration.matchScheme(
@@ -267,10 +764,26 @@ class EventTransformerManager {
                 .horizontal : nil
         )
         let hasSmoothedScrolling = smoothed.vertical != nil || smoothed.horizontal != nil
-        let buttonMappings = scheme.buttons.mappings ?? []
-        let scrollButtonMappings = buttonMappings.filter { $0.scroll != nil }
-        let otherButtonMappings = buttonMappings.filter { $0.scroll == nil }
-        let buttonActionsRuntimeState = ButtonActionsTransformer.RuntimeState()
+        let buttonMappings = (scheme.buttons.mappings ?? []).map { mapping in
+            var mapping = mapping
+            mapping.normalizeAsStructured()
+            return mapping
+        }
+        let gestureTransformer: GestureButtonTransformer? = if let gesture = scheme.buttons.$gesture,
+                                                               gesture.enabled ?? false,
+                                                               let trigger = gesture.trigger,
+                                                               trigger.button != nil {
+            GestureButtonTransformer(
+                trigger: trigger,
+                threshold: Double(gesture.threshold ?? 50),
+                deadZone: Double(gesture.deadZone ?? 40),
+                cooldownMs: gesture.cooldownMs ?? 500,
+                actions: gesture.actions
+            )
+        } else {
+            nil
+        }
+        let autoScrollTransformer = autoScrollTransformer(for: scheme.buttons.$autoScroll)
         if device != nil {
             let highResolutionWheelNormalizer = LogitechHighResolutionWheelNormalizer(
                 verticalMode: highResolutionWheelNormalizerMode(
@@ -287,23 +800,27 @@ class EventTransformerManager {
             }
         }
 
-        func appendScrollButtonMappings() {
-            guard !scrollButtonMappings.isEmpty else {
-                return
-            }
+        if scheme.buttons.switchPrimaryButtonAndSecondaryButtons == true {
+            eventTransformer.append(SwitchPrimaryAndSecondaryButtonsTransformer())
+        }
 
-            eventTransformer.append(ButtonActionsTransformer(
-                mappings: scrollButtonMappings,
+        // Auto Scroll owns its configured trigger before every other button
+        // recognizer, regardless of which other button features are enabled.
+        if let autoScrollTransformer {
+            eventTransformer.append(autoScrollTransformer)
+        }
+
+        if !buttonMappings.isEmpty {
+            eventTransformer.append(ButtonMappingTransformer(
+                mappings: buttonMappings,
                 universalBackForward: scheme.buttons.universalBackForward,
-                ignoresLinearMouseSyntheticScrollEvents: true,
-                runtimeState: buttonActionsRuntimeState
+                gestureTransformer: gestureTransformer
             ))
         }
 
-        func appendScrollRecordingAndButtonMappings() {
-            eventTransformer.append(ButtonMappingScrollRecordingTransformer())
-            appendScrollButtonMappings()
-        }
+        // Record the normalized/reversed physical wheel before configured
+        // modifier actions or smoothing can consume or reshape it.
+        eventTransformer.append(ButtonMappingScrollRecordingTransformer())
 
         if let modifiers = scheme.scrolling.$modifiers,
            hasSmoothedScrolling {
@@ -311,7 +828,6 @@ class EventTransformerManager {
         }
 
         if hasSmoothedScrolling {
-            appendScrollRecordingAndButtonMappings()
             eventTransformer.append(SmoothedScrollingTransformer(
                 smoothed: smoothed
             ))
@@ -379,37 +895,8 @@ class EventTransformerManager {
             eventTransformer.append(ModifierActionsTransformer(modifiers: modifiers))
         }
 
-        if !hasSmoothedScrolling {
-            appendScrollRecordingAndButtonMappings()
-        }
-
-        if scheme.buttons.switchPrimaryButtonAndSecondaryButtons == true {
-            eventTransformer.append(SwitchPrimaryAndSecondaryButtonsTransformer())
-        }
-
-        if let autoScrollTransformer = autoScrollTransformer(for: scheme.buttons.$autoScroll) {
-            eventTransformer.append(autoScrollTransformer)
-        }
-
-        if let gesture = scheme.buttons.$gesture,
-           gesture.enabled ?? false,
-           let trigger = gesture.trigger,
-           trigger.button != nil {
-            eventTransformer.append(GestureButtonTransformer(
-                trigger: trigger,
-                threshold: Double(gesture.threshold ?? 50),
-                deadZone: Double(gesture.deadZone ?? 40),
-                cooldownMs: gesture.cooldownMs ?? 500,
-                actions: gesture.actions
-            ))
-        }
-
-        if !otherButtonMappings.isEmpty {
-            eventTransformer.append(ButtonActionsTransformer(
-                mappings: otherButtonMappings,
-                universalBackForward: scheme.buttons.universalBackForward,
-                runtimeState: buttonActionsRuntimeState
-            ))
+        if buttonMappings.isEmpty, let gestureTransformer {
+            eventTransformer.append(gestureTransformer)
         }
 
         if let universalBackForward = scheme.buttons.universalBackForward,
@@ -421,9 +908,13 @@ class EventTransformerManager {
             eventTransformer.append(PointerRedirectsToScrollTransformer())
         }
 
-        eventTransformerCache.setValue(eventTransformer, forKey: cacheKey)
+        let route = TransformerRoute(transformer: eventTransformer)
+        eventTransformerCache.setValue(route, forKey: cacheKey)
+        if updateActiveRoute {
+            activeRoute = route
+        }
 
-        return eventTransformer
+        return route
     }
 
     private func highResolutionWheelNormalizerMode(
@@ -479,28 +970,119 @@ class EventTransformerManager {
         return transformer
     }
 
-    private func transition(from previous: EventTransformer?, to current: EventTransformer?) {
+    private func transition(from previous: TransformerRoute?, to current: TransformerRoute?) {
         let preservedAutoScrollTransformer = sharedAutoScrollTransformer?.isAutoscrollActive == true
             ? sharedAutoScrollTransformer
             : nil
 
-        deactivate(previous, excluding: preservedAutoScrollTransformer)
-        reactivate(current, excluding: preservedAutoScrollTransformer)
+        if let previous {
+            if isRouteOwned(previous) || hasActiveInteraction(in: previous.transformer) {
+                retiredRoutes[previous.id] = previous
+                deactivate(
+                    previous.transformer,
+                    excluding: preservedAutoScrollTransformer,
+                    interactionTransformers: preservedInteractionTransformers(in: previous)
+                )
+            } else {
+                deactivate(previous.transformer, excluding: preservedAutoScrollTransformer)
+            }
+        }
+
+        if let current {
+            retiredRoutes[current.id] = nil
+        }
+        reactivate(current?.transformer, excluding: preservedAutoScrollTransformer)
     }
 
-    private func resetState() {
-        let activeEventTransformer = activeCacheKey.flatMap { eventTransformerCache.value(forKey: $0) }
+    private func isRouteOwned(_ route: TransformerRoute) -> Bool {
+        activeInteractions.values.contains { $0.route.id == route.id }
+    }
+
+    private func preservedInteractionTransformers(in route: TransformerRoute) -> [EventTransformer] {
+        let owned = activeInteractions.values
+            .filter { $0.route.id == route.id }
+            .map(\.transformer)
+        return owned + activeInteractionTransformers(in: route.transformer)
+    }
+
+    private func deactivateRetiredRouteIfIdle(_ route: TransformerRoute) {
+        guard retiredRoutes[route.id] != nil,
+              !isRouteOwned(route),
+              !hasActiveInteraction(in: route.transformer) else {
+            return
+        }
+
+        retiredRoutes[route.id] = nil
+        let preservedAutoScrollTransformer = sharedAutoScrollTransformer?.isAutoscrollActive == true
+            ? sharedAutoScrollTransformer
+            : nil
+        deactivate(route.transformer, excluding: preservedAutoScrollTransformer)
+    }
+
+    private func invalidateConfigurationState() {
         let oldAutoScroll = sharedAutoScrollTransformer
-        deactivate(activeEventTransformer, excluding: oldAutoScroll)
-        sharedAutoScrollTransformer = nil
-        activeCacheKey = nil
+        let preservedAutoScrollTransformer = oldAutoScroll?.isAutoscrollActive == true
+            ? oldAutoScroll
+            : nil
+
+        if let activeRoute {
+            if isRouteOwned(activeRoute) || hasActiveInteraction(in: activeRoute.transformer) {
+                retiredRoutes[activeRoute.id] = activeRoute
+                deactivate(
+                    activeRoute.transformer,
+                    excluding: oldAutoScroll,
+                    interactionTransformers: preservedInteractionTransformers(in: activeRoute)
+                )
+            } else {
+                deactivate(activeRoute.transformer, excluding: oldAutoScroll)
+            }
+        }
+
+        let inactiveRetiredRoutes = retiredRoutes.values.filter {
+            !isRouteOwned($0) && !hasActiveInteraction(in: $0.transformer)
+        }
+        for route in inactiveRetiredRoutes {
+            deactivate(route.transformer, excluding: oldAutoScroll)
+            retiredRoutes[route.id] = nil
+        }
+
+        activeRoute = nil
         eventTransformerCache.removeAllValues()
+
+        if preservedAutoScrollTransformer == nil {
+            sharedAutoScrollTransformer = nil
+            oldAutoScroll?.deactivate()
+        }
+    }
+
+    private func forceResetState() {
+        let oldAutoScroll = sharedAutoScrollTransformer
+        var routesByID = [UUID: TransformerRoute]()
+        if let activeRoute {
+            routesByID[activeRoute.id] = activeRoute
+        }
+        for interaction in activeInteractions.values {
+            routesByID[interaction.route.id] = interaction.route
+        }
+        for route in retiredRoutes.values {
+            routesByID[route.id] = route
+        }
+        for route in routesByID.values {
+            deactivate(route.transformer, excluding: oldAutoScroll)
+        }
+
+        sharedAutoScrollTransformer = nil
+        activeInteractions.removeAll()
+        activeRoute = nil
+        eventTransformerCache.removeAllValues()
+        retiredRoutes.removeAll()
         oldAutoScroll?.deactivate()
     }
 
     private func deactivate(
         _ transformer: EventTransformer?,
-        excluding preservedAutoScrollTransformer: AutoScrollTransformer?
+        excluding preservedAutoScrollTransformer: AutoScrollTransformer?,
+        interactionTransformers: [EventTransformer] = []
     ) {
         guard let transformer else {
             return
@@ -513,6 +1095,9 @@ class EventTransformerManager {
                    autoScrollTransformer === preservedAutoScrollTransformer {
                     continue
                 }
+                if interactionTransformers.contains(where: { sameTransformer($0, transformer) }) {
+                    continue
+                }
 
                 (transformer as? Deactivatable)?.deactivate()
             }
@@ -522,6 +1107,9 @@ class EventTransformerManager {
         if let preservedAutoScrollTransformer,
            let autoScrollTransformer = transformer as? AutoScrollTransformer,
            autoScrollTransformer === preservedAutoScrollTransformer {
+            return
+        }
+        if interactionTransformers.contains(where: { sameTransformer($0, transformer) }) {
             return
         }
 

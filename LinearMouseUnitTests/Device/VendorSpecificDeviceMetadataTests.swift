@@ -385,6 +385,31 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         )
     }
 
+    func testLogitechControlsMonitorFindsControlsInStructuredTriggers() {
+        let control = LogitechControlIdentity(controlID: 0x00D0, productID: 0xB015, serialNumber: "ABC")
+        let mapping = Scheme.Buttons.Mapping(
+            trigger: .init(input: .wheel(.up), whileHeld: [.logitechControl(control)]),
+            action: .arg0(.none)
+        )
+        let configuration = Configuration(schemes: [
+            Scheme(buttons: .init(mappings: [mapping]))
+        ])
+        let identity = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 1,
+            slot: 0,
+            kind: .mouse,
+            name: "M720",
+            serialNumber: "abc",
+            productID: 0xB015,
+            batteryLevel: nil
+        )
+
+        XCTAssertTrue(LogitechReprogrammableControlsMonitor.isNeeded(
+            configuration: configuration,
+            identity: identity
+        ))
+    }
+
     func testLogitechControlsMonitorCanFallbackToProductWhenDirectBluetoothSerialIsMissing() {
         var mapping = Scheme.Buttons.Mapping()
         mapping.button = .logitechControl(.init(controlID: 0x00D0, productID: 0xB015, serialNumber: "ABC"))
@@ -578,6 +603,26 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         )
     }
 
+    func testLogitechSyntheticFallbackPostsDeferredClickAfterHandledFallbackRelease() {
+        var coordinator = LogitechSyntheticFallbackCoordinator()
+        let controlIdentity = LogitechControlIdentity(controlID: 0x00D0, productID: 0xB015, serialNumber: "ABC")
+
+        _ = coordinator.action(
+            for: controlIdentity,
+            isPressed: true,
+            handlingResult: .handledDeferringSyntheticFallback
+        )
+
+        XCTAssertEqual(
+            coordinator.action(
+                for: controlIdentity,
+                isPressed: false,
+                handlingResult: .handledAllowingSyntheticFallback
+            ),
+            .postClick
+        )
+    }
+
     func testLogitechSyntheticFallbackCancelsDeferredClickWhenGestureHandlesRelease() {
         var coordinator = LogitechSyntheticFallbackCoordinator()
         let controlIdentity = LogitechControlIdentity(controlID: 0x00D0, productID: 0xB015, serialNumber: "ABC")
@@ -617,6 +662,30 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             coordinator.action(for: firstControl, isPressed: false, handlingResult: .notHandled),
             .postClick
         )
+    }
+
+    func testLogitechMonitorDefersReconfigurationUntilControlsAreReleased() {
+        var request = LogitechMonitorReconfigurationRequest()
+        request.request()
+
+        let whilePressed = request.consume(deferringWhileControlsArePressed: true)
+        XCTAssertFalse(whilePressed.needed)
+        XCTAssertFalse(whilePressed.forced)
+
+        let afterRelease = request.consume(deferringWhileControlsArePressed: false)
+        XCTAssertTrue(afterRelease.needed)
+        XCTAssertFalse(afterRelease.forced)
+
+        XCTAssertFalse(request.consume(deferringWhileControlsArePressed: false).needed)
+    }
+
+    func testLogitechMonitorDoesNotDeferForcedReconfiguration() {
+        var request = LogitechMonitorReconfigurationRequest()
+        request.request(forced: true)
+
+        let result = request.consume(deferringWhileControlsArePressed: true)
+        XCTAssertTrue(result.needed)
+        XCTAssertTrue(result.forced)
     }
 
     func testLogitechControlIdentityProvidesFriendlyUserVisibleName() {

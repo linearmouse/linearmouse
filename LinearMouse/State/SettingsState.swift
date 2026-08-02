@@ -13,6 +13,21 @@ class SettingsState: ObservableObject {
         let button: Scheme.Buttons.Mapping.Button?
         let scroll: Scheme.Buttons.Mapping.ScrollDirection?
         let modifierFlags: CGEventFlags
+        let isPressed: Bool?
+
+        init(
+            recordingSessionID: UUID,
+            button: Scheme.Buttons.Mapping.Button?,
+            scroll: Scheme.Buttons.Mapping.ScrollDirection?,
+            modifierFlags: CGEventFlags,
+            isPressed: Bool? = nil
+        ) {
+            self.recordingSessionID = recordingSessionID
+            self.button = button
+            self.scroll = scroll
+            self.modifierFlags = modifierFlags
+            self.isPressed = isPressed
+        }
     }
 
     struct ButtonMappingRecordingSession: Equatable {
@@ -50,7 +65,43 @@ class SettingsState: ObservableObject {
         }
     }
 
-    @Published var navigation: Navigation? = .pointer
+    enum ButtonsDestination: Equatable {
+        case autoScroll
+        case gestureButton
+        case buttonMappings
+
+        var title: LocalizedStringKey {
+            switch self {
+            case .autoScroll:
+                return "Autoscroll"
+            case .gestureButton:
+                return "Gesture Button"
+            case .buttonMappings:
+                return "Button Mappings"
+            }
+        }
+
+        var localizedTitle: String {
+            switch self {
+            case .autoScroll:
+                return NSLocalizedString("Autoscroll", comment: "Buttons settings destination")
+            case .gestureButton:
+                return NSLocalizedString("Gesture Button", comment: "Buttons settings destination")
+            case .buttonMappings:
+                return NSLocalizedString("Button Mappings", comment: "Buttons settings destination")
+            }
+        }
+    }
+
+    @Published var navigation: Navigation? = .pointer {
+        didSet {
+            if navigation != .buttons {
+                buttonsNavigationPath.removeAll()
+            }
+        }
+    }
+
+    @Published var buttonsNavigationPath: [ButtonsDestination] = []
 
     @Published private(set) var buttonMappingRecordingSession: ButtonMappingRecordingSession?
 
@@ -60,7 +111,7 @@ class SettingsState: ObservableObject {
     /// `@Published` emits before storing the new value, so session guards use this reentrancy-safe storage.
     private var currentButtonMappingRecordingSession: ButtonMappingRecordingSession?
 
-    /// When `recording` is true, `ButtonActionsTransformer` should be temporarily disabled.
+    /// When `recording` is true, button mapping recognition should be temporarily disabled.
     var recording: Bool {
         currentButtonMappingRecordingSession != nil
     }

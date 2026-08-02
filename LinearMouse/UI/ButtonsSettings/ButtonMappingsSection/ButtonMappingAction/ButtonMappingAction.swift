@@ -5,10 +5,10 @@ import SwiftUI
 
 struct ButtonMappingAction: View {
     @Binding var action: Scheme.Buttons.Mapping.Action
+    var label: LocalizedStringKey = "Action"
 
     var body: some View {
-        ButtonMappingActionPicker(actionType: $action.kind)
-            .equatable()
+        ButtonMappingActionPicker(actionType: $action.kind, label: label)
 
         switch action {
         case .arg0:

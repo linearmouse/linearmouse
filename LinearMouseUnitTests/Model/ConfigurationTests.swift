@@ -234,22 +234,6 @@ final class ConfigurationTests: XCTestCase {
         XCTAssertNil(jsonObject["repeat"])
     }
 
-    func testKeyPressBehaviorMapsFlagsExclusively() {
-        var mapping = Scheme.Buttons.Mapping()
-
-        mapping.keyPressBehavior = .repeat
-        XCTAssertEqual(mapping.repeat, true)
-        XCTAssertNil(mapping.hold)
-
-        mapping.keyPressBehavior = .holdWhilePressed
-        XCTAssertEqual(mapping.hold, true)
-        XCTAssertNil(mapping.repeat)
-
-        mapping.keyPressBehavior = .sendOnRelease
-        XCTAssertNil(mapping.hold)
-        XCTAssertNil(mapping.repeat)
-    }
-
     func testLogitechControlButtonDecodesHexProductID() throws {
         let mapping = try JSONDecoder().decode(
             Scheme.Buttons.Mapping.self,

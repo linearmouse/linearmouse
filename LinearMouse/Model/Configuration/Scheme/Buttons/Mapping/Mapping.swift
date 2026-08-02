@@ -3,6 +3,13 @@
 
 extension Scheme.Buttons {
     struct Mapping: Equatable, Hashable {
+        /// The structured trigger used by button mappings.
+        ///
+        /// Legacy `button`, `scroll`, and modifier fields remain decodable. Entries
+        /// in `buttons.mappings` are normalized to this structured representation.
+        var trigger: Trigger?
+        var outcomes: Outcomes?
+
         var button: Button?
         var `repeat`: Bool?
         var hold: Bool?
@@ -47,9 +54,51 @@ extension Scheme.Buttons.Mapping {
                 return LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.reservedVirtualButtonNumber
             }
         }
+
+        /// Whether two configured buttons can refer to the same physical
+        /// input. Logitech identities may intentionally omit device fields,
+        /// so exact equality is too strict when recognizers use different
+        /// specificity levels for the same control.
+        func canRepresentSamePhysicalInput(as other: Self) -> Bool {
+            switch (self, other) {
+            case let (.mouse(buttonNumber), .mouse(otherButtonNumber)):
+                return buttonNumber == otherButtonNumber
+
+            case let (.logitechControl(identity), .logitechControl(otherIdentity)):
+                guard identity.controlID == otherIdentity.controlID else {
+                    return false
+                }
+                if let productID = identity.productID,
+                   let otherProductID = otherIdentity.productID,
+                   productID != otherProductID {
+                    return false
+                }
+                if let serialNumber = identity.serialNumber,
+                   let otherSerialNumber = otherIdentity.serialNumber,
+                   serialNumber.caseInsensitiveCompare(otherSerialNumber) != .orderedSame {
+                    return false
+                }
+                return true
+
+            default:
+                return false
+            }
+        }
     }
 
     var valid: Bool {
+        if let trigger {
+            guard trigger.valid(with: outcomes) else {
+                return false
+            }
+            switch trigger.input {
+            case .button:
+                return outcomes?.isEmpty == false
+            case .wheel:
+                return action != nil
+            }
+        }
+
         guard button != nil || scroll != nil else {
             return false
         }
@@ -65,57 +114,30 @@ extension Scheme.Buttons.Mapping {
         case up, down, left, right
     }
 
-    enum KeyPressBehavior: String, CaseIterable, Identifiable {
-        case sendOnRelease
-        case `repeat`
-        case holdWhilePressed
-
-        var id: Self {
-            self
-        }
-    }
-
-    var keyPressBehavior: KeyPressBehavior {
-        get {
-            if hold == true {
-                return .holdWhilePressed
-            }
-
-            if `repeat` == true {
-                return .repeat
-            }
-
-            return .sendOnRelease
-        }
-        set {
-            switch newValue {
-            case .sendOnRelease:
-                `repeat` = nil
-                hold = nil
-            case .repeat:
-                `repeat` = true
-                hold = nil
-            case .holdWhilePressed:
-                `repeat` = nil
-                hold = true
-            }
-        }
-    }
-
     var modifierFlags: CGEventFlags {
         get {
-            CGEventFlags([
-                (command, CGEventFlags.maskCommand),
-                (shift, CGEventFlags.maskShift),
-                (option, CGEventFlags.maskAlternate),
-                (control, CGEventFlags.maskControl)
-            ]
-            .filter { $0.0 == true }
-            .map(\.1)
+            if let trigger {
+                return trigger.modifierFlags
+            }
+
+            return CGEventFlags(
+                [
+                    (command, CGEventFlags.maskCommand),
+                    (shift, CGEventFlags.maskShift),
+                    (option, CGEventFlags.maskAlternate),
+                    (control, CGEventFlags.maskControl)
+                ]
+                .filter { $0.0 == true }
+                .map(\.1)
             )
         }
 
         set {
+            if trigger != nil {
+                trigger?.modifierFlags = newValue
+                return
+            }
+
             let genericFlags = ModifierState.generic(from: newValue)
             command = genericFlags.contains(.maskCommand)
             shift = genericFlags.contains(.maskShift)
@@ -124,59 +146,21 @@ extension Scheme.Buttons.Mapping {
         }
     }
 
-    func match(with event: CGEvent) -> Bool {
-        guard matches(modifierFlags: event.flags) else {
-            return false
-        }
-
-        if let mouseButtonNumber = button?.mouseButtonNumber {
-            guard [.leftMouseDown, .leftMouseUp, .leftMouseDragged,
-                   .rightMouseDown, .rightMouseUp, .rightMouseDragged,
-                   .otherMouseDown, .otherMouseUp, .otherMouseDragged].contains(event.type) else {
-                return false
-            }
-
-            guard let mouseButton = MouseEventView(event).mouseButton,
-                  Int(mouseButton.rawValue) == mouseButtonNumber else {
-                return false
-            }
-        } else if button?.logitechControl != nil {
-            // Logitech control mappings are matched directly via handleLogitechControlEvent,
-            // not through the CGEvent pipeline.
-            return false
-        }
-
-        if let scroll {
-            guard event.type == .scrollWheel else {
-                return false
-            }
-
-            let view = ScrollWheelEventView(event)
-
-            switch scroll {
-            case .up:
-                guard view.deltaY > 0 else {
-                    return false
-                }
-            case .down:
-                guard view.deltaY < 0 else {
-                    return false
-                }
-            case .left:
-                guard view.deltaX > 0 else {
-                    return false
-                }
-            case .right:
-                guard view.deltaX < 0 else {
-                    return false
-                }
-            }
-        }
-
-        return true
-    }
-
     func conflicted(with mapping: Self) -> Bool {
+        if trigger != nil || mapping.trigger != nil {
+            guard let trigger = effectiveTrigger,
+                  let otherTrigger = mapping.effectiveTrigger,
+                  trigger.isEquivalent(to: otherTrigger) else {
+                return false
+            }
+
+            var lhs = self
+            var rhs = mapping
+            lhs.normalizeAsStructured()
+            rhs.normalizeAsStructured()
+            return lhs.hasOverlappingOutcome(with: rhs)
+        }
+
         guard scroll == mapping.scroll,
               conflicts(withModifierFlagsOf: mapping) else {
             return false
@@ -197,17 +181,47 @@ extension Scheme.Buttons.Mapping {
 extension Scheme.Buttons.Mapping: Comparable {
     static func < (lhs: Scheme.Buttons.Mapping, rhs: Scheme.Buttons.Mapping) -> Bool {
         func score(_ mapping: Scheme.Buttons.Mapping) -> Int {
-            var score = 0
+            let triggerButton: Scheme.Buttons.Mapping.Button?
+            let scrollDirection: Scheme.Buttons.Mapping.ScrollDirection?
 
-            if let mouseButtonNumber = mapping.button?.mouseButtonNumber {
-                score |= ((mouseButtonNumber & 0xFF) << 8)
+            switch mapping.trigger?.input {
+            case let .button(button):
+                triggerButton = button
+                scrollDirection = nil
+            case let .wheel(direction):
+                triggerButton = nil
+                scrollDirection = direction
+            case nil:
+                triggerButton = mapping.button
+                scrollDirection = mapping.scroll
             }
 
-            if let logiButtonID = mapping.button?.logitechControl?.controlID {
-                score |= ((logiButtonID & 0xFFFF) << 20)
-                score |= ((mapping.button?.logitechControl?.specificityScore ?? 0) << 18)
-            } else if mapping.button == nil, mapping.scroll != nil {
-                score |= (1 << 16)
+            var score: Int
+            if let mouseButtonNumber = triggerButton?.mouseButtonNumber {
+                score = (mouseButtonNumber & 0xFFFF) << 32
+            } else if let scrollDirection {
+                let directionOrder: Int
+                switch scrollDirection {
+                case .up:
+                    directionOrder = 0
+                case .down:
+                    directionOrder = 1
+                case .left:
+                    directionOrder = 2
+                case .right:
+                    directionOrder = 3
+                }
+                score = (1 << 56) | (directionOrder << 32)
+            } else if let logitechControl = triggerButton?.logitechControl {
+                score = (2 << 56) |
+                    ((logitechControl.controlID & 0xFFFF) << 32) |
+                    ((logitechControl.specificityScore & 0xFFFF) << 16)
+            } else {
+                score = 3 << 56
+            }
+
+            if let trigger = mapping.trigger {
+                score |= (trigger.specificityScore & 0xFFF) << 4
             }
 
             if mapping.modifierFlags.contains(.maskCommand) {
@@ -243,11 +257,15 @@ extension Scheme.Buttons.Mapping: Codable {
         case option
         case control
         case action
+        case trigger
+        case outcomes
     }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
+        trigger = try container.decodeIfPresent(Trigger.self, forKey: .trigger)
+        outcomes = try container.decodeIfPresent(Outcomes.self, forKey: .outcomes)
         button = try container.decodeIfPresent(Button.self, forKey: .button)
             ?? container.decodeIfPresent(LogitechControlIdentity.self, forKey: .logiButton).map(Button.logitechControl)
             ?? container.decodeIfPresent(LogitechControlIdentity.self, forKey: .logitechControl)
@@ -265,6 +283,8 @@ extension Scheme.Buttons.Mapping: Codable {
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
+        try container.encodeIfPresent(trigger, forKey: .trigger)
+        try container.encodeIfPresent(outcomes, forKey: .outcomes)
         try container.encodeIfPresent(button, forKey: .button)
         try container.encodeIfPresent(`repeat`, forKey: .repeat)
         try container.encodeIfPresent(hold, forKey: .hold)

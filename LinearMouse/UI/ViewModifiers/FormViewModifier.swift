@@ -42,22 +42,33 @@ struct PickerViewModifier: ViewModifier {
     }
 }
 
+struct SettingsDescriptionViewModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.callout)
+            .foregroundColor(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+extension View {
+    func settingsDescriptionStyle() -> some View {
+        modifier(SettingsDescriptionViewModifier())
+    }
+}
+
 func withDescription<View1: View, View2: View>(@ViewBuilder content: () -> TupleView<(View1, View2)>) -> some View {
     let c = content()
 
     if #available(macOS 13.0, *) {
         return Group {
             c.value.0
-            c.value.1
+            c.value.1.settingsDescriptionStyle()
         }
     } else {
         return VStack(alignment: .leading) {
             c.value.0
-            c.value
-                .1
-                .controlSize(.small)
-                .foregroundColor(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            c.value.1.settingsDescriptionStyle()
         }
     }
 }

@@ -48,6 +48,10 @@ class GestureButtonTransformer {
 
 extension GestureButtonTransformer: EventTransformer {
     func transform(_ event: CGEvent, in _: EventTransformerContext) -> CGEvent? {
+        guard !SettingsState.shared.recording || hasActiveInteraction else {
+            return event
+        }
+
         // Check if we're in cooldown
         if case let .cooldown(until, released) = state {
             if DispatchTime.now().uptimeNanoseconds < until {
@@ -64,7 +68,22 @@ extension GestureButtonTransformer: EventTransformer {
                 }
                 return event
             }
-            // Cooldown expired, return to idle
+
+            // The action cooldown may expire before the physical button is
+            // released. Keep ownership until that release so lower-priority
+            // click recognizers cannot treat it as a fresh short press.
+            if !released {
+                guard matchesTriggerButton(event) else {
+                    return event
+                }
+                if event.type == mouseUpEventType {
+                    state = .idle
+                    event.isGestureCleanupRelease = true
+                    return event
+                }
+                return nil
+            }
+
             state = .idle
         }
 
@@ -286,6 +305,10 @@ extension GestureButtonTransformer: EventTransformer {
 
 extension GestureButtonTransformer: LogitechControlEventHandling {
     func handleLogitechControlEvent(_ context: LogitechEventContext) -> LogitechControlEventHandlingResult {
+        guard !SettingsState.shared.recording || hasActiveInteraction else {
+            return .notHandled
+        }
+
         guard let triggerLogitechControl = trigger.button?.logitechControl,
               context.matches(triggerLogitechControl) else {
             return .notHandled
@@ -300,6 +323,15 @@ extension GestureButtonTransformer: LogitechControlEventHandling {
                 state = .cooldown(until: until, released: true)
                 return .handled
             }
+
+            if !released {
+                if context.isPressed {
+                    return .handled
+                }
+                state = .idle
+                return .handled
+            }
+
             state = .idle
         }
 
@@ -323,8 +355,54 @@ extension GestureButtonTransformer: LogitechControlEventHandling {
     }
 }
 
+extension GestureButtonTransformer: LogitechControlInteractionCanceling {
+    @discardableResult
+    func cancelLogitechControlInteraction(_ context: LogitechEventContext) -> Bool {
+        guard let triggerLogitechControl = trigger.button?.logitechControl,
+              context.matches(triggerLogitechControl),
+              hasActiveInteraction else {
+            return false
+        }
+
+        state = .idle
+        return true
+    }
+}
+
+extension GestureButtonTransformer {
+    var configuredTriggerButton: Scheme.Buttons.Mapping.Button? {
+        trigger.button
+    }
+
+    /// Stops a still-pending Gesture Button interaction after another
+    /// recognizer has committed the same button stream first.
+    @discardableResult
+    func cancelInteraction(containing button: Scheme.Buttons.Mapping.Button) -> Bool {
+        guard trigger.button?.canRepresentSamePhysicalInput(as: button) == true,
+              hasActiveInteraction else {
+            return false
+        }
+
+        state = .idle
+        return true
+    }
+}
+
 extension GestureButtonTransformer: Deactivatable {
     func deactivate() {
         state = .idle
+    }
+}
+
+extension GestureButtonTransformer: EventTransformerInteractionTracking {
+    var hasActiveInteraction: Bool {
+        switch state {
+        case .idle:
+            return false
+        case .tracking, .triggered:
+            return true
+        case let .cooldown(_, released):
+            return !released
+        }
     }
 }

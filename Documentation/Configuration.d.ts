@@ -457,7 +457,7 @@ declare namespace Scheme {
   type Buttons = {
     /**
      * @title Button mappings
-     * @description Assign actions to buttons.
+     * @description Assign actions to buttons, chords, long presses, swipes, and wheel gestures.
      */
     mappings?: Buttons.Mapping[];
 
@@ -563,7 +563,13 @@ declare namespace Scheme {
       };
     }
 
-    type Mapping = (
+    /**
+     * @description Legacy flat mappings are accepted and migrated to the structured format when the configuration is loaded.
+     */
+    type Mapping = Mapping.Legacy | Mapping.Structured;
+
+    namespace Mapping {
+      type Legacy = (
       | {
           /**
            * @title Button number
@@ -615,7 +621,109 @@ declare namespace Scheme {
       action?: Mapping.Action;
     };
 
-    namespace Mapping {
+      type Structured =
+        | {
+            /**
+             * @title Trigger
+             * @description A button trigger. `simultaneous` buttons form an unordered chord; `whileHeld` buttons must already be down.
+             */
+            trigger: ButtonTrigger;
+
+            /**
+             * @title Outcomes
+             * @description Actions selected by how the button or chord is used. Timing and movement thresholds are global application policy.
+             */
+            outcomes: Outcomes;
+          }
+        | {
+            /**
+             * @title Trigger
+             * @description A wheel impulse, optionally while one or more buttons are held. Wheel triggers do not support long press or swipe outcomes.
+             */
+            trigger: WheelTrigger;
+
+            /**
+             * @title Action
+             */
+            action: Action;
+          };
+
+      type ButtonTrigger = {
+        input: { button: Button };
+
+        /**
+         * @description Additional buttons pressed within the global chord window. Their order does not matter.
+         */
+        simultaneous?: Button[];
+
+        /**
+         * @description Buttons that must already be held when this trigger begins.
+         */
+        whileHeld?: Button[];
+
+        /**
+         * @description Keyboard modifiers that must match exactly.
+         */
+        modifiers?: Modifier[];
+      };
+
+      type WheelTrigger = {
+        input: { wheel: ScrollDirection };
+
+        /**
+         * @description Buttons that must be held while the wheel moves.
+         */
+        whileHeld?: Button[];
+
+        /**
+         * @description Keyboard modifiers that must match exactly.
+         */
+        modifiers?: Modifier[];
+      };
+
+      type Modifier = "command" | "shift" | "option" | "control";
+
+      type Outcomes = {
+        /**
+         * @description Begin an action as soon as the trigger resolves. A press outcome owns the trigger until release and cannot be combined with shortPress, longPress, or swipe.
+         */
+        press?: PressAction;
+
+        /**
+         * @description Execute when a release ends the active button gesture before another outcome commits.
+         */
+        shortPress?: Action;
+
+        /**
+         * @description Execute when the global long-press duration is reached.
+         */
+        longPress?: Action;
+
+        /**
+         * @description Execute when pointer movement crosses the global swipe threshold while the trigger is held.
+         */
+        swipe?: SwipeActions;
+      };
+
+      type PressAction = {
+        /**
+         * @description The action controlled by the pressed/released lifecycle.
+         */
+        action: Action;
+
+        /**
+         * @description Execute once on press, repeat until release, hold keyboard keys until release, or remap a complete physical mouse-button stream.
+         */
+        behavior: "perform" | "repeat" | "hold" | "remap";
+      };
+
+      type SwipeActions = {
+        up?: Action;
+        down?: Action;
+        left?: Action;
+        right?: Action;
+      };
+
       type Button = PhysicalButton | LogitechControlButton;
 
       type LogitechControlButton = {
