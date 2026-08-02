@@ -103,7 +103,6 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
            let button = mappingButton(of: event) {
             let cancellation = engine.cancelInteractions(containing: button)
             if cancellation.consumesEvent {
-                bufferedEvents.removeAll()
                 process(cancellation)
                 scheduleNextDeadline()
                 return nil
@@ -189,7 +188,7 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
             nil
         }
 
-        if output.consumesEvent, canBuffer, forwardedEvent == nil {
+        if output.consumesEvent, output.buffersEvent, canBuffer, forwardedEvent == nil {
             bufferedEvents.append(.init(
                 event: event.copy() ?? event,
                 sink: context.deferredEventSink ?? fallbackEventSink
@@ -301,6 +300,8 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
             for deferredEvent in events {
                 deferredEvent.sink(deferredEvent.event)
             }
+        } else if output.discardsBufferedEvents {
+            bufferedEvents.removeAll()
         }
     }
 
@@ -399,58 +400,69 @@ extension ButtonMappingTransformer: LogitechControlEventHandling {
         }
 
         let now = monotonicClock()
-        process(engine.advance(to: now))
         targetBundleIdentifier = context.pid?.bundleIdentifier
 
-        guard let button = configuredButton(matching: context) else {
+        let configuredButtons = configuredButtons(matching: context)
+        guard !configuredButtons.isEmpty else {
             return gestureResult
         }
-        let output = context.isPressed
-            ? engine.buttonDown(button, modifierFlags: context.modifierFlags, at: now)
-            : engine.buttonUp(button, modifierFlags: context.modifierFlags, at: now)
-        process(output)
+        let result = context.isPressed
+            ? engine.buttonDown(
+                firstMatching: configuredButtons,
+                modifierFlags: context.modifierFlags,
+                at: now
+            )
+            : engine.buttonUp(
+                firstMatching: configuredButtons,
+                modifierFlags: context.modifierFlags,
+                at: now
+            )
+        process(result.output)
         scheduleNextDeadline()
 
-        if output.forwardsCapturedEvent {
-            return .notHandled
-        }
-        guard output.consumesEvent else {
+        guard result.button != nil else {
             return gestureResult
         }
-        if output.replaysBufferedEvents {
+        if result.output.forwardsCapturedEvent {
+            return .notHandled
+        }
+        guard result.output.consumesEvent else {
+            return gestureResult
+        }
+        if result.output.replaysBufferedEvents {
             return .notHandled
         }
         return context.isPressed ? .handledDeferringSyntheticFallback : .handled
     }
 
     private func cancelGestureInteraction(for context: LogitechEventContext) {
-        guard let button = configuredButton(matching: context) else {
+        var cancellation = ButtonMappingEngine.Output()
+        for button in configuredButtons(matching: context) {
+            cancellation.append(engine.cancelInteractions(containing: button))
+        }
+        guard cancellation.consumesEvent else {
             return
         }
-
-        let output = engine.cancelInteractions(containing: button)
-        guard output.consumesEvent else {
-            return
-        }
-        bufferedEvents.removeAll()
-        process(output)
+        process(cancellation)
         scheduleNextDeadline()
     }
 
-    private func configuredButton(matching context: LogitechEventContext) -> Mapping.Button? {
-        mappings.enumerated()
-            .flatMap { mappingIndex, mapping in
-                (mapping.trigger?.statefulButtons ?? []).compactMap { button -> (Int, Mapping.Button)? in
-                    guard let identity = button.logitechControl,
-                          context.matches(identity) else {
-                        return nil
-                    }
-                    let score = identity.specificityScore * 1_000_000 + mappingIndex
-                    return (score, button)
+    private func configuredButtons(matching context: LogitechEventContext) -> [Mapping.Button] {
+        let scoredButtons = mappings.enumerated().reduce(into: [Mapping.Button: Int]()) { result, item in
+            let (mappingIndex, mapping) = item
+            for button in mapping.trigger?.statefulButtons ?? [] {
+                guard let identity = button.logitechControl,
+                      context.matches(identity) else {
+                    continue
                 }
+                let score = identity.specificityScore * 1_000_000 + mappingIndex
+                result[button] = max(result[button] ?? Int.min, score)
             }
-            .max { $0.0 < $1.0 }?
-            .1
+        }
+
+        return scoredButtons
+            .sorted { lhs, rhs in lhs.value > rhs.value }
+            .map(\.key)
     }
 }
 

@@ -53,9 +53,15 @@ struct ButtonMappingEngine {
 
     struct Output: Equatable {
         var consumesEvent = false
+        /// The current physical event belongs to an unresolved interaction and
+        /// must be retained until that interaction commits or falls back.
+        var buffersEvent = false
         var actions = [Action]()
         var lifecycleEvents = [LifecycleEvent]()
         var replaysBufferedEvents = false
+        /// A pending interaction committed, so its retained physical events
+        /// must not be visible to the system or a later fallback stream.
+        var discardsBufferedEvents = false
         /// The current event belongs to a fallback stream whose buffered prefix
         /// has already been replayed and must follow the same delivery path.
         var forwardsCapturedEvent = false
@@ -63,9 +69,11 @@ struct ButtonMappingEngine {
 
         mutating func append(_ output: Self) {
             consumesEvent = consumesEvent || output.consumesEvent
+            buffersEvent = buffersEvent || output.buffersEvent
             actions += output.actions
             lifecycleEvents += output.lifecycleEvents
             replaysBufferedEvents = replaysBufferedEvents || output.replaysBufferedEvents
+            discardsBufferedEvents = discardsBufferedEvents || output.discardsBufferedEvents
             forwardsCapturedEvent = forwardsCapturedEvent || output.forwardsCapturedEvent
             pointerHandling = output.pointerHandling ?? pointerHandling
         }
@@ -238,6 +246,7 @@ struct ButtonMappingEngine {
                 )
                 self.session = session
                 output.consumesEvent = true
+                output.buffersEvent = true
                 output.append(resolveIfPossible(at: timestamp, force: false))
                 return output
             }
@@ -247,6 +256,7 @@ struct ButtonMappingEngine {
                 session.capturedButtons.insert(button)
                 self.session = session
                 output.consumesEvent = true
+                output.buffersEvent = true
                 output.append(resolveIfPossible(at: timestamp, force: false))
                 return output
             }
@@ -260,6 +270,7 @@ struct ButtonMappingEngine {
                 session.capturedButtons.insert(button)
                 self.session = session
                 output.consumesEvent = true
+                output.buffersEvent = true
             }
             return output
         }
@@ -278,8 +289,39 @@ struct ButtonMappingEngine {
             capturedButtons: [button]
         )
         output.consumesEvent = true
+        output.buffersEvent = true
         output.append(resolveIfPossible(at: timestamp, force: false))
         return output
+    }
+
+    /// Tries aliases for one physical control without letting an inapplicable,
+    /// more-specific alias hide a less-specific configured mapping.
+    mutating func buttonDown(
+        firstMatching buttons: [Button],
+        modifierFlags: CGEventFlags,
+        at timestamp: UInt64
+    ) -> (button: Button?, output: Output) {
+        let advancedOutput = advance(to: timestamp)
+        let advancedEngine = self
+
+        for button in buttons {
+            var candidateEngine = advancedEngine
+            let eventOutput = candidateEngine.buttonDown(
+                button,
+                modifierFlags: modifierFlags,
+                at: timestamp
+            )
+            guard eventOutput.consumesEvent else {
+                continue
+            }
+
+            self = candidateEngine
+            var output = advancedOutput
+            output.append(eventOutput)
+            return (button, output)
+        }
+
+        return (nil, advancedOutput)
     }
 
     mutating func buttonUp(
@@ -320,6 +362,7 @@ struct ButtonMappingEngine {
         }
 
         output.consumesEvent = true
+        output.buffersEvent = true
 
         if session.resolution == nil {
             output.append(resolveIfPossible(at: timestamp, force: true, releasingButton: button))
@@ -335,6 +378,7 @@ struct ButtonMappingEngine {
                 if let action = configuredAction(resolution.candidate.mapping.outcomes?.shortPress) {
                     output.actions.append(action)
                     session.commitment = .statefulAction
+                    output.discardsBufferedEvents = true
                 } else {
                     output.append(abandon(session, releasingButton: button))
                     return output
@@ -354,6 +398,7 @@ struct ButtonMappingEngine {
             if let action = configuredAction(session.resolution?.candidate.mapping.outcomes?.shortPress) {
                 output.actions.append(action)
                 session.commitment = .statefulAction
+                output.discardsBufferedEvents = true
                 self.session = session
             } else {
                 output.append(abandon(session, releasingButton: button))
@@ -367,6 +412,34 @@ struct ButtonMappingEngine {
         }
 
         return output
+    }
+
+    mutating func buttonUp(
+        firstMatching buttons: [Button],
+        modifierFlags: CGEventFlags,
+        at timestamp: UInt64
+    ) -> (button: Button?, output: Output) {
+        let advancedOutput = advance(to: timestamp)
+        let advancedEngine = self
+
+        for button in buttons {
+            var candidateEngine = advancedEngine
+            let eventOutput = candidateEngine.buttonUp(
+                button,
+                modifierFlags: modifierFlags,
+                at: timestamp
+            )
+            guard eventOutput.consumesEvent else {
+                continue
+            }
+
+            self = candidateEngine
+            var output = advancedOutput
+            output.append(eventOutput)
+            return (button, output)
+        }
+
+        return (nil, advancedOutput)
     }
 
     mutating func pointerMoved(
@@ -404,6 +477,7 @@ struct ButtonMappingEngine {
         }
 
         output.consumesEvent = true
+        output.buffersEvent = true
         guard session.commitment == nil else {
             return output
         }
@@ -422,6 +496,7 @@ struct ButtonMappingEngine {
         }
 
         output.actions.append(action)
+        output.discardsBufferedEvents = true
         session.commitment = .statefulAction
         commit(session)
         return output
@@ -468,6 +543,7 @@ struct ButtonMappingEngine {
         if var session, !heldButtons.isDisjoint(with: session.capturedButtons) {
             session.commitment = .impulse
             commit(session, blocksImpulses: false)
+            output.discardsBufferedEvents = true
         }
 
         return output
@@ -494,6 +570,7 @@ struct ButtonMappingEngine {
         }
 
         output.actions.append(action)
+        output.discardsBufferedEvents = true
         updatedSession.commitment = .statefulAction
         commit(updatedSession)
         return output
@@ -519,11 +596,13 @@ struct ButtonMappingEngine {
     /// same physical button stream, such as Gesture Button recognizing a drag.
     mutating func cancelInteractions(containing button: Button) -> Output {
         var canceled = false
+        var canceledPendingSession = false
         var lifecycleEvents = [LifecycleEvent]()
 
         if session?.capturedButtons.contains(button) == true {
             session = nil
             canceled = true
+            canceledPendingSession = true
         }
 
         for index in activeCaptures.indices.reversed()
@@ -550,7 +629,11 @@ struct ButtonMappingEngine {
         pressedButtons.remove(button)
         pressedAt[button] = nil
         passthroughButtons.remove(button)
-        return .init(consumesEvent: true, lifecycleEvents: lifecycleEvents)
+        return .init(
+            consumesEvent: true,
+            lifecycleEvents: lifecycleEvents,
+            discardsBufferedEvents: canceledPendingSession
+        )
     }
 
     private var availableButtonsForImpulse: Set<Button> {
@@ -642,13 +725,16 @@ struct ButtonMappingEngine {
             let buttons = best.trigger.statefulButtons
             self.session = session
             commit(session, pressAction: pressAction)
-            return .init(lifecycleEvents: [.began(pressAction, buttons: buttons)])
+            return .init(
+                lifecycleEvents: [.began(pressAction, buttons: buttons)],
+                discardsBufferedEvents: true
+            )
         }
         if let direction = swipeDirection(deltaX: session.deltaX, deltaY: session.deltaY),
            let action = configuredAction(swipeAction(in: session, direction: direction)) {
             session.commitment = .statefulAction
             commit(session)
-            return .init(actions: [action])
+            return .init(actions: [action], discardsBufferedEvents: true)
         }
         self.session = session
         return .init()
