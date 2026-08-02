@@ -299,6 +299,182 @@ final class ButtonMappingTransformerTests: XCTestCase {
         XCTAssertEqual(deliveredEvents.map(\.type), [.otherMouseDown, .otherMouseUp])
     }
 
+    func testIndependentDeferredShortPressesCanOverlap() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let keySimulator = ButtonMappingTestKeySimulator()
+        let transformer = makeTransformer(
+            mappings: [
+                buttonMapping(button: 4, short: .arg1(.keyPress([.a]))),
+                buttonMapping(button: 5, short: .arg1(.keyPress([.b])))
+            ],
+            scheduler: scheduler,
+            keySimulator: keySimulator
+        )
+
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 4, pressed: true),
+            in: .init(device: nil)
+        ))
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 5, pressed: true),
+            in: .init(device: nil)
+        ))
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 5, pressed: false),
+            in: .init(device: nil)
+        ))
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 4, pressed: false),
+            in: .init(device: nil)
+        ))
+
+        let actionsPerformed = expectation(description: "both short press actions performed")
+        DispatchQueue.main.async {
+            XCTAssertEqual(keySimulator.events, [
+                .press([.b]),
+                .reset,
+                .press([.a]),
+                .reset
+            ])
+            actionsPerformed.fulfill()
+        }
+        wait(for: [actionsPerformed], timeout: 1)
+        XCTAssertFalse(transformer.hasActiveInteraction)
+    }
+
+    func testIndependentFallbackBufferSurvivesAnotherShortPressCommit() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        var deliveredEvents = [CGEvent]()
+        let transformer = makeTransformer(
+            mappings: [
+                buttonMapping(button: 4, long: .arg0(.none)),
+                buttonMapping(button: 5, short: .arg0(.none))
+            ],
+            scheduler: scheduler
+        ) { deliveredEvents.append($0) }
+
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 4, pressed: true),
+            in: .init(device: nil)
+        ))
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 5, pressed: true),
+            in: .init(device: nil)
+        ))
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 5, pressed: false),
+            in: .init(device: nil)
+        ))
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 4, pressed: false),
+            in: .init(device: nil)
+        ))
+
+        XCTAssertEqual(deliveredEvents.map(\.type), [.otherMouseDown, .otherMouseUp])
+        XCTAssertEqual(
+            deliveredEvents.map { MouseEventView($0).mouseButton },
+            [CGMouseButton(rawValue: 4), CGMouseButton(rawValue: 4)]
+        )
+        XCTAssertFalse(transformer.hasActiveInteraction)
+    }
+
+    func testIndependentLongPressDeadlinesFireWhileBothButtonsRemainHeld() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let keySimulator = ButtonMappingTestKeySimulator()
+        let transformer = makeTransformer(
+            mappings: [
+                buttonMapping(button: 4, long: .arg1(.keyPress([.a]))),
+                buttonMapping(button: 5, long: .arg1(.keyPress([.b])))
+            ],
+            scheduler: scheduler,
+            keySimulator: keySimulator
+        )
+
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 4, pressed: true),
+            in: .init(device: nil)
+        ))
+        scheduler.advance(to: ms(10))
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 5, pressed: true),
+            in: .init(device: nil)
+        ))
+
+        scheduler.advance(to: ms(500))
+        scheduler.advance(to: ms(510))
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 4, pressed: false),
+            in: .init(device: nil)
+        ))
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 5, pressed: false),
+            in: .init(device: nil)
+        ))
+
+        let actionsPerformed = expectation(description: "both long press actions performed")
+        DispatchQueue.main.async {
+            XCTAssertEqual(keySimulator.events, [
+                .press([.a]),
+                .reset,
+                .press([.b]),
+                .reset
+            ])
+            actionsPerformed.fulfill()
+        }
+        wait(for: [actionsPerformed], timeout: 1)
+        XCTAssertFalse(transformer.hasActiveInteraction)
+    }
+
+    func testHeldWheelMappingWinsAcrossIndependentRecognitionLanes() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let keySimulator = ButtonMappingTestKeySimulator()
+        var deliveredEvents = [CGEvent]()
+        let transformer = makeTransformer(
+            mappings: [
+                buttonMapping(button: 4, long: .arg0(.none)),
+                buttonMapping(button: 5, long: .arg0(.none)),
+                Mapping(trigger: .init(input: .wheel(.up)), action: .arg1(.keyPress([.a]))),
+                Mapping(
+                    trigger: .init(input: .wheel(.up), whileHeld: [.mouse(5)]),
+                    action: .arg1(.keyPress([.b]))
+                )
+            ],
+            scheduler: scheduler,
+            keySimulator: keySimulator
+        ) { deliveredEvents.append($0) }
+
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 4, pressed: true),
+            in: .init(device: nil)
+        ))
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 5, pressed: true),
+            in: .init(device: nil)
+        ))
+        XCTAssertNil(try transformer.transform(scrollEvent(vertical: 1), in: .init(device: nil)))
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 5, pressed: false),
+            in: .init(device: nil)
+        ))
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 4, pressed: false),
+            in: .init(device: nil)
+        ))
+
+        let actionPerformed = expectation(description: "held wheel action performed")
+        DispatchQueue.main.async {
+            XCTAssertEqual(keySimulator.events, [.press([.b]), .reset])
+            actionPerformed.fulfill()
+        }
+        wait(for: [actionPerformed], timeout: 1)
+        XCTAssertEqual(deliveredEvents.map(\.type), [.otherMouseDown, .otherMouseUp])
+        XCTAssertEqual(
+            deliveredEvents.map { MouseEventView($0).mouseButton },
+            [CGMouseButton(rawValue: 4), CGMouseButton(rawValue: 4)]
+        )
+        XCTAssertFalse(transformer.hasActiveInteraction)
+    }
+
     func testFailedChordReplaysPrefixAtChordDeadline() throws {
         let scheduler = ButtonMappingTestTimerScheduler()
         var replayed = [CGEventType]()

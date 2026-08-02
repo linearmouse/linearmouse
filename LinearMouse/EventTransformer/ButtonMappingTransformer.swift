@@ -32,12 +32,32 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
         var sink: (CGEvent) -> Void
     }
 
+    private final class RecognitionLane {
+        var engine: ButtonMappingEngine
+        var bufferedEvents = [DeferredEvent]()
+
+        init(engine: ButtonMappingEngine) {
+            self.engine = engine
+        }
+    }
+
+    private struct RecognitionResult {
+        var lane: RecognitionLane?
+        var output: ButtonMappingEngine.Output
+    }
+
+    private struct RecognitionTrial {
+        var lane: RecognitionLane?
+        var engine: ButtonMappingEngine
+        var output: ButtonMappingEngine.Output
+        var order: Int
+    }
+
     private static let log = OSLog(
         subsystem: Bundle.main.bundleIdentifier!,
         category: "ButtonMapping"
     )
 
-    private var engine: ButtonMappingEngine
     let mappings: [Mapping]
     let universalBackForward: Scheme.Buttons.UniversalBackForward?
     private let actionExecutor: ButtonActionExecutor
@@ -46,11 +66,12 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
     private let fallbackEventSink: (CGEvent) -> Void
     private let swapsPrimaryAndSecondaryButtons: Bool
     private let gestureTransformer: GestureButtonTransformer?
+    private let policy: ButtonMappingPolicy
 
     private var timer: TimerToken?
     private var timerGeneration: UInt64 = 0
     private var scheduledDeadline: UInt64?
-    private var bufferedEvents = [DeferredEvent]()
+    private var recognitionLanes = [RecognitionLane]()
     private var targetBundleIdentifier: String?
 
     init(
@@ -66,7 +87,7 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
     ) {
         self.mappings = mappings
         self.universalBackForward = universalBackForward
-        engine = .init(mappings: mappings, policy: policy)
+        self.policy = policy
         actionExecutor = .init(
             universalBackForward: universalBackForward,
             keySimulator: keySimulator
@@ -97,14 +118,23 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
         }
 
         let now = monotonicClock()
-        process(engine.advance(to: now))
+        advanceRecognitionLanes(to: now)
 
         if event.isGestureCleanupRelease,
            let button = mappingButton(of: event) {
-            let cancellation = engine.cancelInteractions(containing: button)
-            if cancellation.consumesEvent {
-                let canceledRemapTarget = remapTarget(in: cancellation.lifecycleEvents)
-                process(cancellation)
+            var canceledRemapTarget: CGMouseButton?
+            var canceled = false
+            for lane in recognitionLanes {
+                let cancellation = lane.engine.cancelInteractions(containing: button)
+                guard cancellation.consumesEvent else {
+                    continue
+                }
+                canceled = true
+                canceledRemapTarget = remapTarget(in: cancellation.lifecycleEvents) ?? canceledRemapTarget
+                process(cancellation, in: lane)
+            }
+            if canceled {
+                pruneRecognitionLanes()
                 scheduleNextDeadline()
                 if let canceledRemapTarget {
                     remapMouseEvent(event, to: canceledRemapTarget)
@@ -118,7 +148,7 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
             self.targetBundleIdentifier = targetBundleIdentifier
         }
 
-        var output: ButtonMappingEngine.Output
+        let recognition: RecognitionResult
         let canBuffer: Bool
         let alwaysForwardsEvent: Bool
 
@@ -127,7 +157,9 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
             guard let button = mappingButton(of: event) else {
                 return event
             }
-            output = engine.buttonDown(button, modifierFlags: event.flags, at: now)
+            recognition = recognize(includingFreshLane: true) { engine in
+                engine.buttonDown(button, modifierFlags: event.flags, at: now)
+            }
             canBuffer = true
             alwaysForwardsEvent = false
 
@@ -135,27 +167,33 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
             guard let button = mappingButton(of: event) else {
                 return event
             }
-            output = engine.buttonUp(button, modifierFlags: event.flags, at: now)
+            recognition = recognize { engine in
+                engine.buttonUp(button, modifierFlags: event.flags, at: now)
+            }
             canBuffer = true
             alwaysForwardsEvent = false
 
         case .leftMouseDragged, .rightMouseDragged, .otherMouseDragged:
             let button = mappingButton(of: event)
-            output = engine.pointerMoved(
-                for: button,
-                deltaX: event.getDoubleValueField(.mouseEventDeltaX),
-                deltaY: event.getDoubleValueField(.mouseEventDeltaY),
-                at: now
-            )
+            recognition = recognize { engine in
+                engine.pointerMoved(
+                    for: button,
+                    deltaX: event.getDoubleValueField(.mouseEventDeltaX),
+                    deltaY: event.getDoubleValueField(.mouseEventDeltaY),
+                    at: now
+                )
+            }
             canBuffer = true
             alwaysForwardsEvent = false
 
         case .mouseMoved:
-            output = engine.pointerMoved(
-                deltaX: event.getDoubleValueField(.mouseEventDeltaX),
-                deltaY: event.getDoubleValueField(.mouseEventDeltaY),
-                at: now
-            )
+            recognition = recognize { engine in
+                engine.pointerMoved(
+                    deltaX: event.getDoubleValueField(.mouseEventDeltaX),
+                    deltaY: event.getDoubleValueField(.mouseEventDeltaY),
+                    at: now
+                )
+            }
             canBuffer = false
             alwaysForwardsEvent = true
 
@@ -163,13 +201,17 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
             guard let direction = wheelDirection(of: event) else {
                 return event
             }
-            output = engine.wheel(direction, modifierFlags: event.flags, at: now)
+            recognition = recognize(includingFreshLane: true) { engine in
+                engine.wheel(direction, modifierFlags: event.flags, at: now)
+            }
             canBuffer = false
             alwaysForwardsEvent = false
 
         default:
             return event
         }
+
+        var output = recognition.output
 
         if let handling = output.pointerHandling {
             switch handling {
@@ -194,26 +236,108 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
         }
 
         if output.consumesEvent, output.buffersEvent, canBuffer, forwardedEvent == nil {
-            bufferedEvents.append(.init(
+            recognition.lane?.bufferedEvents.append(.init(
                 event: event.copy() ?? event,
                 sink: context.deferredEventSink ?? fallbackEventSink
             ))
         }
 
-        process(output)
+        process(output, in: recognition.lane)
         if let forwardedEvent {
             forwardedEvent.sink(forwardedEvent.event)
         }
+        pruneRecognitionLanes()
         scheduleNextDeadline()
-
-        if engine.state == .idle, !output.replaysBufferedEvents {
-            bufferedEvents.removeAll()
-        }
 
         if forwardedEvent != nil {
             return nil
         }
         return alwaysForwardsEvent || !output.consumesEvent ? event : nil
+    }
+
+    private func recognize(
+        includingFreshLane: Bool = false,
+        operation: (inout ButtonMappingEngine) -> ButtonMappingEngine.Output
+    ) -> RecognitionResult {
+        var trials = recognitionLanes.enumerated().compactMap { index, lane -> RecognitionTrial? in
+            var candidateEngine = lane.engine
+            let output = operation(&candidateEngine)
+            guard output.consumesEvent else {
+                return nil
+            }
+            return .init(lane: lane, engine: candidateEngine, output: output, order: index)
+        }
+
+        if includingFreshLane {
+            var candidateEngine = ButtonMappingEngine(mappings: mappings, policy: policy)
+            let output = operation(&candidateEngine)
+            if output.consumesEvent {
+                trials.append(.init(
+                    lane: nil,
+                    engine: candidateEngine,
+                    output: output,
+                    order: recognitionLanes.count
+                ))
+            }
+        }
+
+        guard let selected = trials.max(by: recognitionTrialIsLowerPriority) else {
+            return .init(lane: nil, output: .init())
+        }
+
+        if let lane = selected.lane {
+            lane.engine = selected.engine
+            return .init(lane: lane, output: selected.output)
+        }
+
+        guard selected.engine.hasActiveInteraction || selected.output.buffersEvent else {
+            return .init(lane: nil, output: selected.output)
+        }
+
+        let lane = RecognitionLane(engine: selected.engine)
+        recognitionLanes.append(lane)
+        return .init(lane: lane, output: selected.output)
+    }
+
+    private func recognitionTrialIsLowerPriority(_ lhs: RecognitionTrial, _ rhs: RecognitionTrial) -> Bool {
+        let lhsStatePriority = recognitionStatePriority(lhs.engine.state)
+        let rhsStatePriority = recognitionStatePriority(rhs.engine.state)
+        if lhsStatePriority != rhsStatePriority {
+            return lhsStatePriority < rhsStatePriority
+        }
+
+        let lhsPriority = lhs.output.recognitionPriority ?? Int.min
+        let rhsPriority = rhs.output.recognitionPriority ?? Int.min
+        if lhsPriority == rhsPriority {
+            return lhs.order > rhs.order
+        }
+        return lhsPriority < rhsPriority
+    }
+
+    private func recognitionStatePriority(_ state: ButtonMappingEngine.State) -> Int {
+        switch state {
+        case .idle:
+            return 0
+        case .waitingForChord:
+            return 1
+        case .tracking:
+            return 2
+        case .committed:
+            return 3
+        }
+    }
+
+    private func advanceRecognitionLanes(to timestamp: UInt64) {
+        for lane in recognitionLanes {
+            process(lane.engine.advance(to: timestamp), in: lane)
+        }
+        pruneRecognitionLanes()
+    }
+
+    private func pruneRecognitionLanes() {
+        recognitionLanes.removeAll { lane in
+            !lane.engine.hasActiveInteraction && lane.bufferedEvents.isEmpty
+        }
     }
 
     private static func scheduleEventThreadTimer(
@@ -269,7 +393,7 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
         return deltaX > 0 ? .left : .right
     }
 
-    private func process(_ output: ButtonMappingEngine.Output) {
+    private func process(_ output: ButtonMappingEngine.Output, in lane: RecognitionLane?) {
         for action in output.actions {
             os_log(
                 "Matched button action: %{public}@",
@@ -285,8 +409,8 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
             case let .began(pressAction, buttons):
                 if pressAction.behavior == .remap,
                    let target = pressAction.action.remappedMouseButton,
-                   !bufferedEvents.isEmpty {
-                    replayBufferedEvents(remappingTo: target)
+                   lane?.bufferedEvents.isEmpty == false {
+                    replayBufferedEvents(in: lane, remappingTo: target)
                 } else {
                     actionExecutor.beginPress(
                         pressAction,
@@ -300,19 +424,19 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
         }
 
         if output.replaysBufferedEvents {
-            let events = bufferedEvents
-            bufferedEvents.removeAll()
+            let events = lane?.bufferedEvents ?? []
+            lane?.bufferedEvents.removeAll()
             for deferredEvent in events {
                 deferredEvent.sink(deferredEvent.event)
             }
         } else if output.discardsBufferedEvents {
-            bufferedEvents.removeAll()
+            lane?.bufferedEvents.removeAll()
         }
     }
 
-    private func replayBufferedEvents(remappingTo target: CGMouseButton) {
-        let events = bufferedEvents
-        bufferedEvents.removeAll()
+    private func replayBufferedEvents(in lane: RecognitionLane?, remappingTo target: CGMouseButton) {
+        let events = lane?.bufferedEvents ?? []
+        lane?.bufferedEvents.removeAll()
         for deferredEvent in events {
             remapMouseEvent(deferredEvent.event, to: target)
             deferredEvent.sink(deferredEvent.event)
@@ -341,7 +465,7 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
     }
 
     private func scheduleNextDeadline() {
-        let deadline = engine.nextDeadline
+        let deadline = recognitionLanes.compactMap(\.engine.nextDeadline).min()
         guard deadline != scheduledDeadline else {
             return
         }
@@ -368,7 +492,7 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
 
         if timer == nil {
             scheduledDeadline = nil
-            process(engine.advance(to: deadline))
+            advanceRecognitionLanes(to: deadline)
             scheduleNextDeadline()
         }
     }
@@ -387,7 +511,7 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
 
         timer = nil
         scheduledDeadline = nil
-        process(engine.advance(to: now))
+        advanceRecognitionLanes(to: now)
         scheduleNextDeadline()
     }
 }
@@ -405,51 +529,67 @@ extension ButtonMappingTransformer: LogitechControlEventHandling {
         }
 
         let now = monotonicClock()
+        advanceRecognitionLanes(to: now)
         targetBundleIdentifier = context.pid?.bundleIdentifier
 
         let configuredButtons = configuredButtons(matching: context)
         guard !configuredButtons.isEmpty else {
             return gestureResult
         }
-        let result = context.isPressed
-            ? engine.buttonDown(
-                firstMatching: configuredButtons,
-                modifierFlags: context.modifierFlags,
-                at: now
-            )
-            : engine.buttonUp(
-                firstMatching: configuredButtons,
-                modifierFlags: context.modifierFlags,
-                at: now
-            )
-        process(result.output)
+        let recognition: RecognitionResult
+        if context.isPressed {
+            recognition = recognize(includingFreshLane: true) { engine in
+                engine.buttonDown(
+                    firstMatching: configuredButtons,
+                    modifierFlags: context.modifierFlags,
+                    at: now
+                )
+                .output
+            }
+        } else {
+            recognition = recognize { engine in
+                engine.buttonUp(
+                    firstMatching: configuredButtons,
+                    modifierFlags: context.modifierFlags,
+                    at: now
+                )
+                .output
+            }
+        }
+        process(recognition.output, in: recognition.lane)
+        pruneRecognitionLanes()
         scheduleNextDeadline()
 
-        guard result.button != nil else {
-            return gestureResult
-        }
-        if result.output.forwardsCapturedEvent {
+        if recognition.output.forwardsCapturedEvent {
             return .notHandled
         }
-        guard result.output.consumesEvent else {
+        guard recognition.output.consumesEvent else {
             return gestureResult
         }
-        if result.output.replaysBufferedEvents {
+        if recognition.output.replaysBufferedEvents {
             return .notHandled
         }
         return context.isPressed ? .handledDeferringSyntheticFallback : .handled
     }
 
     private func cancelGestureInteraction(for context: LogitechEventContext) {
-        var cancellation = ButtonMappingEngine.Output()
-        for button in configuredButtons(matching: context) {
-            cancellation.append(engine.cancelInteractions(containing: button))
+        let buttons = configuredButtons(matching: context)
+        var canceled = false
+        for lane in recognitionLanes {
+            var cancellation = ButtonMappingEngine.Output()
+            for button in buttons {
+                cancellation.append(lane.engine.cancelInteractions(containing: button))
+            }
+            guard cancellation.consumesEvent else {
+                continue
+            }
+            canceled = true
+            process(cancellation, in: lane)
         }
-        guard cancellation.consumesEvent else {
-            return
+        if canceled {
+            pruneRecognitionLanes()
+            scheduleNextDeadline()
         }
-        process(cancellation)
-        scheduleNextDeadline()
     }
 
     private func configuredButtons(matching context: LogitechEventContext) -> [Mapping.Button] {
@@ -477,8 +617,11 @@ extension ButtonMappingTransformer: Deactivatable {
         timer?.invalidate()
         timer = nil
         scheduledDeadline = nil
-        process(engine.reset())
-        bufferedEvents.removeAll()
+        for lane in recognitionLanes {
+            process(lane.engine.reset(), in: lane)
+            lane.bufferedEvents.removeAll()
+        }
+        recognitionLanes.removeAll()
         actionExecutor.deactivate()
         gestureTransformer?.deactivate()
     }
@@ -486,6 +629,7 @@ extension ButtonMappingTransformer: Deactivatable {
 
 extension ButtonMappingTransformer: EventTransformerInteractionTracking {
     var hasActiveInteraction: Bool {
-        engine.hasActiveInteraction || gestureTransformer?.hasActiveInteraction == true
+        recognitionLanes.contains(where: \.engine.hasActiveInteraction)
+            || gestureTransformer?.hasActiveInteraction == true
     }
 }

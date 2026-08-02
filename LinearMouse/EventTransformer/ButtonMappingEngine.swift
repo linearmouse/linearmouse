@@ -66,6 +66,10 @@ struct ButtonMappingEngine {
         /// has already been replayed and must follow the same delivery path.
         var forwardsCapturedEvent = false
         var pointerHandling: PointerHandling?
+        /// Internal precedence used when concurrent recognizers can accept the
+        /// same physical event. Higher values follow the normal mapping
+        /// specificity and configuration-order rules.
+        var recognitionPriority: Int?
 
         mutating func append(_ output: Self) {
             consumesEvent = consumesEvent || output.consumesEvent
@@ -76,6 +80,10 @@ struct ButtonMappingEngine {
             discardsBufferedEvents = discardsBufferedEvents || output.discardsBufferedEvents
             forwardsCapturedEvent = forwardsCapturedEvent || output.forwardsCapturedEvent
             pointerHandling = output.pointerHandling ?? pointerHandling
+            recognitionPriority = max(recognitionPriority ?? Int.min, output.recognitionPriority ?? Int.min)
+            if recognitionPriority == Int.min {
+                recognitionPriority = nil
+            }
         }
     }
 
@@ -247,6 +255,7 @@ struct ButtonMappingEngine {
                 self.session = session
                 output.consumesEvent = true
                 output.buffersEvent = true
+                output.recognitionPriority = recognitionPriority(of: orderedCandidates)
                 output.append(resolveIfPossible(at: timestamp, force: false))
                 return output
             }
@@ -257,6 +266,7 @@ struct ButtonMappingEngine {
                 self.session = session
                 output.consumesEvent = true
                 output.buffersEvent = true
+                output.recognitionPriority = recognitionPriority(of: session.candidates)
                 output.append(resolveIfPossible(at: timestamp, force: false))
                 return output
             }
@@ -271,6 +281,11 @@ struct ButtonMappingEngine {
                 self.session = session
                 output.consumesEvent = true
                 output.buffersEvent = true
+                output.recognitionPriority = heldPrefixRecognitionPriority(
+                    adding: button,
+                    to: session.capturedButtons,
+                    modifierFlags: genericFlags
+                )
             }
             return output
         }
@@ -290,6 +305,17 @@ struct ButtonMappingEngine {
         )
         output.consumesEvent = true
         output.buffersEvent = true
+        output.recognitionPriority = max(
+            recognitionPriority(of: candidates) ?? Int.min,
+            heldPrefixRecognitionPriority(
+                adding: button,
+                to: [],
+                modifierFlags: genericFlags
+            ) ?? Int.min
+        )
+        if output.recognitionPriority == Int.min {
+            output.recognitionPriority = nil
+        }
         output.append(resolveIfPossible(at: timestamp, force: false))
         return output
     }
@@ -538,6 +564,7 @@ struct ButtonMappingEngine {
 
         output.consumesEvent = true
         output.actions.append(action)
+        output.recognitionPriority = recognitionPriority(of: candidate)
 
         let heldButtons = Set(candidate.trigger.whileHeld ?? [])
         if var session, !heldButtons.isDisjoint(with: session.capturedButtons) {
@@ -657,6 +684,37 @@ struct ButtonMappingEngine {
             }
             return .init(index: index, mapping: mapping, trigger: trigger)
         }
+    }
+
+    private func recognitionPriority(of candidate: Candidate) -> Int {
+        candidate.trigger.specificityScore * (mappings.count + 1) + candidate.index
+    }
+
+    private func recognitionPriority(of candidates: [Candidate]) -> Int? {
+        candidates.map(recognitionPriority(of:)).max()
+    }
+
+    private func heldPrefixRecognitionPriority(
+        adding button: Button,
+        to capturedButtons: Set<Button>,
+        modifierFlags: CGEventFlags
+    ) -> Int? {
+        mappings.enumerated()
+            .compactMap { index, mapping -> Int? in
+                guard let trigger = mapping.trigger,
+                      trigger.modifierFlags == modifierFlags,
+                      let whileHeld = trigger.whileHeld,
+                      trigger.statefulButtons.isDisjoint(with: activelyCapturedButtons) else {
+                    return nil
+                }
+                let heldButtons = Set(whileHeld)
+                guard heldButtons.contains(button),
+                      capturedButtons.isSubset(of: heldButtons) else {
+                    return nil
+                }
+                return trigger.specificityScore * (mappings.count + 1) + index
+            }
+            .max()
     }
 
     private func hasHeldPrefix(_ button: Button, modifierFlags: CGEventFlags) -> Bool {
