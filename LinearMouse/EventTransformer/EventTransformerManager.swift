@@ -27,12 +27,12 @@ class EventTransformerManager {
     private var retiredRoutes = [UUID: TransformerRoute]()
     private var sharedAutoScrollTransformer: AutoScrollTransformer?
 
-    /// A stateful transformer owns its route until the interaction it claimed
-    /// has fully drained. This is intentionally independent of the Scheme that
-    /// originally built the route: a newer Scheme may become current while the
-    /// old route finishes its already-started button stream.
+    /// A stateful transformer remains alive until the interaction it claimed
+    /// has fully drained. It is injected into the newest matching route so the
+    /// rest of the Scheme can switch immediately without losing the release.
     private struct ActiveInteraction {
         var route: TransformerRoute
+        var transformer: EventTransformer
         var selection: RouteSelection
     }
 
@@ -181,19 +181,25 @@ class EventTransformerManager {
             display: display
         )
 
-        // An owned interaction takes precedence over source bypass and Scheme
-        // matching. In particular, an overlay or window manager may become the
-        // event source/target during a drag; the release must still reach the
-        // transformer that accepted the press.
-        if let (interactionKey, activeInteraction) = activeInteraction(for: selection) {
-            return resolution(
-                for: activeInteraction.route,
-                selection: selection.mergingDevice(from: activeInteraction.selection),
-                interactionKey: interactionKey
-            )
-        }
+        let activeInteraction = activeInteraction(
+            for: selection,
+            allowsUnidentifiedOwnerForIdentifiedSelection: isInteractionContinuation(cgEvent)
+        )
+        let effectiveSelection = selection.mergingDevice(from: activeInteraction?.1.selection)
 
         if sourcePid != nil, bypassEventsFromOtherApplications, !cgEvent.isLinearMouseSyntheticEvent {
+            if let (interactionKey, interaction) = activeInteraction {
+                // The owner must still receive its release even when the event
+                // source would normally bypass LinearMouse. Use its original
+                // route for this exceptional event so its preprocessing stays
+                // identical to the accepted press.
+                return drainingResolution(
+                    transformer: interaction.route.transformer,
+                    interaction: interaction,
+                    selection: effectiveSelection,
+                    interactionKey: interactionKey
+                )
+            }
             os_log(
                 "Return noop transformer because this event is sent by %{public}s",
                 log: Self.log,
@@ -204,6 +210,14 @@ class EventTransformerManager {
         }
         if let sourceBundleIdentifier = sourcePid?.bundleIdentifier,
            sourceBundleIdentifierBypassSet.contains(sourceBundleIdentifier) {
+            if let (interactionKey, interaction) = activeInteraction {
+                return drainingResolution(
+                    transformer: interaction.route.transformer,
+                    interaction: interaction,
+                    selection: effectiveSelection,
+                    interactionKey: interactionKey
+                )
+            }
             os_log(
                 "Return noop transformer because the source application %{public}s is in the bypass set",
                 log: Self.log,
@@ -214,65 +228,106 @@ class EventTransformerManager {
         }
 
         let route = getRoute(
-            withDevice: device,
-            withProcess: selection.process,
-            withDisplay: display,
+            withDevice: effectiveSelection.device,
+            withProcess: effectiveSelection.process,
+            withDisplay: effectiveSelection.display,
             updateActiveRoute: true
         )
+        if let (interactionKey, interaction) = activeInteraction {
+            return drainingResolution(
+                transformer: transformer(
+                    in: route,
+                    replacingInteractionTrackersWith: interaction.transformer
+                ),
+                interaction: interaction,
+                selection: effectiveSelection,
+                interactionKey: interactionKey
+            )
+        }
         return resolution(for: route, selection: selection)
     }
 
     private func resolution(
         for route: TransformerRoute,
-        selection: RouteSelection,
-        interactionKey: InteractionKey? = nil
+        selection: RouteSelection
     ) -> EventTransformerResolution {
         EventTransformerResolution(
             transformer: route.transformer,
             context: .init(device: selection.device)
         ) { [weak self] in
-            self?.didProcessInteraction(
+            self?.didProcessRoute(
                 on: route,
                 selection: selection,
-                interactionKey: interactionKey ?? selection.interactionKey
+                interactionKey: selection.interactionKey
             )
         }
     }
 
-    private func didProcessInteraction(
+    private func drainingResolution(
+        transformer: EventTransformer,
+        interaction: ActiveInteraction,
+        selection: RouteSelection,
+        interactionKey: InteractionKey
+    ) -> EventTransformerResolution {
+        EventTransformerResolution(
+            transformer: transformer,
+            context: .init(device: selection.device)
+        ) { [weak self] in
+            self?.didProcessOwnedInteraction(
+                interaction,
+                selection: selection,
+                interactionKey: interactionKey
+            )
+        }
+    }
+
+    private func didProcessRoute(
         on route: TransformerRoute,
         selection: RouteSelection,
         interactionKey: InteractionKey
     ) {
-        let remainsActive = hasActiveInteraction(in: route.transformer)
+        guard let transformer = activeInteractionTransformers(in: route.transformer).first else {
+            return
+        }
+        activeInteractions[interactionKey] = .init(
+            route: route,
+            transformer: transformer,
+            selection: selection
+        )
+    }
 
-        if activeInteractions[interactionKey]?.route.id == route.id {
-            guard !remainsActive else {
-                activeInteractions[interactionKey]?.selection = selection
-                return
-            }
-
-            activeInteractions[interactionKey] = nil
-            deactivateRetiredRouteIfIdle(route)
-
-            // Prime and activate the newest matching route only after the old
-            // transformer has processed the final release.
-            _ = getRoute(
-                withDevice: selection.device,
-                withProcess: selection.process,
-                withDisplay: selection.display,
-                updateActiveRoute: true
-            )
+    private func didProcessOwnedInteraction(
+        _ interaction: ActiveInteraction,
+        selection: RouteSelection,
+        interactionKey: InteractionKey
+    ) {
+        guard let current = activeInteractions[interactionKey],
+              sameTransformer(current.transformer, interaction.transformer) else {
             return
         }
 
-        if remainsActive {
-            activeInteractions[interactionKey] = .init(route: route, selection: selection)
+        guard hasActiveInteraction(in: interaction.transformer) else {
+            activeInteractions[interactionKey] = nil
+            deactivateRetiredRouteIfIdle(interaction.route)
+            return
+        }
+
+        var updated = current
+        updated.selection = selection
+        let updatedKey = selection.interactionKey
+        if interactionKey == .unidentified,
+           updatedKey != .unidentified,
+           activeInteractions[updatedKey] == nil {
+            activeInteractions[interactionKey] = nil
+            activeInteractions[updatedKey] = updated
+        } else {
+            activeInteractions[interactionKey] = updated
         }
     }
 
     private func activeInteraction(
-        for selection: RouteSelection
+        for selection: RouteSelection,
+        allowsUnidentifiedOwnerForIdentifiedSelection: Bool = false
     ) -> (InteractionKey, ActiveInteraction)? {
         let interactionKey = selection.interactionKey
         if let interaction = activeInteractions[interactionKey] {
@@ -283,7 +338,8 @@ class EventTransformerManager {
         // press. Prefer the unidentified lease in the latter case. In the
         // former, fall back only when exactly one device owns an interaction,
         // avoiding cross-routing when two mice are active simultaneously.
-        if interactionKey != .unidentified,
+        if allowsUnidentifiedOwnerForIdentifiedSelection,
+           interactionKey != .unidentified,
            let interaction = activeInteractions[.unidentified] {
             return (.unidentified, interaction)
         }
@@ -294,6 +350,64 @@ class EventTransformerManager {
             return nil
         }
         return entry
+    }
+
+    private func isInteractionContinuation(_ event: CGEvent) -> Bool {
+        switch event.type {
+        case .leftMouseUp, .rightMouseUp, .otherMouseUp,
+             .leftMouseDragged, .rightMouseDragged, .otherMouseDragged:
+            return true
+        default:
+            return false
+        }
+    }
+
+    private func activeInteractionTransformers(in transformer: EventTransformer) -> [EventTransformer] {
+        if let tracker = transformer as? EventTransformerInteractionTracking,
+           tracker.hasActiveInteraction {
+            return [transformer]
+        }
+
+        return (transformer as? [EventTransformer])?.flatMap {
+            activeInteractionTransformers(in: $0)
+        } ?? []
+    }
+
+    private func sameTransformer(_ lhs: EventTransformer, _ rhs: EventTransformer) -> Bool {
+        (lhs as AnyObject) === (rhs as AnyObject)
+    }
+
+    private func transformer(
+        in route: TransformerRoute,
+        replacingInteractionTrackersWith owner: EventTransformer
+    ) -> EventTransformer {
+        guard let transformers = route.transformer as? [EventTransformer] else {
+            return owner
+        }
+
+        if transformers.contains(where: { sameTransformer($0, owner) }) {
+            return route.transformer
+        }
+
+        var result = [EventTransformer]()
+        var insertedOwner = false
+        for transformer in transformers {
+            if transformer is EventTransformerInteractionTracking {
+                if !insertedOwner {
+                    result.append(owner)
+                    insertedOwner = true
+                }
+                continue
+            }
+            result.append(transformer)
+        }
+
+        if !insertedOwner {
+            let insertionIndex = result.firstIndex { $0 is ButtonMappingScrollRecordingTransformer }
+                ?? result.endIndex
+            result.insert(owner, at: insertionIndex)
+        }
+        return result
     }
 
     private func hasActiveInteraction(in transformer: EventTransformer) -> Bool {
@@ -365,9 +479,23 @@ class EventTransformerManager {
             process: pid?.processIdentity,
             display: context.display
         )
-        let interaction = activeInteraction(for: selection)
+        let interaction = activeInteraction(
+            for: selection,
+            allowsUnidentifiedOwnerForIdentifiedSelection: true
+        )
         let effectiveSelection = selection.mergingDevice(from: interaction?.1.selection)
-        let route = interaction?.1.route ?? getRoute(
+        if let (interactionKey, activeInteraction) = interaction {
+            let result = (activeInteraction.transformer as? LogitechControlEventHandling)?
+                .handleLogitechControlEvent(context) ?? .notHandled
+            didProcessOwnedInteraction(
+                activeInteraction,
+                selection: effectiveSelection,
+                interactionKey: interactionKey
+            )
+            return result
+        }
+
+        let route = getRoute(
             withDevice: effectiveSelection.device,
             withProcess: effectiveSelection.process,
             withDisplay: effectiveSelection.display,
@@ -375,10 +503,10 @@ class EventTransformerManager {
         )
         let result = (route.transformer as? LogitechControlEventHandling)?
             .handleLogitechControlEvent(context) ?? .notHandled
-        didProcessInteraction(
+        didProcessRoute(
             on: route,
             selection: effectiveSelection,
-            interactionKey: interaction?.0 ?? effectiveSelection.interactionKey
+            interactionKey: effectiveSelection.interactionKey
         )
         return result
     }
@@ -661,6 +789,11 @@ class EventTransformerManager {
         if let previous {
             if isRouteOwned(previous) || hasActiveInteraction(in: previous.transformer) {
                 retiredRoutes[previous.id] = previous
+                deactivate(
+                    previous.transformer,
+                    excluding: preservedAutoScrollTransformer,
+                    interactionTransformers: preservedInteractionTransformers(in: previous)
+                )
             } else {
                 deactivate(previous.transformer, excluding: preservedAutoScrollTransformer)
             }
@@ -674,6 +807,13 @@ class EventTransformerManager {
 
     private func isRouteOwned(_ route: TransformerRoute) -> Bool {
         activeInteractions.values.contains { $0.route.id == route.id }
+    }
+
+    private func preservedInteractionTransformers(in route: TransformerRoute) -> [EventTransformer] {
+        let owned = activeInteractions.values
+            .filter { $0.route.id == route.id }
+            .map(\.transformer)
+        return owned + activeInteractionTransformers(in: route.transformer)
     }
 
     private func deactivateRetiredRouteIfIdle(_ route: TransformerRoute) {
@@ -699,6 +839,11 @@ class EventTransformerManager {
         if let activeRoute {
             if isRouteOwned(activeRoute) || hasActiveInteraction(in: activeRoute.transformer) {
                 retiredRoutes[activeRoute.id] = activeRoute
+                deactivate(
+                    activeRoute.transformer,
+                    excluding: oldAutoScroll,
+                    interactionTransformers: preservedInteractionTransformers(in: activeRoute)
+                )
             } else {
                 deactivate(activeRoute.transformer, excluding: oldAutoScroll)
             }
@@ -747,7 +892,8 @@ class EventTransformerManager {
 
     private func deactivate(
         _ transformer: EventTransformer?,
-        excluding preservedAutoScrollTransformer: AutoScrollTransformer?
+        excluding preservedAutoScrollTransformer: AutoScrollTransformer?,
+        interactionTransformers: [EventTransformer] = []
     ) {
         guard let transformer else {
             return
@@ -760,6 +906,9 @@ class EventTransformerManager {
                    autoScrollTransformer === preservedAutoScrollTransformer {
                     continue
                 }
+                if interactionTransformers.contains(where: { sameTransformer($0, transformer) }) {
+                    continue
+                }
 
                 (transformer as? Deactivatable)?.deactivate()
             }
@@ -769,6 +918,9 @@ class EventTransformerManager {
         if let preservedAutoScrollTransformer,
            let autoScrollTransformer = transformer as? AutoScrollTransformer,
            autoScrollTransformer === preservedAutoScrollTransformer {
+            return
+        }
+        if interactionTransformers.contains(where: { sameTransformer($0, transformer) }) {
             return
         }
 
