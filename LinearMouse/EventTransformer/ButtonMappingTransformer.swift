@@ -466,3 +466,9 @@ extension ButtonMappingTransformer: Deactivatable {
         gestureTransformer?.deactivate()
     }
 }
+
+extension ButtonMappingTransformer: EventTransformerInteractionTracking {
+    var hasActiveInteraction: Bool {
+        engine.hasActiveInteraction || gestureTransformer?.hasActiveInteraction == true
+    }
+}

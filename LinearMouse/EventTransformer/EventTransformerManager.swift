@@ -13,22 +13,35 @@ class EventTransformerManager {
 
     @Default(.bypassEventsFromOtherApplications) var bypassEventsFromOtherApplications
 
-    private var eventTransformerCache = LRUCache<CacheKey, EventTransformer>(countLimit: 16)
-    private var activeCacheKey: CacheKey?
-    private var sharedAutoScrollTransformer: AutoScrollTransformer?
+    private final class TransformerRoute {
+        let id = UUID()
+        let transformer: EventTransformer
 
-    /// Keep one transformer chain for the lifetime of a physical mouse-button
-    /// stream. A drag can cross an application, display, menu bar, or overlay,
-    /// all of which may otherwise select a different scheme between down and
-    /// up. Switching chains mid-stream is especially unsafe when an earlier
-    /// button event was buffered and replayed: the release must follow the same
-    /// delivery path to remain paired with that replayed press.
-    private struct ActivePointerStream {
-        var buttons: Set<CGMouseButton>
-        var resolution: EventTransformerResolution
+        init(transformer: EventTransformer) {
+            self.transformer = transformer
+        }
     }
 
-    private var activePointerStream: ActivePointerStream?
+    private var eventTransformerCache = LRUCache<CacheKey, TransformerRoute>(countLimit: 16)
+    private var activeCacheKey: CacheKey?
+    private var activeRoute: TransformerRoute?
+    private var sharedAutoScrollTransformer: AutoScrollTransformer?
+
+    /// A stateful transformer owns its route until the interaction it claimed
+    /// has fully drained. This is intentionally independent of the Scheme that
+    /// originally built the route: a newer Scheme may become current while the
+    /// old route finishes its already-started button stream.
+    private struct ActivePointerInteraction {
+        var route: TransformerRoute
+    }
+
+    private var activePointerInteraction: ActivePointerInteraction?
+
+    private struct RouteSelection {
+        var device: Device?
+        var process: ProcessIdentity?
+        var display: String?
+    }
 
     struct CacheKey: Hashable {
         var deviceMatcher: DeviceMatcher?
@@ -125,6 +138,22 @@ class EventTransformerManager {
         withMouseLocationPid mouseLocationPid: pid_t?,
         withDisplay display: String?
     ) -> EventTransformerResolution {
+        let device = DeviceManager.shared.deviceFromCGEvent(cgEvent)
+        let pid = mouseLocationPid ?? targetPid
+        let selection = RouteSelection(
+            device: device,
+            process: pid?.processIdentity,
+            display: display
+        )
+
+        // An owned interaction takes precedence over source bypass and Scheme
+        // matching. In particular, an overlay or window manager may become the
+        // event source/target during a drag; the release must still reach the
+        // transformer that accepted the press.
+        if let activePointerInteraction {
+            return resolution(for: activePointerInteraction.route, selection: selection)
+        }
+
         if sourcePid != nil, bypassEventsFromOtherApplications, !cgEvent.isLinearMouseSyntheticEvent {
             os_log(
                 "Return noop transformer because this event is sent by %{public}s",
@@ -145,51 +174,65 @@ class EventTransformerManager {
             return .init(transformer: [], context: .init(device: nil))
         }
 
-        let device = DeviceManager.shared.deviceFromCGEvent(cgEvent)
-
-        if var activePointerStream {
-            updatePointerButtons(in: &activePointerStream.buttons, with: cgEvent)
-            let resolution = activePointerStream.resolution
-            self.activePointerStream = activePointerStream.buttons.isEmpty ? nil : activePointerStream
-            return resolution
-        }
-
-        let pid = mouseLocationPid ?? targetPid
-        let process = pid?.processIdentity
-
-        let resolution = EventTransformerResolution(
-            transformer: get(
-                withDevice: device,
-                withProcess: process,
-                withDisplay: display,
-                updateActiveCacheKey: true
-            ),
-            context: .init(device: device)
+        let route = getRoute(
+            withDevice: device,
+            withProcess: selection.process,
+            withDisplay: display,
+            updateActiveCacheKey: true
         )
-
-        var pointerButtons = Set<CGMouseButton>()
-        updatePointerButtons(in: &pointerButtons, with: cgEvent)
-        if !pointerButtons.isEmpty {
-            activePointerStream = .init(buttons: pointerButtons, resolution: resolution)
-        }
-
-        return resolution
+        return resolution(for: route, selection: selection)
     }
 
-    private func updatePointerButtons(in buttons: inout Set<CGMouseButton>, with event: CGEvent) {
-        guard let button = MouseEventView(event).mouseButton else {
+    private func resolution(
+        for route: TransformerRoute,
+        selection: RouteSelection
+    ) -> EventTransformerResolution {
+        EventTransformerResolution(
+            transformer: route.transformer,
+            context: .init(device: selection.device)
+        ) { [weak self] in
+            self?.didTransformPointerEvent(on: route, selection: selection)
+        }
+    }
+
+    private func didTransformPointerEvent(
+        on route: TransformerRoute,
+        selection: RouteSelection
+    ) {
+        let remainsActive = hasActiveInteraction(in: route.transformer)
+
+        if activePointerInteraction?.route.id == route.id {
+            guard !remainsActive else {
+                return
+            }
+
+            activePointerInteraction = nil
+
+            // Prime and activate the newest matching route only after the old
+            // transformer has processed the final release.
+            _ = getRoute(
+                withDevice: selection.device,
+                withProcess: selection.process,
+                withDisplay: selection.display,
+                updateActiveCacheKey: true
+            )
             return
         }
 
-        switch event.type {
-        case .leftMouseDown, .rightMouseDown, .otherMouseDown,
-             .leftMouseDragged, .rightMouseDragged, .otherMouseDragged:
-            buttons.insert(button)
-        case .leftMouseUp, .rightMouseUp, .otherMouseUp:
-            buttons.remove(button)
-        default:
-            break
+        if remainsActive {
+            activePointerInteraction = .init(route: route)
         }
+    }
+
+    private func hasActiveInteraction(in transformer: EventTransformer) -> Bool {
+        if let tracker = transformer as? EventTransformerInteractionTracking,
+           tracker.hasActiveInteraction {
+            return true
+        }
+
+        return (transformer as? [EventTransformer])?.contains {
+            hasActiveInteraction(in: $0)
+        } == true
     }
 
     func get(withDevice device: Device?, withPid pid: pid_t?, withDisplay display: String?) -> EventTransformer {
@@ -219,7 +262,12 @@ class EventTransformerManager {
         withProcess process: ProcessIdentity?,
         withDisplay display: String?
     ) -> EventTransformer {
-        get(withDevice: device, withProcess: process, withDisplay: display, updateActiveCacheKey: false)
+        getRoute(
+            withDevice: device,
+            withProcess: process,
+            withDisplay: display,
+            updateActiveCacheKey: false
+        ).transformer
     }
 
     func handleLogitechControlEvent(_ context: LogitechEventContext) -> LogitechControlEventHandlingResult {
@@ -244,24 +292,20 @@ class EventTransformerManager {
         return (transformer as? LogitechControlEventHandling)?.handleLogitechControlEvent(context) ?? .notHandled
     }
 
-    private func get(
+    private func getRoute(
         withDevice device: Device?,
         withProcess process: ProcessIdentity?,
         withDisplay display: String?,
         updateActiveCacheKey: Bool
-    ) -> EventTransformer {
-        let prevActiveCacheKey = activeCacheKey
+    ) -> TransformerRoute {
+        let previousRoute = activeRoute
         if updateActiveCacheKey {
             activeCacheKey = nil
+            activeRoute = nil
         }
         defer {
-            if updateActiveCacheKey,
-               let prevActiveCacheKey,
-               prevActiveCacheKey != activeCacheKey {
-                transition(
-                    from: eventTransformerCache.value(forKey: prevActiveCacheKey),
-                    to: activeCacheKey.flatMap { eventTransformerCache.value(forKey: $0) }
-                )
+            if updateActiveCacheKey, previousRoute?.id != activeRoute?.id {
+                transition(from: previousRoute, to: activeRoute)
             }
         }
 
@@ -273,8 +317,11 @@ class EventTransformerManager {
         if updateActiveCacheKey {
             activeCacheKey = cacheKey
         }
-        if let eventTransformer = eventTransformerCache.value(forKey: cacheKey) {
-            return eventTransformer
+        if let route = eventTransformerCache.value(forKey: cacheKey) {
+            if updateActiveCacheKey {
+                activeRoute = route
+            }
+            return route
         }
 
         let scheme = ConfigurationState.shared.configuration.matchScheme(
@@ -453,9 +500,13 @@ class EventTransformerManager {
             eventTransformer.append(PointerRedirectsToScrollTransformer())
         }
 
-        eventTransformerCache.setValue(eventTransformer, forKey: cacheKey)
+        let route = TransformerRoute(transformer: eventTransformer)
+        eventTransformerCache.setValue(route, forKey: cacheKey)
+        if updateActiveCacheKey {
+            activeRoute = route
+        }
 
-        return eventTransformer
+        return route
     }
 
     private func highResolutionWheelNormalizerMode(
@@ -511,22 +562,22 @@ class EventTransformerManager {
         return transformer
     }
 
-    private func transition(from previous: EventTransformer?, to current: EventTransformer?) {
+    private func transition(from previous: TransformerRoute?, to current: TransformerRoute?) {
         let preservedAutoScrollTransformer = sharedAutoScrollTransformer?.isAutoscrollActive == true
             ? sharedAutoScrollTransformer
             : nil
 
-        deactivate(previous, excluding: preservedAutoScrollTransformer)
-        reactivate(current, excluding: preservedAutoScrollTransformer)
+        deactivate(previous?.transformer, excluding: preservedAutoScrollTransformer)
+        reactivate(current?.transformer, excluding: preservedAutoScrollTransformer)
     }
 
     private func resetState() {
-        let activeEventTransformer = activeCacheKey.flatMap { eventTransformerCache.value(forKey: $0) }
         let oldAutoScroll = sharedAutoScrollTransformer
-        deactivate(activeEventTransformer, excluding: oldAutoScroll)
+        deactivate(activeRoute?.transformer, excluding: oldAutoScroll)
         sharedAutoScrollTransformer = nil
-        activePointerStream = nil
+        activePointerInteraction = nil
         activeCacheKey = nil
+        activeRoute = nil
         eventTransformerCache.removeAllValues()
         oldAutoScroll?.deactivate()
     }

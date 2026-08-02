@@ -352,3 +352,16 @@ extension GestureButtonTransformer: Deactivatable {
         state = .idle
     }
 }
+
+extension GestureButtonTransformer: EventTransformerInteractionTracking {
+    var hasActiveInteraction: Bool {
+        switch state {
+        case .idle:
+            return false
+        case .tracking, .triggered:
+            return true
+        case let .cooldown(_, released):
+            return !released
+        }
+    }
+}

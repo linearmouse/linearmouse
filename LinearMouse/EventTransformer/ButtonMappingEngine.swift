@@ -163,6 +163,16 @@ struct ButtonMappingEngine {
         return .waitingForChord
     }
 
+    /// Whether this engine still owns input that must be routed back to it.
+    ///
+    /// `passthroughButtons` are deliberately included even though `state` can
+    /// be `.idle`: their down events have already been replayed, so their up
+    /// events must follow the same transformer route to keep the click stream
+    /// balanced.
+    var hasActiveInteraction: Bool {
+        session != nil || !activeCaptures.isEmpty || !passthroughButtons.isEmpty
+    }
+
     var nextDeadline: UInt64? {
         guard let session, session.commitment == nil else {
             return nil

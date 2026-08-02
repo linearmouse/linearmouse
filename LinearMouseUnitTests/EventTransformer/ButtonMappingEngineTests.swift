@@ -96,6 +96,20 @@ final class ButtonMappingEngineTests: XCTestCase {
         XCTAssertEqual(engine.buttonUp(.mouse(4), modifierFlags: [], at: ms(80)).actions, [])
     }
 
+    func testChordInteractionRemainsActiveUntilEveryButtonIsReleased() {
+        var engine = engine([buttonMapping(0, simultaneous: [1], short: .arg0(.none))])
+
+        _ = engine.buttonDown(.mouse(0), modifierFlags: [], at: ms(0))
+        _ = engine.buttonDown(.mouse(1), modifierFlags: [], at: ms(40))
+        XCTAssertTrue(engine.hasActiveInteraction)
+
+        _ = engine.buttonUp(.mouse(0), modifierFlags: [], at: ms(60))
+        XCTAssertTrue(engine.hasActiveInteraction)
+
+        _ = engine.buttonUp(.mouse(1), modifierFlags: [], at: ms(80))
+        XCTAssertFalse(engine.hasActiveInteraction)
+    }
+
     func testSingleButtonFallbackResolvesAfterChordWindow() {
         var engine = engine([
             buttonMapping(4, short: shortAction),
@@ -125,8 +139,12 @@ final class ButtonMappingEngineTests: XCTestCase {
     func testChordOutsideWindowPassesLateButtonAndForwardsCapturedRelease() {
         var engine = engine([buttonMapping(4, simultaneous: [5], short: chordAction)])
 
+        XCTAssertFalse(engine.hasActiveInteraction)
         _ = engine.buttonDown(.mouse(4), modifierFlags: [], at: ms(0))
+        XCTAssertTrue(engine.hasActiveInteraction)
         XCTAssertTrue(engine.advance(to: ms(80)).replaysBufferedEvents)
+        XCTAssertEqual(engine.state, .idle)
+        XCTAssertTrue(engine.hasActiveInteraction)
         XCTAssertFalse(engine.buttonDown(.mouse(5), modifierFlags: [], at: ms(100)).consumesEvent)
         XCTAssertFalse(engine.buttonUp(.mouse(5), modifierFlags: [], at: ms(110)).consumesEvent)
 
@@ -134,6 +152,7 @@ final class ButtonMappingEngineTests: XCTestCase {
         XCTAssertTrue(release.consumesEvent)
         XCTAssertTrue(release.forwardsCapturedEvent)
         XCTAssertEqual(engine.state, .idle)
+        XCTAssertFalse(engine.hasActiveInteraction)
     }
 
     func testFailedChordForwardsDragUntilCapturedButtonIsReleased() {
