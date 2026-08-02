@@ -369,6 +369,25 @@ extension GestureButtonTransformer: LogitechControlInteractionCanceling {
     }
 }
 
+extension GestureButtonTransformer {
+    var configuredTriggerButton: Scheme.Buttons.Mapping.Button? {
+        trigger.button
+    }
+
+    /// Stops a still-pending Gesture Button interaction after another
+    /// recognizer has committed the same button stream first.
+    @discardableResult
+    func cancelInteraction(containing button: Scheme.Buttons.Mapping.Button) -> Bool {
+        guard trigger.button?.canRepresentSamePhysicalInput(as: button) == true,
+              hasActiveInteraction else {
+            return false
+        }
+
+        state = .idle
+        return true
+    }
+}
+
 extension GestureButtonTransformer: Deactivatable {
     func deactivate() {
         state = .idle

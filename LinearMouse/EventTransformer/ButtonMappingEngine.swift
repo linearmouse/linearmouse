@@ -195,6 +195,16 @@ struct ButtonMappingEngine {
             passthroughButtons.contains(button)
     }
 
+    func ownsInteraction(overlapping button: Button) -> Bool {
+        let containsOverlappingButton: (Set<Button>) -> Bool = { buttons in
+            buttons.contains { $0.canRepresentSamePhysicalInput(as: button) }
+        }
+
+        return session.map { containsOverlappingButton($0.capturedButtons) } == true ||
+            activeCaptures.contains { containsOverlappingButton($0.remainingButtons) } ||
+            containsOverlappingButton(passthroughButtons)
+    }
+
     var nextDeadline: UInt64? {
         guard let session, session.commitment == nil else {
             return nil

@@ -54,6 +54,36 @@ extension Scheme.Buttons.Mapping {
                 return LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.reservedVirtualButtonNumber
             }
         }
+
+        /// Whether two configured buttons can refer to the same physical
+        /// input. Logitech identities may intentionally omit device fields,
+        /// so exact equality is too strict when recognizers use different
+        /// specificity levels for the same control.
+        func canRepresentSamePhysicalInput(as other: Self) -> Bool {
+            switch (self, other) {
+            case let (.mouse(buttonNumber), .mouse(otherButtonNumber)):
+                return buttonNumber == otherButtonNumber
+
+            case let (.logitechControl(identity), .logitechControl(otherIdentity)):
+                guard identity.controlID == otherIdentity.controlID else {
+                    return false
+                }
+                if let productID = identity.productID,
+                   let otherProductID = otherIdentity.productID,
+                   productID != otherProductID {
+                    return false
+                }
+                if let serialNumber = identity.serialNumber,
+                   let otherSerialNumber = otherIdentity.serialNumber,
+                   serialNumber.caseInsensitiveCompare(otherSerialNumber) != .orderedSame {
+                    return false
+                }
+                return true
+
+            default:
+                return false
+            }
+        }
     }
 
     var valid: Bool {

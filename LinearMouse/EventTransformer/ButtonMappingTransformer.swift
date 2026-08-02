@@ -403,6 +403,8 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
     }
 
     private func process(_ output: ButtonMappingEngine.Output, in lane: RecognitionLane?) {
+        cancelCompetingGestureIfNeeded(after: output, in: lane)
+
         for action in output.actions {
             os_log(
                 "Matched button action: %{public}@",
@@ -441,6 +443,20 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
         } else if output.discardsBufferedEvents {
             lane?.bufferedEvents.removeAll()
         }
+    }
+
+    private func cancelCompetingGestureIfNeeded(
+        after output: ButtonMappingEngine.Output,
+        in lane: RecognitionLane?
+    ) {
+        guard output.discardsBufferedEvents,
+              let gestureTransformer,
+              let button = gestureTransformer.configuredTriggerButton,
+              lane?.engine.ownsInteraction(overlapping: button) == true else {
+            return
+        }
+
+        gestureTransformer.cancelInteraction(containing: button)
     }
 
     private func replayBufferedEvents(in lane: RecognitionLane?, remappingTo target: CGMouseButton) {

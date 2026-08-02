@@ -218,8 +218,46 @@ final class ButtonMappingTransformerTests: XCTestCase {
         XCTAssertEqual(keySimulator.events, [])
     }
 
-    func testGestureCleanupBalancesActiveRemapWithRemappedRelease() throws {
+    func testImmediatePressMappingCancelsCompetingGestureTracking() throws {
         let scheduler = ButtonMappingTestTimerScheduler()
+        let gestureTransformer = makeGestureTransformer(button: .mouse(4))
+        let mapping = Mapping(
+            trigger: .init(input: .button(.mouse(4))),
+            outcomes: .init(press: .init(action: .arg0(.none), behavior: .perform))
+        )
+        let transformer = makeTransformer(
+            mappings: [mapping],
+            scheduler: scheduler,
+            gestureTransformer: gestureTransformer
+        )
+
+        XCTAssertNil(try transformer.transform(buttonEvent(pressed: true), in: .init(device: nil)))
+
+        XCTAssertFalse(gestureTransformer.hasActiveInteraction)
+        XCTAssertTrue(transformer.hasActiveInteraction)
+    }
+
+    func testLongPressMappingCancelsCompetingGestureTrackingAtDeadline() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let gestureTransformer = makeGestureTransformer(button: .mouse(4))
+        let transformer = makeTransformer(
+            mappings: [buttonMapping(long: .arg0(.none))],
+            scheduler: scheduler,
+            gestureTransformer: gestureTransformer
+        )
+
+        XCTAssertNil(try transformer.transform(buttonEvent(pressed: true), in: .init(device: nil)))
+        XCTAssertTrue(gestureTransformer.hasActiveInteraction)
+
+        scheduler.advance(to: ms(500))
+
+        XCTAssertFalse(gestureTransformer.hasActiveInteraction)
+        XCTAssertTrue(transformer.hasActiveInteraction)
+    }
+
+    func testImmediateRemapCancelsCompetingGestureAndOwnsCompleteStream() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let gestureTransformer = makeGestureTransformer(button: .mouse(4))
         let mapping = Mapping(
             trigger: .init(input: .button(.mouse(4))),
             outcomes: .init(press: .init(action: .arg0(.mouseButtonLeft), behavior: .remap))
@@ -227,7 +265,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
         let transformer = makeTransformer(
             mappings: [mapping],
             scheduler: scheduler,
-            gestureTransformer: makeGestureTransformer(button: .mouse(4))
+            gestureTransformer: gestureTransformer
         )
 
         let down = try XCTUnwrap(transformer.transform(
@@ -236,11 +274,14 @@ final class ButtonMappingTransformerTests: XCTestCase {
         ))
         XCTAssertEqual(down.type, .leftMouseDown)
         XCTAssertEqual(MouseEventView(down).mouseButton, .left)
+        XCTAssertFalse(gestureTransformer.hasActiveInteraction)
 
-        XCTAssertNil(try transformer.transform(
+        let dragged = try XCTUnwrap(transformer.transform(
             draggedEvent(button: 4, deltaX: 10),
             in: .init(device: nil)
         ))
+        XCTAssertEqual(dragged.type, .leftMouseDragged)
+        XCTAssertEqual(MouseEventView(dragged).mouseButton, .left)
 
         let up = try XCTUnwrap(transformer.transform(
             buttonEvent(pressed: false),
@@ -880,6 +921,33 @@ final class ButtonMappingTransformerTests: XCTestCase {
             .handled
         )
         XCTAssertEqual(keySimulator.events, [])
+    }
+
+    func testSpecificLogitechPressMappingCancelsCompetingGenericGesture() {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let generic = LogitechControlIdentity(controlID: 0xC4)
+        let specific = LogitechControlIdentity(
+            controlID: 0xC4,
+            productID: 0x405E,
+            serialNumber: "ABC"
+        )
+        let gestureTransformer = makeGestureTransformer(button: .logitechControl(generic))
+        let mapping = Mapping(
+            trigger: .init(input: .button(.logitechControl(specific))),
+            outcomes: .init(press: .init(action: .arg0(.none), behavior: .perform))
+        )
+        let transformer = makeTransformer(
+            mappings: [mapping],
+            scheduler: scheduler,
+            gestureTransformer: gestureTransformer
+        )
+
+        XCTAssertEqual(
+            transformer.handleLogitechControlEvent(logitech(specific, pressed: true)),
+            .handledDeferringSyntheticFallback
+        )
+        XCTAssertFalse(gestureTransformer.hasActiveInteraction)
+        XCTAssertTrue(transformer.hasActiveInteraction)
     }
 
     func testGenericLogitechControlMatchesDeviceSpecificEventIdentity() {
