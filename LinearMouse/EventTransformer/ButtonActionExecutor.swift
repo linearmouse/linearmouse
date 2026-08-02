@@ -533,7 +533,7 @@ extension ButtonActionExecutor: Deactivatable {
         runtimeState.heldKeyOrder.removeAll()
         if !heldKeys.isEmpty {
             try? keySimulator.up(keys: heldKeys, tap: .cgSessionEventTap)
+            keySimulator.reset()
         }
-        keySimulator.reset()
     }
 }

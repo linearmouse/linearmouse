@@ -202,6 +202,64 @@ final class EventTransformerManagerTests: XCTestCase {
         XCTAssertNotIdentical(try buttonMappingTransformer(in: nextStreamResolution), initialTransformer)
     }
 
+    func testGestureAndButtonMappingShareRouteUntilRelease() throws {
+        let mapping = Scheme.Buttons.Mapping(
+            trigger: .init(input: .button(.mouse(4))),
+            outcomes: .init(shortPress: .arg0(.none))
+        )
+        var gesture = Scheme.Buttons.Gesture()
+        gesture.enabled = true
+        gesture.trigger = .init(button: .mouse(4))
+        gesture.threshold = 1000
+        gesture.actions = .init(right: .some(.none))
+        var buttons = Scheme.Buttons()
+        buttons.mappings = [mapping]
+        buttons.gesture = gesture
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(buttons: buttons)
+        ])
+        let manager = EventTransformerManager()
+        let button = try XCTUnwrap(CGMouseButton(rawValue: 4))
+        XCTAssertFalse(SettingsState.shared.recording)
+
+        let down = try mouseEvent(type: .otherMouseDown, button: button)
+        let downResolution = manager.resolve(
+            withCGEvent: down,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display A"
+        )
+        XCTAssertNil(downResolution.transform(down) { _ in })
+        let initialTransformer = try buttonMappingTransformer(in: downResolution)
+        XCTAssertEqual(initialTransformer.mappings, [mapping])
+        XCTAssertTrue(initialTransformer.hasActiveInteraction)
+
+        let drag = try mouseEvent(type: .otherMouseDragged, button: button)
+        drag.setDoubleValueField(.mouseEventDeltaX, value: 10)
+        let dragResolution = manager.resolve(
+            withCGEvent: drag,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display B"
+        )
+        XCTAssertIdentical(try buttonMappingTransformer(in: dragResolution), initialTransformer)
+        XCTAssertNil(dragResolution.transform(drag) { _ in })
+
+        let release = try mouseEvent(type: .otherMouseUp, button: button)
+        let releaseResolution = manager.resolve(
+            withCGEvent: release,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display B"
+        )
+        XCTAssertIdentical(try buttonMappingTransformer(in: releaseResolution), initialTransformer)
+        XCTAssertNil(releaseResolution.transform(release) { _ in })
+        XCTAssertFalse(initialTransformer.hasActiveInteraction)
+    }
+
     func testDraggedStreamWithoutObservedDownDoesNotCreateInteractionLease() throws {
         let mapping = Scheme.Buttons.Mapping(
             trigger: .init(input: .button(.mouse(0)), simultaneous: [.mouse(1)]),
@@ -461,6 +519,153 @@ final class EventTransformerManagerTests: XCTestCase {
         XCTAssertIdentical(try buttonMappingTransformer(in: releaseResolution), initialTransformer)
         XCTAssertNil(releaseResolution.transform(release) { _ in })
         XCTAssertFalse(initialTransformer.hasActiveInteraction)
+    }
+
+    func testConfigurationReloadLetsMouseInteractionDrainBeforeUsingNewMapping() throws {
+        let originalMapping = Scheme.Buttons.Mapping(
+            trigger: .init(input: .button(.mouse(4))),
+            outcomes: .init(shortPress: .arg0(.none))
+        )
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(buttons: .init(mappings: [originalMapping]))
+        ])
+        let manager = EventTransformerManager()
+        let button = try XCTUnwrap(CGMouseButton(rawValue: 4))
+        var replayedEvents = [CGEventType]()
+
+        let down = try mouseEvent(type: .otherMouseDown, button: button)
+        let downResolution = manager.resolve(
+            withCGEvent: down,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display A"
+        )
+        XCTAssertNil(downResolution.transform(down) { replayedEvents.append($0.type) })
+        let originalTransformer = try buttonMappingTransformer(in: downResolution)
+        XCTAssertTrue(originalTransformer.hasActiveInteraction)
+
+        let intermediateMapping = Scheme.Buttons.Mapping(
+            trigger: .init(input: .button(.mouse(5))),
+            outcomes: .init(shortPress: .arg0(.none))
+        )
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(buttons: .init(mappings: [intermediateMapping]))
+        ])
+        let latestMapping = Scheme.Buttons.Mapping(
+            trigger: .init(input: .button(.mouse(6))),
+            outcomes: .init(shortPress: .arg0(.none))
+        )
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(buttons: .init(mappings: [latestMapping]))
+        ])
+        XCTAssertTrue(originalTransformer.hasActiveInteraction)
+        XCTAssertTrue(replayedEvents.isEmpty)
+
+        let release = try mouseEvent(type: .otherMouseUp, button: button)
+        let releaseResolution = manager.resolve(
+            withCGEvent: release,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display B"
+        )
+        XCTAssertIdentical(try buttonMappingTransformer(in: releaseResolution), originalTransformer)
+        XCTAssertNil(releaseResolution.transform(release) { replayedEvents.append($0.type) })
+        XCTAssertFalse(originalTransformer.hasActiveInteraction)
+        XCTAssertTrue(replayedEvents.isEmpty)
+
+        let updatedTransformer = try buttonMappingTransformer(in: manager.get(
+            withDevice: nil,
+            withPid: nil,
+            withDisplay: "Display B"
+        ))
+        XCTAssertNotIdentical(updatedTransformer, originalTransformer)
+        XCTAssertEqual(updatedTransformer.mappings, [latestMapping])
+    }
+
+    func testConfigurationReloadLetsLogitechInteractionDrain() throws {
+        let identity = LogitechControlIdentity(controlID: 0x00C3)
+        let originalMapping = Scheme.Buttons.Mapping(
+            trigger: .init(input: .button(.logitechControl(identity))),
+            outcomes: .init(shortPress: .arg0(.none))
+        )
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(buttons: .init(mappings: [originalMapping]))
+        ])
+        let manager = EventTransformerManager()
+        let originalTransformer = try buttonMappingTransformer(in: manager.get(
+            withDevice: nil,
+            withPid: nil,
+            withDisplay: "Display A"
+        ))
+
+        XCTAssertEqual(
+            manager.handleLogitechControlEvent(logitech(identity, pressed: true, display: "Display A")),
+            .handledDeferringSyntheticFallback
+        )
+        XCTAssertTrue(originalTransformer.hasActiveInteraction)
+
+        let updatedMapping = Scheme.Buttons.Mapping(
+            trigger: .init(input: .button(.mouse(5))),
+            outcomes: .init(shortPress: .arg0(.none))
+        )
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(buttons: .init(mappings: [updatedMapping]))
+        ])
+        XCTAssertTrue(originalTransformer.hasActiveInteraction)
+
+        XCTAssertEqual(
+            manager.handleLogitechControlEvent(logitech(identity, pressed: false, display: "Display B")),
+            .handled
+        )
+        XCTAssertFalse(originalTransformer.hasActiveInteraction)
+
+        let updatedTransformer = try buttonMappingTransformer(in: manager.get(
+            withDevice: nil,
+            withPid: nil,
+            withDisplay: "Display B"
+        ))
+        XCTAssertNotIdentical(updatedTransformer, originalTransformer)
+        XCTAssertEqual(updatedTransformer.mappings, [updatedMapping])
+    }
+
+    func testRestartForcesActiveInteractionToReset() throws {
+        let mapping = Scheme.Buttons.Mapping(
+            trigger: .init(input: .button(.mouse(4))),
+            outcomes: .init(shortPress: .arg0(.none))
+        )
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(buttons: .init(mappings: [mapping]))
+        ])
+        let manager = EventTransformerManager()
+        let button = try XCTUnwrap(CGMouseButton(rawValue: 4))
+
+        let down = try mouseEvent(type: .otherMouseDown, button: button)
+        let downResolution = manager.resolve(
+            withCGEvent: down,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display A"
+        )
+        XCTAssertNil(downResolution.transform(down) { _ in })
+        let originalTransformer = try buttonMappingTransformer(in: downResolution)
+        XCTAssertTrue(originalTransformer.hasActiveInteraction)
+
+        manager.resetForRestart()
+        XCTAssertFalse(originalTransformer.hasActiveInteraction)
+
+        let release = try mouseEvent(type: .otherMouseUp, button: button)
+        let releaseResolution = manager.resolve(
+            withCGEvent: release,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display B"
+        )
+        XCTAssertNotIdentical(try buttonMappingTransformer(in: releaseResolution), originalTransformer)
+        XCTAssertNotNil(releaseResolution.transform(release) { _ in })
     }
 
     func testSyntheticSmoothedEventStillGetsModifierActions() throws {

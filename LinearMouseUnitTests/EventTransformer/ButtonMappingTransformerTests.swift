@@ -507,6 +507,67 @@ final class ButtonMappingTransformerTests: XCTestCase {
         XCTAssertEqual(keySimulator.events, [.down([.a]), .up([.a]), .reset])
     }
 
+    func testDeactivateEndsHeldKeyLifecycle() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let keySimulator = ButtonMappingTestKeySimulator()
+        let mapping = Mapping(
+            trigger: .init(input: .button(.mouse(4))),
+            outcomes: .init(press: .init(action: .arg1(.keyPress([.a])), behavior: .hold))
+        )
+        let transformer = makeTransformer(
+            mappings: [mapping],
+            scheduler: scheduler,
+            keySimulator: keySimulator
+        )
+
+        XCTAssertNil(try transformer.transform(buttonEvent(pressed: true), in: .init(device: nil)))
+        XCTAssertTrue(transformer.hasActiveInteraction)
+
+        transformer.deactivate()
+
+        XCTAssertFalse(transformer.hasActiveInteraction)
+        XCTAssertEqual(keySimulator.events, [.down([.a]), .up([.a]), .reset])
+    }
+
+    func testDeactivateAfterCompletedHoldDoesNotResetKeySimulatorAgain() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let keySimulator = ButtonMappingTestKeySimulator()
+        let mapping = Mapping(
+            trigger: .init(input: .button(.mouse(4))),
+            outcomes: .init(press: .init(action: .arg1(.keyPress([.a])), behavior: .hold))
+        )
+        let transformer = makeTransformer(
+            mappings: [mapping],
+            scheduler: scheduler,
+            keySimulator: keySimulator
+        )
+
+        XCTAssertNil(try transformer.transform(buttonEvent(pressed: true), in: .init(device: nil)))
+        XCTAssertNil(try transformer.transform(buttonEvent(pressed: false), in: .init(device: nil)))
+        XCTAssertFalse(transformer.hasActiveInteraction)
+
+        transformer.deactivate()
+
+        XCTAssertEqual(keySimulator.events, [.down([.a]), .up([.a]), .reset])
+    }
+
+    func testDeactivateReplaysUncommittedBufferedPress() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        var replayedEvents = [CGEventType]()
+        let transformer = makeTransformer(
+            mappings: [buttonMapping(short: .arg0(.none))],
+            scheduler: scheduler
+        ) { replayedEvents.append($0.type) }
+
+        XCTAssertNil(try transformer.transform(buttonEvent(pressed: true), in: .init(device: nil)))
+        XCTAssertTrue(transformer.hasActiveInteraction)
+
+        transformer.deactivate()
+
+        XCTAssertFalse(transformer.hasActiveInteraction)
+        XCTAssertEqual(replayedEvents, [.otherMouseDown])
+    }
+
     func testOverlappingHoldPressesReleaseIndependently() throws {
         let scheduler = ButtonMappingTestTimerScheduler()
         let keySimulator = ButtonMappingTestKeySimulator()
