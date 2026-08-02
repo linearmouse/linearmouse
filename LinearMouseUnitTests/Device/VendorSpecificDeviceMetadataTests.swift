@@ -644,6 +644,30 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         )
     }
 
+    func testLogitechMonitorDefersReconfigurationUntilControlsAreReleased() {
+        var request = LogitechMonitorReconfigurationRequest()
+        request.request()
+
+        let whilePressed = request.consume(deferringWhileControlsArePressed: true)
+        XCTAssertFalse(whilePressed.needed)
+        XCTAssertFalse(whilePressed.forced)
+
+        let afterRelease = request.consume(deferringWhileControlsArePressed: false)
+        XCTAssertTrue(afterRelease.needed)
+        XCTAssertFalse(afterRelease.forced)
+
+        XCTAssertFalse(request.consume(deferringWhileControlsArePressed: false).needed)
+    }
+
+    func testLogitechMonitorDoesNotDeferForcedReconfiguration() {
+        var request = LogitechMonitorReconfigurationRequest()
+        request.request(forced: true)
+
+        let result = request.consume(deferringWhileControlsArePressed: true)
+        XCTAssertTrue(result.needed)
+        XCTAssertTrue(result.forced)
+    }
+
     func testLogitechControlIdentityProvidesFriendlyUserVisibleName() {
         XCTAssertEqual(
             LogitechControlIdentity(controlID: 0x00D0, productID: nil, serialNumber: nil)

@@ -2387,7 +2387,9 @@ final class LogitechReprogrammableControlsMonitor {
                 }
 
                 while shouldContinueRunning() {
-                    let reconfigResult = state.consumeReconfigurationRequest()
+                    let reconfigResult = state.consumeReconfigurationRequest(
+                        deferringWhileControlsArePressed: !pressedControls.isEmpty
+                    )
                     if reconfigResult.needed {
                         if reconfigResult.forced {
                             os_log(
@@ -3378,6 +3380,37 @@ struct LogitechSyntheticFallbackCoordinator {
     }
 }
 
+struct LogitechMonitorReconfigurationRequest {
+    private var needed = false
+    private var forced = false
+
+    mutating func request(forced: Bool = false) {
+        needed = true
+        self.forced = self.forced || forced
+    }
+
+    mutating func consume(
+        deferringWhileControlsArePressed: Bool
+    ) -> (needed: Bool, forced: Bool) {
+        guard needed else {
+            return (false, false)
+        }
+
+        if deferringWhileControlsArePressed, !forced {
+            return (false, false)
+        }
+
+        let result = (needed: true, forced: forced)
+        reset()
+        return result
+    }
+
+    mutating func reset() {
+        needed = false
+        forced = false
+    }
+}
+
 private final class LogitechReprogrammableControlsMonitorState {
     private typealias WorkerResources = (Thread?, HIDPPNotificationHandling?, ObservationToken?)
 
@@ -3388,8 +3421,7 @@ private final class LogitechReprogrammableControlsMonitorState {
     private var workerThread: Thread?
     private weak var activeNotificationEndpoint: HIDPPNotificationHandling?
     private var directDeviceReportObservationToken: ObservationToken?
-    private var needsReconfiguration = false
-    private var needsForcedReconfiguration = false
+    private var reconfigurationRequest = LogitechMonitorReconfigurationRequest()
     private var pressedButtons = Set<Int>()
     private var syntheticFallbackCoordinator = LogitechSyntheticFallbackCoordinator()
 
@@ -3420,8 +3452,7 @@ private final class LogitechReprogrammableControlsMonitorState {
         let (thread, endpoint, token) = queue.sync { () -> WorkerResources in
             let resources = (workerThread, activeNotificationEndpoint, directDeviceReportObservationToken)
             isEnabled = false
-            needsReconfiguration = false
-            needsForcedReconfiguration = false
+            reconfigurationRequest.reset()
             activeNotificationEndpoint = nil
             directDeviceReportObservationToken = nil
             return resources
@@ -3442,13 +3473,11 @@ private final class LogitechReprogrammableControlsMonitorState {
 
             guard isEnabled, restartIfEnabled else {
                 isEnabled = false
-                needsReconfiguration = false
-                needsForcedReconfiguration = false
+                reconfigurationRequest.reset()
                 return (nil, nil, reportObservationToken)
             }
 
-            needsReconfiguration = false
-            needsForcedReconfiguration = false
+            reconfigurationRequest.reset()
             let nextThread = makeWorkerThread()
             workerThread = nextThread
             return (nextThread, nil, reportObservationToken)
@@ -3464,8 +3493,7 @@ private final class LogitechReprogrammableControlsMonitorState {
                 return (false, nil)
             }
 
-            needsReconfiguration = true
-            needsForcedReconfiguration = needsForcedReconfiguration || forced
+            reconfigurationRequest.request(forced: forced)
             return (true, activeNotificationEndpoint)
         }
         guard request.accepted else {
@@ -3476,16 +3504,13 @@ private final class LogitechReprogrammableControlsMonitorState {
         request.endpoint?.wake()
     }
 
-    func consumeReconfigurationRequest() -> (needed: Bool, forced: Bool) {
+    func consumeReconfigurationRequest(
+        deferringWhileControlsArePressed: Bool = false
+    ) -> (needed: Bool, forced: Bool) {
         queue.sync {
-            guard needsReconfiguration else {
-                return (false, false)
-            }
-
-            let forced = needsForcedReconfiguration
-            needsReconfiguration = false
-            needsForcedReconfiguration = false
-            return (true, forced)
+            reconfigurationRequest.consume(
+                deferringWhileControlsArePressed: deferringWhileControlsArePressed
+            )
         }
     }
 
