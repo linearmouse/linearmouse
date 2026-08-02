@@ -140,6 +140,39 @@ final class ButtonMappingTransformerTests: XCTestCase {
         XCTAssertEqual(keySimulator.events, [])
     }
 
+    func testGestureCleanupBalancesActiveRemapWithRemappedRelease() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let mapping = Mapping(
+            trigger: .init(input: .button(.mouse(4))),
+            outcomes: .init(press: .init(action: .arg0(.mouseButtonLeft), behavior: .remap))
+        )
+        let transformer = makeTransformer(
+            mappings: [mapping],
+            scheduler: scheduler,
+            gestureTransformer: makeGestureTransformer(button: .mouse(4))
+        )
+
+        let down = try XCTUnwrap(transformer.transform(
+            buttonEvent(pressed: true),
+            in: .init(device: nil)
+        ))
+        XCTAssertEqual(down.type, .leftMouseDown)
+        XCTAssertEqual(MouseEventView(down).mouseButton, .left)
+
+        XCTAssertNil(try transformer.transform(
+            draggedEvent(button: 4, deltaX: 10),
+            in: .init(device: nil)
+        ))
+
+        let up = try XCTUnwrap(transformer.transform(
+            buttonEvent(pressed: false),
+            in: .init(device: nil)
+        ))
+        XCTAssertEqual(up.type, .leftMouseUp)
+        XCTAssertEqual(MouseEventView(up).mouseButton, .left)
+        XCTAssertFalse(transformer.hasActiveInteraction)
+    }
+
     func testGestureCleanupDoesNotDiscardIndependentFallbackStream() throws {
         let scheduler = ButtonMappingTestTimerScheduler()
         var deliveredEvents = [CGEvent]()

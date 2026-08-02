@@ -103,8 +103,13 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
            let button = mappingButton(of: event) {
             let cancellation = engine.cancelInteractions(containing: button)
             if cancellation.consumesEvent {
+                let canceledRemapTarget = remapTarget(in: cancellation.lifecycleEvents)
                 process(cancellation)
                 scheduleNextDeadline()
+                if let canceledRemapTarget {
+                    remapMouseEvent(event, to: canceledRemapTarget)
+                    return event
+                }
                 return nil
             }
         }
