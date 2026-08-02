@@ -84,73 +84,36 @@ struct ButtonMappingButtonRecorder: View {
                     ButtonMappingButtonDescription(mapping: mapping, showPartial: true) {
                         Text(settingsState.isPreparingVirtualButtonRecording ? "Waiting for device…" : "Recording")
                     }
-                    .foregroundColor(.orange)
                 } else {
                     ButtonMappingButtonDescription(mapping: mapping) {
                         Text("Click to record")
                     }
                 }
             }
+            .foregroundColor(.primary)
             .frame(maxWidth: .infinity)
         }
     }
 
     private var advancedRecorder: some View {
-        ZStack {
-            Button {
-                recording.toggle()
-            } label: {
-                Color.clear
-                    .frame(maxWidth: .infinity, minHeight: 28, maxHeight: 28)
-                    .contentShape(Rectangle())
-            }
-            .accessibility(label: recording ? Text("Recording") : Text("Click to record"))
-
+        Button {
+            recording.toggle()
+        } label: {
             ButtonMappingRecordingPreview(
                 mapping: mapping,
                 snapshot: advancedSnapshot,
                 isRecording: recording,
-                isPreparingDevice: settingsState.isPreparingVirtualButtonRecording,
-                onToggleRelationship: editableRelationship == nil ? nil : toggleRelationship
+                isPreparingDevice: settingsState.isPreparingVirtualButtonRecording
             )
             .frame(maxWidth: .infinity, minHeight: 28, maxHeight: 28)
+            .contentShape(Rectangle())
         }
+        .accessibility(label: recording ? Text("Recording") : Text("Click to record"))
         .accessibility(
             hint: recording
                 ? Text("Press, hold, combine buttons, drag, or scroll; the recognized trigger updates live.")
                 : Text("Start recording a button gesture.")
         )
-    }
-
-    private var editableRelationship: Scheme.Buttons.Mapping.Trigger.TwoButtonRelationship? {
-        guard !recording else {
-            return nil
-        }
-        return mapping.trigger?.twoButtonRelationship
-    }
-
-    private func toggleRelationship() {
-        guard var trigger = mapping.trigger,
-              let relationship = trigger.twoButtonRelationship else {
-            return
-        }
-
-        switch relationship.kind {
-        case .simultaneous:
-            let recommendedHeldButton: Scheme.Buttons.Mapping.Button? = if case let .simultaneousPrimaryChord(button) =
-                mapping.buttonUsageRisk {
-                button
-            } else {
-                nil
-            }
-            trigger.setTwoButtonRelationship(
-                .holdThenPress,
-                preferredHeldButton: recommendedHeldButton
-            )
-        case .holdThenPress:
-            trigger.setTwoButtonRelationship(.simultaneous)
-        }
-        mapping.trigger = trigger
     }
 
     private func updateSharedRecordingState(force: Bool? = nil) {
@@ -354,96 +317,72 @@ private struct ButtonMappingRecordingPreview: View {
     var snapshot: ButtonMappingRecordingEngine.Snapshot
     var isRecording: Bool
     var isPreparingDevice: Bool
-    var onToggleRelationship: (() -> Void)?
 
     var body: some View {
         HStack(spacing: 8) {
             if tokens.isEmpty, !isRecording {
                 Text("Click to record")
-                    .foregroundColor(.primary)
                     .allowsHitTesting(false)
                 Spacer(minLength: 0)
             } else {
                 if tokens.isEmpty {
-                    if isPreparingDevice {
-                        Text("Waiting for device…")
-                            .foregroundColor(.primary)
-                            .lineLimit(1)
-                            .allowsHitTesting(false)
-                    } else {
-                        Text("Press a button or scroll")
-                            .foregroundColor(.primary)
-                            .lineLimit(1)
-                            .allowsHitTesting(false)
+                    Group {
+                        if isPreparingDevice {
+                            Text("Waiting for device…")
+                        } else {
+                            Text("Press a button or scroll")
+                        }
                     }
+                    .foregroundColor(.orange)
                 } else {
-                    if displayedMapping.trigger?.twoButtonRelationship == nil {
+                    if let relationshipDescription {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            relationshipDescriptionView(relationshipDescription)
+                        }
+                        .allowsHitTesting(false)
+                        .frame(height: 18)
+                    } else {
                         ScrollView(.horizontal, showsIndicators: false) {
                             tokenRow
                         }
                         .allowsHitTesting(false)
                         .frame(height: 18)
-                    } else {
-                        tokenRow
                     }
                 }
 
                 Spacer(minLength: 0)
             }
         }
+        .font(.body)
+        .foregroundColor(.primary)
         .padding(.horizontal, 10)
+    }
+
+    private func relationshipDescriptionView(_ description: String) -> some View {
+        Text(description)
+            .allowsHitTesting(false)
     }
 
     private var tokenRow: some View {
         HStack(spacing: 5) {
             ForEach(Array(tokens.enumerated()), id: \.offset) { _, token in
-                if let separator = token.separator {
-                    if token.relationshipSeparator {
-                        relationshipSeparator(separator)
-                    } else {
-                        Text(separator.rawValue)
-                            .foregroundColor(.secondary)
-                            .allowsHitTesting(false)
-                    }
-                }
                 Text(token.text)
-                    .foregroundColor(.primary)
-                    .lineLimit(1)
                     .allowsHitTesting(false)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    @ViewBuilder
-    private func relationshipSeparator(_ separator: Token.Separator) -> some View {
-        if let onToggleRelationship {
-            Button(action: onToggleRelationship) {
-                Text(separator.rawValue)
-                    .fontWeight(.medium)
-                    .frame(width: 20, height: 18)
-            }
-            .buttonStyle(.borderless)
-            .controlSize(.small)
-            .frame(width: 20, height: 18)
-            .accessibility(label: relationshipAccessibilityLabel)
-        } else {
-            Text(separator.rawValue)
-                .foregroundColor(.secondary)
-                .frame(width: 20, height: 18)
-                .allowsHitTesting(false)
-        }
-    }
-
-    private var relationshipAccessibilityLabel: Text {
-        if displayedMapping.trigger?.twoButtonRelationship?.kind == .simultaneous {
-            return Text("Change to Hold, Then Press")
-        }
-        return Text("Change to Chord")
-    }
-
     private var displayedMapping: Mapping {
         isRecording ? snapshot.mapping ?? mapping : mapping
+    }
+
+    private var relationshipDescription: String? {
+        guard let trigger = displayedMapping.trigger,
+              trigger.whileHeld?.isEmpty == false || trigger.simultaneous?.isEmpty == false else {
+            return nil
+        }
+        return ButtonMappingTriggerText.description(for: trigger, buttonDescription: buttonDescription)
     }
 
     private var tokens: [Token] {
@@ -459,64 +398,31 @@ private struct ButtonMappingRecordingPreview: View {
             return result
         }
 
-        if isRecording,
-           snapshot.isReadyForOrderedInput,
-           trigger.whileHeld?.isEmpty != false,
-           trigger.simultaneous?.isEmpty != false,
-           case let .button(button) = trigger.input {
+        let swipeDirection: ButtonMappingEngine.SwipeDirection? = switch snapshot.recognition {
+        case let .swipe(direction):
+            direction
+        default:
+            isRecording ? snapshot.movementDirection : nil
+        }
+        if let swipeDirection, case let .button(button) = trigger.input {
             result.append(.init(
                 text: String(
-                    format: NSLocalizedString("Hold %@", comment: "Recorded gesture token"),
-                    buttonDescription(button)
-                ),
-                separator: result.isEmpty ? nil : .plus
-            ))
-            result.append(.init(
-                text: NSLocalizedString("Press a button or scroll", comment: "Button mapping recorder prompt"),
-                separator: .then
+                    format: NSLocalizedString(
+                        "Hold %@, then %@",
+                        comment: "Localized swipe trigger"
+                    ),
+                    buttonDescription(button),
+                    swipeDirectionDescription(swipeDirection)
+                )
             ))
             return result
         }
 
-        for (index, button) in (trigger.whileHeld ?? []).enumerated() {
-            result.append(.init(
-                text: index == 0
-                    ? String(
-                        format: NSLocalizedString("Hold %@", comment: "Recorded gesture token"),
-                        buttonDescription(button)
-                    )
-                    : buttonDescription(button),
-                separator: result.isEmpty ? nil : .plus,
-                relationshipSeparator: false
-            ))
-        }
-
-        let inputSeparator: Token.Separator? = trigger.whileHeld?.isEmpty == false
-            ? .then
-            : result.isEmpty ? nil : .plus
-
         switch trigger.input {
         case let .button(button):
-            result.append(.init(
-                text: triggerButtonDescription(button),
-                separator: inputSeparator,
-                relationshipSeparator: trigger.twoButtonRelationship?.kind == .holdThenPress
-            ))
-            for button in trigger.simultaneous ?? [] {
-                result.append(.init(
-                    text: buttonDescription(button),
-                    separator: .plus,
-                    relationshipSeparator: trigger.twoButtonRelationship?.kind == .simultaneous
-                ))
-            }
+            result.append(.init(text: triggerButtonDescription(button)))
         case let .wheel(direction):
-            result.append(.init(text: wheelDescription(direction), separator: inputSeparator))
-        }
-
-        if case let .swipe(direction) = snapshot.recognition {
-            result.append(.init(text: dragDescription(direction), separator: .detail))
-        } else if isRecording, let direction = snapshot.movementDirection {
-            result.append(.init(text: dragDescription(direction), separator: .detail))
+            result.append(.init(text: wheelDescription(direction)))
         }
         return result
     }
@@ -590,36 +496,21 @@ private struct ButtonMappingRecordingPreview: View {
         }
     }
 
-    private func swipeArrow(_ direction: ButtonMappingEngine.SwipeDirection) -> String {
+    private func swipeDirectionDescription(_ direction: ButtonMappingEngine.SwipeDirection) -> String {
         switch direction {
         case .up:
-            return "↑"
+            return NSLocalizedString("Swipe up", comment: "Swipe direction")
         case .down:
-            return "↓"
+            return NSLocalizedString("Swipe down", comment: "Swipe direction")
         case .left:
-            return "←"
+            return NSLocalizedString("Swipe left", comment: "Swipe direction")
         case .right:
-            return "→"
+            return NSLocalizedString("Swipe right", comment: "Swipe direction")
         }
-    }
-
-    private func dragDescription(_ direction: ButtonMappingEngine.SwipeDirection) -> String {
-        String(
-            format: NSLocalizedString("Drag %@", comment: "Recorded gesture token"),
-            swipeArrow(direction)
-        )
     }
 
     private struct Token {
         var text: String
-        var separator: Separator?
-        var relationshipSeparator = false
-
-        enum Separator: String {
-            case plus = "+"
-            case then = "→"
-            case detail = "·"
-        }
     }
 }
 

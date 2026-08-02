@@ -101,29 +101,12 @@ struct ButtonMappingButtonDescription<FallbackView: View>: View {
     var body: some View {
         if let trigger = mapping.trigger {
             descriptionRow {
-                HStack(spacing: 5) {
-                    if let whileHeld = trigger.whileHeld, !whileHeld.isEmpty {
-                        Text("Hold")
-                            .foregroundColor(.secondary)
-                        ForEach(Array(whileHeld.enumerated()), id: \.offset) { index, button in
-                            if index > 0 {
-                                Text("+")
-                                    .foregroundColor(.secondary)
-                            }
-                            Text(buttonDescription(of: button))
-                        }
-                        Text("→")
-                            .foregroundColor(.secondary)
-                    }
-
+                if let triggerDescription = ButtonMappingTriggerText.description(for: trigger) {
+                    Text(triggerDescription)
+                } else {
                     switch trigger.input {
                     case let .button(button):
                         Text(buttonDescription(of: button))
-                        ForEach(Array((trigger.simultaneous ?? []).enumerated()), id: \.offset) { _, button in
-                            Text("+")
-                                .foregroundColor(.secondary)
-                            Text(buttonDescription(of: button))
-                        }
                     case let .wheel(direction):
                         Text(scrollDescription(of: direction))
                     }
@@ -203,6 +186,129 @@ struct ButtonMappingButtonDescription<FallbackView: View>: View {
         case .right:
             return "Scroll right"
         }
+    }
+}
+
+enum ButtonMappingTriggerText {
+    typealias Mapping = Scheme.Buttons.Mapping
+
+    static func description(for trigger: Mapping.Trigger) -> String? {
+        description(for: trigger, buttonDescription: buttonDescription)
+    }
+
+    static func description(
+        for trigger: Mapping.Trigger,
+        buttonDescription: (Mapping.Button) -> String
+    ) -> String? {
+        let heldButtons = trigger.whileHeld ?? []
+
+        switch trigger.input {
+        case let .button(button):
+            if let simultaneous = trigger.simultaneous, !simultaneous.isEmpty {
+                let simultaneousDescription = String(
+                    format: NSLocalizedString(
+                        "Press %@ simultaneously with %@",
+                        comment: "Localized simultaneous button trigger"
+                    ),
+                    buttonDescription(button),
+                    buttonListDescription(simultaneous, using: buttonDescription)
+                )
+
+                guard !heldButtons.isEmpty else {
+                    return simultaneousDescription
+                }
+
+                return String(
+                    format: NSLocalizedString(
+                        "Hold %@, then %@",
+                        comment: "Localized ordered button trigger"
+                    ),
+                    buttonListDescription(heldButtons, using: buttonDescription),
+                    simultaneousDescription
+                )
+            }
+
+            guard !heldButtons.isEmpty else {
+                return nil
+            }
+
+            return String(
+                format: NSLocalizedString(
+                    "Hold %@, then press %@",
+                    comment: "Localized ordered button trigger"
+                ),
+                buttonListDescription(heldButtons, using: buttonDescription),
+                buttonDescription(button)
+            )
+        case let .wheel(direction):
+            guard !heldButtons.isEmpty else {
+                return nil
+            }
+
+            return String(
+                format: NSLocalizedString(
+                    "Hold %@, then %@",
+                    comment: "Localized ordered button trigger"
+                ),
+                buttonListDescription(heldButtons, using: buttonDescription),
+                scrollDescription(direction)
+            )
+        }
+    }
+
+    static func buttonDescription(_ button: Mapping.Button) -> String {
+        switch button {
+        case let .mouse(buttonNumber):
+            switch buttonNumber {
+            case 0:
+                return NSLocalizedString("Primary click", comment: "Primary mouse button")
+            case 1:
+                return NSLocalizedString("Secondary click", comment: "Secondary mouse button")
+            case 2:
+                return NSLocalizedString("Middle click", comment: "Middle mouse button")
+            default:
+                return String(
+                    format: NSLocalizedString("Button #%lld click", comment: "Mouse button description"),
+                    Int64(buttonNumber)
+                )
+            }
+        case let .logitechControl(identity):
+            return identity.userVisibleName
+        }
+    }
+
+    private static func buttonListDescription(
+        _ buttons: [Mapping.Button],
+        using buttonDescription: (Mapping.Button) -> String
+    ) -> String {
+        let descriptions = buttons.map(buttonDescription)
+        guard let last = descriptions.last else {
+            return ""
+        }
+        guard descriptions.count > 1 else {
+            return last
+        }
+
+        let conjunction = NSLocalizedString("and", comment: "Button list conjunction")
+        return descriptions.dropLast().joined(separator: ", ") + " " + conjunction + " " + last
+    }
+
+    private static func scrollDescription(_ direction: Mapping.ScrollDirection) -> String {
+        let arrow: String
+        switch direction {
+        case .up:
+            arrow = "↑"
+        case .down:
+            arrow = "↓"
+        case .left:
+            arrow = "←"
+        case .right:
+            arrow = "→"
+        }
+        return String(
+            format: NSLocalizedString("Scroll %@", comment: "Recorded gesture token"),
+            arrow
+        )
     }
 }
 
