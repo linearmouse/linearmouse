@@ -470,6 +470,52 @@ class EventTransformerManager {
         return handleLogitechControlEventOnCurrentThread(context)
     }
 
+    /// Abandons a diverted Logitech control stream that cannot deliver its
+    /// physical release, such as when a receiver reconnect forces its monitor
+    /// to restart. Cancellation must not resolve a pending short press.
+    @discardableResult
+    func cancelLogitechControlInteraction(_ context: LogitechEventContext) -> Bool {
+        if EventThread.shared.isCurrent {
+            return cancelLogitechControlInteractionOnCurrentThread(context)
+        }
+
+        if let canceled = EventThread.shared.performAndWait({
+            self.cancelLogitechControlInteractionOnCurrentThread(context)
+        }) {
+            return canceled
+        }
+
+        return cancelLogitechControlInteractionOnCurrentThread(context)
+    }
+
+    private func cancelLogitechControlInteractionOnCurrentThread(_ context: LogitechEventContext) -> Bool {
+        let pid = ConfigurationState.shared.configuration.usesProcessConditions ? context.pid : nil
+        let selection = RouteSelection(
+            device: context.device,
+            process: pid?.processIdentity,
+            display: context.display
+        )
+        var canceled = sharedAutoScrollTransformer?.cancelLogitechControlInteraction(context) == true
+
+        guard let (interactionKey, interaction) = activeInteraction(
+            for: selection,
+            allowsUnidentifiedOwnerForIdentifiedSelection: true
+        ),
+            let canceler = interaction.transformer as? LogitechControlInteractionCanceling else {
+            return canceled
+        }
+
+        if canceler.cancelLogitechControlInteraction(context) {
+            canceled = true
+            didProcessOwnedInteraction(
+                interaction,
+                selection: selection.mergingDevice(from: interaction.selection),
+                interactionKey: interactionKey
+            )
+        }
+        return canceled
+    }
+
     private func handleLogitechControlEventOnCurrentThread(
         _ context: LogitechEventContext
     ) -> LogitechControlEventHandlingResult {
@@ -485,8 +531,42 @@ class EventTransformerManager {
         )
         let effectiveSelection = selection.mergingDevice(from: interaction?.1.selection)
         if let (interactionKey, activeInteraction) = interaction {
-            let result = (activeInteraction.transformer as? LogitechControlEventHandling)?
-                .handleLogitechControlEvent(context) ?? .notHandled
+            if !context.isPressed {
+                let ownerResult = (activeInteraction.transformer as? LogitechControlEventHandling)?
+                    .handleLogitechControlEvent(context) ?? .notHandled
+                didProcessOwnedInteraction(
+                    activeInteraction,
+                    selection: effectiveSelection,
+                    interactionKey: interactionKey
+                )
+                if ownerResult != .notHandled {
+                    return ownerResult
+                }
+
+                // The release belonged to another high-priority feature (most
+                // notably Auto Scroll) while this device also had a mapping
+                // interaction in flight. Do not offer an unmatched release to
+                // a fresh stateful recognizer.
+                let route = getRoute(
+                    withDevice: effectiveSelection.device,
+                    withProcess: effectiveSelection.process,
+                    withDisplay: effectiveSelection.display,
+                    updateActiveRoute: true
+                )
+                return (transformerWithoutInteractionTrackers(in: route) as? LogitechControlEventHandling)?
+                    .handleLogitechControlEvent(context) ?? .notHandled
+            }
+
+            let route = getRoute(
+                withDevice: effectiveSelection.device,
+                withProcess: effectiveSelection.process,
+                withDisplay: effectiveSelection.display,
+                updateActiveRoute: true
+            )
+            let result = (transformer(
+                in: route,
+                replacingInteractionTrackersWith: activeInteraction.transformer
+            ) as? LogitechControlEventHandling)?.handleLogitechControlEvent(context) ?? .notHandled
             didProcessOwnedInteraction(
                 activeInteraction,
                 selection: effectiveSelection,
@@ -509,6 +589,13 @@ class EventTransformerManager {
             interactionKey: effectiveSelection.interactionKey
         )
         return result
+    }
+
+    private func transformerWithoutInteractionTrackers(in route: TransformerRoute) -> EventTransformer {
+        guard let transformers = route.transformer as? [EventTransformer] else {
+            return route.transformer is EventTransformerInteractionTracking ? [] : route.transformer
+        }
+        return transformers.filter { !($0 is EventTransformerInteractionTracking) }
     }
 
     private func getRoute(

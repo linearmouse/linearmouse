@@ -673,7 +673,10 @@ final class ButtonMappingTransformerTests: XCTestCase {
             .handledDeferringSyntheticFallback
         )
         scheduler.advance(to: ms(100))
-        XCTAssertEqual(transformer.handleLogitechControlEvent(logitech(identity, pressed: false)), .notHandled)
+        XCTAssertEqual(
+            transformer.handleLogitechControlEvent(logitech(identity, pressed: false)),
+            .handledAllowingSyntheticFallback
+        )
     }
 
     func testLogitechLongPressSuppressesDeferredFallback() {
@@ -691,6 +694,87 @@ final class ButtonMappingTransformerTests: XCTestCase {
         )
         scheduler.advance(to: ms(500))
         XCTAssertEqual(transformer.handleLogitechControlEvent(logitech(identity, pressed: false)), .handled)
+    }
+
+    func testCancelingPendingLogitechPressDoesNotPerformShortPress() {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let keySimulator = ButtonMappingTestKeySimulator()
+        let identity = LogitechControlIdentity(controlID: 0xC4)
+        let mapping = Mapping(
+            trigger: .init(input: .button(.logitechControl(identity))),
+            outcomes: .init(shortPress: .arg1(.keyPress([.a])))
+        )
+        let transformer = makeTransformer(
+            mappings: [mapping],
+            scheduler: scheduler,
+            keySimulator: keySimulator
+        )
+
+        XCTAssertEqual(
+            transformer.handleLogitechControlEvent(logitech(identity, pressed: true)),
+            .handledDeferringSyntheticFallback
+        )
+        XCTAssertTrue(transformer.hasActiveInteraction)
+
+        XCTAssertTrue(transformer.cancelLogitechControlInteraction(logitech(identity, pressed: false)))
+        XCTAssertFalse(transformer.hasActiveInteraction)
+        scheduler.advance(to: ms(1000))
+        XCTAssertEqual(keySimulator.events, [])
+    }
+
+    func testCancelingCommittedLogitechHoldReleasesHeldKeys() {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let keySimulator = ButtonMappingTestKeySimulator()
+        let identity = LogitechControlIdentity(controlID: 0xC4)
+        let mapping = Mapping(
+            trigger: .init(input: .button(.logitechControl(identity))),
+            outcomes: .init(press: .init(action: .arg1(.keyPress([.a])), behavior: .hold))
+        )
+        let transformer = makeTransformer(
+            mappings: [mapping],
+            scheduler: scheduler,
+            keySimulator: keySimulator
+        )
+
+        XCTAssertEqual(
+            transformer.handleLogitechControlEvent(logitech(identity, pressed: true)),
+            .handledDeferringSyntheticFallback
+        )
+        XCTAssertEqual(keySimulator.events, [.down([.a])])
+
+        XCTAssertTrue(transformer.cancelLogitechControlInteraction(logitech(identity, pressed: false)))
+        XCTAssertFalse(transformer.hasActiveInteraction)
+        XCTAssertEqual(keySimulator.events, [.down([.a]), .up([.a]), .reset])
+    }
+
+    func testCancelingLogitechChordReplaysBufferedPhysicalButtonDown() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let identity = LogitechControlIdentity(controlID: 0xC4)
+        let mapping = Mapping(
+            trigger: .init(
+                input: .button(.logitechControl(identity)),
+                whileHeld: [.mouse(4)]
+            ),
+            outcomes: .init(shortPress: .arg0(.none))
+        )
+        let transformer = makeTransformer(mappings: [mapping], scheduler: scheduler)
+        var replayedEvents = [CGEventType]()
+
+        let physicalDown = try buttonEvent(pressed: true)
+        XCTAssertNil(transformer.transform(
+            physicalDown,
+            in: .init(device: nil) { replayedEvents.append($0.type) }
+        ))
+        XCTAssertEqual(
+            transformer.handleLogitechControlEvent(logitech(identity, pressed: true)),
+            .handledDeferringSyntheticFallback
+        )
+
+        XCTAssertTrue(transformer.cancelLogitechControlInteraction(logitech(identity, pressed: false)))
+        XCTAssertEqual(replayedEvents, [.otherMouseDown])
+        XCTAssertFalse(transformer.hasActiveInteraction)
+
+        XCTAssertNotNil(try transformer.transform(buttonEvent(pressed: false), in: .init(device: nil)))
     }
 
     func testLogitechGestureWinsOverShortPressMapping() throws {

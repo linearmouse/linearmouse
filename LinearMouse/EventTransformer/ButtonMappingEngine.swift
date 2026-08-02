@@ -621,7 +621,10 @@ struct ButtonMappingEngine {
 
     /// Cancels an interaction after a higher-priority recognizer claims the
     /// same physical button stream, such as Gesture Button recognizing a drag.
-    mutating func cancelInteractions(containing button: Button) -> Output {
+    mutating func cancelInteractions(
+        containing button: Button,
+        replayingBufferedEvents: Bool = false
+    ) -> Output {
         var canceled = false
         var canceledPendingSession = false
         var lifecycleEvents = [LifecycleEvent]()
@@ -659,7 +662,8 @@ struct ButtonMappingEngine {
         return .init(
             consumesEvent: true,
             lifecycleEvents: lifecycleEvents,
-            discardsBufferedEvents: canceledPendingSession
+            replaysBufferedEvents: canceledPendingSession && replayingBufferedEvents,
+            discardsBufferedEvents: canceledPendingSession && !replayingBufferedEvents
         )
     }
 

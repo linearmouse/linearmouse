@@ -347,6 +347,20 @@ extension GestureButtonTransformer: LogitechControlEventHandling {
     }
 }
 
+extension GestureButtonTransformer: LogitechControlInteractionCanceling {
+    @discardableResult
+    func cancelLogitechControlInteraction(_ context: LogitechEventContext) -> Bool {
+        guard let triggerLogitechControl = trigger.button?.logitechControl,
+              context.matches(triggerLogitechControl),
+              hasActiveInteraction else {
+            return false
+        }
+
+        state = .idle
+        return true
+    }
+}
+
 extension GestureButtonTransformer: Deactivatable {
     func deactivate() {
         state = .idle

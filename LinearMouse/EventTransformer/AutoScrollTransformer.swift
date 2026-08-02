@@ -468,6 +468,20 @@ extension AutoScrollTransformer: LogitechControlEventHandling {
     }
 }
 
+extension AutoScrollTransformer: LogitechControlInteractionCanceling {
+    @discardableResult
+    func cancelLogitechControlInteraction(_ context: LogitechEventContext) -> Bool {
+        guard let triggerLogitechControl = trigger.button?.logitechControl,
+              context.matches(triggerLogitechControl),
+              isAutoscrollActive else {
+            return false
+        }
+
+        deactivate()
+        return true
+    }
+}
+
 extension AutoScrollTransformer: Deactivatable {
     func deactivate() {
         if isAutoscrollActive {

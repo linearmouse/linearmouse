@@ -556,6 +556,75 @@ final class EventTransformerManagerTests: XCTestCase {
         XCTAssertNotIdentical(latestTransformer, initialTransformer)
     }
 
+    func testLogitechAutoScrollKeepsPriorityWhileAnotherMappingIsActive() throws {
+        let autoScrollIdentity = LogitechControlIdentity(controlID: 0x00C4)
+        let mappingIdentity = LogitechControlIdentity(controlID: 0x00C5)
+        var scheme = Scheme(buttons: .init(mappings: [
+            .init(
+                trigger: .init(input: .button(.logitechControl(mappingIdentity))),
+                outcomes: .init(longPress: .arg0(.none))
+            )
+        ]))
+        scheme.buttons.autoScroll.enabled = true
+        scheme.buttons.autoScroll.modes = [.hold]
+        scheme.buttons.autoScroll.trigger = .init(button: .logitechControl(autoScrollIdentity))
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+        let manager = EventTransformerManager()
+        let route = try XCTUnwrap(manager.get(
+            withDevice: nil,
+            withPid: nil,
+            withDisplay: "Display A"
+        ) as? [EventTransformer])
+        let autoScroll = try XCTUnwrap(route.compactMap { $0 as? AutoScrollTransformer }.first)
+
+        XCTAssertEqual(
+            manager.handleLogitechControlEvent(logitech(mappingIdentity, pressed: true, display: "Display A")),
+            .handledDeferringSyntheticFallback
+        )
+        XCTAssertEqual(
+            manager.handleLogitechControlEvent(logitech(autoScrollIdentity, pressed: true, display: "Display A")),
+            .handled
+        )
+        XCTAssertTrue(autoScroll.isAutoscrollActive)
+
+        XCTAssertEqual(
+            manager.handleLogitechControlEvent(logitech(autoScrollIdentity, pressed: false, display: "Display A")),
+            .handled
+        )
+        XCTAssertFalse(autoScroll.isAutoscrollActive)
+
+        XCTAssertTrue(manager.cancelLogitechControlInteraction(
+            logitech(mappingIdentity, pressed: false, display: "Display A")
+        ))
+    }
+
+    func testCancelingLostLogitechControlStopsAutoScrollWithoutMappingOwner() throws {
+        let identity = LogitechControlIdentity(controlID: 0x00C4)
+        var scheme = Scheme()
+        scheme.buttons.autoScroll.enabled = true
+        scheme.buttons.autoScroll.modes = [.hold]
+        scheme.buttons.autoScroll.trigger = .init(button: .logitechControl(identity))
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+        let manager = EventTransformerManager()
+        let route = try XCTUnwrap(manager.get(
+            withDevice: nil,
+            withPid: nil,
+            withDisplay: "Display A"
+        ) as? [EventTransformer])
+        let autoScroll = try XCTUnwrap(route.compactMap { $0 as? AutoScrollTransformer }.first)
+
+        XCTAssertEqual(
+            manager.handleLogitechControlEvent(logitech(identity, pressed: true, display: "Display A")),
+            .handled
+        )
+        XCTAssertTrue(autoScroll.isAutoscrollActive)
+
+        XCTAssertTrue(manager.cancelLogitechControlInteraction(
+            logitech(identity, pressed: false, display: "Display A")
+        ))
+        XCTAssertFalse(autoScroll.isAutoscrollActive)
+    }
+
     func testLogitechHeldPrefixAndMouseTriggerShareInteractionRoute() throws {
         let identity = LogitechControlIdentity(controlID: 0x00C3)
         let mapping = Scheme.Buttons.Mapping(
@@ -759,6 +828,50 @@ final class EventTransformerManagerTests: XCTestCase {
             manager.handleLogitechControlEvent(logitech(identity, pressed: false, display: "Display B")),
             .handled
         )
+        XCTAssertFalse(originalTransformer.hasActiveInteraction)
+
+        let updatedTransformer = try buttonMappingTransformer(in: manager.get(
+            withDevice: nil,
+            withPid: nil,
+            withDisplay: "Display B"
+        ))
+        XCTAssertNotIdentical(updatedTransformer, originalTransformer)
+        XCTAssertEqual(updatedTransformer.mappings, [updatedMapping])
+    }
+
+    func testCancelingLostLogitechControlDrainsRetiredTransformerWithoutShortPress() throws {
+        let identity = LogitechControlIdentity(controlID: 0x00C3)
+        let originalMapping = Scheme.Buttons.Mapping(
+            trigger: .init(input: .button(.logitechControl(identity))),
+            outcomes: .init(shortPress: .arg0(.none))
+        )
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(buttons: .init(mappings: [originalMapping]))
+        ])
+        let manager = EventTransformerManager()
+
+        XCTAssertEqual(
+            manager.handleLogitechControlEvent(logitech(identity, pressed: true, display: "Display A")),
+            .handledDeferringSyntheticFallback
+        )
+        let originalTransformer = try buttonMappingTransformer(in: manager.get(
+            withDevice: nil,
+            withPid: nil,
+            withDisplay: "Display A"
+        ))
+        XCTAssertTrue(originalTransformer.hasActiveInteraction)
+
+        let updatedMapping = Scheme.Buttons.Mapping(
+            trigger: .init(input: .button(.mouse(5))),
+            outcomes: .init(shortPress: .arg0(.none))
+        )
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(buttons: .init(mappings: [updatedMapping]))
+        ])
+
+        XCTAssertTrue(manager.cancelLogitechControlInteraction(
+            logitech(identity, pressed: false, display: "Display B")
+        ))
         XCTAssertFalse(originalTransformer.hasActiveInteraction)
 
         let updatedTransformer = try buttonMappingTransformer(in: manager.get(

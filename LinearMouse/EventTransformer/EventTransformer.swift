@@ -76,6 +76,13 @@ protocol LogitechControlEventHandling {
     func handleLogitechControlEvent(_ context: LogitechEventContext) -> LogitechControlEventHandlingResult
 }
 
+/// Adopted by stateful transformers that can abandon one Logitech control
+/// stream when its HID++ monitor disappears before reporting the release.
+protocol LogitechControlInteractionCanceling {
+    @discardableResult
+    func cancelLogitechControlInteraction(_ context: LogitechEventContext) -> Bool
+}
+
 extension [EventTransformer]: EventTransformer {
     func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent? {
         var event: CGEvent? = event

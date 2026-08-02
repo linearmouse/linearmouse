@@ -603,6 +603,26 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         )
     }
 
+    func testLogitechSyntheticFallbackPostsDeferredClickAfterHandledFallbackRelease() {
+        var coordinator = LogitechSyntheticFallbackCoordinator()
+        let controlIdentity = LogitechControlIdentity(controlID: 0x00D0, productID: 0xB015, serialNumber: "ABC")
+
+        _ = coordinator.action(
+            for: controlIdentity,
+            isPressed: true,
+            handlingResult: .handledDeferringSyntheticFallback
+        )
+
+        XCTAssertEqual(
+            coordinator.action(
+                for: controlIdentity,
+                isPressed: false,
+                handlingResult: .handledAllowingSyntheticFallback
+            ),
+            .postClick
+        )
+    }
+
     func testLogitechSyntheticFallbackCancelsDeferredClickWhenGestureHandlesRelease() {
         var coordinator = LogitechSyntheticFallbackCoordinator()
         let controlIdentity = LogitechControlIdentity(controlID: 0x00D0, productID: 0xB015, serialNumber: "ABC")

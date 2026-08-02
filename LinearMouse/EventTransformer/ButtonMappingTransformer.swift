@@ -516,7 +516,7 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
     }
 }
 
-extension ButtonMappingTransformer: LogitechControlEventHandling {
+extension ButtonMappingTransformer: LogitechControlEventHandling, LogitechControlInteractionCanceling {
     func handleLogitechControlEvent(_ context: LogitechEventContext) -> LogitechControlEventHandlingResult {
         guard !SettingsState.shared.recording else {
             return .notHandled
@@ -561,24 +561,46 @@ extension ButtonMappingTransformer: LogitechControlEventHandling {
         scheduleNextDeadline()
 
         if recognition.output.forwardsCapturedEvent {
-            return .notHandled
+            return .handledAllowingSyntheticFallback
         }
         guard recognition.output.consumesEvent else {
             return gestureResult
         }
         if recognition.output.replaysBufferedEvents {
-            return .notHandled
+            return .handledAllowingSyntheticFallback
         }
         return context.isPressed ? .handledDeferringSyntheticFallback : .handled
     }
 
     private func cancelGestureInteraction(for context: LogitechEventContext) {
-        let buttons = configuredButtons(matching: context)
+        _ = cancelMappingInteractions(
+            for: configuredButtons(matching: context),
+            replayingBufferedEvents: false
+        )
+    }
+
+    @discardableResult
+    func cancelLogitechControlInteraction(_ context: LogitechEventContext) -> Bool {
+        let canceledGesture = gestureTransformer?.cancelLogitechControlInteraction(context) == true
+        let canceledMapping = cancelMappingInteractions(
+            for: configuredButtons(matching: context),
+            replayingBufferedEvents: true
+        )
+        return canceledGesture || canceledMapping
+    }
+
+    private func cancelMappingInteractions(
+        for buttons: [Mapping.Button],
+        replayingBufferedEvents: Bool
+    ) -> Bool {
         var canceled = false
         for lane in recognitionLanes {
             var cancellation = ButtonMappingEngine.Output()
             for button in buttons {
-                cancellation.append(lane.engine.cancelInteractions(containing: button))
+                cancellation.append(lane.engine.cancelInteractions(
+                    containing: button,
+                    replayingBufferedEvents: replayingBufferedEvents
+                ))
             }
             guard cancellation.consumesEvent else {
                 continue
@@ -590,6 +612,7 @@ extension ButtonMappingTransformer: LogitechControlEventHandling {
             pruneRecognitionLanes()
             scheduleNextDeadline()
         }
+        return canceled
     }
 
     private func configuredButtons(matching context: LogitechEventContext) -> [Mapping.Button] {

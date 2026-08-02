@@ -60,4 +60,30 @@ final class AutoScrollTransformerTests: XCTestCase {
         )
         XCTAssertFalse(transformer.isAutoscrollActive)
     }
+
+    func testCancelingLostLogitechHoldStopsAutoScroll() {
+        let identity = LogitechControlIdentity(controlID: 0xC4)
+        var trigger = Scheme.Buttons.Mapping()
+        trigger.button = .logitechControl(identity)
+        let transformer = AutoScrollTransformer(
+            trigger: trigger,
+            modes: [.hold],
+            speed: 1
+        )
+        let context = LogitechEventContext(
+            device: nil,
+            pid: nil,
+            display: nil,
+            mouseLocation: .zero,
+            controlIdentity: identity,
+            isPressed: true,
+            modifierFlags: []
+        )
+
+        XCTAssertEqual(transformer.handleLogitechControlEvent(context), .handled)
+        XCTAssertTrue(transformer.isAutoscrollActive)
+
+        XCTAssertTrue(transformer.cancelLogitechControlInteraction(context))
+        XCTAssertFalse(transformer.isAutoscrollActive)
+    }
 }

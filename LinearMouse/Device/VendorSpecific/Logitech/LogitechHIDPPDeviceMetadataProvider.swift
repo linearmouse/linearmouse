@@ -2369,6 +2369,14 @@ final class LogitechReprogrammableControlsMonitor {
 
                 var pressedControls = Set<UInt16>()
                 defer {
+                    cancelPressedControlInteractions(
+                        pressedControls,
+                        productID: targetIdentity?.productID,
+                        serialNumber: targetIdentity?.serialNumber,
+                        allowsIdentityFallback: monitorTarget.allowsIdentityFallback,
+                        isRecording: isRecording,
+                        recordingSessionID: recordingSessionID
+                    )
                     releaseButtonIfNeeded()
 
                     let failedRestoreByControlID = restoreReportingState(
@@ -3207,6 +3215,67 @@ final class LogitechReprogrammableControlsMonitor {
 
         for button in buttonsToRelease {
             SyntheticMouseButtonEventEmitter.post(button: button, down: false)
+        }
+    }
+
+    private func cancelPressedControlInteractions(
+        _ controlIDs: Set<UInt16>,
+        productID: Int?,
+        serialNumber: String?,
+        allowsIdentityFallback: Bool,
+        isRecording: Bool,
+        recordingSessionID: UUID?
+    ) {
+        guard !controlIDs.isEmpty else {
+            return
+        }
+
+        let modifierFlags = ModifierState.shared.currentFlags
+        let identities = controlIDs.sorted().map {
+            LogitechControlIdentity(
+                controlID: Int($0),
+                productID: productID,
+                serialNumber: serialNumber
+            )
+        }
+
+        if isRecording {
+            guard let recordingSessionID else {
+                return
+            }
+            for identity in identities {
+                DispatchQueue.main.async {
+                    guard SettingsState.shared.isCurrentButtonMappingRecordingSession(recordingSessionID) else {
+                        return
+                    }
+
+                    SettingsState.shared.recordedButtonMappingEvent = .init(
+                        recordingSessionID: recordingSessionID,
+                        button: .logitechControl(identity),
+                        scroll: nil,
+                        modifierFlags: modifierFlags,
+                        isPressed: false
+                    )
+                }
+            }
+            return
+        }
+
+        let eventContext = eventContextSnapshot()
+        for identity in identities {
+            let context = LogitechEventContext(
+                device: device,
+                pid: eventContext.pid,
+                display: eventContext.display,
+                mouseLocation: eventContext.mouseLocation,
+                controlIdentity: identity,
+                allowsIdentityFallback: allowsIdentityFallback,
+                isPressed: false,
+                modifierFlags: modifierFlags
+            )
+            _ = EventThread.shared.performAndWait {
+                EventTransformerManager.shared.cancelLogitechControlInteraction(context)
+            }
         }
     }
 
