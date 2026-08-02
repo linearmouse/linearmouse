@@ -28,13 +28,14 @@ private func logitechContext(
 private func makeLogitechGestureTransformer(
     trigger: Scheme.Buttons.Mapping = .init(
         button: .logitechControl(.init(controlID: testLogitechControlID))
-    )
+    ),
+    cooldownMs: Int = testGestureCooldownMs
 ) -> GestureButtonTransformer {
     GestureButtonTransformer(
         trigger: trigger,
         threshold: testGestureThreshold,
         deadZone: testGestureDeadZone,
-        cooldownMs: testGestureCooldownMs,
+        cooldownMs: cooldownMs,
         actions: .init(right: Scheme.Buttons.Gesture.GestureAction.none)
     )
 }
@@ -112,6 +113,23 @@ final class GestureButtonTransformerTests: XCTestCase {
         )
         XCTAssertEqual(
             transformer.handleLogitechControlEvent(logitechContext(pressed: true)),
+            .handled
+        )
+    }
+
+    func testLogitechGestureKeepsReleaseAfterCooldownExpires() throws {
+        let transformer = makeLogitechGestureTransformer(cooldownMs: 0)
+
+        XCTAssertEqual(
+            transformer.handleLogitechControlEvent(logitechContext(pressed: true)),
+            .handledDeferringSyntheticFallback
+        )
+        XCTAssertNil(try transformer.transform(
+            makeMouseMovedEvent(deltaX: testGestureThreshold),
+            in: EventTransformerContext(device: nil)
+        ))
+        XCTAssertEqual(
+            transformer.handleLogitechControlEvent(logitechContext(pressed: false)),
             .handled
         )
     }

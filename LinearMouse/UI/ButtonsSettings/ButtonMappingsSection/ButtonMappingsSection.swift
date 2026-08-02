@@ -27,7 +27,7 @@ struct ButtonMappingsSection: View {
                 .frame(height: 200)
             }
         } header: {
-            Text("Assign actions to mouse buttons")
+            Text("Assign actions to buttons and gestures")
         } footer: {
             HStack(spacing: 4) {
                 Button {
@@ -92,7 +92,16 @@ struct ButtonMappingsSection: View {
     private func apply(_ mapping: Scheme.Buttons.Mapping, from sheet: ActiveSheet) {
         switch sheet {
         case .create:
-            state.appendMapping(mapping)
+            if let trigger = mapping.effectiveTrigger,
+               let index = state.mappings.firstIndex(where: {
+                   $0.isStructured && $0.effectiveTrigger?.isEquivalent(to: trigger) == true
+               }) {
+                var existing = state.mappings[index]
+                existing.mergeOutcomes(from: mapping)
+                state.mappings[index] = existing
+            } else {
+                state.appendMapping(mapping)
+            }
 
         case .edit:
             guard let editingOriginalMapping,

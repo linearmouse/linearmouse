@@ -2098,7 +2098,12 @@ final class LogitechReprogrammableControlsMonitor {
 
     private static func logitechControls(in scheme: Scheme) -> [LogitechControlIdentity] {
         let buttons = scheme.buttons
-        let mappedControls = (buttons.mappings ?? []).compactMap(\.button?.logitechControl)
+        let mappedControls = (buttons.mappings ?? []).flatMap { mapping in
+            if let trigger = mapping.trigger {
+                return trigger.statefulButtons.compactMap(\.logitechControl)
+            }
+            return [mapping.button?.logitechControl].compactMap(\.self)
+        }
         let autoScrollControl: LogitechControlIdentity? = {
             guard buttons.$autoScroll?.enabled ?? false else {
                 return nil
@@ -2460,7 +2465,7 @@ final class LogitechReprogrammableControlsMonitor {
                         )
 
                         if isRecording {
-                            if isPressed, let recordingSessionID {
+                            if let recordingSessionID {
                                 DispatchQueue.main.async {
                                     guard SettingsState.shared
                                         .isCurrentButtonMappingRecordingSession(recordingSessionID) else {
@@ -2471,7 +2476,8 @@ final class LogitechReprogrammableControlsMonitor {
                                         recordingSessionID: recordingSessionID,
                                         button: .logitechControl(controlIdentity),
                                         scroll: nil,
-                                        modifierFlags: modifierFlags
+                                        modifierFlags: modifierFlags,
+                                        isPressed: isPressed
                                     )
                                 }
                             }
@@ -2889,12 +2895,15 @@ final class LogitechReprogrammableControlsMonitor {
             return Set(availableControls.map(\.controlID))
         }
 
-        let directMappings: [UInt16] = (scheme.buttons.mappings ?? [])
-            .compactMap { (mapping: Scheme.Buttons.Mapping) -> UInt16? in
-                guard let logiButton = mapping.button?.logitechControl else {
-                    return nil
-                }
+        let directMappings: [UInt16] = (scheme.buttons.mappings ?? []).flatMap { mapping in
+            let mappedControls: [LogitechControlIdentity]
+            if let trigger = mapping.trigger {
+                mappedControls = trigger.statefulButtons.compactMap(\.logitechControl)
+            } else {
+                mappedControls = [mapping.button?.logitechControl].compactMap(\.self)
+            }
 
+            return mappedControls.compactMap { logiButton -> UInt16? in
                 guard Self.matches(
                     logiButton: logiButton,
                     identity: identity,
@@ -2902,9 +2911,9 @@ final class LogitechReprogrammableControlsMonitor {
                 ) else {
                     return nil
                 }
-
                 return logiButton.controlIDValue
             }
+        }
 
         let autoScrollControlID: UInt16? = {
             guard scheme.buttons.autoScroll.enabled ?? false,

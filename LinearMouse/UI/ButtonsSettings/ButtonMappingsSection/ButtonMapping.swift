@@ -13,7 +13,15 @@ struct ButtonMappingListItem: View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 ButtonMappingButtonDescription<EmptyView>(mapping: mapping)
-                ButtonMappingActionDescription(action: mapping.action ?? .arg0(.auto))
+                ForEach(actionRows) { row in
+                    HStack(spacing: 4) {
+                        if let label = row.label {
+                            Text(label)
+                                .foregroundColor(.secondary)
+                        }
+                        ButtonMappingActionDescription(action: row.action)
+                    }
+                }
             }
 
             Spacer()
@@ -28,6 +36,61 @@ struct ButtonMappingListItem: View {
             hover = $0
         }
     }
+
+    private var actionRows: [ActionRow] {
+        guard mapping.isStructured else {
+            return [.init(id: "action", action: mapping.action ?? .arg0(.auto))]
+        }
+
+        if case .wheel = mapping.trigger?.input {
+            return [.init(id: "wheel", action: mapping.action ?? .arg0(.auto))]
+        }
+
+        var rows = [ActionRow]()
+        if let press = mapping.outcomes?.press {
+            rows.append(.init(id: "press", label: press.behavior.label, action: press.action))
+        }
+        if let action = mapping.outcomes?.shortPress {
+            rows.append(.init(id: "short", label: "Short press:", action: action))
+        }
+        if let action = mapping.outcomes?.longPress {
+            rows.append(.init(id: "long", label: "Long press:", action: action))
+        }
+        if let action = mapping.outcomes?.swipe?.up {
+            rows.append(.init(id: "swipe-up", label: "Swipe up:", action: action))
+        }
+        if let action = mapping.outcomes?.swipe?.down {
+            rows.append(.init(id: "swipe-down", label: "Swipe down:", action: action))
+        }
+        if let action = mapping.outcomes?.swipe?.left {
+            rows.append(.init(id: "swipe-left", label: "Swipe left:", action: action))
+        }
+        if let action = mapping.outcomes?.swipe?.right {
+            rows.append(.init(id: "swipe-right", label: "Swipe right:", action: action))
+        }
+        return rows
+    }
+
+    private struct ActionRow: Identifiable {
+        var id: String
+        var label: LocalizedStringKey?
+        var action: Scheme.Buttons.Mapping.Action
+    }
+}
+
+private extension Scheme.Buttons.Mapping.PressAction.Behavior {
+    var label: LocalizedStringKey {
+        switch self {
+        case .perform:
+            return "On press:"
+        case .repeat:
+            return "Repeat:"
+        case .hold:
+            return "Hold:"
+        case .remap:
+            return "Remap:"
+        }
+    }
 }
 
 struct ButtonMappingButtonDescription<FallbackView: View>: View {
@@ -36,7 +99,37 @@ struct ButtonMappingButtonDescription<FallbackView: View>: View {
     var fallback: (() -> FallbackView)?
 
     var body: some View {
-        if let button = mapping.button {
+        if let trigger = mapping.trigger {
+            descriptionRow {
+                HStack(spacing: 5) {
+                    if let whileHeld = trigger.whileHeld, !whileHeld.isEmpty {
+                        Text("Hold")
+                            .foregroundColor(.secondary)
+                        ForEach(Array(whileHeld.enumerated()), id: \.offset) { index, button in
+                            if index > 0 {
+                                Text("+")
+                                    .foregroundColor(.secondary)
+                            }
+                            Text(buttonDescription(of: button))
+                        }
+                        Text("→")
+                            .foregroundColor(.secondary)
+                    }
+
+                    switch trigger.input {
+                    case let .button(button):
+                        Text(buttonDescription(of: button))
+                        ForEach(Array((trigger.simultaneous ?? []).enumerated()), id: \.offset) { _, button in
+                            Text("+")
+                                .foregroundColor(.secondary)
+                            Text(buttonDescription(of: button))
+                        }
+                    case let .wheel(direction):
+                        Text(scrollDescription(of: direction))
+                    }
+                }
+            }
+        } else if let button = mapping.button {
             descriptionRow {
                 Text(buttonDescription(of: button))
             }

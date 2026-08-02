@@ -209,6 +209,9 @@
         }
       }
     },
+    "!" : {
+
+    },
     "(active)" : {
       "localizations" : {
         "af" : {
@@ -2964,214 +2967,6 @@
         }
       }
     },
-    "Multiple buttons" : {
-      "localizations" : {
-        "af" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verskeie knoppies"
-          }
-        },
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "عدة أزرار"
-          }
-        },
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Više dugmadi"
-          }
-        },
-        "ca" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Diversos botons"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Více tlačítek"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Flere knapper"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mehrere Maustasten"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Πολλά κουμπιά"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Varios botones"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Useita painikkeita"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plusieurs boutons"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "מספר כפתורים"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Több gomb"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Beberapa tombol"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Più pulsanti"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "複数のボタン"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "여러 버튼"
-          }
-        },
-        "my" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ခလုတ်အများအပြား"
-          }
-        },
-        "nb-NO" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Flere knapper"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Meerdere knoppen"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wiele przycisków"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vários botões"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vários botões"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mai multe butoane"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Несколько кнопок"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Viaceré tlačidlá"
-          }
-        },
-        "sr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Више дугмади"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Flera knappar"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Birden fazla düğme"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Кілька кнопок"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nhiều nút"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "多个按钮"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "多個按鈕"
-          }
-        },
-        "zh-Hant-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "多個按鈕"
-          }
-        }
-      }
-    },
     "%lld pixels" : {
       "localizations" : {
         "af" : {
@@ -3380,6 +3175,9 @@
         }
       }
     },
+    "→" : {
+
+    },
     "⇧ (Shift)" : {
       "localizations" : {
         "af" : {
@@ -3587,6 +3385,9 @@
           }
         }
       }
+    },
+    "+" : {
+
     },
     "⌃ (Control)" : {
       "localizations" : {
@@ -5043,6 +4844,13 @@
             "value" : "自動適應"
           }
         }
+      }
+    },
+    "Add Button Mapping" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "添加按键映射" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "新增按鈕對應" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "新增按鈕對應" } }
       }
     },
     "All Apps" : {
@@ -8173,7 +7981,15 @@
         }
       }
     },
+    "Assign actions to buttons and gestures" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "为按键和手势分配操作" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "為按鈕與手勢指定操作" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "為按鈕及手勢指定操作" } }
+      }
+    },
     "Assign actions to mouse buttons" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -8382,6 +8198,7 @@
       }
     },
     "Assigning an action to the left button without any modifier keys is not allowed." : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -10253,6 +10070,13 @@
         }
       }
     },
+    "Behavior" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "行为" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "行為" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "行為" } }
+      }
+    },
     "Bug report" : {
       "localizations" : {
         "af" : {
@@ -10667,6 +10491,14 @@
             "value" : "按鍵 #%lld 點擊"
           }
         }
+      }
+    },
+    "Button %d" : {
+      "comment" : "Mouse button token",
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "按键 %d" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "按鈕 %d" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "按鈕 %d" } }
       }
     },
     "Buttons" : {
@@ -11707,6 +11539,82 @@
             "value" : "取消"
           }
         }
+      }
+    },
+    "Change to Chord" : {
+      "localizations" : {
+        "af" : { "stringUnit" : { "state" : "translated", "value" : "Verander na gelyktydige druk" } },
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "التغيير إلى الضغط المتزامن" } },
+        "bs" : { "stringUnit" : { "state" : "translated", "value" : "Promijeni u istovremeni pritisak" } },
+        "ca" : { "stringUnit" : { "state" : "translated", "value" : "Canvia a pulsació simultània" } },
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Změnit na současný stisk" } },
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Skift til samtidigt tryk" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "In gleichzeitiges Drücken ändern" } },
+        "el" : { "stringUnit" : { "state" : "translated", "value" : "Αλλαγή σε ταυτόχρονο πάτημα" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cambiar a pulsación simultánea" } },
+        "fi" : { "stringUnit" : { "state" : "translated", "value" : "Vaihda samanaikaiseen painallukseen" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Passer à l’appui simultané" } },
+        "he" : { "stringUnit" : { "state" : "translated", "value" : "שינוי ללחיצה בו־זמנית" } },
+        "hu" : { "stringUnit" : { "state" : "translated", "value" : "Váltás egyidejű lenyomásra" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Ubah ke tekan bersamaan" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Passa alla pressione simultanea" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "同時押しに変更" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "동시 누르기로 변경" } },
+        "my" : { "stringUnit" : { "state" : "translated", "value" : "တစ်ပြိုင်တည်းနှိပ်ရန် ပြောင်းရန်" } },
+        "nb-NO" : { "stringUnit" : { "state" : "translated", "value" : "Bytt til samtidig trykk" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Wijzig in gelijktijdig indrukken" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Zmień na jednoczesne naciśnięcie" } },
+        "pt" : { "stringUnit" : { "state" : "translated", "value" : "Alterar para pressão simultânea" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Alterar para pressão simultânea" } },
+        "ro" : { "stringUnit" : { "state" : "translated", "value" : "Schimbă la apăsare simultană" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Изменить на одновременное нажатие" } },
+        "sk" : { "stringUnit" : { "state" : "translated", "value" : "Zmeniť na súčasné stlačenie" } },
+        "sr" : { "stringUnit" : { "state" : "translated", "value" : "Промени у истовремени притисак" } },
+        "sv" : { "stringUnit" : { "state" : "translated", "value" : "Ändra till samtidig tryckning" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Eşzamanlı basmaya geç" } },
+        "uk" : { "stringUnit" : { "state" : "translated", "value" : "Змінити на одночасне натискання" } },
+        "vi" : { "stringUnit" : { "state" : "translated", "value" : "Đổi thành nhấn đồng thời" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "切换为同时按下" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "切換為同時按下" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "切換為同時按下" } }
+      }
+    },
+    "Change to Hold, Then Press" : {
+      "localizations" : {
+        "af" : { "stringUnit" : { "state" : "translated", "value" : "Verander na hou en druk dan" } },
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "التغيير إلى الضغط المطوّل، ثم الضغط" } },
+        "bs" : { "stringUnit" : { "state" : "translated", "value" : "Promijeni u drži, pa pritisni" } },
+        "ca" : { "stringUnit" : { "state" : "translated", "value" : "Canvia a mantenir premut i després prémer" } },
+        "cs" : { "stringUnit" : { "state" : "translated", "value" : "Změnit na podržet a poté stisknout" } },
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Skift til hold nede, og tryk derefter" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "In Halten, dann drücken ändern" } },
+        "el" : { "stringUnit" : { "state" : "translated", "value" : "Αλλαγή σε κράτημα και μετά πάτημα" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Cambiar a mantener y luego pulsar" } },
+        "fi" : { "stringUnit" : { "state" : "translated", "value" : "Vaihda muotoon pidä painettuna ja paina sitten" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Passer à maintenir, puis appuyer" } },
+        "he" : { "stringUnit" : { "state" : "translated", "value" : "שינוי להחזקה ואז לחיצה" } },
+        "hu" : { "stringUnit" : { "state" : "translated", "value" : "Váltás nyomva tartásra, majd lenyomásra" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Ubah ke tahan, lalu tekan" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Passa a tieni premuto, poi premi" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "長押ししてから押す操作に変更" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "누른 상태에서 다음 버튼 누르기로 변경" } },
+        "my" : { "stringUnit" : { "state" : "translated", "value" : "ဖိထားပြီးနောက် နှိပ်ရန် ပြောင်းရန်" } },
+        "nb-NO" : { "stringUnit" : { "state" : "translated", "value" : "Bytt til hold, deretter trykk" } },
+        "nl" : { "stringUnit" : { "state" : "translated", "value" : "Wijzig in vasthouden en daarna indrukken" } },
+        "pl" : { "stringUnit" : { "state" : "translated", "value" : "Zmień na przytrzymaj, potem naciśnij" } },
+        "pt" : { "stringUnit" : { "state" : "translated", "value" : "Alterar para manter e depois premir" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Alterar para segurar e depois pressionar" } },
+        "ro" : { "stringUnit" : { "state" : "translated", "value" : "Schimbă la menținere, apoi apăsare" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Изменить на удержание, затем нажатие" } },
+        "sk" : { "stringUnit" : { "state" : "translated", "value" : "Zmeniť na podržanie a následné stlačenie" } },
+        "sr" : { "stringUnit" : { "state" : "translated", "value" : "Промени у држи, па притисни" } },
+        "sv" : { "stringUnit" : { "state" : "translated", "value" : "Ändra till håll ned och tryck sedan" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Basılı tutup ardından basmaya geç" } },
+        "uk" : { "stringUnit" : { "state" : "translated", "value" : "Змінити на утримання, потім натискання" } },
+        "vi" : { "stringUnit" : { "state" : "translated", "value" : "Đổi thành giữ, rồi nhấn" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "切换为按住后再按" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "切換為按住後再按" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "切換為按住後再按" } }
       }
     },
     "Change speed" : {
@@ -22741,6 +22649,36 @@
         }
       }
     },
+    "Drag %@" : {
+      "comment" : "Recorded gesture token",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拖拽 %@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拖移 %@"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拖移 %@"
+          }
+        }
+      }
+    },
+    "Edit Button Mapping" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "编辑按键映射" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "編輯按鈕對應" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "編輯按鈕對應" } }
+      }
+    },
     "Editable" : {
       "localizations" : {
         "af" : {
@@ -28358,6 +28296,36 @@
         }
       }
     },
+    "Hold" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "按住" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "按住" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "按住" } }
+      }
+    },
+    "Hold %@" : {
+      "comment" : "Recorded gesture token",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按住%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按住%@"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按住%@"
+          }
+        }
+      }
+    },
     "Hold keys while pressed" : {
       "localizations" : {
         "af" : {
@@ -29189,6 +29157,13 @@
             "value" : "按住捲動"
           }
         }
+      }
+    },
+    "Hold:" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "按住：" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "按住：" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "按住：" } }
       }
     },
     "Homepage" : {
@@ -34199,6 +34174,28 @@
         }
       }
     },
+    "Long Press %@" : {
+      "comment" : "Recorded gesture token",
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "长按%@" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "長按%@" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "長按%@" } }
+      }
+    },
+    "Long press action" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "长按操作" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "長按操作" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "長按操作" } }
+      }
+    },
+    "Long press:" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "长按：" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "長按：" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "長按：" } }
+      }
+    },
     "Look up & data detectors" : {
       "localizations" : {
         "af" : {
@@ -34823,6 +34820,14 @@
           }
         }
       }
+    },
+    "Middle" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "中键" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "中鍵" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "中鍵" } }
+      },
+      "comment" : "Middle mouse button"
     },
     "Middle button" : {
       "localizations" : {
@@ -37529,6 +37534,214 @@
         }
       }
     },
+    "Multiple buttons" : {
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verskeie knoppies"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عدة أزرار"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Više dugmadi"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diversos botons"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Více tlačítek"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flere knapper"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mehrere Maustasten"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πολλά κουμπιά"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varios botones"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Useita painikkeita"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plusieurs boutons"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מספר כפתורים"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Több gomb"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beberapa tombol"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Più pulsanti"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "複数のボタン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "여러 버튼"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ခလုတ်အများအပြား"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flere knapper"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meerdere knoppen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiele przycisków"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vários botões"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vários botões"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mai multe butoane"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Несколько кнопок"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Viaceré tlačidlá"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Више дугмади"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flera knappar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birden fazla düğme"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кілька кнопок"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nhiều nút"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "多个按钮"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "多個按鈕"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "多個按鈕"
+          }
+        }
+      }
+    },
     "Mute / unmute" : {
       "localizations" : {
         "af" : {
@@ -39818,6 +40031,13 @@
         }
       }
     },
+    "On press:" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "按下时：" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "按下時：" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "按下時：" } }
+      }
+    },
     "Open Accessibility" : {
       "localizations" : {
         "af" : {
@@ -40440,6 +40660,20 @@
             "value" : "其他可執行檔…"
           }
         }
+      }
+    },
+    "Perform once on press" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "按下时执行一次" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "按下時執行一次" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "按下時執行一次" } }
+      }
+    },
+    "Perform once on release" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "松开时执行一次" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "放開時執行一次" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "放開時執行一次" } }
       }
     },
     "Pinch zoom" : {
@@ -41911,6 +42145,21 @@
         }
       }
     },
+    "Press %@" : {
+      "comment" : "Recorded gesture token",
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "按下%@" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "按下%@" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "按下%@" } }
+      }
+    },
+    "Press a button or scroll" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "按下鼠标键或滚动" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "按下滑鼠按鈕或捲動" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "按下滑鼠按鈕或捲動" } }
+      }
+    },
     "Press and hold a button while dragging to trigger gestures like switching desktop spaces or opening Mission Control." : {
       "localizations" : {
         "af" : {
@@ -42117,6 +42366,13 @@
             "value" : "按住按鈕並拖曳，以觸發切換桌面空間或開啟「動態桌面」等手勢。"
           }
         }
+      }
+    },
+    "Press, hold, combine buttons, drag, or scroll; the recognized trigger updates live." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "按下、按住或组合按键，也可以拖拽或滚动；识别到的触发器会实时更新。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "按下、按住或組合按鈕，也可以拖移或捲動；識別到的觸發方式會即時更新。" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "按下、按住或組合按鈕，也可以拖移或捲動；識別到的觸發方式會即時更新。" } }
       }
     },
     "Previous" : {
@@ -42536,6 +42792,14 @@
         }
       }
     },
+    "Primary" : {
+      "comment" : "Primary mouse button",
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "左键" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "左鍵" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "左鍵" } }
+      }
+    },
     "Primary click" : {
       "localizations" : {
         "af" : {
@@ -42740,6 +43004,214 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "左鍵點擊"
+          }
+        }
+      }
+    },
+    "Primary clicks and drags are only captured while Secondary is held." : {
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primêre klikke en sleepbewegings word slegs vasgevang terwyl Sekondêr ingehou word."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يتم التقاط نقرات الزر الأساسي وعمليات السحب إلا أثناء الضغط باستمرار على الزر الثانوي."
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primarni klikovi i povlačenja presreću se samo dok je sekundarno dugme pritisnuto."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Els clics i arrossegaments del botó principal només es capturen mentre es manté premut el botó secundari."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kliknutí a tažení primárním tlačítkem se zachytávají pouze při podržení sekundárního tlačítka."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primære klik og træk registreres kun, mens Sekundær holdes nede."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primärklicks und Ziehbewegungen werden nur erfasst, solange die Sekundärtaste gedrückt gehalten wird."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Τα κλικ και τα συρσίματα με το κύριο κουμπί καταγράφονται μόνο όσο κρατάτε πατημένο το δευτερεύον."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los clics y arrastres con el botón principal solo se capturan mientras se mantiene pulsado el botón secundario."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ensisijaisen painikkeen napsautukset ja vedot kaapataan vain, kun toissijaista painiketta pidetään painettuna."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les clics et glissements avec le bouton principal ne sont interceptés que tant que le bouton secondaire est maintenu enfoncé."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לחיצות וגרירות בלחצן הראשי נקלטות רק כל עוד הלחצן המשני מוחזק."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az elsődleges kattintások és húzások csak a másodlagos gomb nyomva tartásakor kerülnek elfogásra."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klik dan seret Utama hanya ditangkap saat tombol Sekunder ditahan."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I clic e i trascinamenti con il pulsante principale vengono acquisiti solo mentre si tiene premuto il pulsante secondario."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "副ボタンを押している間だけ、主ボタンのクリックとドラッグがこのマッピングに取り込まれます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "보조 버튼을 누르고 있는 동안에만 기본 버튼 클릭과 드래그가 이 매핑에 사용됩니다."
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Secondary ကို ဖိထားစဉ်တွင်သာ Primary နှိပ်ခြင်းနှင့် ဆွဲခြင်းများကို ဖမ်းယူပါသည်။"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primærklikk og drahandlinger fanges bare opp mens Sekundær holdes nede."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primaire klikken en sleepbewegingen worden alleen opgevangen terwijl Secundair wordt ingedrukt."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kliknięcia i przeciągnięcia przyciskiem głównym są przechwytywane tylko podczas przytrzymywania przycisku dodatkowego."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os cliques e arrastamentos com o botão principal só são capturados enquanto o botão secundário estiver premido."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os cliques e arrastos com o botão principal só são capturados enquanto o botão secundário estiver pressionado."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clicurile și tragerile cu butonul principal sunt capturate numai cât timp butonul secundar este ținut apăsat."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Щелчки и перетаскивания основной кнопкой перехватываются только пока удерживается дополнительная кнопка."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kliknutia a ťahania primárnym tlačidlom sa zachytávajú iba počas držania sekundárneho tlačidla."
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Примарни кликови и превлачења пресрећу се само док је секундарно дугме притиснуто."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primärklick och dragningar fångas bara medan Sekundär hålls ned."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birincil tıklamalar ve sürüklemeler yalnızca İkincil basılı tutulurken yakalanır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Клацання й перетягування основною кнопкою перехоплюються лише док утримується додаткова кнопка."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thao tác bấm và kéo bằng nút Chính chỉ được ghi nhận khi đang giữ nút Phụ."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仅在按住右键时，左键点击和拖拽才会被此映射接管。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "只有按住右鍵時，左鍵點按與拖移才會由此對應接管。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "只有按住右鍵時，左鍵點按及拖移才會由此對應接管。"
           }
         }
       }
@@ -43576,6 +44048,20 @@
         }
       }
     },
+    "Recognizing a Primary click long press may delay clicks and interfere with dragging." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "识别左键长按可能会延迟点击并影响拖拽。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "識別左鍵長按可能會延遲點按並影響拖移。" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "識別左鍵長按可能會延遲點按並影響拖移。" } }
+      }
+    },
+    "Record a trigger to choose an action." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "先录制触发器，再选择操作。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "請先錄製觸發方式，再選擇操作。" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "請先錄製觸發方式，再選擇操作。" } }
+      }
+    },
     "Recording" : {
       "localizations" : {
         "af" : {
@@ -44408,7 +44894,22 @@
         }
       }
     },
+    "Remap button while pressed" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "按住时重新映射按键" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "按住時重新對應按鈕" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "按住時重新對應按鈕" } }
+      }
+    },
+    "Remap:" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重新映射：" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "重新對應：" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "重新對應：" } }
+      }
+    },
     "Repeat" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -44617,6 +45118,7 @@
       }
     },
     "Repeat on hold" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -44822,6 +45324,20 @@
             "value" : "按住時重複"
           }
         }
+      }
+    },
+    "Repeat while pressed" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "按住时重复" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "按住時重複" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "按住時重複" } }
+      }
+    },
+    "Repeat:" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重复：" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "重複：" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "重複：" } }
       }
     },
     "Reset timer on mouse up" : {
@@ -47108,6 +47624,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "运行中"
+          }
+        }
+      }
+    },
+    "Scroll %@" : {
+      "comment" : "Recorded gesture token",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "滚动 %@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "捲動 %@"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "捲動 %@"
           }
         }
       }
@@ -52119,6 +52658,14 @@
         }
       }
     },
+    "Secondary" : {
+      "comment" : "Secondary mouse button",
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "右键" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "右鍵" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "右鍵" } }
+      }
+    },
     "Secondary click" : {
       "localizations" : {
         "af" : {
@@ -53161,6 +53708,7 @@
       }
     },
     "Send once on release" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -53790,6 +54338,20 @@
             "value" : "短"
           }
         }
+      }
+    },
+    "Short press action" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "短按操作" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "短按操作" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "短按操作" } }
+      }
+    },
+    "Short press:" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "短按：" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "短按：" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "短按：" } }
       }
     },
     "Show current battery" : {
@@ -56914,6 +57476,13 @@
         }
       }
     },
+    "Start recording a button gesture." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "开始录制按键手势。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "開始錄製按鈕手勢。" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "開始錄製按鈕手勢。" } }
+      }
+    },
     "Suppress unintended clicks caused by a worn or noisy mouse switch." : {
       "localizations" : {
         "af" : {
@@ -57330,6 +57899,20 @@
         }
       }
     },
+    "Swipe down action" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "向下拖拽操作" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "向下拖移操作" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "向下拖移操作" } }
+      }
+    },
+    "Swipe down:" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "向下轻扫：" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "向下滑動：" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "向下滑動：" } }
+      }
+    },
     "Swipe left" : {
       "localizations" : {
         "af" : {
@@ -57536,6 +58119,20 @@
             "value" : "向左掃動"
           }
         }
+      }
+    },
+    "Swipe left action" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "向左拖拽操作" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "向左拖移操作" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "向左拖移操作" } }
+      }
+    },
+    "Swipe left:" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "向左轻扫：" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "向左滑動：" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "向左滑動：" } }
       }
     },
     "Swipe right" : {
@@ -57746,6 +58343,20 @@
         }
       }
     },
+    "Swipe right action" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "向右拖拽操作" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "向右拖移操作" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "向右拖移操作" } }
+      }
+    },
+    "Swipe right:" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "向右轻扫：" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "向右滑動：" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "向右滑動：" } }
+      }
+    },
     "Swipe up" : {
       "localizations" : {
         "af" : {
@@ -57952,6 +58563,20 @@
             "value" : "向上掃動"
           }
         }
+      }
+    },
+    "Swipe up action" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "向上拖拽操作" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "向上拖移操作" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "向上拖移操作" } }
+      }
+    },
+    "Swipe up:" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "向上轻扫：" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "向上滑動：" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "向上滑動：" } }
       }
     },
     "Switch primary and secondary buttons" : {
@@ -58576,6 +59201,13 @@
             "value" : "此觸發器已被指派。"
           }
         }
+      }
+    },
+    "This trigger may delay primary clicks or drag gestures while it is being recognized." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "识别此触发器时，可能会延迟左键点击或拖拽手势。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "識別此觸發方式時，可能會延遲左鍵點按或拖移手勢。" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "識別此觸發方式時，可能會延遲左鍵點按或拖移手勢。" } }
       }
     },
     "This will delete all settings for \"%@\"." : {
@@ -59406,6 +60038,214 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "若要使用 Shift 啟用橫向捲動，請在變更鍵中將 Shift 設定為改變方向。"
+          }
+        }
+      }
+    },
+    "To keep normal Primary clicks and drags responsive, record this as Hold Secondary → Primary." : {
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Om normale Primêre klikke en sleepbewegings responsief te hou, neem dit op as Hou Sekondêr in → Primêr."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "للحفاظ على استجابة نقرات الزر الأساسي وعمليات السحب العادية، سجّلها بالضغط باستمرار على الزر الثانوي ثم الضغط على الزر الأساسي."
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Da bi uobičajeni primarni klikovi i povlačenja ostali odzivni, snimite ovo kao Drži sekundarno → Primarno."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per mantenir àgils els clics i arrossegaments normals del botó principal, enregistra-ho com Mantén premut el secundari → Principal."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aby běžná kliknutí a tažení primárním tlačítkem zůstala pohotová, zaznamenejte gesto jako Podržet sekundární → Primární."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optag dette som Hold Sekundær → Primær for at bevare hurtige normale primære klik og træk."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Damit normale Primärklicks und Ziehbewegungen direkt reagieren, zeichne dies als Sekundärtaste halten → Primärtaste auf."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Για να αποκρίνονται άμεσα τα κανονικά κλικ και συρσίματα με το κύριο κουμπί, καταγράψτε το ως Κράτημα δευτερεύοντος → Κύριο."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para que los clics y arrastres normales con el botón principal sigan respondiendo al instante, grábalo como Mantener Secundario → Principal."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jotta ensisijaisen painikkeen tavalliset napsautukset ja vedot pysyvät responsiivisina, tallenna tämä muodossa Pidä toissijaista → Ensisijainen."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour préserver la réactivité des clics et glissements normaux avec le bouton principal, enregistrez ceci comme Maintenir Secondaire → Principal."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כדי שלחיצות וגרירות רגילות בלחצן הראשי יישארו תגובתיות, הקלט זאת כהחזקה של הלחצן המשני ולאחר מכן לחיצה על הראשי."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A normál elsődleges kattintások és húzások gyors válaszidejéhez rögzítse ezt Másodlagos nyomva tartása → Elsődleges formában."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agar klik dan seret Utama normal tetap responsif, rekam sebagai Tahan Sekunder → Utama."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per mantenere reattivi i normali clic e trascinamenti con il pulsante principale, registra Tieni premuto Secondario → Principale."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通常の主ボタンのクリックとドラッグの反応を保つには、「副ボタンを押したまま → 主ボタン」として記録してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일반적인 기본 버튼 클릭과 드래그가 즉시 반응하도록 하려면 보조 버튼 누르기 → 기본 버튼으로 기록하세요."
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ပုံမှန် Primary နှိပ်ခြင်းနှင့် ဆွဲခြင်းများ တုံ့ပြန်မှုကောင်းစေရန် Hold Secondary → Primary အဖြစ် မှတ်တမ်းတင်ပါ။"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For at vanlige primærklikk og drahandlinger skal reagere raskt, tar du opp dette som Hold Sekundær → Primær."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neem dit op als Secundair ingedrukt houden → Primair, zodat normale primaire klikken en sleepbewegingen direct blijven reageren."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aby zwykłe kliknięcia i przeciągnięcia przyciskiem głównym pozostały responsywne, nagraj to jako Przytrzymaj dodatkowy → Główny."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para manter responsivos os cliques e arrastamentos normais com o botão principal, grave como Manter secundário → Principal."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para manter responsivos os cliques e arrastos normais com o botão principal, grave como Manter secundário → Principal."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pentru ca clicurile și tragerile normale cu butonul principal să răspundă imediat, înregistrați ca Menține secundar → Principal."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чтобы обычные щелчки и перетаскивания основной кнопкой срабатывали без задержки, запишите это как Удерживать дополнительную → Основная."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ak chcete zachovať pohotovú odozvu bežných kliknutí a ťahaní primárnym tlačidlom, zaznamenajte gesto ako Podržať sekundárne → Primárne."
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Да би уобичајени примарни кликови и превлачења остали одзивни, снимите ово као Држи секундарно → Примарно."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spela in detta som Håll Sekundär → Primär för att vanliga primärklick och dragningar ska fortsätta svara direkt."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normal birincil tıklama ve sürüklemelerin hızlı yanıt vermesi için bunu İkincili Basılı Tut → Birincil olarak kaydedin."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Щоб звичайні клацання й перетягування основною кнопкою спрацьовували без затримки, запишіть це як Утримувати додаткову → Основна."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Để thao tác bấm và kéo thông thường bằng nút Chính luôn phản hồi nhanh, hãy ghi dưới dạng Giữ nút Phụ → Nút Chính."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "为避免影响普通左键点击和拖拽，建议录制为“按住右键 → 左键”。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "為避免影響一般左鍵點按與拖移，建議錄製為「按住右鍵 → 左鍵」。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "為避免影響一般左鍵點按及拖移，建議錄製為「按住右鍵 → 左鍵」。"
           }
         }
       }
@@ -62954,6 +63794,7 @@
       }
     },
     "While pressed" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -63159,6 +64000,20 @@
             "value" : "按住時"
           }
         }
+      }
+    },
+    "While pressed action" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "按住时操作" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "按住時操作" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "按住時操作" } }
+      }
+    },
+    "Without modifiers, Primary click can only be assigned to Long Press." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "未使用修饰键时，左键只能分配长按操作。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "未使用修飾鍵時，左鍵只能指定長按操作。" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "未使用修飾鍵時，左鍵只能指定長按操作。" } }
       }
     },
     "You may also press ⌃⇧⌘Z to revert to system defaults." : {

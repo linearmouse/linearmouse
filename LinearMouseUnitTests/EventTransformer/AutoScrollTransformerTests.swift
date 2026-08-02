@@ -1,0 +1,37 @@
+// MIT License
+// Copyright (c) 2021-2026 LinearMouse
+
+import CoreGraphics
+@testable import LinearMouse
+import XCTest
+
+final class AutoScrollTransformerTests: XCTestCase {
+    override func tearDown() {
+        SettingsState.shared.endButtonMappingRecording()
+        super.tearDown()
+    }
+
+    func testButtonMappingRecordingBypassesAutoScrollTrigger() throws {
+        var trigger = Scheme.Buttons.Mapping()
+        trigger.button = .mouse(2)
+        let transformer = AutoScrollTransformer(
+            trigger: trigger,
+            modes: [.toggle, .hold],
+            speed: 1
+        )
+        let event = try XCTUnwrap(CGEvent(
+            mouseEventSource: nil,
+            mouseType: .otherMouseDown,
+            mouseCursorPosition: CGPoint(x: -10_000, y: -10_000),
+            mouseButton: .center
+        ))
+        event.setIntegerValueField(.mouseEventButtonNumber, value: 2)
+        SettingsState.shared.beginButtonMappingRecording(sessionID: UUID())
+
+        XCTAssertIdentical(
+            transformer.transform(event, in: .init(device: nil)),
+            event
+        )
+        XCTAssertFalse(transformer.isAutoscrollActive)
+    }
+}

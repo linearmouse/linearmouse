@@ -62,6 +62,58 @@ extension Scheme.Buttons {
     }
 }
 
+extension Scheme.Buttons {
+    private enum CodingKeys: String, CodingKey {
+        case mappings
+        case universalBackForward
+        case switchPrimaryButtonAndSecondaryButtons
+        case clickDebouncing
+        case autoScroll
+        case gesture
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        mappings = try container.decodeIfPresent([Mapping].self, forKey: .mappings)?.map { mapping in
+            var mapping = mapping
+            mapping.normalizeAsStructured()
+            return mapping
+        }
+        universalBackForward = try container.decodeIfPresent(
+            UniversalBackForward.self,
+            forKey: .universalBackForward
+        )
+        switchPrimaryButtonAndSecondaryButtons = try container.decodeIfPresent(
+            Bool.self,
+            forKey: .switchPrimaryButtonAndSecondaryButtons
+        )
+        _clickDebouncing = try container.decode(
+            ImplicitOptional<ClickDebouncing>.self,
+            forKey: .clickDebouncing
+        )
+        _autoScroll = try container.decode(ImplicitOptional<AutoScroll>.self, forKey: .autoScroll)
+        _gesture = try container.decode(ImplicitOptional<Gesture>.self, forKey: .gesture)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        let normalizedMappings = mappings?.map { mapping in
+            var mapping = mapping
+            mapping.normalizeAsStructured()
+            return mapping
+        }
+        try container.encodeIfPresent(normalizedMappings, forKey: .mappings)
+        try container.encodeIfPresent(universalBackForward, forKey: .universalBackForward)
+        try container.encodeIfPresent(
+            switchPrimaryButtonAndSecondaryButtons,
+            forKey: .switchPrimaryButtonAndSecondaryButtons
+        )
+        try container.encode(_clickDebouncing, forKey: .clickDebouncing)
+        try container.encode(_autoScroll, forKey: .autoScroll)
+        try container.encode(_gesture, forKey: .gesture)
+    }
+}
+
 extension Scheme.Buttons.UniversalBackForward: Codable {
     enum ValueError: Error {
         case invalidValue

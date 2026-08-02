@@ -3,19 +3,17 @@
 
 import SwiftUI
 
-struct ButtonMappingActionPicker: View, Equatable {
+struct ButtonMappingActionPicker: View {
     @Binding var actionType: ActionType
+    var label: LocalizedStringKey = "Action"
 
     var body: some View {
-        Picker("Action", selection: $actionType) {
+        Picker(selection: $actionType) {
             ActionTypeTreeView(nodes: Self.actionTypeTree)
+        } label: {
+            Text(label)
         }
         .modifier(PickerViewModifier())
-    }
-
-    // swiftformat:disable:next redundantEquatable
-    static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.actionType == rhs.actionType
     }
 }
 

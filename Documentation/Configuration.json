@@ -134,7 +134,7 @@
           "title": "Gesture button"
         },
         "mappings": {
-          "description": "Assign actions to buttons.",
+          "description": "Assign actions to buttons, chords, long presses, swipes, and wheel gestures.",
           "items": {
             "$ref": "#/definitions/Scheme.Buttons.Mapping"
           },
@@ -405,82 +405,13 @@
     "Scheme.Buttons.Mapping": {
       "anyOf": [
         {
-          "additionalProperties": false,
-          "properties": {
-            "action": {
-              "$ref": "#/definitions/Scheme.Buttons.Mapping.Action",
-              "title": "Action"
-            },
-            "button": {
-              "$ref": "#/definitions/Scheme.Buttons.Mapping.Button",
-              "description": "The button number. See https://developer.apple.com/documentation/coregraphics/cgmousebutton",
-              "title": "Button number"
-            },
-            "command": {
-              "description": "Indicates if the command modifier key should be pressed.",
-              "type": "boolean"
-            },
-            "control": {
-              "description": "Indicates if the control modifier key should be pressed.",
-              "type": "boolean"
-            },
-            "hold": {
-              "description": "Indicates if keyboard shortcut actions should stay pressed while the button is held. When enabled, LinearMouse sends key down on button press and key up on button release instead of repeating the shortcut.",
-              "type": "boolean"
-            },
-            "option": {
-              "description": "Indicates if the option modifier key should be pressed.",
-              "type": "boolean"
-            },
-            "repeat": {
-              "description": "Indicates if key repeat is enabled. If the value is true, the action will be repeatedly executed when the button is hold according to the key repeat settings in System Settings.",
-              "type": "boolean"
-            },
-            "shift": {
-              "description": "Indicates if the shift modifier key should be pressed.",
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "button"
-          ],
-          "type": "object"
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Legacy"
         },
         {
-          "additionalProperties": false,
-          "properties": {
-            "action": {
-              "$ref": "#/definitions/Scheme.Buttons.Mapping.Action",
-              "title": "Action"
-            },
-            "command": {
-              "description": "Indicates if the command modifier key should be pressed.",
-              "type": "boolean"
-            },
-            "control": {
-              "description": "Indicates if the control modifier key should be pressed.",
-              "type": "boolean"
-            },
-            "option": {
-              "description": "Indicates if the option modifier key should be pressed.",
-              "type": "boolean"
-            },
-            "scroll": {
-              "$ref": "#/definitions/Scheme.Buttons.Mapping.ScrollDirection",
-              "description": "Map scroll events to specific actions.",
-              "title": "Scroll direction"
-            },
-            "shift": {
-              "description": "Indicates if the shift modifier key should be pressed.",
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "scroll"
-          ],
-          "type": "object"
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Structured"
         }
-      ]
+      ],
+      "description": "Legacy flat mappings are accepted and migrated to the structured format when the configuration is loaded."
     },
     "Scheme.Buttons.Mapping.Action": {
       "anyOf": [
@@ -526,6 +457,48 @@
           "$ref": "#/definitions/Scheme.Buttons.Mapping.LogitechControlButton"
         }
       ]
+    },
+    "Scheme.Buttons.Mapping.ButtonTrigger": {
+      "additionalProperties": false,
+      "properties": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "button": {
+              "$ref": "#/definitions/Scheme.Buttons.Mapping.Button"
+            }
+          },
+          "required": [
+            "button"
+          ],
+          "type": "object"
+        },
+        "modifiers": {
+          "description": "Keyboard modifiers that must match exactly.",
+          "items": {
+            "$ref": "#/definitions/Scheme.Buttons.Mapping.Modifier"
+          },
+          "type": "array"
+        },
+        "simultaneous": {
+          "description": "Additional buttons pressed within the global chord window. Their order does not matter.",
+          "items": {
+            "$ref": "#/definitions/Scheme.Buttons.Mapping.Button"
+          },
+          "type": "array"
+        },
+        "whileHeld": {
+          "description": "Buttons that must already be held when this trigger begins.",
+          "items": {
+            "$ref": "#/definitions/Scheme.Buttons.Mapping.Button"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "input"
+      ],
+      "type": "object"
     },
     "Scheme.Buttons.Mapping.DisplayBrightnessDown": {
       "const": "display.brightnessDown",
@@ -681,6 +654,86 @@
       "description": "Launchpad.",
       "type": "string"
     },
+    "Scheme.Buttons.Mapping.Legacy": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "action": {
+              "$ref": "#/definitions/Scheme.Buttons.Mapping.Action",
+              "title": "Action"
+            },
+            "button": {
+              "$ref": "#/definitions/Scheme.Buttons.Mapping.Button",
+              "description": "The button number. See https://developer.apple.com/documentation/coregraphics/cgmousebutton",
+              "title": "Button number"
+            },
+            "command": {
+              "description": "Indicates if the command modifier key should be pressed.",
+              "type": "boolean"
+            },
+            "control": {
+              "description": "Indicates if the control modifier key should be pressed.",
+              "type": "boolean"
+            },
+            "hold": {
+              "description": "Indicates if keyboard shortcut actions should stay pressed while the button is held. When enabled, LinearMouse sends key down on button press and key up on button release instead of repeating the shortcut.",
+              "type": "boolean"
+            },
+            "option": {
+              "description": "Indicates if the option modifier key should be pressed.",
+              "type": "boolean"
+            },
+            "repeat": {
+              "description": "Indicates if key repeat is enabled. If the value is true, the action will be repeatedly executed when the button is hold according to the key repeat settings in System Settings.",
+              "type": "boolean"
+            },
+            "shift": {
+              "description": "Indicates if the shift modifier key should be pressed.",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "button"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "action": {
+              "$ref": "#/definitions/Scheme.Buttons.Mapping.Action",
+              "title": "Action"
+            },
+            "command": {
+              "description": "Indicates if the command modifier key should be pressed.",
+              "type": "boolean"
+            },
+            "control": {
+              "description": "Indicates if the control modifier key should be pressed.",
+              "type": "boolean"
+            },
+            "option": {
+              "description": "Indicates if the option modifier key should be pressed.",
+              "type": "boolean"
+            },
+            "scroll": {
+              "$ref": "#/definitions/Scheme.Buttons.Mapping.ScrollDirection",
+              "description": "Map scroll events to specific actions.",
+              "title": "Scroll direction"
+            },
+            "shift": {
+              "description": "Indicates if the shift modifier key should be pressed.",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "scroll"
+          ],
+          "type": "object"
+        }
+      ]
+    },
     "Scheme.Buttons.Mapping.LogitechControlButton": {
       "additionalProperties": false,
       "properties": {
@@ -773,6 +826,15 @@
     "Scheme.Buttons.Mapping.MissionControlSpaceRight": {
       "const": "missionControl.spaceRight",
       "description": "Mission Control: Move right a space.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.Modifier": {
+      "enum": [
+        "command",
+        "shift",
+        "option",
+        "control"
+      ],
       "type": "string"
     },
     "Scheme.Buttons.Mapping.MouseButtonBack": {
@@ -876,6 +938,52 @@
       "const": "none",
       "description": "Prevent the button events.",
       "type": "string"
+    },
+    "Scheme.Buttons.Mapping.Outcomes": {
+      "additionalProperties": false,
+      "properties": {
+        "longPress": {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Action",
+          "description": "Execute when the global long-press duration is reached."
+        },
+        "press": {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.PressAction",
+          "description": "Begin an action as soon as the trigger resolves. A press outcome owns the trigger until release and cannot be combined with shortPress, longPress, or swipe."
+        },
+        "shortPress": {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Action",
+          "description": "Execute when a release ends the active button gesture before another outcome commits."
+        },
+        "swipe": {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.SwipeActions",
+          "description": "Execute when pointer movement crosses the global swipe threshold while the trigger is held."
+        }
+      },
+      "type": "object"
+    },
+    "Scheme.Buttons.Mapping.PressAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Action",
+          "description": "The action controlled by the pressed/released lifecycle."
+        },
+        "behavior": {
+          "description": "Execute once on press, repeat until release, hold keyboard keys until release, or remap a complete physical mouse-button stream.",
+          "enum": [
+            "perform",
+            "repeat",
+            "hold",
+            "remap"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "behavior"
+      ],
+      "type": "object"
     },
     "Scheme.Buttons.Mapping.Run": {
       "additionalProperties": false,
@@ -1006,6 +1114,102 @@
       "const": "smartZoom",
       "description": "Smart zoom.",
       "type": "string"
+    },
+    "Scheme.Buttons.Mapping.Structured": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "outcomes": {
+              "$ref": "#/definitions/Scheme.Buttons.Mapping.Outcomes",
+              "description": "Actions selected by how the button or chord is used. Timing and movement thresholds are global application policy.",
+              "title": "Outcomes"
+            },
+            "trigger": {
+              "$ref": "#/definitions/Scheme.Buttons.Mapping.ButtonTrigger",
+              "description": "A button trigger. `simultaneous` buttons form an unordered chord; `whileHeld` buttons must already be down.",
+              "title": "Trigger"
+            }
+          },
+          "required": [
+            "trigger",
+            "outcomes"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "action": {
+              "$ref": "#/definitions/Scheme.Buttons.Mapping.Action",
+              "title": "Action"
+            },
+            "trigger": {
+              "$ref": "#/definitions/Scheme.Buttons.Mapping.WheelTrigger",
+              "description": "A wheel impulse, optionally while one or more buttons are held. Wheel triggers do not support long press or swipe outcomes.",
+              "title": "Trigger"
+            }
+          },
+          "required": [
+            "trigger",
+            "action"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Scheme.Buttons.Mapping.SwipeActions": {
+      "additionalProperties": false,
+      "properties": {
+        "down": {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Action"
+        },
+        "left": {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Action"
+        },
+        "right": {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Action"
+        },
+        "up": {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.Action"
+        }
+      },
+      "type": "object"
+    },
+    "Scheme.Buttons.Mapping.WheelTrigger": {
+      "additionalProperties": false,
+      "properties": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "wheel": {
+              "$ref": "#/definitions/Scheme.Buttons.Mapping.ScrollDirection"
+            }
+          },
+          "required": [
+            "wheel"
+          ],
+          "type": "object"
+        },
+        "modifiers": {
+          "description": "Keyboard modifiers that must match exactly.",
+          "items": {
+            "$ref": "#/definitions/Scheme.Buttons.Mapping.Modifier"
+          },
+          "type": "array"
+        },
+        "whileHeld": {
+          "description": "Buttons that must be held while the wheel moves.",
+          "items": {
+            "$ref": "#/definitions/Scheme.Buttons.Mapping.Button"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "input"
+      ],
+      "type": "object"
     },
     "Scheme.Buttons.UniversalBackForward": {
       "anyOf": [

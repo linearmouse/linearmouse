@@ -17,6 +17,19 @@ class EventTransformerManager {
     private var activeCacheKey: CacheKey?
     private var sharedAutoScrollTransformer: AutoScrollTransformer?
 
+    /// Keep one transformer chain for the lifetime of a physical mouse-button
+    /// stream. A drag can cross an application, display, menu bar, or overlay,
+    /// all of which may otherwise select a different scheme between down and
+    /// up. Switching chains mid-stream is especially unsafe when an earlier
+    /// button event was buffered and replayed: the release must follow the same
+    /// delivery path to remain paired with that replayed press.
+    private struct ActivePointerStream {
+        var buttons: Set<CGMouseButton>
+        var resolution: EventTransformerResolution
+    }
+
+    private var activePointerStream: ActivePointerStream?
+
     struct CacheKey: Hashable {
         var deviceMatcher: DeviceMatcher?
         var process: ProcessIdentity?
@@ -132,11 +145,19 @@ class EventTransformerManager {
             return .init(transformer: [], context: .init(device: nil))
         }
 
-        let pid = mouseLocationPid ?? targetPid
-        let process = pid?.processIdentity
         let device = DeviceManager.shared.deviceFromCGEvent(cgEvent)
 
-        return .init(
+        if var activePointerStream {
+            updatePointerButtons(in: &activePointerStream.buttons, with: cgEvent)
+            let resolution = activePointerStream.resolution
+            self.activePointerStream = activePointerStream.buttons.isEmpty ? nil : activePointerStream
+            return resolution
+        }
+
+        let pid = mouseLocationPid ?? targetPid
+        let process = pid?.processIdentity
+
+        let resolution = EventTransformerResolution(
             transformer: get(
                 withDevice: device,
                 withProcess: process,
@@ -145,6 +166,30 @@ class EventTransformerManager {
             ),
             context: .init(device: device)
         )
+
+        var pointerButtons = Set<CGMouseButton>()
+        updatePointerButtons(in: &pointerButtons, with: cgEvent)
+        if !pointerButtons.isEmpty {
+            activePointerStream = .init(buttons: pointerButtons, resolution: resolution)
+        }
+
+        return resolution
+    }
+
+    private func updatePointerButtons(in buttons: inout Set<CGMouseButton>, with event: CGEvent) {
+        guard let button = MouseEventView(event).mouseButton else {
+            return
+        }
+
+        switch event.type {
+        case .leftMouseDown, .rightMouseDown, .otherMouseDown,
+             .leftMouseDragged, .rightMouseDragged, .otherMouseDragged:
+            buttons.insert(button)
+        case .leftMouseUp, .rightMouseUp, .otherMouseUp:
+            buttons.remove(button)
+        default:
+            break
+        }
     }
 
     func get(withDevice device: Device?, withPid pid: pid_t?, withDisplay display: String?) -> EventTransformer {
@@ -267,10 +312,25 @@ class EventTransformerManager {
                 .horizontal : nil
         )
         let hasSmoothedScrolling = smoothed.vertical != nil || smoothed.horizontal != nil
-        let buttonMappings = scheme.buttons.mappings ?? []
-        let scrollButtonMappings = buttonMappings.filter { $0.scroll != nil }
-        let otherButtonMappings = buttonMappings.filter { $0.scroll == nil }
-        let buttonActionsRuntimeState = ButtonActionsTransformer.RuntimeState()
+        let buttonMappings = (scheme.buttons.mappings ?? []).map { mapping in
+            var mapping = mapping
+            mapping.normalizeAsStructured()
+            return mapping
+        }
+        let gestureTransformer: GestureButtonTransformer? = if let gesture = scheme.buttons.$gesture,
+                                                               gesture.enabled ?? false,
+                                                               let trigger = gesture.trigger,
+                                                               trigger.button != nil {
+            GestureButtonTransformer(
+                trigger: trigger,
+                threshold: Double(gesture.threshold ?? 50),
+                deadZone: Double(gesture.deadZone ?? 40),
+                cooldownMs: gesture.cooldownMs ?? 500,
+                actions: gesture.actions
+            )
+        } else {
+            nil
+        }
         if device != nil {
             let highResolutionWheelNormalizer = LogitechHighResolutionWheelNormalizer(
                 verticalMode: highResolutionWheelNormalizerMode(
@@ -287,23 +347,21 @@ class EventTransformerManager {
             }
         }
 
-        func appendScrollButtonMappings() {
-            guard !scrollButtonMappings.isEmpty else {
-                return
-            }
+        if scheme.buttons.switchPrimaryButtonAndSecondaryButtons == true {
+            eventTransformer.append(SwitchPrimaryAndSecondaryButtonsTransformer())
+        }
 
-            eventTransformer.append(ButtonActionsTransformer(
-                mappings: scrollButtonMappings,
+        if !buttonMappings.isEmpty {
+            eventTransformer.append(ButtonMappingTransformer(
+                mappings: buttonMappings,
                 universalBackForward: scheme.buttons.universalBackForward,
-                ignoresLinearMouseSyntheticScrollEvents: true,
-                runtimeState: buttonActionsRuntimeState
+                gestureTransformer: gestureTransformer
             ))
         }
 
-        func appendScrollRecordingAndButtonMappings() {
-            eventTransformer.append(ButtonMappingScrollRecordingTransformer())
-            appendScrollButtonMappings()
-        }
+        // Record the normalized/reversed physical wheel before configured
+        // modifier actions or smoothing can consume or reshape it.
+        eventTransformer.append(ButtonMappingScrollRecordingTransformer())
 
         if let modifiers = scheme.scrolling.$modifiers,
            hasSmoothedScrolling {
@@ -311,7 +369,6 @@ class EventTransformerManager {
         }
 
         if hasSmoothedScrolling {
-            appendScrollRecordingAndButtonMappings()
             eventTransformer.append(SmoothedScrollingTransformer(
                 smoothed: smoothed
             ))
@@ -379,37 +436,12 @@ class EventTransformerManager {
             eventTransformer.append(ModifierActionsTransformer(modifiers: modifiers))
         }
 
-        if !hasSmoothedScrolling {
-            appendScrollRecordingAndButtonMappings()
-        }
-
-        if scheme.buttons.switchPrimaryButtonAndSecondaryButtons == true {
-            eventTransformer.append(SwitchPrimaryAndSecondaryButtonsTransformer())
-        }
-
         if let autoScrollTransformer = autoScrollTransformer(for: scheme.buttons.$autoScroll) {
             eventTransformer.append(autoScrollTransformer)
         }
 
-        if let gesture = scheme.buttons.$gesture,
-           gesture.enabled ?? false,
-           let trigger = gesture.trigger,
-           trigger.button != nil {
-            eventTransformer.append(GestureButtonTransformer(
-                trigger: trigger,
-                threshold: Double(gesture.threshold ?? 50),
-                deadZone: Double(gesture.deadZone ?? 40),
-                cooldownMs: gesture.cooldownMs ?? 500,
-                actions: gesture.actions
-            ))
-        }
-
-        if !otherButtonMappings.isEmpty {
-            eventTransformer.append(ButtonActionsTransformer(
-                mappings: otherButtonMappings,
-                universalBackForward: scheme.buttons.universalBackForward,
-                runtimeState: buttonActionsRuntimeState
-            ))
+        if buttonMappings.isEmpty, let gestureTransformer {
+            eventTransformer.append(gestureTransformer)
         }
 
         if let universalBackForward = scheme.buttons.universalBackForward,
@@ -493,6 +525,7 @@ class EventTransformerManager {
         let oldAutoScroll = sharedAutoScrollTransformer
         deactivate(activeEventTransformer, excluding: oldAutoScroll)
         sharedAutoScrollTransformer = nil
+        activePointerStream = nil
         activeCacheKey = nil
         eventTransformerCache.removeAllValues()
         oldAutoScroll?.deactivate()

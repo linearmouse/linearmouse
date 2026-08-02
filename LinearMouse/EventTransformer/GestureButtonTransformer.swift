@@ -64,7 +64,22 @@ extension GestureButtonTransformer: EventTransformer {
                 }
                 return event
             }
-            // Cooldown expired, return to idle
+
+            // The action cooldown may expire before the physical button is
+            // released. Keep ownership until that release so lower-priority
+            // click recognizers cannot treat it as a fresh short press.
+            if !released {
+                guard matchesTriggerButton(event) else {
+                    return event
+                }
+                if event.type == mouseUpEventType {
+                    state = .idle
+                    event.isGestureCleanupRelease = true
+                    return event
+                }
+                return nil
+            }
+
             state = .idle
         }
 
@@ -300,6 +315,15 @@ extension GestureButtonTransformer: LogitechControlEventHandling {
                 state = .cooldown(until: until, released: true)
                 return .handled
             }
+
+            if !released {
+                if context.isPressed {
+                    return .handled
+                }
+                state = .idle
+                return .handled
+            }
+
             state = .idle
         }
 

@@ -57,6 +57,11 @@ final class AutoScrollTransformer {
 
 extension AutoScrollTransformer: EventTransformer {
     func transform(_ event: CGEvent, in _: EventTransformerContext) -> CGEvent? {
+        guard !SettingsState.shared.recording else {
+            cancelInteractionForButtonMappingRecording()
+            return event
+        }
+
         if case let .active(_, _, session) = state,
            session == .toggle,
            isAnyMouseDownEvent(event),
@@ -348,6 +353,15 @@ extension AutoScrollTransformer: EventTransformer {
         abs(point.x - anchor.x) > Self.deadZone || abs(point.y - anchor.y) > Self.deadZone
     }
 
+    private func cancelInteractionForButtonMappingRecording() {
+        guard isAutoscrollActive || suppressTriggerUp || suppressedExitMouseButton != nil else {
+            return
+        }
+
+        suppressedExitMouseButton = nil
+        deactivate()
+    }
+
     private func hitTestPoint(for event: CGEvent) -> CGPoint {
         event.location
     }
@@ -404,6 +418,11 @@ extension AutoScrollTransformer: EventTransformer {
 
 extension AutoScrollTransformer: LogitechControlEventHandling {
     func handleLogitechControlEvent(_ context: LogitechEventContext) -> LogitechControlEventHandlingResult {
+        guard !SettingsState.shared.recording else {
+            cancelInteractionForButtonMappingRecording()
+            return .notHandled
+        }
+
         guard let triggerLogitechControl = trigger.button?.logitechControl,
               context.matches(triggerLogitechControl) else {
             return .notHandled

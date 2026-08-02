@@ -13,6 +13,21 @@ class SettingsState: ObservableObject {
         let button: Scheme.Buttons.Mapping.Button?
         let scroll: Scheme.Buttons.Mapping.ScrollDirection?
         let modifierFlags: CGEventFlags
+        let isPressed: Bool?
+
+        init(
+            recordingSessionID: UUID,
+            button: Scheme.Buttons.Mapping.Button?,
+            scroll: Scheme.Buttons.Mapping.ScrollDirection?,
+            modifierFlags: CGEventFlags,
+            isPressed: Bool? = nil
+        ) {
+            self.recordingSessionID = recordingSessionID
+            self.button = button
+            self.scroll = scroll
+            self.modifierFlags = modifierFlags
+            self.isPressed = isPressed
+        }
     }
 
     struct ButtonMappingRecordingSession: Equatable {
@@ -60,7 +75,7 @@ class SettingsState: ObservableObject {
     /// `@Published` emits before storing the new value, so session guards use this reentrancy-safe storage.
     private var currentButtonMappingRecordingSession: ButtonMappingRecordingSession?
 
-    /// When `recording` is true, `ButtonActionsTransformer` should be temporarily disabled.
+    /// When `recording` is true, button mapping recognition should be temporarily disabled.
     var recording: Bool {
         currentButtonMappingRecordingSession != nil
     }
