@@ -52,7 +52,50 @@ private func makeMouseMovedEvent(deltaX: Double, deltaY: Double = 0) throws -> C
     return event
 }
 
+private func makeMouseButtonEvent(
+    type: CGEventType,
+    button: CGMouseButton,
+    deltaX: Double = 0
+) throws -> CGEvent {
+    let event = try XCTUnwrap(CGEvent(
+        mouseEventSource: nil,
+        mouseType: type,
+        mouseCursorPosition: .zero,
+        mouseButton: button
+    ))
+    event.setIntegerValueField(.mouseEventButtonNumber, value: Int64(button.rawValue))
+    event.setDoubleValueField(.mouseEventDeltaX, value: deltaX)
+    return event
+}
+
 final class GestureButtonTransformerTests: XCTestCase {
+    override func tearDown() {
+        SettingsState.shared.endButtonMappingRecording()
+        super.tearDown()
+    }
+
+    func testStandaloneMouseGestureBypassesNewInteractionsWhileRecording() throws {
+        let button = try XCTUnwrap(CGMouseButton(rawValue: 4))
+        let transformer = GestureButtonTransformer(
+            trigger: .init(button: .mouse(4)),
+            threshold: testGestureThreshold,
+            deadZone: testGestureDeadZone,
+            cooldownMs: testGestureCooldownMs,
+            actions: .init(right: .some(.none))
+        )
+        SettingsState.shared.beginButtonMappingRecording(sessionID: UUID())
+
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(type: .otherMouseDown, button: button),
+            in: .init(device: nil)
+        ))
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(type: .otherMouseDragged, button: button, deltaX: testGestureThreshold),
+            in: .init(device: nil)
+        ))
+        XCTAssertFalse(transformer.hasActiveInteraction)
+    }
+
     func testLogitechControlClickAllowsSyntheticFallbackWhenGestureDoesNotTrigger() {
         let transformer = makeLogitechGestureTransformer()
 

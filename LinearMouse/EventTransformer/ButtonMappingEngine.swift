@@ -189,6 +189,12 @@ struct ButtonMappingEngine {
         session != nil || !activeCaptures.isEmpty || !passthroughButtons.isEmpty
     }
 
+    func ownsInteraction(containing button: Button) -> Bool {
+        session?.capturedButtons.contains(button) == true ||
+            activeCaptures.contains { $0.remainingButtons.contains(button) } ||
+            passthroughButtons.contains(button)
+    }
+
     var nextDeadline: UInt64? {
         guard let session, session.commitment == nil else {
             return nil

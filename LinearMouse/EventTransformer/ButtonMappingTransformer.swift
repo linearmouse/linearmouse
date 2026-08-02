@@ -100,12 +100,14 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
     }
 
     func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent? {
-        guard !SettingsState.shared.recording,
-              !event.isLinearMouseSyntheticEvent else {
+        let isRecording = SettingsState.shared.recording
+        guard !event.isLinearMouseSyntheticEvent,
+              !isRecording || hasActiveInteraction else {
             return event
         }
 
         if let gestureTransformer,
+           !isRecording || gestureTransformer.hasActiveInteraction,
            gestureTransformer.transform(event, in: context) == nil {
             return nil
         }
@@ -157,7 +159,11 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
             guard let button = mappingButton(of: event) else {
                 return event
             }
-            recognition = recognize(includingFreshLane: true) { engine in
+            if isRecording,
+               !recognitionLanes.contains(where: { $0.engine.ownsInteraction(containing: button) }) {
+                return event
+            }
+            recognition = recognize(includingFreshLane: !isRecording) { engine in
                 engine.buttonDown(button, modifierFlags: event.flags, at: now)
             }
             canBuffer = true
@@ -198,6 +204,9 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
             alwaysForwardsEvent = true
 
         case .scrollWheel:
+            guard !isRecording else {
+                return event
+            }
             guard let direction = wheelDirection(of: event) else {
                 return event
             }
@@ -518,11 +527,17 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
 
 extension ButtonMappingTransformer: LogitechControlEventHandling, LogitechControlInteractionCanceling {
     func handleLogitechControlEvent(_ context: LogitechEventContext) -> LogitechControlEventHandlingResult {
-        guard !SettingsState.shared.recording else {
+        let isRecording = SettingsState.shared.recording
+        guard !isRecording || hasActiveInteraction else {
             return .notHandled
         }
 
-        let gestureResult = gestureTransformer?.handleLogitechControlEvent(context) ?? .notHandled
+        let gestureResult: LogitechControlEventHandlingResult = if !isRecording ||
+            gestureTransformer?.hasActiveInteraction == true {
+            gestureTransformer?.handleLogitechControlEvent(context) ?? .notHandled
+        } else {
+            .notHandled
+        }
         if gestureResult == .handled {
             cancelGestureInteraction(for: context)
             return .handled
@@ -536,9 +551,16 @@ extension ButtonMappingTransformer: LogitechControlEventHandling, LogitechContro
         guard !configuredButtons.isEmpty else {
             return gestureResult
         }
+        if isRecording,
+           context.isPressed,
+           !recognitionLanes.contains(where: { lane in
+               configuredButtons.contains { lane.engine.ownsInteraction(containing: $0) }
+           }) {
+            return gestureResult
+        }
         let recognition: RecognitionResult
         if context.isPressed {
-            recognition = recognize(includingFreshLane: true) { engine in
+            recognition = recognize(includingFreshLane: !isRecording) { engine in
                 engine.buttonDown(
                     firstMatching: configuredButtons,
                     modifierFlags: context.modifierFlags,

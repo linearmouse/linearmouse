@@ -140,6 +140,31 @@ final class EventTransformerManagerTests: XCTestCase {
         XCTAssertLessThan(autoScrollIndex, gestureIndex)
     }
 
+    func testStandaloneGestureDoesNotInterceptButtonMappingRecording() throws {
+        var gesture = Scheme.Buttons.Gesture()
+        gesture.enabled = true
+        gesture.trigger = .init(button: .mouse(4))
+        gesture.threshold = 10
+        gesture.actions = .init(right: .some(.none))
+        var scheme = Scheme()
+        scheme.buttons.gesture = gesture
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+        SettingsState.shared.beginButtonMappingRecording(sessionID: UUID())
+
+        let transformer = EventTransformerManager().get(
+            withDevice: nil,
+            withPid: nil,
+            withDisplay: nil
+        )
+        let button = try XCTUnwrap(CGMouseButton(rawValue: 4))
+        let down = try mouseEvent(type: .otherMouseDown, button: button)
+        let dragged = try mouseEvent(type: .otherMouseDragged, button: button)
+        dragged.setDoubleValueField(.mouseEventDeltaX, value: 10)
+
+        XCTAssertNotNil(transformer.transform(down, in: .init(device: nil)))
+        XCTAssertNotNil(transformer.transform(dragged, in: .init(device: nil)))
+    }
+
     func testTransformerCacheDoesNotReuseValueForNewProcess() throws {
         ConfigurationState.shared.configuration = .init(schemes: [
             Scheme(scrolling: .init(reverse: .init(vertical: true)))

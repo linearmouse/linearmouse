@@ -151,6 +151,52 @@ final class ButtonMappingTransformerTests: XCTestCase {
         XCTAssertEqual(replayed, [.otherMouseDown, .otherMouseUp])
     }
 
+    func testInteractionStartedBeforeRecordingDrainsWithoutClaimingNewButtons() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let transformer = makeTransformer(
+            mappings: [buttonMapping(button: 4, short: .arg0(.none))],
+            scheduler: scheduler
+        )
+
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 4, pressed: true),
+            in: .init(device: nil)
+        ))
+        SettingsState.shared.beginButtonMappingRecording(sessionID: UUID())
+
+        XCTAssertNotNil(try transformer.transform(
+            buttonEvent(button: 5, pressed: true),
+            in: .init(device: nil)
+        ))
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 4, pressed: false),
+            in: .init(device: nil)
+        ))
+        XCTAssertFalse(transformer.hasActiveInteraction)
+    }
+
+    func testLogitechInteractionStartedBeforeRecordingDrainsOnRelease() {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let identity = LogitechControlIdentity(controlID: 0xC4)
+        let mapping = Mapping(
+            trigger: .init(input: .button(.logitechControl(identity))),
+            outcomes: .init(shortPress: .arg0(.none))
+        )
+        let transformer = makeTransformer(mappings: [mapping], scheduler: scheduler)
+
+        XCTAssertEqual(
+            transformer.handleLogitechControlEvent(logitech(identity, pressed: true)),
+            .handledDeferringSyntheticFallback
+        )
+        SettingsState.shared.beginButtonMappingRecording(sessionID: UUID())
+
+        XCTAssertEqual(
+            transformer.handleLogitechControlEvent(logitech(identity, pressed: false)),
+            .handled
+        )
+        XCTAssertFalse(transformer.hasActiveInteraction)
+    }
+
     func testGestureButtonWinsOverShortPressMappingAfterDrag() throws {
         let scheduler = ButtonMappingTestTimerScheduler()
         let keySimulator = ButtonMappingTestKeySimulator()

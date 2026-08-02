@@ -48,6 +48,10 @@ class GestureButtonTransformer {
 
 extension GestureButtonTransformer: EventTransformer {
     func transform(_ event: CGEvent, in _: EventTransformerContext) -> CGEvent? {
+        guard !SettingsState.shared.recording || hasActiveInteraction else {
+            return event
+        }
+
         // Check if we're in cooldown
         if case let .cooldown(until, released) = state {
             if DispatchTime.now().uptimeNanoseconds < until {
@@ -301,6 +305,10 @@ extension GestureButtonTransformer: EventTransformer {
 
 extension GestureButtonTransformer: LogitechControlEventHandling {
     func handleLogitechControlEvent(_ context: LogitechEventContext) -> LogitechControlEventHandlingResult {
+        guard !SettingsState.shared.recording || hasActiveInteraction else {
+            return .notHandled
+        }
+
         guard let triggerLogitechControl = trigger.button?.logitechControl,
               context.matches(triggerLogitechControl) else {
             return .notHandled
