@@ -373,6 +373,23 @@ final class ButtonMappingEngineTests: XCTestCase {
         XCTAssertEqual(movement.pointerHandling, .forwardAsMovement)
     }
 
+    func testPendingSideButtonDoesNotCaptureUnrelatedPrimaryDrag() {
+        var engine = engine([buttonMapping(4, long: longAction)])
+
+        XCTAssertTrue(engine.buttonDown(.mouse(4), modifierFlags: [], at: ms(0)).consumesEvent)
+
+        let movement = engine.pointerMoved(
+            for: .mouse(0),
+            deltaX: 4,
+            deltaY: 2,
+            at: ms(10)
+        )
+
+        XCTAssertFalse(movement.consumesEvent)
+        XCTAssertFalse(movement.buffersEvent)
+        XCTAssertEqual(engine.state, .tracking)
+    }
+
     func testOrderedHeldButtonThenTriggerButton() {
         let mapping = Mapping(
             trigger: .init(input: .button(.mouse(5)), whileHeld: [.mouse(4)]),

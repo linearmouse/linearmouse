@@ -502,6 +502,10 @@ struct ButtonMappingEngine {
             return output
         }
 
+        if let button, !session.capturedButtons.contains(button) {
+            return output
+        }
+
         output.consumesEvent = true
         output.buffersEvent = true
         guard session.commitment == nil else {

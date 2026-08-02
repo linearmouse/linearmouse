@@ -119,6 +119,38 @@ final class ButtonMappingTransformerTests: XCTestCase {
         XCTAssertEqual(replayed, [])
     }
 
+    func testPendingSideButtonDoesNotDelayUnrelatedPrimaryDrag() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        var replayed = [CGEventType]()
+        let transformer = makeTransformer(
+            mappings: [buttonMapping(button: 4, long: .arg0(.none))],
+            scheduler: scheduler
+        ) { replayed.append($0.type) }
+
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 4, pressed: true),
+            in: .init(device: nil)
+        ))
+        XCTAssertNotNil(try transformer.transform(
+            buttonEvent(button: 0, pressed: true),
+            in: .init(device: nil)
+        ))
+        XCTAssertNotNil(try transformer.transform(
+            draggedEvent(button: 0, deltaX: 3),
+            in: .init(device: nil)
+        ))
+        XCTAssertNotNil(try transformer.transform(
+            buttonEvent(button: 0, pressed: false),
+            in: .init(device: nil)
+        ))
+        XCTAssertNil(try transformer.transform(
+            buttonEvent(button: 4, pressed: false),
+            in: .init(device: nil)
+        ))
+
+        XCTAssertEqual(replayed, [.otherMouseDown, .otherMouseUp])
+    }
+
     func testGestureButtonWinsOverShortPressMappingAfterDrag() throws {
         let scheduler = ButtonMappingTestTimerScheduler()
         let keySimulator = ButtonMappingTestKeySimulator()
