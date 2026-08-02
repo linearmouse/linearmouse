@@ -248,7 +248,7 @@ private struct ButtonMappingMessage: View {
             Image(systemName: systemImage)
                 .accessibilityHidden(true)
         } else {
-            Text("!")
+            Text(verbatim: "!")
                 .fontWeight(.semibold)
         }
     }
