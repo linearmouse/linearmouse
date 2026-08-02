@@ -28326,6 +28326,13 @@
         }
       }
     },
+    "Using Primary as the held button delays normal clicks and drags until you release it." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "将左键作为需要先按住的按键时，普通点击和拖拽会被延迟，直到松开左键。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "將左鍵作為需要先按住的按鍵時，一般點按與拖移會被延遲，直到放開左鍵。" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "將左鍵作為需要先按住的按鍵時，一般點按及拖移會被延遲，直到放開左鍵。" } }
+      }
+    },
     "Hold keys while pressed" : {
       "localizations" : {
         "af" : {
@@ -34180,6 +34187,13 @@
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "长按%@" } },
         "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "長按%@" } },
         "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "長按%@" } }
+      }
+    },
+    "Long Press on Primary delays normal clicks and may interrupt dragging." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "识别左键长按时，普通点击会被延迟，拖拽也可能中断。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "識別左鍵長按時，一般點按會被延遲，拖移也可能中斷。" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "識別左鍵長按時，一般點按會被延遲，拖移亦可能中斷。" } }
       }
     },
     "Long press action" : {
@@ -42798,6 +42812,13 @@
         "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "左键" } },
         "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "左鍵" } },
         "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "左鍵" } }
+      }
+    },
+    "Primary alone only supports Long Press. Add a modifier or another button for other actions." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "左键单独使用时仅支持长按。若要设置其他操作，请加入修饰键或另一个按键。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "左鍵單獨使用時僅支援長按。若要設定其他操作，請加入修飾鍵或另一個按鍵。" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "左鍵單獨使用時僅支援長按。若要設定其他操作，請加入變更鍵或另一個按鍵。" } }
       }
     },
     "Primary click" : {
@@ -62122,6 +62143,13 @@
         }
       }
     },
+    "Use Hold, Then Press" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "改为按住后再按" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "改為按住後再按" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "改為按住後再按" } }
+      }
+    },
     "Use finer vertical wheel steps on supported Logitech mice." : {
       "localizations" : {
         "af" : {
@@ -64009,11 +64037,11 @@
         "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "按住時操作" } }
       }
     },
-    "Without modifiers, Primary click can only be assigned to Long Press." : {
+    "Combining Primary with another button may briefly delay normal clicks and drags." : {
       "localizations" : {
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "未使用修饰键时，左键只能分配长按操作。" } },
-        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "未使用修飾鍵時，左鍵只能指定長按操作。" } },
-        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "未使用修飾鍵時，左鍵只能指定長按操作。" } }
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "左键参与同时按下的组合时，普通点击和拖拽可能会有短暂延迟。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "左鍵參與同時按下的組合時，一般點按與拖移可能會有短暫延遲。" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "左鍵參與同時按下的組合時，一般點按及拖移可能會有短暫延遲。" } }
       }
     },
     "You may also press ⌃⇧⌘Z to revert to system defaults." : {

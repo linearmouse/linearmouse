@@ -109,45 +109,56 @@ struct ButtonMappingEditSheet: View {
 
     @ViewBuilder
     private var triggerMessages: some View {
-        if !valid, conflicted {
+        if conflicted {
             ButtonMappingMessage(
                 "The trigger is already assigned.",
                 systemImage: "exclamationmark.circle.fill",
                 color: .red
             )
-        }
-
-        if !valid, mapping.isUnmodifiedStandalonePrimaryButton {
+        } else if !mapping.valid, mapping.isUnmodifiedStandalonePrimaryButton {
             ButtonMappingMessage(
-                "Without modifiers, Primary click can only be assigned to Long Press.",
+                "Primary alone only supports Long Press. Add a modifier or another button for other actions.",
                 systemImage: "exclamationmark.circle.fill",
                 color: .red
             )
-        } else if mapping.isUnmodifiedStandalonePrimaryLongPress {
-            ButtonMappingMessage(
-                "Recognizing a Primary click long press may delay clicks and interfere with dragging.",
-                systemImage: "exclamationmark.triangle.fill",
-                color: .orange
-            )
-        } else if mapping.isUnmodifiedPrimarySecondaryChord {
-            ButtonMappingMessage(
-                "To keep normal Primary clicks and drags responsive, record this as Hold Secondary → Primary.",
-                systemImage: "lightbulb.fill",
-                color: .orange
-            )
-        } else if mapping.isUnmodifiedSecondaryHeldPrimaryTrigger {
-            ButtonMappingMessage(
-                "Primary clicks and drags are only captured while Secondary is held.",
-                systemImage: "info.circle.fill",
-                color: .accentColor
-            )
-        } else if mapping.mayAffectPrimaryButtonUsage {
-            ButtonMappingMessage(
-                "This trigger may delay primary clicks or drag gestures while it is being recognized.",
-                systemImage: "exclamationmark.triangle.fill",
-                color: .orange
-            )
+        } else {
+            switch mapping.primaryButtonUsageRisk {
+            case .standaloneLongPress:
+                ButtonMappingMessage(
+                    "Long Press on Primary delays normal clicks and may interrupt dragging.",
+                    systemImage: "exclamationmark.triangle.fill",
+                    color: .orange
+                )
+            case let .simultaneousChord(recommendedHeldButton):
+                ButtonMappingMessage(
+                    "Combining Primary with another button may briefly delay normal clicks and drags.",
+                    systemImage: "exclamationmark.triangle.fill",
+                    color: .orange,
+                    actionTitle: recommendedHeldButton == nil ? nil : "Use Hold, Then Press"
+                ) {
+                    guard let recommendedHeldButton else {
+                        return
+                    }
+                    useOrderedPrimaryTrigger(holding: recommendedHeldButton)
+                }
+            case .heldPrefix:
+                ButtonMappingMessage(
+                    "Using Primary as the held button delays normal clicks and drags until you release it.",
+                    systemImage: "exclamationmark.triangle.fill",
+                    color: .orange
+                )
+            case nil:
+                EmptyView()
+            }
         }
+    }
+
+    private func useOrderedPrimaryTrigger(holding button: Scheme.Buttons.Mapping.Button) {
+        guard var trigger = mapping.trigger else {
+            return
+        }
+        trigger.setTwoButtonRelationship(.holdThenPress, preferredHeldButton: button)
+        mapping.trigger = trigger
     }
 }
 
@@ -188,11 +199,21 @@ private struct ButtonMappingMessage: View {
     let text: LocalizedStringKey
     let systemImage: String
     let color: Color
+    let actionTitle: LocalizedStringKey?
+    let action: (() -> Void)?
 
-    init(_ text: LocalizedStringKey, systemImage: String, color: Color) {
+    init(
+        _ text: LocalizedStringKey,
+        systemImage: String,
+        color: Color,
+        actionTitle: LocalizedStringKey? = nil,
+        action: (() -> Void)? = nil
+    ) {
         self.text = text
         self.systemImage = systemImage
         self.color = color
+        self.actionTitle = actionTitle
+        self.action = action
     }
 
     var body: some View {
@@ -201,16 +222,27 @@ private struct ButtonMappingMessage: View {
                 .foregroundColor(color)
             Text(text)
                 .foregroundColor(.secondary)
+                .layoutPriority(1)
+
+            if let actionTitle, let action {
+                Spacer(minLength: 6)
+                Button(action: action) {
+                    Text(actionTitle)
+                        .lineLimit(1)
+                }
+                .buttonStyle(.borderless)
+                .controlSize(.small)
+            }
         }
         .font(.callout)
         .fixedSize(horizontal: false, vertical: true)
-        .accessibilityElement(children: .combine)
     }
 
     @ViewBuilder
     private var messageIcon: some View {
         if #available(macOS 11.0, *) {
             Image(systemName: systemImage)
+                .accessibilityHidden(true)
         } else {
             Text("!")
                 .fontWeight(.semibold)
@@ -383,11 +415,7 @@ private extension Scheme.Buttons.Mapping {
               case .button(.mouse(0)) = trigger.input else {
             return false
         }
-        return trigger.simultaneous == nil && trigger.whileHeld == nil
-    }
-
-    var isUnmodifiedStandalonePrimaryLongPress: Bool {
-        isUnmodifiedStandalonePrimaryButton && outcomes?.isLongPressOnly == true
+        return trigger.simultaneous?.isEmpty != false && trigger.whileHeld?.isEmpty != false
     }
 
     var supportsPressBehaviorSelection: Bool {

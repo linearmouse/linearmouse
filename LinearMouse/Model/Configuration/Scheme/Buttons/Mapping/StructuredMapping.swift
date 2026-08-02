@@ -4,6 +4,12 @@
 import CoreGraphics
 
 extension Scheme.Buttons.Mapping {
+    enum PrimaryButtonUsageRisk: Equatable {
+        case standaloneLongPress
+        case simultaneousChord(recommendedHeldButton: Button?)
+        case heldPrefix
+    }
+
     /// Optional collections keep the persisted schema compact and distinguish omitted fields.
     struct Trigger: Codable, Equatable, Hashable {
         struct TwoButtonRelationship: Equatable {
@@ -388,33 +394,40 @@ extension Scheme.Buttons.Mapping {
         return nil
     }
 
-    /// Whether recognizing this mapping can temporarily take ownership of an
-    /// otherwise unmodified primary-button event stream.
-    var mayAffectPrimaryButtonUsage: Bool {
+    /// Describes how an unmodified trigger can take ownership of an otherwise
+    /// normal primary-button stream. An ordered trigger whose input is Primary
+    /// is intentionally excluded: it cannot match until its held prefix is
+    /// already down, so an ordinary Primary click remains untouched.
+    var primaryButtonUsageRisk: PrimaryButtonUsageRisk? {
         guard let trigger = effectiveTrigger,
               trigger.modifierFlags.isEmpty else {
-            return false
+            return nil
         }
-        return trigger.statefulButtons.contains(.mouse(0))
-    }
 
-    var isUnmodifiedPrimarySecondaryChord: Bool {
-        guard let trigger = effectiveTrigger,
-              trigger.modifierFlags.isEmpty,
-              trigger.whileHeld == nil else {
-            return false
+        let primaryButton = Button.mouse(0)
+        let heldButtons = Set(trigger.whileHeld ?? [])
+        if heldButtons.contains(primaryButton) {
+            return .heldPrefix
         }
-        return trigger.chordButtons == [.mouse(0), .mouse(1)]
-    }
 
-    var isUnmodifiedSecondaryHeldPrimaryTrigger: Bool {
-        guard let trigger = effectiveTrigger,
-              trigger.modifierFlags.isEmpty,
-              trigger.simultaneous == nil,
-              case .button(.mouse(0)) = trigger.input else {
-            return false
+        guard heldButtons.isEmpty,
+              trigger.chordButtons.contains(primaryButton) else {
+            return nil
         }
-        return Set(trigger.whileHeld ?? []) == [.mouse(1)]
+
+        if trigger.chordButtons.count > 1 {
+            let recommendedHeldButton: Button? = if let relationship = trigger.twoButtonRelationship {
+                relationship.first == primaryButton ? relationship.second : relationship.first
+            } else {
+                nil
+            }
+            return .simultaneousChord(recommendedHeldButton: recommendedHeldButton)
+        }
+
+        guard outcomes?.isLongPressOnly == true else {
+            return nil
+        }
+        return .standaloneLongPress
     }
 
     var immediateAction: Action? {

@@ -386,6 +386,39 @@ final class ButtonMappingEngineTests: XCTestCase {
         XCTAssertEqual(engine.buttonUp(.mouse(4), modifierFlags: [], at: ms(260)).actions, [])
     }
 
+    func testOrderedPrimaryInputDoesNotCaptureOrdinaryPrimaryStream() {
+        let mapping = Mapping(
+            trigger: .init(input: .button(.mouse(0)), whileHeld: [.mouse(4)]),
+            outcomes: .init(shortPress: chordAction)
+        )
+        var engine = engine([mapping])
+
+        XCTAssertFalse(engine.buttonDown(.mouse(0), modifierFlags: [], at: ms(0)).consumesEvent)
+        XCTAssertFalse(engine.hasActiveInteraction)
+        XCTAssertFalse(
+            engine.pointerMoved(for: .mouse(0), deltaX: 10, deltaY: 0, at: ms(10)).consumesEvent
+        )
+        XCTAssertFalse(engine.buttonUp(.mouse(0), modifierFlags: [], at: ms(20)).consumesEvent)
+    }
+
+    func testPrimaryHeldPrefixCapturesPrimaryStreamUntilRelease() {
+        let mapping = Mapping(
+            trigger: .init(input: .button(.mouse(4)), whileHeld: [.mouse(0)]),
+            outcomes: .init(shortPress: chordAction)
+        )
+        var engine = engine([mapping])
+
+        XCTAssertTrue(engine.buttonDown(.mouse(0), modifierFlags: [], at: ms(0)).consumesEvent)
+        XCTAssertTrue(engine.hasActiveInteraction)
+        XCTAssertTrue(
+            engine.pointerMoved(for: .mouse(0), deltaX: 10, deltaY: 0, at: ms(10)).consumesEvent
+        )
+        let release = engine.buttonUp(.mouse(0), modifierFlags: [], at: ms(20))
+        XCTAssertTrue(release.consumesEvent)
+        XCTAssertTrue(release.replaysBufferedEvents)
+        XCTAssertFalse(engine.hasActiveInteraction)
+    }
+
     func testOrderedTriggerTakesPriorityOverHeldButtonsOwnShortPress() {
         let ordered = Mapping(
             trigger: .init(input: .button(.mouse(5)), whileHeld: [.mouse(4)]),
