@@ -555,7 +555,7 @@ wins over a mapping for one of its individual buttons:
 ```
 
 Use `whileHeld` for an ordered combination or for button-plus-wheel. In the recorder, keep the first
-button held until the prompt changes to **Then press another button**, then press the trigger button;
+button held until the prompt changes to **Press a button or scroll**, then press the trigger button;
 the result is shown as `Hold A → B`. A wheel is an instantaneous input, so it has one `action` and
 cannot have long-press or swipe outcomes:
 

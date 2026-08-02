@@ -459,6 +459,25 @@ private struct ButtonMappingRecordingPreview: View {
             return result
         }
 
+        if isRecording,
+           snapshot.isReadyForOrderedInput,
+           trigger.whileHeld?.isEmpty != false,
+           trigger.simultaneous?.isEmpty != false,
+           case let .button(button) = trigger.input {
+            result.append(.init(
+                text: String(
+                    format: NSLocalizedString("Hold %@", comment: "Recorded gesture token"),
+                    buttonDescription(button)
+                ),
+                separator: result.isEmpty ? nil : .plus
+            ))
+            result.append(.init(
+                text: NSLocalizedString("Press a button or scroll", comment: "Button mapping recorder prompt"),
+                separator: .then
+            ))
+            return result
+        }
+
         for (index, button) in (trigger.whileHeld ?? []).enumerated() {
             result.append(.init(
                 text: index == 0
