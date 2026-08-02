@@ -77,9 +77,7 @@ struct ButtonsSettings: View {
                     Text(destination.title)
 
                     Text(description)
-                        .font(.callout)
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                        .settingsDescriptionStyle()
                 }
 
                 Spacer(minLength: 12)

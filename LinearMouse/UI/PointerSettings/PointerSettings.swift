@@ -26,8 +26,7 @@ struct PointerSettings: View {
                         Toggle(isOn: $state.pointerRedirectsToScroll.animation()) {
                             Text("Convert pointer movement to scroll events")
                             Text("Scrolling settings are applied to converted events.")
-                                .controlSize(.small)
-                                .foregroundColor(.secondary)
+                                .settingsDescriptionStyle()
                         }
                     }
 
@@ -119,8 +118,7 @@ struct PointerSettings: View {
                             .keyboardShortcut("z", modifiers: [.control, .command, .shift])
 
                             Text("You may also press ⌃⇧⌘Z to revert to system defaults.")
-                                .controlSize(.small)
-                                .foregroundColor(.secondary)
+                                .settingsDescriptionStyle()
                         } else {
                             Button("Revert to system defaults") {
                                 revertPointerSpeed()
@@ -158,8 +156,7 @@ struct PointerSettings: View {
                         .keyboardShortcut("z", modifiers: [.control, .command, .shift])
 
                         Text("You may also press ⌃⇧⌘Z to revert to system defaults.")
-                            .controlSize(.small)
-                            .foregroundColor(.secondary)
+                            .settingsDescriptionStyle()
                     } else {
                         if state.showsPointerHardwareDPIControl {
                             pointerHardwareDPIControl

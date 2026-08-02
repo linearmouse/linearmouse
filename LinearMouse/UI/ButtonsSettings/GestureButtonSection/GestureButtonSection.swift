@@ -77,8 +77,7 @@ struct GestureButtonSection: View {
                     Text(
                         "Hold the button and drag to trigger gestures. Drag at least \(state.gestureThreshold) pixels in one direction."
                     )
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .settingsDescriptionStyle()
                     .padding(.top, 8)
                 }
             }

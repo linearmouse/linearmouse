@@ -355,7 +355,7 @@ private struct ButtonMappingRecordingPreview: View {
         }
         .font(.body)
         .foregroundColor(.primary)
-        .padding(.horizontal, 10)
+        .padding(.horizontal, 8)
     }
 
     private func relationshipDescriptionView(_ description: String) -> some View {
