@@ -25,28 +25,51 @@ class EventTransformerManager {
     private var eventTransformerCache = LRUCache<CacheKey, TransformerRoute>(countLimit: 16)
     private var activeCacheKey: CacheKey?
     private var activeRoute: TransformerRoute?
+    private var retiredRoutes = [UUID: TransformerRoute]()
     private var sharedAutoScrollTransformer: AutoScrollTransformer?
 
     /// A stateful transformer owns its route until the interaction it claimed
     /// has fully drained. This is intentionally independent of the Scheme that
     /// originally built the route: a newer Scheme may become current while the
     /// old route finishes its already-started button stream.
-    private struct ActivePointerInteraction {
+    private struct ActiveInteraction {
         var route: TransformerRoute
     }
 
-    private var activePointerInteraction: ActivePointerInteraction?
+    private enum InteractionKey: Hashable {
+        case device(Int32)
+        case unidentified
+    }
+
+    private var activeInteractions = [InteractionKey: ActiveInteraction]()
 
     private struct RouteSelection {
         var device: Device?
         var process: ProcessIdentity?
         var display: String?
+
+        var interactionKey: InteractionKey {
+            device.map { .device($0.id) } ?? .unidentified
+        }
     }
 
     struct CacheKey: Hashable {
+        var deviceID: Int32?
         var deviceMatcher: DeviceMatcher?
         var process: ProcessIdentity?
         var screen: String?
+
+        init(
+            deviceID: Int32? = nil,
+            deviceMatcher: DeviceMatcher?,
+            process: ProcessIdentity?,
+            screen: String?
+        ) {
+            self.deviceID = deviceID
+            self.deviceMatcher = deviceMatcher
+            self.process = process
+            self.screen = screen
+        }
     }
 
     private var subscriptions = Set<AnyCancellable>()
@@ -150,8 +173,8 @@ class EventTransformerManager {
         // matching. In particular, an overlay or window manager may become the
         // event source/target during a drag; the release must still reach the
         // transformer that accepted the press.
-        if let activePointerInteraction {
-            return resolution(for: activePointerInteraction.route, selection: selection)
+        if let activeInteraction = activeInteractions[selection.interactionKey] {
+            return resolution(for: activeInteraction.route, selection: selection)
         }
 
         if sourcePid != nil, bypassEventsFromOtherApplications, !cgEvent.isLinearMouseSyntheticEvent {
@@ -191,22 +214,24 @@ class EventTransformerManager {
             transformer: route.transformer,
             context: .init(device: selection.device)
         ) { [weak self] in
-            self?.didTransformPointerEvent(on: route, selection: selection)
+            self?.didProcessInteraction(on: route, selection: selection)
         }
     }
 
-    private func didTransformPointerEvent(
+    private func didProcessInteraction(
         on route: TransformerRoute,
         selection: RouteSelection
     ) {
         let remainsActive = hasActiveInteraction(in: route.transformer)
+        let interactionKey = selection.interactionKey
 
-        if activePointerInteraction?.route.id == route.id {
+        if activeInteractions[interactionKey]?.route.id == route.id {
             guard !remainsActive else {
                 return
             }
 
-            activePointerInteraction = nil
+            activeInteractions[interactionKey] = nil
+            deactivateRetiredRouteIfIdle(route)
 
             // Prime and activate the newest matching route only after the old
             // transformer has processed the final release.
@@ -220,7 +245,7 @@ class EventTransformerManager {
         }
 
         if remainsActive {
-            activePointerInteraction = .init(route: route)
+            activeInteractions[interactionKey] = .init(route: route)
         }
     }
 
@@ -288,8 +313,21 @@ class EventTransformerManager {
         _ context: LogitechEventContext
     ) -> LogitechControlEventHandlingResult {
         let pid = ConfigurationState.shared.configuration.usesProcessConditions ? context.pid : nil
-        let transformer = get(withDevice: context.device, withPid: pid, withDisplay: context.display)
-        return (transformer as? LogitechControlEventHandling)?.handleLogitechControlEvent(context) ?? .notHandled
+        let selection = RouteSelection(
+            device: context.device,
+            process: pid?.processIdentity,
+            display: context.display
+        )
+        let route = activeInteractions[selection.interactionKey]?.route ?? getRoute(
+            withDevice: selection.device,
+            withProcess: selection.process,
+            withDisplay: selection.display,
+            updateActiveCacheKey: true
+        )
+        let result = (route.transformer as? LogitechControlEventHandling)?
+            .handleLogitechControlEvent(context) ?? .notHandled
+        didProcessInteraction(on: route, selection: selection)
+        return result
     }
 
     private func getRoute(
@@ -310,6 +348,7 @@ class EventTransformerManager {
         }
 
         let cacheKey = CacheKey(
+            deviceID: device?.id,
             deviceMatcher: device.map { DeviceMatcher(of: $0) },
             process: process,
             screen: display
@@ -567,18 +606,60 @@ class EventTransformerManager {
             ? sharedAutoScrollTransformer
             : nil
 
-        deactivate(previous?.transformer, excluding: preservedAutoScrollTransformer)
+        if let previous {
+            if isRouteOwned(previous) || hasActiveInteraction(in: previous.transformer) {
+                retiredRoutes[previous.id] = previous
+            } else {
+                deactivate(previous.transformer, excluding: preservedAutoScrollTransformer)
+            }
+        }
+
+        if let current {
+            retiredRoutes[current.id] = nil
+        }
         reactivate(current?.transformer, excluding: preservedAutoScrollTransformer)
+    }
+
+    private func isRouteOwned(_ route: TransformerRoute) -> Bool {
+        activeInteractions.values.contains { $0.route.id == route.id }
+    }
+
+    private func deactivateRetiredRouteIfIdle(_ route: TransformerRoute) {
+        guard retiredRoutes[route.id] != nil,
+              !isRouteOwned(route),
+              !hasActiveInteraction(in: route.transformer) else {
+            return
+        }
+
+        retiredRoutes[route.id] = nil
+        let preservedAutoScrollTransformer = sharedAutoScrollTransformer?.isAutoscrollActive == true
+            ? sharedAutoScrollTransformer
+            : nil
+        deactivate(route.transformer, excluding: preservedAutoScrollTransformer)
     }
 
     private func resetState() {
         let oldAutoScroll = sharedAutoScrollTransformer
-        deactivate(activeRoute?.transformer, excluding: oldAutoScroll)
+        var routesByID = [UUID: TransformerRoute]()
+        if let activeRoute {
+            routesByID[activeRoute.id] = activeRoute
+        }
+        for interaction in activeInteractions.values {
+            routesByID[interaction.route.id] = interaction.route
+        }
+        for route in retiredRoutes.values {
+            routesByID[route.id] = route
+        }
+        for route in routesByID.values {
+            deactivate(route.transformer, excluding: oldAutoScroll)
+        }
+
         sharedAutoScrollTransformer = nil
-        activePointerInteraction = nil
+        activeInteractions.removeAll()
         activeCacheKey = nil
         activeRoute = nil
         eventTransformerCache.removeAllValues()
+        retiredRoutes.removeAll()
         oldAutoScroll?.deactivate()
     }
 

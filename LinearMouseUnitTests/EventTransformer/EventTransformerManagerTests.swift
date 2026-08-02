@@ -29,6 +29,24 @@ final class EventTransformerManagerTests: XCTestCase {
         XCTAssertEqual(firstKey, secondKey)
     }
 
+    func testCacheKeySeparatesRuntimeDevicesWithTheSameMatcher() {
+        let matcher = DeviceMatcher(category: .mouse)
+        let firstKey = EventTransformerManager.CacheKey(
+            deviceID: 1,
+            deviceMatcher: matcher,
+            process: nil,
+            screen: nil
+        )
+        let secondKey = EventTransformerManager.CacheKey(
+            deviceID: 2,
+            deviceMatcher: matcher,
+            process: nil,
+            screen: nil
+        )
+
+        XCTAssertNotEqual(firstKey, secondKey)
+    }
+
     func testClickDebouncingWithoutModeUsesLegacyTransformer() throws {
         var scheme = Scheme()
         scheme.buttons.clickDebouncing.timeout = 50
@@ -302,6 +320,147 @@ final class EventTransformerManagerTests: XCTestCase {
             try buttonMappingTransformer(in: downResolution)
         )
         XCTAssertNil(releaseResolution.transform(release) { _ in })
+    }
+
+    func testLogitechReleaseUsesRouteThatHandledPressAcrossDisplayBoundary() throws {
+        let identity = LogitechControlIdentity(controlID: 0x00C3)
+        let mapping = Scheme.Buttons.Mapping(
+            trigger: .init(input: .button(.logitechControl(identity))),
+            outcomes: .init(shortPress: .arg0(.none))
+        )
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(buttons: .init(mappings: [mapping]))
+        ])
+        let manager = EventTransformerManager()
+        let initialTransformer = try buttonMappingTransformer(in: manager.get(
+            withDevice: nil,
+            withPid: nil,
+            withDisplay: "Display A"
+        ))
+
+        XCTAssertEqual(
+            manager.handleLogitechControlEvent(logitech(identity, pressed: true, display: "Display A")),
+            .handledDeferringSyntheticFallback
+        )
+        XCTAssertTrue(initialTransformer.hasActiveInteraction)
+
+        XCTAssertEqual(
+            manager.handleLogitechControlEvent(logitech(identity, pressed: false, display: "Display B")),
+            .handled
+        )
+        XCTAssertFalse(initialTransformer.hasActiveInteraction)
+
+        let latestTransformer = try buttonMappingTransformer(in: manager.get(
+            withDevice: nil,
+            withPid: nil,
+            withDisplay: "Display B"
+        ))
+        XCTAssertNotIdentical(latestTransformer, initialTransformer)
+    }
+
+    func testLogitechHeldPrefixAndMouseTriggerShareInteractionRoute() throws {
+        let identity = LogitechControlIdentity(controlID: 0x00C3)
+        let mapping = Scheme.Buttons.Mapping(
+            trigger: .init(
+                input: .button(.mouse(4)),
+                whileHeld: [.logitechControl(identity)]
+            ),
+            outcomes: .init(shortPress: .arg0(.none))
+        )
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(buttons: .init(mappings: [mapping]))
+        ])
+        let manager = EventTransformerManager()
+
+        XCTAssertEqual(
+            manager.handleLogitechControlEvent(logitech(identity, pressed: true, display: "Display A")),
+            .handledDeferringSyntheticFallback
+        )
+        let initialTransformer = try buttonMappingTransformer(in: manager.get(
+            withDevice: nil,
+            withPid: nil,
+            withDisplay: "Display A"
+        ))
+
+        let button = try XCTUnwrap(CGMouseButton(rawValue: 4))
+        let down = try mouseEvent(type: .otherMouseDown, button: button)
+        let downResolution = manager.resolve(
+            withCGEvent: down,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display B"
+        )
+        XCTAssertIdentical(try buttonMappingTransformer(in: downResolution), initialTransformer)
+        XCTAssertNil(downResolution.transform(down) { _ in })
+
+        let release = try mouseEvent(type: .otherMouseUp, button: button)
+        let releaseResolution = manager.resolve(
+            withCGEvent: release,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display B"
+        )
+        XCTAssertIdentical(try buttonMappingTransformer(in: releaseResolution), initialTransformer)
+        XCTAssertNil(releaseResolution.transform(release) { _ in })
+        XCTAssertTrue(initialTransformer.hasActiveInteraction)
+
+        XCTAssertEqual(
+            manager.handleLogitechControlEvent(logitech(identity, pressed: false, display: "Display B")),
+            .handled
+        )
+        XCTAssertFalse(initialTransformer.hasActiveInteraction)
+    }
+
+    func testMouseHeldPrefixAndLogitechTriggerShareInteractionRoute() throws {
+        let identity = LogitechControlIdentity(controlID: 0x00C3)
+        let mapping = Scheme.Buttons.Mapping(
+            trigger: .init(
+                input: .button(.logitechControl(identity)),
+                whileHeld: [.mouse(4)]
+            ),
+            outcomes: .init(shortPress: .arg0(.none))
+        )
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(buttons: .init(mappings: [mapping]))
+        ])
+        let manager = EventTransformerManager()
+        let button = try XCTUnwrap(CGMouseButton(rawValue: 4))
+
+        let down = try mouseEvent(type: .otherMouseDown, button: button)
+        let downResolution = manager.resolve(
+            withCGEvent: down,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display A"
+        )
+        XCTAssertNil(downResolution.transform(down) { _ in })
+        let initialTransformer = try buttonMappingTransformer(in: downResolution)
+
+        XCTAssertEqual(
+            manager.handleLogitechControlEvent(logitech(identity, pressed: true, display: "Display B")),
+            .handledDeferringSyntheticFallback
+        )
+        XCTAssertTrue(initialTransformer.hasActiveInteraction)
+        XCTAssertEqual(
+            manager.handleLogitechControlEvent(logitech(identity, pressed: false, display: "Display B")),
+            .handled
+        )
+        XCTAssertTrue(initialTransformer.hasActiveInteraction)
+
+        let release = try mouseEvent(type: .otherMouseUp, button: button)
+        let releaseResolution = manager.resolve(
+            withCGEvent: release,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display B"
+        )
+        XCTAssertIdentical(try buttonMappingTransformer(in: releaseResolution), initialTransformer)
+        XCTAssertNil(releaseResolution.transform(release) { _ in })
+        XCTAssertFalse(initialTransformer.hasActiveInteraction)
     }
 
     func testSyntheticSmoothedEventStillGetsModifierActions() throws {
@@ -788,9 +947,31 @@ final class EventTransformerManagerTests: XCTestCase {
     private func buttonMappingTransformer(
         in resolution: EventTransformerResolution
     ) throws -> ButtonMappingTransformer {
-        try XCTUnwrap((resolution.transformer as? [EventTransformer])?
+        try buttonMappingTransformer(in: resolution.transformer)
+    }
+
+    private func buttonMappingTransformer(
+        in transformer: EventTransformer
+    ) throws -> ButtonMappingTransformer {
+        try XCTUnwrap((transformer as? [EventTransformer])?
             .compactMap { $0 as? ButtonMappingTransformer }
             .first)
+    }
+
+    private func logitech(
+        _ identity: LogitechControlIdentity,
+        pressed: Bool,
+        display: String
+    ) -> LogitechEventContext {
+        .init(
+            device: nil,
+            pid: nil,
+            display: display,
+            mouseLocation: .zero,
+            controlIdentity: identity,
+            isPressed: pressed,
+            modifierFlags: []
+        )
     }
 
     private func mouseEvent(type: CGEventType, button: CGMouseButton) throws -> CGEvent {
