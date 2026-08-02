@@ -9215,6 +9215,7 @@
       }
     },
     "Autoscroll" : {
+      "comment" : "Buttons settings destination",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -9423,6 +9424,7 @@
       }
     },
     "Back" : {
+      "comment" : "Navigation action",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -11297,6 +11299,7 @@
       }
     },
     "Button Mappings" : {
+      "comment" : "Buttons settings destination",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -11505,6 +11508,7 @@
       }
     },
     "Buttons" : {
+      "comment" : "Buttons settings parent page",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -29194,6 +29198,7 @@
       }
     },
     "Gesture Button" : {
+      "comment" : "Buttons settings destination",
       "localizations" : {
         "af" : {
           "stringUnit" : {

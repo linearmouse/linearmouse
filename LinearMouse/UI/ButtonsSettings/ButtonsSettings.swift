@@ -7,12 +7,12 @@ import SwiftUI
 struct ButtonsSettings: View {
     @Environment(\.layoutDirection) private var layoutDirection
     @ObservedObject private var deviceState: DeviceState = .shared
-    @State private var navigationPath: [Destination] = []
+    @ObservedObject private var settingsState: SettingsState = .shared
 
     var body: some View {
         DetailView {
             Group {
-                if let destination = navigationPath.last {
+                if let destination = settingsState.buttonsNavigationPath.last {
                     destinationView(destination)
                 } else {
                     overview
@@ -20,10 +20,13 @@ struct ButtonsSettings: View {
             }
         }
         .onReceive(deviceState.$currentDeviceRef) { deviceRef in
-            if navigationPath.last == .gestureButton,
+            if settingsState.buttonsNavigationPath.last == .gestureButton,
                deviceRef?.value?.category != .mouse {
-                navigationPath.removeAll()
+                settingsState.buttonsNavigationPath.removeAll()
             }
+        }
+        .onDisappear {
+            settingsState.buttonsNavigationPath.removeAll()
         }
     }
 
@@ -67,14 +70,14 @@ struct ButtonsSettings: View {
         description: LocalizedStringKey
     ) -> some View {
         Button {
-            navigationPath.append(destination)
+            settingsState.buttonsNavigationPath.append(destination)
         } label: {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(destination.title)
 
                     Text(description)
-                        .font(.caption)
+                        .font(.callout)
                         .foregroundColor(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -98,74 +101,24 @@ struct ButtonsSettings: View {
     }
 
     private func destinationView(_ destination: Destination) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 12) {
-                Button {
-                    navigationPath.removeLast()
-                } label: {
-                    HStack(spacing: 5) {
-                        Image(nsImage: backIndicator)
-                            .renderingMode(.template)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 7, height: 10)
-                        Text("Buttons")
-                    }
-                }
-                .buttonStyle(.borderless)
-
-                Divider()
-                    .frame(height: 18)
-
-                Text(destination.title)
-                    .font(.headline)
-                    .fontWeight(.semibold)
-
-                Spacer(minLength: 0)
+        Form {
+            switch destination {
+            case .autoScroll:
+                AutoScrollSection()
+            case .gestureButton:
+                GestureButtonSection()
+            case .buttonMappings:
+                ButtonMappingsSection()
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-
-            Divider()
-
-            Form {
-                switch destination {
-                case .autoScroll:
-                    AutoScrollSection()
-                case .gestureButton:
-                    GestureButtonSection()
-                case .buttonMappings:
-                    ButtonMappingsSection()
-                }
-            }
-            .modifier(FormViewModifier())
         }
+        .modifier(FormViewModifier())
     }
 
     private var forwardIndicator: NSImage {
         NSImage(named: layoutDirection == .rightToLeft ? NSImage.goBackTemplateName : NSImage.goForwardTemplateName)!
     }
-
-    private var backIndicator: NSImage {
-        NSImage(named: layoutDirection == .rightToLeft ? NSImage.goForwardTemplateName : NSImage.goBackTemplateName)!
-    }
 }
 
 private extension ButtonsSettings {
-    enum Destination: Equatable {
-        case autoScroll
-        case gestureButton
-        case buttonMappings
-
-        var title: LocalizedStringKey {
-            switch self {
-            case .autoScroll:
-                return "Autoscroll"
-            case .gestureButton:
-                return "Gesture Button"
-            case .buttonMappings:
-                return "Button Mappings"
-            }
-        }
-    }
+    typealias Destination = SettingsState.ButtonsDestination
 }

@@ -65,7 +65,43 @@ class SettingsState: ObservableObject {
         }
     }
 
-    @Published var navigation: Navigation? = .pointer
+    enum ButtonsDestination: Equatable {
+        case autoScroll
+        case gestureButton
+        case buttonMappings
+
+        var title: LocalizedStringKey {
+            switch self {
+            case .autoScroll:
+                return "Autoscroll"
+            case .gestureButton:
+                return "Gesture Button"
+            case .buttonMappings:
+                return "Button Mappings"
+            }
+        }
+
+        var localizedTitle: String {
+            switch self {
+            case .autoScroll:
+                return NSLocalizedString("Autoscroll", comment: "Buttons settings destination")
+            case .gestureButton:
+                return NSLocalizedString("Gesture Button", comment: "Buttons settings destination")
+            case .buttonMappings:
+                return NSLocalizedString("Button Mappings", comment: "Buttons settings destination")
+            }
+        }
+    }
+
+    @Published var navigation: Navigation? = .pointer {
+        didSet {
+            if navigation != .buttons {
+                buttonsNavigationPath.removeAll()
+            }
+        }
+    }
+
+    @Published var buttonsNavigationPath: [ButtonsDestination] = []
 
     @Published private(set) var buttonMappingRecordingSession: ButtonMappingRecordingSession?
 
