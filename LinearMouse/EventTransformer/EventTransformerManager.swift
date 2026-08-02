@@ -466,6 +466,7 @@ class EventTransformerManager {
         } else {
             nil
         }
+        let autoScrollTransformer = autoScrollTransformer(for: scheme.buttons.$autoScroll)
         if device != nil {
             let highResolutionWheelNormalizer = LogitechHighResolutionWheelNormalizer(
                 verticalMode: highResolutionWheelNormalizerMode(
@@ -484,6 +485,12 @@ class EventTransformerManager {
 
         if scheme.buttons.switchPrimaryButtonAndSecondaryButtons == true {
             eventTransformer.append(SwitchPrimaryAndSecondaryButtonsTransformer())
+        }
+
+        // Auto Scroll owns its configured trigger before every other button
+        // recognizer, regardless of which other button features are enabled.
+        if let autoScrollTransformer {
+            eventTransformer.append(autoScrollTransformer)
         }
 
         if !buttonMappings.isEmpty {
@@ -569,10 +576,6 @@ class EventTransformerManager {
         if let modifiers = scheme.scrolling.$modifiers,
            !hasSmoothedScrolling {
             eventTransformer.append(ModifierActionsTransformer(modifiers: modifiers))
-        }
-
-        if let autoScrollTransformer = autoScrollTransformer(for: scheme.buttons.$autoScroll) {
-            eventTransformer.append(autoScrollTransformer)
         }
 
         if buttonMappings.isEmpty, let gestureTransformer {

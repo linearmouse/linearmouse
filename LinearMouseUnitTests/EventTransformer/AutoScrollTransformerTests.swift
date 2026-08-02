@@ -34,4 +34,30 @@ final class AutoScrollTransformerTests: XCTestCase {
         )
         XCTAssertFalse(transformer.isAutoscrollActive)
     }
+
+    func testLogitechModifierMismatchAllowsLowerPriorityRecognizer() {
+        let identity = LogitechControlIdentity(controlID: 0xC4)
+        var trigger = Scheme.Buttons.Mapping()
+        trigger.button = .logitechControl(identity)
+        trigger.command = true
+        let transformer = AutoScrollTransformer(
+            trigger: trigger,
+            modes: [.hold],
+            speed: 1
+        )
+
+        XCTAssertEqual(
+            transformer.handleLogitechControlEvent(.init(
+                device: nil,
+                pid: nil,
+                display: nil,
+                mouseLocation: .zero,
+                controlIdentity: identity,
+                isPressed: true,
+                modifierFlags: []
+            )),
+            .notHandled
+        )
+        XCTAssertFalse(transformer.isAutoscrollActive)
+    }
 }

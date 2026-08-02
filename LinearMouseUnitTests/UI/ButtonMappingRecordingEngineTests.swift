@@ -233,6 +233,24 @@ final class ButtonMappingRecordingEngineTests: XCTestCase {
         XCTAssertEqual(recorder.snapshot.recognition, .wheel(.up))
     }
 
+    func testWheelCanReplaceProvisionalLongPressWhileButtonRemainsHeld() {
+        var recorder = ButtonMappingRecordingEngine()
+
+        recorder.buttonDown(.mouse(4), modifierFlags: [], at: ms(0))
+        recorder.advance(to: ms(500))
+        XCTAssertEqual(recorder.snapshot.recognition, .longPress)
+
+        recorder.wheel(.down, modifierFlags: [], at: ms(700))
+
+        XCTAssertEqual(recorder.snapshot.recognition, .wheel(.down))
+        XCTAssertEqual(recorder.snapshot.mapping?.trigger?.input, .wheel(.down))
+        XCTAssertEqual(recorder.snapshot.mapping?.trigger?.whileHeld, [.mouse(4)])
+        XCTAssertFalse(recorder.snapshot.isComplete)
+
+        recorder.buttonUp(.mouse(4), at: ms(750))
+        XCTAssertTrue(recorder.snapshot.isComplete)
+    }
+
     func testCommittedSwipeCannotBecomeWheelGesture() {
         var recorder = ButtonMappingRecordingEngine()
 

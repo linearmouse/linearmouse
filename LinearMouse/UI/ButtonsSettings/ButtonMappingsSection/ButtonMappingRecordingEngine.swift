@@ -157,9 +157,14 @@ struct ButtonMappingRecordingEngine {
         at timestamp: UInt64
     ) {
         advance(to: timestamp)
-        guard recognition == nil,
+        let replacesProvisionalLongPress = recognition == .longPress && !pressedButtons.isEmpty
+        guard recognition == nil || replacesProvisionalLongPress,
               wheelMapping == nil else {
             return
+        }
+
+        if replacesProvisionalLongPress {
+            recognition = nil
         }
 
         let heldButtons = pressedButtons

@@ -439,7 +439,7 @@ extension AutoScrollTransformer: LogitechControlEventHandling {
             }
 
             guard trigger.matches(modifierFlags: context.modifierFlags) else {
-                return .handled
+                return .notHandled
             }
 
             activate(at: context.mouseLocation, session: activationSession)

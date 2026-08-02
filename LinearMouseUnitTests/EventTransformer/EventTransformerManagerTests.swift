@@ -83,6 +83,63 @@ final class EventTransformerManagerTests: XCTestCase {
         )
     }
 
+    func testAutoScrollKeepsPriorityWhenButtonMappingsArePresent() throws {
+        var scheme = Scheme()
+        scheme.buttons.autoScroll.enabled = true
+        scheme.buttons.autoScroll.modes = [.hold]
+        var autoScrollTrigger = Scheme.Buttons.Mapping()
+        autoScrollTrigger.button = .mouse(2)
+        scheme.buttons.autoScroll.trigger = autoScrollTrigger
+
+        var gesture = Scheme.Buttons.Gesture()
+        gesture.enabled = true
+        gesture.trigger = .init(button: .mouse(2))
+        gesture.actions = .init(right: .some(.none))
+        scheme.buttons.gesture = gesture
+        scheme.buttons.mappings = [
+            .init(
+                trigger: .init(input: .button(.mouse(4))),
+                outcomes: .init(shortPress: .arg0(.none))
+            )
+        ]
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+
+        let transformers = try XCTUnwrap(EventTransformerManager().get(
+            withDevice: nil,
+            withPid: nil,
+            withDisplay: nil
+        ) as? [EventTransformer])
+        let autoScrollIndex = try XCTUnwrap(transformers.firstIndex { $0 is AutoScrollTransformer })
+        let buttonMappingIndex = try XCTUnwrap(transformers.firstIndex { $0 is ButtonMappingTransformer })
+
+        XCTAssertLessThan(autoScrollIndex, buttonMappingIndex)
+    }
+
+    func testAutoScrollPrecedesGestureWithoutButtonMappings() throws {
+        var scheme = Scheme()
+        scheme.buttons.autoScroll.enabled = true
+        var autoScrollTrigger = Scheme.Buttons.Mapping()
+        autoScrollTrigger.button = .mouse(2)
+        scheme.buttons.autoScroll.trigger = autoScrollTrigger
+
+        var gesture = Scheme.Buttons.Gesture()
+        gesture.enabled = true
+        gesture.trigger = .init(button: .mouse(2))
+        gesture.actions = .init(right: .some(.none))
+        scheme.buttons.gesture = gesture
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+
+        let transformers = try XCTUnwrap(EventTransformerManager().get(
+            withDevice: nil,
+            withPid: nil,
+            withDisplay: nil
+        ) as? [EventTransformer])
+        let autoScrollIndex = try XCTUnwrap(transformers.firstIndex { $0 is AutoScrollTransformer })
+        let gestureIndex = try XCTUnwrap(transformers.firstIndex { $0 is GestureButtonTransformer })
+
+        XCTAssertLessThan(autoScrollIndex, gestureIndex)
+    }
+
     func testTransformerCacheDoesNotReuseValueForNewProcess() throws {
         ConfigurationState.shared.configuration = .init(schemes: [
             Scheme(scrolling: .init(reverse: .init(vertical: true)))
