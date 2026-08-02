@@ -28326,11 +28326,11 @@
         }
       }
     },
-    "Using Primary as the held button delays normal clicks and drags until you release it." : {
+    "Using Primary as the held button delays normal clicks until you release it." : {
       "localizations" : {
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "将左键作为需要先按住的按键时，普通点击和拖拽会被延迟，直到松开左键。" } },
-        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "將左鍵作為需要先按住的按鍵時，一般點按與拖移會被延遲，直到放開左鍵。" } },
-        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "將左鍵作為需要先按住的按鍵時，一般點按及拖移會被延遲，直到放開左鍵。" } }
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "将左键作为需要先按住的按键时，普通点击会被延迟，直到松开左键。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "將左鍵作為需要先按住的按鍵時，一般點按會被延遲，直到放開左鍵。" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "將左鍵作為需要先按住的按鍵時，一般點按會被延遲，直到放開左鍵。" } }
       }
     },
     "Hold keys while pressed" : {
@@ -34189,11 +34189,11 @@
         "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "長按%@" } }
       }
     },
-    "Long Press on Primary delays normal clicks and may interrupt dragging." : {
+    "Configuring Long Press may delay this button's normal clicks." : {
       "localizations" : {
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "识别左键长按时，普通点击会被延迟，拖拽也可能中断。" } },
-        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "識別左鍵長按時，一般點按會被延遲，拖移也可能中斷。" } },
-        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "識別左鍵長按時，一般點按會被延遲，拖移亦可能中斷。" } }
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "配置长按后，这个按键的普通点击可能会延迟。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "設定長按後，這個按鍵的一般點按可能會延遲。" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "設定長按後，此按鍵的一般點按可能會延遲。" } }
       }
     },
     "Long press action" : {
@@ -64037,11 +64037,11 @@
         "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "按住時操作" } }
       }
     },
-    "Combining Primary with another button may briefly delay normal clicks and drags." : {
+    "Combining Primary with another button may briefly delay normal clicks." : {
       "localizations" : {
-        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "左键参与同时按下的组合时，普通点击和拖拽可能会有短暂延迟。" } },
-        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "左鍵參與同時按下的組合時，一般點按與拖移可能會有短暫延遲。" } },
-        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "左鍵參與同時按下的組合時，一般點按及拖移可能會有短暫延遲。" } }
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "左键参与同时按下的组合时，普通点击可能会有短暂延迟。" } },
+        "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "左鍵參與同時按下的組合時，一般點按可能會有短暫延遲。" } },
+        "zh-Hant-HK" : { "stringUnit" : { "state" : "translated", "value" : "左鍵參與同時按下的組合時，一般點按可能會有短暫延遲。" } }
       }
     },
     "You may also press ⌃⇧⌘Z to revert to system defaults." : {

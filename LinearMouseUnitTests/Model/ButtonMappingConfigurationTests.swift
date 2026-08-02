@@ -344,7 +344,7 @@ final class ButtonMappingConfigurationTests: XCTestCase {
         XCTAssertTrue(chordedPrimary.valid)
     }
 
-    func testPrimaryButtonUsageRiskClassifiesActualCaptureRoles() {
+    func testButtonUsageRiskClassifiesActualCaptureRoles() {
         let standaloneLongPress = Mapping(
             trigger: .init(input: .button(.mouse(0))),
             outcomes: .init(longPress: .arg0(.none))
@@ -362,16 +362,19 @@ final class ButtonMappingConfigurationTests: XCTestCase {
             action: .arg0(.none)
         )
 
-        XCTAssertEqual(standaloneLongPress.primaryButtonUsageRisk, .standaloneLongPress)
         XCTAssertEqual(
-            chord.primaryButtonUsageRisk,
-            .simultaneousChord(recommendedHeldButton: .mouse(1))
+            standaloneLongPress.buttonUsageRisk,
+            .singleButtonLongPress(button: .mouse(0))
         )
-        XCTAssertEqual(heldPrefix.primaryButtonUsageRisk, .heldPrefix)
-        XCTAssertEqual(heldWheel.primaryButtonUsageRisk, .heldPrefix)
+        XCTAssertEqual(
+            chord.buttonUsageRisk,
+            .simultaneousPrimaryChord(recommendedHeldButton: .mouse(1))
+        )
+        XCTAssertEqual(heldPrefix.buttonUsageRisk, .primaryHeldPrefix)
+        XCTAssertEqual(heldWheel.buttonUsageRisk, .primaryHeldPrefix)
     }
 
-    func testPrimaryButtonUsageRiskIgnoresSafeOrderedPrimaryInputAndModifiedTriggers() {
+    func testButtonUsageRiskIgnoresSafeOrderedPrimaryInputAndModifiedChords() {
         let orderedPrimaryInput = Mapping(
             trigger: .init(input: .button(.mouse(0)), whileHeld: [.mouse(4)]),
             outcomes: .init(shortPress: .arg0(.none))
@@ -397,10 +400,45 @@ final class ButtonMappingConfigurationTests: XCTestCase {
             outcomes: .init(shortPress: .arg0(.none))
         )
 
-        XCTAssertNil(orderedPrimaryInput.primaryButtonUsageRisk)
-        XCTAssertNil(prefixedChord.primaryButtonUsageRisk)
-        XCTAssertNil(modifiedChord.primaryButtonUsageRisk)
-        XCTAssertNil(unrelated.primaryButtonUsageRisk)
+        XCTAssertNil(orderedPrimaryInput.buttonUsageRisk)
+        XCTAssertNil(prefixedChord.buttonUsageRisk)
+        XCTAssertNil(modifiedChord.buttonUsageRisk)
+        XCTAssertNil(unrelated.buttonUsageRisk)
+    }
+
+    func testButtonUsageRiskIncludesLongPressForSecondaryAndOtherButtons() {
+        let secondaryLongPress = Mapping(
+            trigger: .init(input: .button(.mouse(1))),
+            outcomes: .init(longPress: .arg0(.none))
+        )
+        let modifiedOtherButtonWithShortPress = Mapping(
+            trigger: .init(input: .button(.mouse(4)), modifiers: [.command]),
+            outcomes: .init(shortPress: .arg0(.none), longPress: .arg0(.none))
+        )
+        let otherButtonShortPressOnly = Mapping(
+            trigger: .init(input: .button(.mouse(5))),
+            outcomes: .init(shortPress: .arg0(.none))
+        )
+        let logitechLongPress = Mapping(
+            trigger: .init(input: .button(.logitechControl(.init(controlID: 0xC4)))),
+            outcomes: .init(longPress: .arg0(.none))
+        )
+
+        XCTAssertTrue(secondaryLongPress.valid)
+        XCTAssertTrue(modifiedOtherButtonWithShortPress.valid)
+        XCTAssertEqual(
+            secondaryLongPress.buttonUsageRisk,
+            .singleButtonLongPress(button: .mouse(1))
+        )
+        XCTAssertEqual(
+            modifiedOtherButtonWithShortPress.buttonUsageRisk,
+            .singleButtonLongPress(button: .mouse(4))
+        )
+        XCTAssertNil(otherButtonShortPressOnly.buttonUsageRisk)
+        XCTAssertEqual(
+            logitechLongPress.buttonUsageRisk,
+            .singleButtonLongPress(button: .logitechControl(.init(controlID: 0xC4)))
+        )
     }
 
     func testPrimaryChordRecommendationIsIndependentOfInputOrder() {
@@ -422,18 +460,18 @@ final class ButtonMappingConfigurationTests: XCTestCase {
         )
 
         XCTAssertEqual(
-            primaryFirst.primaryButtonUsageRisk,
-            .simultaneousChord(recommendedHeldButton: .mouse(4))
+            primaryFirst.buttonUsageRisk,
+            .simultaneousPrimaryChord(recommendedHeldButton: .mouse(4))
         )
         XCTAssertEqual(
-            primarySecond.primaryButtonUsageRisk,
-            .simultaneousChord(recommendedHeldButton: .mouse(4))
+            primarySecond.buttonUsageRisk,
+            .simultaneousPrimaryChord(recommendedHeldButton: .mouse(4))
         )
         XCTAssertEqual(
-            multiButtonChord.primaryButtonUsageRisk,
-            .simultaneousChord(recommendedHeldButton: nil)
+            multiButtonChord.buttonUsageRisk,
+            .simultaneousPrimaryChord(recommendedHeldButton: nil)
         )
-        XCTAssertNil(ordered.primaryButtonUsageRisk)
+        XCTAssertNil(ordered.buttonUsageRisk)
     }
 
     func testPrimarySecondaryChordCanBeConvertedToSafeOrderedTrigger() throws {
@@ -447,7 +485,7 @@ final class ButtonMappingConfigurationTests: XCTestCase {
         XCTAssertEqual(trigger.input, .button(.mouse(0)))
         XCTAssertEqual(trigger.whileHeld, [.mouse(1)])
         XCTAssertNil(trigger.simultaneous)
-        XCTAssertNil(chord.primaryButtonUsageRisk)
+        XCTAssertNil(chord.buttonUsageRisk)
     }
 
     func testTwoButtonRelationshipCanSwitchWithoutChangingModifiersOrOutcomes() {

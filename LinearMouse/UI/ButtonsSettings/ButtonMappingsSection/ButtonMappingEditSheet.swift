@@ -122,16 +122,16 @@ struct ButtonMappingEditSheet: View {
                 color: .red
             )
         } else {
-            switch mapping.primaryButtonUsageRisk {
-            case .standaloneLongPress:
+            switch mapping.buttonUsageRisk {
+            case .singleButtonLongPress:
                 ButtonMappingMessage(
-                    "Long Press on Primary delays normal clicks and may interrupt dragging.",
+                    "Configuring Long Press may delay this button's normal clicks.",
                     systemImage: "exclamationmark.triangle.fill",
                     color: .orange
                 )
-            case let .simultaneousChord(recommendedHeldButton):
+            case let .simultaneousPrimaryChord(recommendedHeldButton):
                 ButtonMappingMessage(
-                    "Combining Primary with another button may briefly delay normal clicks and drags.",
+                    "Combining Primary with another button may briefly delay normal clicks.",
                     systemImage: "exclamationmark.triangle.fill",
                     color: .orange,
                     actionTitle: recommendedHeldButton == nil ? nil : "Use Hold, Then Press"
@@ -141,9 +141,9 @@ struct ButtonMappingEditSheet: View {
                     }
                     useOrderedPrimaryTrigger(holding: recommendedHeldButton)
                 }
-            case .heldPrefix:
+            case .primaryHeldPrefix:
                 ButtonMappingMessage(
-                    "Using Primary as the held button delays normal clicks and drags until you release it.",
+                    "Using Primary as the held button delays normal clicks until you release it.",
                     systemImage: "exclamationmark.triangle.fill",
                     color: .orange
                 )
@@ -217,25 +217,29 @@ private struct ButtonMappingMessage: View {
     }
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 6) {
+        HStack(alignment: .top, spacing: 8) {
             messageIcon
                 .foregroundColor(color)
-            Text(text)
-                .foregroundColor(.secondary)
-                .layoutPriority(1)
+                .padding(.top, 2)
 
-            if let actionTitle, let action {
-                Spacer(minLength: 6)
-                Button(action: action) {
-                    Text(actionTitle)
-                        .lineLimit(1)
+            VStack(alignment: .leading, spacing: 5) {
+                Text(text)
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if let actionTitle, let action {
+                    Button(action: action) {
+                        Text(actionTitle)
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .buttonStyle(.borderless)
+                    .controlSize(.small)
                 }
-                .buttonStyle(.borderless)
-                .controlSize(.small)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .font(.callout)
-        .fixedSize(horizontal: false, vertical: true)
     }
 
     @ViewBuilder

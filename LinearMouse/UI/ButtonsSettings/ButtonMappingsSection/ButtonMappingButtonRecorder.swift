@@ -137,8 +137,8 @@ struct ButtonMappingButtonRecorder: View {
 
         switch relationship.kind {
         case .simultaneous:
-            let recommendedHeldButton: Scheme.Buttons.Mapping.Button? = if case let .simultaneousChord(button) =
-                mapping.primaryButtonUsageRisk {
+            let recommendedHeldButton: Scheme.Buttons.Mapping.Button? = if case let .simultaneousPrimaryChord(button) =
+                mapping.buttonUsageRisk {
                 button
             } else {
                 nil
