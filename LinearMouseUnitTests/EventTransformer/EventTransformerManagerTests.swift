@@ -367,6 +367,220 @@ final class EventTransformerManagerTests: XCTestCase {
             .isEmpty == true)
     }
 
+    func testOwnedReleaseUsesOriginalButtonSwapAcrossSchemeBoundary() throws {
+        let mapping = Scheme.Buttons.Mapping(
+            trigger: .init(input: .button(.mouse(1))),
+            outcomes: .init(shortPress: .arg0(.none))
+        )
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(
+                if: [.init(display: "Display A")],
+                buttons: .init(
+                    mappings: [mapping],
+                    switchPrimaryButtonAndSecondaryButtons: true
+                )
+            ),
+            Scheme(
+                if: [.init(display: "Display B")],
+                buttons: .init(switchPrimaryButtonAndSecondaryButtons: false)
+            )
+        ])
+        let manager = EventTransformerManager()
+
+        let down = try mouseEvent(type: .leftMouseDown, button: .left)
+        let downResolution = manager.resolve(
+            withCGEvent: down,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display A"
+        )
+        XCTAssertNil(downResolution.transform(down) { _ in })
+        let owner = try buttonMappingTransformer(in: downResolution)
+        XCTAssertTrue(owner.hasActiveInteraction)
+
+        let release = try mouseEvent(type: .leftMouseUp, button: .left)
+        let releaseResolution = manager.resolve(
+            withCGEvent: release,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display B"
+        )
+
+        XCTAssertIdentical(try buttonMappingTransformer(in: releaseResolution), owner)
+        XCTAssertNil(releaseResolution.transform(release) { _ in })
+        XCTAssertFalse(owner.hasActiveInteraction)
+    }
+
+    func testPassThroughButtonPairStaysOnOriginalRouteWhileOwnerDrains() throws {
+        let mapping = Scheme.Buttons.Mapping(
+            trigger: .init(input: .button(.mouse(4))),
+            outcomes: .init(shortPress: .arg0(.none))
+        )
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(
+                if: [.init(display: "Display A")],
+                buttons: .init(
+                    mappings: [mapping],
+                    switchPrimaryButtonAndSecondaryButtons: true
+                )
+            ),
+            Scheme(
+                if: [.init(display: "Display B")],
+                buttons: .init(switchPrimaryButtonAndSecondaryButtons: false)
+            )
+        ])
+        let manager = EventTransformerManager()
+        let mappedButton = try XCTUnwrap(CGMouseButton(rawValue: 4))
+
+        let mappedDown = try mouseEvent(type: .otherMouseDown, button: mappedButton)
+        let initialResolution = manager.resolve(
+            withCGEvent: mappedDown,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display A"
+        )
+        XCTAssertNil(initialResolution.transform(mappedDown) { _ in })
+        let owner = try buttonMappingTransformer(in: initialResolution)
+
+        let passThroughDown = try mouseEvent(type: .leftMouseDown, button: .left)
+        let passThroughDownResolution = manager.resolve(
+            withCGEvent: passThroughDown,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display B"
+        )
+        let transformedDown = try XCTUnwrap(passThroughDownResolution.transform(passThroughDown) { _ in })
+        XCTAssertEqual(transformedDown.type, .rightMouseDown)
+        XCTAssertEqual(MouseEventView(transformedDown).mouseButton, .right)
+
+        let mappedUp = try mouseEvent(type: .otherMouseUp, button: mappedButton)
+        let mappedUpResolution = manager.resolve(
+            withCGEvent: mappedUp,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display B"
+        )
+        XCTAssertNil(mappedUpResolution.transform(mappedUp) { _ in })
+        XCTAssertFalse(owner.hasActiveInteraction)
+
+        let passThroughUp = try mouseEvent(type: .leftMouseUp, button: .left)
+        let passThroughUpResolution = manager.resolve(
+            withCGEvent: passThroughUp,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display B"
+        )
+        XCTAssertIdentical(try buttonMappingTransformer(in: passThroughUpResolution), owner)
+        let transformedUp = try XCTUnwrap(passThroughUpResolution.transform(passThroughUp) { _ in })
+        XCTAssertEqual(transformedUp.type, .rightMouseUp)
+        XCTAssertEqual(MouseEventView(transformedUp).mouseButton, .right)
+
+        let nextDown = try mouseEvent(type: .leftMouseDown, button: .left)
+        let nextResolution = manager.resolve(
+            withCGEvent: nextDown,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display B"
+        )
+        let transformedNextDown = try XCTUnwrap(nextResolution.transform(nextDown) { _ in })
+        XCTAssertEqual(transformedNextDown.type, .leftMouseDown)
+        XCTAssertEqual(MouseEventView(transformedNextDown).mouseButton, .left)
+    }
+
+    func testPassThroughRoutePinDoesNotRestoreIdleMappingForWheelInput() throws {
+        let buttonMapping = Scheme.Buttons.Mapping(
+            trigger: .init(input: .button(.mouse(4))),
+            outcomes: .init(shortPress: .arg0(.none))
+        )
+        let oldWheelMapping = Scheme.Buttons.Mapping(
+            trigger: .init(input: .wheel(.up)),
+            action: .arg0(.none)
+        )
+        ConfigurationState.shared.configuration = .init(schemes: [
+            Scheme(
+                if: [.init(display: "Display A")],
+                buttons: .init(
+                    mappings: [buttonMapping, oldWheelMapping],
+                    switchPrimaryButtonAndSecondaryButtons: true
+                )
+            ),
+            Scheme(
+                if: [.init(display: "Display B")],
+                scrolling: .init(reverse: .init(vertical: true)),
+                buttons: .init(switchPrimaryButtonAndSecondaryButtons: false)
+            )
+        ])
+        let manager = EventTransformerManager()
+        let mappedButton = try XCTUnwrap(CGMouseButton(rawValue: 4))
+
+        let mappedDown = try mouseEvent(type: .otherMouseDown, button: mappedButton)
+        let initialResolution = manager.resolve(
+            withCGEvent: mappedDown,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display A"
+        )
+        XCTAssertNil(initialResolution.transform(mappedDown) { _ in })
+        let owner = try buttonMappingTransformer(in: initialResolution)
+
+        let passThroughDown = try mouseEvent(type: .leftMouseDown, button: .left)
+        let passThroughDownResolution = manager.resolve(
+            withCGEvent: passThroughDown,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display B"
+        )
+        XCTAssertNotNil(passThroughDownResolution.transform(passThroughDown) { _ in })
+
+        let mappedUp = try mouseEvent(type: .otherMouseUp, button: mappedButton)
+        let mappedUpResolution = manager.resolve(
+            withCGEvent: mappedUp,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display B"
+        )
+        XCTAssertNil(mappedUpResolution.transform(mappedUp) { _ in })
+        XCTAssertFalse(owner.hasActiveInteraction)
+
+        let wheel = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 1,
+            wheel1: 1,
+            wheel2: 0,
+            wheel3: 0
+        ))
+        let wheelResolution = manager.resolve(
+            withCGEvent: wheel,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display B"
+        )
+        let transformedWheel = try XCTUnwrap(wheelResolution.transform(wheel) { _ in })
+        XCTAssertEqual(ScrollWheelEventView(transformedWheel).deltaY, -1)
+
+        let passThroughUp = try mouseEvent(type: .leftMouseUp, button: .left)
+        let passThroughUpResolution = manager.resolve(
+            withCGEvent: passThroughUp,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: "Display B"
+        )
+        XCTAssertNotNil(passThroughUpResolution.transform(passThroughUp) { _ in })
+    }
+
     func testGestureAndButtonMappingShareRouteUntilRelease() throws {
         let mapping = Scheme.Buttons.Mapping(
             trigger: .init(input: .button(.mouse(4))),

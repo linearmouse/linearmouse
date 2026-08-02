@@ -34,6 +34,16 @@ class EventTransformerManager {
         var route: TransformerRoute
         var transformer: EventTransformer
         var selection: RouteSelection
+        /// Physical buttons whose down event was routed through `route` after
+        /// this owner was established. Keep the route until their matching up
+        /// events use the same preprocessing, even when the owner itself did
+        /// not claim them.
+        var pinnedMouseButtons = Set<CGMouseButton>()
+    }
+
+    private enum MouseButtonTransition {
+        case pressed(CGMouseButton)
+        case released(CGMouseButton)
     }
 
     private enum InteractionKey: Hashable {
@@ -186,6 +196,7 @@ class EventTransformerManager {
             allowsUnidentifiedOwnerForIdentifiedSelection: isInteractionContinuation(cgEvent)
         )
         let effectiveSelection = selection.mergingDevice(from: activeInteraction?.1.selection)
+        let mouseButtonTransition = mouseButtonTransition(for: cgEvent)
 
         if sourcePid != nil, bypassEventsFromOtherApplications, !cgEvent.isLinearMouseSyntheticEvent {
             if let (interactionKey, interaction) = activeInteraction {
@@ -197,7 +208,8 @@ class EventTransformerManager {
                     transformer: interaction.route.transformer,
                     interaction: interaction,
                     selection: effectiveSelection,
-                    interactionKey: interactionKey
+                    interactionKey: interactionKey,
+                    mouseButtonTransition: mouseButtonTransition
                 )
             }
             os_log(
@@ -215,7 +227,8 @@ class EventTransformerManager {
                     transformer: interaction.route.transformer,
                     interaction: interaction,
                     selection: effectiveSelection,
-                    interactionKey: interactionKey
+                    interactionKey: interactionKey,
+                    mouseButtonTransition: mouseButtonTransition
                 )
             }
             os_log(
@@ -234,6 +247,32 @@ class EventTransformerManager {
             updateActiveRoute: true
         )
         if let (interactionKey, interaction) = activeInteraction {
+            if isMouseButtonInteractionEvent(cgEvent) {
+                // Keep one physical button stream on one preprocessing route.
+                // The latest route is already active for unrelated input, but
+                // changing button-swap policy between a down and its up would
+                // give the stateful owner (and the target app) different logical
+                // button identities. Newly pressed, unclaimed buttons are pinned
+                // here as well so their pass-through down/up pair stays balanced.
+                return drainingResolution(
+                    transformer: interaction.route.transformer,
+                    interaction: interaction,
+                    selection: effectiveSelection,
+                    interactionKey: interactionKey,
+                    mouseButtonTransition: mouseButtonTransition
+                )
+            }
+            if !hasActiveInteraction(in: interaction.transformer) {
+                // Only manager-owned pass-through buttons remain. Keep their
+                // mouse stream pinned, but do not let the now-idle old mapping
+                // recognizer claim unrelated input from the latest Scheme.
+                return drainingResolution(
+                    transformer: transformerWithoutInteractionTrackers(in: route),
+                    interaction: interaction,
+                    selection: effectiveSelection,
+                    interactionKey: interactionKey
+                )
+            }
             return drainingResolution(
                 transformer: transformer(
                     in: route,
@@ -267,7 +306,8 @@ class EventTransformerManager {
         transformer: EventTransformer,
         interaction: ActiveInteraction,
         selection: RouteSelection,
-        interactionKey: InteractionKey
+        interactionKey: InteractionKey,
+        mouseButtonTransition: MouseButtonTransition? = nil
     ) -> EventTransformerResolution {
         EventTransformerResolution(
             transformer: transformer,
@@ -276,7 +316,8 @@ class EventTransformerManager {
             self?.didProcessOwnedInteraction(
                 interaction,
                 selection: selection,
-                interactionKey: interactionKey
+                interactionKey: interactionKey,
+                mouseButtonTransition: mouseButtonTransition
             )
         }
     }
@@ -299,20 +340,30 @@ class EventTransformerManager {
     private func didProcessOwnedInteraction(
         _ interaction: ActiveInteraction,
         selection: RouteSelection,
-        interactionKey: InteractionKey
+        interactionKey: InteractionKey,
+        mouseButtonTransition: MouseButtonTransition? = nil
     ) {
         guard let current = activeInteractions[interactionKey],
               sameTransformer(current.transformer, interaction.transformer) else {
             return
         }
 
-        guard hasActiveInteraction(in: interaction.transformer) else {
+        var updated = current
+        switch mouseButtonTransition {
+        case let .pressed(button):
+            updated.pinnedMouseButtons.insert(button)
+        case let .released(button):
+            updated.pinnedMouseButtons.remove(button)
+        case nil:
+            break
+        }
+
+        guard hasActiveInteraction(in: interaction.transformer) || !updated.pinnedMouseButtons.isEmpty else {
             activeInteractions[interactionKey] = nil
             deactivateRetiredRouteIfIdle(interaction.route)
             return
         }
 
-        var updated = current
         updated.selection = selection
         let updatedKey = selection.interactionKey
         if interactionKey == .unidentified,
@@ -352,6 +403,17 @@ class EventTransformerManager {
         return entry
     }
 
+    private func isMouseButtonInteractionEvent(_ event: CGEvent) -> Bool {
+        switch event.type {
+        case .leftMouseDown, .rightMouseDown, .otherMouseDown,
+             .leftMouseUp, .rightMouseUp, .otherMouseUp,
+             .leftMouseDragged, .rightMouseDragged, .otherMouseDragged:
+            return true
+        default:
+            return false
+        }
+    }
+
     private func isInteractionContinuation(_ event: CGEvent) -> Bool {
         switch event.type {
         case .leftMouseUp, .rightMouseUp, .otherMouseUp,
@@ -359,6 +421,21 @@ class EventTransformerManager {
             return true
         default:
             return false
+        }
+    }
+
+    private func mouseButtonTransition(for event: CGEvent) -> MouseButtonTransition? {
+        guard let button = MouseEventView(event).mouseButton else {
+            return nil
+        }
+
+        switch event.type {
+        case .leftMouseDown, .rightMouseDown, .otherMouseDown:
+            return .pressed(button)
+        case .leftMouseUp, .rightMouseUp, .otherMouseUp:
+            return .released(button)
+        default:
+            return nil
         }
     }
 
