@@ -24829,6 +24829,7 @@
       }
     },
     "Enable gesture button" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -25035,6 +25036,12 @@
           }
         }
       }
+    },
+    "Enable primary gesture button" : {
+
+    },
+    "Enable secondary gesture button" : {
+
     },
     "Enable universal back and forward" : {
       "localizations" : {
@@ -37748,6 +37755,9 @@
         }
       }
     },
+    "Maximize Window" : {
+
+    },
     "Media" : {
       "localizations" : {
         "af" : {
@@ -38581,6 +38591,9 @@
           }
         }
       }
+    },
+    "Minimize Window" : {
+
     },
     "Missing key %1$@ at %2$@" : {
       "localizations" : {
@@ -41911,6 +41924,9 @@
           }
         }
       }
+    },
+    "Next Track" : {
+
     },
     "No action" : {
       "localizations" : {
@@ -47544,6 +47560,9 @@
           }
         }
       }
+    },
+    "Previous Track" : {
+
     },
     "Primary" : {
       "comment" : "Primary mouse button",
@@ -69835,6 +69854,9 @@
           }
         }
       }
+    },
+    "Use a second mouse button as an independent gesture trigger." : {
+
     },
     "Use finer vertical wheel steps on supported Logitech mice." : {
       "localizations" : {
