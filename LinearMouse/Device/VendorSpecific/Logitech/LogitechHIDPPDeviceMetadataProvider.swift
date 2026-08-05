@@ -1102,6 +1102,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
     private let ioQueue: DispatchQueue
     private let ioQueueKey = DispatchSpecificKey<Void>()
     private let cancellationSemaphore = DispatchSemaphore(value: 0)
+    private var isActivated = false
     private let inputReportBufferLength: Int
     private var inputReportBuffer: UnsafeMutablePointer<UInt8>?
     private let pendingLock = NSLock()
@@ -1214,9 +1215,15 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
             cancellationSemaphore.signal()
         }
         IOHIDDeviceActivate(device)
+        isActivated = true
     }
 
     deinit {
+        // Skip teardown if the device never activated
+        guard isActivated else {
+            return
+        }
+
         IOHIDDeviceCancel(device)
         if DispatchQueue.getSpecific(key: ioQueueKey) == nil {
             cancellationSemaphore.wait()
