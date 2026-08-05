@@ -389,129 +389,129 @@ extension ButtonsSettingsState {
     }
 
     var secondaryGestureEnabled: Bool {
-    get {
-        mergedScheme.buttons.secondaryGesture.enabled ?? false
-    }
-    set {
-        guard newValue != secondaryGestureEnabled else {
-            return
+        get {
+            mergedScheme.buttons.secondaryGesture.enabled ?? false
         }
-
-        if newValue {
-            scheme.buttons.secondaryGesture.enabled = true
-
-            if scheme.buttons.secondaryGesture.trigger == nil {
-                scheme.buttons.secondaryGesture.trigger = defaultGestureTrigger
+        set {
+            guard newValue != secondaryGestureEnabled else {
+                return
             }
 
-            if scheme.buttons.secondaryGesture.threshold == nil {
-                scheme.buttons.secondaryGesture.threshold = 50
+            if newValue {
+                scheme.buttons.secondaryGesture.enabled = true
+
+                if scheme.buttons.secondaryGesture.trigger == nil {
+                    scheme.buttons.secondaryGesture.trigger = defaultGestureTrigger
+                }
+
+                if scheme.buttons.secondaryGesture.threshold == nil {
+                    scheme.buttons.secondaryGesture.threshold = 50
+                }
+
+                if scheme.buttons.secondaryGesture.actions.left == nil {
+                    scheme.buttons.secondaryGesture.actions.left = .spaceLeft
+                }
+
+                if scheme.buttons.secondaryGesture.actions.right == nil {
+                    scheme.buttons.secondaryGesture.actions.right = .spaceRight
+                }
+
+                if scheme.buttons.secondaryGesture.actions.up == nil {
+                    scheme.buttons.secondaryGesture.actions.up = .missionControl
+                }
+
+                if scheme.buttons.secondaryGesture.actions.down == nil {
+                    scheme.buttons.secondaryGesture.actions.down = .appExpose
+                }
+            } else {
+                scheme.buttons.secondaryGesture.enabled = false
             }
 
-            if scheme.buttons.secondaryGesture.actions.left == nil {
-                scheme.buttons.secondaryGesture.actions.left = .spaceLeft
-            }
-
-            if scheme.buttons.secondaryGesture.actions.right == nil {
-                scheme.buttons.secondaryGesture.actions.right = .spaceRight
-            }
-
-            if scheme.buttons.secondaryGesture.actions.up == nil {
-                scheme.buttons.secondaryGesture.actions.up = .missionControl
-            }
-
-            if scheme.buttons.secondaryGesture.actions.down == nil {
-                scheme.buttons.secondaryGesture.actions.down = .appExpose
-            }
-        } else {
-            scheme.buttons.secondaryGesture.enabled = false
+            GlobalEventTap.shared.stop()
+            GlobalEventTap.shared.start()
         }
-
-        GlobalEventTap.shared.stop()
-        GlobalEventTap.shared.start()
     }
-}
 
-var secondaryGestureTrigger: Scheme.Buttons.Mapping {
-    get {
-        mergedScheme.buttons.secondaryGesture.trigger ?? defaultGestureTrigger
-    }
-    set {
-        var trigger = newValue
-        trigger.action = nil
-        trigger.repeat = nil
-        trigger.hold = nil
-        trigger.scroll = nil
-        scheme.buttons.secondaryGesture.trigger = trigger
-    }
-}
-
-var secondaryGestureTriggerBinding: Binding<Scheme.Buttons.Mapping> {
-    Binding(
-        get: { [self] in
-            secondaryGestureTrigger
-        },
-        set: { [self] in
-            secondaryGestureTrigger = $0
+    var secondaryGestureTrigger: Scheme.Buttons.Mapping {
+        get {
+            mergedScheme.buttons.secondaryGesture.trigger ?? defaultGestureTrigger
         }
-    )
-}
+        set {
+            var trigger = newValue
+            trigger.action = nil
+            trigger.repeat = nil
+            trigger.hold = nil
+            trigger.scroll = nil
+            scheme.buttons.secondaryGesture.trigger = trigger
+        }
+    }
 
-var secondaryGestureTriggerValid: Bool {
-    secondaryGestureTrigger.valid
-}
+    var secondaryGestureTriggerBinding: Binding<Scheme.Buttons.Mapping> {
+        Binding(
+            get: { [self] in
+                secondaryGestureTrigger
+            },
+            set: { [self] in
+                secondaryGestureTrigger = $0
+            }
+        )
+    }
 
-var secondaryGestureThreshold: Int {
-    get {
-        mergedScheme.buttons.secondaryGesture.threshold ?? 50
+    var secondaryGestureTriggerValid: Bool {
+        secondaryGestureTrigger.valid
     }
-    set {
-        scheme.buttons.secondaryGesture.threshold = newValue
-    }
-}
 
-var secondaryGestureThresholdDouble: Double {
-    get {
-        Double(secondaryGestureThreshold)
+    var secondaryGestureThreshold: Int {
+        get {
+            mergedScheme.buttons.secondaryGesture.threshold ?? 50
+        }
+        set {
+            scheme.buttons.secondaryGesture.threshold = newValue
+        }
     }
-    set {
-        secondaryGestureThreshold = Int(round(newValue / 5)) * 5
-    }
-}
 
-var secondaryGestureActionLeft: Scheme.Buttons.Gesture.GestureAction {
-    get {
-        mergedScheme.buttons.secondaryGesture.actions.left ?? .spaceLeft
+    var secondaryGestureThresholdDouble: Double {
+        get {
+            Double(secondaryGestureThreshold)
+        }
+        set {
+            secondaryGestureThreshold = Int(round(newValue / 5)) * 5
+        }
     }
-    set {
-        scheme.buttons.secondaryGesture.actions.left = newValue
-    }
-}
 
-var secondaryGestureActionRight: Scheme.Buttons.Gesture.GestureAction {
-    get {
-        mergedScheme.buttons.secondaryGesture.actions.right ?? .spaceRight
+    var secondaryGestureActionLeft: Scheme.Buttons.Gesture.GestureAction {
+        get {
+            mergedScheme.buttons.secondaryGesture.actions.left ?? .spaceLeft
+        }
+        set {
+            scheme.buttons.secondaryGesture.actions.left = newValue
+        }
     }
-    set {
-        scheme.buttons.secondaryGesture.actions.right = newValue
-    }
-}
 
-var secondaryGestureActionUp: Scheme.Buttons.Gesture.GestureAction {
-    get {
-        mergedScheme.buttons.secondaryGesture.actions.up ?? .missionControl
+    var secondaryGestureActionRight: Scheme.Buttons.Gesture.GestureAction {
+        get {
+            mergedScheme.buttons.secondaryGesture.actions.right ?? .spaceRight
+        }
+        set {
+            scheme.buttons.secondaryGesture.actions.right = newValue
+        }
     }
-    set {
-        scheme.buttons.secondaryGesture.actions.up = newValue
-    }
-}
 
-var secondaryGestureActionDown: Scheme.Buttons.Gesture.GestureAction {
-    get {
-        mergedScheme.buttons.secondaryGesture.actions.down ?? .appExpose
+    var secondaryGestureActionUp: Scheme.Buttons.Gesture.GestureAction {
+        get {
+            mergedScheme.buttons.secondaryGesture.actions.up ?? .missionControl
+        }
+        set {
+            scheme.buttons.secondaryGesture.actions.up = newValue
+        }
     }
-    set {
-        scheme.buttons.secondaryGesture.actions.down = newValue
+
+    var secondaryGestureActionDown: Scheme.Buttons.Gesture.GestureAction {
+        get {
+            mergedScheme.buttons.secondaryGesture.actions.down ?? .appExpose
+        }
+        set {
+            scheme.buttons.secondaryGesture.actions.down = newValue
+        }
     }
-}
 }

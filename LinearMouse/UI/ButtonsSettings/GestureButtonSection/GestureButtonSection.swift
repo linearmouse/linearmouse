@@ -17,7 +17,6 @@ struct GestureButtonSection: View {
         }
     }
 
-    @ViewBuilder
     private var primaryGestureSection: some View {
         Section {
             Toggle(isOn: $state.gestureEnabled.animation()) {
@@ -45,7 +44,6 @@ struct GestureButtonSection: View {
         .modifier(SectionViewModifier())
     }
 
-    @ViewBuilder
     private var secondaryGestureSection: some View {
         Section {
             Toggle(isOn: $state.secondaryGestureEnabled.animation()) {

@@ -300,7 +300,7 @@ extension GestureButtonTransformer: EventTransformer {
 
         case .launchpad:
             launchpad()
-        
+
         case .previousTrack:
             postMediaKey(NX_KEYTYPE_PREVIOUS)
 
@@ -314,6 +314,7 @@ extension GestureButtonTransformer: EventTransformer {
             minimizeFocusedWindow()
         }
     }
+
     private func postMediaKey(_ key: Int32) {
         let keyDown = NSEvent.otherEvent(
             with: .systemDefined,
@@ -342,6 +343,7 @@ extension GestureButtonTransformer: EventTransformer {
         keyDown?.cgEvent?.post(tap: .cghidEventTap)
         keyUp?.cgEvent?.post(tap: .cghidEventTap)
     }
+
     private func focusedWindow() -> AXUIElement? {
         guard let application = NSWorkspace.shared.frontmostApplication else {
             return nil
@@ -373,13 +375,13 @@ extension GestureButtonTransformer: EventTransformer {
             kAXPositionAttribute as CFString,
             &positionValue
         ) == .success,
-        AXUIElementCopyAttributeValue(
-            window,
-            kAXSizeAttribute as CFString,
-            &sizeValue
-        ) == .success,
-        let positionValue,
-        let sizeValue else {
+            AXUIElementCopyAttributeValue(
+                window,
+                kAXSizeAttribute as CFString,
+                &sizeValue
+            ) == .success,
+            let positionValue,
+            let sizeValue else {
             return nil
         }
 
@@ -391,11 +393,11 @@ extension GestureButtonTransformer: EventTransformer {
             .cgPoint,
             &position
         ),
-        AXValueGetValue(
-            sizeValue as! AXValue,
-            .cgSize,
-            &size
-        ) else {
+            AXValueGetValue(
+                sizeValue as! AXValue,
+                .cgSize,
+                &size
+            ) else {
             return nil
         }
 

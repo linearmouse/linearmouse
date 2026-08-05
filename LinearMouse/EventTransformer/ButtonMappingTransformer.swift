@@ -450,22 +450,22 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
     }
 
     private func cancelCompetingGestureIfNeeded(
-    after output: ButtonMappingEngine.Output,
-    in lane: RecognitionLane?
-) {
-    guard output.discardsBufferedEvents else {
-        return
-    }
-
-    for gestureTransformer in gestureTransformers {
-        guard let button = gestureTransformer.configuredTriggerButton,
-              lane?.engine.ownsInteraction(overlapping: button) == true else {
-            continue
+        after output: ButtonMappingEngine.Output,
+        in lane: RecognitionLane?
+    ) {
+        guard output.discardsBufferedEvents else {
+            return
         }
 
-        gestureTransformer.cancelInteraction(containing: button)
+        for gestureTransformer in gestureTransformers {
+            guard let button = gestureTransformer.configuredTriggerButton,
+                  lane?.engine.ownsInteraction(overlapping: button) == true else {
+                continue
+            }
+
+            gestureTransformer.cancelInteraction(containing: button)
+        }
     }
-}
 
     private func replayBufferedEvents(in lane: RecognitionLane?, remappingTo target: CGMouseButton) {
         let events = lane?.bufferedEvents ?? []

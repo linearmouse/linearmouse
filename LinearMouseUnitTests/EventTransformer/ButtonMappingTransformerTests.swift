@@ -205,7 +205,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
             mappings: [buttonMapping(short: .arg1(.keyPress([.a])))],
             scheduler: scheduler,
             keySimulator: keySimulator,
-            gestureTransformer: gestureTransformer
+            gestureTransformers: [gestureTransformer]
         )
 
         XCTAssertNil(try transformer.transform(buttonEvent(pressed: true), in: .init(device: nil)))
@@ -228,7 +228,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
         let transformer = makeTransformer(
             mappings: [mapping],
             scheduler: scheduler,
-            gestureTransformer: gestureTransformer
+            gestureTransformers: [gestureTransformer]
         )
 
         XCTAssertNil(try transformer.transform(buttonEvent(pressed: true), in: .init(device: nil)))
@@ -243,7 +243,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
         let transformer = makeTransformer(
             mappings: [buttonMapping(long: .arg0(.none))],
             scheduler: scheduler,
-            gestureTransformer: gestureTransformer
+            gestureTransformers: [gestureTransformer]
         )
 
         XCTAssertNil(try transformer.transform(buttonEvent(pressed: true), in: .init(device: nil)))
@@ -265,7 +265,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
         let transformer = makeTransformer(
             mappings: [mapping],
             scheduler: scheduler,
-            gestureTransformer: gestureTransformer
+            gestureTransformers: [gestureTransformer]
         )
 
         let down = try XCTUnwrap(transformer.transform(
@@ -301,7 +301,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
                 buttonMapping(button: 5, long: .arg0(.none))
             ],
             scheduler: scheduler,
-            gestureTransformer: makeGestureTransformer(button: .mouse(4))
+            gestureTransformers: [makeGestureTransformer(button: .mouse(4))]
         ) { deliveredEvents.append($0) }
 
         XCTAssertNil(try transformer.transform(
@@ -344,7 +344,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
             mappings: [buttonMapping(short: .arg1(.keyPress([.a])))],
             scheduler: scheduler,
             keySimulator: keySimulator,
-            gestureTransformer: makeGestureTransformer(button: .mouse(4))
+            gestureTransformers: [makeGestureTransformer(button: .mouse(4))]
         )
 
         XCTAssertNil(try transformer.transform(buttonEvent(pressed: true), in: .init(device: nil)))
@@ -908,7 +908,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
             mappings: [mapping],
             scheduler: scheduler,
             keySimulator: keySimulator,
-            gestureTransformer: makeGestureTransformer(button: .logitechControl(identity))
+            gestureTransformers: [makeGestureTransformer(button: .logitechControl(identity))]
         )
 
         XCTAssertEqual(
@@ -939,7 +939,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
         let transformer = makeTransformer(
             mappings: [mapping],
             scheduler: scheduler,
-            gestureTransformer: gestureTransformer
+            gestureTransformers: [gestureTransformer]
         )
 
         XCTAssertEqual(
@@ -1223,7 +1223,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
         scheduler: ButtonMappingTestTimerScheduler,
         swapsPrimaryAndSecondaryButtons: Bool = false,
         keySimulator: KeySimulating? = nil,
-        gestureTransformer: GestureButtonTransformer? = nil,
+        gestureTransformers: [GestureButtonTransformer] = [],
         eventSink: @escaping (CGEvent) -> Void = { _ in }
     ) -> ButtonMappingTransformer {
         .init(
@@ -1232,7 +1232,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
             scheduleTimer: scheduler.schedule,
             monotonicClock: { scheduler.now },
             keySimulator: keySimulator,
-            gestureTransformer: gestureTransformer,
+            gestureTransformers: gestureTransformers,
             eventSink: eventSink
         )
     }

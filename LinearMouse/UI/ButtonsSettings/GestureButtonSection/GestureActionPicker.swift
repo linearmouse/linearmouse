@@ -18,7 +18,7 @@ struct GestureActionPicker: View {
             Text("App Expose").tag(GestureAction.appExpose)
             Text("Show Desktop").tag(GestureAction.showDesktop)
             Text("Launchpad").tag(GestureAction.launchpad)
-            
+
             Text("Previous Track").tag(GestureAction.previousTrack)
             Text("Next Track").tag(GestureAction.nextTrack)
             Text("Maximize Window").tag(GestureAction.maximizeWindow)
