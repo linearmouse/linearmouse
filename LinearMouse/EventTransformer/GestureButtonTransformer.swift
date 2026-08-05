@@ -4,6 +4,7 @@
 import AppKit
 import DockKit
 import Foundation
+import IOKit.hidsystem
 import KeyKit
 import os.log
 
@@ -299,7 +300,47 @@ extension GestureButtonTransformer: EventTransformer {
 
         case .launchpad:
             launchpad()
+        
+        case .previousTrack:
+            postMediaKey(NX_KEYTYPE_PREVIOUS)
+
+        case .nextTrack:
+            postMediaKey(NX_KEYTYPE_NEXT)
+
+        case .maximizeWindow:
+            break
+
+        case .minimizeWindow:
+            break
         }
+    }
+    private func postMediaKey(_ key: Int32) {
+        let keyDown = NSEvent.otherEvent(
+            with: .systemDefined,
+            location: .zero,
+            modifierFlags: NSEvent.ModifierFlags(rawValue: 0xA00),
+            timestamp: 0,
+            windowNumber: 0,
+            context: nil,
+            subtype: 8,
+            data1: Int((key << 16) | (0xA << 8)),
+            data2: -1
+        )
+
+        let keyUp = NSEvent.otherEvent(
+            with: .systemDefined,
+            location: .zero,
+            modifierFlags: NSEvent.ModifierFlags(rawValue: 0xB00),
+            timestamp: 0,
+            windowNumber: 0,
+            context: nil,
+            subtype: 8,
+            data1: Int((key << 16) | (0xB << 8)),
+            data2: -1
+        )
+
+        keyDown?.cgEvent?.post(tap: .cghidEventTap)
+        keyUp?.cgEvent?.post(tap: .cghidEventTap)
     }
 }
 

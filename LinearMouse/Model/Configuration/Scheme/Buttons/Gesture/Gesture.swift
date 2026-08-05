@@ -32,6 +32,11 @@ extension Scheme.Buttons {
             case appExpose
             case showDesktop
             case launchpad
+
+            case previousTrack
+            case nextTrack
+            case maximizeWindow
+            case minimizeWindow
         }
     }
 }
