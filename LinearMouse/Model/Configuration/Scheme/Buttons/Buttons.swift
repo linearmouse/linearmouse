@@ -23,6 +23,8 @@ extension Scheme {
         @ImplicitOptional var autoScroll: AutoScroll
 
         @ImplicitOptional var gesture: Gesture
+
+        @ImplicitOptional var secondaryGesture: Gesture
     }
 }
 
@@ -51,6 +53,9 @@ extension Scheme.Buttons {
         if let gesture = $gesture {
             buttons.$gesture = gesture
         }
+        if let secondaryGesture = $secondaryGesture {
+            buttons.$secondaryGesture = secondaryGesture
+        }
     }
 
     func merge(into buttons: inout Self?) {
@@ -70,6 +75,7 @@ extension Scheme.Buttons {
         case clickDebouncing
         case autoScroll
         case gesture
+        case secondaryGesture
     }
 
     init(from decoder: Decoder) throws {
@@ -93,6 +99,10 @@ extension Scheme.Buttons {
         )
         _autoScroll = try container.decode(ImplicitOptional<AutoScroll>.self, forKey: .autoScroll)
         _gesture = try container.decode(ImplicitOptional<Gesture>.self, forKey: .gesture)
+        _secondaryGesture = try container.decode(
+            ImplicitOptional<Gesture>.self,
+            forKey: .secondaryGesture
+        )
     }
 
     func encode(to encoder: Encoder) throws {
@@ -111,6 +121,7 @@ extension Scheme.Buttons {
         try container.encode(_clickDebouncing, forKey: .clickDebouncing)
         try container.encode(_autoScroll, forKey: .autoScroll)
         try container.encode(_gesture, forKey: .gesture)
+        try container.encode(_secondaryGesture, forKey: .secondaryGesture)
     }
 }
 
