@@ -12,76 +12,138 @@ struct GestureButtonSection: View {
 
     var body: some View {
         if isMouseDevice {
-            Section {
-                Toggle(isOn: $state.gestureEnabled.animation()) {
-                    withDescription {
-                        Text("Enable gesture button")
-                        Text(
-                            "Press and hold a button while dragging to trigger gestures like switching desktop spaces or opening Mission Control."
-                        )
-                    }
-                }
+            primaryGestureSection
+            secondaryGestureSection
+        }
+    }
 
-                if state.gestureEnabled {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Trigger")
-                            .font(.headline)
-
-                        ButtonMappingButtonRecorder(
-                            mapping: state.gestureTriggerBinding
-                        )
-
-                        if !state.gestureTriggerValid {
-                            Text("Choose a mouse button trigger. Left click without modifier keys is not allowed.")
-                                .foregroundColor(.red)
-                                .controlSize(.small)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text("Threshold")
-                            Spacer()
-                            Text("\(state.gestureThreshold) pixels")
-                                .foregroundColor(.secondary)
-                        }
-                        Slider(value: $state.gestureThresholdDouble, in: 20 ... 200, step: 5)
-                    }
-
-                    Divider()
-
-                    Text("Gesture Actions")
-                        .font(.headline)
-
-                    GestureActionPicker(
-                        label: "Swipe left",
-                        selection: $state.gestureActionLeft
-                    )
-
-                    GestureActionPicker(
-                        label: "Swipe right",
-                        selection: $state.gestureActionRight
-                    )
-
-                    GestureActionPicker(
-                        label: "Swipe up",
-                        selection: $state.gestureActionUp
-                    )
-
-                    GestureActionPicker(
-                        label: "Swipe down",
-                        selection: $state.gestureActionDown
-                    )
-
+    @ViewBuilder
+    private var primaryGestureSection: some View {
+        Section {
+            Toggle(isOn: $state.gestureEnabled.animation()) {
+                withDescription {
+                    Text("Enable primary gesture button")
                     Text(
-                        "Hold the button and drag to trigger gestures. Drag at least \(state.gestureThreshold) pixels in one direction."
+                        "Press and hold a button while dragging to trigger gestures like switching desktop spaces or opening Mission Control."
                     )
-                    .settingsDescriptionStyle()
-                    .padding(.top, 8)
                 }
             }
-            .modifier(SectionViewModifier())
+
+            if state.gestureEnabled {
+                gestureConfiguration(
+                    trigger: state.gestureTriggerBinding,
+                    triggerValid: state.gestureTriggerValid,
+                    threshold: $state.gestureThresholdDouble,
+                    thresholdPixels: state.gestureThreshold,
+                    actionLeft: $state.gestureActionLeft,
+                    actionRight: $state.gestureActionRight,
+                    actionUp: $state.gestureActionUp,
+                    actionDown: $state.gestureActionDown
+                )
+            }
         }
+        .modifier(SectionViewModifier())
+    }
+
+    @ViewBuilder
+    private var secondaryGestureSection: some View {
+        Section {
+            Toggle(isOn: $state.secondaryGestureEnabled.animation()) {
+                withDescription {
+                    Text("Enable secondary gesture button")
+                    Text(
+                        "Use a second mouse button as an independent gesture trigger."
+                    )
+                }
+            }
+
+            if state.secondaryGestureEnabled {
+                gestureConfiguration(
+                    trigger: state.secondaryGestureTriggerBinding,
+                    triggerValid: state.secondaryGestureTriggerValid,
+                    threshold: $state.secondaryGestureThresholdDouble,
+                    thresholdPixels: state.secondaryGestureThreshold,
+                    actionLeft: $state.secondaryGestureActionLeft,
+                    actionRight: $state.secondaryGestureActionRight,
+                    actionUp: $state.secondaryGestureActionUp,
+                    actionDown: $state.secondaryGestureActionDown
+                )
+            }
+        }
+        .modifier(SectionViewModifier())
+    }
+
+    @ViewBuilder
+    private func gestureConfiguration(
+        trigger: Binding<Scheme.Buttons.Mapping>,
+        triggerValid: Bool,
+        threshold: Binding<Double>,
+        thresholdPixels: Int,
+        actionLeft: Binding<Scheme.Buttons.Gesture.GestureAction>,
+        actionRight: Binding<Scheme.Buttons.Gesture.GestureAction>,
+        actionUp: Binding<Scheme.Buttons.Gesture.GestureAction>,
+        actionDown: Binding<Scheme.Buttons.Gesture.GestureAction>
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Trigger")
+                .font(.headline)
+
+            ButtonMappingButtonRecorder(
+                mapping: trigger
+            )
+
+            if !triggerValid {
+                Text("Choose a mouse button trigger. Left click without modifier keys is not allowed.")
+                    .foregroundColor(.red)
+                    .controlSize(.small)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text("Threshold")
+                Spacer()
+                Text("\(thresholdPixels) pixels")
+                    .foregroundColor(.secondary)
+            }
+
+            Slider(
+                value: threshold,
+                in: 20 ... 200,
+                step: 5
+            )
+        }
+
+        Divider()
+
+        Text("Gesture Actions")
+            .font(.headline)
+
+        GestureActionPicker(
+            label: "Swipe left",
+            selection: actionLeft
+        )
+
+        GestureActionPicker(
+            label: "Swipe right",
+            selection: actionRight
+        )
+
+        GestureActionPicker(
+            label: "Swipe up",
+            selection: actionUp
+        )
+
+        GestureActionPicker(
+            label: "Swipe down",
+            selection: actionDown
+        )
+
+        Text(
+            "Hold the button and drag to trigger gestures. Drag at least \(thresholdPixels) pixels in one direction."
+        )
+        .settingsDescriptionStyle()
+        .padding(.top, 8)
     }
 }
