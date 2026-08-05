@@ -769,19 +769,36 @@ class EventTransformerManager {
             mapping.normalizeAsStructured()
             return mapping
         }
-        let gestureTransformer: GestureButtonTransformer? = if let gesture = scheme.buttons.$gesture,
-                                                               gesture.enabled ?? false,
-                                                               let trigger = gesture.trigger,
-                                                               trigger.button != nil {
-            GestureButtonTransformer(
-                trigger: trigger,
-                threshold: Double(gesture.threshold ?? 50),
-                deadZone: Double(gesture.deadZone ?? 40),
-                cooldownMs: gesture.cooldownMs ?? 500,
-                actions: gesture.actions
+        var gestureTransformers: [GestureButtonTransformer] = []
+
+        if let gesture = scheme.buttons.$gesture,
+           gesture.enabled ?? false,
+           let trigger = gesture.trigger,
+           trigger.button != nil {
+            gestureTransformers.append(
+                GestureButtonTransformer(
+                    trigger: trigger,
+                    threshold: Double(gesture.threshold ?? 50),
+                    deadZone: Double(gesture.deadZone ?? 40),
+                    cooldownMs: gesture.cooldownMs ?? 500,
+                    actions: gesture.actions
+                )
             )
-        } else {
-            nil
+        }
+
+        if let gesture = scheme.buttons.$secondaryGesture,
+           gesture.enabled ?? false,
+           let trigger = gesture.trigger,
+           trigger.button != nil {
+            gestureTransformers.append(
+                GestureButtonTransformer(
+                    trigger: trigger,
+                    threshold: Double(gesture.threshold ?? 50),
+                    deadZone: Double(gesture.deadZone ?? 40),
+                    cooldownMs: gesture.cooldownMs ?? 500,
+                    actions: gesture.actions
+                )
+            )
         }
         let autoScrollTransformer = autoScrollTransformer(for: scheme.buttons.$autoScroll)
         if device != nil {
@@ -814,7 +831,7 @@ class EventTransformerManager {
             eventTransformer.append(ButtonMappingTransformer(
                 mappings: buttonMappings,
                 universalBackForward: scheme.buttons.universalBackForward,
-                gestureTransformer: gestureTransformer
+                gestureTransformers: gestureTransformers
             ))
         }
 
@@ -895,8 +912,10 @@ class EventTransformerManager {
             eventTransformer.append(ModifierActionsTransformer(modifiers: modifiers))
         }
 
-        if buttonMappings.isEmpty, let gestureTransformer {
-            eventTransformer.append(gestureTransformer)
+        if buttonMappings.isEmpty {
+            for gestureTransformer in gestureTransformers {
+                eventTransformer.append(gestureTransformer)
+            }
         }
 
         if let universalBackForward = scheme.buttons.universalBackForward,

@@ -65,7 +65,7 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
     private let monotonicClock: MonotonicClock
     private let fallbackEventSink: (CGEvent) -> Void
     private let swapsPrimaryAndSecondaryButtons: Bool
-    private let gestureTransformer: GestureButtonTransformer?
+    private let gestureTransformers: [GestureButtonTransformer]
     private let policy: ButtonMappingPolicy
 
     private var timer: TimerToken?
@@ -82,7 +82,7 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
         scheduleTimer: @escaping TimerScheduler = ButtonMappingTransformer.scheduleEventThreadTimer,
         monotonicClock: @escaping MonotonicClock = { DispatchTime.now().uptimeNanoseconds },
         keySimulator: KeySimulating? = nil,
-        gestureTransformer: GestureButtonTransformer? = nil,
+        gestureTransformers: [GestureButtonTransformer] = [],
         eventSink: @escaping (CGEvent) -> Void = { $0.post(tap: .cgSessionEventTap) }
     ) {
         self.mappings = mappings
@@ -96,7 +96,7 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
         self.monotonicClock = monotonicClock
         fallbackEventSink = eventSink
         self.swapsPrimaryAndSecondaryButtons = swapsPrimaryAndSecondaryButtons
-        self.gestureTransformer = gestureTransformer
+        self.gestureTransformers = gestureTransformers
     }
 
     func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent? {
@@ -106,10 +106,14 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
             return event
         }
 
-        if let gestureTransformer,
-           !isRecording || gestureTransformer.hasActiveInteraction,
-           gestureTransformer.transform(event, in: context) == nil {
-            return nil
+        for gestureTransformer in gestureTransformers {
+            guard !isRecording || gestureTransformer.hasActiveInteraction else {
+                continue
+            }
+
+            if gestureTransformer.transform(event, in: context) == nil {
+                return nil
+            }
         }
 
         if [.keyDown, .keyUp].contains(event.type) {
@@ -446,18 +450,22 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
     }
 
     private func cancelCompetingGestureIfNeeded(
-        after output: ButtonMappingEngine.Output,
-        in lane: RecognitionLane?
-    ) {
-        guard output.discardsBufferedEvents,
-              let gestureTransformer,
-              let button = gestureTransformer.configuredTriggerButton,
+    after output: ButtonMappingEngine.Output,
+    in lane: RecognitionLane?
+) {
+    guard output.discardsBufferedEvents else {
+        return
+    }
+
+    for gestureTransformer in gestureTransformers {
+        guard let button = gestureTransformer.configuredTriggerButton,
               lane?.engine.ownsInteraction(overlapping: button) == true else {
-            return
+            continue
         }
 
         gestureTransformer.cancelInteraction(containing: button)
     }
+}
 
     private func replayBufferedEvents(in lane: RecognitionLane?, remappingTo target: CGMouseButton) {
         let events = lane?.bufferedEvents ?? []
@@ -548,11 +556,29 @@ extension ButtonMappingTransformer: LogitechControlEventHandling, LogitechContro
             return .notHandled
         }
 
-        let gestureResult: LogitechControlEventHandlingResult = if !isRecording ||
-            gestureTransformer?.hasActiveInteraction == true {
-            gestureTransformer?.handleLogitechControlEvent(context) ?? .notHandled
-        } else {
-            .notHandled
+        var gestureResult: LogitechControlEventHandlingResult = .notHandled
+
+        for gestureTransformer in gestureTransformers {
+            guard !isRecording || gestureTransformer.hasActiveInteraction else {
+                continue
+            }
+
+            let result = gestureTransformer.handleLogitechControlEvent(context)
+
+            switch result {
+            case .handled:
+                gestureResult = .handled
+            case .handledDeferringSyntheticFallback:
+                if gestureResult != .handled {
+                    gestureResult = .handledDeferringSyntheticFallback
+                }
+            case .handledAllowingSyntheticFallback:
+                if gestureResult == .notHandled {
+                    gestureResult = .handledAllowingSyntheticFallback
+                }
+            case .notHandled:
+                break
+            }
         }
         if gestureResult == .handled {
             cancelGestureInteraction(for: context)
@@ -619,7 +645,9 @@ extension ButtonMappingTransformer: LogitechControlEventHandling, LogitechContro
 
     @discardableResult
     func cancelLogitechControlInteraction(_ context: LogitechEventContext) -> Bool {
-        let canceledGesture = gestureTransformer?.cancelLogitechControlInteraction(context) == true
+        let canceledGesture = gestureTransformers.reduce(false) { canceled, transformer in
+            transformer.cancelLogitechControlInteraction(context) || canceled
+        }
         let canceledMapping = cancelMappingInteractions(
             for: configuredButtons(matching: context),
             replayingBufferedEvents: true
@@ -684,13 +712,15 @@ extension ButtonMappingTransformer: Deactivatable {
         }
         recognitionLanes.removeAll()
         actionExecutor.deactivate()
-        gestureTransformer?.deactivate()
+        for gestureTransformer in gestureTransformers {
+            gestureTransformer.deactivate()
+        }
     }
 }
 
 extension ButtonMappingTransformer: EventTransformerInteractionTracking {
     var hasActiveInteraction: Bool {
         recognitionLanes.contains(where: \.engine.hasActiveInteraction)
-            || gestureTransformer?.hasActiveInteraction == true
+            || gestureTransformers.contains(where: \.hasActiveInteraction)
     }
 }
