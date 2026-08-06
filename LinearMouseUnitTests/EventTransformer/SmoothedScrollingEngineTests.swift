@@ -610,6 +610,30 @@ final class SmoothedScrollingEngineTests: XCTestCase {
         XCTAssertEqual(emissions.last?.phase, .touchEnded)
     }
 
+    // MARK: - Boundary contract for the == lowerBound short-circuit (#1303)
+
+    func testValuesJustAboveLowerBoundStayOnLegacyPath() {
+        // A value just above the lower bound must NOT trip the ==lowerBound
+        // short-circuit. This locks the equality so a future change to <= (or a
+        // shifted lowerBound) is caught instead of silently widening the bypass.
+        let tuning = SmoothedScrollingEngine.AxisTuning(
+            configuration: .init(
+                preset: .easeInOut,
+                speed: 1,
+                acceleration: Decimal(string: "0.001"),
+                inertia: Decimal(string: "0.001")
+            )
+        )
+
+        // acceleration = 0.001: the rate curve is active, so a 4x faster input
+        // yields more than 4x velocity (NOT linear as at acceleration == 0).
+        XCTAssertGreaterThan(tuning.desiredVelocity(for: 100), tuning.desiredVelocity(for: 25) * 4)
+
+        // inertia = 0.001: legacy decay is positive (NOT the 0 returned at
+        // inertia == 0).
+        XCTAssertGreaterThan(tuning.momentumDecay(for: 1.0 / 120.0), 0)
+    }
+
     private struct TimedScrollInput {
         var timestamp: TimeInterval
         var deltaY: Double
