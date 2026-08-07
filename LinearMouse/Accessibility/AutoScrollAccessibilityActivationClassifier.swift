@@ -44,6 +44,11 @@ struct AutoScrollAccessibilityActivationClassifier {
         "AXDisclosureTriangle",
         "AXSwitch"
     ]
+    private static let listContainerRoles: Set<String> = [
+        "AXTable",
+        "AXOutline",
+        "AXList"
+    ]
 
     private let elementQuery: AccessibilityElementQuerying
     private let bypassRuleMatcher: AccessibilityBypassRuleMatcher
@@ -76,6 +81,14 @@ struct AutoScrollAccessibilityActivationClassifier {
         }
 
         return actions.contains(kAXPressAction as String)
+    }
+
+    static func isListContainerRole(_ role: String?) -> Bool {
+        guard let role else {
+            return false
+        }
+
+        return listContainerRoles.contains(role)
     }
 
     private func refineActivationProbe(from initialProbe: AutoScrollActivationProbe) -> AutoScrollActivationProbe {
@@ -120,11 +133,15 @@ struct AutoScrollAccessibilityActivationClassifier {
         case let .success(value):
             hitElement = value
         case let .failure(error):
-            return .nonPressable(diagnostic: "hitTest.\(error.linearMouseDescription)", path: [])
+            return .nonPressable(
+                diagnostic: "hitTest.\(error.linearMouseDescription)",
+                path: [],
+                isInsideWebContent: false
+            )
         }
 
         guard let hitElement else {
-            return .nonPressable(diagnostic: nil, path: [])
+            return .nonPressable(diagnostic: nil, path: [], isInsideWebContent: false)
         }
 
         var currentElement: AXUIElement? = hitElement
@@ -132,7 +149,7 @@ struct AutoScrollAccessibilityActivationClassifier {
         var isInsideWebContent = false
         for depth in 0 ..< Self.maxParentDepth {
             guard let element = currentElement else {
-                return .nonPressable(diagnostic: nil, path: path)
+                return .nonPressable(diagnostic: nil, path: path, isInsideWebContent: isInsideWebContent)
             }
 
             let role: String?
@@ -140,7 +157,11 @@ struct AutoScrollAccessibilityActivationClassifier {
             case let .success(value):
                 role = value
             case let .failure(error):
-                return .nonPressable(diagnostic: "role.\(error.linearMouseDescription)", path: path)
+                return .nonPressable(
+                    diagnostic: "role.\(error.linearMouseDescription)",
+                    path: path,
+                    isInsideWebContent: isInsideWebContent
+                )
             }
 
             let subrole: String?
@@ -148,7 +169,11 @@ struct AutoScrollAccessibilityActivationClassifier {
             case let .success(value):
                 subrole = value
             case let .failure(error):
-                return .nonPressable(diagnostic: "subrole.\(error.linearMouseDescription)", path: path)
+                return .nonPressable(
+                    diagnostic: "subrole.\(error.linearMouseDescription)",
+                    path: path,
+                    isInsideWebContent: isInsideWebContent
+                )
             }
 
             let actions: [String]
@@ -156,7 +181,11 @@ struct AutoScrollAccessibilityActivationClassifier {
             case let .success(value):
                 actions = value
             case let .failure(error):
-                return .nonPressable(diagnostic: "actions.\(error.linearMouseDescription)", path: path)
+                return .nonPressable(
+                    diagnostic: "actions.\(error.linearMouseDescription)",
+                    path: path,
+                    isInsideWebContent: isInsideWebContent
+                )
             }
 
             path.append(Self.pathEntry(role: role, subrole: subrole, actions: actions))
@@ -189,15 +218,27 @@ struct AutoScrollAccessibilityActivationClassifier {
                 return .pressable(path: path)
             }
 
+            // Once we're inside a table/outline/list (e.g. Finder's file list, or a table on a
+            // web page) and the hit element itself isn't pressable, the remaining ancestors are
+            // decorative wrapper containers. Stop climbing instead of walking all the way to
+            // maxParentDepth, which was slow enough to be perceptible before auto scroll activated.
+            if Self.isListContainerRole(role) {
+                return .nonPressable(diagnostic: "listContainer", path: path, isInsideWebContent: isInsideWebContent)
+            }
+
             switch elementQuery.optionalElementValue(of: kAXParentAttribute as CFString, on: element) {
             case let .success(value):
                 currentElement = value
             case let .failure(error):
-                return .nonPressable(diagnostic: "parent.\(error.linearMouseDescription)", path: path)
+                return .nonPressable(
+                    diagnostic: "parent.\(error.linearMouseDescription)",
+                    path: path,
+                    isInsideWebContent: isInsideWebContent
+                )
             }
         }
 
-        return .nonPressable(diagnostic: "depthLimit", path: path)
+        return .nonPressable(diagnostic: "depthLimit", path: path, isInsideWebContent: isInsideWebContent)
     }
 
     private static func isExcludedActivationElement(role: String?, subrole: String?) -> Bool {
@@ -370,13 +411,13 @@ struct AutoScrollActivationProbe {
 
 enum AutoScrollActivationHit {
     case pressable(path: [String])
-    case nonPressable(diagnostic: String?, path: [String])
+    case nonPressable(diagnostic: String?, path: [String], isInsideWebContent: Bool)
 
     var path: [String] {
         switch self {
         case let .pressable(path):
             path
-        case let .nonPressable(_, path):
+        case let .nonPressable(_, path, _):
             path
         }
     }
@@ -385,7 +426,7 @@ enum AutoScrollActivationHit {
         switch self {
         case .pressable:
             "pressable"
-        case let .nonPressable(diagnostic, _):
+        case let .nonPressable(diagnostic, _, _):
             diagnostic.map { "nonPressable.\($0)" } ?? "nonPressable"
         }
     }
@@ -397,7 +438,15 @@ enum AutoScrollActivationHit {
         return false
     }
 
+    /// Nearby-point resampling only exists to compensate for browser accessibility trees
+    /// reporting an imprecise hit element near a link or button. It never changes the
+    /// outcome for native apps (Finder, Xcode, etc.), so skip it there — each extra sample
+    /// is a synchronous cross-process AX call and running all of them was adding
+    /// hundreds of milliseconds of perceptible delay before auto scroll activated.
     var requiresAdditionalSampling: Bool {
-        !isPressable
+        guard case let .nonPressable(_, _, isInsideWebContent) = self else {
+            return false
+        }
+        return isInsideWebContent
     }
 }

@@ -14,10 +14,11 @@ final class AutoScrollAccessibilityActivationClassifierTests: XCTestCase {
         XCTAssertEqual(hit.summary, "pressable")
     }
 
-    func testAccessibilityFailureIsNonPressableWithDiagnostic() {
+    func testAccessibilityFailureInsideWebContentRequiresAdditionalSampling() {
         let hit = AutoScrollActivationHit.nonPressable(
             diagnostic: "role.cannotComplete",
-            path: ["AXGroup"]
+            path: ["AXGroup"],
+            isInsideWebContent: true
         )
 
         XCTAssertFalse(hit.isPressable)
@@ -25,13 +26,35 @@ final class AutoScrollAccessibilityActivationClassifierTests: XCTestCase {
         XCTAssertEqual(hit.summary, "nonPressable.role.cannotComplete")
     }
 
+    func testNonPressableHitOutsideWebContentSkipsAdditionalSampling() {
+        let hit = AutoScrollActivationHit.nonPressable(
+            diagnostic: "listContainer",
+            path: ["AXOutline"],
+            isInsideWebContent: false
+        )
+
+        XCTAssertFalse(hit.isPressable)
+        XCTAssertFalse(hit.requiresAdditionalSampling)
+        XCTAssertEqual(hit.summary, "nonPressable.listContainer")
+    }
+
     func testAutoScrollStartsOnlyForNonPressableOrUnavailableHit() {
         XCTAssertFalse(AutoScrollTransformer.shouldStartAutoScroll(for: .pressable(path: [])))
         XCTAssertTrue(AutoScrollTransformer.shouldStartAutoScroll(for: .nonPressable(
             diagnostic: nil,
-            path: []
+            path: [],
+            isInsideWebContent: false
         )))
         XCTAssertTrue(AutoScrollTransformer.shouldStartAutoScroll(for: nil))
+    }
+
+    func testListContainerRoleStopsClimbingTablesOutlinesAndLists() {
+        XCTAssertTrue(AutoScrollAccessibilityActivationClassifier.isListContainerRole("AXTable"))
+        XCTAssertTrue(AutoScrollAccessibilityActivationClassifier.isListContainerRole("AXOutline"))
+        XCTAssertTrue(AutoScrollAccessibilityActivationClassifier.isListContainerRole("AXList"))
+        XCTAssertFalse(AutoScrollAccessibilityActivationClassifier.isListContainerRole("AXCell"))
+        XCTAssertFalse(AutoScrollAccessibilityActivationClassifier.isListContainerRole("AXGroup"))
+        XCTAssertFalse(AutoScrollAccessibilityActivationClassifier.isListContainerRole(nil))
     }
 
     func testPressableActivationElementAcceptsExplicitControls() {
