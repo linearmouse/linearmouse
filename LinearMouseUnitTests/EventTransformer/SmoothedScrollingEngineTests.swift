@@ -424,6 +424,216 @@ final class SmoothedScrollingEngineTests: XCTestCase {
         XCTAssertEqual(switchedEmission.deltaY, 0, accuracy: 0.001)
     }
 
+    // MARK: - Honoring acceleration = 0 (issue #1303)
+
+    func testDesiredVelocityIsProportionalToInputWhenAccelerationDisabled() {
+        // acceleration at its lower bound (0): the rate-dependent curve is
+        // bypassed, so velocity is strictly proportional to the input — each
+        // wheel tick travels a constant distance. This must hold for every
+        // preset and speed, since the bypass is structural rather than
+        // preset-dependent.
+        let presets: [Scheme.Scrolling.Smoothed.Preset] = [.easeInOut, .linear, .easeIn, .smooth]
+        let speeds: [Decimal] = [1, Decimal(string: "2.5") ?? 1]
+
+        for preset in presets {
+            for speed in speeds {
+                let tuning = SmoothedScrollingEngine.AxisTuning(
+                    configuration: .init(
+                        preset: preset,
+                        speed: speed,
+                        acceleration: 0,
+                        inertia: Decimal(string: "0.65")
+                    )
+                )
+
+                let velocityAt25 = tuning.desiredVelocity(for: 25)
+                let velocityAt50 = tuning.desiredVelocity(for: 50)
+                let velocityAt100 = tuning.desiredVelocity(for: 100)
+
+                XCTAssertGreaterThan(velocityAt25, 0, "preset=\(preset) speed=\(speed)")
+                XCTAssertEqual(velocityAt100, velocityAt25 * 4, accuracy: 1e-6, "preset=\(preset) speed=\(speed)")
+                XCTAssertEqual(velocityAt50, velocityAt25 * 2, accuracy: 1e-6, "preset=\(preset) speed=\(speed)")
+                XCTAssertEqual(
+                    tuning.desiredVelocity(for: -100),
+                    -velocityAt100,
+                    accuracy: 1e-6,
+                    "preset=\(preset) speed=\(speed)"
+                )
+            }
+        }
+    }
+
+    func testDesiredVelocityAppliesRateCurveWhenAccelerationEnabled() {
+        // Default acceleration (1.2): the legacy rate curve stays active, so a
+        // 4x faster input yields MORE than 4x velocity. Guards the byte-for-byte
+        // preservation of the non-zero path.
+        let tuning = SmoothedScrollingEngine.AxisTuning(
+            configuration: .init(
+                preset: .easeInOut,
+                speed: 1,
+                acceleration: Decimal(string: "1.2"),
+                inertia: Decimal(string: "0.65")
+            )
+        )
+
+        let velocityAt25 = tuning.desiredVelocity(for: 25)
+        let velocityAt100 = tuning.desiredVelocity(for: 100)
+
+        XCTAssertGreaterThan(velocityAt100, velocityAt25 * 4)
+        // Golden lock on the byte-for-byte legacy formula at the default:
+        // 100 * (100/124)^1.06 * 31 * (0.85 + 0.4) * (1 + 1.2 * 0.10).
+        XCTAssertEqual(velocityAt100, 3455.1168794399878, accuracy: 1e-3)
+    }
+
+    func testDesiredVelocityScalesUpWithAccelerationInLegacyRange() {
+        // A mid-range acceleration must yield a larger velocity than the
+        // default, proving the acceleration-gain path is intact for non-zero
+        // values (mid-range regression check).
+        let defaultTuning = SmoothedScrollingEngine.AxisTuning(
+            configuration: .init(
+                preset: .easeInOut,
+                speed: 1,
+                acceleration: Decimal(string: "1.2"),
+                inertia: Decimal(string: "0.65")
+            )
+        )
+        let midRangeTuning = SmoothedScrollingEngine.AxisTuning(
+            configuration: .init(
+                preset: .easeInOut,
+                speed: 1,
+                acceleration: Decimal(string: "4"),
+                inertia: Decimal(string: "0.65")
+            )
+        )
+
+        XCTAssertGreaterThan(midRangeTuning.desiredVelocity(for: 100), defaultTuning.desiredVelocity(for: 100))
+    }
+
+    // MARK: - Honoring inertia = 0 (issue #1303)
+
+    func testMomentumDecayIsZeroWhenInertiaDisabled() {
+        // inertia at its lower bound (0): no synthetic momentum is carried.
+        let tuning = SmoothedScrollingEngine.AxisTuning(
+            configuration: .init(preset: .easeInOut, acceleration: Decimal(string: "1.2"), inertia: 0)
+        )
+
+        XCTAssertEqual(tuning.momentumDecay(for: 1.0 / 120.0), 0, accuracy: 1e-12)
+        XCTAssertEqual(tuning.momentumDecay(for: 1.0 / 60.0), 0, accuracy: 1e-12)
+        XCTAssertEqual(tuning.momentumDecay(for: 1.0 / 30.0), 0, accuracy: 1e-12)
+    }
+
+    func testMomentumDecayPreservesLegacyCarryAtDefaultInertia() {
+        // Default inertia (0.65): legacy carry is preserved exactly. At 0.65 the
+        // inertia boosts vanish and decay == profile.decay (0.89 for easeInOut),
+        // so momentumDecay(for: dt) == pow(0.89, max(dt * 60, 0.25)).
+        let tuning = SmoothedScrollingEngine.AxisTuning(
+            configuration: .init(
+                preset: .easeInOut,
+                acceleration: Decimal(string: "1.2"),
+                inertia: Decimal(string: "0.65")
+            )
+        )
+
+        let dt = 1.0 / 120.0
+        let expected = pow(0.89, max(dt * 60, 0.25))
+        let decay = tuning.momentumDecay(for: dt)
+
+        XCTAssertGreaterThan(decay, 0)
+        XCTAssertLessThan(decay, 1)
+        XCTAssertEqual(decay, expected, accuracy: 1e-9)
+
+        // Sub-threshold dt exercises the max(dt * 60, 0.25) clamp: dtScale pins
+        // to 0.25 independently of dt, so momentumDecay == pow(0.89, 0.25).
+        let clampedDt = 1.0 / 600.0
+        XCTAssertLessThan(clampedDt * 60, 0.25)
+        XCTAssertEqual(tuning.momentumDecay(for: clampedDt), 0.9712868336416696, accuracy: 1e-9)
+    }
+
+    func testMomentumDecayScalesUpWithInertiaInLegacyRange() {
+        // A mid-range inertia (2.0) must carry more momentum than the default
+        // (0.65), proving the legacy decay formula still responds to inertia for
+        // non-zero values (mid-range regression check).
+        let defaultTuning = SmoothedScrollingEngine.AxisTuning(
+            configuration: .init(
+                preset: .easeInOut,
+                acceleration: Decimal(string: "1.2"),
+                inertia: Decimal(string: "0.65")
+            )
+        )
+        let midRangeTuning = SmoothedScrollingEngine.AxisTuning(
+            configuration: .init(
+                preset: .easeInOut,
+                acceleration: Decimal(string: "1.2"),
+                inertia: Decimal(string: "2")
+            )
+        )
+
+        let dt = 1.0 / 120.0
+        XCTAssertGreaterThan(midRangeTuning.momentumDecay(for: dt), defaultTuning.momentumDecay(for: dt))
+    }
+
+    func testInertiaDisabledStopsScrollingWithoutSyntheticMomentum() {
+        // End-to-end: with inertia disabled, scrolling stops the moment the wheel
+        // stops — the engine never emits a synthetic momentum phase.
+        let engine = SmoothedScrollingEngine(
+            smoothed: .init(
+                vertical: .init(
+                    enabled: true,
+                    preset: .easeInOut,
+                    speed: 1,
+                    acceleration: Decimal(string: "1.2"),
+                    inertia: 0
+                )
+            )
+        )
+
+        var emissions: [SmoothedScrollingEngine.Emission] = []
+
+        for step in 0 ..< 6 {
+            let timestamp = Double(step) / 120
+            engine.feed(deltaX: 0, deltaY: 40, timestamp: timestamp)
+            if let emission = engine.advance(to: timestamp + 1.0 / 120) {
+                emissions.append(emission)
+            }
+        }
+
+        for step in 6 ..< 480 {
+            let timestamp = Double(step + 1) / 120
+            if let emission = engine.advance(to: timestamp) {
+                emissions.append(emission)
+            }
+        }
+
+        XCTAssertEqual(emissions.first?.phase, .touchBegan)
+        XCTAssertFalse(emissions.contains { $0.phase == .momentumBegan })
+        XCTAssertFalse(emissions.contains { $0.phase == .momentumChanged })
+        XCTAssertEqual(emissions.last?.phase, .touchEnded)
+    }
+
+    // MARK: - Boundary contract for the == lowerBound short-circuit (#1303)
+
+    func testValuesJustAboveLowerBoundStayOnLegacyPath() {
+        // A value just above the lower bound must NOT trip the ==lowerBound
+        // short-circuit. This locks the equality so a future change to <= (or a
+        // shifted lowerBound) is caught instead of silently widening the bypass.
+        let tuning = SmoothedScrollingEngine.AxisTuning(
+            configuration: .init(
+                preset: .easeInOut,
+                speed: 1,
+                acceleration: Decimal(string: "0.001"),
+                inertia: Decimal(string: "0.001")
+            )
+        )
+
+        // acceleration = 0.001: the rate curve is active, so a 4x faster input
+        // yields more than 4x velocity (NOT linear as at acceleration == 0).
+        XCTAssertGreaterThan(tuning.desiredVelocity(for: 100), tuning.desiredVelocity(for: 25) * 4)
+
+        // inertia = 0.001: legacy decay is positive (NOT the 0 returned at
+        // inertia == 0).
+        XCTAssertGreaterThan(tuning.momentumDecay(for: 1.0 / 120.0), 0)
+    }
+
     private struct TimedScrollInput {
         var timestamp: TimeInterval
         var deltaY: Double

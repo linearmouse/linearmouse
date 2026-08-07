@@ -41,7 +41,10 @@ final class SmoothedScrollingEngine {
         case smoothed(AxisTuning)
     }
 
-    private struct AxisTuning {
+    /// Internal so the velocity/decay contracts can be exercised directly via
+    /// @testable unit tests (see SmoothedScrollingEngineTests). It stays nested
+    /// under the engine and therefore out of the module's public API surface.
+    struct AxisTuning {
         private static let legacyUpperBound = 3.0
 
         let configuration: Scheme.Scrolling.Smoothed
@@ -81,11 +84,25 @@ final class SmoothedScrollingEngine {
 
             let profile = presetProfile
             let baseMagnitude = abs(input)
-            let normalizedMagnitude = (baseMagnitude / (baseMagnitude + 24)).clamped(to: 0 ... 1)
-            let curvedMagnitude = pow(normalizedMagnitude, profile.inputExponent)
-            let magnitude = baseMagnitude * curvedMagnitude
+
+            // acceleration == lowerBound (slider disabled): bypass the
+            // rate-dependent input curve and the acceleration gain so each wheel
+            // tick travels a constant distance (velocity is linear in input).
+            // The gain is already 1 here; the branch keeps the bypass explicit
+            // and the non-zero path byte-for-byte unchanged.
+            let magnitude: Double
+            let accelerationBoost: Double
+            if acceleration == Scheme.Scrolling.Smoothed.accelerationRange.lowerBound {
+                magnitude = baseMagnitude
+                accelerationBoost = 1
+            } else {
+                let normalizedMagnitude = (baseMagnitude / (baseMagnitude + 24)).clamped(to: 0 ... 1)
+                let curvedMagnitude = pow(normalizedMagnitude, profile.inputExponent)
+                magnitude = baseMagnitude * curvedMagnitude
+                accelerationBoost = 1 + acceleration * profile.accelerationGain
+            }
+
             let speedBoost = 0.85 + speed * 0.4
-            let accelerationBoost = 1 + acceleration * profile.accelerationGain
             let velocity = magnitude * profile.velocityScale * speedBoost * accelerationBoost
 
             return input.sign == .minus ? -velocity : velocity
@@ -168,6 +185,13 @@ final class SmoothedScrollingEngine {
         }
 
         func momentumDecay(for dt: TimeInterval) -> Double {
+            // inertia == lowerBound (slider disabled): carry no synthetic
+            // momentum. Velocity drops to zero as soon as the wheel stops. The
+            // legacy decay formula below stays byte-for-byte unchanged.
+            if inertia == Scheme.Scrolling.Smoothed.inertiaRange.lowerBound {
+                return 0
+            }
+
             let profile = presetProfile
             let legacyInertiaBoost = ((min(inertia, Self.legacyUpperBound) - 0.65) * 0.05)
                 .clamped(to: -0.08 ... 0.10)
