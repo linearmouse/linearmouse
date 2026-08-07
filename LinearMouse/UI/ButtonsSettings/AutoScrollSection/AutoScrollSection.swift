@@ -56,6 +56,15 @@ struct AutoScrollSection: View {
                     Slider(value: $state.autoScrollSpeed, in: 0.3 ... 3.0, step: 0.1)
                 }
 
+                Toggle(isOn: $state.autoScrollActivateOverPressableElements.animation()) {
+                    withDescription {
+                        Text("Activate over clickable elements")
+                        Text(
+                            "Start autoscroll even when the click begins on a link, button, or other clickable item. This may prevent middle-click actions like opening links in a new tab."
+                        )
+                    }
+                }
+
                 Text(modeDescription)
                     .settingsDescriptionStyle()
                     .padding(.top, 4)

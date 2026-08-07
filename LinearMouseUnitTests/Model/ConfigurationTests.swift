@@ -167,6 +167,17 @@ final class ConfigurationTests: XCTestCase {
         XCTAssertEqual(scheme.buttons.autoScroll.modes, [.toggle])
     }
 
+    func testMergeAutoScrollActivateOverPressableElements() {
+        var scheme = Scheme()
+        scheme.buttons.autoScroll.enabled = true
+
+        var override = Scheme()
+        override.buttons.autoScroll.activateOverPressableElements = true
+        override.merge(into: &scheme)
+
+        XCTAssertEqual(scheme.buttons.autoScroll.activateOverPressableElements, true)
+    }
+
     func testMappingDecodesLegacyGenericModifierFlagsWithoutRawFlags() throws {
         let mapping = try JSONDecoder().decode(
             Scheme.Buttons.Mapping.self,
@@ -282,6 +293,21 @@ final class ConfigurationTests: XCTestCase {
         let encoded = try JSONEncoder().encode(autoScroll)
         let object = try XCTUnwrap(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
         XCTAssertNil(object["preserveNativeMiddleClick"])
+    }
+
+    func testDecodeAndEncodeAutoScrollActivateOverPressableElements() throws {
+        let autoScroll = try JSONDecoder().decode(
+            Scheme.Buttons.AutoScroll.self,
+            from: XCTUnwrap(
+                #"{"enabled":true,"activateOverPressableElements":true}"#.data(using: .utf8)
+            )
+        )
+
+        XCTAssertEqual(autoScroll.activateOverPressableElements, true)
+
+        let encoded = try JSONEncoder().encode(autoScroll)
+        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        XCTAssertEqual(object["activateOverPressableElements"] as? Bool, true)
     }
 
     func testMergeSmoothedScrollingPreservesInheritedFields() {

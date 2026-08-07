@@ -252,6 +252,15 @@ extension ButtonsSettingsState {
         autoScrollTrigger.valid
     }
 
+    var autoScrollActivateOverPressableElements: Bool {
+        get {
+            mergedScheme.buttons.autoScroll.activateOverPressableElements ?? false
+        }
+        set {
+            scheme.buttons.autoScroll.activateOverPressableElements = newValue
+        }
+    }
+
     var mappings: [Scheme.Buttons.Mapping] {
         get { scheme.buttons.mappings ?? [] }
         set { scheme.buttons.mappings = newValue }

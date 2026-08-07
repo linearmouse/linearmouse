@@ -18,6 +18,7 @@ extension Scheme.Buttons {
         var modes: [Mode]?
         var speed: Decimal?
         var trigger: Mapping?
+        var activateOverPressableElements: Bool?
 
         init() {}
     }
@@ -29,6 +30,7 @@ extension Scheme.Buttons.AutoScroll: Codable {
         case mode
         case speed
         case trigger
+        case activateOverPressableElements
     }
 
     init(from decoder: Decoder) throws {
@@ -38,6 +40,10 @@ extension Scheme.Buttons.AutoScroll: Codable {
         modes = try container.decodeIfPresent(SingleValueOrArray<Mode>.self, forKey: .mode)?.wrappedValue
         speed = try container.decodeIfPresent(Decimal.self, forKey: .speed)
         trigger = try container.decodeIfPresent(Scheme.Buttons.Mapping.self, forKey: .trigger)
+        activateOverPressableElements = try container.decodeIfPresent(
+            Bool.self,
+            forKey: .activateOverPressableElements
+        )
     }
 
     func encode(to encoder: Encoder) throws {
@@ -47,6 +53,7 @@ extension Scheme.Buttons.AutoScroll: Codable {
         try container.encode(SingleValueOrArray(wrappedValue: modes), forKey: .mode)
         try container.encodeIfPresent(speed, forKey: .speed)
         try container.encodeIfPresent(trigger, forKey: .trigger)
+        try container.encodeIfPresent(activateOverPressableElements, forKey: .activateOverPressableElements)
     }
 }
 
@@ -79,6 +86,10 @@ extension Scheme.Buttons.AutoScroll {
 
         if let trigger {
             autoScroll.trigger = trigger
+        }
+
+        if let activateOverPressableElements {
+            autoScroll.activateOverPressableElements = activateOverPressableElements
         }
     }
 
