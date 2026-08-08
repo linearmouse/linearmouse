@@ -159,6 +159,12 @@
     "Scheme.Buttons.AutoScroll": {
       "additionalProperties": false,
       "properties": {
+        "activateOverPressableElements": {
+          "default": false,
+          "description": "Activate auto scroll even if the initial click lands on a clickable element such as a link or button. When disabled (default), the click is passed through so links and buttons can still be activated normally.",
+          "title": "Activate over clickable elements",
+          "type": "boolean"
+        },
         "enabled": {
           "default": false,
           "description": "Indicates if auto scroll is enabled.",

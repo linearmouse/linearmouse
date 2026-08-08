@@ -14,10 +14,11 @@ final class AutoScrollAccessibilityActivationClassifierTests: XCTestCase {
         XCTAssertEqual(hit.summary, "pressable")
     }
 
-    func testAccessibilityFailureIsNonPressableWithDiagnostic() {
+    func testAccessibilityFailureInsideWebContentRequiresAdditionalSampling() {
         let hit = AutoScrollActivationHit.nonPressable(
             diagnostic: "role.cannotComplete",
-            path: ["AXGroup"]
+            path: ["AXGroup"],
+            isInsideWebContent: true
         )
 
         XCTAssertFalse(hit.isPressable)
@@ -25,13 +26,55 @@ final class AutoScrollAccessibilityActivationClassifierTests: XCTestCase {
         XCTAssertEqual(hit.summary, "nonPressable.role.cannotComplete")
     }
 
+    func testNonPressableHitOutsideWebContentSkipsAdditionalSampling() {
+        let hit = AutoScrollActivationHit.nonPressable(
+            diagnostic: "listContainer",
+            path: ["AXOutline"],
+            isInsideWebContent: false
+        )
+
+        XCTAssertFalse(hit.isPressable)
+        XCTAssertFalse(hit.requiresAdditionalSampling)
+        XCTAssertEqual(hit.summary, "nonPressable.listContainer")
+    }
+
     func testAutoScrollStartsOnlyForNonPressableOrUnavailableHit() {
-        XCTAssertFalse(AutoScrollTransformer.shouldStartAutoScroll(for: .pressable(path: [])))
-        XCTAssertTrue(AutoScrollTransformer.shouldStartAutoScroll(for: .nonPressable(
-            diagnostic: nil,
-            path: []
-        )))
-        XCTAssertTrue(AutoScrollTransformer.shouldStartAutoScroll(for: nil))
+        XCTAssertFalse(AutoScrollTransformer.shouldStartAutoScroll(
+            for: .pressable(path: []),
+            activateOverPressableElements: false
+        ))
+        XCTAssertTrue(AutoScrollTransformer.shouldStartAutoScroll(
+            for: .nonPressable(diagnostic: nil, path: [], isInsideWebContent: false),
+            activateOverPressableElements: false
+        ))
+        XCTAssertTrue(AutoScrollTransformer.shouldStartAutoScroll(
+            for: nil,
+            activateOverPressableElements: false
+        ))
+    }
+
+    func testAutoScrollStartsOverPressableHitWhenActivateOverPressableElementsIsEnabled() {
+        XCTAssertTrue(AutoScrollTransformer.shouldStartAutoScroll(
+            for: .pressable(path: ["AXLink"]),
+            activateOverPressableElements: true
+        ))
+        XCTAssertTrue(AutoScrollTransformer.shouldStartAutoScroll(
+            for: .nonPressable(diagnostic: nil, path: [], isInsideWebContent: false),
+            activateOverPressableElements: true
+        ))
+        XCTAssertTrue(AutoScrollTransformer.shouldStartAutoScroll(
+            for: nil,
+            activateOverPressableElements: true
+        ))
+    }
+
+    func testListContainerRoleStopsClimbingTablesOutlinesAndLists() {
+        XCTAssertTrue(AutoScrollAccessibilityActivationClassifier.isListContainerRole("AXTable"))
+        XCTAssertTrue(AutoScrollAccessibilityActivationClassifier.isListContainerRole("AXOutline"))
+        XCTAssertTrue(AutoScrollAccessibilityActivationClassifier.isListContainerRole("AXList"))
+        XCTAssertFalse(AutoScrollAccessibilityActivationClassifier.isListContainerRole("AXCell"))
+        XCTAssertFalse(AutoScrollAccessibilityActivationClassifier.isListContainerRole("AXGroup"))
+        XCTAssertFalse(AutoScrollAccessibilityActivationClassifier.isListContainerRole(nil))
     }
 
     func testPressableActivationElementAcceptsExplicitControls() {

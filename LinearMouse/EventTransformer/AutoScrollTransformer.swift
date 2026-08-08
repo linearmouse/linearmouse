@@ -15,6 +15,7 @@ final class AutoScrollTransformer {
     private let trigger: Scheme.Buttons.Mapping
     private let modes: [Scheme.Buttons.AutoScroll.Mode]
     private let speed: Double
+    private let activateOverPressableElements: Bool
 
     private enum Session {
         case toggle
@@ -34,18 +35,23 @@ final class AutoScrollTransformer {
     private let indicatorController = AutoScrollIndicatorWindowController()
     private let accessibilityActivationClassifier = AutoScrollAccessibilityActivationClassifier()
 
-    static func shouldStartAutoScroll(for hit: AutoScrollActivationHit?) -> Bool {
-        hit?.isPressable != true
+    static func shouldStartAutoScroll(
+        for hit: AutoScrollActivationHit?,
+        activateOverPressableElements: Bool
+    ) -> Bool {
+        activateOverPressableElements || hit?.isPressable != true
     }
 
     init(
         trigger: Scheme.Buttons.Mapping,
         modes: [Scheme.Buttons.AutoScroll.Mode],
-        speed: Double
+        speed: Double,
+        activateOverPressableElements: Bool = false
     ) {
         self.trigger = trigger
         self.modes = modes
         self.speed = speed
+        self.activateOverPressableElements = activateOverPressableElements
     }
 
     deinit {
@@ -131,7 +137,10 @@ extension AutoScrollTransformer: EventTransformer {
         }
 
         let activationHit = activationHit(for: event)
-        guard Self.shouldStartAutoScroll(for: activationHit) else {
+        guard Self.shouldStartAutoScroll(
+            for: activationHit,
+            activateOverPressableElements: activateOverPressableElements
+        ) else {
             return event
         }
 
@@ -503,10 +512,12 @@ extension AutoScrollTransformer {
     func matchesConfiguration(
         trigger: Scheme.Buttons.Mapping,
         modes: [Scheme.Buttons.AutoScroll.Mode],
-        speed: Double
+        speed: Double,
+        activateOverPressableElements: Bool
     ) -> Bool {
         self.trigger == trigger &&
             self.modes == modes &&
-            abs(self.speed - speed) < 0.0001
+            abs(self.speed - speed) < 0.0001 &&
+            self.activateOverPressableElements == activateOverPressableElements
     }
 }

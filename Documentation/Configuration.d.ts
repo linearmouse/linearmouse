@@ -519,6 +519,13 @@ declare namespace Scheme {
        * @description Choose the mouse button and modifier keys used to activate auto scroll.
        */
       trigger?: AutoScroll.Trigger;
+
+      /**
+       * @title Activate over clickable elements
+       * @description Activate auto scroll even if the initial click lands on a clickable element such as a link or button. When disabled (default), the click is passed through so links and buttons can still be activated normally.
+       * @default false
+       */
+      activateOverPressableElements?: boolean;
     };
 
     namespace AutoScroll {

@@ -86,4 +86,28 @@ final class AutoScrollTransformerTests: XCTestCase {
         XCTAssertTrue(transformer.cancelLogitechControlInteraction(context))
         XCTAssertFalse(transformer.isAutoscrollActive)
     }
+
+    func testMatchesConfigurationDistinguishesActivateOverPressableElements() {
+        var trigger = Scheme.Buttons.Mapping()
+        trigger.button = .mouse(2)
+        let transformer = AutoScrollTransformer(
+            trigger: trigger,
+            modes: [.toggle],
+            speed: 1,
+            activateOverPressableElements: true
+        )
+
+        XCTAssertTrue(transformer.matchesConfiguration(
+            trigger: trigger,
+            modes: [.toggle],
+            speed: 1,
+            activateOverPressableElements: true
+        ))
+        XCTAssertFalse(transformer.matchesConfiguration(
+            trigger: trigger,
+            modes: [.toggle],
+            speed: 1,
+            activateOverPressableElements: false
+        ))
+    }
 }

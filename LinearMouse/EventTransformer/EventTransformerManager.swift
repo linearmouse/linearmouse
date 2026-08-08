@@ -949,12 +949,14 @@ class EventTransformerManager {
 
         let modes = autoScroll.normalizedModes
         let speed = autoScroll.speed?.asTruncatedDouble ?? 1
+        let activateOverPressableElements = autoScroll.activateOverPressableElements ?? false
 
         if let sharedAutoScrollTransformer,
            sharedAutoScrollTransformer.matchesConfiguration(
                trigger: trigger,
                modes: modes,
-               speed: speed
+               speed: speed,
+               activateOverPressableElements: activateOverPressableElements
            ) {
             return sharedAutoScrollTransformer
         }
@@ -964,7 +966,8 @@ class EventTransformerManager {
         let transformer = AutoScrollTransformer(
             trigger: trigger,
             modes: modes,
-            speed: speed
+            speed: speed,
+            activateOverPressableElements: activateOverPressableElements
         )
         sharedAutoScrollTransformer = transformer
         return transformer
