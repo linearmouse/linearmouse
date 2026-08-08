@@ -27,7 +27,10 @@ extension HexRepresentation: Codable {
         let container = try decoder.singleValueContainer()
         do {
             var hexValue = try container.decode(String.self)
-            if hexValue.hasPrefix("0x") {
+            // Hex prefixes are conventionally case-insensitive (0x or 0X);
+            // strip either form before radix-16 parsing so hand-edited or
+            // third-party configs using an uppercase 0X prefix still load.
+            if hexValue.lowercased().hasPrefix("0x") {
                 hexValue = String(hexValue.dropFirst(2))
             }
             guard let parsedValue = Int64(hexValue, radix: 16) else {

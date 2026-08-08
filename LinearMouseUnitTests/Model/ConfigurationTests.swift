@@ -249,6 +249,28 @@ final class ConfigurationTests: XCTestCase {
         )
     }
 
+    func testLoadUppercaseHexDeviceID() throws {
+        // Hex prefixes are conventionally case-insensitive, but the
+        // decoder used to strip only a lowercase 0x. A device matcher
+        // whose vendor/product IDs use an uppercase 0X prefix must still
+        // load (hand-edited and third-party configs frequently use 0X).
+        let configuration = try Configuration.load(from: #"""
+        {
+          "schemes": [
+            {
+              "if": [
+                { "device": { "vendorID": "0X045E", "productID": "0X00C5" } }
+              ]
+            }
+          ]
+        }
+        """#)
+
+        let device = try XCTUnwrap(configuration.schemes[0].if?[0].device)
+        XCTAssertEqual(device.vendorID, 0x045E) // 1118
+        XCTAssertEqual(device.productID, 0x00C5) // 197
+    }
+
     func testDecodeAutoScrollSingleMode() throws {
         let autoScroll = try JSONDecoder().decode(
             Scheme.Buttons.AutoScroll.self,
