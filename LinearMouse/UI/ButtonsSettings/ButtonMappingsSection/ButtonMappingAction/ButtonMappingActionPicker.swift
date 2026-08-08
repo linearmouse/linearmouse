@@ -60,6 +60,11 @@ extension ButtonMappingActionPicker {
         .actionType(.arg0(.showDesktop)),
         .actionType(.arg0(.lookUpAndDataDetectors)),
         .actionType(.arg0(.smartZoom)),
+        .section("Window") { [
+            .actionType(.arg0(.windowMaximize)),
+            .actionType(.arg0(.windowMinimize))
+        ]
+        },
         .section("Display") { [
             .actionType(.arg0(.displayBrightnessUp)),
             .actionType(.arg0(.displayBrightnessDown))
