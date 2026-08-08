@@ -204,18 +204,17 @@ extension ButtonActionExecutor {
         let appElement = AXUIElementCreateApplication(application.processIdentifier)
 
         var value: CFTypeRef?
-        let result = AXUIElementCopyAttributeValue(
+        guard AXUIElementCopyAttributeValue(
             appElement,
             kAXFocusedWindowAttribute as CFString,
             &value
-        )
-
-        guard result == .success,
-              let value else {
+        ) == .success,
+            let value,
+            CFGetTypeID(value) == AXUIElementGetTypeID() else {
             return nil
         }
 
-        return value as! AXUIElement
+        return unsafeBitCast(value, to: AXUIElement.self)
     }
 
     private func windowFrame(_ window: AXUIElement) -> CGRect? {
@@ -233,7 +232,17 @@ extension ButtonActionExecutor {
                 &sizeValue
             ) == .success,
             let positionValue,
-            let sizeValue else {
+            let sizeValue,
+            CFGetTypeID(positionValue) == AXValueGetTypeID(),
+            CFGetTypeID(sizeValue) == AXValueGetTypeID() else {
+            return nil
+        }
+
+        let axPositionValue = unsafeBitCast(positionValue, to: AXValue.self)
+        let axSizeValue = unsafeBitCast(sizeValue, to: AXValue.self)
+
+        guard AXValueGetType(axPositionValue) == .cgPoint,
+              AXValueGetType(axSizeValue) == .cgSize else {
             return nil
         }
 
@@ -241,12 +250,12 @@ extension ButtonActionExecutor {
         var size = CGSize.zero
 
         guard AXValueGetValue(
-            positionValue as! AXValue,
+            axPositionValue,
             .cgPoint,
             &position
         ),
             AXValueGetValue(
-                sizeValue as! AXValue,
+                axSizeValue,
                 .cgSize,
                 &size
             ) else {
@@ -256,8 +265,33 @@ extension ButtonActionExecutor {
         return CGRect(origin: position, size: size)
     }
 
+    private func appKitFrame(fromAXFrame frame: CGRect) -> CGRect? {
+        guard let primaryScreen = NSScreen.screens.first else {
+            return nil
+        }
+
+        return CGRect(
+            x: frame.minX,
+            y: primaryScreen.frame.maxY - frame.maxY,
+            width: frame.width,
+            height: frame.height
+        )
+    }
+
+    private func axPosition(fromAppKitFrame frame: CGRect) -> CGPoint? {
+        guard let primaryScreen = NSScreen.screens.first else {
+            return nil
+        }
+
+        return CGPoint(
+            x: frame.minX,
+            y: primaryScreen.frame.maxY - frame.maxY
+        )
+    }
+
     private func screenForWindow(_ window: AXUIElement) -> NSScreen? {
-        guard let frame = windowFrame(window) else {
+        guard let axFrame = windowFrame(window),
+              let frame = appKitFrame(fromAXFrame: axFrame) else {
             return NSScreen.main
         }
 
@@ -269,19 +303,12 @@ extension ButtonActionExecutor {
 
     private func maximizeFocusedWindow() {
         guard let window = focusedWindow(),
-              let screen = screenForWindow(window) else {
+              let screen = screenForWindow(window),
+              var position = axPosition(fromAppKitFrame: screen.visibleFrame) else {
             return
         }
 
-        let visibleFrame = screen.visibleFrame
-        let screenFrame = screen.frame
-
-        var position = CGPoint(
-            x: visibleFrame.minX,
-            y: screenFrame.maxY - visibleFrame.maxY
-        )
-
-        var size = visibleFrame.size
+        var size = screen.visibleFrame.size
 
         guard let positionValue = AXValueCreate(.cgPoint, &position),
               let sizeValue = AXValueCreate(.cgSize, &size) else {

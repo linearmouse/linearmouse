@@ -1046,6 +1046,12 @@
           "$ref": "#/definitions/Scheme.Buttons.Mapping.SmartZoom"
         },
         {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.WindowMaximize"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.Mapping.WindowMinimize"
+        },
+        {
           "$ref": "#/definitions/Scheme.Buttons.Mapping.DisplayBrightnessUp"
         },
         {
@@ -1210,6 +1216,16 @@
         "input"
       ],
       "type": "object"
+    },
+    "Scheme.Buttons.Mapping.WindowMaximize": {
+      "const": "window.maximize",
+      "description": "Window: Maximize.",
+      "type": "string"
+    },
+    "Scheme.Buttons.Mapping.WindowMinimize": {
+      "const": "window.minimize",
+      "description": "Window: Minimize.",
+      "type": "string"
     },
     "Scheme.Buttons.UniversalBackForward": {
       "anyOf": [

@@ -37748,6 +37748,9 @@
         }
       }
     },
+    "Maximize Window" : {
+      "extractionState" : "manual"
+    },
     "Media" : {
       "localizations" : {
         "af" : {
@@ -38581,6 +38584,9 @@
           }
         }
       }
+    },
+    "Minimize Window" : {
+      "extractionState" : "manual"
     },
     "Missing key %1$@ at %2$@" : {
       "localizations" : {
@@ -72130,6 +72136,9 @@
           }
         }
       }
+    },
+    "Window" : {
+      "extractionState" : "manual"
     },
     "You may also press ⌃⇧⌘Z to revert to system defaults." : {
       "localizations" : {
