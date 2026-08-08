@@ -240,7 +240,7 @@ declare namespace Scheme {
 
       /**
        * @description The scrolling distance in pixels.
-       * @pattern ^\d[1-9]*(\.\d+)?px
+       * @pattern ^\d[0-9]*(\.\d+)?px
        */
       type Pixel = string;
     }
