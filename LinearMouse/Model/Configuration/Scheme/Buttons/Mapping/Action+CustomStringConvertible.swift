@@ -37,6 +37,10 @@ extension Scheme.Buttons.Mapping.Action.Arg0: CustomStringConvertible {
             return NSLocalizedString("Look up & data detectors", comment: "")
         case .smartZoom:
             return NSLocalizedString("Smart zoom", comment: "")
+        case .windowMaximize:
+            return NSLocalizedString("Maximize Window", comment: "")
+        case .windowMinimize:
+            return NSLocalizedString("Minimize Window", comment: "")
         case .displayBrightnessUp:
             return NSLocalizedString("Increase display brightness", comment: "")
         case .displayBrightnessDown:

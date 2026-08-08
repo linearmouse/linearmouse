@@ -196,6 +196,123 @@ extension ButtonActionExecutor {
         }
     }
 
+    private func focusedWindow() -> AXUIElement? {
+        guard let application = NSWorkspace.shared.frontmostApplication else {
+            return nil
+        }
+
+        let appElement = AXUIElementCreateApplication(application.processIdentifier)
+
+        var value: CFTypeRef?
+        let result = AXUIElementCopyAttributeValue(
+            appElement,
+            kAXFocusedWindowAttribute as CFString,
+            &value
+        )
+
+        guard result == .success,
+              let value else {
+            return nil
+        }
+
+        return value as! AXUIElement
+    }
+
+    private func windowFrame(_ window: AXUIElement) -> CGRect? {
+        var positionValue: CFTypeRef?
+        var sizeValue: CFTypeRef?
+
+        guard AXUIElementCopyAttributeValue(
+            window,
+            kAXPositionAttribute as CFString,
+            &positionValue
+        ) == .success,
+            AXUIElementCopyAttributeValue(
+                window,
+                kAXSizeAttribute as CFString,
+                &sizeValue
+            ) == .success,
+            let positionValue,
+            let sizeValue else {
+            return nil
+        }
+
+        var position = CGPoint.zero
+        var size = CGSize.zero
+
+        guard AXValueGetValue(
+            positionValue as! AXValue,
+            .cgPoint,
+            &position
+        ),
+            AXValueGetValue(
+                sizeValue as! AXValue,
+                .cgSize,
+                &size
+            ) else {
+            return nil
+        }
+
+        return CGRect(origin: position, size: size)
+    }
+
+    private func screenForWindow(_ window: AXUIElement) -> NSScreen? {
+        guard let frame = windowFrame(window) else {
+            return NSScreen.main
+        }
+
+        return NSScreen.screens.max {
+            $0.frame.intersection(frame).area
+                < $1.frame.intersection(frame).area
+        }
+    }
+
+    private func maximizeFocusedWindow() {
+        guard let window = focusedWindow(),
+              let screen = screenForWindow(window) else {
+            return
+        }
+
+        let visibleFrame = screen.visibleFrame
+        let screenFrame = screen.frame
+
+        var position = CGPoint(
+            x: visibleFrame.minX,
+            y: screenFrame.maxY - visibleFrame.maxY
+        )
+
+        var size = visibleFrame.size
+
+        guard let positionValue = AXValueCreate(.cgPoint, &position),
+              let sizeValue = AXValueCreate(.cgSize, &size) else {
+            return
+        }
+
+        AXUIElementSetAttributeValue(
+            window,
+            kAXPositionAttribute as CFString,
+            positionValue
+        )
+
+        AXUIElementSetAttributeValue(
+            window,
+            kAXSizeAttribute as CFString,
+            sizeValue
+        )
+    }
+
+    private func minimizeFocusedWindow() {
+        guard let window = focusedWindow() else {
+            return
+        }
+
+        AXUIElementSetAttributeValue(
+            window,
+            kAXMinimizedAttribute as CFString,
+            kCFBooleanTrue
+        )
+    }
+
     private func scheduleRepeatActions(
         action: Scheme.Buttons.Mapping.Action,
         buttons: Set<Scheme.Buttons.Mapping.Button>,
@@ -286,6 +403,12 @@ extension ButtonActionExecutor {
 
         case .arg0(.smartZoom):
             GestureEvent(zoomToggleSource: nil)?.post(tap: .cgSessionEventTap)
+
+        case .arg0(.windowMaximize):
+            maximizeFocusedWindow()
+
+        case .arg0(.windowMinimize):
+            minimizeFocusedWindow()
 
         case .arg0(.displayBrightnessUp):
             postSystemDefinedKey(.brightnessUp)
@@ -535,5 +658,11 @@ extension ButtonActionExecutor: Deactivatable {
             try? keySimulator.up(keys: heldKeys, tap: .cgSessionEventTap)
             keySimulator.reset()
         }
+    }
+}
+
+private extension CGRect {
+    var area: CGFloat {
+        width * height
     }
 }
