@@ -119,8 +119,11 @@ class StatusItem: NSObject, NSMenuDelegate {
         startAtLoginItem.state = LaunchAtLogin.isEnabled ? .on : .off
         LaunchAtLogin.publisher
             .receive(on: RunLoop.main)
-            .sink { [weak self] value in
-                self?.startAtLoginItem.state = value ? .on : .off
+            .sink { [weak self] _ in
+                // The publisher forwards the *requested* value even when the
+                // registration lands at `.requiresApproval` or fails, so re-read
+                // the actual `SMAppService` status to keep the checkmark truthful.
+                self?.startAtLoginItem.state = LaunchAtLogin.isEnabled ? .on : .off
             }
             .store(in: &subscriptions)
 

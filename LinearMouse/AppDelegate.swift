@@ -17,6 +17,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var sessionActive = true
     private var sleeping = false
 
+    /// Runs the one-time legacy -> SMAppService login-item migration on launch.
+    ///
+    /// It's a no-op below macOS 13 and after the first successful run. This call
+    /// was lost in 5437d88 and is restored here (issue #1328).
+    override init() {
+        LaunchAtLogin.migrateIfNeeded()
+    }
+
     func applicationDidFinishLaunching(_: Notification) {
         guard ProcessEnvironment.isRunningApp else {
             return
