@@ -3,11 +3,11 @@
 
 import ApplicationServices
 import CoreGraphics
+import Foundation
 
 struct AutoScrollAccessibilityActivationClassifier {
     private static let domClassListAttribute = "AXDOMClassList" as CFString
     private static let maxParentDepth = 20
-    private static let probeRadius: CGFloat = 4
     private static let standardWindowButtonAttributes = [
         kAXCloseButtonAttribute as CFString,
         kAXMinimizeButtonAttribute as CFString,
@@ -47,21 +47,30 @@ struct AutoScrollAccessibilityActivationClassifier {
 
     private let elementQuery: AccessibilityElementQuerying
     private let bypassRuleMatcher: AccessibilityBypassRuleMatcher
+    private let accessibilityHitTestRetryDelay: () -> Void
 
     init(
         elementQuery: AccessibilityElementQuerying = AccessibilityElementQuery(),
         bypassRuleMatcher: AccessibilityBypassRuleMatcher = AccessibilityBypassRuleMatcher(
             rules: AccessibilityBypassRule.autoScrollRules,
             scrollableRoles: Self.webContentRoles
-        )
+        ),
+        accessibilityHitTestRetryDelay: @escaping () -> Void = {
+            Thread.sleep(forTimeInterval: 0.005)
+        }
     ) {
         self.elementQuery = elementQuery
         self.bypassRuleMatcher = bypassRuleMatcher
+        self.accessibilityHitTestRetryDelay = accessibilityHitTestRetryDelay
     }
 
     func classify(at point: CGPoint) -> AutoScrollActivationClassification {
-        let initialProbe = AutoScrollActivationProbe(point: point, hit: hitAccessibilityElement(at: point))
-        let resolvedProbe = refineActivationProbe(from: initialProbe)
+        let initialResult = hitAccessibilityElement(at: point)
+        let initialProbe = AutoScrollActivationProbe(point: point, hit: initialResult.hit)
+        let resolvedProbe = refineActivationProbe(
+            from: initialProbe,
+            shouldRetryAtSamePoint: initialResult.shouldRetryAtSamePoint
+        )
         return AutoScrollActivationClassification(initial: initialProbe, resolved: resolvedProbe)
     }
 
@@ -78,61 +87,54 @@ struct AutoScrollAccessibilityActivationClassifier {
         return actions.contains(kAXPressAction as String)
     }
 
-    private func refineActivationProbe(from initialProbe: AutoScrollActivationProbe) -> AutoScrollActivationProbe {
-        guard initialProbe.hit.requiresAdditionalSampling else {
+    private func refineActivationProbe(
+        from initialProbe: AutoScrollActivationProbe,
+        shouldRetryAtSamePoint: Bool
+    ) -> AutoScrollActivationProbe {
+        guard shouldRetryAtSamePoint,
+              initialProbe.hit.requiresRetry else {
             return initialProbe
         }
 
-        // Browser accessibility trees can return a generic container chain for a point that
-        // is visually still inside a pressable element. Probe nearby points and preserve the
-        // native event if any sample resolves as pressable.
-        for point in accessibilityProbePoints(around: initialProbe.point) {
-            let sampledProbe = AutoScrollActivationProbe(point: point, hit: hitAccessibilityElement(at: point))
-            if sampledProbe.hit.isPressable {
-                return sampledProbe
-            }
-        }
-
-        return initialProbe
+        // Chromium documents that its first synchronous hit test can be approximate and
+        // that a subsequent hit test can use the asynchronously resolved renderer result:
+        // https://chromium.googlesource.com/chromium/src/+/main/docs/accessibility/browser/how_a11y_works_3.md#Hit-testing
+        // Chromium's regression test expects the first cached hit test to miss and the
+        // second hit test at the same point to return the correct element:
+        // https://chromium.googlesource.com/chromium/src/+/HEAD/content/browser/accessibility/hit_testing_browsertest.cc#710
+        // Safari also returned a transient kAXErrorNotImplemented during cold-start testing.
+        // Give either result a small window, then retry the original point so an adjacent
+        // control cannot change the activation decision.
+        accessibilityHitTestRetryDelay()
+        return AutoScrollActivationProbe(
+            point: initialProbe.point,
+            hit: hitAccessibilityElement(at: initialProbe.point).hit
+        )
     }
 
-    private func accessibilityProbePoints(around point: CGPoint) -> [CGPoint] {
-        let offsets = [
-            CGPoint.zero,
-            CGPoint(x: -Self.probeRadius, y: 0),
-            CGPoint(x: Self.probeRadius, y: 0),
-            CGPoint(x: 0, y: -Self.probeRadius),
-            CGPoint(x: 0, y: Self.probeRadius),
-            CGPoint(x: -Self.probeRadius, y: -Self.probeRadius),
-            CGPoint(x: -Self.probeRadius, y: Self.probeRadius),
-            CGPoint(x: Self.probeRadius, y: -Self.probeRadius),
-            CGPoint(x: Self.probeRadius, y: Self.probeRadius)
-        ]
-
-        return offsets.map { offset in
-            CGPoint(x: point.x + offset.x, y: point.y + offset.y)
-        }
-    }
-
-    private func hitAccessibilityElement(at point: CGPoint) -> AutoScrollActivationHit {
+    private func hitAccessibilityElement(at point: CGPoint) -> AccessibilityHitTestResult {
         let hitElement: AXUIElement?
         switch elementQuery.systemWideElement(at: point) {
         case let .success(value):
             hitElement = value
         case let .failure(error):
-            return .nonPressable(diagnostic: "hitTest.\(error.linearMouseDescription)", path: [])
+            return Self.failedQueryResult(stage: "hitTest", error: error, path: [])
         }
 
         guard let hitElement else {
-            return .nonPressable(diagnostic: nil, path: [])
+            return .certain(.nonPressable(diagnostic: nil, path: []))
         }
 
         var currentElement: AXUIElement? = hitElement
         var path: [String] = []
         var isInsideWebContent = false
+        var hasBrowserAccessibilitySignal = false
         for depth in 0 ..< Self.maxParentDepth {
             guard let element = currentElement else {
-                return .nonPressable(diagnostic: nil, path: path)
+                return .init(
+                    hit: .nonPressable(diagnostic: nil, path: path),
+                    shouldRetryAtSamePoint: hasBrowserAccessibilitySignal
+                )
             }
 
             let role: String?
@@ -140,7 +142,7 @@ struct AutoScrollAccessibilityActivationClassifier {
             case let .success(value):
                 role = value
             case let .failure(error):
-                return .nonPressable(diagnostic: "role.\(error.linearMouseDescription)", path: path)
+                return Self.failedQueryResult(stage: "role", error: error, path: path)
             }
 
             let subrole: String?
@@ -148,56 +150,89 @@ struct AutoScrollAccessibilityActivationClassifier {
             case let .success(value):
                 subrole = value
             case let .failure(error):
-                return .nonPressable(diagnostic: "subrole.\(error.linearMouseDescription)", path: path)
+                return Self.failedQueryResult(stage: "subrole", error: error, path: path)
             }
 
             let actions: [String]
-            switch elementQuery.optionalActionNames(of: element) {
-            case let .success(value):
-                actions = value
-            case let .failure(error):
-                return .nonPressable(diagnostic: "actions.\(error.linearMouseDescription)", path: path)
+            if Self.requiresActionNames(role: role, depth: depth) {
+                switch elementQuery.optionalActionNames(of: element) {
+                case let .success(value):
+                    actions = value
+                case let .failure(error):
+                    return Self.failedQueryResult(stage: "actions", error: error, path: path)
+                }
+            } else {
+                actions = []
             }
 
             path.append(Self.pathEntry(role: role, subrole: subrole, actions: actions))
 
+            if let role, Self.webContentRoles.contains(role) {
+                isInsideWebContent = true
+                if role == "AXWebArea" {
+                    hasBrowserAccessibilitySignal = true
+                }
+            }
+
+            // Native controls can return before querying browser-only AX attributes.
+            if !isInsideWebContent,
+               Self.isExcludedActivationElement(role: role, subrole: subrole) {
+                return .certain(.pressable(path: path))
+            }
+
+            if Self.isPressableActivationElement(role: role, actions: actions) {
+                return .certain(.pressable(path: path))
+            }
+
+            let domClassList = domClassList(of: element)
+            hasBrowserAccessibilitySignal = hasBrowserAccessibilitySignal || !domClassList.isEmpty
             if matchingBypassRule(
                 element,
                 depth: depth,
                 role: role,
                 subrole: subrole,
                 actions: actions,
+                domClassList: domClassList,
                 at: point
             ) != nil {
-                return .pressable(path: path)
-            }
-
-            if let role, Self.webContentRoles.contains(role) {
-                isInsideWebContent = true
-            }
-
-            // Once we have entered web content, ignore higher-level browser chrome ancestors
-            // like tab groups or toolbars. Safari and Chromium often expose those above the
-            // page content, and treating them as excluded chrome would block autoscroll on
-            // normal page clicks.
-            if !isInsideWebContent,
-               Self.isExcludedActivationElement(role: role, subrole: subrole) {
-                return .pressable(path: path)
-            }
-
-            if Self.isPressableActivationElement(role: role, actions: actions) {
-                return .pressable(path: path)
+                return .certain(.pressable(path: path))
             }
 
             switch elementQuery.optionalElementValue(of: kAXParentAttribute as CFString, on: element) {
             case let .success(value):
                 currentElement = value
             case let .failure(error):
-                return .nonPressable(diagnostic: "parent.\(error.linearMouseDescription)", path: path)
+                return Self.failedQueryResult(stage: "parent", error: error, path: path)
             }
         }
 
-        return .nonPressable(diagnostic: "depthLimit", path: path)
+        return .uncertain(.nonPressable(diagnostic: "depthLimit", path: path))
+    }
+
+    private static func failedQueryResult(
+        stage: String,
+        error: AXError,
+        path: [String]
+    ) -> AccessibilityHitTestResult {
+        let hit = AutoScrollActivationHit.nonPressable(
+            diagnostic: "\(stage).\(error.linearMouseDescription)",
+            path: path
+        )
+
+        switch error {
+        case .cannotComplete, .notImplemented:
+            return .uncertain(hit)
+        default:
+            return .certain(hit)
+        }
+    }
+
+    private static func requiresActionNames(role: String?, depth: Int) -> Bool {
+        guard let role else {
+            return false
+        }
+
+        return pressableRoles.contains(role) || (depth == 0 && role == "AXGroup")
     }
 
     private static func isExcludedActivationElement(role: String?, subrole: String?) -> Bool {
@@ -218,6 +253,7 @@ struct AutoScrollAccessibilityActivationClassifier {
         role: String?,
         subrole: String?,
         actions: [String],
+        domClassList: [String],
         at point: CGPoint
     ) -> AccessibilityBypassRule? {
         bypassRuleMatcher.firstMatchingRule(
@@ -226,7 +262,8 @@ struct AutoScrollAccessibilityActivationClassifier {
                 depth: depth,
                 role: role,
                 subrole: subrole,
-                actions: actions
+                actions: actions,
+                domClassList: domClassList
             ),
             in: AccessibilityBypassRuleContext(
                 point: point
@@ -239,23 +276,33 @@ struct AutoScrollAccessibilityActivationClassifier {
         depth: Int,
         role: String?,
         subrole: String?,
-        actions: [String]
+        actions: [String],
+        domClassList: [String]
     ) -> AccessibilityBypassElementSnapshot {
-        let parent = optionalParent(of: element)
+        let needsFullWindowGroupSnapshot = depth == 0
+            && role == "AXGroup"
+            && subrole == nil
+            && actions.isEmpty
+        let needsWindowSnapshot = role == "AXWindow"
+        // Geometry, child enumeration, and scrollbar queries cross the process boundary.
+        // Fetch them only when the cheap rule conditions leave a possible match.
+        let parent = needsFullWindowGroupSnapshot ? optionalParent(of: element) : nil
 
         return AccessibilityBypassElementSnapshot(
             depth: depth,
             role: role,
             subrole: subrole,
             actions: actions,
-            frame: frame(of: element),
+            frame: needsFullWindowGroupSnapshot || needsWindowSnapshot ? frame(of: element) : nil,
             parentRole: parent.flatMap { self.role(of: $0) },
             parentFrame: parent.flatMap { frame(of: $0) },
-            children: immediateChildren(of: element).map(childSnapshot),
-            hasVerticalScrollBar: hasAttributeValue(kAXVerticalScrollBarAttribute as CFString, on: element),
-            hasHorizontalScrollBar: hasAttributeValue(kAXHorizontalScrollBarAttribute as CFString, on: element),
-            domClassList: domClassList(of: element),
-            standardWindowButtonFrames: role == "AXWindow" ? standardWindowButtonFrames(of: element) : []
+            children: needsFullWindowGroupSnapshot ? immediateChildren(of: element).map(childSnapshot) : [],
+            hasVerticalScrollBar: needsFullWindowGroupSnapshot
+                && hasAttributeValue(kAXVerticalScrollBarAttribute as CFString, on: element),
+            hasHorizontalScrollBar: needsFullWindowGroupSnapshot
+                && hasAttributeValue(kAXHorizontalScrollBarAttribute as CFString, on: element),
+            domClassList: domClassList,
+            standardWindowButtonFrames: needsWindowSnapshot ? standardWindowButtonFrames(of: element) : []
         )
     }
 
@@ -368,6 +415,19 @@ struct AutoScrollActivationProbe {
     let hit: AutoScrollActivationHit
 }
 
+private struct AccessibilityHitTestResult {
+    let hit: AutoScrollActivationHit
+    let shouldRetryAtSamePoint: Bool
+
+    static func certain(_ hit: AutoScrollActivationHit) -> Self {
+        .init(hit: hit, shouldRetryAtSamePoint: false)
+    }
+
+    static func uncertain(_ hit: AutoScrollActivationHit) -> Self {
+        .init(hit: hit, shouldRetryAtSamePoint: true)
+    }
+}
+
 enum AutoScrollActivationHit {
     case pressable(path: [String])
     case nonPressable(diagnostic: String?, path: [String])
@@ -397,7 +457,7 @@ enum AutoScrollActivationHit {
         return false
     }
 
-    var requiresAdditionalSampling: Bool {
+    var requiresRetry: Bool {
         !isPressable
     }
 }
