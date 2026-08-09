@@ -32,6 +32,8 @@ final class ButtonActionExecutor {
 
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ButtonActions")
 
+    private static let enhancedUserInterfaceAttribute = "AXEnhancedUserInterface" as CFString
+
     final class RuntimeState {
         var repeatTimers = [Set<Scheme.Buttons.Mapping.Button>: TimerToken]()
         var pendingReleaseActions = [
@@ -196,6 +198,245 @@ extension ButtonActionExecutor {
         }
     }
 
+    private func focusedWindow() -> AXUIElement? {
+        guard let application = NSWorkspace.shared.frontmostApplication else {
+            return nil
+        }
+
+        let appElement = AXUIElementCreateApplication(application.processIdentifier)
+
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(
+            appElement,
+            kAXFocusedWindowAttribute as CFString,
+            &value
+        ) == .success,
+            let value,
+            CFGetTypeID(value) == AXUIElementGetTypeID() else {
+            return nil
+        }
+
+        return unsafeBitCast(value, to: AXUIElement.self)
+    }
+
+    private func windowFrame(_ window: AXUIElement) -> CGRect? {
+        var positionValue: CFTypeRef?
+        var sizeValue: CFTypeRef?
+
+        guard AXUIElementCopyAttributeValue(
+            window,
+            kAXPositionAttribute as CFString,
+            &positionValue
+        ) == .success,
+            AXUIElementCopyAttributeValue(
+                window,
+                kAXSizeAttribute as CFString,
+                &sizeValue
+            ) == .success,
+            let positionValue,
+            let sizeValue,
+            CFGetTypeID(positionValue) == AXValueGetTypeID(),
+            CFGetTypeID(sizeValue) == AXValueGetTypeID() else {
+            return nil
+        }
+
+        let axPositionValue = unsafeBitCast(positionValue, to: AXValue.self)
+        let axSizeValue = unsafeBitCast(sizeValue, to: AXValue.self)
+
+        guard AXValueGetType(axPositionValue) == .cgPoint,
+              AXValueGetType(axSizeValue) == .cgSize else {
+            return nil
+        }
+
+        var position = CGPoint.zero
+        var size = CGSize.zero
+
+        guard AXValueGetValue(
+            axPositionValue,
+            .cgPoint,
+            &position
+        ),
+            AXValueGetValue(
+                axSizeValue,
+                .cgSize,
+                &size
+            ) else {
+            return nil
+        }
+
+        return CGRect(origin: position, size: size)
+    }
+
+    private func appKitFrame(fromAXFrame frame: CGRect) -> CGRect? {
+        guard let primaryScreen = NSScreen.screens.first else {
+            return nil
+        }
+
+        return CGRect(
+            x: frame.minX,
+            y: primaryScreen.frame.maxY - frame.maxY,
+            width: frame.width,
+            height: frame.height
+        )
+    }
+
+    private func axPosition(fromAppKitFrame frame: CGRect) -> CGPoint? {
+        guard let primaryScreen = NSScreen.screens.first else {
+            return nil
+        }
+
+        return CGPoint(
+            x: frame.minX,
+            y: primaryScreen.frame.maxY - frame.maxY
+        )
+    }
+
+    private func screenForWindow(_ window: AXUIElement) -> NSScreen? {
+        guard let axFrame = windowFrame(window),
+              let frame = appKitFrame(fromAXFrame: axFrame) else {
+            return NSScreen.main
+        }
+
+        return NSScreen.screens.max {
+            $0.frame.intersection(frame).area
+                < $1.frame.intersection(frame).area
+        }
+    }
+
+    private func maximizeFocusedWindow() {
+        guard let window = focusedWindow(),
+              let screen = screenForWindow(window),
+              let position = axPosition(fromAppKitFrame: screen.visibleFrame) else {
+            return
+        }
+
+        let targetFrame = CGRect(origin: position, size: screen.visibleFrame.size)
+        setWindowFrame(targetFrame, window: window)
+    }
+
+    private func setWindowFrame(_ targetFrame: CGRect, window: AXUIElement) {
+        // AXEnhancedUserInterface can make Firefox window frame updates unreliable:
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=1664992
+        // Rectangle and Hammerspoon temporarily disable it while applying size-position-size:
+        // https://github.com/rxhanson/Rectangle/blob/master/Rectangle/AccessibilityElement.swift
+        // https://github.com/Hammerspoon/hammerspoon/blob/master/Hammerspoon/HSuicore.m
+        var pid = pid_t()
+        let appElement: AXUIElement? = if AXUIElementGetPid(window, &pid) == .success {
+            AXUIElementCreateApplication(pid)
+        } else {
+            nil
+        }
+
+        let enhancedUserInterfaceWasEnabled = appElement.flatMap {
+            enhancedUserInterfaceEnabled(for: $0)
+        }
+
+        if let appElement, enhancedUserInterfaceWasEnabled == true {
+            os_log(
+                "Temporarily disabling AXEnhancedUserInterface before setting window frame",
+                log: Self.log,
+                type: .info
+            )
+            let result = AXUIElementSetAttributeValue(
+                appElement,
+                Self.enhancedUserInterfaceAttribute,
+                kCFBooleanFalse
+            )
+            if result != .success {
+                os_log(
+                    "Failed to disable AXEnhancedUserInterface: %{public}@",
+                    log: Self.log,
+                    type: .error,
+                    String(describing: result)
+                )
+            }
+        }
+
+        defer {
+            if let appElement, enhancedUserInterfaceWasEnabled == true {
+                let result = AXUIElementSetAttributeValue(
+                    appElement,
+                    Self.enhancedUserInterfaceAttribute,
+                    kCFBooleanTrue
+                )
+                if result != .success {
+                    os_log(
+                        "Failed to restore AXEnhancedUserInterface: %{public}@",
+                        log: Self.log,
+                        type: .error,
+                        String(describing: result)
+                    )
+                }
+            }
+        }
+
+        var position = targetFrame.origin
+        var size = targetFrame.size
+
+        guard let positionValue = AXValueCreate(.cgPoint, &position),
+              let sizeValue = AXValueCreate(.cgSize, &size) else {
+            return
+        }
+
+        let initialSizeResult = AXUIElementSetAttributeValue(
+            window,
+            kAXSizeAttribute as CFString,
+            sizeValue
+        )
+
+        let positionResult = AXUIElementSetAttributeValue(
+            window,
+            kAXPositionAttribute as CFString,
+            positionValue
+        )
+
+        let finalSizeResult = AXUIElementSetAttributeValue(
+            window,
+            kAXSizeAttribute as CFString,
+            sizeValue
+        )
+
+        if initialSizeResult != .success
+            || positionResult != .success
+            || finalSizeResult != .success {
+            os_log(
+                "Failed to set window frame: size=%{public}@, position=%{public}@, finalSize=%{public}@",
+                log: Self.log,
+                type: .error,
+                String(describing: initialSizeResult),
+                String(describing: positionResult),
+                String(describing: finalSizeResult)
+            )
+        }
+    }
+
+    private func enhancedUserInterfaceEnabled(for application: AXUIElement) -> Bool? {
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(
+            application,
+            Self.enhancedUserInterfaceAttribute,
+            &value
+        ) == .success,
+            let value,
+            CFGetTypeID(value) == CFBooleanGetTypeID() else {
+            return nil
+        }
+
+        return CFBooleanGetValue(unsafeBitCast(value, to: CFBoolean.self))
+    }
+
+    private func minimizeFocusedWindow() {
+        guard let window = focusedWindow() else {
+            return
+        }
+
+        AXUIElementSetAttributeValue(
+            window,
+            kAXMinimizedAttribute as CFString,
+            kCFBooleanTrue
+        )
+    }
+
     private func scheduleRepeatActions(
         action: Scheme.Buttons.Mapping.Action,
         buttons: Set<Scheme.Buttons.Mapping.Button>,
@@ -286,6 +527,12 @@ extension ButtonActionExecutor {
 
         case .arg0(.smartZoom):
             GestureEvent(zoomToggleSource: nil)?.post(tap: .cgSessionEventTap)
+
+        case .arg0(.windowMaximize):
+            maximizeFocusedWindow()
+
+        case .arg0(.windowMinimize):
+            minimizeFocusedWindow()
 
         case .arg0(.displayBrightnessUp):
             postSystemDefinedKey(.brightnessUp)
@@ -535,5 +782,11 @@ extension ButtonActionExecutor: Deactivatable {
             try? keySimulator.up(keys: heldKeys, tap: .cgSessionEventTap)
             keySimulator.reset()
         }
+    }
+}
+
+private extension CGRect {
+    var area: CGFloat {
+        width * height
     }
 }

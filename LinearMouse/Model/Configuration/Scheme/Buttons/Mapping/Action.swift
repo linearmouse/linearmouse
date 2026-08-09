@@ -32,6 +32,9 @@ extension Scheme.Buttons.Mapping.Action {
         case lookUpAndDataDetectors
         case smartZoom
 
+        case windowMaximize = "window.maximize"
+        case windowMinimize = "window.minimize"
+
         case displayBrightnessUp = "display.brightnessUp"
         case displayBrightnessDown = "display.brightnessDown"
 

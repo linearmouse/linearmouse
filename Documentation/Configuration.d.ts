@@ -768,6 +768,8 @@ declare namespace Scheme {
         | ShowDesktop
         | LookUpAndDataDetectors
         | SmartZoom
+        | WindowMaximize
+        | WindowMinimize
         | DisplayBrightnessUp
         | DisplayBrightnessDown
         | MediaVolumeUp
@@ -839,6 +841,15 @@ declare namespace Scheme {
        * @description Smart zoom.
        */
       type SmartZoom = "smartZoom";
+      /**
+       * @description Window: Maximize.
+       */
+      type WindowMaximize = "window.maximize";
+
+      /**
+       * @description Window: Minimize.
+       */
+      type WindowMinimize = "window.minimize";
 
       /**
        * @description Display: Brightness up.
