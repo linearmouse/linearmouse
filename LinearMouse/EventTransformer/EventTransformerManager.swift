@@ -948,12 +948,14 @@ class EventTransformerManager {
         }
 
         let modes = autoScroll.normalizedModes
+        let toggleActivation = autoScroll.normalizedToggleActivation
         let speed = autoScroll.speed?.asTruncatedDouble ?? 1
 
         if let sharedAutoScrollTransformer,
            sharedAutoScrollTransformer.matchesConfiguration(
                trigger: trigger,
                modes: modes,
+               toggleActivation: toggleActivation,
                speed: speed
            ) {
             return sharedAutoScrollTransformer
@@ -964,6 +966,7 @@ class EventTransformerManager {
         let transformer = AutoScrollTransformer(
             trigger: trigger,
             modes: modes,
+            toggleActivation: toggleActivation,
             speed: speed
         )
         sharedAutoScrollTransformer = transformer

@@ -166,13 +166,19 @@
         },
         "mode": {
           "$ref": "#/definitions/SingleValueOrArray%3CScheme.Buttons.AutoScroll.Mode%3E",
-          "description": "Use \\\"toggle\\\" to click once and move until clicking again, \\\"hold\\\" to scroll only while the trigger stays pressed, or provide both to support both behaviors.",
+          "description": "Use \\\"toggle\\\" to keep scrolling active until the trigger is pressed again, \\\"hold\\\" to scroll only while the trigger stays pressed, or provide both to support both behaviors.",
           "title": "Activation mode"
         },
         "speed": {
           "default": 1,
           "description": "Adjust the auto scroll speed multiplier.",
           "type": "number"
+        },
+        "toggleActivation": {
+          "$ref": "#/definitions/Scheme.Buttons.AutoScroll.ToggleActivation",
+          "default": "shortPress",
+          "description": "Choose whether toggle mode activates with a short press or after the same long-press threshold used by button mappings. This does not affect hold mode.",
+          "title": "Toggle activation"
         },
         "trigger": {
           "$ref": "#/definitions/Scheme.Buttons.AutoScroll.Trigger",
@@ -187,6 +193,11 @@
       "description": "Auto scroll is active only while the trigger button remains pressed.",
       "type": "string"
     },
+    "Scheme.Buttons.AutoScroll.LongPress": {
+      "const": "longPress",
+      "description": "Activate toggle mode after the button mapping long-press threshold.",
+      "type": "string"
+    },
     "Scheme.Buttons.AutoScroll.Mode": {
       "anyOf": [
         {
@@ -197,10 +208,25 @@
         }
       ]
     },
+    "Scheme.Buttons.AutoScroll.ShortPress": {
+      "const": "shortPress",
+      "description": "Activate toggle mode with a short press.",
+      "type": "string"
+    },
     "Scheme.Buttons.AutoScroll.Toggle": {
       "const": "toggle",
-      "description": "Click once to enter auto scroll and click again to exit.",
+      "description": "Keep auto scroll active until the trigger is pressed again. The toggleActivation setting controls whether activation requires a short or long press.",
       "type": "string"
+    },
+    "Scheme.Buttons.AutoScroll.ToggleActivation": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Scheme.Buttons.AutoScroll.ShortPress"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.AutoScroll.LongPress"
+        }
+      ]
     },
     "Scheme.Buttons.AutoScroll.Trigger": {
       "additionalProperties": false,

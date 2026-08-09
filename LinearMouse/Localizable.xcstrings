@@ -14013,6 +14013,7 @@
     },
     "Click once to toggle" : {
       "comment" : "Autoscroll mode label. One click turns the mode on or off.",
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -35041,6 +35042,29 @@
         }
       }
     },
+    "Keep scrolling after release" : {
+      "comment" : "Checkbox label for keeping autoscroll active after releasing its trigger.",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "松开后保持滚动"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "放開後保持捲動"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "放開後保持捲動"
+          }
+        }
+      }
+    },
     "Launchpad" : {
       "localizations" : {
         "af" : {
@@ -36706,6 +36730,29 @@
         }
       }
     },
+    "Long press" : {
+      "comment" : "Autoscroll toggle activation option.",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "长按"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "長按"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "長按"
+          }
+        }
+      }
+    },
     "Long Press %@" : {
       "comment" : "Recorded gesture token",
       "localizations" : {
@@ -37327,6 +37374,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "長按："
+          }
+        }
+      }
+    },
+    "Long-press and release to keep autoscroll active, or drag beyond the dead zone to scroll only until you let go." : {
+      "comment" : "Autoscroll description when long-press toggle and hold modes are enabled.",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "长按并松开可保持自动滚动，或拖动超过死区，仅在按住期间滚动。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "長按並放開可保持自動捲動，或拖動超過死區，僅在按住期間捲動。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "長按並放開可保持自動捲動，或拖動超過死區，只在按住期間捲動。"
+          }
+        }
+      }
+    },
+    "Long-press the trigger to enter autoscroll, move in any direction to scroll, then click again to exit." : {
+      "comment" : "Autoscroll description when toggle mode requires a long press.",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "长按触发按钮以进入自动滚动，向任意方向移动以滚动，然后再次单击退出。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "長按觸發按鈕以進入自動捲動，向任意方向移動以捲動，然後再次點按退出。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "長按觸發按鈕以進入自動捲動，向任何方向移動以捲動，然後再按一下退出。"
           }
         }
       }
@@ -60470,6 +60563,29 @@
         }
       }
     },
+    "Short press" : {
+      "comment" : "Autoscroll toggle activation option.",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "短按"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "短按"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "短按"
+          }
+        }
+      }
+    },
     "Short press action" : {
       "localizations" : {
         "af" : {
@@ -70872,6 +70988,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "當你想自行微調手感時，請使用這個選項。"
+          }
+        }
+      }
+    },
+    "Uses the same long-press threshold as button mappings." : {
+      "comment" : "Explains the autoscroll long-press timing.",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用与按钮映射相同的长按阈值。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用與按鈕映射相同的長按閾值。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用與按鈕映射相同的長按閾值。"
           }
         }
       }

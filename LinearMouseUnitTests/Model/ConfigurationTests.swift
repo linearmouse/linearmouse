@@ -123,9 +123,12 @@ final class ConfigurationTests: XCTestCase {
         trigger.shift = true
         scheme.buttons.autoScroll.trigger = trigger
 
-        Scheme().merge(into: &scheme)
+        var override = Scheme()
+        override.buttons.autoScroll.toggleActivation = .longPress
+        override.merge(into: &scheme)
 
         XCTAssertEqual(scheme.buttons.autoScroll.enabled, true)
+        XCTAssertEqual(scheme.buttons.autoScroll.toggleActivation, .longPress)
         XCTAssertEqual(scheme.buttons.autoScroll.modes, [.hold])
         XCTAssertEqual(scheme.buttons.autoScroll.trigger?.button, .mouse(4))
         XCTAssertEqual(scheme.buttons.autoScroll.trigger?.modifierFlags.contains(.maskShift), true)
@@ -134,6 +137,7 @@ final class ConfigurationTests: XCTestCase {
     func testMergeAutoScrollPreservesInheritedFields() {
         var scheme = Scheme()
         scheme.buttons.autoScroll.enabled = true
+        scheme.buttons.autoScroll.toggleActivation = .longPress
         scheme.buttons.autoScroll.modes = [.toggle]
         scheme.buttons.autoScroll.speed = 1
 
@@ -148,6 +152,7 @@ final class ConfigurationTests: XCTestCase {
         override.merge(into: &scheme)
 
         XCTAssertEqual(scheme.buttons.autoScroll.enabled, true)
+        XCTAssertEqual(scheme.buttons.autoScroll.toggleActivation, .longPress)
         XCTAssertEqual(scheme.buttons.autoScroll.modes, [.toggle, .hold])
         XCTAssertEqual(scheme.buttons.autoScroll.speed, 2)
         XCTAssertEqual(scheme.buttons.autoScroll.trigger?.button, .mouse(2))
@@ -289,6 +294,30 @@ final class ConfigurationTests: XCTestCase {
 
         XCTAssertEqual(autoScroll.modes, [.toggle, .hold])
         XCTAssertEqual(autoScroll.normalizedModes, [.toggle, .hold])
+    }
+
+    func testDecodeAutoScrollDefaultsToShortPressToggleActivation() throws {
+        let autoScroll = try JSONDecoder().decode(
+            Scheme.Buttons.AutoScroll.self,
+            from: XCTUnwrap(#"{"enabled":true}"#.data(using: .utf8))
+        )
+
+        XCTAssertNil(autoScroll.toggleActivation)
+        XCTAssertEqual(autoScroll.normalizedToggleActivation, .shortPress)
+    }
+
+    func testAutoScrollLongPressToggleActivationRoundTrips() throws {
+        let autoScroll = try JSONDecoder().decode(
+            Scheme.Buttons.AutoScroll.self,
+            from: XCTUnwrap(#"{"toggleActivation":"longPress"}"#.data(using: .utf8))
+        )
+
+        XCTAssertEqual(autoScroll.toggleActivation, .longPress)
+        XCTAssertEqual(autoScroll.normalizedToggleActivation, .longPress)
+
+        let encoded = try JSONEncoder().encode(autoScroll)
+        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        XCTAssertEqual(object["toggleActivation"] as? String, "longPress")
     }
 
     func testDecodeAutoScrollIgnoresRemovedPreserveNativeMiddleClickOption() throws {

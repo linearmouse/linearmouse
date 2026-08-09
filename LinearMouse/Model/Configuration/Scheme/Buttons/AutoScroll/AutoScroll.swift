@@ -5,6 +5,15 @@ import Foundation
 
 extension Scheme.Buttons {
     struct AutoScroll: Equatable, ImplicitInitable {
+        enum ToggleActivation: String, Codable, Equatable, CaseIterable, Identifiable {
+            var id: Self {
+                self
+            }
+
+            case shortPress
+            case longPress
+        }
+
         enum Mode: String, Codable, Equatable, CaseIterable, Identifiable {
             var id: Self {
                 self
@@ -15,6 +24,7 @@ extension Scheme.Buttons {
         }
 
         var enabled: Bool?
+        var toggleActivation: ToggleActivation?
         var modes: [Mode]?
         var speed: Decimal?
         var trigger: Mapping?
@@ -26,6 +36,7 @@ extension Scheme.Buttons {
 extension Scheme.Buttons.AutoScroll: Codable {
     private enum CodingKeys: String, CodingKey {
         case enabled
+        case toggleActivation
         case mode
         case speed
         case trigger
@@ -35,6 +46,7 @@ extension Scheme.Buttons.AutoScroll: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled)
+        toggleActivation = try container.decodeIfPresent(ToggleActivation.self, forKey: .toggleActivation)
         modes = try container.decodeIfPresent(SingleValueOrArray<Mode>.self, forKey: .mode)?.wrappedValue
         speed = try container.decodeIfPresent(Decimal.self, forKey: .speed)
         trigger = try container.decodeIfPresent(Scheme.Buttons.Mapping.self, forKey: .trigger)
@@ -44,6 +56,7 @@ extension Scheme.Buttons.AutoScroll: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encodeIfPresent(enabled, forKey: .enabled)
+        try container.encodeIfPresent(toggleActivation, forKey: .toggleActivation)
         try container.encode(SingleValueOrArray(wrappedValue: modes), forKey: .mode)
         try container.encodeIfPresent(speed, forKey: .speed)
         try container.encodeIfPresent(trigger, forKey: .trigger)
@@ -51,6 +64,10 @@ extension Scheme.Buttons.AutoScroll: Codable {
 }
 
 extension Scheme.Buttons.AutoScroll {
+    var normalizedToggleActivation: ToggleActivation {
+        toggleActivation ?? .shortPress
+    }
+
     var normalizedModes: [Mode] {
         let orderedModes = Mode.allCases.filter { modes?.contains($0) == true }
         return orderedModes.isEmpty ? [.toggle] : orderedModes
@@ -67,6 +84,10 @@ extension Scheme.Buttons.AutoScroll {
     func merge(into autoScroll: inout Self) {
         if let enabled {
             autoScroll.enabled = enabled
+        }
+
+        if let toggleActivation {
+            autoScroll.toggleActivation = toggleActivation
         }
 
         if let modes {

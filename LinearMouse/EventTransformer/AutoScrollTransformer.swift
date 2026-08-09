@@ -7,6 +7,7 @@ import os.log
 
 final class AutoScrollTransformer {
     typealias ActivationHitProvider = (CGEvent) -> AutoScrollActivationHit?
+    typealias LongPressTimerScheduler = (TimeInterval, @escaping () -> Void) -> (() -> Void)?
 
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "AutoScroll")
 
@@ -16,7 +17,9 @@ final class AutoScrollTransformer {
 
     private let trigger: Scheme.Buttons.Mapping
     private let modes: [Scheme.Buttons.AutoScroll.Mode]
+    private let toggleActivation: Scheme.Buttons.AutoScroll.ToggleActivation
     private let speed: Double
+    private let scheduleLongPressTimer: LongPressTimerScheduler
     private let activationHitProvider: ActivationHitProvider?
     private let fallbackEventSink: (CGEvent) -> Void
 
@@ -31,9 +34,32 @@ final class AutoScrollTransformer {
         var sink: (CGEvent) -> Void
     }
 
+    private enum PendingActivationStrategy {
+        case movement(Session)
+        case longPress(Session)
+        case movementOrLongPress
+
+        var schedulesLongPress: Bool {
+            switch self {
+            case .longPress, .movementOrLongPress:
+                return true
+            case .movement:
+                return false
+            }
+        }
+    }
+
+    private enum PendingActivationCause {
+        case movement
+        case longPress
+    }
+
     private struct PendingActivation {
         var anchor: CGPoint
+        var current: CGPoint
         var bufferedEvents: [DeferredEvent]
+        var strategy: PendingActivationStrategy
+        var isPhysicalTrigger: Bool
     }
 
     private enum State {
@@ -45,6 +71,8 @@ final class AutoScrollTransformer {
     private var state: State = .idle
     private var suppressTriggerUp = false
     private var suppressedExitMouseButton: CGMouseButton?
+    private var longPressTimerCancellation: (() -> Void)?
+    private var longPressTimerGeneration: UInt64 = 0
     private var timer: EventThreadTimer?
     private let indicatorController = AutoScrollIndicatorWindowController()
     private let accessibilityActivationClassifier = AutoScrollAccessibilityActivationClassifier()
@@ -56,18 +84,24 @@ final class AutoScrollTransformer {
     init(
         trigger: Scheme.Buttons.Mapping,
         modes: [Scheme.Buttons.AutoScroll.Mode],
+        toggleActivation: Scheme.Buttons.AutoScroll.ToggleActivation = .shortPress,
         speed: Double,
+        longPressTimerScheduler: @escaping LongPressTimerScheduler = AutoScrollTransformer
+            .scheduleEventThreadLongPressTimer,
         activationHitProvider: ActivationHitProvider? = nil,
         eventSink: @escaping (CGEvent) -> Void = { $0.post(tap: .cgSessionEventTap) }
     ) {
         self.trigger = trigger
         self.modes = modes
+        self.toggleActivation = toggleActivation
         self.speed = speed
+        scheduleLongPressTimer = longPressTimerScheduler
         self.activationHitProvider = activationHitProvider
         fallbackEventSink = eventSink
     }
 
     deinit {
+        longPressTimerCancellation?()
         DispatchQueue.main.async { [indicatorController] in
             indicatorController.hide()
         }
@@ -161,8 +195,20 @@ extension AutoScrollTransformer: EventTransformer, DeferredEventTransformer {
             return event
         }
 
+        if usesLongPressToggle {
+            let strategy: PendingActivationStrategy = hasHoldMode
+                ? .movementOrLongPress
+                : .longPress(.toggle)
+            beginPendingActivation(
+                with: event,
+                in: context,
+                strategy: strategy
+            )
+            return nil
+        }
+
         if isHoldOnlyMode {
-            beginPendingActivation(with: event, in: context)
+            beginPendingActivation(with: event, in: context, strategy: .movement(.hold))
             return nil
         }
 
@@ -175,7 +221,11 @@ extension AutoScrollTransformer: EventTransformer, DeferredEventTransformer {
         guard Self.shouldStartAutoScroll(for: activationHitResult) else {
             // Delay the native stream only until movement distinguishes a click from
             // an Auto Scroll drag. A click replays the complete stream in order.
-            beginPendingActivation(with: event, in: context)
+            beginPendingActivation(
+                with: event,
+                in: context,
+                strategy: .movement(activationSession)
+            )
             return nil
         }
 
@@ -235,17 +285,18 @@ extension AutoScrollTransformer: EventTransformer, DeferredEventTransformer {
             }
 
             let point = pointerLocation(for: event)
-            guard exceedsDeadZone(from: pending.anchor, to: point) else {
-                if isTriggerDrag {
-                    pending.bufferedEvents.append(deferredEvent(event, in: context))
-                }
-                state = .pending(pending)
-                return isTriggerDrag ? nil : event
+            pending.current = point
+            if isTriggerDrag {
+                pending.bufferedEvents.append(deferredEvent(event, in: context))
+            }
+            state = .pending(pending)
+
+            if exceedsDeadZone(from: pending.anchor, to: point),
+               activatePending(for: .movement) {
+                return handlePointerMoved(event, in: context)
             }
 
-            activate(at: pending.anchor, session: activationSession)
-            suppressTriggerUp = isTriggerDrag
-            return handlePointerMoved(event, in: context)
+            return isTriggerDrag ? nil : event
 
         case let .active(anchor, _, session):
             let point = pointerLocation(for: event)
@@ -300,11 +351,38 @@ extension AutoScrollTransformer: EventTransformer, DeferredEventTransformer {
         )
     }
 
-    private func beginPendingActivation(with event: CGEvent, in context: EventTransformerContext) {
+    private func beginPendingActivation(
+        with event: CGEvent,
+        in context: EventTransformerContext,
+        strategy: PendingActivationStrategy
+    ) {
+        let point = pointerLocation(for: event)
+        beginPendingActivation(
+            at: point,
+            bufferedEvents: [deferredEvent(event, in: context)],
+            strategy: strategy,
+            isPhysicalTrigger: true
+        )
+    }
+
+    private func beginPendingActivation(
+        at point: CGPoint,
+        bufferedEvents: [DeferredEvent],
+        strategy: PendingActivationStrategy,
+        isPhysicalTrigger: Bool
+    ) {
+        cancelLongPressTimer()
         state = .pending(.init(
-            anchor: pointerLocation(for: event),
-            bufferedEvents: [deferredEvent(event, in: context)]
+            anchor: point,
+            current: point,
+            bufferedEvents: bufferedEvents,
+            strategy: strategy,
+            isPhysicalTrigger: isPhysicalTrigger
         ))
+
+        if strategy.schedulesLongPress {
+            schedulePendingLongPressActivation()
+        }
     }
 
     private func replayPendingActivation(including finalEvent: DeferredEvent? = nil) {
@@ -313,12 +391,85 @@ extension AutoScrollTransformer: EventTransformer, DeferredEventTransformer {
         }
 
         state = .idle
+        cancelLongPressTimer()
         var events = pending.bufferedEvents
         if let finalEvent {
             events.append(finalEvent)
         }
         for event in events {
             event.sink(event.event)
+        }
+    }
+
+    @discardableResult
+    private func activatePending(for cause: PendingActivationCause) -> Bool {
+        guard case let .pending(pending) = state else {
+            return false
+        }
+
+        let session: Session
+        switch (pending.strategy, cause) {
+        case let (.movement(pendingSession), .movement),
+             let (.longPress(pendingSession), .longPress):
+            session = pendingSession
+        case (.movementOrLongPress, .movement):
+            session = .hold
+        case (.movementOrLongPress, .longPress):
+            session = .pendingToggleOrHold
+        default:
+            return false
+        }
+
+        cancelLongPressTimer()
+        suppressTriggerUp = pending.isPhysicalTrigger
+        activate(
+            at: pending.anchor,
+            current: pending.current,
+            session: session
+        )
+        return true
+    }
+
+    private func schedulePendingLongPressActivation() {
+        longPressTimerGeneration &+= 1
+        let generation = longPressTimerGeneration
+        longPressTimerCancellation = scheduleLongPressTimer(
+            ButtonMappingPolicy.default.longPressDuration
+        ) { [weak self] in
+            self?.longPressThresholdReached(generation: generation)
+        }
+    }
+
+    private func longPressThresholdReached(generation: UInt64) {
+        guard generation == longPressTimerGeneration,
+              case .pending = state else {
+            return
+        }
+
+        longPressTimerCancellation = nil
+        activatePending(for: .longPress)
+    }
+
+    private func cancelLongPressTimer() {
+        longPressTimerGeneration &+= 1
+        longPressTimerCancellation?()
+        longPressTimerCancellation = nil
+    }
+
+    private static func scheduleEventThreadLongPressTimer(
+        interval: TimeInterval,
+        handler: @escaping () -> Void
+    ) -> (() -> Void)? {
+        guard let timer = EventThread.shared.scheduleTimer(
+            interval: interval,
+            repeats: false,
+            handler: handler
+        ) else {
+            return nil
+        }
+
+        return {
+            timer.invalidate()
         }
     }
 
@@ -360,7 +511,7 @@ extension AutoScrollTransformer: EventTransformer, DeferredEventTransformer {
         }
     }
 
-    private func activate(at point: CGPoint, session: Session) {
+    private func activate(at point: CGPoint, current: CGPoint? = nil, session: Session) {
         os_log(
             "Auto scroll activated (modes=%{public}@, button=%{public}d)",
             log: Self.log,
@@ -370,10 +521,12 @@ extension AutoScrollTransformer: EventTransformer, DeferredEventTransformer {
         )
 
         suppressedExitMouseButton = nil
-        state = .active(anchor: point, current: point, session: session)
+        let current = current ?? point
+        state = .active(anchor: point, current: current, session: session)
+        let delta = CGVector(dx: current.x - point.x, dy: current.y - point.y)
         DispatchQueue.main.async { [indicatorController] in
             indicatorController.show(at: point)
-            indicatorController.update(delta: .zero)
+            indicatorController.update(delta: delta)
         }
         startTimerIfNeeded()
     }
@@ -449,6 +602,10 @@ extension AutoScrollTransformer: EventTransformer, DeferredEventTransformer {
 
     private var isHoldOnlyMode: Bool {
         hasHoldMode && !hasToggleMode
+    }
+
+    private var usesLongPressToggle: Bool {
+        hasToggleMode && toggleActivation == .longPress
     }
 
     private var activationSession: Session {
@@ -559,8 +716,26 @@ extension AutoScrollTransformer: LogitechControlEventHandling {
                 return .notHandled
             }
 
+            if usesLongPressToggle {
+                let strategy: PendingActivationStrategy = hasHoldMode
+                    ? .movementOrLongPress
+                    : .longPress(.toggle)
+                beginPendingActivation(
+                    at: context.mouseLocation,
+                    bufferedEvents: [],
+                    strategy: strategy,
+                    isPhysicalTrigger: false
+                )
+                return .handledDeferringSyntheticFallback
+            }
+
             if isHoldOnlyMode {
-                state = .pending(.init(anchor: context.mouseLocation, bufferedEvents: []))
+                beginPendingActivation(
+                    at: context.mouseLocation,
+                    bufferedEvents: [],
+                    strategy: .movement(.hold),
+                    isPhysicalTrigger: false
+                )
                 return .handledDeferringSyntheticFallback
             }
 
@@ -570,7 +745,7 @@ extension AutoScrollTransformer: LogitechControlEventHandling {
 
         switch state {
         case .pending:
-            state = .idle
+            replayPendingActivation()
             return .notHandled
         case let .active(anchor, current, session):
             switch session {
@@ -610,6 +785,7 @@ extension AutoScrollTransformer: LogitechControlInteractionCanceling {
 extension AutoScrollTransformer: Deactivatable {
     func deactivate() {
         replayPendingActivation()
+        cancelLongPressTimer()
 
         if isAutoscrollActive {
             os_log("Auto scroll deactivated", log: Self.log, type: .info)
@@ -630,10 +806,12 @@ extension AutoScrollTransformer {
     func matchesConfiguration(
         trigger: Scheme.Buttons.Mapping,
         modes: [Scheme.Buttons.AutoScroll.Mode],
+        toggleActivation: Scheme.Buttons.AutoScroll.ToggleActivation,
         speed: Double
     ) -> Bool {
         self.trigger == trigger &&
             self.modes == modes &&
+            self.toggleActivation == toggleActivation &&
             abs(self.speed - speed) < 0.0001
     }
 }
