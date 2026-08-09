@@ -34418,6 +34418,215 @@
         }
       }
     },
+    "Keep scrolling after release" : {
+      "comment" : "Checkbox label for keeping autoscroll active after releasing its trigger.",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hou aan blaai nadat jy loslaat"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "استمرار التمرير بعد الإفلات"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nastavi pomicanje nakon otpuštanja"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continua desplaçant després de deixar anar"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokračovat v rolování po uvolnění"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fortsæt rulning efter slip"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach dem Loslassen weiterscrollen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Συνέχιση κύλισης μετά την απελευθέρωση"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguir desplazándose después de soltar"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jatka vieritystä vapauttamisen jälkeen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer le défilement après le relâchement"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המשך לגלול לאחר השחרור"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Görgetés folytatása felengedés után"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terus gulir setelah dilepas"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continua a scorrere dopo il rilascio"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "離した後もスクロールを継続"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "놓은 후에도 스크롤 유지"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "လွှတ်ပြီးနောက် ဆက်လှိမ့်ရန်"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fortsett å rulle etter slipp"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blijf scrollen na loslaten"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontynuuj przewijanie po zwolnieniu"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar a rolar após soltar"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar rolando após soltar"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuați derularea după eliberare"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Продолжать прокрутку после отпускания"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokračovať v rolovaní po uvoľnení"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настави померање након отпуштања"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fortsätt rulla efter att du släppt"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bıraktıktan sonra kaydırmaya devam et"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Продовжувати прокручування після відпускання"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tiếp tục cuộn sau khi thả"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "松开后保持滚动"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "放開後保持捲動"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "放開後保持捲動"
+          }
+        }
+      }
+    },
     "Keyboard" : {
       "localizations" : {
         "af" : {
@@ -35038,29 +35247,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "鍵盤捷徑鍵…"
-          }
-        }
-      }
-    },
-    "Keep scrolling after release" : {
-      "comment" : "Checkbox label for keeping autoscroll active after releasing its trigger.",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "松开后保持滚动"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "放開後保持捲動"
-          }
-        },
-        "zh-Hant-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "放開後保持捲動"
           }
         }
       }
@@ -36733,6 +36919,192 @@
     "Long press" : {
       "comment" : "Autoscroll toggle activation option.",
       "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lang druk"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الضغط المطول"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dugi pritisak"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulsació llarga"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dlouhé stisknutí"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Langt tryk"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Langes Drücken"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Παρατεταμένο πάτημα"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulsación prolongada"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pitkä painallus"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appui long"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לחיצה ארוכה"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hosszú lenyomás"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekan lama"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pressione prolungata"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "長押し"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "길게 누르기"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ကြာကြာဖိခြင်း"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Langt trykk"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lang indrukken"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Długie naciśnięcie"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pressão prolongada"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pressionar e segurar"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apăsare lungă"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Долгое нажатие"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dlhé stlačenie"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дуги притисак"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Långt tryck"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uzun basma"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Довге натискання"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nhấn giữ"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -37381,6 +37753,192 @@
     "Long-press and release to keep autoscroll active, or drag beyond the dead zone to scroll only until you let go." : {
       "comment" : "Autoscroll description when long-press toggle and hold modes are enabled.",
       "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Druk lank en laat los om outomatiese blaai aktief te hou, of sleep verby die dooie sone om slegs te blaai totdat jy loslaat."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اضغط مطولاً ثم حرر للحفاظ على التمرير التلقائي نشطًا، أو اسحب خارج المنطقة الميتة للتمرير فقط حتى تفلت."
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pritisnite dugo i otpustite da biste zadržali automatsko pomicanje aktivnim, ili povucite izvan mrtve zone da biste pomicali samo dok ne otpustite."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantén premut i deixa anar per mantenir el desplaçament automàtic actiu, o arrossega més enllà de la zona morta per desplaçar-te només fins que deixis anar."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dlouhým stisknutím a uvolněním ponecháte automatické rolování aktivní, nebo tažením mimo mrtvou zónu budete rolovat jen do uvolnění."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tryk længe og slip for at holde autoscroll aktiv, eller træk ud over dødzonen for kun at rulle, indtil du slipper."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lange drücken und loslassen, um das automatische Scrollen beizubehalten, oder über die Totzone hinaus ziehen, um nur bis zum Loslassen zu scrollen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πατήστε παρατεταμένα και αφήστε για να παραμείνει ενεργή η αυτόματη κύλιση, ή σύρετε πέρα από τη νεκρή ζώνη για κύλιση μόνο μέχρι να αφήσετε."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantén pulsado y suelta para mantener activo el desplazamiento automático, o arrastra más allá de la zona muerta para desplazarte solo hasta que sueltes."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paina pitkään ja vapauta pitääksesi automaattisen vierityksen aktiivisena, tai vedä kuolleen alueen ulkopuolelle vierittääksesi vain siihen asti, kunnes vapautat."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effectuez un appui long et relâchez pour maintenir le défilement automatique actif, ou faites glisser au-delà de la zone morte pour faire défiler uniquement jusqu’à ce que vous relâchiez."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לחץ לחיצה ארוכה ושחרר כדי להשאיר את הגלילה האוטומטית פעילה, או גרור מעבר לאזור המת כדי לגלול רק עד שתשחרר."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nyomja meg hosszan, majd engedje fel az automatikus görgetés aktívan tartásához, vagy húzza a holtzónán túlra, hogy csak az elengedésig görgessen."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekan lama lalu lepas untuk menjaga gulir otomatis tetap aktif, atau seret melewati zona mati untuk menggulir hanya sampai Anda melepasnya."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tieni premuto e rilascia per mantenere attivo lo scorrimento automatico, oppure trascina oltre la zona morta per scorrere solo finché non rilasci."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "長押しして離すとオートスクロールが維持され、デッドゾーンを越えてドラッグすると離すまでスクロールします。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "길게 누른 후 놓으면 자동 스크롤이 유지되고, 데드 존을 벗어나 드래그하면 놓을 때까지만 스크롤됩니다."
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "အလိုအလျောက် လှိမ့်ခြင်းကို ဆက်လက်အသက်ဝင်စေရန် ကြာကြာဖိပြီး လွှတ်ပါ၊ သို့မဟုတ် လွှတ်သည်အထိသာ လှိမ့်ရန် မတုံ့ပြန်ဇုန်ကို ကျော်၍ ဆွဲပါ။"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trykk lenge og slipp for å holde autoskroll aktiv, eller dra forbi dødsonen for å rulle bare til du slipper."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Houd lang ingedrukt en laat los om automatisch scrollen actief te houden, of sleep voorbij de dode zone om alleen te scrollen totdat je loslaat."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naciśnij i przytrzymaj, a następnie puść, aby przewijanie automatyczne pozostało aktywne, lub przeciągnij poza martwą strefę, aby przewijać tylko do momentu zwolnienia przycisku."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prima continuamente e solte para manter a rolagem automática ativa, ou arraste para além da zona morta para rolar apenas até soltar."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pressione e segure, depois solte para manter a rolagem automática ativa, ou arraste além da zona morta para rolar apenas até soltar."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Țineți apăsat și eliberați pentru a menține activă derularea automată, sau trageți dincolo de zona moartă pentru a derula doar până când eliberați."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите и удерживайте, затем отпустите, чтобы автопрокрутка оставалась активной, либо перетащите указатель за пределы мёртвой зоны, чтобы прокручивать только до отпускания."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dlhým stlačením a uvoľnením ponecháte automatické rolovanie aktívne, alebo potiahnutím za mŕtvu zónu budete rolovať iba dovtedy, kým nepustíte."
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Притисните дуго и отпустите да бисте задржали аутоматско померање активним, или превуците изван мртве зоне да бисте померали само док не отпустите."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tryck länge och släpp för att hålla autoscroll aktiv, eller dra förbi dödzonen för att bara rulla tills du släpper."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otomatik kaydırmayı etkin tutmak için uzun basıp bırakın veya yalnızca bırakana kadar kaydırmak için ölü bölgenin dışına sürükleyin."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Натисніть і утримуйте, а потім відпустіть, щоб автопрокручування залишалося активним, або перетягніть за межі мертвої зони, щоб прокручувати лише до відпускання."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nhấn giữ rồi thả để duy trì tính năng tự động cuộn, hoặc kéo ra ngoài vùng chết để chỉ cuộn cho đến khi bạn thả tay."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -37404,6 +37962,192 @@
     "Long-press the trigger to enter autoscroll, move in any direction to scroll, then click again to exit." : {
       "comment" : "Autoscroll description when toggle mode requires a long press.",
       "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Druk die sneller lank om outomatiese blaai te betree, beweeg in enige rigting om te blaai, klik dan weer om uit te gaan."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اضغط مطولاً على المشغل للدخول في التمرير التلقائي، وحرك في أي اتجاه للتمرير، ثم انقر مرة أخرى للخروج."
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dugo pritisnite okidač za ulazak u automatsko pomicanje, pomičite se u bilo kojem smjeru za pomicanje, zatim kliknite ponovo za izlaz."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantén premut el disparador per entrar al desplaçament automàtic, mou-te en qualsevol direcció per desplaçar-te i, a continuació, fes clic de nou per sortir."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dlouhým stisknutím spouště vstoupíte do automatického rolování, pohybem libovolným směrem rolujete a dalším kliknutím rolování ukončíte."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tryk længe på udløseren for at gå ind i autoscroll, bevæg dig i enhver retning for at rulle, og klik derefter igen for at afslutte."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drücken Sie lange auf die Auslösetaste, um das automatische Scrollen zu starten, bewegen Sie sich zum Scrollen in eine beliebige Richtung und klicken Sie dann erneut, um es zu beenden."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Πατήστε παρατεταμένα το έναυσμα για να εισέλθετε στην αυτόματη κύλιση, μετακινηθείτε προς οποιαδήποτε κατεύθυνση για κύλιση και, στη συνέχεια, κάντε ξανά κλικ για έξοδο."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantén pulsado el disparador para entrar en el desplazamiento automático, muévete en cualquier dirección para desplazarte y luego haz clic de nuevo para salir."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paina laukaisinta pitkään siirtyäksesi automaattiseen vieritykseen, liikuta mihin tahansa suuntaan vierittääksesi ja napsauta sitten uudelleen poistuaksesi."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effectuez un appui long sur le déclencheur pour activer le défilement automatique, déplacez-vous dans n’importe quelle direction pour faire défiler, puis cliquez à nouveau pour quitter."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לחץ לחיצה ארוכה על הטריגר כדי להיכנס לגלילה אוטומטית, הזז לכל כיוון כדי לגלול, ואז לחץ שוב כדי לצאת."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nyomja meg hosszan az eseményindítót az automatikus görgetés elindításához, mozgassa bármely irányba a görgetéshez, majd kattintson újra a kilépéshez."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekan lama pemicu untuk masuk ke gulir otomatis, gerakkan ke arah mana pun untuk menggulir, lalu klik lagi untuk keluar."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tieni premuto il trigger per attivare lo scorrimento automatico, muoviti in qualsiasi direzione per scorrere, quindi fai clic di nuovo per uscire."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "トリガーを長押ししてオートスクロールを開始し、任意の方向に移動してスクロールしてから、もう一度クリックして終了します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "트리거를 길게 눌러 자동 스크롤 모드로 들어가고, 원하는 방향으로 이동하여 스크롤한 다음 다시 클릭하여 종료합니다."
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "အလိုအလျောက် လှိမ့်ခြင်းသို့ ဝင်ရန် အစပျိုးခလုတ်ကို ကြာကြာဖိပါ၊ လှိမ့်ရန် မည်သည့်ဦးတည်ရာသို့မဆို ရွှေ့ပါ၊ ထို့နောက် ထွက်ရန် ထပ်မံကလစ်နှိပ်ပါ။"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trykk lenge på utløseren for å aktivere autoskroll, beveg i hvilken som helst retning for å rulle, klikk deretter igjen for å avslutte."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Houd de trigger lang ingedrukt om automatisch scrollen te starten, beweeg in elke richting om te scrollen en klik nogmaals om te stoppen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naciśnij i przytrzymaj wyzwalacz, aby wejść w tryb przewijania automatycznego, przesuń w dowolnym kierunku, aby przewijać, a następnie kliknij ponownie, aby wyjść."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prima continuamente o gatilho para entrar na rolagem automática, mova-se em qualquer direção para rolar e clique novamente para sair."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pressione e segure o gatilho para entrar na rolagem automática, mova-se em qualquer direção para rolar e clique novamente para sair."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Țineți apăsat declanșatorul pentru a intra în modul de derulare automată, mișcați în orice direcție pentru a derula, apoi faceți clic din nou pentru a ieși."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите и удерживайте триггер, чтобы начать автопрокрутку, перемещайте курсор в любом направлении для прокрутки, затем нажмите ещё раз, чтобы выйти."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dlhým stlačením spúšťača vstúpite do automatického rolovania, pohybom ľubovoľným smerom rolujete a potom opätovným kliknutím ukončíte."
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дуго притисните окидач да бисте ушли у аутоматско померање, померајте се у било ком правцу да бисте се померали, а затим кликните поново да бисте изашли."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tryck länge på utlösaren för att aktivera autoscroll, rör dig i valfri riktning för att rulla, klicka sedan igen för att avsluta."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otomatik kaydırmaya girmek için tetikleyiciye uzun basın, kaydırmak için herhangi bir yöne hareket edin, ardından çıkmak için tekrar tıklayın."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Натисніть і утримуйте тригер, щоб увійти в режим автопрокручування, рухайтеся в будь-якому напрямку для прокручування, а потім клацніть ще раз, щоб вийти."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nhấn giữ trình kích hoạt để vào chế độ tự động cuộn, di chuyển theo bất kỳ hướng nào để cuộn, sau đó nhấp lại để thoát."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -60566,6 +61310,192 @@
     "Short press" : {
       "comment" : "Autoscroll toggle activation option.",
       "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kort druk"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الضغط القصير"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kratki pritisak"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulsació curta"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Krátké stisknutí"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kort tryk"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kurzes Drücken"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σύντομο πάτημα"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulsación corta"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lyhyt painallus"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appui bref"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לחיצה קצרה"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rövid lenyomás"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekan singkat"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pressione breve"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "短押し"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "짧게 누르기"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "တိုတိုဖိခြင်း"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kort trykk"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kort indrukken"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Krótkie naciśnięcie"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pressão curta"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pressionar"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apăsare scurtă"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Короткое нажатие"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Krátke stlačenie"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кратки притисак"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kort tryck"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kısa basma"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Коротке натискання"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nhấn nhanh"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -70995,6 +71925,192 @@
     "Uses the same long-press threshold as button mappings." : {
       "comment" : "Explains the autoscroll long-press timing.",
       "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gebruik dieselfde langdrukdrempel as knoppietoewysings."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يستخدم عتبة الضغط المطول نفسها المستخدمة في تعيينات الأزرار."
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koristi isti prag dugog pritiska kao mapiranja dugmadi."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utilitza el mateix llindar de pulsació llarga que les assignacions de botons."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Používá stejnou prahovou hodnotu dlouhého stisknutí jako mapování tlačítek."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bruger samme tærskel for langt tryk som knaptilknytninger."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwendet denselben Schwellenwert für langes Drücken wie die Tastenzuordnungen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Χρησιμοποιεί το ίδιο όριο παρατεταμένου πατήματος με τις αντιστοιχίσεις κουμπιών."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa el mismo umbral de pulsación prolongada que las asignaciones de botones."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Käyttää samaa pitkän painalluksen kynnysarvoa kuin painikemääritykset."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utilise le même seuil d’appui long que les affectations de boutons."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "משתמש באותו סף לחיצה ארוכה כמו מיפויי הלחצנים."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ugyanazt a hosszú lenyomási küszöbértéket használja, mint a gombhozzárendelések."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menggunakan ambang tekan lama yang sama dengan pemetaan tombol."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa la stessa soglia di pressione prolungata delle mappature dei pulsanti."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ボタンマッピングと同じ長押しのしきい値を使用します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "버튼 매핑과 동일한 길게 누르기 임계값을 사용합니다."
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ခလုတ်သတ်မှတ်ချက်များနှင့် တူညီသော ကြာကြာဖိမှု အတိုင်းအတာကို အသုံးပြုသည်။"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bruker samme terskel for langt trykk som knappetilordninger."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gebruikt dezelfde drempel voor lang indrukken als knoptoewijzingen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Używa tego samego progu długiego naciśnięcia co mapowania przycisków."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa o mesmo limiar de pressão prolongada dos mapeamentos de botões."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa o mesmo limite de pressionar e segurar dos mapeamentos de botões."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folosește același prag de apăsare lungă ca mapările de butoane."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Используется тот же порог долгого нажатия, что и для назначений кнопок."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Používa rovnakú prahovú hodnotu dlhého stlačenia ako mapovania tlačidiel."
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Користи исти праг дугог притиска као мапирања дугмади."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Använder samma tröskel för långt tryck som knapptilldelningar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Düğme eşlemeleriyle aynı uzun basma eşiğini kullanır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Використовується той самий поріг довгого натискання, що й для призначень кнопок."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sử dụng cùng ngưỡng nhấn giữ như ánh xạ nút."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
