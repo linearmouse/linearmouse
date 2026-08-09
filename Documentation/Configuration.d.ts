@@ -503,8 +503,15 @@ declare namespace Scheme {
       enabled?: boolean;
 
       /**
+       * @title Toggle activation
+       * @description Choose whether toggle mode activates with a short press or after the same long-press threshold used by button mappings. This does not affect hold mode.
+       * @default "shortPress"
+       */
+      toggleActivation?: AutoScroll.ToggleActivation;
+
+      /**
        * @title Activation mode
-       * @description Use \"toggle\" to click once and move until clicking again, \"hold\" to scroll only while the trigger stays pressed, or provide both to support both behaviors.
+       * @description Use \"toggle\" to keep scrolling active until the trigger is pressed again, \"hold\" to scroll only while the trigger stays pressed, or provide both to support both behaviors.
        */
       mode?: SingleValueOrArray<AutoScroll.Mode>;
 
@@ -523,7 +530,19 @@ declare namespace Scheme {
 
     namespace AutoScroll {
       /**
-       * @description Click once to enter auto scroll and click again to exit.
+       * @description Activate toggle mode with a short press.
+       */
+      type ShortPress = "shortPress";
+
+      /**
+       * @description Activate toggle mode after the button mapping long-press threshold.
+       */
+      type LongPress = "longPress";
+
+      type ToggleActivation = ShortPress | LongPress;
+
+      /**
+       * @description Keep auto scroll active until the trigger is pressed again. The toggleActivation setting controls whether activation requires a short or long press.
        */
       type Toggle = "toggle";
 

@@ -22,10 +22,31 @@ struct AutoScrollSection: View {
                     Text("Modes")
                         .font(.headline)
 
-                    Toggle("Click once to toggle", isOn: $state.autoScrollToggleModeEnabled.animation())
+                    HStack(spacing: 12) {
+                        Toggle(
+                            "Keep scrolling after release",
+                            isOn: $state.autoScrollToggleModeEnabled.animation()
+                        )
+                        .toggleStyle(.checkbox)
                         .disabled(state.autoScrollToggleModeEnabled && !state.autoScrollHoldModeEnabled)
 
+                        Spacer(minLength: 12)
+
+                        if state.autoScrollToggleModeEnabled {
+                            Picker(String(""), selection: $state.autoScrollToggleActivation) {
+                                Text("Short press")
+                                    .tag(Scheme.Buttons.AutoScroll.ToggleActivation.shortPress)
+                                Text("Long press")
+                                    .tag(Scheme.Buttons.AutoScroll.ToggleActivation.longPress)
+                            }
+                            .labelsHidden()
+                            .fixedSize()
+                            .modifier(PickerViewModifier())
+                        }
+                    }
+
                     Toggle("Hold to scroll", isOn: $state.autoScrollHoldModeEnabled.animation())
+                        .toggleStyle(.checkbox)
                         .disabled(state.autoScrollHoldModeEnabled && !state.autoScrollToggleModeEnabled)
                 }
 
@@ -59,6 +80,12 @@ struct AutoScrollSection: View {
                 Text(modeDescription)
                     .settingsDescriptionStyle()
                     .padding(.top, 4)
+
+                if state.autoScrollToggleModeEnabled,
+                   state.autoScrollToggleActivation == .longPress {
+                    Text("Uses the same long-press threshold as button mappings.")
+                        .settingsDescriptionStyle()
+                }
             }
         }
         .modifier(SectionViewModifier())
@@ -66,6 +93,15 @@ struct AutoScrollSection: View {
 
     private var modeDescription: LocalizedStringKey {
         let modes = Set(state.autoScrollModes)
+
+        if state.autoScrollToggleModeEnabled,
+           state.autoScrollToggleActivation == .longPress {
+            if modes == [.toggle] {
+                return "Long-press the trigger to enter autoscroll, move in any direction to scroll, then click again to exit."
+            }
+
+            return "Long-press and release to keep autoscroll active, or drag beyond the dead zone to scroll only until you let go."
+        }
 
         if modes == [.toggle] {
             return "Click the trigger once to enter autoscroll, move in any direction to scroll, then click again to exit."

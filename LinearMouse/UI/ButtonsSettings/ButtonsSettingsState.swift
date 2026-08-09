@@ -180,6 +180,15 @@ extension ButtonsSettingsState {
         }
     }
 
+    var autoScrollToggleActivation: Scheme.Buttons.AutoScroll.ToggleActivation {
+        get {
+            mergedScheme.buttons.autoScroll.normalizedToggleActivation
+        }
+        set {
+            scheme.buttons.autoScroll.toggleActivation = newValue
+        }
+    }
+
     var autoScrollToggleModeEnabled: Bool {
         get {
             autoScrollModes.contains(.toggle)
