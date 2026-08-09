@@ -32,6 +32,8 @@ final class ButtonActionExecutor {
 
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ButtonActions")
 
+    private static let enhancedUserInterfaceAttribute = "AXEnhancedUserInterface" as CFString
+
     final class RuntimeState {
         var repeatTimers = [Set<Scheme.Buttons.Mapping.Button>: TimerToken]()
         var pendingReleaseActions = [
@@ -304,28 +306,123 @@ extension ButtonActionExecutor {
     private func maximizeFocusedWindow() {
         guard let window = focusedWindow(),
               let screen = screenForWindow(window),
-              var position = axPosition(fromAppKitFrame: screen.visibleFrame) else {
+              let position = axPosition(fromAppKitFrame: screen.visibleFrame) else {
             return
         }
 
-        var size = screen.visibleFrame.size
+        let targetFrame = CGRect(origin: position, size: screen.visibleFrame.size)
+        setWindowFrame(targetFrame, window: window)
+    }
+
+    private func setWindowFrame(_ targetFrame: CGRect, window: AXUIElement) {
+        // AXEnhancedUserInterface can make Firefox window frame updates unreliable:
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=1664992
+        // Rectangle and Hammerspoon temporarily disable it while applying size-position-size:
+        // https://github.com/rxhanson/Rectangle/blob/master/Rectangle/AccessibilityElement.swift
+        // https://github.com/Hammerspoon/hammerspoon/blob/master/Hammerspoon/HSuicore.m
+        var pid = pid_t()
+        let appElement: AXUIElement? = if AXUIElementGetPid(window, &pid) == .success {
+            AXUIElementCreateApplication(pid)
+        } else {
+            nil
+        }
+
+        let enhancedUserInterfaceWasEnabled = appElement.flatMap {
+            enhancedUserInterfaceEnabled(for: $0)
+        }
+
+        if let appElement, enhancedUserInterfaceWasEnabled == true {
+            os_log(
+                "Temporarily disabling AXEnhancedUserInterface before setting window frame",
+                log: Self.log,
+                type: .info
+            )
+            let result = AXUIElementSetAttributeValue(
+                appElement,
+                Self.enhancedUserInterfaceAttribute,
+                kCFBooleanFalse
+            )
+            if result != .success {
+                os_log(
+                    "Failed to disable AXEnhancedUserInterface: %{public}@",
+                    log: Self.log,
+                    type: .error,
+                    String(describing: result)
+                )
+            }
+        }
+
+        defer {
+            if let appElement, enhancedUserInterfaceWasEnabled == true {
+                let result = AXUIElementSetAttributeValue(
+                    appElement,
+                    Self.enhancedUserInterfaceAttribute,
+                    kCFBooleanTrue
+                )
+                if result != .success {
+                    os_log(
+                        "Failed to restore AXEnhancedUserInterface: %{public}@",
+                        log: Self.log,
+                        type: .error,
+                        String(describing: result)
+                    )
+                }
+            }
+        }
+
+        var position = targetFrame.origin
+        var size = targetFrame.size
 
         guard let positionValue = AXValueCreate(.cgPoint, &position),
               let sizeValue = AXValueCreate(.cgSize, &size) else {
             return
         }
 
-        AXUIElementSetAttributeValue(
+        let initialSizeResult = AXUIElementSetAttributeValue(
+            window,
+            kAXSizeAttribute as CFString,
+            sizeValue
+        )
+
+        let positionResult = AXUIElementSetAttributeValue(
             window,
             kAXPositionAttribute as CFString,
             positionValue
         )
 
-        AXUIElementSetAttributeValue(
+        let finalSizeResult = AXUIElementSetAttributeValue(
             window,
             kAXSizeAttribute as CFString,
             sizeValue
         )
+
+        if initialSizeResult != .success
+            || positionResult != .success
+            || finalSizeResult != .success {
+            os_log(
+                "Failed to set window frame: size=%{public}@, position=%{public}@, finalSize=%{public}@",
+                log: Self.log,
+                type: .error,
+                String(describing: initialSizeResult),
+                String(describing: positionResult),
+                String(describing: finalSizeResult)
+            )
+        }
+    }
+
+    private func enhancedUserInterfaceEnabled(for application: AXUIElement) -> Bool? {
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(
+            application,
+            Self.enhancedUserInterfaceAttribute,
+            &value
+        ) == .success,
+            let value,
+            CFGetTypeID(value) == CFBooleanGetTypeID() else {
+            return nil
+        }
+
+        return CFBooleanGetValue(unsafeBitCast(value, to: CFBoolean.self))
     }
 
     private func minimizeFocusedWindow() {
