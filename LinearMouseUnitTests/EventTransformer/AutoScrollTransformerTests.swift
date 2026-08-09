@@ -6,6 +6,8 @@ import CoreGraphics
 import XCTest
 
 final class AutoScrollTransformerTests: XCTestCase {
+    private typealias Mapping = Scheme.Buttons.Mapping
+
     override func tearDown() {
         SettingsState.shared.endButtonMappingRecording()
         super.tearDown()
@@ -85,5 +87,160 @@ final class AutoScrollTransformerTests: XCTestCase {
 
         XCTAssertTrue(transformer.cancelLogitechControlInteraction(context))
         XCTAssertFalse(transformer.isAutoscrollActive)
+    }
+
+    func testDraggingPressableElementBeyondDeadZoneActivatesAutoScroll() throws {
+        var replayedEvents = [CGEventType]()
+        let transformer = pressableElementTransformer { replayedEvents.append($0.type) }
+
+        XCTAssertNil(try transformer.transform(
+            mouseEvent(type: .otherMouseDown, location: CGPoint(x: 100, y: 100)),
+            in: .init(device: nil)
+        ))
+        XCTAssertFalse(transformer.isAutoscrollActive)
+
+        XCTAssertNil(try transformer.transform(
+            mouseEvent(type: .otherMouseDragged, location: CGPoint(x: 120, y: 100)),
+            in: .init(device: nil)
+        ))
+        XCTAssertTrue(transformer.isAutoscrollActive)
+
+        XCTAssertNil(try transformer.transform(
+            mouseEvent(type: .otherMouseUp, location: CGPoint(x: 120, y: 100)),
+            in: .init(device: nil)
+        ))
+        XCTAssertFalse(transformer.isAutoscrollActive)
+        XCTAssertEqual(replayedEvents, [])
+    }
+
+    func testClickingPressableElementReplaysBalancedNativeClick() throws {
+        var replayedEvents = [CGEventType]()
+        let transformer = pressableElementTransformer { replayedEvents.append($0.type) }
+        let down = try mouseEvent(type: .otherMouseDown, location: CGPoint(x: 100, y: 100))
+        let up = try mouseEvent(type: .otherMouseUp, location: CGPoint(x: 100, y: 100))
+
+        XCTAssertNil(transformer.transform(down, in: .init(device: nil)))
+        XCTAssertNil(transformer.transform(up, in: .init(device: nil)))
+
+        XCTAssertEqual(replayedEvents, [.otherMouseDown, .otherMouseUp])
+        XCTAssertFalse(transformer.isAutoscrollActive)
+    }
+
+    func testReplayedClickUsesEachEventsDownstreamContinuation() throws {
+        let transformer = pressableElementTransformer { _ in
+            XCTFail("Expected the contextual event sinks to be used")
+        }
+        var deliveries = [(String, CGEventType)]()
+        let down = try mouseEvent(type: .otherMouseDown, location: CGPoint(x: 100, y: 100))
+        let up = try mouseEvent(type: .otherMouseUp, location: CGPoint(x: 100, y: 100))
+
+        XCTAssertNil(transformer.transform(
+            down,
+            in: .init(device: nil) { deliveries.append(("down", $0.type)) }
+        ))
+        XCTAssertNil(transformer.transform(
+            up,
+            in: .init(device: nil) { deliveries.append(("up", $0.type)) }
+        ))
+
+        XCTAssertEqual(deliveries.map(\.0), ["down", "up"])
+        XCTAssertEqual(deliveries.map(\.1), [.otherMouseDown, .otherMouseUp])
+    }
+
+    func testOtherButtonPressIsReplayedAfterPendingTriggerDown() throws {
+        var replayedEvents = [CGEventType]()
+        let transformer = pressableElementTransformer { replayedEvents.append($0.type) }
+        let otherDown = try XCTUnwrap(CGEvent(
+            mouseEventSource: nil,
+            mouseType: .leftMouseDown,
+            mouseCursorPosition: CGPoint(x: 100, y: 100),
+            mouseButton: .left
+        ))
+
+        XCTAssertNil(try transformer.transform(
+            mouseEvent(type: .otherMouseDown, location: CGPoint(x: 100, y: 100)),
+            in: .init(device: nil)
+        ))
+        XCTAssertNil(transformer.transform(otherDown, in: .init(device: nil)))
+
+        XCTAssertEqual(replayedEvents, [.otherMouseDown, .leftMouseDown])
+        XCTAssertFalse(transformer.isAutoscrollActive)
+    }
+
+    func testSubDeadZoneDragOnPressableElementReplaysNativeStream() throws {
+        var replayedEvents = [CGEventType]()
+        let transformer = pressableElementTransformer { replayedEvents.append($0.type) }
+        let up = try mouseEvent(type: .otherMouseUp, location: CGPoint(x: 105, y: 100))
+
+        XCTAssertNil(try transformer.transform(
+            mouseEvent(type: .otherMouseDown, location: CGPoint(x: 100, y: 100)),
+            in: .init(device: nil)
+        ))
+        XCTAssertNil(try transformer.transform(
+            mouseEvent(type: .otherMouseDragged, location: CGPoint(x: 105, y: 100)),
+            in: .init(device: nil)
+        ))
+        XCTAssertNil(transformer.transform(up, in: .init(device: nil)))
+
+        XCTAssertEqual(replayedEvents, [.otherMouseDown, .otherMouseDragged, .otherMouseUp])
+        XCTAssertFalse(transformer.isAutoscrollActive)
+    }
+
+    func testToggleOnlyModeActivatesAfterDraggingPressableElement() throws {
+        var trigger = Mapping()
+        trigger.button = .mouse(2)
+        var replayedEvents = [CGEventType]()
+        let activationHitProvider: AutoScrollTransformer.ActivationHitProvider = { _ in
+            .pressable(path: ["AXLink"])
+        }
+        let transformer = AutoScrollTransformer(
+            trigger: trigger,
+            modes: [.toggle],
+            speed: 1,
+            activationHitProvider: activationHitProvider
+        ) { replayedEvents.append($0.type) }
+
+        XCTAssertNil(try transformer.transform(
+            mouseEvent(type: .otherMouseDown, location: CGPoint(x: 100, y: 100)),
+            in: .init(device: nil)
+        ))
+        XCTAssertNil(try transformer.transform(
+            mouseEvent(type: .otherMouseDragged, location: CGPoint(x: 120, y: 100)),
+            in: .init(device: nil)
+        ))
+        XCTAssertTrue(transformer.isAutoscrollActive)
+        XCTAssertNil(try transformer.transform(
+            mouseEvent(type: .otherMouseUp, location: CGPoint(x: 120, y: 100)),
+            in: .init(device: nil)
+        ))
+
+        XCTAssertTrue(transformer.isAutoscrollActive)
+        XCTAssertEqual(replayedEvents, [])
+        transformer.deactivate()
+    }
+
+    private func pressableElementTransformer(
+        eventSink: @escaping (CGEvent) -> Void
+    ) -> AutoScrollTransformer {
+        var trigger = Mapping()
+        trigger.button = .mouse(2)
+        return AutoScrollTransformer(
+            trigger: trigger,
+            modes: [.toggle, .hold],
+            speed: 1,
+            activationHitProvider: { _ in .pressable(path: ["AXLink"]) },
+            eventSink: eventSink
+        )
+    }
+
+    private func mouseEvent(type: CGEventType, location: CGPoint) throws -> CGEvent {
+        let event = try XCTUnwrap(CGEvent(
+            mouseEventSource: nil,
+            mouseType: type,
+            mouseCursorPosition: location,
+            mouseButton: .center
+        ))
+        event.setIntegerValueField(.mouseEventButtonNumber, value: 2)
+        return event
     }
 }
