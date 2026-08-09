@@ -890,8 +890,16 @@ final class EventTransformerManagerTests: XCTestCase {
         )
         XCTAssertEqual(
             manager.handleLogitechControlEvent(logitech(autoScrollIdentity, pressed: true, display: "Display A")),
-            .handled
+            .handledDeferringSyntheticFallback
         )
+        XCTAssertFalse(autoScroll.isAutoscrollActive)
+
+        let move = try mouseEvent(
+            type: .mouseMoved,
+            button: .center,
+            location: CGPoint(x: 11, y: 0)
+        )
+        XCTAssertNotNil(route.transform(move, in: .init(device: nil)))
         XCTAssertTrue(autoScroll.isAutoscrollActive)
 
         XCTAssertEqual(
@@ -922,8 +930,16 @@ final class EventTransformerManagerTests: XCTestCase {
 
         XCTAssertEqual(
             manager.handleLogitechControlEvent(logitech(identity, pressed: true, display: "Display A")),
-            .handled
+            .handledDeferringSyntheticFallback
         )
+        XCTAssertFalse(autoScroll.isAutoscrollActive)
+
+        let move = try mouseEvent(
+            type: .mouseMoved,
+            button: .center,
+            location: CGPoint(x: 11, y: 0)
+        )
+        XCTAssertNotNil(route.transform(move, in: .init(device: nil)))
         XCTAssertTrue(autoScroll.isAutoscrollActive)
 
         XCTAssertTrue(manager.cancelLogitechControlInteraction(
@@ -1739,11 +1755,15 @@ final class EventTransformerManagerTests: XCTestCase {
         )
     }
 
-    private func mouseEvent(type: CGEventType, button: CGMouseButton) throws -> CGEvent {
+    private func mouseEvent(
+        type: CGEventType,
+        button: CGMouseButton,
+        location: CGPoint = .zero
+    ) throws -> CGEvent {
         let event = try XCTUnwrap(CGEvent(
             mouseEventSource: nil,
             mouseType: type,
-            mouseCursorPosition: .zero,
+            mouseCursorPosition: location,
             mouseButton: button
         ))
         event.setIntegerValueField(.mouseEventButtonNumber, value: Int64(button.rawValue))
