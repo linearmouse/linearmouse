@@ -161,6 +161,11 @@ extension AutoScrollTransformer: EventTransformer, DeferredEventTransformer {
             return event
         }
 
+        if isHoldOnlyMode {
+            beginPendingActivation(with: event, in: context)
+            return nil
+        }
+
         let activationHitResult: AutoScrollActivationHit?
         if let activationHitProvider {
             activationHitResult = activationHitProvider(event)
@@ -170,10 +175,7 @@ extension AutoScrollTransformer: EventTransformer, DeferredEventTransformer {
         guard Self.shouldStartAutoScroll(for: activationHitResult) else {
             // Delay the native stream only until movement distinguishes a click from
             // an Auto Scroll drag. A click replays the complete stream in order.
-            state = .pending(.init(
-                anchor: pointerLocation(for: event),
-                bufferedEvents: [deferredEvent(event, in: context)]
-            ))
+            beginPendingActivation(with: event, in: context)
             return nil
         }
 
@@ -225,20 +227,24 @@ extension AutoScrollTransformer: EventTransformer, DeferredEventTransformer {
     private func handlePointerMoved(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent? {
         switch state {
         case var .pending(pending):
-            guard event.type == triggerMouseDraggedEventType,
-                  matchesTriggerButton(event) else {
+            let isTriggerDrag = event.type == triggerMouseDraggedEventType
+                && matchesTriggerButton(event)
+            let isLogitechMove = triggerIsLogitechControl && event.type == .mouseMoved
+            guard isTriggerDrag || isLogitechMove else {
                 return event
             }
 
             let point = pointerLocation(for: event)
             guard exceedsDeadZone(from: pending.anchor, to: point) else {
-                pending.bufferedEvents.append(deferredEvent(event, in: context))
+                if isTriggerDrag {
+                    pending.bufferedEvents.append(deferredEvent(event, in: context))
+                }
                 state = .pending(pending)
-                return nil
+                return isTriggerDrag ? nil : event
             }
 
             activate(at: pending.anchor, session: activationSession)
-            suppressTriggerUp = true
+            suppressTriggerUp = isTriggerDrag
             return handlePointerMoved(event, in: context)
 
         case let .active(anchor, _, session):
@@ -292,6 +298,13 @@ extension AutoScrollTransformer: EventTransformer, DeferredEventTransformer {
             event: event.copy() ?? event,
             sink: context.deferredEventSink ?? fallbackEventSink
         )
+    }
+
+    private func beginPendingActivation(with event: CGEvent, in context: EventTransformerContext) {
+        state = .pending(.init(
+            anchor: pointerLocation(for: event),
+            bufferedEvents: [deferredEvent(event, in: context)]
+        ))
     }
 
     private func replayPendingActivation(including finalEvent: DeferredEvent? = nil) {
@@ -434,6 +447,10 @@ extension AutoScrollTransformer: EventTransformer, DeferredEventTransformer {
         modes.contains(.hold)
     }
 
+    private var isHoldOnlyMode: Bool {
+        hasHoldMode && !hasToggleMode
+    }
+
     private var activationSession: Session {
         switch (hasToggleMode, hasHoldMode) {
         case (true, true):
@@ -542,11 +559,19 @@ extension AutoScrollTransformer: LogitechControlEventHandling {
                 return .notHandled
             }
 
+            if isHoldOnlyMode {
+                state = .pending(.init(anchor: context.mouseLocation, bufferedEvents: []))
+                return .handledDeferringSyntheticFallback
+            }
+
             activate(at: context.mouseLocation, session: activationSession)
             return .handled
         }
 
         switch state {
+        case .pending:
+            state = .idle
+            return .notHandled
         case let .active(anchor, current, session):
             switch session {
             case .hold:
@@ -573,7 +598,7 @@ extension AutoScrollTransformer: LogitechControlInteractionCanceling {
     func cancelLogitechControlInteraction(_ context: LogitechEventContext) -> Bool {
         guard let triggerLogitechControl = trigger.button?.logitechControl,
               context.matches(triggerLogitechControl),
-              isAutoscrollActive else {
+              hasPendingActivation || isAutoscrollActive else {
             return false
         }
 

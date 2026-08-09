@@ -63,7 +63,7 @@ final class AutoScrollTransformerTests: XCTestCase {
         XCTAssertFalse(transformer.isAutoscrollActive)
     }
 
-    func testCancelingLostLogitechHoldStopsAutoScroll() {
+    func testCancelingLostLogitechHoldStopsAutoScroll() throws {
         let identity = LogitechControlIdentity(controlID: 0xC4)
         var trigger = Scheme.Buttons.Mapping()
         trigger.button = .logitechControl(identity)
@@ -82,10 +82,123 @@ final class AutoScrollTransformerTests: XCTestCase {
             modifierFlags: []
         )
 
-        XCTAssertEqual(transformer.handleLogitechControlEvent(context), .handled)
+        XCTAssertEqual(transformer.handleLogitechControlEvent(context), .handledDeferringSyntheticFallback)
+        XCTAssertFalse(transformer.isAutoscrollActive)
+
+        try XCTAssertNotNil(transformer.transform(
+            XCTUnwrap(CGEvent(
+                mouseEventSource: nil,
+                mouseType: .mouseMoved,
+                mouseCursorPosition: CGPoint(x: 11, y: 0),
+                mouseButton: .center
+            )),
+            in: .init(device: nil)
+        ))
         XCTAssertTrue(transformer.isAutoscrollActive)
 
         XCTAssertTrue(transformer.cancelLogitechControlInteraction(context))
+        XCTAssertFalse(transformer.isAutoscrollActive)
+    }
+
+    func testReleasingLogitechHoldWithinDeadZoneDoesNotActivateAutoScroll() {
+        let identity = LogitechControlIdentity(controlID: 0xC4)
+        var trigger = Scheme.Buttons.Mapping()
+        trigger.button = .logitechControl(identity)
+        let transformer = AutoScrollTransformer(
+            trigger: trigger,
+            modes: [.hold],
+            speed: 1
+        )
+        let press = LogitechEventContext(
+            device: nil,
+            pid: nil,
+            display: nil,
+            mouseLocation: .zero,
+            controlIdentity: identity,
+            isPressed: true,
+            modifierFlags: []
+        )
+        let release = LogitechEventContext(
+            device: nil,
+            pid: nil,
+            display: nil,
+            mouseLocation: .zero,
+            controlIdentity: identity,
+            isPressed: false,
+            modifierFlags: []
+        )
+
+        XCTAssertEqual(transformer.handleLogitechControlEvent(press), .handledDeferringSyntheticFallback)
+        XCTAssertFalse(transformer.isAutoscrollActive)
+        XCTAssertEqual(transformer.handleLogitechControlEvent(release), .notHandled)
+        XCTAssertFalse(transformer.isAutoscrollActive)
+    }
+
+    func testHoldOnlyClickReplaysNativeClickWithoutAccessibilityHitTest() throws {
+        var replayedEvents = [CGEventType]()
+        var trigger = Mapping()
+        trigger.button = .mouse(2)
+        let transformer = AutoScrollTransformer(
+            trigger: trigger,
+            modes: [.hold],
+            speed: 1,
+            activationHitProvider: { _ in
+                XCTFail("Hold-only activation should not depend on accessibility hit testing")
+                return .nonPressable(diagnostic: nil, path: [])
+            }
+        ) { replayedEvents.append($0.type) }
+
+        XCTAssertNil(try transformer.transform(
+            mouseEvent(type: .otherMouseDown, location: CGPoint(x: 100, y: 100)),
+            in: .init(device: nil)
+        ))
+        XCTAssertFalse(transformer.isAutoscrollActive)
+
+        XCTAssertNil(try transformer.transform(
+            mouseEvent(type: .otherMouseUp, location: CGPoint(x: 100, y: 100)),
+            in: .init(device: nil)
+        ))
+
+        XCTAssertEqual(replayedEvents, [.otherMouseDown, .otherMouseUp])
+        XCTAssertFalse(transformer.isAutoscrollActive)
+    }
+
+    func testHoldOnlyDragActivatesAfterDeadZone() throws {
+        var replayedEvents = [CGEventType]()
+        var trigger = Mapping()
+        trigger.button = .mouse(2)
+        let transformer = AutoScrollTransformer(
+            trigger: trigger,
+            modes: [.hold],
+            speed: 1,
+            activationHitProvider: { _ in
+                XCTFail("Hold-only activation should not depend on accessibility hit testing")
+                return nil
+            }
+        ) { replayedEvents.append($0.type) }
+
+        XCTAssertNil(try transformer.transform(
+            mouseEvent(type: .otherMouseDown, location: CGPoint(x: 100, y: 100)),
+            in: .init(device: nil)
+        ))
+        XCTAssertNil(try transformer.transform(
+            mouseEvent(type: .otherMouseDragged, location: CGPoint(x: 105, y: 100)),
+            in: .init(device: nil)
+        ))
+        XCTAssertFalse(transformer.isAutoscrollActive)
+
+        XCTAssertNil(try transformer.transform(
+            mouseEvent(type: .otherMouseDragged, location: CGPoint(x: 111, y: 100)),
+            in: .init(device: nil)
+        ))
+        XCTAssertTrue(transformer.isAutoscrollActive)
+
+        XCTAssertNil(try transformer.transform(
+            mouseEvent(type: .otherMouseUp, location: CGPoint(x: 111, y: 100)),
+            in: .init(device: nil)
+        ))
+
+        XCTAssertEqual(replayedEvents, [])
         XCTAssertFalse(transformer.isAutoscrollActive)
     }
 
