@@ -768,8 +768,8 @@ declare namespace Scheme {
         | ShowDesktop
         | LookUpAndDataDetectors
         | SmartZoom
-	| WindowMaximize
-	| WindowMinimize
+        | WindowMaximize
+        | WindowMinimize
         | DisplayBrightnessUp
         | DisplayBrightnessDown
         | MediaVolumeUp
