@@ -419,7 +419,7 @@ declare namespace Scheme {
     /**
      * @title Pointer speed
      * @description A number to set speed, or "unset" to restore device default. If omitted, the previous/merged value applies.
-     * @minimal 0
+     * @minimum 0
      * @maximum 1
      */
     speed?: number | Unset;
