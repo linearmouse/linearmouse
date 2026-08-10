@@ -9,6 +9,8 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
     typealias Mapping = Scheme.Buttons.Mapping
     typealias TimerScheduler = (TimeInterval, @escaping () -> Void) -> TimerToken?
     typealias MonotonicClock = () -> UInt64
+    typealias AsyncScheduler = (@escaping () -> Void) -> Void
+    typealias DelayedScheduler = (TimeInterval, @escaping () -> Void) -> Void
 
     final class TimerToken {
         private var invalidateHandler: (() -> Void)?
@@ -30,6 +32,13 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
     private struct DeferredEvent {
         var event: CGEvent
         var sink: (CGEvent) -> Void
+    }
+
+    private struct SyntheticClickRequest {
+        var button: CGMouseButton
+        var location: CGPoint
+        var flags: CGEventFlags
+        var clickState: Int64
     }
 
     private final class RecognitionLane {
@@ -57,6 +66,7 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
         subsystem: Bundle.main.bundleIdentifier!,
         category: "ButtonMapping"
     )
+    private static let syntheticClickReleaseDelay: TimeInterval = 0.015
 
     let mappings: [Mapping]
     let universalBackForward: Scheme.Buttons.UniversalBackForward?
@@ -64,6 +74,9 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
     private let scheduleTimer: TimerScheduler
     private let monotonicClock: MonotonicClock
     private let fallbackEventSink: (CGEvent) -> Void
+    private let syntheticClickScheduler: AsyncScheduler
+    private let syntheticClickReleaseScheduler: DelayedScheduler
+    private let syntheticClickEventSink: (CGEvent) -> Void
     private let swapsPrimaryAndSecondaryButtons: Bool
     private let gestureTransformer: GestureButtonTransformer?
     private let policy: ButtonMappingPolicy
@@ -83,7 +96,12 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
         monotonicClock: @escaping MonotonicClock = { DispatchTime.now().uptimeNanoseconds },
         keySimulator: KeySimulating? = nil,
         gestureTransformer: GestureButtonTransformer? = nil,
-        eventSink: @escaping (CGEvent) -> Void = { $0.post(tap: .cgSessionEventTap) }
+        eventSink: @escaping (CGEvent) -> Void = { $0.post(tap: .cgSessionEventTap) },
+        syntheticClickScheduler: @escaping AsyncScheduler = ButtonMappingTransformer
+            .scheduleSyntheticClickReplay,
+        syntheticClickReleaseScheduler: @escaping DelayedScheduler = ButtonMappingTransformer
+            .scheduleSyntheticClickRelease,
+        syntheticClickEventSink: @escaping (CGEvent) -> Void = { $0.post(tap: .cghidEventTap) }
     ) {
         self.mappings = mappings
         self.universalBackForward = universalBackForward
@@ -95,6 +113,9 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
         self.scheduleTimer = scheduleTimer
         self.monotonicClock = monotonicClock
         fallbackEventSink = eventSink
+        self.syntheticClickScheduler = syntheticClickScheduler
+        self.syntheticClickReleaseScheduler = syntheticClickReleaseScheduler
+        self.syntheticClickEventSink = syntheticClickEventSink
         self.swapsPrimaryAndSecondaryButtons = swapsPrimaryAndSecondaryButtons
         self.gestureTransformer = gestureTransformer
     }
@@ -437,12 +458,103 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
         if output.replaysBufferedEvents {
             let events = lane?.bufferedEvents ?? []
             lane?.bufferedEvents.removeAll()
-            for deferredEvent in events {
-                deferredEvent.sink(deferredEvent.event)
+            if let request = syntheticClickRequest(from: events) {
+                replaySyntheticClick(request)
+            } else {
+                for deferredEvent in events {
+                    deferredEvent.sink(deferredEvent.event)
+                }
             }
         } else if output.discardsBufferedEvents {
             lane?.bufferedEvents.removeAll()
         }
+    }
+
+    /// A completed fallback is a semantic click, not a delayed copy of the
+    /// physical stream. Rebuild it at delivery time so stale timestamps,
+    /// annotations, and sub-threshold drag events do not reach the target app.
+    private func syntheticClickRequest(from events: [DeferredEvent]) -> SyntheticClickRequest? {
+        guard events.count >= 2,
+              let down = events.first?.event,
+              let up = events.last?.event,
+              let button = MouseEventView(down).mouseButton,
+              down.type == button.fixedCGEventType(of: .otherMouseDown),
+              up.type == button.fixedCGEventType(of: .otherMouseUp),
+              MouseEventView(up).mouseButton == button else {
+            return nil
+        }
+
+        let draggedType = button.fixedCGEventType(of: .otherMouseDragged)
+        guard events.dropFirst().dropLast().allSatisfy({ deferredEvent in
+            deferredEvent.event.type == draggedType &&
+                MouseEventView(deferredEvent.event).mouseButton == button
+        }) else {
+            return nil
+        }
+
+        return .init(
+            button: button,
+            location: down.location,
+            flags: down.flags,
+            clickState: down.getIntegerValueField(.mouseEventClickState)
+        )
+    }
+
+    private func replaySyntheticClick(_ request: SyntheticClickRequest) {
+        let eventSink = syntheticClickEventSink
+        let releaseScheduler = syntheticClickReleaseScheduler
+        syntheticClickScheduler {
+            guard let source = CGEventSource(stateID: .hidSystemState),
+                  let down = Self.makeSyntheticClickEvent(request, source: source, pressed: true) else {
+                os_log("Failed to create synthetic fallback mouse down", log: Self.log, type: .error)
+                return
+            }
+
+            eventSink(down)
+            releaseScheduler(Self.syntheticClickReleaseDelay) {
+                guard let up = Self.makeSyntheticClickEvent(request, source: source, pressed: false) else {
+                    os_log("Failed to create synthetic fallback mouse up", log: Self.log, type: .error)
+                    return
+                }
+                eventSink(up)
+            }
+        }
+    }
+
+    private static func scheduleSyntheticClickReplay(_ handler: @escaping () -> Void) {
+        if !EventThread.shared.perform(handler) {
+            DispatchQueue.main.async(execute: handler)
+        }
+    }
+
+    private static func scheduleSyntheticClickRelease(
+        after delay: TimeInterval,
+        _ handler: @escaping () -> Void
+    ) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: handler)
+    }
+
+    private static func makeSyntheticClickEvent(
+        _ request: SyntheticClickRequest,
+        source: CGEventSource,
+        pressed: Bool
+    ) -> CGEvent? {
+        guard let event = CGEvent(
+            mouseEventSource: source,
+            mouseType: request.button.fixedCGEventType(
+                of: pressed ? .otherMouseDown : .otherMouseUp
+            ),
+            mouseCursorPosition: request.location,
+            mouseButton: request.button
+        ) else {
+            return nil
+        }
+
+        event.flags = request.flags
+        event.setIntegerValueField(.mouseEventButtonNumber, value: Int64(request.button.rawValue))
+        event.setIntegerValueField(.mouseEventClickState, value: request.clickState)
+        event.isLinearMouseSyntheticEvent = true
+        return event
     }
 
     private func cancelCompetingGestureIfNeeded(

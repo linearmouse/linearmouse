@@ -373,6 +373,60 @@ final class ButtonMappingTransformerTests: XCTestCase {
         XCTAssertEqual(replayed, [.otherMouseDown, .otherMouseUp])
     }
 
+    func testUndefinedShortPressRebuildsFreshClickAfterCallbackAndDropsDrag() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        var scheduledReplay: (() -> Void)?
+        var scheduledRelease: (() -> Void)?
+        var scheduledReleaseDelay: TimeInterval?
+        var replayed = [CGEvent]()
+        let mapping = Mapping(
+            trigger: .init(input: .button(.mouse(1)), modifiers: [.shift]),
+            outcomes: .init(longPress: .arg0(.none))
+        )
+        let transformer = ButtonMappingTransformer(
+            mappings: [mapping],
+            scheduleTimer: scheduler.schedule,
+            monotonicClock: { scheduler.now },
+            syntheticClickScheduler: { scheduledReplay = $0 },
+            syntheticClickReleaseScheduler: { delay, handler in
+                scheduledReleaseDelay = delay
+                scheduledRelease = handler
+            },
+            syntheticClickEventSink: { replayed.append($0) }
+        )
+
+        let down = try buttonEvent(button: 1, pressed: true)
+        down.location = .init(x: 120, y: 80)
+        down.flags = [.maskShift]
+        down.setIntegerValueField(.mouseEventClickState, value: 2)
+        let drag = try draggedEvent(button: 1, deltaX: 3)
+        let up = try buttonEvent(button: 1, pressed: false)
+
+        XCTAssertNil(transformer.transform(down, in: .init(device: nil)))
+        XCTAssertNil(transformer.transform(drag, in: .init(device: nil)))
+        XCTAssertNil(transformer.transform(up, in: .init(device: nil)))
+        XCTAssertTrue(replayed.isEmpty)
+
+        try XCTUnwrap(scheduledReplay)()
+
+        XCTAssertEqual(replayed.map(\.type), [.rightMouseDown])
+        XCTAssertEqual(try XCTUnwrap(scheduledReleaseDelay), 0.015, accuracy: 0.000001)
+
+        try XCTUnwrap(scheduledRelease)()
+
+        XCTAssertEqual(replayed.map(\.type), [.rightMouseDown, .rightMouseUp])
+        XCTAssertNotIdentical(replayed[0], down)
+        XCTAssertNotIdentical(replayed[1], up)
+        XCTAssertEqual(replayed.map { MouseEventView($0).mouseButton }, [.right, .right])
+        XCTAssertEqual(replayed.map(\.location), [down.location, down.location])
+        XCTAssertEqual(replayed.map(\.flags), [down.flags, down.flags])
+        XCTAssertEqual(
+            replayed.map { $0.getIntegerValueField(.mouseEventClickState) },
+            [2, 2]
+        )
+        XCTAssertTrue(replayed.allSatisfy(\.isLinearMouseSyntheticEvent))
+    }
+
     func testCommittedLongPressDoesNotLeakIntoIndependentFallbackStream() throws {
         let scheduler = ButtonMappingTestTimerScheduler()
         var deliveredEvents = [CGEvent]()
@@ -1233,7 +1287,10 @@ final class ButtonMappingTransformerTests: XCTestCase {
             monotonicClock: { scheduler.now },
             keySimulator: keySimulator,
             gestureTransformer: gestureTransformer,
-            eventSink: eventSink
+            eventSink: eventSink,
+            syntheticClickScheduler: { $0() },
+            syntheticClickReleaseScheduler: { _, handler in handler() },
+            syntheticClickEventSink: eventSink
         )
     }
 

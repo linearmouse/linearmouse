@@ -15,6 +15,11 @@ class SwitchPrimaryAndSecondaryButtonsTransformer {
 
 extension SwitchPrimaryAndSecondaryButtonsTransformer: EventTransformer {
     func transform(_ event: CGEvent, in _: EventTransformerContext) -> CGEvent? {
+        // Replayed clicks have already passed through this transformer once.
+        guard !event.isLinearMouseSyntheticEvent else {
+            return event
+        }
+
         let mouseEventView = MouseEventView(event)
 
         guard var mouseButton = mouseEventView.mouseButton else {
