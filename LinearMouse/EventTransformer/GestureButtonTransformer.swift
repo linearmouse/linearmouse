@@ -249,7 +249,7 @@ extension GestureButtonTransformer: EventTransformer {
         // Determine dominant axis
         if absDeltaX > absDeltaY {
             // Horizontal gesture
-            guard absDeltaY < deadZone else {
+            guard absDeltaY <= deadZone else {
 //                os_log(
 //                    "Horizontal gesture rejected: absDeltaY=%.1f >= deadZone=%.1f",
 //                    log: Self.log,
@@ -263,7 +263,7 @@ extension GestureButtonTransformer: EventTransformer {
             return deltaX > 0 ? (actions.right ?? .spaceRight) : (actions.left ?? .spaceLeft)
         }
         // Vertical gesture
-        guard absDeltaX < deadZone else {
+        guard absDeltaX <= deadZone else {
 //                os_log(
 //                    "Vertical gesture rejected: absDeltaX=%.1f >= deadZone=%.1f",
 //                    log: Self.log,
