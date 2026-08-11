@@ -51,7 +51,9 @@ class ScrollingAccelerationSpeedAdjustmentTransformer: EventTransformer {
             let targetPt = scrollWheelEventView.deltaYPt + Double(deltaYSignum) * speed
             scrollWheelEventView.deltaY = deltaYSignum * max(1, Int64(abs(targetPt) / 10))
             scrollWheelEventView.deltaYPt = targetPt
-            scrollWheelEventView.deltaYFixedPt = targetPt / 10
+            // deltaYFixedPt carries pixel deltas for continuous events but line deltas
+            // for discrete ones, so keep it in the event's native delta unit.
+            scrollWheelEventView.deltaYFixedPt = scrollWheelEventView.continuous ? targetPt : targetPt / 10
             // TODO: Test if ioHidScrollY needs to be modified.
             os_log("deltaY: speed=%{public}f", log: Self.log, type: .info, speed)
         }
@@ -61,7 +63,7 @@ class ScrollingAccelerationSpeedAdjustmentTransformer: EventTransformer {
             let targetPt = scrollWheelEventView.deltaXPt + Double(deltaXSignum) * speed
             scrollWheelEventView.deltaX = deltaXSignum * max(1, Int64(abs(targetPt) / 10))
             scrollWheelEventView.deltaXPt = targetPt
-            scrollWheelEventView.deltaXFixedPt = targetPt / 10
+            scrollWheelEventView.deltaXFixedPt = scrollWheelEventView.continuous ? targetPt : targetPt / 10
             os_log("deltaX: speed=%{public}f", log: Self.log, type: .info, speed)
         }
 
