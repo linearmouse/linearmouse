@@ -1447,6 +1447,7 @@
           ],
           "description": "A number to set speed, or \"unset\" to restore device default. If omitted, the previous/merged value applies.",
           "maximum": 1,
+          "minimum": 0,
           "title": "Pointer speed"
         }
       },
