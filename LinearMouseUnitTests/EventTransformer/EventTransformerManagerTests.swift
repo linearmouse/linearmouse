@@ -717,6 +717,22 @@ final class EventTransformerManagerTests: XCTestCase {
         XCTAssertEqual(deliveredEventTypes, [.leftMouseDown, .leftMouseDragged, .leftMouseUp])
     }
 
+    func testShottrSourceApplicationIsBypassed() {
+        XCTAssertTrue(EventTransformerManager.shouldBypassSourceApplication("cc.ffitch.shottr"))
+    }
+
+    func testHomerowSourceApplicationIsBypassed() {
+        XCTAssertTrue(EventTransformerManager.shouldBypassSourceApplication("com.superultra.Homerow"))
+    }
+
+    func testUnknownSourceApplicationIsNotBypassed() {
+        XCTAssertFalse(EventTransformerManager.shouldBypassSourceApplication("com.example.Unknown"))
+    }
+
+    func testEmptySourceApplicationIsNotBypassed() {
+        XCTAssertFalse(EventTransformerManager.shouldBypassSourceApplication(""))
+    }
+
     func testOwnedReleaseTakesPriorityOverSourceBypass() throws {
         let mapping = Scheme.Buttons.Mapping(
             trigger: .init(input: .button(.mouse(4))),

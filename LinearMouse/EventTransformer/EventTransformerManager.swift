@@ -117,9 +117,14 @@ class EventTransformerManager {
         forceResetState()
     }
 
-    private let sourceBundleIdentifierBypassSet: Set<String> = [
-        "cc.ffitch.shottr"
+    private static let sourceBundleIdentifierBypassSet: Set<String> = [
+        "cc.ffitch.shottr",
+        "com.superultra.Homerow"
     ]
+
+    static func shouldBypassSourceApplication(_ bundleIdentifier: String) -> Bool {
+        sourceBundleIdentifierBypassSet.contains(bundleIdentifier)
+    }
 
     func resolve(
         withCGEvent cgEvent: CGEvent,
@@ -222,7 +227,7 @@ class EventTransformerManager {
             return .init(transformer: [], context: .init(device: nil))
         }
         if let sourceBundleIdentifier = sourcePid?.bundleIdentifier,
-           sourceBundleIdentifierBypassSet.contains(sourceBundleIdentifier) {
+           Self.shouldBypassSourceApplication(sourceBundleIdentifier) {
             if let (interactionKey, interaction) = activeInteraction,
                interactionOwnsContinuation(cgEvent, interaction: interaction) {
                 return drainingResolution(
