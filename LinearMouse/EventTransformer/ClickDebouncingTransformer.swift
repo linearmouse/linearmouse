@@ -33,6 +33,12 @@ class ClickDebouncingTransformer: EventTransformer {
     }
 
     private var lastClickedAtInNanoseconds: UInt64 = 0
+    private var lastReleasedAtInNanoseconds: UInt64 = 0
+
+    /// Forwarded presses that have not been closed by a forwarded release yet.
+    /// A counter rather than a flag: event streams from other applications are
+    /// not guaranteed to alternate down/up.
+    private var unreleasedPressCount = 0
 
     func transform(_ event: CGEvent, in _: EventTransformerContext) -> CGEvent? {
         guard [mouseDownEventType, mouseUpEventType].contains(event.type) else {
@@ -57,10 +63,34 @@ class ClickDebouncingTransformer: EventTransformer {
                 )
                 return nil
             }
+            unreleasedPressCount += 1
             return event
         case mouseUpEventType:
+            // Never swallow the release that closes a forwarded press: the app
+            // would see a mouse down without its mouse up and treat the button
+            // as stuck. Only releases with no forwarded press to close are
+            // bounce artifacts and may be dropped inside the window.
+            let intervalSinceLastRelease = intervalSinceLastRelease
+            touchLastReleasedAt()
+            // A suppressed release is still a physical contact break: the next
+            // bounce-down must land inside the press window, so the press timer
+            // re-arms on every release, forwarded or not — the same sliding
+            // behavior the press side applies to suppressed presses.
             if resetTimerOnMouseUp {
                 touchLastClickedAt()
+            }
+            if intervalSinceLastRelease <= timeout, unreleasedPressCount == 0 {
+                os_log(
+                    "Mouse up ignored because interval since last release %{public}f <= %{public}f",
+                    log: Self.log,
+                    type: .info,
+                    intervalSinceLastRelease,
+                    timeout
+                )
+                return nil
+            }
+            if unreleasedPressCount > 0 {
+                unreleasedPressCount -= 1
             }
             return event
         default:
@@ -74,8 +104,17 @@ class ClickDebouncingTransformer: EventTransformer {
         lastClickedAtInNanoseconds = nowInNanoseconds()
     }
 
+    private func touchLastReleasedAt() {
+        lastReleasedAtInNanoseconds = nowInNanoseconds()
+    }
+
     private var intervalSinceLastClick: TimeInterval {
         let nanosecondsPerSecond = 1e9
         return Double(nowInNanoseconds() - lastClickedAtInNanoseconds) / nanosecondsPerSecond
+    }
+
+    private var intervalSinceLastRelease: TimeInterval {
+        let nanosecondsPerSecond = 1e9
+        return Double(nowInNanoseconds() - lastReleasedAtInNanoseconds) / nanosecondsPerSecond
     }
 }

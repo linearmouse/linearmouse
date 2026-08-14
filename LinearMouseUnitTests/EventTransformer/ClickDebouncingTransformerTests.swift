@@ -93,7 +93,7 @@ private func makeMouseButtonEvent(
 }
 
 final class ClickDebouncingTransformerTests: XCTestCase {
-    func testLegacyModeSuppressesRapidPressButAlwaysForwardsRelease() throws {
+    func testLegacyModeSuppressesRapidPressButForwardsFirstRelease() throws {
         var now: UInt64 = 1_000_000_000
         let transformer = ClickDebouncingTransformer(
             for: .left,
@@ -136,6 +136,301 @@ final class ClickDebouncingTransformerTests: XCTestCase {
         now += 10_000_000
         XCTAssertNil(try transformer.transform(
             makeMouseButtonEvent(button: .left, pressed: true, eventNumber: 3),
+            in: .init(device: nil)
+        ))
+    }
+
+    func testLegacyModeSuppressesPhantomReleaseFromContactBounce() throws {
+        var now: UInt64 = 1_000_000_000
+        let transformer = ClickDebouncingTransformer(
+            for: .left,
+            timeout: 0.05,
+            resetTimerOnMouseUp: false
+        ) { now }
+
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: true, eventNumber: 1),
+            in: .init(device: nil)
+        ))
+        now += 10_000_000
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 2),
+            in: .init(device: nil)
+        ))
+        now += 10_000_000
+        XCTAssertNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 3),
+            in: .init(device: nil)
+        ))
+        now += 51_000_000
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 4),
+            in: .init(device: nil)
+        ))
+    }
+
+    func testLegacyModeStillForwardsIntentionalRapidClickRelease() throws {
+        var now: UInt64 = 1_000_000_000
+        let transformer = ClickDebouncingTransformer(
+            for: .left,
+            timeout: 0.05,
+            resetTimerOnMouseUp: false
+        ) { now }
+
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: true, eventNumber: 1),
+            in: .init(device: nil)
+        ))
+        now += 60_000_000
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 2),
+            in: .init(device: nil)
+        ))
+        now += 60_000_000
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: true, eventNumber: 3),
+            in: .init(device: nil)
+        ))
+        now += 60_000_000
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 4),
+            in: .init(device: nil)
+        ))
+    }
+
+    func testLegacyModeSuppressesBounceUpAfterSuppressedBounceDown() throws {
+        var now: UInt64 = 1_000_000_000
+        let transformer = ClickDebouncingTransformer(
+            for: .left,
+            timeout: 0.05,
+            resetTimerOnMouseUp: false
+        ) { now }
+
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: true, eventNumber: 1),
+            in: .init(device: nil)
+        ))
+        now += 15_000_000
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 2),
+            in: .init(device: nil)
+        ))
+        now += 10_000_000
+        XCTAssertNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: true, eventNumber: 3),
+            in: .init(device: nil)
+        ))
+        now += 10_000_000
+        XCTAssertNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 4),
+            in: .init(device: nil)
+        ))
+    }
+
+    func testLegacyModeSuppressedReleaseStillResetsPressTimerWhenEnabled() throws {
+        var now: UInt64 = 1_000_000_000
+        let transformer = ClickDebouncingTransformer(
+            for: .left,
+            timeout: 0.05,
+            resetTimerOnMouseUp: true
+        ) { now }
+
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: true, eventNumber: 1),
+            in: .init(device: nil)
+        ))
+        now += 10_000_000
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 2),
+            in: .init(device: nil)
+        ))
+        now += 10_000_000
+        XCTAssertNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 3),
+            in: .init(device: nil)
+        ))
+        now += 45_000_000
+        XCTAssertNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: true, eventNumber: 4),
+            in: .init(device: nil)
+        ))
+    }
+
+    func testLegacyModeCountsMultipleForwardedPressesWithoutRelease() throws {
+        var now: UInt64 = 1_000_000_000
+        let transformer = ClickDebouncingTransformer(
+            for: .left,
+            timeout: 0.05,
+            resetTimerOnMouseUp: false
+        ) { now }
+
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: true, eventNumber: 1),
+            in: .init(device: nil)
+        ))
+        now += 60_000_000
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: true, eventNumber: 2),
+            in: .init(device: nil)
+        ))
+        now += 5_000_000
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 3),
+            in: .init(device: nil)
+        ))
+        now += 5_000_000
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 4),
+            in: .init(device: nil)
+        ))
+    }
+
+    func testLegacyModeReleaseDebounceWindowAnchorsAtLastRelease() throws {
+        var now: UInt64 = 1_000_000_000
+        let transformer = ClickDebouncingTransformer(
+            for: .left,
+            timeout: 0.05,
+            resetTimerOnMouseUp: false
+        ) { now }
+
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: true, eventNumber: 1),
+            in: .init(device: nil)
+        ))
+        now += 100_000_000
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 2),
+            in: .init(device: nil)
+        ))
+        now += 10_000_000
+        XCTAssertNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 3),
+            in: .init(device: nil)
+        ))
+    }
+
+    func testLegacyModeSuppressedReleaseExtendsDebounceWindow() throws {
+        var now: UInt64 = 1_000_000_000
+        let transformer = ClickDebouncingTransformer(
+            for: .left,
+            timeout: 0.05,
+            resetTimerOnMouseUp: false
+        ) { now }
+
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: true, eventNumber: 1),
+            in: .init(device: nil)
+        ))
+        now += 10_000_000
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 2),
+            in: .init(device: nil)
+        ))
+        now += 40_000_000
+        XCTAssertNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 3),
+            in: .init(device: nil)
+        ))
+        now += 40_000_000
+        XCTAssertNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 4),
+            in: .init(device: nil)
+        ))
+    }
+
+    func testLegacyModeReleaseAtExactTimeoutBoundaryIsSuppressed() throws {
+        var now: UInt64 = 1_000_000_000
+        let transformer = ClickDebouncingTransformer(
+            for: .left,
+            timeout: 0.05,
+            resetTimerOnMouseUp: false
+        ) { now }
+
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: true, eventNumber: 1),
+            in: .init(device: nil)
+        ))
+        now += 100_000_000
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 2),
+            in: .init(device: nil)
+        ))
+        now += 50_000_000
+        XCTAssertNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 3),
+            in: .init(device: nil)
+        ))
+    }
+
+    func testLegacyModeForwardsReleaseClosingForwardedPressInsideWindow() throws {
+        var now: UInt64 = 1_000_000_000
+        let transformer = ClickDebouncingTransformer(
+            for: .left,
+            timeout: 0.05,
+            resetTimerOnMouseUp: false
+        ) { now }
+
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: true, eventNumber: 1),
+            in: .init(device: nil)
+        ))
+        now += 100_000_000
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 2),
+            in: .init(device: nil)
+        ))
+        now += 5_000_000
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: true, eventNumber: 3),
+            in: .init(device: nil)
+        ))
+        now += 45_000_000
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 4),
+            in: .init(device: nil)
+        ))
+    }
+
+    func testLegacyModeForwardsRealReleaseAfterBounceChatterWithLargeTimeout() throws {
+        var now: UInt64 = 1_000_000_000
+        let transformer = ClickDebouncingTransformer(
+            for: .left,
+            timeout: 0.1,
+            resetTimerOnMouseUp: false
+        ) { now }
+
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: true, eventNumber: 1),
+            in: .init(device: nil)
+        ))
+        now += 10_000_000
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 2),
+            in: .init(device: nil)
+        ))
+        now += 20_000_000
+        XCTAssertNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 3),
+            in: .init(device: nil)
+        ))
+        now += 30_000_000
+        XCTAssertNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 4),
+            in: .init(device: nil)
+        ))
+        now += 30_000_000
+        XCTAssertNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 5),
+            in: .init(device: nil)
+        ))
+        now += 20_000_000
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: true, eventNumber: 6),
+            in: .init(device: nil)
+        ))
+        now += 40_000_000
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseButtonEvent(button: .left, pressed: false, eventNumber: 7),
             in: .init(device: nil)
         ))
     }
