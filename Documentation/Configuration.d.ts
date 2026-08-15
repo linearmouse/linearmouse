@@ -1308,7 +1308,10 @@ declare namespace Scheme {
         | "missionControl"
         | "appExpose"
         | "showDesktop"
-        | "launchpad";
+        | "launchpad"
+        | "media.playPause"
+        | "media.next"
+        | "media.previous";
     }
   }
 }

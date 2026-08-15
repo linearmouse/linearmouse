@@ -18,6 +18,9 @@ struct GestureActionPicker: View {
             Text("App Expose").tag(GestureAction.appExpose)
             Text("Show Desktop").tag(GestureAction.showDesktop)
             Text("Launchpad").tag(GestureAction.launchpad)
+            Text("Play / pause").tag(GestureAction.mediaPlayPause)
+            Text("Next").tag(GestureAction.mediaNext)
+            Text("Previous").tag(GestureAction.mediaPrevious)
         }
         .modifier(PickerViewModifier())
     }
