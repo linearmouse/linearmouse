@@ -32,6 +32,9 @@ extension Scheme.Buttons {
             case appExpose
             case showDesktop
             case launchpad
+            case mediaPlayPause = "media.playPause"
+            case mediaNext = "media.next"
+            case mediaPrevious = "media.previous"
         }
     }
 }

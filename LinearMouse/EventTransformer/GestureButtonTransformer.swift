@@ -299,6 +299,15 @@ extension GestureButtonTransformer: EventTransformer {
 
         case .launchpad:
             launchpad()
+
+        case .mediaPlayPause:
+            postSystemDefinedKey(.play)
+
+        case .mediaNext:
+            postSystemDefinedKey(.next)
+
+        case .mediaPrevious:
+            postSystemDefinedKey(.previous)
         }
     }
 }
