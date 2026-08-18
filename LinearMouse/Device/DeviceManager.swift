@@ -14,6 +14,7 @@ class DeviceManager: ObservableObject {
 
     private let manager = PointerDeviceManager()
     private let receiverMonitor = ReceiverMonitor()
+    private let wakeReapplyScheduler = WakeReapplyScheduler()
 
     private var pointerDeviceToDevice = [PointerDevice: Device]()
     @Published private(set) var receiverPairedDeviceIdentities = [Int: [ReceiverLogicalDeviceIdentity]]()
@@ -70,6 +71,8 @@ class DeviceManager: ObservableObject {
     private var activateApplicationObserver: Any?
 
     func stop() {
+        wakeReapplyScheduler.cancel()
+
         guard state == .running else {
             return
         }
@@ -384,6 +387,26 @@ class DeviceManager: ObservableObject {
         }
 
         device.applyConfiguredHighResolutionWheel(highResolutionWheel)
+    }
+
+    /// Re-applies the pointer settings across the window in which macOS restores its own HID
+    /// properties after a wake.
+    ///
+    /// The settings applied while handling `NSWorkspace.didWakeNotification` are overwritten by the
+    /// system shortly afterwards, leaving the pointer on the macOS defaults until something
+    /// unrelated (a frontmost-app change, a configuration edit) happens to call
+    /// `updatePointerSpeed()` again. See `WakeReapplyScheduler`.
+    func reapplyPointerSpeedAfterWake() {
+        os_log(
+            "Re-applying pointer settings for the %{public}.0fs after wake",
+            log: Self.log,
+            type: .info,
+            wakeReapplyScheduler.duration
+        )
+
+        wakeReapplyScheduler.restart { [weak self] in
+            self?.updatePointerSpeed()
+        }
     }
 
     func restorePointerSpeedToInitialValue() {

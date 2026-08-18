@@ -127,6 +127,7 @@ extension AppDelegate {
             os_log("System did wake", log: Self.log, type: .info)
             self?.sleeping = false
             self?.restartIfAllowed()
+            self?.reapplyPointerSpeedAfterWake()
             self?.requestLogitechControlsReconfigurationAfterWake()
         }
     }
@@ -142,6 +143,17 @@ extension AppDelegate {
     func restartIfAllowed() {
         stop()
         startIfAllowed()
+    }
+
+    /// `restartIfAllowed()` applies the pointer settings as soon as the wake notification arrives,
+    /// which is before macOS has finished restoring its own HID properties. Keep re-applying them
+    /// until the system has settled.
+    func reapplyPointerSpeedAfterWake() {
+        guard sessionActive, !sleeping else {
+            return
+        }
+
+        DeviceManager.shared.reapplyPointerSpeedAfterWake()
     }
 
     func requestLogitechControlsReconfigurationAfterWake() {
