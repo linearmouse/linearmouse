@@ -1,8 +1,28 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
+import Carbon
 import CoreFoundation
+import CoreGraphics
 import KeyKitC
+
+/// See `KeySimulator`: events without HID system state, a timestamp and a
+/// keyboard type are treated as foreign by some event consumers (e.g. Wine's
+/// modifier tracking), which leaves modifiers stuck. Mimic hardware events.
+private let symbolicHotKeyEventSource = CGEventSource(stateID: .hidSystemState)
+
+private func makeHardwareLikeKeyEvent(virtualKey: CGKeyCode, keyDown: Bool) -> CGEvent? {
+    guard let event = CGEvent(
+        keyboardEventSource: symbolicHotKeyEventSource,
+        virtualKey: virtualKey,
+        keyDown: keyDown
+    ) else {
+        return nil
+    }
+    event.timestamp = CGEventTimestamp(DispatchTime.now().uptimeNanoseconds)
+    event.setIntegerValueField(.keyboardEventKeyboardType, value: Int64(LMGetKbdType()))
+    return event
+}
 
 public enum SymbolicHotKey: UInt32 {
     /// full keyboard access hotkeys
@@ -124,15 +144,15 @@ public func postSymbolicHotKey(_ hotkey: SymbolicHotKey) throws {
     var accumulated = CGEventFlags()
     for (flag, keyCode) in activeModifiers {
         accumulated.insert(flag)
-        let event = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: true)!
+        let event = makeHardwareLikeKeyEvent(virtualKey: keyCode, keyDown: true)!
         event.type = .flagsChanged
         event.flags = accumulated
         event.post(tap: .cgSessionEventTap)
     }
 
-    let keyDown = CGEvent(keyboardEventSource: nil, virtualKey: virtualKeyCode, keyDown: true)!
+    let keyDown = makeHardwareLikeKeyEvent(virtualKey: virtualKeyCode, keyDown: true)!
     keyDown.flags = flags
-    let keyUp = CGEvent(keyboardEventSource: nil, virtualKey: virtualKeyCode, keyDown: false)!
+    let keyUp = makeHardwareLikeKeyEvent(virtualKey: virtualKeyCode, keyDown: false)!
     keyUp.flags = flags
 
     keyDown.post(tap: .cgSessionEventTap)
@@ -140,7 +160,7 @@ public func postSymbolicHotKey(_ hotkey: SymbolicHotKey) throws {
 
     for (flag, keyCode) in activeModifiers.reversed() {
         accumulated.remove(flag)
-        let event = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: false)!
+        let event = makeHardwareLikeKeyEvent(virtualKey: keyCode, keyDown: false)!
         event.type = .flagsChanged
         event.flags = accumulated
         event.post(tap: .cgSessionEventTap)
