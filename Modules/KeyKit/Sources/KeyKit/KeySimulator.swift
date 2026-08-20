@@ -2,6 +2,7 @@
 // Copyright (c) 2021-2026 LinearMouse
 
 import AppKit
+import Carbon
 import os
 
 public enum KeySimulatorError: Error {
@@ -46,6 +47,12 @@ public class KeySimulator: KeySimulating {
             NX_DEVICERCMDKEYMASK
     ))
     private static let keyboardModifierFlags = genericModifierFlags.union(deviceSpecificModifierFlags)
+
+    /// Events created without a source carry no HID system state, a zero
+    /// timestamp and no keyboard type. Some event consumers (e.g. Wine's
+    /// mouse-capture handling in games) treat such events as foreign and
+    /// break held-button state, so mimic hardware-generated events.
+    private static let eventSource = CGEventSource(stateID: .hidSystemState)
 
     private let keyCodeResolver = KeyCodeResolver()
     private let eventSourceUserData: Int64?
@@ -114,11 +121,17 @@ public class KeySimulator: KeySimulating {
             throw KeySimulatorError.unsupportedKey
         }
 
-        guard let event = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: keyDown) else {
+        guard let event = CGEvent(
+            keyboardEventSource: Self.eventSource,
+            virtualKey: keyCode,
+            keyDown: keyDown
+        ) else {
             return
         }
 
         event.flags = Self.replacingKeyboardModifierFlags(in: event.flags, with: eventFlags)
+        event.timestamp = CGEventTimestamp(DispatchTime.now().uptimeNanoseconds)
+        event.setIntegerValueField(.keyboardEventKeyboardType, value: Int64(LMGetKbdType()))
 
         if !flagsToToggle.isEmpty {
             event.type = .flagsChanged
@@ -202,11 +215,17 @@ public class KeySimulator: KeySimulating {
             return
         }
 
-        guard let event = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: true) else {
+        guard let event = CGEvent(
+            keyboardEventSource: Self.eventSource,
+            virtualKey: keyCode,
+            keyDown: true
+        ) else {
             return
         }
 
         event.type = .flagsChanged
+        event.timestamp = CGEventTimestamp(DispatchTime.now().uptimeNanoseconds)
+        event.setIntegerValueField(.keyboardEventKeyboardType, value: Int64(LMGetKbdType()))
         event.flags = Self.replacingKeyboardModifierFlags(
             in: event.flags,
             with: restoringModifierFlags
