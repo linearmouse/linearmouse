@@ -102,6 +102,7 @@ final class ConfigurationTests: XCTestCase {
             ofDeviceCategory: .mouse,
             ofApp: nil,
             ofProcessPath: nil,
+            ofProcessName: nil,
             ofDisplay: nil
         )
 
@@ -111,6 +112,65 @@ final class ConfigurationTests: XCTestCase {
         }
 
         XCTAssertEqual(insertIndex, 0)
+    }
+
+    func testSchemeIndexMatchesProcessNameWithoutCrossMatching() {
+        var matcher = DeviceMatcher(category: .mouse)
+        matcher.vendorID = 1
+        matcher.productID = 2
+
+        let schemes = [
+            Scheme(if: [.init(device: matcher)]),
+            Scheme(if: [.init(device: matcher, processName: "Foo.exe")]),
+            Scheme(if: [.init(device: matcher, processPath: "/tmp/Foo.exe")])
+        ]
+
+        guard case let .at(nameIndex) = schemes.schemeIndex(
+            ofDeviceMatcher: matcher,
+            ofApp: nil,
+            ofProcessPath: nil,
+            ofProcessName: "Foo.exe",
+            ofDisplay: nil
+        ) else {
+            XCTFail("Expected to find the processName scheme")
+            return
+        }
+        XCTAssertEqual(nameIndex, 1)
+
+        guard case let .at(pathIndex) = schemes.schemeIndex(
+            ofDeviceMatcher: matcher,
+            ofApp: nil,
+            ofProcessPath: "/tmp/Foo.exe",
+            ofProcessName: nil,
+            ofDisplay: nil
+        ) else {
+            XCTFail("Expected to find the processPath scheme")
+            return
+        }
+        XCTAssertEqual(pathIndex, 2)
+
+        guard case let .at(deviceIndex) = schemes.schemeIndex(
+            ofDeviceMatcher: matcher,
+            ofApp: nil,
+            ofProcessPath: nil,
+            ofProcessName: nil,
+            ofDisplay: nil
+        ) else {
+            XCTFail("Expected to find the device scheme")
+            return
+        }
+        XCTAssertEqual(deviceIndex, 0)
+
+        guard case .insertAt = schemes.schemeIndex(
+            ofDeviceMatcher: matcher,
+            ofApp: nil,
+            ofProcessPath: nil,
+            ofProcessName: "Bar.exe",
+            ofDisplay: nil
+        ) else {
+            XCTFail("Expected an insertion index for an unknown process name")
+            return
+        }
     }
 
     func testMergeAutoScroll() {

@@ -249,6 +249,7 @@ extension [Scheme] {
         ofDevice device: Device,
         ofApp app: String?,
         ofProcessPath processPath: String?,
+        ofProcessName processName: String?,
         ofDisplay display: String?
     ) -> SchemeIndex {
         schemeIndex(
@@ -256,6 +257,7 @@ extension [Scheme] {
             emptyInsertionIndex: endIndex,
             ofApp: app,
             ofProcessPath: processPath,
+            ofProcessName: processName,
             ofDisplay: display
         )
     }
@@ -264,6 +266,7 @@ extension [Scheme] {
         ofDeviceMatcher matcher: DeviceMatcher,
         ofApp app: String?,
         ofProcessPath processPath: String?,
+        ofProcessName processName: String?,
         ofDisplay display: String?
     ) -> SchemeIndex {
         if let category = matcher.categoryOnlyValue {
@@ -271,6 +274,7 @@ extension [Scheme] {
                 ofDeviceCategory: category,
                 ofApp: app,
                 ofProcessPath: processPath,
+                ofProcessName: processName,
                 ofDisplay: display
             )
         }
@@ -280,6 +284,7 @@ extension [Scheme] {
             emptyInsertionIndex: endIndex,
             ofApp: app,
             ofProcessPath: processPath,
+            ofProcessName: processName,
             ofDisplay: display
         )
     }
@@ -288,6 +293,7 @@ extension [Scheme] {
         ofDeviceCategory category: DeviceMatcher.Category,
         ofApp app: String?,
         ofProcessPath processPath: String?,
+        ofProcessName processName: String?,
         ofDisplay display: String?
     ) -> SchemeIndex {
         schemeIndex(
@@ -295,6 +301,7 @@ extension [Scheme] {
             emptyInsertionIndex: firstDeviceSpecificSchemeIndex(of: category) ?? endIndex,
             ofApp: app,
             ofProcessPath: processPath,
+            ofProcessName: processName,
             ofDisplay: display
         )
     }
@@ -304,6 +311,7 @@ extension [Scheme] {
         emptyInsertionIndex: Int,
         ofApp app: String?,
         ofProcessPath processPath: String?,
+        ofProcessName processName: String?,
         ofDisplay display: String?
     ) -> SchemeIndex {
         guard let first = matchingSchemes.first,
@@ -315,16 +323,17 @@ extension [Scheme] {
             .first(where: { _, scheme in
                 scheme.if?.first?.app == app &&
                     scheme.if?.first?.processPath == processPath &&
+                    scheme.if?.first?.processName == processName &&
                     scheme.if?.first?.display == display
             }) {
             return .at(index)
         }
 
-        if app == nil, processPath == nil, display == nil {
+        if app == nil, processPath == nil, processName == nil, display == nil {
             return .insertAt(first.offset)
         }
 
-        if app != nil || processPath != nil, display != nil {
+        if app != nil || processPath != nil || processName != nil, display != nil {
             return .insertAt(last.offset + 1)
         }
 
@@ -338,6 +347,13 @@ extension [Scheme] {
         if processPath != nil {
             if let (index, _) = matchingSchemes
                 .first(where: { _, scheme in scheme.if?.first?.processPath == processPath }) {
+                return .insertAt(index)
+            }
+        }
+
+        if processName != nil {
+            if let (index, _) = matchingSchemes
+                .first(where: { _, scheme in scheme.if?.first?.processName == processName }) {
                 return .insertAt(index)
             }
         }

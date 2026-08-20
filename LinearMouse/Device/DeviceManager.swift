@@ -346,6 +346,7 @@ class DeviceManager: ObservableObject {
             ofDevice: device,
             ofApp: nil,
             ofProcessPath: nil,
+            ofProcessName: nil,
             ofDisplay: nil
         ),
             let hardwareDPI = schemes[index].pointer.hardwareDPI
@@ -376,6 +377,7 @@ class DeviceManager: ObservableObject {
             ofDevice: device,
             ofApp: nil,
             ofProcessPath: nil,
+            ofProcessName: nil,
             ofDisplay: nil
         ),
             let highResolutionWheel = schemes[index].logitech.highResolutionWheel
