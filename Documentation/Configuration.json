@@ -340,6 +340,12 @@
           "title": "Enable gesture button",
           "type": "boolean"
         },
+        "suppressPointerMovement": {
+          "default": false,
+          "description": "Keep the pointer in place while the gesture trigger is held.",
+          "title": "Prevent pointer movement",
+          "type": "boolean"
+        },
         "threshold": {
           "$ref": "#/definitions/Int",
           "default": 50,

@@ -361,6 +361,15 @@ extension ButtonsSettingsState {
         }
     }
 
+    var gestureSuppressPointerMovement: Bool {
+        get {
+            mergedScheme.buttons.gesture.suppressPointerMovement ?? false
+        }
+        set {
+            scheme.buttons.gesture.suppressPointerMovement = newValue
+        }
+    }
+
     var gestureActionLeft: Scheme.Buttons.Gesture.GestureAction {
         get {
             mergedScheme.buttons.gesture.actions.left ?? .spaceLeft

@@ -10,6 +10,7 @@ extension Scheme.Buttons {
         var threshold: Int?
         var deadZone: Int?
         var cooldownMs: Int?
+        var suppressPointerMovement: Bool?
 
         @ImplicitOptional var actions: Actions
 
@@ -44,6 +45,7 @@ extension Scheme.Buttons.Gesture: Codable {
         case threshold
         case deadZone
         case cooldownMs
+        case suppressPointerMovement
         case actions
     }
 
@@ -54,6 +56,7 @@ extension Scheme.Buttons.Gesture: Codable {
         threshold = try container.decodeIfPresent(Int.self, forKey: .threshold)
         deadZone = try container.decodeIfPresent(Int.self, forKey: .deadZone)
         cooldownMs = try container.decodeIfPresent(Int.self, forKey: .cooldownMs)
+        suppressPointerMovement = try container.decodeIfPresent(Bool.self, forKey: .suppressPointerMovement)
         _actions = try container.decodeIfPresent(ImplicitOptional<Actions>.self, forKey: .actions) ?? .init()
 
         // Migrate legacy "button" field to "trigger"
@@ -71,6 +74,7 @@ extension Scheme.Buttons.Gesture: Codable {
         try container.encodeIfPresent(threshold, forKey: .threshold)
         try container.encodeIfPresent(deadZone, forKey: .deadZone)
         try container.encodeIfPresent(cooldownMs, forKey: .cooldownMs)
+        try container.encodeIfPresent(suppressPointerMovement, forKey: .suppressPointerMovement)
         try container.encodeIfPresent($actions, forKey: .actions)
     }
 }

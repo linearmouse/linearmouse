@@ -778,6 +778,7 @@ class EventTransformerManager {
                 threshold: Double(gesture.threshold ?? 50),
                 deadZone: Double(gesture.deadZone ?? 40),
                 cooldownMs: gesture.cooldownMs ?? 500,
+                suppressPointerMovement: gesture.suppressPointerMovement ?? false,
                 actions: gesture.actions
             )
         } else {

@@ -99,6 +99,7 @@ final class GestureTests: XCTestCase {
         gesture.threshold = 70
         gesture.deadZone = 30
         gesture.cooldownMs = 300
+        gesture.suppressPointerMovement = true
         gesture.actions.left = .spaceLeft
         gesture.actions.right = .spaceRight
 
@@ -110,6 +111,7 @@ final class GestureTests: XCTestCase {
         XCTAssertEqual(decoded.threshold, 70)
         XCTAssertEqual(decoded.deadZone, 30)
         XCTAssertEqual(decoded.cooldownMs, 300)
+        XCTAssertEqual(decoded.suppressPointerMovement, true)
         XCTAssertEqual(decoded.actions.left, .spaceLeft)
         XCTAssertEqual(decoded.actions.right, .spaceRight)
     }

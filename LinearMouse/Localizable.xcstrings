@@ -34418,6 +34418,29 @@
         }
       }
     },
+    "Keep the pointer in place while the gesture trigger is held." : {
+      "comment" : "Explains the gesture button option that prevents pointer movement.",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按住手势触发按钮时保持指针不动。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按住手勢觸發按鈕時保持指標不動。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按住手勢觸發按鈕時保持指標不動。"
+          }
+        }
+      }
+    },
     "Keep scrolling after release" : {
       "comment" : "Checkbox label for keeping autoscroll active after releasing its trigger.",
       "localizations" : {
@@ -47126,6 +47149,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "指標速度"
+          }
+        }
+      }
+    },
+    "Prevent pointer movement" : {
+      "comment" : "Gesture button option that keeps the pointer stationary.",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "防止指针移动"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "防止指標移動"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "防止指標移動"
           }
         }
       }

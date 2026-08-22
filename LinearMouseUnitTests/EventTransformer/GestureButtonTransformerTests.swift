@@ -29,22 +29,30 @@ private func makeLogitechGestureTransformer(
     trigger: Scheme.Buttons.Mapping = .init(
         button: .logitechControl(.init(controlID: testLogitechControlID))
     ),
-    cooldownMs: Int = testGestureCooldownMs
+    cooldownMs: Int = testGestureCooldownMs,
+    suppressPointerMovement: Bool = false,
+    warpPointer: @escaping (CGPoint) -> Void = { _ in }
 ) -> GestureButtonTransformer {
     GestureButtonTransformer(
         trigger: trigger,
         threshold: testGestureThreshold,
         deadZone: testGestureDeadZone,
         cooldownMs: cooldownMs,
-        actions: .init(right: Scheme.Buttons.Gesture.GestureAction.none)
+        suppressPointerMovement: suppressPointerMovement,
+        actions: .init(right: Scheme.Buttons.Gesture.GestureAction.none),
+        warpPointer: warpPointer
     )
 }
 
-private func makeMouseMovedEvent(deltaX: Double, deltaY: Double = 0) throws -> CGEvent {
+private func makeMouseMovedEvent(
+    deltaX: Double,
+    deltaY: Double = 0,
+    location: CGPoint = .zero
+) throws -> CGEvent {
     let event = try XCTUnwrap(CGEvent(
         mouseEventSource: nil,
         mouseType: .mouseMoved,
-        mouseCursorPosition: .zero,
+        mouseCursorPosition: location,
         mouseButton: .center
     ))
     event.setDoubleValueField(.mouseEventDeltaX, value: deltaX)
@@ -81,6 +89,7 @@ final class GestureButtonTransformerTests: XCTestCase {
             threshold: testGestureThreshold,
             deadZone: testGestureDeadZone,
             cooldownMs: testGestureCooldownMs,
+            suppressPointerMovement: false,
             actions: .init(right: .some(.none))
         )
         SettingsState.shared.beginButtonMappingRecording(sessionID: UUID())
@@ -119,6 +128,51 @@ final class GestureButtonTransformerTests: XCTestCase {
             transformer.handleLogitechControlEvent(logitechContext(pressed: true)),
             .notHandled
         )
+    }
+
+    func testLogitechControlGestureAllowsPointerMovementByDefault() throws {
+        let transformer = makeLogitechGestureTransformer()
+
+        XCTAssertEqual(
+            transformer.handleLogitechControlEvent(logitechContext(pressed: true)),
+            .handledDeferringSyntheticFallback
+        )
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseMovedEvent(deltaX: 1),
+            in: EventTransformerContext(device: nil)
+        ))
+    }
+
+    func testLogitechControlGestureSuppressesPointerMovementUntilReleased() throws {
+        var warpedLocations = [CGPoint]()
+        let transformer = makeLogitechGestureTransformer(
+            suppressPointerMovement: true,
+            warpPointer: { warpedLocations.append($0) }
+        )
+        let gestureLocation = CGPoint(x: 100, y: 200)
+        let cooldownLocation = CGPoint(x: 110, y: 200)
+
+        XCTAssertEqual(
+            transformer.handleLogitechControlEvent(logitechContext(pressed: true)),
+            .handledDeferringSyntheticFallback
+        )
+        XCTAssertNil(try transformer.transform(
+            makeMouseMovedEvent(deltaX: testGestureThreshold, location: gestureLocation),
+            in: EventTransformerContext(device: nil)
+        ))
+        XCTAssertNil(try transformer.transform(
+            makeMouseMovedEvent(deltaX: 1, location: cooldownLocation),
+            in: EventTransformerContext(device: nil)
+        ))
+        XCTAssertEqual(warpedLocations, [gestureLocation, cooldownLocation])
+        XCTAssertEqual(
+            transformer.handleLogitechControlEvent(logitechContext(pressed: false)),
+            .handled
+        )
+        XCTAssertNotNil(try transformer.transform(
+            makeMouseMovedEvent(deltaX: 1),
+            in: EventTransformerContext(device: nil)
+        ))
     }
 
     func testLogitechControlGestureSuppressesSyntheticFallbackForCleanupRelease() throws {

@@ -49,6 +49,13 @@ struct GestureButtonSection: View {
                         Slider(value: $state.gestureThresholdDouble, in: 20 ... 200, step: 5)
                     }
 
+                    Toggle(isOn: $state.gestureSuppressPointerMovement) {
+                        withDescription {
+                            Text("Prevent pointer movement")
+                            Text("Keep the pointer in place while the gesture trigger is held.")
+                        }
+                    }
+
                     Divider()
 
                     Text("Gesture Actions")

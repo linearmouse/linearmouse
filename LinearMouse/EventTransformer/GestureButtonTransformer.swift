@@ -16,7 +16,9 @@ class GestureButtonTransformer {
     private let threshold: Double
     private let deadZone: Double
     private let cooldownMs: Int
+    private let suppressPointerMovement: Bool
     private let actions: Scheme.Buttons.Gesture.Actions
+    private let warpPointer: (CGPoint) -> Void
 
     /// State machine
     private enum State {
@@ -33,7 +35,11 @@ class GestureButtonTransformer {
         threshold: Double,
         deadZone: Double,
         cooldownMs: Int,
-        actions: Scheme.Buttons.Gesture.Actions
+        suppressPointerMovement: Bool,
+        actions: Scheme.Buttons.Gesture.Actions,
+        warpPointer: @escaping (CGPoint) -> Void = { position in
+            _ = CGWarpMouseCursorPosition(position)
+        }
     ) {
         self.trigger = trigger
         let defaultButton = UInt32(CGMouseButton.center.rawValue)
@@ -42,7 +48,9 @@ class GestureButtonTransformer {
         self.threshold = threshold
         self.deadZone = deadZone
         self.cooldownMs = cooldownMs
+        self.suppressPointerMovement = suppressPointerMovement
         self.actions = actions
+        self.warpPointer = warpPointer
     }
 }
 
@@ -54,6 +62,13 @@ extension GestureButtonTransformer: EventTransformer {
 
         // Check if we're in cooldown
         if case let .cooldown(until, released) = state {
+            // Logitech gesture controls report pointer movement without a
+            // button number. Keep the pointer stationary until their trigger
+            // release, even after a gesture has entered cooldown.
+            if suppressPointerMovement, !released, event.type == .mouseMoved {
+                return suppressPointerMovementEvent(event)
+            }
+
             if DispatchTime.now().uptimeNanoseconds < until {
                 // Still in cooldown - consume our button events
                 if matchesTriggerButton(event) {
@@ -191,15 +206,30 @@ extension GestureButtonTransformer: EventTransformer {
                 state = .idle
             }
 
-            // Consume the event
-            return nil
+            // Consume the event. mouseMoved still changes the system cursor
+            // unless its pre-event location is restored explicitly.
+            return isMouseMoved && suppressPointerMovement
+                ? suppressPointerMovementEvent(event)
+                : nil
         }
 
         // Update state with new deltas
         state = .tracking(startTime: startTime, deltaX: deltaX, deltaY: deltaY)
 
-        // Consume drag events while tracking; pass through mouseMoved events
+        // Drag events are always consumed. Logitech gesture controls report
+        // movement as mouseMoved, which remains opt-in to preserve existing
+        // pointer behavior.
+        if isMouseMoved, suppressPointerMovement {
+            return suppressPointerMovementEvent(event)
+        }
         return isMouseMoved ? event : nil
+    }
+
+    /// Returning nil from a HID event tap does not prevent macOS from moving
+    /// the cursor for mouseMoved events, so restore the pre-event location too.
+    private func suppressPointerMovementEvent(_ event: CGEvent) -> CGEvent? {
+        warpPointer(event.location)
+        return nil
     }
 
     private func handleButtonUp(_ event: CGEvent) -> CGEvent? {
