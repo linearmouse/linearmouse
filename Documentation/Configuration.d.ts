@@ -1236,6 +1236,13 @@ declare namespace Scheme {
       cooldownMs?: Int;
 
       /**
+       * @title Prevent pointer movement
+       * @description Keep the pointer in place while the gesture trigger is held.
+       * @default false
+       */
+      suppressPointerMovement?: boolean;
+
+      /**
        * @title Gesture actions
        * @description Actions to trigger for each gesture direction.
        */

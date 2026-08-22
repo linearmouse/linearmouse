@@ -1300,6 +1300,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
             threshold: 10,
             deadZone: 40,
             cooldownMs: 500,
+            suppressPointerMovement: false,
             actions: .init(right: .some(.none))
         )
     }
