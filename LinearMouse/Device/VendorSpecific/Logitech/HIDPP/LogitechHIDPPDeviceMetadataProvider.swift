@@ -4,11 +4,13 @@
 import AppKit
 import Combine
 import Foundation
+import HIDPP
 import IOKit.hid
 import ObservationToken
 import os.log
 import PointerKit
 
+/// Discovers Logitech HID++ metadata and owns shared receiver/device transports.
 struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider {
     static let log = OSLog(
         subsystem: Bundle.main.bundleIdentifier ?? "LinearMouse",
@@ -16,16 +18,15 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
     )
 
     enum Constants {
-        static let vendorID = 0x046D
-        static let softwareID: UInt8 = 0x08
-        static let shortReportID: UInt8 = 0x10
-        static let longReportID: UInt8 = 0x11
-        static let shortReportLength = 7
-        static let longReportLength = 20
-        static let timeout: TimeInterval = 2.0
+        static let vendorID = HIDPPConstants.vendorID
+        static let shortReportID = HIDPPConstants.shortReportID
+        static let longReportID = HIDPPConstants.longReportID
+        static let shortReportLength = HIDPPConstants.shortReportLength
+        static let longReportLength = HIDPPConstants.longReportLength
+        static let timeout = HIDPPConstants.timeout
 
-        static let receiverIndex: UInt8 = 0xFF
-        static let directReplyIndices: Set<UInt8> = [0x00, 0xFF]
+        static let receiverIndex = HIDPPConstants.receiverIndex
+        static let directReplyIndices = HIDPPConstants.directReplyIndices
         static let receiverNotificationFlagsRegister: UInt8 = 0x00
         static let receiverConnectionStateRegister: UInt8 = 0x02
         static let receiverInfoRegister: UInt8 = 0xB5
@@ -89,19 +90,6 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         }
     }
 
-    enum FeatureID: UInt16 {
-        case root = 0x0000
-        case deviceName = 0x0005
-        case deviceFriendlyName = 0x0007
-        case batteryStatus = 0x1000
-        case batteryVoltage = 0x1001
-        case unifiedBattery = 0x1004
-        case reprogControlsV4 = 0x1B04
-        case adcMeasurement = 0x1F20
-        case hiresWheel = 0x2121
-        case adjustableDPI = 0x2201
-    }
-
     enum ReprogControlsV4 {
         static let gestureButtonControlIDs: Set<UInt16> = [0x00C3, 0x00D0]
         static let virtualGestureButtonControlIDs: Set<UInt16> = [0x00D7]
@@ -152,10 +140,6 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         case mouse = 0x02
         case trackball = 0x08
         case touchpad = 0x09
-    }
-
-    struct Response {
-        let payload: [UInt8]
     }
 
     struct ReceiverSlotInfo {
@@ -552,7 +536,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         }
     }
 
-    private func metadata(using transport: LogitechHIDPPTransport) -> VendorSpecificDeviceMetadata? {
+    private func metadata(using transport: HIDPPTransport) -> VendorSpecificDeviceMetadata? {
         let name = readFriendlyName(using: transport) ?? readName(using: transport)
         let batteryLevel = transport
             .isReceiverRoutedDevice ? readReceiverBatteryLevel(using: transport) : readBatteryLevel(using: transport)
@@ -564,15 +548,15 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         return VendorSpecificDeviceMetadata(name: name, batteryLevel: batteryLevel)
     }
 
-    private func directTransport(for device: VendorSpecificDeviceContext) -> LogitechHIDPPTransport? {
+    private func directTransport(for device: VendorSpecificDeviceContext) -> HIDPPTransport? {
         guard device.transport == PointerDeviceTransportName.bluetoothLowEnergy else {
             return nil
         }
 
-        return LogitechHIDPPTransport(device: device, deviceIndex: nil)
+        return HIDPPTransport(device: device, deviceIndex: nil)
     }
 
-    private func receiverTransport(for device: VendorSpecificDeviceContext) -> LogitechHIDPPTransport? {
+    private func receiverTransport(for device: VendorSpecificDeviceContext) -> HIDPPTransport? {
         guard device.transport == PointerDeviceTransportName.usb,
               let locationID = device.locationID,
               let receiverChannel = LogitechReceiverChannel.open(locationID: locationID),
@@ -581,7 +565,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             return nil
         }
 
-        return LogitechHIDPPTransport(device: receiverChannel, deviceIndex: slot)
+        return HIDPPTransport(device: receiverChannel, deviceIndex: slot)
     }
 
     private func discoverReceiverSlot(
@@ -639,7 +623,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         var results = [ReceiverSlotMetadata]()
 
         for slot in UInt8(1) ... UInt8(6) {
-            guard let transport = LogitechHIDPPTransport(device: receiver, deviceIndex: slot) else {
+            guard let transport = HIDPPTransport(device: receiver, deviceIndex: slot) else {
                 continue
             }
 
@@ -668,7 +652,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         }
     }
 
-    func readFriendlyName(using transport: LogitechHIDPPTransport) -> String? {
+    func readFriendlyName(using transport: HIDPPTransport) -> String? {
         guard let featureIndex = transport.featureIndex(for: .deviceFriendlyName),
               let lengthResponse = transport.request(featureIndex: featureIndex, function: 0x00, parameters: []),
               let length = lengthResponse.payload.first,
@@ -685,7 +669,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         )
     }
 
-    func readName(using transport: LogitechHIDPPTransport) -> String? {
+    func readName(using transport: HIDPPTransport) -> String? {
         guard let featureIndex = transport.featureIndex(for: .deviceName),
               let lengthResponse = transport.request(featureIndex: featureIndex, function: 0x00, parameters: []),
               let length = lengthResponse.payload.first,
@@ -703,7 +687,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
     }
 
     private func readNameFragments(
-        using transport: LogitechHIDPPTransport,
+        using transport: HIDPPTransport,
         featureIndex: UInt8,
         length: Int,
         skipFirstPayloadByte: Bool
@@ -737,7 +721,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         return String(bytes: trimmed.isEmpty ? Array(bytes.prefix(length)) : trimmed, encoding: .utf8)
     }
 
-    fileprivate func readBatteryLevel(using transport: LogitechHIDPPTransport) -> Int? {
+    fileprivate func readBatteryLevel(using transport: HIDPPTransport) -> Int? {
         if let featureIndex = transport.featureIndex(for: .batteryStatus),
            let response = transport.request(featureIndex: featureIndex, function: 0x00, parameters: []),
            response.payload.count >= 3,
@@ -775,7 +759,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         return nil
     }
 
-    func readReceiverBatteryLevel(using transport: LogitechHIDPPTransport) -> Int? {
+    func readReceiverBatteryLevel(using transport: HIDPPTransport) -> Int? {
         readBatteryLevel(using: transport)
     }
 
@@ -853,185 +837,6 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         }
 
         return Int(response[5])
-    }
-}
-
-struct LogitechHIDPPTransport {
-    private enum ResponseResult {
-        case response(LogitechHIDPPDeviceMetadataProvider.Response)
-        case busy
-        case failure
-    }
-
-    private static let maximumBusyAttempts = 3
-
-    private let device: VendorSpecificDeviceContext
-    private let reportID: UInt8
-    private let reportLength: Int
-    private let deviceIndex: UInt8
-    private let acceptedReplyIndices: Set<UInt8>
-    let isReceiverRoutedDevice: Bool
-
-    init?(device: VendorSpecificDeviceContext, deviceIndex: UInt8?) {
-        let maxOutputReportSize = device.maxOutputReportSize ?? 0
-        if maxOutputReportSize >= LogitechHIDPPDeviceMetadataProvider.Constants.longReportLength {
-            reportID = LogitechHIDPPDeviceMetadataProvider.Constants.longReportID
-            reportLength = LogitechHIDPPDeviceMetadataProvider.Constants.longReportLength
-        } else if maxOutputReportSize >= LogitechHIDPPDeviceMetadataProvider.Constants.shortReportLength {
-            reportID = LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID
-            reportLength = LogitechHIDPPDeviceMetadataProvider.Constants.shortReportLength
-        } else {
-            return nil
-        }
-
-        self.device = device
-        self.deviceIndex = deviceIndex ?? LogitechHIDPPDeviceMetadataProvider.Constants.receiverIndex
-        isReceiverRoutedDevice = deviceIndex != nil
-        acceptedReplyIndices = deviceIndex.map { Set([$0]) } ?? LogitechHIDPPDeviceMetadataProvider.Constants
-            .directReplyIndices
-    }
-
-    func featureIndex(for featureID: LogitechHIDPPDeviceMetadataProvider.FeatureID) -> UInt8? {
-        guard let response = request(featureIndex: 0x00, function: 0x00, parameters: featureID.bytes),
-              let featureIndex = response.payload.first,
-              featureIndex != 0
-        else {
-            return nil
-        }
-
-        return featureIndex
-    }
-
-    func request(
-        featureIndex: UInt8,
-        function: UInt8,
-        parameters: [UInt8]
-    ) -> LogitechHIDPPDeviceMetadataProvider.Response? {
-        request(
-            featureIndex: featureIndex,
-            function: function,
-            parameters: parameters,
-            performsSingleTransaction: false
-        )
-    }
-
-    func requestOnce(
-        featureIndex: UInt8,
-        function: UInt8,
-        parameters: [UInt8]
-    ) -> LogitechHIDPPDeviceMetadataProvider.Response? {
-        request(
-            featureIndex: featureIndex,
-            function: function,
-            parameters: parameters,
-            performsSingleTransaction: true
-        )
-    }
-
-    private func request(
-        featureIndex: UInt8,
-        function: UInt8,
-        parameters: [UInt8],
-        performsSingleTransaction: Bool
-    ) -> LogitechHIDPPDeviceMetadataProvider.Response? {
-        for attempt in 1 ... Self.maximumBusyAttempts {
-            switch response(
-                featureIndex: featureIndex,
-                function: function,
-                parameters: parameters,
-                performsSingleTransaction: performsSingleTransaction
-            ) {
-            case let .response(response):
-                return response
-            case .busy where attempt < Self.maximumBusyAttempts:
-                continue
-            case .busy, .failure:
-                return nil
-            }
-        }
-
-        return nil
-    }
-
-    private func response(
-        featureIndex: UInt8,
-        function: UInt8,
-        parameters: [UInt8],
-        performsSingleTransaction: Bool
-    ) -> ResponseResult {
-        let address = address(for: function)
-        let report = makeReport(
-            featureIndex: featureIndex,
-            address: address,
-            parameters: parameters
-        )
-        let matching: (Data) -> Bool = { response in
-            let reply = [UInt8](response)
-            guard reply.count >= LogitechHIDPPDeviceMetadataProvider.Constants.shortReportLength,
-                  [
-                      LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
-                      LogitechHIDPPDeviceMetadataProvider.Constants.longReportID
-                  ].contains(reply[0]),
-                  acceptedReplyIndices.contains(reply[1])
-            else {
-                return false
-            }
-
-            if reply[2] == 0xFF {
-                return reply.count >= 6 && reply[3] == featureIndex && reply[4] == address
-            }
-
-            return reply[2] == featureIndex && reply[3] == address
-        }
-        let response = if performsSingleTransaction {
-            device.performSynchronousOutputReportRequestOnce(
-                report,
-                timeout: LogitechHIDPPDeviceMetadataProvider.Constants.timeout,
-                matching: matching
-            )
-        } else {
-            device.performSynchronousOutputReportRequest(
-                report,
-                timeout: LogitechHIDPPDeviceMetadataProvider.Constants.timeout,
-                matching: matching
-            )
-        }
-
-        guard let response else {
-            return .failure
-        }
-
-        let reply = [UInt8](response)
-        guard reply.count >= 4 else {
-            return .failure
-        }
-
-        if reply[2] == 0xFF {
-            let hidpp20BusyError: UInt8 = 0x08
-            return reply.count >= 6 && reply[5] == hidpp20BusyError ? .busy : .failure
-        }
-
-        return .response(.init(payload: Array(reply.dropFirst(4))))
-    }
-
-    private func address(for function: UInt8) -> UInt8 {
-        (function << 4) | LogitechHIDPPDeviceMetadataProvider.Constants.softwareID
-    }
-
-    private func makeReport(
-        featureIndex: UInt8,
-        address: UInt8,
-        parameters: [UInt8]
-    ) -> Data {
-        var bytes = [UInt8](repeating: 0, count: reportLength)
-        bytes[0] = reportID
-        bytes[1] = deviceIndex
-        bytes[2] = featureIndex
-        bytes[3] = address
-        for (index, parameter) in parameters.enumerated() where index + 4 < bytes.count {
-            bytes[index + 4] = parameter
-        }
-        return Data(bytes)
     }
 }
 
@@ -1328,7 +1133,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         let kind = connectionSnapshot?.kind
             ?? pairingResponse.flatMap(Self.parseReceiverKind)
             ?? 0
-        let routedTransport = LogitechHIDPPTransport(device: self, deviceIndex: slot)
+        let routedTransport = HIDPPTransport(device: self, deviceIndex: slot)
         let routedName = routedTransport.flatMap { transport in
             metadataProvider.readFriendlyName(using: transport) ?? metadataProvider.readName(using: transport)
         }
@@ -1409,7 +1214,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
                 name: slot.name ?? baseName,
                 serialNumber: slot.serialNumber,
                 productID: slot.productID,
-                batteryLevel: slot.batteryLevel ?? LogitechHIDPPTransport(device: self, deviceIndex: slot.slot)
+                batteryLevel: slot.batteryLevel ?? HIDPPTransport(device: self, deviceIndex: slot.slot)
                     .flatMap { provider.readReceiverBatteryLevel(using: $0) },
                 hasLiveMetadata: slot.hasLiveMetadata
             )
@@ -1985,12 +1790,6 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
     }
 }
 
-private extension LogitechHIDPPDeviceMetadataProvider.FeatureID {
-    var bytes: [UInt8] {
-        [UInt8(rawValue >> 8), UInt8(rawValue & 0xFF)]
-    }
-}
-
 final class LogitechReprogrammableControlsMonitor {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "LogitechReprogrammableControls")
 
@@ -2024,7 +1823,7 @@ final class LogitechReprogrammableControlsMonitor {
         let identity: ReceiverLogicalDeviceIdentity?
         let allowsIdentityFallback: Bool
         let notificationDeviceIndices: Set<UInt8>
-        let transport: LogitechHIDPPTransport
+        let transport: HIDPPTransport
         let featureIndex: UInt8
         let controls: [ControlInfo]
         let notificationEndpoint: HIDPPNotificationHandling
@@ -2627,7 +2426,7 @@ final class LogitechReprogrammableControlsMonitor {
         }
     }
 
-    private func findMonitoredControls(using transport: LogitechHIDPPTransport, featureIndex: UInt8) -> [ControlInfo] {
+    private func findMonitoredControls(using transport: HIDPPTransport, featureIndex: UInt8) -> [ControlInfo] {
         let controls = fetchControls(using: transport, featureIndex: featureIndex)
         return controls
             .filter(Self.shouldMonitor)
@@ -2653,7 +2452,7 @@ final class LogitechReprogrammableControlsMonitor {
     }
 
     private func buildDirectMonitorTarget() -> MonitorTarget? {
-        guard let transport = LogitechHIDPPTransport(device: device.pointerDevice, deviceIndex: nil),
+        guard let transport = HIDPPTransport(device: device.pointerDevice, deviceIndex: nil),
               let featureIndex = transport.featureIndex(for: .reprogControlsV4) else {
             return nil
         }
@@ -2805,7 +2604,7 @@ final class LogitechReprogrammableControlsMonitor {
         identity: ReceiverLogicalDeviceIdentity?,
         using receiverChannel: LogitechReceiverChannel
     ) -> MonitorTarget? {
-        guard let transport = LogitechHIDPPTransport(device: receiverChannel, deviceIndex: slot),
+        guard let transport = HIDPPTransport(device: receiverChannel, deviceIndex: slot),
               let featureIndex = transport.featureIndex(for: .reprogControlsV4)
         else {
             return nil
@@ -2975,7 +2774,7 @@ final class LogitechReprogrammableControlsMonitor {
         .matches(logiButton, allowingIdentityFallback: allowsIdentityFallback)
     }
 
-    private func fetchControls(using transport: LogitechHIDPPTransport, featureIndex: UInt8) -> [ControlInfo] {
+    private func fetchControls(using transport: HIDPPTransport, featureIndex: UInt8) -> [ControlInfo] {
         guard let countResponse = transport.request(
             featureIndex: featureIndex,
             function: LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.getControlCountFunction,
@@ -2989,7 +2788,7 @@ final class LogitechReprogrammableControlsMonitor {
 
     private func readControlInfo(
         index: UInt8,
-        using transport: LogitechHIDPPTransport,
+        using transport: HIDPPTransport,
         featureIndex: UInt8
     ) -> ControlInfo? {
         guard let response = transport.request(
@@ -3021,7 +2820,7 @@ final class LogitechReprogrammableControlsMonitor {
 
     private func readReportingInfo(
         for controlID: UInt16,
-        using transport: LogitechHIDPPTransport,
+        using transport: HIDPPTransport,
         featureIndex: UInt8
     ) -> ReportingInfo? {
         guard let response = transport.request(
@@ -3051,7 +2850,7 @@ final class LogitechReprogrammableControlsMonitor {
     private func setDiverted(
         _ enabled: Bool,
         for controlID: UInt16,
-        using transport: LogitechHIDPPTransport,
+        using transport: HIDPPTransport,
         featureIndex: UInt8
     ) -> Bool {
         let flags = enabled
@@ -3106,7 +2905,7 @@ final class LogitechReprogrammableControlsMonitor {
     private func setDivertedWithRetry(
         _ enabled: Bool,
         for controlID: UInt16,
-        using transport: LogitechHIDPPTransport,
+        using transport: HIDPPTransport,
         featureIndex: UInt8,
         maxAttempts: Int = 3,
         retryDelay: TimeInterval = 0.05
@@ -3135,7 +2934,7 @@ final class LogitechReprogrammableControlsMonitor {
 
     private func restoreReportingState(
         _ reportingByControlID: [UInt16: ReportingInfo],
-        using transport: LogitechHIDPPTransport,
+        using transport: HIDPPTransport,
         featureIndex: UInt8,
         locationID: Int,
         slot: UInt8,
@@ -3325,7 +3124,7 @@ final class LogitechReprogrammableControlsMonitor {
     }
 
     private func logAvailableControls(
-        transport: LogitechHIDPPTransport,
+        transport: HIDPPTransport,
         featureIndex: UInt8,
         slot: UInt8,
         locationID: Int

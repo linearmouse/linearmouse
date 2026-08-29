@@ -1,0 +1,81 @@
+// MIT License
+// Copyright (c) 2021-2026 LinearMouse
+
+@testable import LinearMouse
+import XCTest
+
+/// Covers desired-state diffing and forced wake/reconnect replay.
+final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
+    private final class Device: LogitechDeviceSettingsTarget {
+        var isRemoved = false
+        private(set) var actions = [String]()
+
+        func applyConfiguredSensorDPI(_ dpi: Int) {
+            actions.append("dpi:\(dpi)")
+        }
+
+        func applyConfiguredHighResolutionWheel(_ enabled: Bool) {
+            actions.append("hiResWheel:\(enabled)")
+        }
+
+        func requestLogitechControlsForcedReconfiguration() {
+            actions.append("controls")
+        }
+
+        func prepareSensorDPIForReconnect() {
+            actions.append("prepareDPI")
+        }
+
+        func prepareHighResolutionWheelForReconnect() {
+            actions.append("prepareHiResWheel")
+        }
+
+        func resetActions() {
+            actions.removeAll()
+        }
+    }
+
+    func testApplyOnlyUpdatesChangedSettings() {
+        let device = Device()
+        let reconciler = LogitechDeviceSettingsReconciler(device: device)
+
+        reconciler.apply(.init(dpi: 1000, highResolutionWheel: true))
+        XCTAssertEqual(device.actions, ["dpi:1000", "hiResWheel:true"])
+
+        device.resetActions()
+        reconciler.apply(.init(dpi: 1000, highResolutionWheel: true))
+        XCTAssertTrue(device.actions.isEmpty)
+
+        reconciler.apply(.init(dpi: 1000, highResolutionWheel: false))
+        XCTAssertEqual(device.actions, ["hiResWheel:false"])
+    }
+
+    func testReapplyForcesEveryVolatileSettingAndControlReconfiguration() {
+        let device = Device()
+        let reconciler = LogitechDeviceSettingsReconciler(device: device)
+        let settings = LogitechDeviceSettings(dpi: 1200, highResolutionWheel: true)
+
+        reconciler.apply(settings)
+        device.resetActions()
+        reconciler.reapply(settings)
+
+        XCTAssertEqual(device.actions, [
+            "controls",
+            "prepareDPI",
+            "prepareHiResWheel",
+            "dpi:1200",
+            "hiResWheel:true"
+        ])
+    }
+
+    func testRemovedDeviceIgnoresApplyAndReapply() {
+        let device = Device()
+        device.isRemoved = true
+        let reconciler = LogitechDeviceSettingsReconciler(device: device)
+
+        reconciler.apply(.init(dpi: 1000, highResolutionWheel: true))
+        reconciler.reapply(.init(dpi: 1000, highResolutionWheel: true))
+
+        XCTAssertTrue(device.actions.isEmpty)
+    }
+}

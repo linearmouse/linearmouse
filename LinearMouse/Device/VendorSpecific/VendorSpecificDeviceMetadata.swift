@@ -2,8 +2,9 @@
 // Copyright (c) 2021-2026 LinearMouse
 
 import Foundation
+import HIDPP
 
-protocol VendorSpecificDeviceContext {
+protocol VendorSpecificDeviceContext: HIDPPDeviceIO {
     var vendorID: Int? { get }
     var productID: Int? { get }
     var product: String? { get }
@@ -16,28 +17,6 @@ protocol VendorSpecificDeviceContext {
     var maxInputReportSize: Int? { get }
     var maxOutputReportSize: Int? { get }
     var maxFeatureReportSize: Int? { get }
-
-    func performSynchronousOutputReportRequest(
-        _ report: Data,
-        timeout: TimeInterval,
-        matching: @escaping (Data) -> Bool
-    ) -> Data?
-
-    func performSynchronousOutputReportRequestOnce(
-        _ report: Data,
-        timeout: TimeInterval,
-        matching: @escaping (Data) -> Bool
-    ) -> Data?
-}
-
-extension VendorSpecificDeviceContext {
-    func performSynchronousOutputReportRequestOnce(
-        _ report: Data,
-        timeout: TimeInterval,
-        matching: @escaping (Data) -> Bool
-    ) -> Data? {
-        performSynchronousOutputReportRequest(report, timeout: timeout, matching: matching)
-    }
 }
 
 struct VendorSpecificDeviceMatcher {

@@ -1,16 +1,18 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
+import HIDPP
 import PointerKit
 
+/// Resolves a HID++ feature to either a direct device or receiver-routed target.
 enum LogitechHIDPPFeatureTargetResolver {
     struct Target {
-        let transport: LogitechHIDPPTransport
+        let transport: HIDPPTransport
         let featureIndex: UInt8
     }
 
     static func resolve(
-        _ featureID: LogitechHIDPPDeviceMetadataProvider.FeatureID,
+        _ featureID: HIDPPFeatureID,
         for device: VendorSpecificDeviceContext
     ) -> Target? {
         guard device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID,
@@ -36,10 +38,10 @@ enum LogitechHIDPPFeatureTargetResolver {
     }
 
     private static func directTarget(
-        _ featureID: LogitechHIDPPDeviceMetadataProvider.FeatureID,
+        _ featureID: HIDPPFeatureID,
         for device: VendorSpecificDeviceContext
     ) -> Target? {
-        guard let transport = LogitechHIDPPTransport(device: device, deviceIndex: nil),
+        guard let transport = HIDPPTransport(device: device, deviceIndex: nil),
               let featureIndex = transport.featureIndex(for: featureID)
         else {
             return nil
@@ -49,14 +51,14 @@ enum LogitechHIDPPFeatureTargetResolver {
     }
 
     private static func receiverTarget(
-        _ featureID: LogitechHIDPPDeviceMetadataProvider.FeatureID,
+        _ featureID: HIDPPFeatureID,
         for device: VendorSpecificDeviceContext,
         provider: LogitechHIDPPDeviceMetadataProvider
     ) -> Target? {
         guard device.transport == PointerDeviceTransportName.usb,
               let receiverChannel = provider.openReceiverChannel(for: device),
               let slot = receiverSlot(for: device, using: receiverChannel, provider: provider),
-              let transport = LogitechHIDPPTransport(device: receiverChannel, deviceIndex: slot),
+              let transport = HIDPPTransport(device: receiverChannel, deviceIndex: slot),
               let featureIndex = transport.featureIndex(for: featureID)
         else {
             return nil
@@ -83,5 +85,25 @@ enum LogitechHIDPPFeatureTargetResolver {
         case nil:
             return provider.receiverSlot(for: device, using: receiverChannel)
         }
+    }
+}
+
+extension AdjustableDPI {
+    init?(device: VendorSpecificDeviceContext) {
+        guard let target = LogitechHIDPPFeatureTargetResolver.resolve(.adjustableDPI, for: device) else {
+            return nil
+        }
+
+        self.init(transport: target.transport, featureIndex: target.featureIndex)
+    }
+}
+
+extension HiResWheel {
+    init?(device: VendorSpecificDeviceContext) {
+        guard let target = LogitechHIDPPFeatureTargetResolver.resolve(.hiresWheel, for: device) else {
+            return nil
+        }
+
+        self.init(transport: target.transport, featureIndex: target.featureIndex)
     }
 }

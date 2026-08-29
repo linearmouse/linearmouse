@@ -101,8 +101,7 @@ class DeviceManager: ObservableObject {
                 }
                 DispatchQueue.main.async {
                     self.updatePointerSpeed()
-                    self.updateHardwareDPI()
-                    self.updateHighResolutionWheel()
+                    self.updateLogitechDeviceSettings()
                 }
             }
             .store(in: &subscriptions)
@@ -135,8 +134,7 @@ class DeviceManager: ObservableObject {
         }
 
         updatePointerSpeed()
-        updateHardwareDPI()
-        updateHighResolutionWheel()
+        updateLogitechDeviceSettings()
     }
 
     private func deviceAdded(_: PointerDeviceManager, _ pointerDevice: PointerDevice) {
@@ -155,8 +153,7 @@ class DeviceManager: ObservableObject {
         )
 
         updatePointerSpeed(for: device)
-        updateHardwareDPI(for: device)
-        updateHighResolutionWheel(for: device)
+        updateLogitechDeviceSettings(for: device)
 
         if shouldMonitorReceiver(device) {
             receiverMonitor.startMonitoring(device: device)
@@ -326,64 +323,40 @@ class DeviceManager: ObservableObject {
         }
     }
 
-    func updateHardwareDPI() {
+    func updateLogitechDeviceSettings() {
         guard state == .running else {
             return
         }
 
         for device in devices {
-            updateHardwareDPI(for: device)
+            updateLogitechDeviceSettings(for: device)
         }
     }
 
-    func updateHardwareDPI(for device: Device) {
+    func updateLogitechDeviceSettings(for device: Device) {
         guard state == .running else {
             return
         }
 
+        device.logitechSettingsReconciler.apply(configuredLogitechDeviceSettings(for: device))
+    }
+
+    private func configuredLogitechDeviceSettings(for device: Device) -> LogitechDeviceSettings {
         let schemes = ConfigurationState.shared.configuration.schemes
         guard case let .at(index) = schemes.schemeIndex(
             ofDevice: device,
             ofApp: nil,
             ofProcessPath: nil,
             ofDisplay: nil
-        ),
-            let hardwareDPI = schemes[index].pointer.hardwareDPI
-        else {
-            return
+        ) else {
+            return LogitechDeviceSettings(dpi: nil, highResolutionWheel: nil)
         }
 
-        device.applyConfiguredHardwareDPI(hardwareDPI)
-    }
-
-    func updateHighResolutionWheel() {
-        guard state == .running else {
-            return
-        }
-
-        for device in devices {
-            updateHighResolutionWheel(for: device)
-        }
-    }
-
-    func updateHighResolutionWheel(for device: Device) {
-        guard state == .running else {
-            return
-        }
-
-        let schemes = ConfigurationState.shared.configuration.schemes
-        guard case let .at(index) = schemes.schemeIndex(
-            ofDevice: device,
-            ofApp: nil,
-            ofProcessPath: nil,
-            ofDisplay: nil
-        ),
-            let highResolutionWheel = schemes[index].logitech.highResolutionWheel
-        else {
-            return
-        }
-
-        device.applyConfiguredHighResolutionWheel(highResolutionWheel)
+        let scheme = schemes[index]
+        return LogitechDeviceSettings(
+            dpi: scheme.pointer.hardwareDPI,
+            highResolutionWheel: scheme.logitech.highResolutionWheel
+        )
     }
 
     func restorePointerSpeedToInitialValue() {
@@ -435,20 +408,18 @@ class DeviceManager: ObservableObject {
             reason
         )
 
-        // A Logitech mouse can retain hardware settings while switching between receiver and
-        // Bluetooth connections. Discard connection-local caches before applying the newly active
-        // connection's configuration.
-        device.prepareHardwareDPIForReconnect()
-        device.prepareHighResolutionWheelForReconnect()
         updatePointerSpeed()
-        updateHardwareDPI(for: device)
-        updateHighResolutionWheel(for: device)
+        reapplyLogitechDeviceSettings(for: device)
     }
 
-    func requestLogitechControlsForcedReconfiguration() {
+    func requestLogitechDeviceSettingsReconciliation() {
         for device in devices {
-            device.requestLogitechControlsForcedReconfiguration()
+            reapplyLogitechDeviceSettings(for: device)
         }
+    }
+
+    private func reapplyLogitechDeviceSettings(for device: Device) {
+        device.logitechSettingsReconciler.reapply(configuredLogitechDeviceSettings(for: device))
     }
 
     func pairedReceiverDevices(for device: Device) -> [ReceiverLogicalDeviceIdentity] {
@@ -525,11 +496,7 @@ class DeviceManager: ObservableObject {
         let hasReconnectedDevice = identities.contains { !previousSlots.contains($0.slot) }
         if hasReconnectedDevice {
             for (_, device) in pointerDeviceToDevice where device.pointerDevice.locationID == locationID {
-                device.requestLogitechControlsForcedReconfiguration()
-                device.prepareHardwareDPIForReconnect()
-                device.prepareHighResolutionWheelForReconnect()
-                updateHardwareDPI(for: device)
-                updateHighResolutionWheel(for: device)
+                reapplyLogitechDeviceSettings(for: device)
             }
         }
     }

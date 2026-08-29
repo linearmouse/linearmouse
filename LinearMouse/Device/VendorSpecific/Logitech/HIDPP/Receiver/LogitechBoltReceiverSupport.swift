@@ -2,8 +2,10 @@
 // Copyright (c) 2021-2026 LinearMouse
 
 import Foundation
+import HIDPP
 import os.log
 
+/// HID++ 1.0 report used by Bolt receiver discovery and connection monitoring.
 private struct BoltHIDPP10Report {
     let bytes: [UInt8]
 }
@@ -74,7 +76,7 @@ extension LogitechReceiverMonitoringChannel {
             return nil
         }
 
-        let routedTransport = LogitechHIDPPTransport(device: self, deviceIndex: slot)
+        let routedTransport = HIDPPTransport(device: self, deviceIndex: slot)
         let routedName = routedTransport.flatMap { transport in
             metadataProvider.readFriendlyName(using: transport) ?? metadataProvider.readName(using: transport)
         }

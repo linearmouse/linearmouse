@@ -2,11 +2,13 @@
 // Copyright (c) 2021-2026 LinearMouse
 
 import Foundation
+@testable import HIDPP
 @testable import LinearMouse
 import PointerKit
 import XCTest
 
-final class LogitechHIDPPHighResolutionWheelControllerTests: XCTestCase {
+/// Covers HID++ Hi-Res Wheel feature encoding, discovery, and transport behavior.
+final class HiResWheelTests: XCTestCase {
     func testReadsAndWritesHighResolutionWheelMode() {
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,
@@ -38,7 +40,7 @@ final class LogitechHIDPPHighResolutionWheelControllerTests: XCTestCase {
             }
         }
 
-        let controller = LogitechHIDPPHighResolutionWheelController(device: device)
+        let controller = HiResWheel(device: device)
 
         XCTAssertEqual(controller?.capabilities(), .init(multiplier: 8, flags: 0x0C))
         XCTAssertEqual(controller?.isHighResolutionWheelEnabled(), false)
@@ -73,7 +75,7 @@ final class LogitechHIDPPHighResolutionWheelControllerTests: XCTestCase {
             }
         }
 
-        let controller = LogitechHIDPPHighResolutionWheelController(device: device)
+        let controller = HiResWheel(device: device)
 
         XCTAssertEqual(controller?.setHighResolutionWheelEnabled(true), true)
         XCTAssertEqual(device.outputReportRequestCount, 2)
@@ -109,7 +111,7 @@ final class LogitechHIDPPHighResolutionWheelControllerTests: XCTestCase {
             }
         }
 
-        let controller = LogitechHIDPPHighResolutionWheelController(device: device)
+        let controller = HiResWheel(device: device)
         let requestCount = device.outputReportRequestCount
 
         XCTAssertEqual(
@@ -136,7 +138,7 @@ final class LogitechHIDPPHighResolutionWheelControllerTests: XCTestCase {
             return Self.hidppLongReply(featureIndex: 0x00, address: 0x08, payload: [0x00])
         }
 
-        XCTAssertNil(LogitechHIDPPHighResolutionWheelController(device: device))
+        XCTAssertNil(HiResWheel(device: device))
     }
 
     func testReadsAndWritesHighResolutionWheelModeThroughReceiverSlot() {
@@ -180,9 +182,9 @@ final class LogitechHIDPPHighResolutionWheelControllerTests: XCTestCase {
             }
         }
 
-        let transport = LogitechHIDPPTransport(device: device, deviceIndex: 2)
+        let transport = HIDPPTransport(device: device, deviceIndex: 2)
         let controller = transport.map {
-            LogitechHIDPPHighResolutionWheelController(transport: $0, featureIndex: 0x1E)
+            HiResWheel(transport: $0, featureIndex: 0x1E)
         }
 
         XCTAssertEqual(controller?.capabilities(), .init(multiplier: 8, flags: 0x0C))
@@ -203,7 +205,7 @@ final class LogitechHIDPPHighResolutionWheelControllerTests: XCTestCase {
             maxOutputReportSize: 20
         )
 
-        XCTAssertNil(LogitechHIDPPHighResolutionWheelController(device: device))
+        XCTAssertNil(HiResWheel(device: device))
         XCTAssertEqual(device.outputReportRequestCount, 0)
     }
 

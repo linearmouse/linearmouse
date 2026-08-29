@@ -2,14 +2,16 @@
 // Copyright (c) 2021-2026 LinearMouse
 
 import Foundation
+@testable import HIDPP
 @testable import LinearMouse
 import PointerKit
 import XCTest
 
-final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
+/// Covers HID++ Adjustable DPI feature encoding, discovery, and transport behavior.
+final class AdjustableDPITests: XCTestCase {
     func testParsesExplicitAndRangeEncodedDPIList() {
         XCTAssertEqual(
-            LogitechHIDPPDeviceDPIController.parseSupportedDPI([
+            AdjustableDPI.parseSupportedDPI([
                 0x03, 0x20, // 800
                 0xE0, 0x64, // range step 100
                 0x04, 0xB0, // through 1200
@@ -113,7 +115,7 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
             }
         }
 
-        let controller = LogitechHIDPPDeviceDPIController(device: device)
+        let controller = AdjustableDPI(device: device)
 
         XCTAssertEqual(controller?.supportedDPI, [800, 1600])
         XCTAssertEqual(controller?.currentDPI(), 800)
@@ -158,7 +160,7 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
             }
         }
 
-        let controller = LogitechHIDPPDeviceDPIController(device: device)
+        let controller = AdjustableDPI(device: device)
 
         XCTAssertEqual(controller?.supportedDPI, [800, 1600])
         XCTAssertEqual(controller?.dpiRange, 800 ... 1600)
@@ -200,7 +202,7 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
             }
         }
 
-        let controller = LogitechHIDPPDeviceDPIController(device: device)
+        let controller = AdjustableDPI(device: device)
 
         XCTAssertEqual(controller?.supportedDPI, [1000])
         XCTAssertEqual(controller?.dpiRange, 1000 ... 1000)
@@ -247,7 +249,7 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
             }
         }
 
-        let controller = LogitechHIDPPDeviceDPIController(device: device)
+        let controller = AdjustableDPI(device: device)
 
         let requestCount = device.sentReports.count
         let requestOnceCount = device.outputReportRequestOnceCount
@@ -280,9 +282,9 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
             )
         }
 
-        let transport = LogitechHIDPPTransport(device: device, deviceIndex: 2)
+        let transport = HIDPPTransport(device: device, deviceIndex: 2)
         let controller = transport.map {
-            LogitechHIDPPDeviceDPIController(
+            AdjustableDPI(
                 transport: $0,
                 featureIndex: 0x05,
                 supportedDPI: [800, 1600]
@@ -305,9 +307,9 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
             maxInputReportSize: 20,
             maxOutputReportSize: 20
         )
-        let transport = LogitechHIDPPTransport(device: device, deviceIndex: 2)
+        let transport = HIDPPTransport(device: device, deviceIndex: 2)
         let controller = transport.map {
-            LogitechHIDPPDeviceDPIController(
+            AdjustableDPI(
                 transport: $0,
                 featureIndex: 0x05,
                 supportedDPI: [800, 1600]
@@ -337,9 +339,9 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
             )
         }
 
-        let transport = LogitechHIDPPTransport(device: device, deviceIndex: 2)
+        let transport = HIDPPTransport(device: device, deviceIndex: 2)
         let controller = transport.map {
-            LogitechHIDPPDeviceDPIController(
+            AdjustableDPI(
                 transport: $0,
                 featureIndex: 0x05,
                 supportedDPI: [800, 1600]
@@ -374,7 +376,7 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
             return Self.hidppLongReply(featureIndex: bytes[2], address: bytes[3], payload: [0x00])
         }
 
-        let response = LogitechHIDPPTransport(device: device, deviceIndex: nil)?.request(
+        let response = HIDPPTransport(device: device, deviceIndex: nil)?.request(
             featureIndex: 0x05,
             function: 0x03,
             parameters: [0x00, 0x06, 0x40]
@@ -394,7 +396,7 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
             maxOutputReportSize: 20
         )
 
-        let response = LogitechHIDPPTransport(device: device, deviceIndex: nil)?.request(
+        let response = HIDPPTransport(device: device, deviceIndex: nil)?.request(
             featureIndex: 0x05,
             function: 0x03,
             parameters: [0x00, 0x06, 0x40]
@@ -422,7 +424,7 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
             )
         }
 
-        let response = LogitechHIDPPTransport(device: device, deviceIndex: nil)?.request(
+        let response = HIDPPTransport(device: device, deviceIndex: nil)?.request(
             featureIndex: 0x05,
             function: 0x03,
             parameters: [0x00, 0x06, 0x40]
@@ -466,7 +468,7 @@ final class LogitechHIDPPDeviceDPIControllerTests: XCTestCase {
             }
         }
 
-        let controller = LogitechHIDPPDeviceDPIController(device: device)
+        let controller = AdjustableDPI(device: device)
 
         XCTAssertEqual(controller?.currentDPI(), 1000)
     }

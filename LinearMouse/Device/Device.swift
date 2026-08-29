@@ -4,6 +4,7 @@
 import Combine
 import Defaults
 import Foundation
+import HIDPP
 import ObservationToken
 import os.log
 import PointerKit
@@ -35,40 +36,40 @@ class Device {
     private weak var manager: DeviceManager?
     private var inputReportHandlers: [InputReportHandler] = []
     private var logitechReprogrammableControlsMonitor: LogitechReprogrammableControlsMonitor?
-    private var cachedLogitechDPIController: LogitechHIDPPDeviceDPIController?
-    private var cachedLogitechHighResolutionWheelController: LogitechHIDPPHighResolutionWheelController?
-    var logitechDPIController: LogitechHIDPPDeviceDPIController? {
-        if let cachedLogitechDPIController {
-            return cachedLogitechDPIController
+    private var cachedLogitechAdjustableDPI: AdjustableDPI?
+    private var cachedLogitechHiResWheel: HiResWheel?
+    var logitechAdjustableDPI: AdjustableDPI? {
+        if let cachedLogitechAdjustableDPI {
+            return cachedLogitechAdjustableDPI
         }
 
-        guard let controller = LogitechHIDPPDeviceDPIController(device: device) else {
+        guard let feature = AdjustableDPI(device: device) else {
             return nil
         }
 
-        cachedLogitechDPIController = controller
-        return controller
+        cachedLogitechAdjustableDPI = feature
+        return feature
     }
 
-    func invalidateLogitechDPIController() {
-        cachedLogitechDPIController = nil
+    func invalidateLogitechAdjustableDPI() {
+        cachedLogitechAdjustableDPI = nil
     }
 
-    var logitechHighResolutionWheelController: LogitechHIDPPHighResolutionWheelController? {
-        if let cachedLogitechHighResolutionWheelController {
-            return cachedLogitechHighResolutionWheelController
+    var logitechHiResWheel: HiResWheel? {
+        if let cachedLogitechHiResWheel {
+            return cachedLogitechHiResWheel
         }
 
-        guard let controller = LogitechHIDPPHighResolutionWheelController(device: device) else {
+        guard let feature = HiResWheel(device: device) else {
             return nil
         }
 
-        cachedLogitechHighResolutionWheelController = controller
-        return controller
+        cachedLogitechHiResWheel = feature
+        return feature
     }
 
-    func invalidateLogitechHighResolutionWheelController() {
-        cachedLogitechHighResolutionWheelController = nil
+    func invalidateLogitechHiResWheel() {
+        cachedLogitechHiResWheel = nil
     }
 
     private var logitechControlsMonitorSubscriptions = Set<AnyCancellable>()
@@ -83,26 +84,42 @@ class Device {
     private var verbosedLoggingOn = Defaults[.verbosedLoggingOn]
 
     private let initialPointerResolution: Double
-    let hardwareDPILock = NSLock()
-    lazy var hardwareDPIQueue = DispatchQueue(
-        label: "app.linearmouse.hardware-dpi.\(id)",
+    let logitechSettingsLock = NSLock()
+    lazy var logitechSettingsQueue = DispatchQueue(
+        label: "app.linearmouse.logitech-settings.\(id)",
         qos: .default
     )
-    var cachedHardwareDPI: Int?
-    var hardwareDPIApplyRequestID = UUID()
-    let highResolutionWheelLock = NSLock()
-    lazy var highResolutionWheelQueue = DispatchQueue(
-        label: "app.linearmouse.high-resolution-wheel.\(id)",
-        qos: .default
-    )
-    var cachedHighResolutionWheelEnabled: Bool?
-    var cachedHighResolutionWheelMultiplier: Int?
-    var initialHighResolutionWheelEnabled: Bool?
-    var highResolutionWheelApplyRequestID = UUID()
+    lazy var dpiApplyCoordinator = HardwareSettingApplyCoordinator { [weak self] delay, work in
+        guard let self else {
+            return
+        }
+
+        logitechSettingsQueue.asyncAfter(
+            deadline: .now() + delay,
+            execute: DispatchWorkItem(block: work)
+        )
+    }
+
+    lazy var hiResWheelApplyCoordinator = HardwareSettingApplyCoordinator { [weak self] delay, work in
+        guard let self else {
+            return
+        }
+
+        logitechSettingsQueue.asyncAfter(
+            deadline: .now() + delay,
+            execute: DispatchWorkItem(block: work)
+        )
+    }
+
+    lazy var logitechSettingsReconciler = LogitechDeviceSettingsReconciler(device: self)
+    var cachedSensorDPI: Int?
+    var cachedHiResWheelEnabled: Bool?
+    var cachedHiResWheelMultiplier: Int?
+    var initialHiResWheelEnabled: Bool?
 
     var isRemoved: Bool {
-        hardwareDPILock.lock()
-        defer { hardwareDPILock.unlock() }
+        logitechSettingsLock.lock()
+        defer { logitechSettingsLock.unlock() }
         return removed
     }
 
@@ -184,17 +201,17 @@ class Device {
     }
 
     func markRemoved() {
-        hardwareDPILock.lock()
+        dpiApplyCoordinator.cancel()
+        hiResWheelApplyCoordinator.cancel()
+        logitechSettingsLock.lock()
         removed = true
-        cachedHardwareDPI = nil
-        hardwareDPIApplyRequestID = UUID()
-        hardwareDPILock.unlock()
-        invalidateLogitechHighResolutionWheelController()
-        highResolutionWheelLock.lock()
-        cachedHighResolutionWheelEnabled = nil
-        cachedHighResolutionWheelMultiplier = nil
-        initialHighResolutionWheelEnabled = nil
-        highResolutionWheelLock.unlock()
+        cachedSensorDPI = nil
+        cachedHiResWheelEnabled = nil
+        cachedHiResWheelMultiplier = nil
+        initialHiResWheelEnabled = nil
+        logitechSettingsLock.unlock()
+        invalidateLogitechAdjustableDPI()
+        invalidateLogitechHiResWheel()
 
         inputObservationToken = nil
         reportObservationToken = nil
@@ -410,7 +427,7 @@ extension Device {
     }
 
     func restorePointerAccelerationAndPointerSpeed() {
-        restoreHardwareDPI()
+        restoreSensorDPI()
         restoreHighResolutionWheel()
         restorePointerSpeed()
         restorePointerAcceleration()

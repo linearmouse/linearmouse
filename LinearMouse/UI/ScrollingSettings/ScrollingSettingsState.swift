@@ -77,7 +77,7 @@ extension ScrollingSettingsState {
             schemeState.deviceScheme = deviceScheme
 
             if let currentDevice {
-                DeviceManager.shared.updateHighResolutionWheel(for: currentDevice)
+                DeviceManager.shared.updateLogitechDeviceSettings(for: currentDevice)
             }
         }
     }
@@ -123,7 +123,7 @@ extension ScrollingSettingsState {
             return
         }
 
-        DeviceManager.shared.updateHighResolutionWheel(for: device)
+        DeviceManager.shared.updateLogitechDeviceSettings(for: device)
     }
 
     enum ScrollingMode: String, Identifiable, CaseIterable {

@@ -127,7 +127,7 @@ extension AppDelegate {
             os_log("System did wake", log: Self.log, type: .info)
             self?.sleeping = false
             self?.restartIfAllowed()
-            self?.requestLogitechControlsReconfigurationAfterWake()
+            self?.requestLogitechDeviceSettingsReconciliationAfterWake()
         }
     }
 
@@ -144,13 +144,13 @@ extension AppDelegate {
         startIfAllowed()
     }
 
-    func requestLogitechControlsReconfigurationAfterWake() {
+    func requestLogitechDeviceSettingsReconciliationAfterWake() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
             guard let self, sessionActive, !sleeping else {
                 return
             }
 
-            DeviceManager.shared.requestLogitechControlsForcedReconfiguration()
+            DeviceManager.shared.requestLogitechDeviceSettingsReconciliation()
         }
     }
 
