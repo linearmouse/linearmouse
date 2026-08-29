@@ -17,6 +17,7 @@
 		97C97728288FC49F009094BA /* DockKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C97727288FC49F009094BA /* DockKit */; };
 		97FC692F29F44D0100859859 /* AppMover in Frameworks */ = {isa = PBXBuildFile; productRef = 97FC692E29F44D0100859859 /* AppMover */; };
 		97FD5B552CCDF2A600125BFE /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 97FD5B542CCDF2A600125BFE /* Sparkle */; };
+		D2D2D2D2D2D2D2D2D2D2D2D2 /* HIDPP in Frameworks */ = {isa = PBXBuildFile; productRef = D1D1D1D1D1D1D1D1D1D1D1D1 /* HIDPP */; };
 		B70A58F6284F987900E5C86E /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = B70A58F5284F987900E5C86E /* LaunchAtLogin */; };
 		B73AC55127C29C7C00F7D3E8 /* Version in Frameworks */ = {isa = PBXBuildFile; productRef = B73AC55027C29C7C00F7D3E8 /* Version */; };
 		B7F6C5F827A4F6A800E5400B /* LRUCache in Frameworks */ = {isa = PBXBuildFile; productRef = B7F6C5F727A4F6A800E5400B /* LRUCache */; };
@@ -70,6 +71,7 @@
 				97FC692F29F44D0100859859 /* AppMover in Frameworks */,
 				972A5E30285D891100CB6440 /* Defaults in Frameworks */,
 				97A7A39C28587E8C00EE4833 /* PointerKit in Frameworks */,
+				D2D2D2D2D2D2D2D2D2D2D2D2 /* HIDPP in Frameworks */,
 				97C5D8FF2856E3CB00CBED2D /* GestureKit in Frameworks */,
 				B73AC55127C29C7C00F7D3E8 /* Version in Frameworks */,
 				975979DB2A6BA1A700016EDF /* ObservationToken in Frameworks */,
@@ -145,6 +147,7 @@
 				B70A58F5284F987900E5C86E /* LaunchAtLogin */,
 				97C5D8FE2856E3CB00CBED2D /* GestureKit */,
 				97A7A39B28587E8C00EE4833 /* PointerKit */,
+				D1D1D1D1D1D1D1D1D1D1D1D1 /* HIDPP */,
 				972A5E2F285D891100CB6440 /* Defaults */,
 				977638F8286BE9EE00A698B6 /* PublishedObject */,
 				97C97727288FC49F009094BA /* DockKit */,
@@ -664,6 +667,10 @@
 		97A7A39B28587E8C00EE4833 /* PointerKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PointerKit;
+		};
+		D1D1D1D1D1D1D1D1D1D1D1D1 /* HIDPP */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = HIDPP;
 		};
 		97C5D8FE2856E3CB00CBED2D /* GestureKit */ = {
 			isa = XCSwiftPackageProductDependency;
