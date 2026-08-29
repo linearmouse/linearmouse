@@ -31,10 +31,10 @@ final class HardwareSettingApplyCoordinatorTests: XCTestCase {
             scheduler: scheduler.schedule
         )
         var results = [false, true, true]
-        var verificationFlags = [Bool]()
+        var attempts = [HardwareSettingApplyCoordinator.Attempt]()
 
-        coordinator.start { verifiesCachedValue in
-            verificationFlags.append(verifiesCachedValue)
+        coordinator.start { attempt in
+            attempts.append(attempt)
             return results.removeFirst()
         }
 
@@ -46,7 +46,11 @@ final class HardwareSettingApplyCoordinatorTests: XCTestCase {
         scheduler.runNext()
 
         XCTAssertTrue(scheduler.work.isEmpty)
-        XCTAssertEqual(verificationFlags, [false, false, true])
+        XCTAssertEqual(attempts, [
+            .init(verifiesCachedValue: false, number: 1, isFinal: false),
+            .init(verifiesCachedValue: false, number: 2, isFinal: false),
+            .init(verifiesCachedValue: true, number: 1, isFinal: false)
+        ])
     }
 
     func testRetriesFailedConfirmationWithoutRestartingApplyPhase() {
@@ -59,8 +63,8 @@ final class HardwareSettingApplyCoordinatorTests: XCTestCase {
         var results = [true, false, true]
         var verificationFlags = [Bool]()
 
-        coordinator.start { verifiesCachedValue in
-            verificationFlags.append(verifiesCachedValue)
+        coordinator.start { attempt in
+            verificationFlags.append(attempt.verifiesCachedValue)
             return results.removeFirst()
         }
 
@@ -82,8 +86,10 @@ final class HardwareSettingApplyCoordinatorTests: XCTestCase {
             scheduler: scheduler.schedule
         )
         var calls = 0
+        var attempts = [HardwareSettingApplyCoordinator.Attempt]()
 
-        coordinator.start { _ in
+        coordinator.start { attempt in
+            attempts.append(attempt)
             calls += 1
             return false
         }
@@ -96,6 +102,7 @@ final class HardwareSettingApplyCoordinatorTests: XCTestCase {
         scheduler.runNext()
 
         XCTAssertEqual(calls, 3)
+        XCTAssertEqual(attempts.last, .init(verifiesCachedValue: false, number: 3, isFinal: true))
         XCTAssertTrue(scheduler.work.isEmpty)
     }
 
@@ -144,5 +151,25 @@ final class HardwareSettingApplyCoordinatorTests: XCTestCase {
 
         XCTAssertEqual(calls, 0)
         XCTAssertTrue(scheduler.work.isEmpty)
+    }
+
+    func testRunningAttemptObservesWhenItIsSuperseded() {
+        let scheduler = Scheduler()
+        let coordinator = HardwareSettingApplyCoordinator(
+            retryDelays: [1],
+            confirmationDelay: 3,
+            scheduler: scheduler.schedule
+        )
+        var firstAttemptShouldContinue: (() -> Bool)?
+
+        coordinator.start { attempt in
+            firstAttemptShouldContinue = attempt.shouldContinue
+            coordinator.start { _ in true }
+            return false
+        }
+        scheduler.runNext()
+
+        XCTAssertEqual(firstAttemptShouldContinue?(), false)
+        XCTAssertEqual(scheduler.work.map(\.delay), [0])
     }
 }

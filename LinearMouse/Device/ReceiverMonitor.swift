@@ -295,9 +295,21 @@ private final class ReceiverContext {
                     for: device.pointerDevice, using: receiverChannel
                 )
                 mergeDiscovery(discovery)
-                hasCompletedInitialDiscovery = true
 
                 let identities = currentPublishedIdentities()
+                if identities.isEmpty, Date() < initialDeadline {
+                    os_log(
+                        "Receiver initial discovery is not ready, retrying: locationID=%{public}d device=%{public}@",
+                        log: ReceiverMonitor.log,
+                        type: .info,
+                        locationID,
+                        String(describing: device)
+                    )
+                    waitBeforeRetryingChannelOpen(until: initialDeadline)
+                    continue
+                }
+
+                hasCompletedInitialDiscovery = true
                 let identitiesDescription = identities.map { identity in
                     let battery = identity.batteryLevel.map(String.init) ?? "(nil)"
                     return "slot=\(identity.slot) name=\(identity.name) battery=\(battery)"
@@ -319,7 +331,7 @@ private final class ReceiverContext {
                 } else if !hasPublishedInitialState, !identities.isEmpty {
                     publish(identities)
                     hasPublishedInitialState = true
-                } else if !hasPublishedInitialState, Date() >= initialDeadline {
+                } else if !hasPublishedInitialState {
                     os_log(
                         "Receiver logical discovery timed out: locationID=%{public}d device=%{public}@",
                         log: ReceiverMonitor.log,

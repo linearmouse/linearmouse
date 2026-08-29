@@ -152,11 +152,14 @@ class DeviceManager: ObservableObject {
             String(describing: device)
         )
 
-        updatePointerSpeed(for: device)
-        updateLogitechDeviceSettings(for: device)
-
         if shouldMonitorReceiver(device) {
             receiverMonitor.startMonitoring(device: device)
+        }
+
+        updatePointerSpeed(for: device)
+        updateLogitechDeviceSettings(for: device)
+        if device.hasLogitechControlsMonitor, !shouldMonitorReceiver(device) {
+            device.requestLogitechControlsForcedReconfiguration()
         }
     }
 
@@ -334,7 +337,13 @@ class DeviceManager: ObservableObject {
     }
 
     func updateLogitechDeviceSettings(for device: Device) {
-        guard state == .running else {
+        guard state == .running,
+              device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID
+        else {
+            return
+        }
+
+        guard updateLogitechReceiverRoute(for: device) else {
             return
         }
 
@@ -396,6 +405,7 @@ class DeviceManager: ObservableObject {
             return
         }
 
+        let hadActiveDevice = lastActiveDeviceId != nil
         lastActiveDeviceId = device.id
         lastActiveDeviceRef = .init(device)
 
@@ -409,17 +419,55 @@ class DeviceManager: ObservableObject {
         )
 
         updatePointerSpeed()
-        reapplyLogitechDeviceSettings(for: device)
+        if hadActiveDevice {
+            reapplyLogitechDeviceSettings(for: device)
+        } else {
+            updateLogitechDeviceSettings(for: device)
+        }
     }
 
     func requestLogitechDeviceSettingsReconciliation() {
-        for device in devices {
+        // Receiver-backed devices reconcile from their discovery callback. A
+        // fixed wake timer must not race discovery or issue commands without a slot.
+        for device in devices where !shouldMonitorReceiver(device) {
             reapplyLogitechDeviceSettings(for: device)
         }
     }
 
     private func reapplyLogitechDeviceSettings(for device: Device) {
+        guard device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID else {
+            return
+        }
+
+        guard updateLogitechReceiverRoute(for: device) else {
+            return
+        }
+
         device.logitechSettingsReconciler.reapply(configuredLogitechDeviceSettings(for: device))
+    }
+
+    /// Returns false for a monitored receiver until discovery has identified a
+    /// unique pointing-device slot. Direct devices are ready immediately.
+    @discardableResult
+    private func updateLogitechReceiverRoute(for device: Device) -> Bool {
+        guard shouldMonitorReceiver(device) else {
+            device.updateLogitechReceiverRoute(nil)
+            return true
+        }
+
+        guard let locationID = device.pointerDevice.locationID,
+              let identities = receiverPairedDeviceIdentities[locationID],
+              let route = LogitechReceiverRouteResolver.resolve(
+                  for: device.pointerDevice,
+                  identities: identities
+              )
+        else {
+            device.updateLogitechReceiverRoute(nil)
+            return false
+        }
+
+        device.updateLogitechReceiverRoute(route)
+        return true
     }
 
     func pairedReceiverDevices(for device: Device) -> [ReceiverLogicalDeviceIdentity] {
@@ -429,16 +477,7 @@ class DeviceManager: ObservableObject {
             return []
         }
 
-        let identities = receiverPairedDeviceIdentities[locationID] ?? []
-        os_log(
-            "Receiver paired device lookup: locationID=%{public}d device=%{public}@ count=%{public}u",
-            log: Self.log,
-            type: .info,
-            locationID,
-            String(describing: device),
-            UInt32(identities.count)
-        )
-        return identities
+        return receiverPairedDeviceIdentities[locationID] ?? []
     }
 
     func preferredName(for device: Device, fallback: String? = nil) -> String {
@@ -489,14 +528,22 @@ class DeviceManager: ObservableObject {
             identitiesDescription
         )
 
-        // Only trigger forced reconfiguration when a device has actually reconnected
-        // (a slot appeared that wasn't in the previous identity set), since device
-        // firmware resets diversion state on reconnect.
         let previousSlots = Set(previousIdentities.map(\.slot))
-        let hasReconnectedDevice = identities.contains { !previousSlots.contains($0.slot) }
-        if hasReconnectedDevice {
-            for (_, device) in pointerDeviceToDevice where device.pointerDevice.locationID == locationID {
+        for (_, device) in pointerDeviceToDevice where device.pointerDevice.locationID == locationID {
+            let previousRoute = device.logitechReceiverRouteSnapshot
+            let isReady = updateLogitechReceiverRoute(for: device)
+            guard isReady, let route = device.logitechReceiverRouteSnapshot else {
+                continue
+            }
+
+            let routeChanged = previousRoute?.slot != route.slot
+                || previousRoute?.identity.receiverLocationID != route.identity.receiverLocationID
+            let identityChanged = previousRoute != route
+            let slotReconnected = !previousSlots.contains(route.slot)
+            if routeChanged || slotReconnected {
                 reapplyLogitechDeviceSettings(for: device)
+            } else if identityChanged {
+                device.requestLogitechControlsForcedReconfiguration()
             }
         }
     }

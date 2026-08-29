@@ -17,25 +17,55 @@ extension Device {
     }
 
     func applyConfiguredHighResolutionWheel(_ enabled: Bool) {
-        hiResWheelApplyCoordinator.start { [weak self] verifiesCachedValue in
-            guard let self, !isRemoved else {
+        renewLogitechHiResWheelTransportGeneration()
+        logitechSettingsQueue.async { [weak self] in
+            self?.invalidateLogitechHiResWheel()
+        }
+        hiResWheelApplyCoordinator.start { [weak self] attempt in
+            guard let self, !isRemoved, attempt.shouldContinue() else {
                 return false
             }
 
+            let start = Date()
             let applied = applyHighResolutionWheelSynchronously(
                 enabled,
-                verifiesCachedValue: verifiesCachedValue
+                verifiesCachedValue: attempt.verifiesCachedValue
             )
-            if applied == nil {
-                os_log(
-                    "Failed to apply configured high-resolution wheel %{public}@ to %{public}@",
-                    log: Self.logitechHiResWheelLog,
-                    type: .error,
-                    enabled ? "enabled" : "disabled",
-                    name
-                )
+            guard !isRemoved, attempt.shouldContinue() else {
+                return false
             }
-            return applied != nil
+
+            let phase = attempt.verifiesCachedValue ? "verification" : "apply"
+            let duration = Date().timeIntervalSince(start)
+            let slot = logitechReceiverRouteSnapshot.map { String($0.slot) } ?? "direct"
+            if applied != nil {
+                os_log(
+                    "Logitech Hi-Res Wheel %{public}@ succeeded: enabled=%{public}@ device=%{public}@ slot=%{public}@ attempt=%{public}d duration=%{public}.3f",
+                    log: Self.logitechHiResWheelLog,
+                    type: .info,
+                    phase,
+                    enabled ? "enabled" : "disabled",
+                    name,
+                    slot,
+                    attempt.number,
+                    duration
+                )
+                return true
+            }
+
+            os_log(
+                "Logitech Hi-Res Wheel %{public}@ attempt failed: enabled=%{public}@ device=%{public}@ slot=%{public}@ attempt=%{public}d final=%{public}@ duration=%{public}.3f",
+                log: Self.logitechHiResWheelLog,
+                type: attempt.isFinal ? .error : .info,
+                phase,
+                enabled ? "enabled" : "disabled",
+                name,
+                slot,
+                attempt.number,
+                attempt.isFinal ? "true" : "false",
+                duration
+            )
+            return false
         }
     }
 
@@ -127,13 +157,16 @@ extension Device {
 
     func restoreHighResolutionWheel() {
         hiResWheelApplyCoordinator.cancel()
+        renewLogitechHiResWheelTransportGeneration()
         logitechSettingsQueue.async { [weak self] in
+            self?.invalidateLogitechHiResWheel()
             self?.restoreHighResolutionWheelSynchronously()
         }
     }
 
     func prepareHighResolutionWheelForReconnect() {
         hiResWheelApplyCoordinator.cancel()
+        renewLogitechHiResWheelTransportGeneration()
         logitechSettingsQueue.async { [weak self] in
             guard let self else {
                 return

@@ -840,7 +840,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
     }
 }
 
-final class LogitechReceiverChannel: VendorSpecificDeviceContext {
+final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellableDeviceIO {
     private final class WeakChannelReference {
         weak var channel: LogitechReceiverChannel?
 
@@ -1349,13 +1349,49 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         timeout: TimeInterval,
         matching: @escaping (Data) -> Bool
     ) -> Data? {
-        if let strategy = currentRequestStrategy(),
-           let response = performRequest(report, timeout: timeout, matching: matching, strategy: strategy) {
-            return response
+        performSynchronousOutputReportRequest(
+            report,
+            timeout: timeout,
+            matching: matching
+        ) { true }
+    }
+
+    func performSynchronousOutputReportRequest(
+        _ report: Data,
+        timeout: TimeInterval,
+        matching: @escaping (Data) -> Bool,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Data? {
+        guard shouldContinue() else {
+            return nil
         }
 
+        if let strategy = currentRequestStrategy(),
+           shouldContinue() {
+            return performRequest(
+                report,
+                timeout: timeout,
+                matching: matching,
+                strategy: strategy,
+                until: shouldContinue
+            )
+        }
+
+        // Strategy detection should be quick. Giving every callback strategy the
+        // full HID++ timeout can turn one failed request into several seconds.
+        let probeTimeout = min(timeout, 0.25)
         for strategy in RequestStrategy.allCases {
-            guard let response = performRequest(report, timeout: timeout, matching: matching, strategy: strategy) else {
+            guard shouldContinue() else {
+                return nil
+            }
+
+            guard let response = performRequest(
+                report,
+                timeout: probeTimeout,
+                matching: matching,
+                strategy: strategy,
+                until: shouldContinue
+            ) else {
                 continue
             }
 
@@ -1372,11 +1408,25 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         timeout: TimeInterval,
         matching: @escaping (Data) -> Bool
     ) -> Data? {
+        performSynchronousOutputReportRequestOnce(
+            report,
+            timeout: timeout,
+            matching: matching
+        ) { true }
+    }
+
+    func performSynchronousOutputReportRequestOnce(
+        _ report: Data,
+        timeout: TimeInterval,
+        matching: @escaping (Data) -> Bool,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Data? {
         performCallbackRequest(
             report,
             timeout: timeout,
             matching: matching,
-            reportType: kIOHIDReportTypeOutput
+            reportType: kIOHIDReportTypeOutput,
+            until: shouldContinue
         )
     }
 
@@ -1384,32 +1434,49 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         _ report: Data,
         timeout: TimeInterval,
         matching: @escaping (Data) -> Bool,
-        strategy: RequestStrategy
+        strategy: RequestStrategy,
+        until shouldContinue: @escaping () -> Bool
     ) -> Data? {
-        guard !report.isEmpty else {
+        guard !report.isEmpty, shouldContinue() else {
             return nil
         }
 
         if let responseType = strategy.responseType {
             return performGetReportRequest(
                 report,
+                timeout: timeout,
                 matching: matching,
                 requestType: strategy.requestType,
-                responseType: responseType
+                responseType: responseType,
+                until: shouldContinue
             )
         }
 
-        return performCallbackRequest(report, timeout: timeout, matching: matching, reportType: strategy.requestType)
+        return performCallbackRequest(
+            report,
+            timeout: timeout,
+            matching: matching,
+            reportType: strategy.requestType,
+            until: shouldContinue
+        )
     }
 
     private func performCallbackRequest(
         _ report: Data,
         timeout: TimeInterval,
         matching: @escaping (Data) -> Bool,
-        reportType: IOHIDReportType
+        reportType: IOHIDReportType,
+        until shouldContinue: @escaping () -> Bool
     ) -> Data? {
-        requestLock.lock()
+        let deadline = Date().addingTimeInterval(timeout)
+        guard acquireRequestLock(until: deadline, while: shouldContinue) else {
+            return nil
+        }
         defer { requestLock.unlock() }
+
+        guard shouldContinue() else {
+            return nil
+        }
 
         let semaphore = DispatchSemaphore(value: 0)
         pendingLock.lock()
@@ -1424,24 +1491,49 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
             return nil
         }
 
-        return waitForPendingResponse(timeout: timeout)
+        return waitForPendingResponse(
+            timeout: max(0, deadline.timeIntervalSinceNow),
+            until: shouldContinue
+        )
     }
 
     private func performGetReportRequest(
         _ report: Data,
+        timeout: TimeInterval,
         matching: @escaping (Data) -> Bool,
         requestType: IOHIDReportType,
-        responseType: IOHIDReportType
+        responseType: IOHIDReportType,
+        until shouldContinue: @escaping () -> Bool
     ) -> Data? {
-        requestLock.lock()
+        let deadline = Date().addingTimeInterval(timeout)
+        guard acquireRequestLock(until: deadline, while: shouldContinue) else {
+            return nil
+        }
         defer { requestLock.unlock() }
+
+        guard shouldContinue() else {
+            return nil
+        }
 
         clearPendingRequest()
         guard sendReport(report, type: requestType) == kIOReturnSuccess else {
             return nil
         }
 
-        return getMatchingReport(type: responseType, matching: matching)
+        return getMatchingReport(type: responseType, matching: matching, until: shouldContinue)
+    }
+
+    private func acquireRequestLock(
+        until deadline: Date,
+        while shouldContinue: () -> Bool
+    ) -> Bool {
+        while shouldContinue(), Date() < deadline {
+            if requestLock.lock(before: min(deadline, Date().addingTimeInterval(0.05))) {
+                return true
+            }
+        }
+
+        return false
     }
 
     private func sendReport(_ report: Data, type: IOHIDReportType) -> IOReturn {
@@ -1454,8 +1546,12 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext {
         }
     }
 
-    private func getMatchingReport(type: IOHIDReportType, matching: @escaping (Data) -> Bool) -> Data? {
-        for candidate in candidateReportDescriptors() {
+    private func getMatchingReport(
+        type: IOHIDReportType,
+        matching: @escaping (Data) -> Bool,
+        until shouldContinue: () -> Bool
+    ) -> Data? {
+        for candidate in candidateReportDescriptors() where shouldContinue() {
             guard let response = getReport(type: type, reportID: candidate.reportID, length: candidate.length),
                   matching(response) else {
                 continue
@@ -1811,11 +1907,6 @@ final class LogitechReprogrammableControlsMonitor {
     private struct ReportingInfo {
         let flags: LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.ReportingFlags
         let mappedControlID: UInt16
-    }
-
-    struct TargetDevice {
-        let slot: UInt8
-        let identity: ReceiverLogicalDeviceIdentity?
     }
 
     private struct MonitorTarget {
@@ -2444,16 +2535,26 @@ final class LogitechReprogrammableControlsMonitor {
             return buildDirectMonitorTarget()
         }
 
-        guard let receiverChannel = provider.openReceiverChannel(for: device.pointerDevice) else {
+        guard let route = device.logitechReceiverRouteSnapshot,
+              let receiverChannel = provider.openReceiverChannel(for: device.pointerDevice)
+        else {
             return nil
         }
 
-        return resolveMonitorTarget(using: receiverChannel)
+        return buildMonitorTarget(
+            slot: route.slot,
+            identity: route.identity,
+            using: receiverChannel
+        )
     }
 
     private func buildDirectMonitorTarget() -> MonitorTarget? {
-        guard let transport = HIDPPTransport(device: device.pointerDevice, deviceIndex: nil),
-              let featureIndex = transport.featureIndex(for: .reprogControlsV4) else {
+        guard let transport = HIDPPTransport(
+            device: device.pointerDevice,
+            deviceIndex: nil,
+            shouldContinue: { [weak self] in self?.shouldContinueRunning() == true }
+        ),
+            let featureIndex = transport.featureIndex(for: .reprogControlsV4) else {
             return nil
         }
 
@@ -2495,117 +2596,17 @@ final class LogitechReprogrammableControlsMonitor {
         return endpoint
     }
 
-    private func resolveTargetDevice(
-        using receiverChannel: LogitechReceiverChannel,
-        discovery: LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery
-    ) -> TargetDevice? {
-        if let slot = provider.receiverSlot(for: device.pointerDevice, identities: discovery.identities) {
-            return TargetDevice(
-                slot: slot,
-                identity: discovery.identities.first { $0.slot == slot }
-            )
-        }
-
-        // Classic receivers can fall back to their pairing-information query.
-        // Bolt slot matching must use the Bolt discovery path above.
-        guard LogitechHIDPPDeviceMetadataProvider.receiverProtocolFamily(
-            vendorID: device.vendorID,
-            productID: device.productID,
-            transport: device.pointerDevice.transport
-        ) == .classic else {
-            return nil
-        }
-
-        if let slot = provider.receiverSlot(for: device.pointerDevice, using: receiverChannel) {
-            let identity = discovery.identities.first { $0.slot == slot }
-            return TargetDevice(slot: slot, identity: identity)
-        }
-
-        return nil
-    }
-
-    private func resolveMonitorTarget(using receiverChannel: LogitechReceiverChannel) -> MonitorTarget? {
-        let discovery = provider.receiverPointingDeviceDiscovery(for: device.pointerDevice, using: receiverChannel)
-
-        if let targetDevice = resolveTargetDevice(using: receiverChannel, discovery: discovery),
-           let target = buildMonitorTarget(
-               slot: targetDevice.slot,
-               identity: targetDevice.identity,
-               using: receiverChannel
-           ) {
-            return target
-        }
-
-        // Only scan connected slots instead of all 6
-        let connectedSlots = Set(discovery.connectionSnapshots.compactMap { slot, snapshot in
-            snapshot.isConnected ? slot : nil
-        })
-        // Prefer connected slots; fall back to identity slots or all 1...6
-        // when connection snapshots are unavailable.
-        let identitySlots = Array(Set(discovery.identities.map(\.slot))).sorted()
-        let candidateSlots: [UInt8]
-        if !connectedSlots.isEmpty {
-            candidateSlots = identitySlots.isEmpty
-                ? Array(connectedSlots.sorted())
-                : identitySlots.filter { connectedSlots.contains($0) }
-        } else if !identitySlots.isEmpty {
-            candidateSlots = identitySlots
-        } else {
-            candidateSlots = Array(UInt8(1) ... UInt8(6))
-        }
-
-        let scannedTargets = candidateSlots.compactMap { slot in
-            buildMonitorTarget(
-                slot: slot,
-                identity: discovery.identities.first { $0.slot == slot },
-                using: receiverChannel
-            )
-        }
-
-        if scannedTargets.count == 1 {
-            let target = scannedTargets[0]
-            os_log(
-                "Resolved Logitech monitor target by slot scan: receiver=%{public}@ slot=%{public}u name=%{public}@",
-                log: Self.log,
-                type: .info,
-                device.productName ?? device.name,
-                target.slot,
-                target.identity?.name ?? "(nil)"
-            )
-            return target
-        }
-
-        let candidatesDescription = scannedTargets.map { target in
-            let name = target.identity?.name ?? "(nil)"
-            let firstControl = target.controls.first
-            return String(
-                format: "slot=%u name=%@ firstCID=0x%04X count=%u",
-                target.slot,
-                name,
-                firstControl?.controlID ?? 0,
-                target.controls.count
-            )
-        }
-        .joined(separator: ", ")
-
-        os_log(
-            "Failed to resolve Logitech monitor target: receiver=%{public}@ discoveryCount=%{public}u candidates=%{public}@",
-            log: Self.log,
-            type: .info,
-            device.productName ?? device.name,
-            UInt32(discovery.identities.count),
-            candidatesDescription
-        )
-        return nil
-    }
-
     private func buildMonitorTarget(
         slot: UInt8,
         identity: ReceiverLogicalDeviceIdentity?,
         using receiverChannel: LogitechReceiverChannel
     ) -> MonitorTarget? {
-        guard let transport = HIDPPTransport(device: receiverChannel, deviceIndex: slot),
-              let featureIndex = transport.featureIndex(for: .reprogControlsV4)
+        guard let transport = HIDPPTransport(
+            device: receiverChannel,
+            deviceIndex: slot,
+            shouldContinue: { [weak self] in self?.shouldContinueRunning() == true }
+        ),
+            let featureIndex = transport.featureIndex(for: .reprogControlsV4)
         else {
             return nil
         }

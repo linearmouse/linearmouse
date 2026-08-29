@@ -17,9 +17,14 @@ public struct HIDPPTransport {
     private let reportLength: Int
     private let deviceIndex: UInt8
     private let acceptedReplyIndices: Set<UInt8>
+    private let shouldContinue: () -> Bool
     public let isReceiverRoutedDevice: Bool
 
-    public init?(device: HIDPPDeviceIO, deviceIndex: UInt8?) {
+    public init?(
+        device: HIDPPDeviceIO,
+        deviceIndex: UInt8?,
+        shouldContinue: @escaping () -> Bool = { true }
+    ) {
         let maxOutputReportSize = device.maxOutputReportSize ?? 0
         if maxOutputReportSize >= HIDPPConstants.longReportLength {
             reportID = HIDPPConstants.longReportID
@@ -33,6 +38,7 @@ public struct HIDPPTransport {
 
         self.device = device
         self.deviceIndex = deviceIndex ?? HIDPPConstants.receiverIndex
+        self.shouldContinue = shouldContinue
         isReceiverRoutedDevice = deviceIndex != nil
         acceptedReplyIndices = deviceIndex.map { Set([$0]) } ?? HIDPPConstants.directReplyIndices
     }
@@ -105,6 +111,10 @@ public struct HIDPPTransport {
         parameters: [UInt8],
         performsSingleTransaction: Bool
     ) -> ResponseResult {
+        guard shouldContinue() else {
+            return .failure
+        }
+
         let address = address(for: function)
         let report = makeReport(
             featureIndex: featureIndex,
@@ -126,21 +136,38 @@ public struct HIDPPTransport {
 
             return reply[2] == featureIndex && reply[3] == address
         }
-        let response = if performsSingleTransaction {
-            device.performSynchronousOutputReportRequestOnce(
+        let response: Data?
+        if let cancellableDevice = device as? HIDPPCancellableDeviceIO {
+            if performsSingleTransaction {
+                response = cancellableDevice.performSynchronousOutputReportRequestOnce(
+                    report,
+                    timeout: HIDPPConstants.timeout,
+                    matching: matching,
+                    until: shouldContinue
+                )
+            } else {
+                response = cancellableDevice.performSynchronousOutputReportRequest(
+                    report,
+                    timeout: HIDPPConstants.timeout,
+                    matching: matching,
+                    until: shouldContinue
+                )
+            }
+        } else if performsSingleTransaction {
+            response = device.performSynchronousOutputReportRequestOnce(
                 report,
                 timeout: HIDPPConstants.timeout,
                 matching: matching
             )
         } else {
-            device.performSynchronousOutputReportRequest(
+            response = device.performSynchronousOutputReportRequest(
                 report,
                 timeout: HIDPPConstants.timeout,
                 matching: matching
             )
         }
 
-        guard let response else {
+        guard shouldContinue(), let response else {
             return .failure
         }
 

@@ -40,10 +40,10 @@ final class LogitechDeviceSettingsReconciler {
             return
         }
 
-        device.requestLogitechControlsForcedReconfiguration()
         device.prepareSensorDPIForReconnect()
         device.prepareHighResolutionWheelForReconnect()
         apply(settings, force: true)
+        device.requestLogitechControlsForcedReconfiguration()
     }
 
     private func apply(_ settings: LogitechDeviceSettings, force: Bool) {

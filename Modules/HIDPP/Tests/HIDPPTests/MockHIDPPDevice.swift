@@ -4,7 +4,7 @@
 import Foundation
 import HIDPP
 
-final class MockHIDPPDevice: HIDPPDeviceIO {
+final class MockHIDPPDevice: HIDPPCancellableDeviceIO {
     let maxOutputReportSize: Int?
     var responseProvider: ((Data) -> Data?)?
 
@@ -30,6 +30,34 @@ final class MockHIDPPDevice: HIDPPDeviceIO {
         timeout _: TimeInterval,
         matching: @escaping (Data) -> Bool
     ) -> Data? {
+        singleTransactionRequestCount += 1
+        return response(to: report, matching: matching)
+    }
+
+    func performSynchronousOutputReportRequest(
+        _ report: Data,
+        timeout _: TimeInterval,
+        matching: @escaping (Data) -> Bool,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Data? {
+        guard shouldContinue() else {
+            return nil
+        }
+
+        regularRequestCount += 1
+        return response(to: report, matching: matching)
+    }
+
+    func performSynchronousOutputReportRequestOnce(
+        _ report: Data,
+        timeout _: TimeInterval,
+        matching: @escaping (Data) -> Bool,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Data? {
+        guard shouldContinue() else {
+            return nil
+        }
+
         singleTransactionRequestCount += 1
         return response(to: report, matching: matching)
     }

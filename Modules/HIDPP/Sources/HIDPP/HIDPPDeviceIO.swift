@@ -22,6 +22,24 @@ public protocol HIDPPDeviceIO {
     ) -> Data?
 }
 
+/// Optional I/O extension for transports that can stop an in-flight request
+/// when its owning device disappears or a newer route supersedes it.
+public protocol HIDPPCancellableDeviceIO: HIDPPDeviceIO {
+    func performSynchronousOutputReportRequest(
+        _ report: Data,
+        timeout: TimeInterval,
+        matching: @escaping (Data) -> Bool,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Data?
+
+    func performSynchronousOutputReportRequestOnce(
+        _ report: Data,
+        timeout: TimeInterval,
+        matching: @escaping (Data) -> Bool,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Data?
+}
+
 public extension HIDPPDeviceIO {
     func performSynchronousOutputReportRequestOnce(
         _ report: Data,

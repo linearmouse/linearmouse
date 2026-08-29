@@ -76,4 +76,15 @@ final class HIDPPTransportTests: XCTestCase {
 
         XCTAssertEqual(transport.featureIndex(for: .adjustableDPI), 0x2A)
     }
+
+    func testCancellationStopsRequestBeforeIO() throws {
+        let device = MockHIDPPDevice()
+        let transport = try XCTUnwrap(HIDPPTransport(
+            device: device,
+            deviceIndex: nil
+        ) { false })
+
+        XCTAssertNil(transport.request(featureIndex: 0x22, function: 0x01, parameters: []))
+        XCTAssertTrue(device.reports.isEmpty)
+    }
 }

@@ -21,6 +21,40 @@ final class AdjustableDPITests: XCTestCase {
         )
     }
 
+    func testMonitoredReceiverDoesNotResolveFeatureBeforeSlotDiscovery() {
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xC548,
+            transport: PointerDeviceTransportName.usb,
+            locationID: 123
+        )
+
+        XCTAssertNil(LogitechHIDPPFeatureTargetResolver.resolve(
+            .adjustableDPI,
+            for: device,
+            receiverSlot: nil
+        ) { true })
+        XCTAssertTrue(device.sentReports.isEmpty)
+    }
+
+    func testDirectBluetoothFeatureResolutionDoesNotWaitForReceiverDiscovery() {
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xB015,
+            transport: PointerDeviceTransportName.bluetoothLowEnergy
+        )
+        device.responseProvider = { _ in
+            Self.hidppLongReply(featureIndex: 0x00, address: 0x08, payload: [0x05])
+        }
+
+        XCTAssertNotNil(LogitechHIDPPFeatureTargetResolver.resolve(
+            .adjustableDPI,
+            for: device,
+            receiverSlot: nil
+        ) { true })
+        XCTAssertEqual(device.sentReports.count, 1)
+    }
+
     func testBoltReceiverSlotFallsBackToOnlyDiscoveredPointingDevice() {
         let device = Self.boltReceiver()
         let identities = [Self.receiverIdentity(slot: 2, name: "MX Master 3S")]

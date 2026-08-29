@@ -43,7 +43,15 @@ class Device {
             return cachedLogitechAdjustableDPI
         }
 
-        guard let feature = AdjustableDPI(device: device) else {
+        let receiverRoute = logitechReceiverRouteSnapshot
+        let transportGeneration = logitechDPITransportGenerationSnapshot
+        guard let feature = AdjustableDPI(
+            device: device,
+            receiverSlot: receiverRoute?.slot,
+            shouldContinue: { [weak self] in
+                self?.isCurrentLogitechDPITransportGeneration(transportGeneration) == true
+            }
+        ) else {
             return nil
         }
 
@@ -60,7 +68,15 @@ class Device {
             return cachedLogitechHiResWheel
         }
 
-        guard let feature = HiResWheel(device: device) else {
+        let receiverRoute = logitechReceiverRouteSnapshot
+        let transportGeneration = logitechHiResWheelTransportGenerationSnapshot
+        guard let feature = HiResWheel(
+            device: device,
+            receiverSlot: receiverRoute?.slot,
+            shouldContinue: { [weak self] in
+                self?.isCurrentLogitechHiResWheelTransportGeneration(transportGeneration) == true
+            }
+        ) else {
             return nil
         }
 
@@ -94,10 +110,12 @@ class Device {
             return
         }
 
-        logitechSettingsQueue.asyncAfter(
-            deadline: .now() + delay,
-            execute: DispatchWorkItem(block: work)
-        )
+        let workItem = DispatchWorkItem(block: work)
+        if delay <= 0 {
+            logitechSettingsQueue.async(execute: workItem)
+        } else {
+            logitechSettingsQueue.asyncAfter(deadline: .now() + delay, execute: workItem)
+        }
     }
 
     lazy var hiResWheelApplyCoordinator = HardwareSettingApplyCoordinator { [weak self] delay, work in
@@ -105,10 +123,12 @@ class Device {
             return
         }
 
-        logitechSettingsQueue.asyncAfter(
-            deadline: .now() + delay,
-            execute: DispatchWorkItem(block: work)
-        )
+        let workItem = DispatchWorkItem(block: work)
+        if delay <= 0 {
+            logitechSettingsQueue.async(execute: workItem)
+        } else {
+            logitechSettingsQueue.asyncAfter(deadline: .now() + delay, execute: workItem)
+        }
     }
 
     lazy var logitechSettingsReconciler = LogitechDeviceSettingsReconciler(device: self)
@@ -116,6 +136,89 @@ class Device {
     var cachedHiResWheelEnabled: Bool?
     var cachedHiResWheelMultiplier: Int?
     var initialHiResWheelEnabled: Bool?
+    private var logitechReceiverRoute: LogitechReceiverRoute?
+    private var logitechDPITransportGeneration = UUID()
+    private var logitechHiResWheelTransportGeneration = UUID()
+
+    var logitechReceiverRouteSnapshot: LogitechReceiverRoute? {
+        logitechSettingsLock.lock()
+        defer { logitechSettingsLock.unlock() }
+        return logitechReceiverRoute
+    }
+
+    private var logitechDPITransportGenerationSnapshot: UUID {
+        logitechSettingsLock.lock()
+        defer { logitechSettingsLock.unlock() }
+        return logitechDPITransportGeneration
+    }
+
+    private var logitechHiResWheelTransportGenerationSnapshot: UUID {
+        logitechSettingsLock.lock()
+        defer { logitechSettingsLock.unlock() }
+        return logitechHiResWheelTransportGeneration
+    }
+
+    func renewLogitechDPITransportGeneration() {
+        logitechSettingsLock.lock()
+        logitechDPITransportGeneration = UUID()
+        logitechSettingsLock.unlock()
+    }
+
+    func renewLogitechHiResWheelTransportGeneration() {
+        logitechSettingsLock.lock()
+        logitechHiResWheelTransportGeneration = UUID()
+        logitechSettingsLock.unlock()
+    }
+
+    private func isCurrentLogitechDPITransportGeneration(_ generation: UUID) -> Bool {
+        logitechSettingsLock.lock()
+        defer { logitechSettingsLock.unlock() }
+        return !removed && logitechDPITransportGeneration == generation
+    }
+
+    private func isCurrentLogitechHiResWheelTransportGeneration(_ generation: UUID) -> Bool {
+        logitechSettingsLock.lock()
+        defer { logitechSettingsLock.unlock() }
+        return !removed && logitechHiResWheelTransportGeneration == generation
+    }
+
+    @discardableResult
+    func updateLogitechReceiverRoute(_ route: LogitechReceiverRoute?) -> Bool {
+        logitechSettingsLock.lock()
+        let previousRoute = logitechReceiverRoute
+        let routingChanged = previousRoute?.slot != route?.slot
+            || previousRoute?.identity.receiverLocationID != route?.identity.receiverLocationID
+        logitechReceiverRoute = route
+        if routingChanged {
+            logitechDPITransportGeneration = UUID()
+            logitechHiResWheelTransportGeneration = UUID()
+        }
+        logitechSettingsLock.unlock()
+
+        guard routingChanged else {
+            return false
+        }
+
+        dpiApplyCoordinator.cancel()
+        hiResWheelApplyCoordinator.cancel()
+        logitechSettingsQueue.async { [weak self] in
+            guard let self else {
+                return
+            }
+
+            invalidateLogitechAdjustableDPI()
+            invalidateLogitechHiResWheel()
+            logitechSettingsLock.lock()
+            cachedSensorDPI = nil
+            cachedHiResWheelEnabled = nil
+            cachedHiResWheelMultiplier = nil
+            logitechSettingsLock.unlock()
+        }
+        if route == nil {
+            updateLogitechControlsMonitorRunning()
+        }
+        return true
+    }
 
     var isRemoved: Bool {
         logitechSettingsLock.lock()
@@ -177,7 +280,6 @@ class Device {
             let monitor = LogitechReprogrammableControlsMonitor(device: self)
             logitechReprogrammableControlsMonitor = monitor
             observeLogitechControlsMonitorDemand()
-            updateLogitechControlsMonitorRunning()
         }
 
         os_log(
@@ -209,6 +311,9 @@ class Device {
         cachedHiResWheelEnabled = nil
         cachedHiResWheelMultiplier = nil
         initialHiResWheelEnabled = nil
+        logitechReceiverRoute = nil
+        logitechDPITransportGeneration = UUID()
+        logitechHiResWheelTransportGeneration = UUID()
         logitechSettingsLock.unlock()
         invalidateLogitechAdjustableDPI()
         invalidateLogitechHiResWheel()
@@ -234,8 +339,16 @@ class Device {
     }
 
     func requestLogitechControlsForcedReconfiguration() {
-        updateLogitechControlsMonitorRunning()
-        logitechReprogrammableControlsMonitor?.requestForcedReconfiguration()
+        logitechSettingsQueue.async { [weak self] in
+            DispatchQueue.main.async {
+                guard let self, !self.isRemoved else {
+                    return
+                }
+
+                self.updateLogitechControlsMonitorRunning()
+                self.logitechReprogrammableControlsMonitor?.requestForcedReconfiguration()
+            }
+        }
     }
 
     func prepareLogitechControlsRecording() {
@@ -276,7 +389,9 @@ class Device {
             return
         }
 
-        if LogitechReprogrammableControlsMonitor.isNeeded(for: self) {
+        let waitingForReceiverDiscovery = LogitechReceiverRouteResolver.requiresDiscovery(for: pointerDevice)
+            && logitechReceiverRouteSnapshot == nil
+        if LogitechReprogrammableControlsMonitor.isNeeded(for: self), !waitingForReceiverDiscovery {
             logitechReprogrammableControlsMonitor.enable()
         } else {
             logitechReprogrammableControlsMonitor.disable()

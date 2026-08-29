@@ -60,11 +60,11 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
         reconciler.reapply(settings)
 
         XCTAssertEqual(device.actions, [
-            "controls",
             "prepareDPI",
             "prepareHiResWheel",
             "dpi:1200",
-            "hiResWheel:true"
+            "hiResWheel:true",
+            "controls"
         ])
     }
 

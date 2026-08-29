@@ -7,7 +7,32 @@ import Foundation
 /// device may not answer immediately after waking, and some firmware accepts
 /// an early write before resetting it during the remainder of its boot sequence.
 final class HardwareSettingApplyCoordinator {
-    typealias Operation = (_ verifiesCachedValue: Bool) -> Bool
+    struct Attempt: Equatable {
+        let verifiesCachedValue: Bool
+        let number: Int
+        let isFinal: Bool
+        let shouldContinue: () -> Bool
+
+        init(
+            verifiesCachedValue: Bool,
+            number: Int,
+            isFinal: Bool,
+            shouldContinue: @escaping () -> Bool = { true }
+        ) {
+            self.verifiesCachedValue = verifiesCachedValue
+            self.number = number
+            self.isFinal = isFinal
+            self.shouldContinue = shouldContinue
+        }
+
+        static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.verifiesCachedValue == rhs.verifiesCachedValue
+                && lhs.number == rhs.number
+                && lhs.isFinal == rhs.isFinal
+        }
+    }
+
+    typealias Operation = (_ attempt: Attempt) -> Bool
     typealias Scheduler = (_ delay: TimeInterval, _ work: @escaping () -> Void) -> Void
 
     private enum Phase {
@@ -79,7 +104,11 @@ final class HardwareSettingApplyCoordinator {
             return
         }
 
-        let succeeded = operation(phase == .confirm)
+        let succeeded = operation(.init(
+            verifiesCachedValue: phase == .confirm,
+            number: retryIndex + 1,
+            isFinal: retryIndex >= retryDelays.count
+        ) { [weak self] in self?.isCurrent(requestID) == true })
         guard isCurrent(requestID) else {
             return
         }

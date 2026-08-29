@@ -23,25 +23,55 @@ extension Device {
     }
 
     func applyConfiguredSensorDPI(_ dpi: Int) {
-        dpiApplyCoordinator.start { [weak self] verifiesCachedValue in
-            guard let self, !isRemoved else {
+        renewLogitechDPITransportGeneration()
+        logitechSettingsQueue.async { [weak self] in
+            self?.invalidateLogitechAdjustableDPI()
+        }
+        dpiApplyCoordinator.start { [weak self] attempt in
+            guard let self, !isRemoved, attempt.shouldContinue() else {
                 return false
             }
 
+            let start = Date()
             let appliedDPI = applySensorDPISynchronously(
                 dpi,
-                verifiesCachedValue: verifiesCachedValue
+                verifiesCachedValue: attempt.verifiesCachedValue
             )
-            if appliedDPI == nil {
-                os_log(
-                    "Failed to apply configured hardware DPI %{public}d to %{public}@",
-                    log: Self.logitechDPILog,
-                    type: .error,
-                    dpi,
-                    name
-                )
+            guard !isRemoved, attempt.shouldContinue() else {
+                return false
             }
-            return appliedDPI != nil
+
+            let phase = attempt.verifiesCachedValue ? "verification" : "apply"
+            let duration = Date().timeIntervalSince(start)
+            let slot = logitechReceiverRouteSnapshot.map { String($0.slot) } ?? "direct"
+            if let appliedDPI {
+                os_log(
+                    "Logitech hardware DPI %{public}@ succeeded: dpi=%{public}d device=%{public}@ slot=%{public}@ attempt=%{public}d duration=%{public}.3f",
+                    log: Self.logitechDPILog,
+                    type: .info,
+                    phase,
+                    appliedDPI,
+                    name,
+                    slot,
+                    attempt.number,
+                    duration
+                )
+                return true
+            }
+
+            os_log(
+                "Logitech hardware DPI %{public}@ attempt failed: dpi=%{public}d device=%{public}@ slot=%{public}@ attempt=%{public}d final=%{public}@ duration=%{public}.3f",
+                log: Self.logitechDPILog,
+                type: attempt.isFinal ? .error : .info,
+                phase,
+                dpi,
+                name,
+                slot,
+                attempt.number,
+                attempt.isFinal ? "true" : "false",
+                duration
+            )
+            return false
         }
     }
 
@@ -57,7 +87,9 @@ extension Device {
 
     func applyHardwareDPI(_ dpi: Int, completion: @escaping (HardwareDPIApplyResult) -> Void) {
         dpiApplyCoordinator.cancel()
+        renewLogitechDPITransportGeneration()
         logitechSettingsQueue.async {
+            self.invalidateLogitechAdjustableDPI()
             let result: HardwareDPIApplyResult
             if !self.isRemoved, let controller = self.logitechAdjustableDPI {
                 let targetDPI = self.applySensorDPISynchronously(dpi, controller: controller)
@@ -161,6 +193,7 @@ extension Device {
 
     func restoreSensorDPI() {
         dpiApplyCoordinator.cancel()
+        renewLogitechDPITransportGeneration()
         logitechSettingsLock.lock()
         cachedSensorDPI = nil
         logitechSettingsLock.unlock()
@@ -168,6 +201,7 @@ extension Device {
 
     func prepareSensorDPIForReconnect() {
         dpiApplyCoordinator.cancel()
+        renewLogitechDPITransportGeneration()
         logitechSettingsQueue.async { [weak self] in
             guard let self else {
                 return
