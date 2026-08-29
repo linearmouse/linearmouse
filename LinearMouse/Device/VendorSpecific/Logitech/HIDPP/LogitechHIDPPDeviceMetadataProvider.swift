@@ -917,6 +917,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
     private var pendingResponse: Data?
     private var pendingSemaphore: DispatchSemaphore?
     private var requestStrategy: RequestStrategy?
+    private var requestStrategyFailureCount = 0
     /// Passive notification consumers are independent of the single synchronous
     /// request slot, so one input report can be fanned out without blocking commands.
     private var inputReportWaiters = [UUID: InputReportWaiter]()
@@ -1366,15 +1367,20 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             return nil
         }
 
-        if let strategy = currentRequestStrategy(),
-           shouldContinue() {
-            return performRequest(
+        if let strategy = currentRequestStrategy(), shouldContinue() {
+            let response = performRequest(
                 report,
                 timeout: timeout,
                 matching: matching,
                 strategy: strategy,
                 until: shouldContinue
             )
+            if response != nil {
+                recordRequestStrategySuccess(strategy)
+            } else if shouldContinue() {
+                recordRequestStrategyFailure(strategy)
+            }
+            return response
         }
 
         // Strategy detection should be quick. Giving every callback strategy the
@@ -1395,7 +1401,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
                 continue
             }
 
-            setCurrentRequestStrategy(strategy)
+            recordRequestStrategySuccess(strategy)
             return response
         }
 
@@ -1612,15 +1618,29 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         return requestStrategy
     }
 
-    private func setCurrentRequestStrategy(_ strategy: RequestStrategy) {
+    private func recordRequestStrategySuccess(_ strategy: RequestStrategy) {
         strategyLock.lock()
         requestStrategy = strategy
+        requestStrategyFailureCount = 0
+        strategyLock.unlock()
+    }
+
+    private func recordRequestStrategyFailure(_ strategy: RequestStrategy) {
+        strategyLock.lock()
+        if requestStrategy == strategy {
+            requestStrategyFailureCount += 1
+            if requestStrategyFailureCount >= 2 {
+                requestStrategy = nil
+                requestStrategyFailureCount = 0
+            }
+        }
         strategyLock.unlock()
     }
 
     private func clearCurrentRequestStrategy() {
         strategyLock.lock()
         requestStrategy = nil
+        requestStrategyFailureCount = 0
         strategyLock.unlock()
     }
 
@@ -2535,17 +2555,36 @@ final class LogitechReprogrammableControlsMonitor {
             return buildDirectMonitorTarget()
         }
 
-        guard let route = device.logitechReceiverRouteSnapshot,
-              let receiverChannel = provider.openReceiverChannel(for: device.pointerDevice)
+        guard let receiverChannel = provider.openReceiverChannel(for: device.pointerDevice) else {
+            return nil
+        }
+
+        if let route = device.logitechReceiverRouteSnapshot {
+            return buildMonitorTarget(
+                slot: route.slot,
+                identity: route.identity,
+                using: receiverChannel
+            )
+        }
+
+        guard let discovery = device.logitechReceiverDiscoverySnapshot,
+              !discovery.identities.isEmpty
         else {
             return nil
         }
 
-        return buildMonitorTarget(
-            slot: route.slot,
-            identity: route.identity,
-            using: receiverChannel
-        )
+        let targets = discovery.identities.compactMap { identity in
+            buildMonitorTarget(
+                slot: identity.slot,
+                identity: identity,
+                using: receiverChannel
+            )
+        }
+        guard targets.count == 1 else {
+            return nil
+        }
+
+        return targets[0]
     }
 
     private func buildDirectMonitorTarget() -> MonitorTarget? {

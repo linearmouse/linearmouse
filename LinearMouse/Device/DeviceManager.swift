@@ -343,7 +343,7 @@ class DeviceManager: ObservableObject {
             return
         }
 
-        guard updateLogitechReceiverRoute(for: device) else {
+        guard updateLogitechReceiverDiscovery(for: device) else {
             return
         }
 
@@ -427,10 +427,18 @@ class DeviceManager: ObservableObject {
     }
 
     func requestLogitechDeviceSettingsReconciliation() {
-        // Receiver-backed devices reconcile from their discovery callback. A
-        // fixed wake timer must not race discovery or issue commands without a slot.
-        for device in devices where !shouldMonitorReceiver(device) {
-            reapplyLogitechDeviceSettings(for: device)
+        for device in devices {
+            if shouldMonitorReceiver(device) {
+                // Wake only restarts discovery. Settings still wait for a route.
+                let identities = device.pointerDevice.locationID.flatMap {
+                    receiverPairedDeviceIdentities[$0]
+                }
+                if identities?.isEmpty != false {
+                    receiverMonitor.requestRediscovery(device: device)
+                }
+            } else {
+                reapplyLogitechDeviceSettings(for: device)
+            }
         }
     }
 
@@ -439,7 +447,7 @@ class DeviceManager: ObservableObject {
             return
         }
 
-        guard updateLogitechReceiverRoute(for: device) else {
+        guard updateLogitechReceiverDiscovery(for: device) else {
             return
         }
 
@@ -449,25 +457,25 @@ class DeviceManager: ObservableObject {
     /// Returns false for a monitored receiver until discovery has identified a
     /// unique pointing-device slot. Direct devices are ready immediately.
     @discardableResult
-    private func updateLogitechReceiverRoute(for device: Device) -> Bool {
+    private func updateLogitechReceiverDiscovery(for device: Device) -> Bool {
         guard shouldMonitorReceiver(device) else {
-            device.updateLogitechReceiverRoute(nil)
+            device.updateLogitechReceiverDiscovery(nil)
             return true
         }
 
         guard let locationID = device.pointerDevice.locationID,
-              let identities = receiverPairedDeviceIdentities[locationID],
-              let route = LogitechReceiverRouteResolver.resolve(
-                  for: device.pointerDevice,
-                  identities: identities
-              )
+              let identities = receiverPairedDeviceIdentities[locationID]
         else {
-            device.updateLogitechReceiverRoute(nil)
+            device.updateLogitechReceiverDiscovery(nil)
             return false
         }
 
-        device.updateLogitechReceiverRoute(route)
-        return true
+        let route = LogitechReceiverRouteResolver.resolve(
+            for: device.pointerDevice,
+            identities: identities
+        )
+        device.updateLogitechReceiverDiscovery(.init(identities: identities, route: route))
+        return route != nil
     }
 
     func pairedReceiverDevices(for device: Device) -> [ReceiverLogicalDeviceIdentity] {
@@ -531,13 +539,15 @@ class DeviceManager: ObservableObject {
         let previousSlots = Set(previousIdentities.map(\.slot))
         for (_, device) in pointerDeviceToDevice where device.pointerDevice.locationID == locationID {
             let previousRoute = device.logitechReceiverRouteSnapshot
-            let isReady = updateLogitechReceiverRoute(for: device)
+            let isReady = updateLogitechReceiverDiscovery(for: device)
             guard isReady, let route = device.logitechReceiverRouteSnapshot else {
+                if !identities.isEmpty {
+                    device.requestLogitechControlsForcedReconfiguration()
+                }
                 continue
             }
 
-            let routeChanged = previousRoute?.slot != route.slot
-                || previousRoute?.identity.receiverLocationID != route.identity.receiverLocationID
+            let routeChanged = LogitechReceiverRoute.hardwareTargetChanged(from: previousRoute, to: route)
             let identityChanged = previousRoute != route
             let slotReconnected = !previousSlots.contains(route.slot)
             if routeChanged || slotReconnected {

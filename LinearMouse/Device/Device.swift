@@ -136,14 +136,20 @@ class Device {
     var cachedHiResWheelEnabled: Bool?
     var cachedHiResWheelMultiplier: Int?
     var initialHiResWheelEnabled: Bool?
-    private var logitechReceiverRoute: LogitechReceiverRoute?
+    private var logitechReceiverDiscovery: LogitechReceiverDiscovery?
     private var logitechDPITransportGeneration = UUID()
     private var logitechHiResWheelTransportGeneration = UUID()
 
     var logitechReceiverRouteSnapshot: LogitechReceiverRoute? {
         logitechSettingsLock.lock()
         defer { logitechSettingsLock.unlock() }
-        return logitechReceiverRoute
+        return logitechReceiverDiscovery?.route
+    }
+
+    var logitechReceiverDiscoverySnapshot: LogitechReceiverDiscovery? {
+        logitechSettingsLock.lock()
+        defer { logitechSettingsLock.unlock() }
+        return logitechReceiverDiscovery
     }
 
     private var logitechDPITransportGenerationSnapshot: UUID {
@@ -183,17 +189,24 @@ class Device {
     }
 
     @discardableResult
-    func updateLogitechReceiverRoute(_ route: LogitechReceiverRoute?) -> Bool {
+    func updateLogitechReceiverDiscovery(_ discovery: LogitechReceiverDiscovery?) -> Bool {
         logitechSettingsLock.lock()
-        let previousRoute = logitechReceiverRoute
-        let routingChanged = previousRoute?.slot != route?.slot
-            || previousRoute?.identity.receiverLocationID != route?.identity.receiverLocationID
-        logitechReceiverRoute = route
+        let previousDiscovery = logitechReceiverDiscovery
+        let routingChanged = LogitechReceiverRoute.hardwareTargetChanged(
+            from: previousDiscovery?.route,
+            to: discovery?.route
+        )
+        let candidateAvailabilityChanged = previousDiscovery?.identities.isEmpty != discovery?.identities.isEmpty
+        logitechReceiverDiscovery = discovery
         if routingChanged {
             logitechDPITransportGeneration = UUID()
             logitechHiResWheelTransportGeneration = UUID()
         }
         logitechSettingsLock.unlock()
+
+        if candidateAvailabilityChanged, discovery?.identities.isEmpty != false {
+            updateLogitechControlsMonitorRunning()
+        }
 
         guard routingChanged else {
             return false
@@ -213,9 +226,6 @@ class Device {
             cachedHiResWheelEnabled = nil
             cachedHiResWheelMultiplier = nil
             logitechSettingsLock.unlock()
-        }
-        if route == nil {
-            updateLogitechControlsMonitorRunning()
         }
         return true
     }
@@ -311,7 +321,7 @@ class Device {
         cachedHiResWheelEnabled = nil
         cachedHiResWheelMultiplier = nil
         initialHiResWheelEnabled = nil
-        logitechReceiverRoute = nil
+        logitechReceiverDiscovery = nil
         logitechDPITransportGeneration = UUID()
         logitechHiResWheelTransportGeneration = UUID()
         logitechSettingsLock.unlock()
@@ -389,8 +399,9 @@ class Device {
             return
         }
 
+        let receiverDiscovery = logitechReceiverDiscoverySnapshot
         let waitingForReceiverDiscovery = LogitechReceiverRouteResolver.requiresDiscovery(for: pointerDevice)
-            && logitechReceiverRouteSnapshot == nil
+            && (receiverDiscovery?.identities.isEmpty != false)
         if LogitechReprogrammableControlsMonitor.isNeeded(for: self), !waitingForReceiverDiscovery {
             logitechReprogrammableControlsMonitor.enable()
         } else {

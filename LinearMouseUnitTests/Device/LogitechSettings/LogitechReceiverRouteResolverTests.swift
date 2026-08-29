@@ -13,6 +13,11 @@ final class LogitechReceiverRouteResolverTests: XCTestCase {
 
         XCTAssertFalse(LogitechReceiverRouteResolver.requiresDiscovery(for: directBluetoothDevice()))
         XCTAssertFalse(LogitechReceiverRouteResolver.requiresDiscovery(for: directUSBDevice()))
+        XCTAssertFalse(LogitechReceiverRouteResolver.requiresDiscovery(for: MockVendorSpecificDeviceContext(
+            vendorID: 0x3554,
+            productID: 0xC548,
+            transport: PointerDeviceTransportName.usb
+        )))
         XCTAssertFalse(LogitechReceiverRouteResolver.requiresDiscovery(for: receiver(
             productID: 0xC548,
             transport: PointerDeviceTransportName.bluetoothLowEnergy
@@ -58,6 +63,60 @@ final class LogitechReceiverRouteResolverTests: XCTestCase {
         XCTAssertEqual(first, updated)
     }
 
+    func testHardwareTargetIgnoresMetadataEnrichmentForSameDevice() {
+        let initial = LogitechReceiverRoute(
+            slot: 2,
+            identity: receiverIdentity(slot: 2, name: "", productID: 0xB034)
+        )
+        let enriched = LogitechReceiverRoute(
+            slot: 2,
+            identity: receiverIdentity(
+                slot: 2,
+                name: "MX Master 3S",
+                serialNumber: "513BBE34",
+                productID: 0xB034
+            )
+        )
+
+        XCTAssertFalse(LogitechReceiverRoute.hardwareTargetChanged(from: initial, to: enriched))
+    }
+
+    func testHardwareTargetChangesWhenDifferentDeviceOccupiesSameSlot() {
+        let previous = LogitechReceiverRoute(
+            slot: 2,
+            identity: receiverIdentity(
+                slot: 2,
+                name: "MX Master 3S",
+                serialNumber: "AAAAAAAA",
+                productID: 0xB034
+            )
+        )
+        let replacement = LogitechReceiverRoute(
+            slot: 2,
+            identity: receiverIdentity(
+                slot: 2,
+                name: "MX Anywhere 3S",
+                serialNumber: "BBBBBBBB",
+                productID: 0xB037
+            )
+        )
+
+        XCTAssertTrue(LogitechReceiverRoute.hardwareTargetChanged(from: previous, to: replacement))
+    }
+
+    func testHardwareTargetChangesWhenReceiverSlotChanges() {
+        let previous = LogitechReceiverRoute(
+            slot: 1,
+            identity: receiverIdentity(slot: 1, name: "MX Master 3S")
+        )
+        let current = LogitechReceiverRoute(
+            slot: 2,
+            identity: receiverIdentity(slot: 2, name: "MX Master 3S")
+        )
+
+        XCTAssertTrue(LogitechReceiverRoute.hardwareTargetChanged(from: previous, to: current))
+    }
+
     private func receiver(
         productID: Int,
         transport: String = PointerDeviceTransportName.usb
@@ -92,6 +151,8 @@ final class LogitechReceiverRouteResolverTests: XCTestCase {
     private func receiverIdentity(
         slot: UInt8,
         name: String,
+        serialNumber: String? = nil,
+        productID: Int? = nil,
         batteryLevel: Int? = nil
     ) -> ReceiverLogicalDeviceIdentity {
         ReceiverLogicalDeviceIdentity(
@@ -99,8 +160,8 @@ final class LogitechReceiverRouteResolverTests: XCTestCase {
             slot: slot,
             kind: .mouse,
             name: name,
-            serialNumber: nil,
-            productID: nil,
+            serialNumber: serialNumber,
+            productID: productID,
             batteryLevel: batteryLevel
         )
     }

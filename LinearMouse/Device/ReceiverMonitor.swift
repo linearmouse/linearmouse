@@ -8,6 +8,7 @@ final class ReceiverMonitor {
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ReceiverMonitor")
     static let initialDiscoveryTimeout: TimeInterval = 3
     static let channelOpenRetryInterval: TimeInterval = 0.5
+    static let maximumDiscoveryRetryInterval: TimeInterval = 15
     static let refreshInterval: TimeInterval = 15
 
     private let provider = LogitechHIDPPDeviceMetadataProvider()
@@ -59,6 +60,14 @@ final class ReceiverMonitor {
         }
 
         context.stop()
+    }
+
+    func requestRediscovery(device: Device) {
+        guard let locationID = device.pointerDevice.locationID else {
+            return
+        }
+
+        contexts[locationID]?.requestRediscovery()
     }
 }
 
@@ -153,6 +162,20 @@ struct ReceiverSlotStateStore {
 }
 
 private final class ReceiverContext {
+    private enum DiscoveryState {
+        case pending(retryInterval: TimeInterval)
+        case ready
+
+        var retryInterval: TimeInterval {
+            switch self {
+            case let .pending(retryInterval):
+                return retryInterval
+            case .ready:
+                return ReceiverMonitor.channelOpenRetryInterval
+            }
+        }
+    }
+
     let device: Device
     private let locationID: Int
     private let provider: LogitechHIDPPDeviceMetadataProvider
@@ -162,6 +185,7 @@ private final class ReceiverContext {
     private var lastPublishedIdentities = [ReceiverLogicalDeviceIdentity]()
     private var stateStore = ReceiverSlotStateStore()
     private var currentChannel: LogitechReceiverChannel?
+    private var rediscoveryRequested = false
     private let retrySemaphore = DispatchSemaphore(value: 0)
 
     var onDiscoveryTimedOut: (() -> Void)?
@@ -180,6 +204,7 @@ private final class ReceiverContext {
             return
         }
         isRunning = true
+        rediscoveryRequested = false
         lastPublishedIdentities = []
         stateStore.reset()
 
@@ -204,22 +229,41 @@ private final class ReceiverContext {
         thread?.cancel()
     }
 
+    func requestRediscovery() {
+        stateLock.lock()
+        guard isRunning else {
+            stateLock.unlock()
+            return
+        }
+
+        rediscoveryRequested = true
+        let channel = currentChannel
+        stateLock.unlock()
+
+        channel?.wake()
+        retrySemaphore.signal()
+    }
+
     private func workerMain() {
         let initialDeadline = Date().addingTimeInterval(ReceiverMonitor.initialDiscoveryTimeout)
         var hasPublishedInitialState = false
-        var hasCompletedInitialDiscovery = false
         var hasLoggedMissingChannel = false
-        var hasOpenedChannel = false
+        var discoveryState = DiscoveryState.pending(
+            retryInterval: ReceiverMonitor.channelOpenRetryInterval
+        )
         defer {
             setCurrentChannel(nil)
             markStopped()
         }
 
         while shouldContinueRunning() {
+            if consumeRediscoveryRequest() {
+                discoveryState = .pending(retryInterval: ReceiverMonitor.channelOpenRetryInterval)
+            }
+
             if currentChannelSnapshot() == nil {
                 let channel = provider.openReceiverChannel(for: device.pointerDevice)
                 setCurrentChannel(channel)
-                hasCompletedInitialDiscovery = false
 
                 if !shouldContinueRunning() {
                     channel?.wake()
@@ -246,22 +290,9 @@ private final class ReceiverContext {
                     hasPublishedInitialState = true
                 }
 
-                if Date() >= initialDeadline {
-                    if hasOpenedChannel {
-                        waitBeforeRetryingChannelOpen()
-                    } else {
-                        os_log(
-                            "Receiver channel unavailable after initial timeout, stopping monitor: locationID=%{public}d device=%{public}@",
-                            log: ReceiverMonitor.log,
-                            type: .info,
-                            locationID,
-                            String(describing: device)
-                        )
-                        break
-                    }
-                } else {
-                    waitBeforeRetryingChannelOpen(until: initialDeadline)
-                }
+                let retryInterval = discoveryState.retryInterval
+                waitBeforeRetryingDiscovery(after: retryInterval, until: initialDeadline)
+                discoveryState = .pending(retryInterval: nextDiscoveryRetryInterval(after: retryInterval))
 
                 continue
             }
@@ -274,30 +305,34 @@ private final class ReceiverContext {
             ) == .lightspeed,
                 !provider.receiverChannelIsReachable(for: device.pointerDevice, using: receiverChannel) {
                 os_log(
-                    "Lightspeed receiver did not respond to the HID++ capability probe, stopping monitor: locationID=%{public}d device=%{public}@",
+                    "Lightspeed receiver did not respond to the HID++ capability probe, retrying: locationID=%{public}d device=%{public}@",
                     log: ReceiverMonitor.log,
                     type: .info,
                     locationID,
                     String(describing: device)
                 )
                 setCurrentChannel(nil)
-                DispatchQueue.main.async { [weak self] in
-                    self?.onDiscoveryTimedOut?()
+                if !hasPublishedInitialState, Date() >= initialDeadline {
+                    DispatchQueue.main.async { [weak self] in
+                        self?.onDiscoveryTimedOut?()
+                    }
+                    hasPublishedInitialState = true
                 }
-                break
+                let retryInterval = discoveryState.retryInterval
+                waitBeforeRetryingDiscovery(after: retryInterval, until: initialDeadline)
+                discoveryState = .pending(retryInterval: nextDiscoveryRetryInterval(after: retryInterval))
+                continue
             }
 
-            hasOpenedChannel = true
-
-            // Full discovery only once per channel open
-            if !hasCompletedInitialDiscovery {
+            // A receiver has no usable route until full discovery succeeds.
+            if case let .pending(retryInterval) = discoveryState {
                 let discovery = provider.receiverPointingDeviceDiscovery(
                     for: device.pointerDevice, using: receiverChannel
                 )
                 mergeDiscovery(discovery)
 
                 let identities = currentPublishedIdentities()
-                if identities.isEmpty, Date() < initialDeadline {
+                if identities.isEmpty {
                     os_log(
                         "Receiver initial discovery is not ready, retrying: locationID=%{public}d device=%{public}@",
                         log: ReceiverMonitor.log,
@@ -305,11 +340,27 @@ private final class ReceiverContext {
                         locationID,
                         String(describing: device)
                     )
-                    waitBeforeRetryingChannelOpen(until: initialDeadline)
+                    if !hasPublishedInitialState, Date() >= initialDeadline {
+                        os_log(
+                            "Receiver logical discovery timed out; background retries will continue: locationID=%{public}d device=%{public}@",
+                            log: ReceiverMonitor.log,
+                            type: .info,
+                            locationID,
+                            String(describing: device)
+                        )
+                        DispatchQueue.main.async { [weak self] in
+                            self?.onDiscoveryTimedOut?()
+                        }
+                        hasPublishedInitialState = true
+                    }
+
+                    waitBeforeRetryingDiscovery(after: retryInterval, until: initialDeadline)
+                    discoveryState = .pending(retryInterval: nextDiscoveryRetryInterval(after: retryInterval))
                     continue
                 }
 
-                hasCompletedInitialDiscovery = true
+                discoveryState = .ready
+                _ = consumeRediscoveryRequest()
                 let identitiesDescription = identities.map { identity in
                     let battery = identity.batteryLevel.map(String.init) ?? "(nil)"
                     return "slot=\(identity.slot) name=\(identity.name) battery=\(battery)"
@@ -328,20 +379,8 @@ private final class ReceiverContext {
                 if identities != lastPublishedIdentities {
                     publish(identities)
                     hasPublishedInitialState = true
-                } else if !hasPublishedInitialState, !identities.isEmpty {
-                    publish(identities)
-                    hasPublishedInitialState = true
                 } else if !hasPublishedInitialState {
-                    os_log(
-                        "Receiver logical discovery timed out: locationID=%{public}d device=%{public}@",
-                        log: ReceiverMonitor.log,
-                        type: .info,
-                        locationID,
-                        String(describing: device)
-                    )
-                    DispatchQueue.main.async { [weak self] in
-                        self?.onDiscoveryTimedOut?()
-                    }
+                    publish(identities)
                     hasPublishedInitialState = true
                 }
             }
@@ -352,11 +391,15 @@ private final class ReceiverContext {
                 using: receiverChannel,
                 timeout: ReceiverMonitor.refreshInterval
             ) { [weak self] in
-                self?.shouldContinueRunning() ?? false
+                self?.shouldContinueWaitingForNotifications() ?? false
             }
 
             if !shouldContinueRunning() {
                 break
+            }
+
+            if hasRediscoveryRequest() {
+                continue
             }
 
             guard !connectionSnapshots.isEmpty else {
@@ -370,6 +413,7 @@ private final class ReceiverContext {
                         String(describing: device)
                     )
                     setCurrentChannel(nil)
+                    discoveryState = .pending(retryInterval: ReceiverMonitor.channelOpenRetryInterval)
                 }
                 continue
             }
@@ -449,12 +493,41 @@ private final class ReceiverContext {
         stateLock.unlock()
     }
 
-    private func waitBeforeRetryingChannelOpen(until deadline: Date? = nil) {
+    private func hasRediscoveryRequest() -> Bool {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        return rediscoveryRequested
+    }
+
+    private func shouldContinueWaitingForNotifications() -> Bool {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        return isRunning && !rediscoveryRequested
+    }
+
+    private func consumeRediscoveryRequest() -> Bool {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+
+        let requested = rediscoveryRequested
+        rediscoveryRequested = false
+        return requested
+    }
+
+    private func nextDiscoveryRetryInterval(after interval: TimeInterval) -> TimeInterval {
+        min(interval * 2, ReceiverMonitor.maximumDiscoveryRetryInterval)
+    }
+
+    private func waitBeforeRetryingDiscovery(
+        after interval: TimeInterval,
+        until deadline: Date? = nil
+    ) {
         let retryDelay: TimeInterval
         if let deadline {
-            retryDelay = min(ReceiverMonitor.channelOpenRetryInterval, max(0, deadline.timeIntervalSinceNow))
+            let remaining = deadline.timeIntervalSinceNow
+            retryDelay = remaining > 0 ? min(interval, remaining) : interval
         } else {
-            retryDelay = ReceiverMonitor.channelOpenRetryInterval
+            retryDelay = interval
         }
 
         guard retryDelay > 0 else {
@@ -477,8 +550,6 @@ private final class ReceiverContext {
     }
 
     private func mergeDiscovery(_ discovery: LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery) {
-        stateLock.lock()
-        defer { stateLock.unlock() }
         stateStore.mergeDiscovery(discovery)
     }
 
@@ -489,9 +560,7 @@ private final class ReceiverContext {
             return
         }
 
-        stateLock.lock()
         stateStore.mergeConnectionSnapshots(newSnapshots)
-        stateLock.unlock()
     }
 
     private func refreshSlotIdentity(
@@ -508,9 +577,7 @@ private final class ReceiverContext {
             return
         }
 
-        stateLock.lock()
         stateStore.updateSlotIdentity(identity)
-        stateLock.unlock()
 
         os_log(
             "Refreshed slot identity: locationID=%{public}d slot=%{public}u name=%{public}@ battery=%{public}@",
@@ -524,16 +591,10 @@ private final class ReceiverContext {
     }
 
     private func needsIdentityRefresh(slot: UInt8) -> Bool {
-        stateLock.lock()
-        let needs = stateStore.needsIdentityRefresh(slot: slot)
-        stateLock.unlock()
-        return needs
+        stateStore.needsIdentityRefresh(slot: slot)
     }
 
     private func currentPublishedIdentities() -> [ReceiverLogicalDeviceIdentity] {
-        stateLock.lock()
-        let identities = stateStore.currentPublishedIdentities()
-        stateLock.unlock()
-        return identities
+        stateStore.currentPublishedIdentities()
     }
 }
