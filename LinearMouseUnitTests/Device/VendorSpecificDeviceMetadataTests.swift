@@ -524,6 +524,33 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertEqual(notification?.snapshot, .init(isConnected: true, kind: 0x02))
     }
 
+    func testReceiverReconnectPublicationRequiresRouteLossOnlyForPointingReconnects() throws {
+        let mouse = receiverIdentity(slot: 1, name: "Mouse A")
+        let pointing = [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot](
+            uniqueKeysWithValues: [(1, .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue))]
+        )
+        let keyboard = [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot](
+            uniqueKeysWithValues: [(2, .init(isConnected: true, kind: ReceiverLogicalDeviceKind.keyboard.rawValue))]
+        )
+
+        XCTAssertTrue(ReceiverReconnectPublication.requiresRouteLoss(
+            reconnectedSlots: [1], snapshots: pointing, currentIdentities: []
+        ))
+        XCTAssertFalse(ReceiverReconnectPublication.requiresRouteLoss(
+            reconnectedSlots: [], snapshots: pointing, currentIdentities: [mouse]
+        ))
+        XCTAssertFalse(ReceiverReconnectPublication.requiresRouteLoss(
+            reconnectedSlots: [2], snapshots: keyboard, currentIdentities: []
+        ))
+        XCTAssertTrue(ReceiverReconnectPublication.requiresRouteLoss(
+            reconnectedSlots: [1], snapshots: [1: .init(isConnected: true, kind: nil)], currentIdentities: [mouse]
+        ))
+        XCTAssertTrue(try ReceiverReconnectPublication.requiresRouteLoss(
+            reconnectedSlots: [1, 2], snapshots: [1: XCTUnwrap(pointing[1]), 2: XCTUnwrap(keyboard[2])],
+            currentIdentities: []
+        ))
+    }
+
     func testParseConnectedDeviceCountReadsReceiverConnectionRegister() {
         XCTAssertEqual(
             LogitechHIDPPDeviceMetadataProvider.parseConnectedDeviceCount([0x10, 0xFF, 0x81, 0x02, 0x00, 0x01, 0x00]),

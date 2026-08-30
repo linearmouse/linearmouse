@@ -13,6 +13,19 @@ enum ReceiverConnectionEventPublication {
     }
 }
 
+enum ReceiverReconnectPublication {
+    static func requiresRouteLoss(
+        reconnectedSlots: Set<UInt8>,
+        snapshots: [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot],
+        currentIdentities: [ReceiverLogicalDeviceIdentity]
+    ) -> Bool {
+        reconnectedSlots.contains { slot in
+            currentIdentities.contains { $0.slot == slot }
+                || ReceiverLogicalDeviceKind(rawValue: snapshots[slot]?.kind ?? 0)?.isPointingDevice == true
+        }
+    }
+}
+
 enum ReceiverPendingDiscoveryDisposition {
     case retryCurrentChannel
     case reopenChannel
@@ -533,12 +546,11 @@ private final class ReceiverContext {
                 continue
             }
 
-            let reconnectsPointingSlot = connectionBatch.reconnectedSlots.contains { slot in
-                currentPublishedIdentities().contains { $0.slot == slot }
-                    || ReceiverLogicalDeviceKind(rawValue: connectionBatch.snapshots[slot]?.kind ?? 0)?
-                    .isPointingDevice == true
-            }
-            if reconnectsPointingSlot {
+            if ReceiverReconnectPublication.requiresRouteLoss(
+                reconnectedSlots: connectionBatch.reconnectedSlots,
+                snapshots: connectionBatch.snapshots,
+                currentIdentities: currentPublishedIdentities()
+            ) {
                 // Preserve a route-loss transition even when the refreshed
                 // identity is available in this same notification batch.
                 publishUnavailable()
