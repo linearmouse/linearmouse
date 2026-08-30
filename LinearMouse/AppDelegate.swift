@@ -133,11 +133,7 @@ extension AppDelegate {
         ) { [weak self] _ in
             os_log("System will sleep", log: Self.log, type: .info)
             self?.lifecycleAdmission.sleeping = true
-            self?.stop(
-                restoringHighResolutionWheel: false,
-                applyingSleepHiResPolicy: true,
-                controlsTeardownPolicy: .sleepPreserve
-            )
+            self?.stopForSleep()
         }
 
         NSWorkspace.shared.notificationCenter.addObserver(
@@ -147,8 +143,7 @@ extension AppDelegate {
         ) { [weak self] _ in
             os_log("System did wake", log: Self.log, type: .info)
             self?.lifecycleAdmission.sleeping = false
-            self?.restartIfAllowed()
-            self?.requestLogitechReceiverRediscoveryAfterWake()
+            self?.completeSleepStopAndRestartIfAllowed()
         }
     }
 
@@ -163,6 +158,19 @@ extension AppDelegate {
     func restartIfAllowed() {
         stop { [weak self] in
             self?.startIfAllowed()
+        }
+    }
+
+    /// A wake resumes the sleep teardown already in flight; it must not
+    /// upgrade that teardown to terminal hardware restoration and delay the
+    /// new observation lifetime while the receiver is still coming online.
+    func completeSleepStopAndRestartIfAllowed() {
+        stopForSleep { [weak self] in
+            guard let self else {
+                return
+            }
+            startIfAllowed()
+            requestLogitechReceiverRediscoveryAfterWake()
         }
     }
 
@@ -196,5 +204,14 @@ extension AppDelegate {
             completion: completion
         )
         GlobalEventTap.shared.stop()
+    }
+
+    private func stopForSleep(completion: (() -> Void)? = nil) {
+        stop(
+            restoringHighResolutionWheel: false,
+            applyingSleepHiResPolicy: true,
+            controlsTeardownPolicy: .sleepPreserve,
+            completion: completion
+        )
     }
 }
