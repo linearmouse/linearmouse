@@ -2491,12 +2491,9 @@ final class LogitechReprogrammableControlsMonitor {
     }
 
     func stopForSleep(completion: @escaping () -> Void) {
-        if state.hasStoreBackedActiveTarget {
-            disableForSleep()
-            DispatchQueue.main.async(execute: completion)
-        } else {
-            disable(completion: completion)
-        }
+        state.disableForSleep(completion: completion)
+        releaseButtonIfNeeded()
+        subscriptions.removeAll()
     }
 
     func hasPendingBaselineForCurrentTarget() -> Bool {
@@ -4060,11 +4057,8 @@ final class LogitechReprogrammableControlsMonitorState {
     /// received the completion and started a new lifecycle explicitly.
     private var preventsWorkerRestart = false
     private var allowsTeardownIO = false
+    private var hasEstablishedActiveTarget = false
     private var hasStoreBackedActiveTargetValue = false
-
-    var hasStoreBackedActiveTarget: Bool {
-        queue.sync { workerThread != nil && hasStoreBackedActiveTargetValue }
-    }
 
     var shouldContinueRunning: Bool {
         queue.sync { isEnabled } && !Thread.current.isCancelled
@@ -4099,12 +4093,19 @@ final class LogitechReprogrammableControlsMonitorState {
     }
 
     func disableForSleep() {
-        disable(completion: nil, allowingTeardownIO: false)
+        disableForSleep(completion: nil)
+    }
+
+    func disableForSleep(completion: (() -> Void)?) {
+        // `nil` selects the policy while this same state transaction disables
+        // the worker, so a target transition cannot race a read-then-act
+        // sleep decision.
+        disable(completion: completion, allowingTeardownIO: nil)
     }
 
     func disable(
         completion: (() -> Void)?,
-        allowingTeardownIO: Bool = true
+        allowingTeardownIO: Bool? = true
     ) {
         let (resources, completions) = queue.sync { () -> (WorkerResources, [() -> Void]) in
             let resources = (workerThread, activeNotificationEndpoint, directDeviceReportObservationToken)
@@ -4115,7 +4116,9 @@ final class LogitechReprogrammableControlsMonitorState {
                 }
             }
             isEnabled = false
-            allowsTeardownIO = allowingTeardownIO
+            let resolvedAllowsTeardownIO = allowingTeardownIO
+                ?? (hasEstablishedActiveTarget && !hasStoreBackedActiveTargetValue)
+            allowsTeardownIO = resolvedAllowsTeardownIO
             reconfigurationRequest.reset()
             activeNotificationEndpoint = nil
             directDeviceReportObservationToken = nil
@@ -4140,6 +4143,7 @@ final class LogitechReprogrammableControlsMonitorState {
         let (thread, token, completions, releasesRestartBarrier) = queue.sync {
             () -> (Thread?, ObservationToken?, [() -> Void], Bool) in
             workerThread = nil
+            hasEstablishedActiveTarget = false
             hasStoreBackedActiveTargetValue = false
             activeNotificationEndpoint = nil
             let reportObservationToken = directDeviceReportObservationToken
@@ -4238,6 +4242,7 @@ final class LogitechReprogrammableControlsMonitorState {
             guard workerThread != nil else {
                 return
             }
+            hasEstablishedActiveTarget = true
             hasStoreBackedActiveTargetValue = value
         }
     }
