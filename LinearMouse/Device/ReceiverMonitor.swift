@@ -48,6 +48,23 @@ enum ReceiverReadyCountDisposition {
     }
 }
 
+enum ReceiverWorkerPostCallAdmission {
+    struct Admitted<Value> {
+        let value: Value
+    }
+
+    static func admit<Value>(
+        _ operation: () -> Value,
+        whileRunning: () -> Bool
+    ) -> Admitted<Value>? {
+        let value = operation()
+        guard whileRunning() else {
+            return nil
+        }
+        return .init(value: value)
+    }
+}
+
 final class ReceiverMonitor {
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ReceiverMonitor")
     static let initialDiscoveryTimeout: TimeInterval = 3
@@ -360,20 +377,21 @@ private final class ReceiverContext {
             markStopped()
         }
 
-        while shouldContinueRunning() {
+        workerLoop: while shouldContinueRunning() {
             if consumeRediscoveryRequest() {
                 discoveryState = .pending
                 discoveryBackoff.reset()
             }
 
             if currentChannelSnapshot() == nil {
-                let channel = provider.openReceiverChannel(for: device.pointerDevice)
-                setCurrentChannel(channel)
-
-                if !shouldContinueRunning() {
-                    channel?.wake()
+                guard let admitted = ReceiverWorkerPostCallAdmission.admit(
+                    { provider.openReceiverChannel(for: device.pointerDevice) },
+                    whileRunning: shouldContinueRunning
+                ) else {
                     break
                 }
+                let channel = admitted.value
+                setCurrentChannel(channel)
             }
 
             guard let receiverChannel = currentChannelSnapshot() else {
@@ -405,44 +423,68 @@ private final class ReceiverContext {
                 vendorID: device.pointerDevice.vendorID,
                 productID: device.pointerDevice.productID,
                 transport: device.pointerDevice.transport
-            ) == .lightspeed,
-                !provider.receiverChannelIsReachable(for: device.pointerDevice, using: receiverChannel) {
-                os_log(
-                    "Lightspeed receiver did not respond to the HID++ capability probe, retrying: locationID=%{public}d device=%{public}@",
-                    log: ReceiverMonitor.log,
-                    type: .info,
-                    locationID,
-                    String(describing: device)
-                )
-                invalidateCurrentChannel(receiverChannel)
-                discoveryState = .pending
-                discoveryBackoff.reset()
-                if !hasPublishedInitialState, Date() >= initialDeadline {
-                    DispatchQueue.main.async { [weak self] in
-                        self?.onDiscoveryTimedOut?()
-                    }
-                    hasPublishedInitialState = true
+            ) == .lightspeed {
+                guard let probe = ReceiverWorkerPostCallAdmission.admit(
+                    { provider.receiverChannelIsReachable(for: device.pointerDevice, using: receiverChannel) },
+                    whileRunning: shouldContinueRunning
+                ) else {
+                    break
                 }
-                waitBeforeRetryingDiscovery(after: discoveryBackoff.nextDelay(), until: initialDeadline)
-                continue
+                if !probe.value {
+                    os_log(
+                        "Lightspeed receiver did not respond to the HID++ capability probe, retrying: locationID=%{public}d device=%{public}@",
+                        log: ReceiverMonitor.log,
+                        type: .info,
+                        locationID,
+                        String(describing: device)
+                    )
+                    invalidateCurrentChannel(receiverChannel)
+                    discoveryState = .pending
+                    discoveryBackoff.reset()
+                    if !hasPublishedInitialState, Date() >= initialDeadline {
+                        DispatchQueue.main.async { [weak self] in
+                            self?.onDiscoveryTimedOut?()
+                        }
+                        hasPublishedInitialState = true
+                    }
+                    waitBeforeRetryingDiscovery(after: discoveryBackoff.nextDelay(), until: initialDeadline)
+                    continue
+                }
             }
 
             // A receiver has no usable route until full discovery succeeds.
             if case .pending = discoveryState {
-                let discovery = provider.receiverPointingDeviceDiscovery(
-                    for: device.pointerDevice, using: receiverChannel
-                )
+                guard let admitted = ReceiverWorkerPostCallAdmission.admit(
+                    {
+                        provider.receiverPointingDeviceDiscovery(
+                            for: device.pointerDevice,
+                            using: receiverChannel
+                        )
+                    },
+                    whileRunning: shouldContinueRunning
+                ) else {
+                    break
+                }
+                let discovery = admitted.value
                 let mergeResult = mergeDiscovery(discovery)
 
                 let identities = currentPublishedIdentities()
                 if !mergeResult.inventoryComplete {
+                    guard let reachability = ReceiverWorkerPostCallAdmission.admit(
+                        {
+                            provider.receiverChannelIsReachable(
+                                for: device.pointerDevice,
+                                using: receiverChannel
+                            )
+                        },
+                        whileRunning: shouldContinueRunning
+                    ) else {
+                        break
+                    }
                     publishUnavailable()
                     if case .reopenChannel = ReceiverPendingDiscoveryDisposition.resolve(
                         inventoryAvailable: discovery.inventoryAvailable,
-                        channelReachable: provider.receiverChannelIsReachable(
-                            for: device.pointerDevice,
-                            using: receiverChannel
-                        )
+                        channelReachable: reachability.value
                     ) {
                         invalidateCurrentChannel(receiverChannel)
                         lastCompleteConnectedDeviceCount = nil
@@ -501,17 +543,21 @@ private final class ReceiverContext {
             }
 
             // Wait for connection events (event-driven, no periodic rescan)
-            let connectionBatch = provider.waitForReceiverConnectionChange(
-                for: device.pointerDevice,
-                using: receiverChannel,
-                timeout: ReceiverMonitor.refreshInterval
-            ) { [weak self] in
-                self?.shouldContinueWaitingForNotifications() ?? false
-            }
-
-            if !shouldContinueRunning() {
+            guard let admitted = ReceiverWorkerPostCallAdmission.admit(
+                {
+                    provider.waitForReceiverConnectionChange(
+                        for: device.pointerDevice,
+                        using: receiverChannel,
+                        timeout: ReceiverMonitor.refreshInterval
+                    ) { [weak self] in
+                        self?.shouldContinueWaitingForNotifications() ?? false
+                    }
+                },
+                whileRunning: shouldContinueRunning
+            ) else {
                 break
             }
+            let connectionBatch = admitted.value
 
             if hasRediscoveryRequest() {
                 continue
@@ -519,7 +565,13 @@ private final class ReceiverContext {
 
             guard !connectionBatch.snapshots.isEmpty else {
                 // Timeout with no events — verify channel is still alive
-                if !provider.receiverChannelIsReachable(for: device.pointerDevice, using: receiverChannel) {
+                guard let reachability = ReceiverWorkerPostCallAdmission.admit(
+                    { provider.receiverChannelIsReachable(for: device.pointerDevice, using: receiverChannel) },
+                    whileRunning: shouldContinueRunning
+                ) else {
+                    break
+                }
+                if !reachability.value {
                     os_log(
                         "Receiver channel appears dead, will reopen: locationID=%{public}d device=%{public}@",
                         log: ReceiverMonitor.log,
@@ -531,17 +583,27 @@ private final class ReceiverContext {
                     discoveryState = .pending
                     discoveryBackoff.reset()
                     lastCompleteConnectedDeviceCount = nil
-                } else if case .enterPending = ReceiverReadyCountDisposition.resolve(
-                    previousCount: lastCompleteConnectedDeviceCount,
-                    currentCount: provider.connectedDeviceCount(
-                        for: device.pointerDevice,
-                        using: receiverChannel
-                    )
-                ) {
-                    publishUnavailable()
-                    discoveryState = .pending
-                    discoveryBackoff.reset()
-                    lastCompleteConnectedDeviceCount = nil
+                } else {
+                    guard let count = ReceiverWorkerPostCallAdmission.admit(
+                        {
+                            provider.connectedDeviceCount(
+                                for: device.pointerDevice,
+                                using: receiverChannel
+                            )
+                        },
+                        whileRunning: shouldContinueRunning
+                    ) else {
+                        break
+                    }
+                    if case .enterPending = ReceiverReadyCountDisposition.resolve(
+                        previousCount: lastCompleteConnectedDeviceCount,
+                        currentCount: count.value
+                    ) {
+                        publishUnavailable()
+                        discoveryState = .pending
+                        discoveryBackoff.reset()
+                        lastCompleteConnectedDeviceCount = nil
+                    }
                 }
                 continue
             }
@@ -564,12 +626,18 @@ private final class ReceiverContext {
             // For newly connected devices, read their identity info
             for (slot, snapshot) in connectionBatch.snapshots where snapshot.isConnected {
                 if needsIdentityRefresh(slot: slot) {
-                    refreshSlotIdentity(
+                    guard refreshSlotIdentity(
                         slot: slot,
                         connectionSnapshot: snapshot,
                         using: receiverChannel
-                    )
+                    ) else {
+                        break workerLoop
+                    }
                 }
+            }
+
+            guard shouldContinueRunning() else {
+                break
             }
 
             let snapshotDescription = connectionBatch.snapshots
@@ -738,14 +806,22 @@ private final class ReceiverContext {
         slot: UInt8,
         connectionSnapshot: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot?,
         using receiverChannel: LogitechReceiverChannel
-    ) {
-        guard let identity = provider.receiverSlotIdentity(
-            for: device.pointerDevice,
-            slot: slot,
-            connectionSnapshot: connectionSnapshot,
-            using: receiverChannel
+    ) -> Bool {
+        guard let admitted = ReceiverWorkerPostCallAdmission.admit(
+            {
+                provider.receiverSlotIdentity(
+                    for: device.pointerDevice,
+                    slot: slot,
+                    connectionSnapshot: connectionSnapshot,
+                    using: receiverChannel
+                )
+            },
+            whileRunning: shouldContinueRunning
         ) else {
-            return
+            return false
+        }
+        guard let identity = admitted.value else {
+            return true
         }
 
         stateStore.updateSlotIdentity(identity)
@@ -759,6 +835,7 @@ private final class ReceiverContext {
             identity.name,
             identity.batteryLevel.map(String.init) ?? "(nil)"
         )
+        return true
     }
 
     private func needsIdentityRefresh(slot: UInt8) -> Bool {

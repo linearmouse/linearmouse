@@ -551,6 +551,47 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         ))
     }
 
+    func testStoppedWorkerCannotInvalidateChannelAfterSlowLightspeedProbe() {
+        var running = true
+        var invalidatedChannel = false
+
+        let probe = ReceiverWorkerPostCallAdmission.admit {
+            running = false
+            return false
+        } whileRunning: {
+            running
+        }
+        if let probe, !probe.value {
+            invalidatedChannel = true
+        }
+
+        XCTAssertNil(probe)
+        XCTAssertFalse(invalidatedChannel)
+    }
+
+    func testStoppedWorkerCannotPublishOrInvalidateAfterSlowPendingDiscovery() {
+        var running = true
+        var mutatedReceiverState = false
+
+        let discovery = ReceiverWorkerPostCallAdmission.admit {
+            running = false
+            return LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery(
+                identities: [],
+                connectionSnapshots: [:],
+                liveReachableSlots: [],
+                inventoryAvailable: false
+            )
+        } whileRunning: {
+            running
+        }
+        if let discovery, !discovery.value.inventoryAvailable {
+            mutatedReceiverState = true
+        }
+
+        XCTAssertNil(discovery)
+        XCTAssertFalse(mutatedReceiverState)
+    }
+
     func testParseConnectedDeviceCountReadsReceiverConnectionRegister() {
         XCTAssertEqual(
             LogitechHIDPPDeviceMetadataProvider.parseConnectedDeviceCount([0x10, 0xFF, 0x81, 0x02, 0x00, 0x01, 0x00]),
