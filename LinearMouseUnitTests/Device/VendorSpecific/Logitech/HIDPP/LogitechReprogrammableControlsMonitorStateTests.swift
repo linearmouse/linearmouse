@@ -123,4 +123,112 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
             Thread {}
         }
     }
+
+    func testRestorePendingForTeardownUpgradesSleepingWorkerAtomically() {
+        let state = LogitechReprogrammableControlsMonitorState()
+        let restored = expectation(description: "pending restore drained")
+        var madeReplacementWorker = false
+
+        state.enable { Thread {} }
+        state.disableForSleep()
+        XCTAssertFalse(state.shouldAllowTeardownIO)
+
+        state.restorePendingForTeardown(
+            true,
+            makeWorkerThread: {
+                madeReplacementWorker = true
+                return Thread {}
+            },
+            completion: {
+                restored.fulfill()
+            }
+        )
+
+        XCTAssertFalse(madeReplacementWorker)
+        XCTAssertTrue(state.shouldContinueRunning)
+        XCTAssertTrue(state.shouldAllowTeardownIO)
+        XCTAssertTrue(state.isRestoringPendingForTeardown)
+
+        // A sleeping worker has already been cancelled. It is replaced with a
+        // fresh restore-only worker rather than releasing the completion.
+        state.workerDidStop(restartIfEnabled: true) {
+            madeReplacementWorker = true
+            return Thread {}
+        }
+        XCTAssertTrue(madeReplacementWorker)
+
+        // The replacement reaches this point only after it observed no
+        // pending baseline, so completion cannot race ahead of restoration.
+        state.workerDidStop(restartIfEnabled: false) { Thread {} }
+        wait(for: [restored], timeout: 1)
+    }
+
+    func testRestorePendingForTeardownStartsWorkerOnlyWhenBaselineExists() {
+        let state = LogitechReprogrammableControlsMonitorState()
+        let noWorkCompletion = expectation(description: "no pending baseline")
+        var madeWorker = false
+
+        state.restorePendingForTeardown(
+            false,
+            makeWorkerThread: {
+                madeWorker = true
+                return Thread {}
+            },
+            completion: {
+                noWorkCompletion.fulfill()
+            }
+        )
+
+        XCTAssertFalse(madeWorker)
+        wait(for: [noWorkCompletion], timeout: 1)
+
+        let restored = expectation(description: "pending baseline restored")
+        state.restorePendingForTeardown(
+            true,
+            makeWorkerThread: {
+                madeWorker = true
+                return Thread {}
+            },
+            completion: {
+                restored.fulfill()
+            }
+        )
+
+        XCTAssertTrue(madeWorker)
+        XCTAssertTrue(state.shouldAllowTeardownIO)
+        state.workerDidStop(restartIfEnabled: false) { Thread {} }
+        wait(for: [restored], timeout: 1)
+    }
+
+    func testRetryWaitReturnsAfterTimeout() {
+        let state = LogitechReprogrammableControlsMonitorState()
+        state.enable { Thread {} }
+
+        let result = state.waitForReconfigurationOrRetryTimeout(timeout: 0)
+        XCTAssertTrue(result.shouldContinue)
+        XCTAssertTrue(result.timedOut)
+        XCTAssertFalse(result.forced)
+
+        state.disable()
+        state.workerDidStop(restartIfEnabled: false) { Thread {} }
+    }
+
+    func testUnkeyedRestoreStoreRejectsStaleGenerationWrites() {
+        typealias Monitor = LogitechReprogrammableControlsMonitor
+        let store = Monitor.UnkeyedControlsRestoreStore()
+        let key = Monitor.EphemeralControlsTargetKey(
+            locationID: 1,
+            slot: 2,
+            kind: .mouse,
+            productID: 0x1234
+        )
+        let reporting = Monitor.ReportingInfo(flags: [.diverted], mappedControlID: 0x00C3)
+        let firstClaim = store.claim(for: key)
+
+        XCTAssertTrue(store.replace([0x00C3: reporting], for: key, expectedGeneration: firstClaim.generation))
+        store.invalidateAll()
+
+        XCTAssertFalse(store.replace([0x00C3: reporting], for: key, expectedGeneration: firstClaim.generation))
+        XCTAssertTrue(store.claim(for: key).reporting.isEmpty)
+    }
 }

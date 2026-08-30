@@ -158,6 +158,9 @@ class Device {
     @discardableResult
     func updateLogitechReceiverDiscovery(_ discovery: LogitechReceiverDiscovery?) -> Bool {
         let update = logitechSession.updateDiscovery(discovery)
+        if update.hardwareTargetChanged {
+            logitechReprogrammableControlsMonitor?.invalidateUnkeyedBaselinesForTargetChange()
+        }
         if update.candidateAvailabilityChanged, !update.hasCandidates {
             updateLogitechControlsMonitorRunning()
         }
@@ -298,6 +301,17 @@ class Device {
         }
 
         logitechReprogrammableControlsMonitor.stopForSleep(completion: completion)
+    }
+
+    /// Restores a persisted Logitech controls baseline even when normal
+    /// mapping demand no longer keeps the monitor running.
+    func restorePendingLogitechControlsForTeardown(completion: @escaping () -> Void) {
+        guard let logitechReprogrammableControlsMonitor else {
+            DispatchQueue.main.async(execute: completion)
+            return
+        }
+
+        logitechReprogrammableControlsMonitor.restorePendingForTeardown(completion: completion)
     }
 
     func requestLogitechControlsForcedReconfiguration() {
