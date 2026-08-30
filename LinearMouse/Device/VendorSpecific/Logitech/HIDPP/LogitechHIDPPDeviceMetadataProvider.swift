@@ -2349,10 +2349,57 @@ final class LogitechReprogrammableControlsMonitor {
         let notificationEndpoint: HIDPPNotificationHandling
     }
 
+    private struct EphemeralControlsTargetKey: Hashable {
+        let locationID: Int
+        let slot: UInt8
+        let kind: ReceiverLogicalDeviceKind?
+        let productID: Int?
+
+        init(locationID: Int, target: MonitorTarget) {
+            self.locationID = locationID
+            slot = target.slot
+            kind = target.identity?.kind
+            productID = target.identity?.productID
+        }
+    }
+
+    private final class UnkeyedControlsRestoreStore {
+        private var pending = [EphemeralControlsTargetKey: [UInt16: ReportingInfo]]()
+
+        func reporting(for key: EphemeralControlsTargetKey) -> [UInt16: ReportingInfo] {
+            pending[key] ?? [:]
+        }
+
+        func merge(_ reporting: [UInt16: ReportingInfo], for key: EphemeralControlsTargetKey) {
+            pending[
+                key,
+                default: [:]
+            ].merge(reporting) { _, new in new }
+        }
+
+        func replace(_ reporting: [UInt16: ReportingInfo], for key: EphemeralControlsTargetKey) {
+            if reporting.isEmpty {
+                pending.removeValue(forKey: key)
+            } else {
+                pending[key] = reporting
+            }
+        }
+
+        func consume(_ controlIDs: Set<UInt16>, for key: EphemeralControlsTargetKey) {
+            for controlID in controlIDs {
+                pending[key]?.removeValue(forKey: controlID)
+            }
+            if pending[key]?.isEmpty == true {
+                pending.removeValue(forKey: key)
+            }
+        }
+    }
+
     private let device: Device
     private let provider = LogitechHIDPPDeviceMetadataProvider()
     private let state = LogitechReprogrammableControlsMonitorState()
     private var subscriptions = Set<AnyCancellable>()
+    private let unkeyedRestoreStore = UnkeyedControlsRestoreStore()
 
     init(device: Device) {
         self.device = device
@@ -2561,7 +2608,8 @@ final class LogitechReprogrammableControlsMonitor {
             let targetName = targetIdentity?.name ?? device.productName ?? device.name
             let baselineStore = device.logitechHardwareBaselineStore
             let baselineTarget = device.logitechHardwareTargetKey(receiverSlot: transport.receiverSlot)
-            var pendingUnkeyedReportingRestoreByControlID = [UInt16: ReportingInfo]()
+            let unkeyedTarget = EphemeralControlsTargetKey(locationID: locationID, target: monitorTarget)
+            var pendingUnkeyedReportingRestoreByControlID = unkeyedRestoreStore.reporting(for: unkeyedTarget)
             state.setStoreBackedActiveTarget(baselineTarget != nil)
 
             state.setActiveNotificationEndpoint(monitorTarget.notificationEndpoint)
@@ -2599,6 +2647,7 @@ final class LogitechReprogrammableControlsMonitor {
                     for controlID in Set(retired.keys).subtracting(failed.keys) {
                         pendingUnkeyedReportingRestoreByControlID.removeValue(forKey: controlID)
                     }
+                    unkeyedRestoreStore.replace(pendingUnkeyedReportingRestoreByControlID, for: unkeyedTarget)
                 }
 
                 restoreStoredReportingNotIn(
@@ -2715,6 +2764,25 @@ final class LogitechReprogrammableControlsMonitor {
                 }
 
                 guard !activeControlIDs.isEmpty else {
+                    let failedRestore = shouldAllowTeardownIO()
+                        ? restoreReportingState(
+                            originalReportingByControlID,
+                            using: transport,
+                            featureIndex: featureIndex,
+                            locationID: locationID,
+                            slot: slot,
+                            reason: "rollback failed control diversion"
+                        )
+                        : originalReportingByControlID
+                    consumeRestoredBaselines(
+                        capturedReporting.claims,
+                        excluding: Set(failedRestore.keys),
+                        store: baselineStore
+                    )
+                    if baselineTarget == nil {
+                        pendingUnkeyedReportingRestoreByControlID.merge(failedRestore) { _, new in new }
+                        unkeyedRestoreStore.replace(pendingUnkeyedReportingRestoreByControlID, for: unkeyedTarget)
+                    }
                     finishVirtualButtonRecordingPreparationIfNeeded(sessionID: recordingSessionID)
                     os_log(
                         "Failed to enable any Logitech control diversion: locationID=%{public}d slot=%{public}u device=%{public}@",
@@ -2826,6 +2894,7 @@ final class LogitechReprogrammableControlsMonitor {
                             pendingUnkeyedReportingRestoreByControlID.removeValue(forKey: controlID)
                         }
                         pendingUnkeyedReportingRestoreByControlID.merge(failedRestoreByControlID) { _, new in new }
+                        unkeyedRestoreStore.replace(pendingUnkeyedReportingRestoreByControlID, for: unkeyedTarget)
                         if !pendingUnkeyedReportingRestoreByControlID.isEmpty, shouldAllowTeardownIO() {
                             _ = LogitechHardwareRestoreRetry.perform(
                                 operation: {
