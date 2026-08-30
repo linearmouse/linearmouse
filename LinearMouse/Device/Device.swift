@@ -61,12 +61,20 @@ class Device {
                 return nil
             }
 
-            return AdjustableDPI(
+            let feature = AdjustableDPI(
                 device: device,
                 receiverSlot: route?.slot
             ) { [weak self] in
                 token.shouldContinue && self?.isRemoved == false
             }
+            guard let feature else {
+                return nil
+            }
+            return .init(
+                feature: feature,
+                stableTargetKey: logitechHardwareTargetKey(for: route, receiverSlot: route?.slot),
+                receiverSlot: route?.slot
+            )
         }
     }
 
@@ -88,12 +96,23 @@ class Device {
                 return nil
             }
 
-            return HiResWheel(
+            let feature = HiResWheel(
                 device: device,
                 receiverSlot: route?.slot
             ) { [weak self] in
                 token.shouldContinue && self?.isRemoved == false
             }
+            guard let feature else {
+                return nil
+            }
+            return .init(
+                feature: feature,
+                stableTargetKey: logitechHardwareTargetKey(
+                    for: route,
+                    receiverSlot: feature.receiverSlot
+                ),
+                receiverSlot: feature.receiverSlot
+            )
         }
     }
 
@@ -121,7 +140,14 @@ class Device {
     }
 
     func logitechHardwareTargetKey(receiverSlot: UInt8? = nil) -> LogitechHardwareTargetKey? {
-        if let route = logitechReceiverRouteSnapshot {
+        logitechHardwareTargetKey(for: logitechReceiverRouteSnapshot, receiverSlot: receiverSlot)
+    }
+
+    func logitechHardwareTargetKey(
+        for route: LogitechReceiverRoute?,
+        receiverSlot: UInt8? = nil
+    ) -> LogitechHardwareTargetKey? {
+        if let route {
             guard receiverSlot == nil || receiverSlot == route.slot else {
                 return nil
             }
@@ -158,6 +184,7 @@ class Device {
     @discardableResult
     func updateLogitechReceiverDiscovery(_ discovery: LogitechReceiverDiscovery?) -> Bool {
         let update = logitechSession.updateDiscovery(discovery)
+        promoteHiResWheelBaselineIfPossible()
         if update.hardwareTargetChanged {
             logitechReprogrammableControlsMonitor?.invalidateUnkeyedBaselinesForTargetChange()
         }

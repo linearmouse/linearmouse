@@ -116,10 +116,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
 
         _ = session.updateDiscovery(discovery(serialNumber: "BBBBBBBB", productID: 0xB037))
 
-        XCTAssertNil(session.initialHiResWheelEnabled(
-            requiresReceiverRoute: true,
-            receiverSlot: access.feature.receiverSlot
-        ))
+        XCTAssertNil(session.initialHiResWheelEnabled(for: access))
     }
 
     func testSupersededWheelAccessCannotMutateSessionState() throws {
@@ -131,10 +128,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
         session.recordInitialHiResWheelState(enabled: false, for: access)
         session.updateHiResWheelState(enabled: true, multiplier: 8, for: access)
 
-        XCTAssertNil(session.initialHiResWheelEnabled(
-            requiresReceiverRoute: true,
-            receiverSlot: access.feature.receiverSlot
-        ))
+        XCTAssertNil(session.initialHiResWheelEnabled(for: access))
         XCTAssertNil(session.hiResWheelEnabled)
         XCTAssertNil(session.hiResWheelNormalizationMultiplier)
     }
@@ -144,14 +138,10 @@ final class LogitechDeviceSessionTests: XCTestCase {
         let access = try hiResWheelAccess(for: session, receiverSlot: 2)
         session.recordInitialHiResWheelState(enabled: false, for: access)
 
-        XCTAssertFalse(try XCTUnwrap(session.initialHiResWheelEnabled(
-            requiresReceiverRoute: false,
-            receiverSlot: 2
-        )))
-        XCTAssertNil(session.initialHiResWheelEnabled(
-            requiresReceiverRoute: false,
-            receiverSlot: 3
-        ))
+        XCTAssertFalse(try XCTUnwrap(session.initialHiResWheelEnabled(for: access)))
+        session.cancelHiResWheelApply()
+        let otherAccess = try hiResWheelAccess(for: session, receiverSlot: 3)
+        XCTAssertNil(session.initialHiResWheelEnabled(for: otherAccess))
     }
 
     func testWheelRestoreCommitsActualModeBeforeDiscardingInitialState() throws {
@@ -162,19 +152,13 @@ final class LogitechDeviceSessionTests: XCTestCase {
 
         // An acknowledged write changes the runtime cache but must not consume
         // the original target before the coordinator's readback phase.
-        XCTAssertFalse(try XCTUnwrap(session.initialHiResWheelEnabled(
-            requiresReceiverRoute: false,
-            receiverSlot: access.feature.receiverSlot
-        )))
+        XCTAssertFalse(try XCTUnwrap(session.initialHiResWheelEnabled(for: access)))
 
         session.completeHiResWheelRestore(enabled: false, multiplier: nil, for: access)
 
         XCTAssertEqual(session.hiResWheelEnabled, false)
         XCTAssertNil(session.hiResWheelNormalizationMultiplier)
-        XCTAssertNil(session.initialHiResWheelEnabled(
-            requiresReceiverRoute: false,
-            receiverSlot: access.feature.receiverSlot
-        ))
+        XCTAssertNil(session.initialHiResWheelEnabled(for: access))
     }
 
     func testWheelRestoreKeepsNormalizerForOriginalHighResolutionMode() throws {
@@ -221,7 +205,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
         })
     }
 
-    func testOldSessionCommitCannotConsumeNewBaselineGeneration() throws {
+    func testOldSessionCommitCannotConsumeReplacementBaselineOwnership() throws {
         let store = LogitechHardwareBaselineStore()
         let target = try XCTUnwrap(LogitechHardwareTargetKey.direct(
             transport: "USB",
@@ -233,29 +217,165 @@ final class LogitechDeviceSessionTests: XCTestCase {
         ))
         let oldClaim = store.captureHiResBaseline(enabled: false, for: target)
         let session = LogitechDeviceSession(deviceID: 1)
-        let access = try hiResWheelAccess(for: session, receiverSlot: 2)
-        session.seedInitialHiResWheelState(
-            enabled: oldClaim.baseline.enabled,
-            route: nil,
-            receiverSlot: access.feature.receiverSlot,
-            baselineHandle: oldClaim.handle
-        )
+        let access = try hiResWheelAccess(for: session, stableTargetKey: target)
+        let lease = try XCTUnwrap(session.hiResWheelTargetLease(
+            receiverSlot: nil
+        )            { _, _ in target })
+        XCTAssertTrue(session.seedInitialHiResWheelState(oldClaim, for: lease))
 
         XCTAssertTrue(store.consumeHiResBaseline(oldClaim.handle))
         let newClaim = store.captureHiResBaseline(enabled: true, for: target)
 
         let commit = session.completeHiResWheelRestore(enabled: false, multiplier: nil, for: access)
         guard case let .committed(handle?) = commit else {
-            return XCTFail("current session must commit its restore")
+            XCTFail("current session must commit its restore")
+            return
         }
 
         XCTAssertFalse(store.consumeHiResBaseline(handle))
         XCTAssertEqual(store.hiResBaseline(for: target)?.baseline, newClaim.baseline)
     }
 
+    func testExtendedSerialEnrichmentPromotesSavedInitialMode() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        _ = session.updateDiscovery(discovery(serialNumber: nil, productID: 0xB034))
+        let originalAccess = try hiResWheelAccess(for: session, receiverSlot: 2)
+        XCTAssertTrue(session.recordInitialHiResWheelState(enabled: false, for: originalAccess))
+
+        let enriched = discovery(serialNumber: "513BBE34", productID: 0xB034)
+        _ = session.updateDiscovery(enriched)
+        let target = try receiverTarget(for: enriched)
+        let lease = try XCTUnwrap(session.hiResWheelTargetLease(
+            receiverSlot: 2
+        )            { _, _ in target })
+        let promotion = try XCTUnwrap(session.hiResBaselinePromotion(for: lease))
+        let store = LogitechHardwareBaselineStore()
+        let claim = store.captureHiResBaseline(enabled: promotion.enabled, for: target)
+
+        XCTAssertFalse(promotion.enabled)
+        XCTAssertTrue(session.attachHiResBaseline(claim, to: promotion))
+        XCTAssertTrue(session.hasStoredHiResWheelBaseline)
+        let reboundAccess = try hiResWheelAccess(
+            for: session,
+            receiverSlot: 2,
+            stableTargetKey: target
+        )
+        XCTAssertEqual(reboundAccess.lease.stableTargetKey, target)
+
+        _ = session.updateDiscovery(.init(identities: [], route: nil))
+        _ = session.updateDiscovery(discovery(serialNumber: nil, productID: 0xB034))
+        XCTAssertTrue(session.hasStoredHiResWheelBaseline)
+        XCTAssertNil(session.hiResWheel { _, _ in nil })
+    }
+
+    func testReadInFlightDuringEnrichmentPromotesUsingCurrentLease() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        _ = session.updateDiscovery(discovery(serialNumber: nil, productID: 0xB034))
+        let accessAtReadStart = try hiResWheelAccess(for: session, receiverSlot: 2)
+
+        let enriched = discovery(serialNumber: "513BBE34", productID: 0xB034)
+        _ = session.updateDiscovery(enriched)
+        let target = try receiverTarget(for: enriched)
+        let currentLease = try XCTUnwrap(session.hiResWheelTargetLease(
+            receiverSlot: 2
+        )            { _, _ in target })
+        XCTAssertNil(session.hiResBaselinePromotion(for: currentLease))
+
+        XCTAssertTrue(session.recordInitialHiResWheelState(enabled: false, for: accessAtReadStart))
+
+        let promotion = try XCTUnwrap(session.hiResBaselinePromotion(for: currentLease))
+        XCTAssertFalse(promotion.enabled)
+        XCTAssertEqual(promotion.target, target)
+    }
+
+    func testSeedRejectsLeaseAfterRouteChangesToDifferentSerial() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let discoveryA = discovery(serialNumber: "AAAAAAAA", productID: 0xB034)
+        _ = session.updateDiscovery(discoveryA)
+        let targetA = try receiverTarget(for: discoveryA)
+        let leaseA = try XCTUnwrap(session.hiResWheelTargetLease(
+            receiverSlot: 2
+        )            { _, _ in targetA })
+        let store = LogitechHardwareBaselineStore()
+        let claimA = store.captureHiResBaseline(enabled: false, for: targetA)
+
+        _ = session.updateDiscovery(discovery(serialNumber: "BBBBBBBB", productID: 0xB034))
+
+        XCTAssertFalse(session.seedInitialHiResWheelState(claimA, for: leaseA))
+        XCTAssertFalse(session.hasInitialHiResWheelState)
+    }
+
+    func testOldAccessCannotRecordForReplacementRoute() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let discoveryA = discovery(serialNumber: "AAAAAAAA", productID: 0xB034)
+        _ = session.updateDiscovery(discoveryA)
+        let accessA = try hiResWheelAccess(
+            for: session,
+            receiverSlot: 2,
+            stableTargetKey: receiverTarget(for: discoveryA)
+        )
+
+        _ = session.updateDiscovery(discovery(serialNumber: nil, productID: 0xB034))
+
+        XCTAssertFalse(session.recordInitialHiResWheelState(enabled: false, for: accessA))
+        XCTAssertFalse(session.hasInitialHiResWheelState)
+    }
+
+    func testStableBaselineQuarantinesAmbiguousRouteThenClearsDifferentSerial() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let discoveryA = discovery(serialNumber: "AAAAAAAA", productID: 0xB034)
+        _ = session.updateDiscovery(discoveryA)
+        let targetA = try receiverTarget(for: discoveryA)
+        let accessA = try hiResWheelAccess(for: session, receiverSlot: 2, stableTargetKey: targetA)
+        XCTAssertTrue(session.recordInitialHiResWheelState(enabled: false, for: accessA))
+
+        _ = session.updateDiscovery(.init(identities: [], route: nil))
+        _ = session.updateDiscovery(discovery(serialNumber: nil, productID: 0xB034))
+
+        XCTAssertTrue(session.hasInitialHiResWheelState)
+        XCTAssertNil(session.hiResWheel { _, _ in
+            XCTFail("ambiguous route must remain quarantined")
+            return nil
+        })
+
+        _ = session.updateDiscovery(discovery(serialNumber: "BBBBBBBB", productID: 0xB034))
+        XCTAssertFalse(session.hasInitialHiResWheelState)
+    }
+
+    func testSameStableSerialRebindsAcrossReceiverSlots() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let discoveryA = discovery(serialNumber: "AAAAAAAA", productID: 0xB034, slot: 2)
+        _ = session.updateDiscovery(discoveryA)
+        let targetA = try receiverTarget(for: discoveryA)
+        let accessA = try hiResWheelAccess(for: session, receiverSlot: 2, stableTargetKey: targetA)
+        XCTAssertTrue(session.recordInitialHiResWheelState(enabled: false, for: accessA))
+
+        _ = session.updateDiscovery(.init(identities: [], route: nil))
+        _ = session.updateDiscovery(discovery(serialNumber: "AAAAAAAA", productID: 0xB034, slot: 3))
+        let reboundAccess = try hiResWheelAccess(
+            for: session,
+            receiverSlot: 3,
+            stableTargetKey: targetA
+        )
+
+        XCTAssertEqual(session.initialHiResWheelEnabled(for: reboundAccess), false)
+    }
+
+    func testUnkeyedReceiverBaselineIsClearedWhenRouteIsLost() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        _ = session.updateDiscovery(discovery(serialNumber: nil, productID: 0xB034))
+        let access = try hiResWheelAccess(for: session, receiverSlot: 2)
+        XCTAssertTrue(session.recordInitialHiResWheelState(enabled: false, for: access))
+
+        _ = session.updateDiscovery(.init(identities: [], route: nil))
+
+        XCTAssertFalse(session.hasInitialHiResWheelState)
+    }
+
     private func hiResWheelAccess(
         for session: LogitechDeviceSession,
-        receiverSlot: UInt8? = nil
+        receiverSlot: UInt8? = nil,
+        stableTargetKey: LogitechHardwareTargetKey? = nil
     ) throws -> LogitechDeviceSession.FeatureAccess<HiResWheel> {
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,
@@ -266,17 +386,33 @@ final class LogitechDeviceSessionTests: XCTestCase {
         )
         let transport = try XCTUnwrap(HIDPPTransport(device: device, deviceIndex: receiverSlot))
         return try XCTUnwrap(session.hiResWheel { _, _ in
-            HiResWheel(transport: transport, featureIndex: 1)
+            .init(
+                feature: HiResWheel(transport: transport, featureIndex: 1),
+                stableTargetKey: stableTargetKey,
+                receiverSlot: receiverSlot
+            )
         })
+    }
+
+    private func receiverTarget(
+        for discovery: LogitechReceiverDiscovery
+    ) throws -> LogitechHardwareTargetKey {
+        let identity = try XCTUnwrap(discovery.route?.identity)
+        return try XCTUnwrap(LogitechHardwareTargetKey.receiver(
+            vendorID: 0x046D,
+            receiverLocationID: identity.receiverLocationID,
+            identity: identity
+        ))
     }
 
     private func discovery(
         serialNumber: String?,
-        productID: Int
+        productID: Int,
+        slot: UInt8 = 2
     ) -> LogitechReceiverDiscovery {
         let identity = ReceiverLogicalDeviceIdentity(
             receiverLocationID: 123,
-            slot: 2,
+            slot: slot,
             kind: .mouse,
             name: "MX Mouse",
             serialNumber: serialNumber,

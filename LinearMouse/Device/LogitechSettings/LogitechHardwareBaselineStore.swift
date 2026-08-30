@@ -48,13 +48,28 @@ enum LogitechHardwareTargetKey: Hashable {
 /// intentionally never persisted: writing it after a later launch could alter
 /// a replaced physical device.
 final class LogitechHardwareBaselineStore {
+    fileprivate final class EntryOwnership {}
+
     struct HiResBaseline: Equatable {
         let enabled: Bool
     }
 
     struct HiResHandle: Hashable {
         fileprivate let target: LogitechHardwareTargetKey
-        fileprivate let version: UInt64
+        fileprivate let ownership: EntryOwnership
+
+        static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.target == rhs.target && lhs.ownership === rhs.ownership
+        }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(target)
+            hasher.combine(ObjectIdentifier(ownership))
+        }
+
+        func belongs(to target: LogitechHardwareTargetKey) -> Bool {
+            self.target == target
+        }
     }
 
     struct HiResClaim: Equatable {
@@ -70,7 +85,19 @@ final class LogitechHardwareBaselineStore {
     struct ControlsHandle: Hashable {
         fileprivate let target: LogitechHardwareTargetKey
         fileprivate let controlID: UInt16
-        fileprivate let version: UInt64
+        fileprivate let ownership: EntryOwnership
+
+        static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.target == rhs.target
+                && lhs.controlID == rhs.controlID
+                && lhs.ownership === rhs.ownership
+        }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(target)
+            hasher.combine(controlID)
+            hasher.combine(ObjectIdentifier(ownership))
+        }
     }
 
     struct ControlsClaim: Equatable {
@@ -81,16 +108,15 @@ final class LogitechHardwareBaselineStore {
 
     private struct HiResEntry {
         let baseline: HiResBaseline
-        let version: UInt64
+        let ownership = EntryOwnership()
     }
 
     private struct ControlsEntry {
         let baseline: ControlsReportingBaseline
-        let version: UInt64
+        let ownership = EntryOwnership()
     }
 
     private let lock = NSLock()
-    private var nextVersion: UInt64 = 0
     private var hiResEntries = [LogitechHardwareTargetKey: HiResEntry]()
     private var controlsEntries = [LogitechHardwareTargetKey: [UInt16: ControlsEntry]]()
 
@@ -104,16 +130,15 @@ final class LogitechHardwareBaselineStore {
             if let entry = hiResEntries[target] {
                 return .init(
                     baseline: entry.baseline,
-                    handle: .init(target: target, version: entry.version)
+                    handle: .init(target: target, ownership: entry.ownership)
                 )
             }
 
-            nextVersion &+= 1
-            let entry = HiResEntry(baseline: .init(enabled: enabled), version: nextVersion)
+            let entry = HiResEntry(baseline: .init(enabled: enabled))
             hiResEntries[target] = entry
             return .init(
                 baseline: entry.baseline,
-                handle: .init(target: target, version: entry.version)
+                handle: .init(target: target, ownership: entry.ownership)
             )
         }
     }
@@ -125,17 +150,17 @@ final class LogitechHardwareBaselineStore {
             }
             return .init(
                 baseline: entry.baseline,
-                handle: .init(target: target, version: entry.version)
+                handle: .init(target: target, ownership: entry.ownership)
             )
         }
     }
 
-    /// Removes only the exact baseline generation that was confirmed restored.
+    /// Removes only the exact baseline entry that was confirmed restored.
     /// A stale session cannot consume an entry captured by a newer session.
     @discardableResult
     func consumeHiResBaseline(_ handle: HiResHandle) -> Bool {
         lock.withLock {
-            guard hiResEntries[handle.target]?.version == handle.version else {
+            guard hiResEntries[handle.target]?.ownership === handle.ownership else {
                 return false
             }
             hiResEntries.removeValue(forKey: handle.target)
@@ -155,17 +180,16 @@ final class LogitechHardwareBaselineStore {
                 return .init(
                     controlID: controlID,
                     baseline: entry.baseline,
-                    handle: .init(target: target, controlID: controlID, version: entry.version)
+                    handle: .init(target: target, controlID: controlID, ownership: entry.ownership)
                 )
             }
 
-            nextVersion &+= 1
-            let entry = ControlsEntry(baseline: baseline, version: nextVersion)
+            let entry = ControlsEntry(baseline: baseline)
             controlsEntries[target, default: [:]][controlID] = entry
             return .init(
                 controlID: controlID,
                 baseline: baseline,
-                handle: .init(target: target, controlID: controlID, version: entry.version)
+                handle: .init(target: target, controlID: controlID, ownership: entry.ownership)
             )
         }
     }
@@ -181,7 +205,7 @@ final class LogitechHardwareBaselineStore {
             return .init(
                 controlID: controlID,
                 baseline: entry.baseline,
-                handle: .init(target: target, controlID: controlID, version: entry.version)
+                handle: .init(target: target, controlID: controlID, ownership: entry.ownership)
             )
         }
     }
@@ -192,7 +216,7 @@ final class LogitechHardwareBaselineStore {
                 .init(
                     controlID: controlID,
                     baseline: entry.baseline,
-                    handle: .init(target: target, controlID: controlID, version: entry.version)
+                    handle: .init(target: target, controlID: controlID, ownership: entry.ownership)
                 )
             }
         }
@@ -201,7 +225,7 @@ final class LogitechHardwareBaselineStore {
     @discardableResult
     func consumeControlsBaseline(_ handle: ControlsHandle) -> Bool {
         lock.withLock {
-            guard controlsEntries[handle.target]?[handle.controlID]?.version == handle.version else {
+            guard controlsEntries[handle.target]?[handle.controlID]?.ownership === handle.ownership else {
                 return false
             }
             controlsEntries[handle.target]?.removeValue(forKey: handle.controlID)

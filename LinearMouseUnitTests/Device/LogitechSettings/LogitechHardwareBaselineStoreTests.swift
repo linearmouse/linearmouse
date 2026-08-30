@@ -5,7 +5,7 @@
 import XCTest
 
 final class LogitechHardwareBaselineStoreTests: XCTestCase {
-    func testHiResFirstWriterWinsAndStaleHandleCannotConsumeNewBaseline() throws {
+    func testHiResFirstWriterWinsAndStaleOwnershipCannotConsumeReplacement() throws {
         let store = LogitechHardwareBaselineStore()
         let target = try directTarget(serial: "ABC123")
 
@@ -37,12 +37,11 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
 
         let rebuiltSession = LogitechDeviceSession(deviceID: 2)
         let claim = try XCTUnwrap(store.hiResBaseline(for: receiver))
-        rebuiltSession.seedInitialHiResWheelState(enabled: claim.baseline.enabled, route: nil, receiverSlot: nil)
-
-        XCTAssertEqual(rebuiltSession.initialHiResWheelEnabled(
-            requiresReceiverRoute: false,
+        let lease = try XCTUnwrap(rebuiltSession.hiResWheelTargetLease(
             receiverSlot: nil
-        ), false)
+        )            { _, _ in receiver })
+        XCTAssertTrue(rebuiltSession.seedInitialHiResWheelState(claim, for: lease))
+
         XCTAssertTrue(store.consumeHiResBaseline(claim.handle))
         XCTAssertNil(store.hiResBaseline(for: direct))
     }
@@ -128,22 +127,28 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
         XCTAssertNotNil(store.hiResBaseline(for: original))
     }
 
-    func testRouteMismatchedSessionCannotSeedReceiverBaseline() {
+    func testRouteMismatchedSessionCannotSeedReceiverBaseline() throws {
         let session = LogitechDeviceSession(deviceID: 1)
         let current = route(serial: "AAAA")
         let replacement = route(serial: "BBBB")
         _ = session.updateDiscovery(.init(identities: [current.identity], route: current))
-
-        session.seedInitialHiResWheelState(
-            enabled: false,
-            route: replacement,
-            receiverSlot: replacement.slot
-        )
-
-        XCTAssertNil(session.initialHiResWheelEnabled(
-            requiresReceiverRoute: true,
-            receiverSlot: current.slot
+        let store = LogitechHardwareBaselineStore()
+        let replacementTarget = try XCTUnwrap(LogitechHardwareTargetKey.receiver(
+            vendorID: 0x046D,
+            receiverLocationID: replacement.identity.receiverLocationID,
+            identity: replacement.identity
         ))
+        let claim = store.captureHiResBaseline(enabled: false, for: replacementTarget)
+        let currentTarget = try XCTUnwrap(LogitechHardwareTargetKey.receiver(
+            vendorID: 0x046D,
+            receiverLocationID: current.identity.receiverLocationID,
+            identity: current.identity
+        ))
+        let lease = try XCTUnwrap(session.hiResWheelTargetLease(
+            receiverSlot: current.slot
+        )            { _, _ in currentTarget })
+
+        XCTAssertFalse(session.seedInitialHiResWheelState(claim, for: lease))
     }
 
     func testUnconsumedBaselineSurvivesAFailedRestoreAttempt() throws {
@@ -171,12 +176,10 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
         hardwareMode = true
         let rebuiltSession = LogitechDeviceSession(deviceID: 4)
         let claim = try XCTUnwrap(store.hiResBaseline(for: target))
-        rebuiltSession.seedInitialHiResWheelState(enabled: claim.baseline.enabled, route: nil, receiverSlot: nil)
-
-        XCTAssertEqual(rebuiltSession.initialHiResWheelEnabled(
-            requiresReceiverRoute: false,
+        let lease = try XCTUnwrap(rebuiltSession.hiResWheelTargetLease(
             receiverSlot: nil
-        ), false)
+        )            { _, _ in target })
+        XCTAssertTrue(rebuiltSession.seedInitialHiResWheelState(claim, for: lease))
     }
 
     func testLifecycleRestoreRetriesUntilAWriteSucceeds() {

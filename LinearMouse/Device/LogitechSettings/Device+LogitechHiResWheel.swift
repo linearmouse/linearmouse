@@ -320,10 +320,7 @@ extension Device {
             return true
         }
 
-        let initialEnabled = logitechSession.initialHiResWheelEnabled(
-            requiresReceiverRoute: LogitechReceiverRouteResolver.requiresDiscovery(for: pointerDevice),
-            receiverSlot: access.feature.receiverSlot
-        )
+        let initialEnabled = logitechSession.initialHiResWheelEnabled(for: access)
         guard let initialEnabled else {
             logitechSession.invalidateHiResWheel(for: expectedToken)
             return false
@@ -408,7 +405,7 @@ extension Device {
                     for: access
                 )
             } else {
-                let commit = logitechSession.consumeHiResWheelState(for: expectedToken)
+                let commit = logitechSession.consumeHiResWheelState(for: access)
                 consumeStoredHiResWheelBaseline(after: commit)
             }
         } else {
@@ -436,16 +433,17 @@ extension Device {
 
     @discardableResult
     private func seedStoredHiResWheelBaseline(receiverSlot: UInt8?) -> Bool {
-        guard let target = logitechHardwareTargetKey(receiverSlot: receiverSlot),
-              let claim = logitechHardwareBaselineStore?.hiResBaseline(for: target) else {
+        guard let lease = logitechSession.hiResWheelTargetLease(
+            receiverSlot: receiverSlot,
+            stableTargetKey: { [weak self] route, slot in
+                self?.logitechHardwareTargetKey(for: route, receiverSlot: slot)
+            }
+        ),
+            let target = lease.stableTargetKey,
+            let claim = logitechHardwareBaselineStore?.hiResBaseline(for: target) else {
             return false
         }
-        logitechSession.seedInitialHiResWheelState(
-            enabled: claim.baseline.enabled,
-            route: logitechReceiverRouteSnapshot,
-            receiverSlot: receiverSlot,
-            baselineHandle: claim.handle
-        )
+        _ = logitechSession.seedInitialHiResWheelState(claim, for: lease)
         return true
     }
 
@@ -453,17 +451,27 @@ extension Device {
         enabled: Bool,
         for access: LogitechDeviceSession.FeatureAccess<HiResWheel>
     ) {
-        guard let target = logitechHardwareTargetKey(receiverSlot: access.feature.receiverSlot),
-              let store = logitechHardwareBaselineStore else {
-            logitechSession.recordInitialHiResWheelState(enabled: enabled, for: access)
+        _ = logitechSession.recordInitialHiResWheelState(enabled: enabled, for: access)
+        // Discovery may enrich serial metadata while the HID read is in
+        // flight, so promotion always uses a freshly validated lease.
+        promoteHiResWheelBaselineIfPossible()
+    }
+
+    func promoteHiResWheelBaselineIfPossible() {
+        guard let store = logitechHardwareBaselineStore,
+              let lease = logitechSession.hiResWheelTargetLease(
+                  receiverSlot: nil,
+                  stableTargetKey: { [weak self] route, slot in
+                      self?.logitechHardwareTargetKey(for: route, receiverSlot: slot)
+                  }
+              ),
+              let promotion = logitechSession.hiResBaselinePromotion(for: lease)
+        else {
             return
         }
-        let claim = store.captureHiResBaseline(enabled: enabled, for: target)
-        logitechSession.recordInitialHiResWheelState(
-            enabled: claim.baseline.enabled,
-            baselineHandle: claim.handle,
-            for: access
-        )
+
+        let claim = store.captureHiResBaseline(enabled: promotion.enabled, for: promotion.target)
+        _ = logitechSession.attachHiResBaseline(claim, to: promotion)
     }
 
     private func consumeStoredHiResWheelBaseline(

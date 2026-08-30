@@ -5,18 +5,62 @@ import Foundation
 import HIDPP
 
 final class LogitechDeviceSession {
-    /// A controller bound to the cancellation token that created its HID++ transport.
-    /// Superseded operations cannot use a controller from a newer device session.
-    struct FeatureAccess<Feature> {
-        let feature: Feature
+    /// Hardware target invariants:
+    /// 1. A TargetLease is immutable and binds one operation to its token, route,
+    ///    stable target key, and receiver slot.
+    /// 2. A feature result may mutate session state only while that exact lease
+    ///    still belongs to the current route and cancellation token.
+    /// 3. A process-store handle may be attached or consumed only for the stable
+    ///    target carried by the validated lease.
+    /// 4. A stable receiver baseline is quarantined while identity is incomplete,
+    ///    may rebind to the same serial (even in another slot), and is discarded
+    ///    when a different serial is confirmed.
+    /// 5. A receiver baseline without a stable key never crosses route loss.
+    /// 6. Promotion copies the session's saved original mode; it never rereads
+    ///    managed hardware or substitutes a later write's previous mode.
+    struct TargetLease {
+        let route: LogitechReceiverRoute?
+        let stableTargetKey: LogitechHardwareTargetKey?
+        let receiverSlot: UInt8?
         fileprivate let token: CancellationToken
     }
 
-    private struct InitialHiResWheelState {
-        let route: LogitechReceiverRoute?
+    struct FeatureBinding<Feature> {
+        let feature: Feature
+        let stableTargetKey: LogitechHardwareTargetKey?
         let receiverSlot: UInt8?
+    }
+
+    struct FeatureAccess<Feature> {
+        let feature: Feature
+        let lease: TargetLease
+
+        fileprivate var token: CancellationToken {
+            lease.token
+        }
+    }
+
+    fileprivate final class InitialHiResWheelState {
+        var lease: TargetLease
+        var enabled: Bool
+        var baselineHandle: LogitechHardwareBaselineStore.HiResHandle?
+
+        init(
+            lease: TargetLease,
+            enabled: Bool,
+            baselineHandle: LogitechHardwareBaselineStore.HiResHandle?
+        ) {
+            self.lease = lease
+            self.enabled = enabled
+            self.baselineHandle = baselineHandle
+        }
+    }
+
+    struct HiResBaselinePromotion {
         let enabled: Bool
-        let baselineHandle: LogitechHardwareBaselineStore.HiResHandle?
+        let target: LogitechHardwareTargetKey
+        fileprivate let initialState: InitialHiResWheelState
+        fileprivate let currentLease: TargetLease
     }
 
     enum HiResWheelCommit {
@@ -26,8 +70,8 @@ final class LogitechDeviceSession {
 
     private struct State {
         var discovery: LogitechReceiverDiscovery?
-        var adjustableDPI: AdjustableDPI?
-        var hiResWheel: HiResWheel?
+        var adjustableDPI: FeatureAccess<AdjustableDPI>?
+        var hiResWheel: FeatureAccess<HiResWheel>?
         var dpiCancellationSource = CancellationSource()
         var hiResWheelCancellationSource = CancellationSource()
         var sensorDPI: Int?
@@ -104,20 +148,58 @@ final class LogitechDeviceSession {
         let wheelCoordinator = hiResWheelApplyCoordinator
         let update = withState { state -> (DiscoveryUpdate, CancellationSource?, CancellationSource?) in
             let previousDiscovery = state.discovery
-            let hardwareTargetChanged = LogitechReceiverRoute.hardwareTargetChanged(
-                from: previousDiscovery?.route,
-                to: discovery?.route
-            )
+            let previousRoute = previousDiscovery?.route
+            let currentRoute = discovery?.route
+            let routeIdentityChanged = previousRoute != currentRoute
+            var hardwareTargetChanged = !Self.routeCanContinue(from: previousRoute, to: currentRoute)
             let candidateAvailabilityChanged = previousDiscovery?.identities.isEmpty
                 != discovery?.identities.isEmpty
+
+            let previousInitialStateUsable = state.initialHiResWheelState.map {
+                Self.initialStateRelation($0, to: previousRoute) == .compatible
+            } ?? false
             state.discovery = discovery
-            if let initialState = state.initialHiResWheelState,
-               let route = discovery?.route,
-               LogitechReceiverRoute.hardwareTargetChanged(from: initialState.route, to: route) {
+
+            if currentRoute == nil,
+               let initialState = state.initialHiResWheelState,
+               initialState.lease.route != nil,
+               initialState.lease.stableTargetKey == nil {
                 state.initialHiResWheelState = nil
             }
 
+            var stableInitialToRebind: InitialHiResWheelState?
+            if let initialState = state.initialHiResWheelState, let currentRoute {
+                switch Self.initialStateRelation(initialState, to: currentRoute) {
+                case .different:
+                    state.initialHiResWheelState = nil
+                    hardwareTargetChanged = true
+                case .compatible:
+                    if initialState.lease.stableTargetKey != nil {
+                        stableInitialToRebind = initialState
+                    }
+                    if !previousInitialStateUsable {
+                        hardwareTargetChanged = true
+                    }
+                case .ambiguous:
+                    break
+                }
+            }
+
+            if routeIdentityChanged {
+                // The controller may remain usable across metadata enrichment,
+                // but its immutable lease cannot. Recreate access lazily.
+                state.adjustableDPI = nil
+                state.hiResWheel = nil
+            }
+
             guard hardwareTargetChanged else {
+                if let stableInitialToRebind, let currentRoute {
+                    stableInitialToRebind.lease = Self.reboundLease(
+                        stableInitialToRebind.lease,
+                        route: currentRoute,
+                        token: state.hiResWheelCancellationSource.token
+                    )
+                }
                 return (
                     .init(
                         hardwareTargetChanged: false,
@@ -140,6 +222,13 @@ final class LogitechDeviceSession {
             state.hiResWheelMultiplier = nil
             dpiCoordinator.cancel()
             wheelCoordinator.cancel()
+            if let stableInitialToRebind, let currentRoute {
+                stableInitialToRebind.lease = Self.reboundLease(
+                    stableInitialToRebind.lease,
+                    route: currentRoute,
+                    token: state.hiResWheelCancellationSource.token
+                )
+            }
             return (
                 .init(
                     hardwareTargetChanged: true,
@@ -262,8 +351,11 @@ final class LogitechDeviceSession {
 
     func updateSensorDPI(_ dpi: Int, for access: FeatureAccess<AdjustableDPI>) {
         withState { state in
-            guard state.dpiCancellationSource.token == access.token,
-                  access.token.shouldContinue else {
+            guard Self.accessIsCurrent(
+                access,
+                token: state.dpiCancellationSource.token,
+                route: state.discovery?.route
+            ) else {
                 return
             }
             state.sensorDPI = dpi
@@ -289,8 +381,7 @@ final class LogitechDeviceSession {
         for access: FeatureAccess<HiResWheel>
     ) {
         withState { state in
-            guard state.hiResWheelCancellationSource.token == access.token,
-                  access.token.shouldContinue else {
+            guard Self.accessIsCurrent(access, in: state) else {
                 return
             }
             state.hiResWheelEnabled = enabled
@@ -298,74 +389,128 @@ final class LogitechDeviceSession {
         }
     }
 
+    @discardableResult
     func recordInitialHiResWheelState(
         enabled: Bool,
-        baselineHandle: LogitechHardwareBaselineStore.HiResHandle? = nil,
         for access: FeatureAccess<HiResWheel>
-    ) {
+    ) -> Bool {
         withState { state in
-            guard state.hiResWheelCancellationSource.token == access.token,
-                  access.token.shouldContinue,
+            guard Self.accessIsCurrent(access, in: state),
                   state.initialHiResWheelState == nil else {
-                return
+                return false
             }
             state.initialHiResWheelState = .init(
-                route: state.discovery?.route,
-                receiverSlot: access.feature.receiverSlot,
+                lease: access.lease,
                 enabled: enabled,
-                baselineHandle: baselineHandle
+                baselineHandle: nil
             )
+            return true
         }
     }
 
     /// Seeds a rebuilt session from a process-lifetime hardware baseline. The
-    /// current discovery route must agree so a receiver replacement can never
-    /// inherit another target's original mode.
+    /// lease must still be current so a receiver replacement can never inherit
+    /// another target's original mode.
+    @discardableResult
     func seedInitialHiResWheelState(
-        enabled: Bool,
-        route: LogitechReceiverRoute?,
-        receiverSlot: UInt8?,
-        baselineHandle: LogitechHardwareBaselineStore.HiResHandle? = nil
-    ) {
+        _ claim: LogitechHardwareBaselineStore.HiResClaim,
+        for lease: TargetLease
+    ) -> Bool {
         withState { state in
             guard state.initialHiResWheelState == nil,
-                  !LogitechReceiverRoute.hardwareTargetChanged(
-                      from: state.discovery?.route,
-                      to: route
-                  )
+                  Self.leaseIsCurrent(lease, in: state),
+                  lease.stableTargetKey.map({ claim.handle.belongs(to: $0) }) == true
             else {
-                return
+                return false
             }
             state.initialHiResWheelState = .init(
-                route: route,
-                receiverSlot: receiverSlot,
-                enabled: enabled,
-                baselineHandle: baselineHandle
+                lease: lease,
+                enabled: claim.baseline.enabled,
+                baselineHandle: claim.handle
             )
+            return true
         }
     }
 
-    func initialHiResWheelEnabled(
-        requiresReceiverRoute: Bool,
-        receiverSlot: UInt8?
-    ) -> Bool? {
+    func initialHiResWheelEnabled(for access: FeatureAccess<HiResWheel>) -> Bool? {
         withState { state in
-            guard let initialState = state.initialHiResWheelState else {
-                return nil
-            }
-
-            let currentRoute = state.discovery?.route
-            if requiresReceiverRoute, currentRoute == nil {
-                return nil
-            }
-            guard !LogitechReceiverRoute.hardwareTargetChanged(
-                from: initialState.route,
-                to: currentRoute
-            ), initialState.receiverSlot == receiverSlot
+            guard let initialState = state.initialHiResWheelState,
+                  Self.accessIsCurrent(access, in: state),
+                  Self.initialState(initialState, matches: access.lease),
+                  Self.initialStateRelation(initialState, to: state.discovery?.route) == .compatible
             else {
                 return nil
             }
             return initialState.enabled
+        }
+    }
+
+    /// Captures route, stable key, slot, and cancellation ownership under the
+    /// session lock. The key provider must derive identity only from its inputs.
+    func hiResWheelTargetLease(
+        receiverSlot: UInt8?,
+        stableTargetKey: (LogitechReceiverRoute?, UInt8?) -> LogitechHardwareTargetKey?
+    ) -> TargetLease? {
+        withState { state in
+            let token = state.hiResWheelCancellationSource.token
+            guard token.shouldContinue else {
+                return nil
+            }
+            let route = state.discovery?.route
+            guard route.map({ receiverSlot == nil || $0.slot == receiverSlot }) ?? true else {
+                return nil
+            }
+            let resolvedSlot = receiverSlot ?? route?.slot
+            return .init(
+                route: route,
+                stableTargetKey: stableTargetKey(route, resolvedSlot),
+                receiverSlot: resolvedSlot,
+                token: token
+            )
+        }
+    }
+
+    func hiResBaselinePromotion(for lease: TargetLease) -> HiResBaselinePromotion? {
+        withState { state in
+            guard let initialState = state.initialHiResWheelState,
+                  initialState.baselineHandle == nil,
+                  let stableTargetKey = lease.stableTargetKey,
+                  Self.leaseIsCurrent(lease, in: state),
+                  Self.initialStateRelation(initialState, to: lease.route) == .compatible,
+                  initialState.lease.stableTargetKey.map({ $0 == stableTargetKey }) ?? true
+            else {
+                return nil
+            }
+            return .init(
+                enabled: initialState.enabled,
+                target: stableTargetKey,
+                initialState: initialState,
+                currentLease: lease
+            )
+        }
+    }
+
+    @discardableResult
+    func attachHiResBaseline(
+        _ claim: LogitechHardwareBaselineStore.HiResClaim,
+        to promotion: HiResBaselinePromotion
+    ) -> Bool {
+        withState { state in
+            guard state.initialHiResWheelState === promotion.initialState,
+                  promotion.initialState.baselineHandle == nil,
+                  claim.handle.belongs(to: promotion.target),
+                  Self.leaseIsCurrent(promotion.currentLease, in: state),
+                  Self.initialStateRelation(
+                      promotion.initialState,
+                      to: state.discovery?.route
+                  ) == .compatible
+            else {
+                return false
+            }
+            promotion.initialState.lease = promotion.currentLease
+            promotion.initialState.enabled = claim.baseline.enabled
+            promotion.initialState.baselineHandle = claim.handle
+            return true
         }
     }
 
@@ -413,11 +558,14 @@ final class LogitechDeviceSession {
         for access: FeatureAccess<HiResWheel>
     ) -> HiResWheelCommit {
         withState { state -> HiResWheelCommit in
-            guard state.hiResWheelCancellationSource.token == access.token,
-                  access.token.shouldContinue else {
+            guard let initialState = state.initialHiResWheelState,
+                  Self.accessIsCurrent(access, in: state),
+                  Self.initialState(initialState, matches: access.lease),
+                  Self.initialStateRelation(initialState, to: state.discovery?.route) == .compatible
+            else {
                 return .rejected
             }
-            let baselineHandle = state.initialHiResWheelState?.baselineHandle
+            let baselineHandle = initialState.baselineHandle
             state.hiResWheelEnabled = enabled
             state.hiResWheelMultiplier = enabled ? multiplier : nil
             state.initialHiResWheelState = nil
@@ -429,13 +577,16 @@ final class LogitechDeviceSession {
     /// Used by lifecycle teardown, which intentionally clears runtime cache
     /// rather than retaining the restored mode for normalization.
     @discardableResult
-    func consumeHiResWheelState(for token: CancellationToken) -> HiResWheelCommit {
+    func consumeHiResWheelState(for access: FeatureAccess<HiResWheel>) -> HiResWheelCommit {
         withState { state -> HiResWheelCommit in
-            guard state.hiResWheelCancellationSource.token == token,
-                  token.shouldContinue else {
+            guard let initialState = state.initialHiResWheelState,
+                  Self.accessIsCurrent(access, in: state),
+                  Self.initialState(initialState, matches: access.lease),
+                  Self.initialStateRelation(initialState, to: state.discovery?.route) == .compatible
+            else {
                 return .rejected
             }
-            let baselineHandle = state.initialHiResWheelState?.baselineHandle
+            let baselineHandle = initialState.baselineHandle
             state.hiResWheel = nil
             state.hiResWheelEnabled = nil
             state.hiResWheelMultiplier = nil
@@ -454,8 +605,9 @@ final class LogitechDeviceSession {
         }
     }
 
+    @discardableResult
     private func resetFeatureOperation<Feature>(
-        cache: WritableKeyPath<State, Feature?>,
+        cache: WritableKeyPath<State, FeatureAccess<Feature>?>,
         cancellationSource: WritableKeyPath<State, CancellationSource>,
         mutateState: (inout State) -> Void = { _ in },
         updateCoordinator: (CancellationToken) -> Void
@@ -475,7 +627,7 @@ final class LogitechDeviceSession {
 
     @discardableResult
     private func runFeatureOperation<Feature>(
-        cache: WritableKeyPath<State, Feature?>,
+        cache: WritableKeyPath<State, FeatureAccess<Feature>?>,
         cancellationSource: WritableKeyPath<State, CancellationSource>,
         coordinator: HardwareSettingApplyCoordinator,
         waitUntilFinished: Bool,
@@ -530,7 +682,7 @@ final class LogitechDeviceSession {
 
     func adjustableDPI(
         expectedToken: CancellationToken? = nil,
-        create: (LogitechReceiverRoute?, CancellationToken) -> AdjustableDPI?
+        create: (LogitechReceiverRoute?, CancellationToken) -> FeatureBinding<AdjustableDPI>?
     ) -> FeatureAccess<AdjustableDPI>? {
         feature(
             cache: \State.adjustableDPI,
@@ -542,9 +694,18 @@ final class LogitechDeviceSession {
 
     func hiResWheel(
         expectedToken: CancellationToken? = nil,
-        create: (LogitechReceiverRoute?, CancellationToken) -> HiResWheel?
+        create: (LogitechReceiverRoute?, CancellationToken) -> FeatureBinding<HiResWheel>?
     ) -> FeatureAccess<HiResWheel>? {
-        feature(
+        let admitted = withState { state in
+            guard let initialState = state.initialHiResWheelState else {
+                return true
+            }
+            return Self.initialStateRelation(initialState, to: state.discovery?.route) == .compatible
+        }
+        guard admitted else {
+            return nil
+        }
+        return feature(
             cache: \State.hiResWheel,
             cancellationSource: \State.hiResWheelCancellationSource,
             expectedToken: expectedToken,
@@ -567,10 +728,10 @@ final class LogitechDeviceSession {
     }
 
     private func feature<Feature>(
-        cache: WritableKeyPath<State, Feature?>,
+        cache: WritableKeyPath<State, FeatureAccess<Feature>?>,
         cancellationSource: KeyPath<State, CancellationSource>,
         expectedToken: CancellationToken?,
-        create: (LogitechReceiverRoute?, CancellationToken) -> Feature?
+        create: (LogitechReceiverRoute?, CancellationToken) -> FeatureBinding<Feature>?
     ) -> FeatureAccess<Feature>? {
         let snapshot = withState { state in
             (
@@ -586,23 +747,155 @@ final class LogitechDeviceSession {
             return nil
         }
         if let cached = snapshot.cached {
-            return .init(feature: cached, token: snapshot.token)
+            return cached
         }
 
-        guard let feature = create(snapshot.route, snapshot.token)
+        guard let binding = create(snapshot.route, snapshot.token)
         else {
             return nil
         }
 
         return withState { state in
             let currentToken = state[keyPath: cancellationSource].token
-            guard currentToken == snapshot.token, currentToken.shouldContinue else {
+            guard currentToken == snapshot.token,
+                  currentToken.shouldContinue,
+                  snapshot.route == state.discovery?.route
+            else {
                 return nil
             }
 
-            state[keyPath: cache] = feature
-            return .init(feature: feature, token: currentToken)
+            let access = FeatureAccess(
+                feature: binding.feature,
+                lease: .init(
+                    route: snapshot.route,
+                    stableTargetKey: binding.stableTargetKey,
+                    receiverSlot: binding.receiverSlot,
+                    token: currentToken
+                )
+            )
+            state[keyPath: cache] = access
+            return access
         }
+    }
+
+    private static func accessIsCurrent<Feature>(
+        _ access: FeatureAccess<Feature>,
+        token: CancellationToken,
+        route: LogitechReceiverRoute?
+    ) -> Bool {
+        access.token == token
+            && access.token.shouldContinue
+            && routeCanContinue(from: access.lease.route, to: route)
+    }
+
+    private static func accessIsCurrent(
+        _ access: FeatureAccess<HiResWheel>,
+        in state: State
+    ) -> Bool {
+        accessIsCurrent(
+            access,
+            token: state.hiResWheelCancellationSource.token,
+            route: state.discovery?.route
+        )
+    }
+
+    private static func leaseIsCurrent(_ lease: TargetLease, in state: State) -> Bool {
+        lease.token == state.hiResWheelCancellationSource.token
+            && lease.token.shouldContinue
+            && routeCanContinue(from: lease.route, to: state.discovery?.route)
+    }
+
+    /// Directional compatibility for an operation that started at `previous`.
+    /// Metadata may be enriched, but known identity cannot be downgraded.
+    private static func routeCanContinue(
+        from previous: LogitechReceiverRoute?,
+        to current: LogitechReceiverRoute?
+    ) -> Bool {
+        guard let previous, let current else {
+            return previous == nil && current == nil
+        }
+        guard previous.slot == current.slot,
+              previous.identity.receiverLocationID == current.identity.receiverLocationID else {
+            return false
+        }
+
+        let previousSerial = normalizedSerial(previous.identity.serialNumber)
+        let currentSerial = normalizedSerial(current.identity.serialNumber)
+        if let previousSerial {
+            return currentSerial == previousSerial
+        }
+        if let previousProductID = previous.identity.productID,
+           let currentProductID = current.identity.productID,
+           previousProductID != currentProductID {
+            return false
+        }
+        return true
+    }
+
+    private enum InitialStateRelation {
+        case compatible
+        case ambiguous
+        case different
+    }
+
+    private static func initialState(
+        _ initialState: InitialHiResWheelState,
+        matches lease: TargetLease
+    ) -> Bool {
+        guard initialState.lease.receiverSlot == lease.receiverSlot else {
+            return false
+        }
+        return initialState.lease.stableTargetKey.map { $0 == lease.stableTargetKey } ?? true
+    }
+
+    private static func initialStateRelation(
+        _ initialState: InitialHiResWheelState,
+        to currentRoute: LogitechReceiverRoute?
+    ) -> InitialStateRelation {
+        guard let initialRoute = initialState.lease.route else {
+            return currentRoute == nil ? .compatible : .different
+        }
+        guard let currentRoute else {
+            return .ambiguous
+        }
+        if let initialSerial = normalizedSerial(initialRoute.identity.serialNumber) {
+            guard let currentSerial = normalizedSerial(currentRoute.identity.serialNumber) else {
+                return .ambiguous
+            }
+            return currentSerial == initialSerial ? .compatible : .different
+        }
+        guard initialRoute.slot == currentRoute.slot,
+              initialRoute.identity.receiverLocationID == currentRoute.identity.receiverLocationID,
+              initialState.lease.receiverSlot == currentRoute.slot else {
+            return .different
+        }
+        if let initialProductID = initialRoute.identity.productID,
+           let currentProductID = currentRoute.identity.productID,
+           initialProductID != currentProductID {
+            return .different
+        }
+        return .compatible
+    }
+
+    private static func reboundLease(
+        _ lease: TargetLease,
+        route: LogitechReceiverRoute,
+        token: CancellationToken
+    ) -> TargetLease {
+        .init(
+            route: route,
+            stableTargetKey: lease.stableTargetKey,
+            receiverSlot: route.slot,
+            token: token
+        )
+    }
+
+    private static func normalizedSerial(_ serial: String?) -> String? {
+        guard let serial else {
+            return nil
+        }
+        let normalized = serial.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        return normalized.isEmpty ? nil : normalized
     }
 
     private static func makeApplyCoordinator(queue: DispatchQueue) -> HardwareSettingApplyCoordinator {
