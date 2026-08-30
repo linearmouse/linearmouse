@@ -2,6 +2,7 @@
 // Copyright (c) 2021-2026 LinearMouse
 
 import Foundation
+import HIDPP
 import os.log
 
 extension Device {
@@ -17,8 +18,7 @@ extension Device {
     }
 
     func applyConfiguredHighResolutionWheel(_ enabled: Bool) {
-        logitechSession.renewHiResWheelTransport()
-        logitechSession.hiResWheelApplyCoordinator.start { [weak self] attempt in
+        logitechSession.startHiResWheelApply { [weak self] attempt, token in
             guard let self, !isRemoved, attempt.shouldContinue() else {
                 return false
             }
@@ -26,6 +26,7 @@ extension Device {
             let start = Date()
             let applied = applyHighResolutionWheelSynchronously(
                 enabled,
+                expectedToken: token,
                 verifiesCachedValue: attempt.verifiesCachedValue
             )
             guard !isRemoved, attempt.shouldContinue() else {
@@ -67,7 +68,7 @@ extension Device {
     }
 
     func refreshHighResolutionWheelInfo(completion: @escaping (HighResolutionWheelInfo) -> Void) {
-        logitechSession.queue.async {
+        logitechSession.perform {
             let info = self.highResolutionWheelInfo
 
             DispatchQueue.main.async {
@@ -85,14 +86,15 @@ extension Device {
     }
 
     private var highResolutionWheelInfo: HighResolutionWheelInfo {
-        guard !isRemoved, let controller = logitechHiResWheel else {
+        guard !isRemoved, let access = logitechHiResWheel else {
             return unsupportedHighResolutionWheelInfo
         }
 
+        let controller = access.feature
         let capabilities = controller.capabilities()
         let enabled = controller.isHighResolutionWheelEnabled()
         let multiplier = capabilities.map { Int($0.multiplier) }
-        updateHighResolutionWheelCache(enabled: enabled, multiplier: multiplier)
+        updateHighResolutionWheelCache(enabled: enabled, multiplier: multiplier, for: access)
 
         return HighResolutionWheelInfo(
             supportsHighResolutionWheel: true,
@@ -103,14 +105,16 @@ extension Device {
 
     private func applyHighResolutionWheelSynchronously(
         _ enabled: Bool,
+        expectedToken: CancellationToken,
         verifiesCachedValue: Bool = false
     ) -> Bool? {
         guard !isRemoved,
-              let controller = logitechHiResWheel else {
+              let access = logitechHiResWheel(for: expectedToken) else {
             return nil
         }
 
-        let cachedEnabled = logitechSession.withState { $0.hiResWheelEnabled }
+        let controller = access.feature
+        let cachedEnabled = logitechSession.hiResWheelEnabled
 
         if cachedEnabled == enabled {
             if !verifiesCachedValue || controller.isHighResolutionWheelEnabled() == enabled {
@@ -123,82 +127,63 @@ extension Device {
             return nil
         }
 
-        logitechSession.withState { state in
-            if state.initialHiResWheelEnabled == nil {
-                state.initialHiResWheelEnabled = result.previousEnabled
-            }
-        }
+        logitechSession.recordInitialHiResWheelState(enabled: result.previousEnabled, for: access)
 
         updateHighResolutionWheelCache(
             enabled: result.appliedEnabled,
-            multiplier: result.appliedEnabled ? capabilities.map { Int($0.multiplier) } : nil
+            multiplier: result.appliedEnabled ? capabilities.map { Int($0.multiplier) } : nil,
+            for: access
         )
 
         return result.appliedEnabled
     }
 
     var highResolutionWheelNormalizationMultiplier: Int? {
-        let multiplier = logitechSession.withState { state -> Int? in
-            guard state.hiResWheelEnabled == true,
-                  let multiplier = state.hiResWheelMultiplier else {
-                return nil
-            }
-            return multiplier
-        }
-        guard let multiplier, multiplier > 1 else {
-            return nil
-        }
-
-        return multiplier
+        logitechSession.hiResWheelNormalizationMultiplier
     }
 
-    func restoreHighResolutionWheel() {
-        logitechSession.hiResWheelApplyCoordinator.cancel()
-        logitechSession.renewHiResWheelTransport()
-        logitechSession.queue.async { [weak self] in
-            self?.restoreHighResolutionWheelSynchronously()
+    func restoreHighResolutionWheel(waitUntilFinished: Bool) {
+        logitechSession.runHiResWheelOperation(waitUntilFinished: waitUntilFinished) { [weak self] token in
+            guard let self else {
+                return
+            }
+            restoreHighResolutionWheelSynchronously(expectedToken: token)
         }
     }
 
     func prepareHighResolutionWheelForReconnect() {
-        logitechSession.hiResWheelApplyCoordinator.cancel()
-        logitechSession.renewHiResWheelTransport()
-        logitechSession.withState {
-            $0.hiResWheelEnabled = nil
-            $0.hiResWheelMultiplier = nil
-        }
+        logitechSession.cancelHiResWheelApply()
+        logitechSession.clearHiResWheelState(includingInitialState: false)
     }
 
-    private func restoreHighResolutionWheelSynchronously() {
-        guard !isRemoved,
-              let controller = logitechHiResWheel else {
+    private func restoreHighResolutionWheelSynchronously(expectedToken: CancellationToken) {
+        let initialEnabled = logitechSession.initialHiResWheelEnabled(
+            requiresReceiverRoute: LogitechReceiverRouteResolver.requiresDiscovery(for: pointerDevice)
+        )
+        guard let initialEnabled,
+              !isRemoved,
+              let access = logitechHiResWheel(for: expectedToken) else {
             clearHighResolutionWheelCache()
             logitechSession.invalidateHiResWheel()
             return
         }
 
-        let initialEnabled = logitechSession.withState { $0.initialHiResWheelEnabled }
-
-        if let initialEnabled {
-            _ = controller.setHighResolutionWheelEnabled(initialEnabled)
-        }
+        let controller = access.feature
+        _ = controller.setHighResolutionWheelEnabled(initialEnabled)
 
         logitechSession.invalidateHiResWheel()
         clearHighResolutionWheelCache()
     }
 
     private func clearHighResolutionWheelCache() {
-        logitechSession.withState {
-            $0.hiResWheelEnabled = nil
-            $0.hiResWheelMultiplier = nil
-            $0.initialHiResWheelEnabled = nil
-        }
+        logitechSession.clearHiResWheelState(includingInitialState: true)
     }
 
-    private func updateHighResolutionWheelCache(enabled: Bool?, multiplier: Int?) {
-        logitechSession.withState {
-            $0.hiResWheelEnabled = enabled
-            $0.hiResWheelMultiplier = enabled == true ? multiplier : nil
-        }
+    private func updateHighResolutionWheelCache(
+        enabled: Bool?,
+        multiplier: Int?,
+        for access: LogitechDeviceSession.FeatureAccess<HiResWheel>
+    ) {
+        logitechSession.updateHiResWheelState(enabled: enabled, multiplier: multiplier, for: access)
     }
 }

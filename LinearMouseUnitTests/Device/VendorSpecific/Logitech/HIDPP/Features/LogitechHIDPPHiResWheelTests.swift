@@ -40,7 +40,10 @@ final class HiResWheelTests: XCTestCase {
             }
         }
 
-        let controller = HiResWheel(device: device)
+        let controller = HiResWheel(
+            device: device,
+            receiverSlot: nil
+        ) { true }
 
         XCTAssertEqual(controller?.capabilities(), .init(multiplier: 8, flags: 0x0C))
         XCTAssertEqual(controller?.isHighResolutionWheelEnabled(), false)
@@ -75,7 +78,10 @@ final class HiResWheelTests: XCTestCase {
             }
         }
 
-        let controller = HiResWheel(device: device)
+        let controller = HiResWheel(
+            device: device,
+            receiverSlot: nil
+        ) { true }
 
         XCTAssertEqual(controller?.setHighResolutionWheelEnabled(true), true)
         XCTAssertEqual(device.outputReportRequestCount, 2)
@@ -111,7 +117,10 @@ final class HiResWheelTests: XCTestCase {
             }
         }
 
-        let controller = HiResWheel(device: device)
+        let controller = HiResWheel(
+            device: device,
+            receiverSlot: nil
+        ) { true }
         let requestCount = device.outputReportRequestCount
 
         XCTAssertEqual(
@@ -138,7 +147,10 @@ final class HiResWheelTests: XCTestCase {
             return Self.hidppLongReply(featureIndex: 0x00, address: 0x08, payload: [0x00])
         }
 
-        XCTAssertNil(HiResWheel(device: device))
+        XCTAssertNil(HiResWheel(
+            device: device,
+            receiverSlot: nil
+        ) { true })
     }
 
     func testReadsAndWritesHighResolutionWheelModeThroughReceiverSlot() {
@@ -205,7 +217,10 @@ final class HiResWheelTests: XCTestCase {
             maxOutputReportSize: 20
         )
 
-        XCTAssertNil(HiResWheel(device: device))
+        XCTAssertNil(HiResWheel(
+            device: device,
+            receiverSlot: nil
+        ) { true })
         XCTAssertEqual(device.outputReportRequestCount, 0)
     }
 

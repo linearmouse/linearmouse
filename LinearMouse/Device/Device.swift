@@ -38,8 +38,20 @@ class Device {
     private var logitechReprogrammableControlsMonitor: LogitechReprogrammableControlsMonitor?
     lazy var logitechSession = LogitechDeviceSession(deviceID: id)
 
-    var logitechAdjustableDPI: AdjustableDPI? {
-        logitechSession.adjustableDPI { [weak self] route, token in
+    var logitechAdjustableDPI: LogitechDeviceSession.FeatureAccess<AdjustableDPI>? {
+        logitechAdjustableDPI(expectedToken: nil)
+    }
+
+    func logitechAdjustableDPI(
+        for token: CancellationToken
+    ) -> LogitechDeviceSession.FeatureAccess<AdjustableDPI>? {
+        logitechAdjustableDPI(expectedToken: token)
+    }
+
+    private func logitechAdjustableDPI(
+        expectedToken: CancellationToken?
+    ) -> LogitechDeviceSession.FeatureAccess<AdjustableDPI>? {
+        logitechSession.adjustableDPI(expectedToken: expectedToken) { [weak self] route, token in
             guard let self else {
                 return nil
             }
@@ -53,8 +65,20 @@ class Device {
         }
     }
 
-    var logitechHiResWheel: HiResWheel? {
-        logitechSession.hiResWheel { [weak self] route, token in
+    var logitechHiResWheel: LogitechDeviceSession.FeatureAccess<HiResWheel>? {
+        logitechHiResWheel(expectedToken: nil)
+    }
+
+    func logitechHiResWheel(
+        for token: CancellationToken
+    ) -> LogitechDeviceSession.FeatureAccess<HiResWheel>? {
+        logitechHiResWheel(expectedToken: token)
+    }
+
+    private func logitechHiResWheel(
+        expectedToken: CancellationToken?
+    ) -> LogitechDeviceSession.FeatureAccess<HiResWheel>? {
+        logitechSession.hiResWheel(expectedToken: expectedToken) { [weak self] route, token in
             guard let self else {
                 return nil
             }
@@ -205,7 +229,7 @@ class Device {
     }
 
     func requestLogitechControlsForcedReconfiguration() {
-        logitechSession.queue.async { [weak self] in
+        logitechSession.perform { [weak self] in
             DispatchQueue.main.async {
                 guard let self, !self.isRemoved else {
                     return
@@ -408,9 +432,16 @@ extension Device {
         device.pointerResolution = initialPointerResolution
     }
 
-    func restorePointerAccelerationAndPointerSpeed() {
+    func restorePointerAccelerationAndPointerSpeed(
+        restoringHighResolutionWheel: Bool = true,
+        waitForHighResolutionWheelRestore: Bool = false
+    ) {
         restoreSensorDPI()
-        restoreHighResolutionWheel()
+        if restoringHighResolutionWheel {
+            restoreHighResolutionWheel(waitUntilFinished: waitForHighResolutionWheelRestore)
+        } else {
+            prepareHighResolutionWheelForReconnect()
+        }
         restorePointerSpeed()
         restorePointerAcceleration()
     }

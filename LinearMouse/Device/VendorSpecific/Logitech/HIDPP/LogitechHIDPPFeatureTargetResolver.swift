@@ -11,32 +11,6 @@ enum LogitechHIDPPFeatureTargetResolver {
         let featureIndex: UInt8
     }
 
-    static func resolve(
-        _ featureID: HIDPPFeatureID,
-        for device: VendorSpecificDeviceContext
-    ) -> Target? {
-        guard device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID,
-              [PointerDeviceTransportName.usb, PointerDeviceTransportName.bluetoothLowEnergy]
-              .contains(device.transport)
-        else {
-            return nil
-        }
-
-        let provider = LogitechHIDPPDeviceMetadataProvider()
-        if !LogitechHIDPPDeviceMetadataProvider.isKnownReceiver(
-            vendorID: device.vendorID,
-            productID: device.productID
-        ), let directTarget = directTarget(featureID, for: device) {
-            return directTarget
-        }
-
-        if let receiverTarget = receiverTarget(featureID, for: device, provider: provider) {
-            return receiverTarget
-        }
-
-        return directTarget(featureID, for: device)
-    }
-
     /// Resolves a production device using the receiver monitor's route. Monitored
     /// receivers deliberately remain unavailable until discovery supplies a slot.
     static func resolve(
@@ -187,14 +161,6 @@ enum LogitechHIDPPFeatureTargetResolver {
 }
 
 extension HIDPPFeature {
-    init?(device: VendorSpecificDeviceContext) {
-        guard let target = LogitechHIDPPFeatureTargetResolver.resolve(Self.featureID, for: device) else {
-            return nil
-        }
-
-        self.init(transport: target.transport, featureIndex: target.featureIndex)
-    }
-
     init?(
         device: VendorSpecificDeviceContext,
         receiverSlot: UInt8?,

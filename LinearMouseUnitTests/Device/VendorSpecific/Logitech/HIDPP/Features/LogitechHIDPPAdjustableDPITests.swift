@@ -149,7 +149,10 @@ final class AdjustableDPITests: XCTestCase {
             }
         }
 
-        let controller = AdjustableDPI(device: device)
+        let controller = AdjustableDPI(
+            device: device,
+            receiverSlot: nil
+        ) { true }
 
         XCTAssertEqual(controller?.supportedDPI, [800, 1600])
         XCTAssertEqual(controller?.currentDPI(), 800)
@@ -194,7 +197,10 @@ final class AdjustableDPITests: XCTestCase {
             }
         }
 
-        let controller = AdjustableDPI(device: device)
+        let controller = AdjustableDPI(
+            device: device,
+            receiverSlot: nil
+        ) { true }
 
         XCTAssertEqual(controller?.supportedDPI, [800, 1600])
         XCTAssertEqual(controller?.dpiRange, 800 ... 1600)
@@ -236,7 +242,10 @@ final class AdjustableDPITests: XCTestCase {
             }
         }
 
-        let controller = AdjustableDPI(device: device)
+        let controller = AdjustableDPI(
+            device: device,
+            receiverSlot: nil
+        ) { true }
 
         XCTAssertEqual(controller?.supportedDPI, [1000])
         XCTAssertEqual(controller?.dpiRange, 1000 ... 1000)
@@ -283,7 +292,10 @@ final class AdjustableDPITests: XCTestCase {
             }
         }
 
-        let controller = AdjustableDPI(device: device)
+        let controller = AdjustableDPI(
+            device: device,
+            receiverSlot: nil
+        ) { true }
 
         let requestCount = device.sentReports.count
         let requestOnceCount = device.outputReportRequestOnceCount
@@ -502,7 +514,10 @@ final class AdjustableDPITests: XCTestCase {
             }
         }
 
-        let controller = AdjustableDPI(device: device)
+        let controller = AdjustableDPI(
+            device: device,
+            receiverSlot: nil
+        ) { true }
 
         XCTAssertEqual(controller?.currentDPI(), 1000)
     }

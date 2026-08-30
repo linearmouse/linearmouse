@@ -67,7 +67,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        stop()
+        stop(restoringHighResolutionWheel: true)
     }
 }
 
@@ -95,7 +95,7 @@ extension AppDelegate {
         ) { [weak self] _ in
             os_log("Session inactive", log: Self.log, type: .info)
             self?.sessionActive = false
-            self?.stop()
+            self?.stop(restoringHighResolutionWheel: true)
         }
 
         NSWorkspace.shared.notificationCenter.addObserver(
@@ -116,7 +116,7 @@ extension AppDelegate {
         ) { [weak self] _ in
             os_log("System will sleep", log: Self.log, type: .info)
             self?.sleeping = true
-            self?.stop()
+            self?.stop(restoringHighResolutionWheel: false)
         }
 
         NSWorkspace.shared.notificationCenter.addObserver(
@@ -160,9 +160,9 @@ extension AppDelegate {
         GlobalEventTap.shared.start()
     }
 
-    func stop() {
+    func stop(restoringHighResolutionWheel: Bool = true) {
         BatteryDeviceMonitor.shared.disable()
-        DeviceManager.shared.stop()
+        DeviceManager.shared.stop(restoringHighResolutionWheel: restoringHighResolutionWheel)
         GlobalEventTap.shared.stop()
     }
 }

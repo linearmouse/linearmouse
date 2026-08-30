@@ -56,7 +56,7 @@ class DeviceManager: ObservableObject {
     }
 
     deinit {
-        stop()
+        stop(restoringHighResolutionWheel: false)
     }
 
     private enum State {
@@ -69,13 +69,15 @@ class DeviceManager: ObservableObject {
 
     private var activateApplicationObserver: Any?
 
-    func stop() {
+    func stop(restoringHighResolutionWheel: Bool = true) {
         guard state == .running else {
             return
         }
         state = .stopped
 
-        restorePointerSpeedToInitialValue()
+        restorePointerSpeedToInitialValue(
+            restoringHighResolutionWheel: restoringHighResolutionWheel
+        )
         manager.stopObservation()
         subscriptions.removeAll()
 
@@ -368,9 +370,12 @@ class DeviceManager: ObservableObject {
         )
     }
 
-    func restorePointerSpeedToInitialValue() {
+    func restorePointerSpeedToInitialValue(restoringHighResolutionWheel: Bool = true) {
         for device in devices {
-            device.restorePointerAccelerationAndPointerSpeed()
+            device.restorePointerAccelerationAndPointerSpeed(
+                restoringHighResolutionWheel: restoringHighResolutionWheel,
+                waitForHighResolutionWheelRestore: restoringHighResolutionWheel
+            )
         }
     }
 
