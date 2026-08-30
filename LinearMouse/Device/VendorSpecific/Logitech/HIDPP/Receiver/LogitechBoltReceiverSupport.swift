@@ -193,7 +193,7 @@ extension LogitechReceiverMonitoringChannel {
     func waitForBoltConnectionSnapshots(
         timeout: TimeInterval,
         until shouldContinue: (() -> Bool)? = nil
-    ) -> [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot] {
+    ) -> LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotBatch {
         // Retrying this idempotent setup recovers from a transient failure without
         // triggering a connection snapshot or short-circuiting the bounded wait.
         enableWirelessNotifications()
@@ -202,20 +202,23 @@ extension LogitechReceiverMonitoringChannel {
             timeout: timeout,
             until: shouldContinue
         ) else {
-            return [:]
+            return .empty
         }
 
-        var snapshots = [initialNotification.slot: initialNotification.snapshot]
+        var collector = LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotCollector(
+            expectedConnectedDeviceCount: nil
+        )
+        collector.record(slot: initialNotification.slot, snapshot: initialNotification.snapshot)
         let deadline = Date().addingTimeInterval(0.1)
         while Date() < deadline, shouldContinue?() ?? true {
             guard let notification = waitForReceiverConnectionNotification(timeout: 0.02, until: shouldContinue) else {
                 continue
             }
 
-            snapshots[notification.slot] = notification.snapshot
+            collector.record(slot: notification.slot, snapshot: notification.snapshot)
         }
 
-        return snapshots
+        return collector.batch
     }
 
     func isBoltReceiverReachable() -> Bool {

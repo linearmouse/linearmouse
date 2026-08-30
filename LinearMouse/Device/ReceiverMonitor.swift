@@ -183,7 +183,8 @@ struct ReceiverSlotStateStore {
     }
 
     mutating func mergeConnectionSnapshots(
-        _ newSnapshots: [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot]
+        _ newSnapshots: [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot],
+        reconnectedSlots: Set<UInt8> = []
     ) {
         for (slot, snapshot) in newSnapshots {
             let newPresence: SlotPresenceState = snapshot.isConnected ? .connected : .disconnected
@@ -195,8 +196,17 @@ struct ReceiverSlotStateStore {
                 continue
             }
 
-            let reportedKind = snapshot.kind.flatMap(ReceiverLogicalDeviceKind.init(rawValue:))
-            if let reportedKind, !reportedKind.isPointingDevice {
+            let pairingKind = pairedIdentitiesBySlot[slot]?.kind.rawValue
+            let effectiveKind = resolveReceiverLogicalDeviceKind(
+                snapshotRaw: snapshot.kind,
+                pairingRaw: pairingKind
+            )
+            if snapshot.kind != nil, effectiveKind == nil {
+                pairedIdentitiesBySlot.removeValue(forKey: slot)
+                slotsRequiringIdentityResolution.insert(slot)
+                continue
+            }
+            if let effectiveKind, !effectiveKind.isPointingDevice {
                 // An explicitly non-pointing device cannot inherit a stale
                 // mouse identity or hold up pointing-device discovery.
                 pairedIdentitiesBySlot.removeValue(forKey: slot)
@@ -206,7 +216,7 @@ struct ReceiverSlotStateStore {
 
             // Clear stale identity when a device reconnects to a slot,
             // so the next needsIdentityRefresh check will trigger a refresh.
-            if oldPresence == .disconnected {
+            if oldPresence == .disconnected || reconnectedSlots.contains(slot) {
                 pairedIdentitiesBySlot.removeValue(forKey: slot)
             }
 
@@ -478,7 +488,7 @@ private final class ReceiverContext {
             }
 
             // Wait for connection events (event-driven, no periodic rescan)
-            let connectionSnapshots = provider.waitForReceiverConnectionChange(
+            let connectionBatch = provider.waitForReceiverConnectionChange(
                 for: device.pointerDevice,
                 using: receiverChannel,
                 timeout: ReceiverMonitor.refreshInterval
@@ -494,7 +504,7 @@ private final class ReceiverContext {
                 continue
             }
 
-            guard !connectionSnapshots.isEmpty else {
+            guard !connectionBatch.snapshots.isEmpty else {
                 // Timeout with no events — verify channel is still alive
                 if !provider.receiverChannelIsReachable(for: device.pointerDevice, using: receiverChannel) {
                     os_log(
@@ -523,10 +533,13 @@ private final class ReceiverContext {
                 continue
             }
 
-            mergeConnectionSnapshots(connectionSnapshots)
+            mergeConnectionSnapshots(
+                connectionBatch.snapshots,
+                reconnectedSlots: connectionBatch.reconnectedSlots
+            )
 
             // For newly connected devices, read their identity info
-            for (slot, snapshot) in connectionSnapshots where snapshot.isConnected {
+            for (slot, snapshot) in connectionBatch.snapshots where snapshot.isConnected {
                 if needsIdentityRefresh(slot: slot) {
                     refreshSlotIdentity(
                         slot: slot,
@@ -536,10 +549,11 @@ private final class ReceiverContext {
                 }
             }
 
-            let snapshotDescription = connectionSnapshots.keys
+            let snapshotDescription = connectionBatch.snapshots
+                .keys
                 .sorted()
                 .compactMap { slot -> String? in
-                    guard let snapshot = connectionSnapshots[slot] else {
+                    guard let snapshot = connectionBatch.snapshots[slot] else {
                         return nil
                     }
 
@@ -687,13 +701,14 @@ private final class ReceiverContext {
     }
 
     private func mergeConnectionSnapshots(
-        _ newSnapshots: [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot]
+        _ newSnapshots: [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot],
+        reconnectedSlots: Set<UInt8> = []
     ) {
         guard !newSnapshots.isEmpty else {
             return
         }
 
-        stateStore.mergeConnectionSnapshots(newSnapshots)
+        stateStore.mergeConnectionSnapshots(newSnapshots, reconnectedSlots: reconnectedSlots)
     }
 
     private func refreshSlotIdentity(

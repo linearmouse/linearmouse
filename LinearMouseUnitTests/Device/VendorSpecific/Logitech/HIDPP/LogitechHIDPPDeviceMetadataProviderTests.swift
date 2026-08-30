@@ -284,6 +284,18 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         XCTAssertEqual(ReceiverReadyCountDisposition.resolve(previousCount: 2, currentCount: nil), .stayReady)
     }
 
+    func testConnectionSnapshotCollectorRetainsReconnectTransition() {
+        var collector = LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotCollector(
+            expectedConnectedDeviceCount: nil
+        )
+        collector.record(slot: 1, snapshot: .init(isConnected: false, kind: 0x02))
+        collector.record(slot: 1, snapshot: .init(isConnected: true, kind: 0x02))
+        collector.record(slot: 2, snapshot: .init(isConnected: true, kind: 0x02))
+
+        XCTAssertEqual(collector.batch.snapshots[1], .init(isConnected: true, kind: 0x02))
+        XCTAssertEqual(collector.batch.reconnectedSlots, Set([1]))
+    }
+
     func testBoltOnDemandDiscoveryRejectsPartialSingletonAndAllowsCompleteInventory() throws {
         let provider = LogitechHIDPPDeviceMetadataProvider()
         let identity = ReceiverLogicalDeviceIdentity(

@@ -347,8 +347,8 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         let snapshots = device.waitForBoltConnectionSnapshots(timeout: 0.1)
         let secondSnapshots = device.waitForBoltConnectionSnapshots(timeout: 0)
 
-        XCTAssertEqual(snapshots[1], .init(isConnected: true, kind: 0x02))
-        XCTAssertTrue(secondSnapshots.isEmpty)
+        XCTAssertEqual(snapshots.snapshots[1], .init(isConnected: true, kind: 0x02))
+        XCTAssertTrue(secondSnapshots.snapshots.isEmpty)
         XCTAssertEqual(device.wirelessNotificationEnableCount, 2)
         XCTAssertEqual(device.outputReportRequestCount, 0)
         XCTAssertTrue(device.sentReports.isEmpty)
@@ -869,6 +869,53 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
 
         XCTAssertFalse(store.hasUnresolvedConnectedSlot)
         XCTAssertEqual(store.currentPublishedIdentities(), [identity])
+    }
+
+    func testReceiverSlotStateStoreClearsIdentityForCoalescedReconnectBatch() {
+        var store = ReceiverSlotStateStore()
+        let identity = receiverIdentity(slot: 1, name: "Mouse A")
+
+        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
+            1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
+        ], liveReachableSlots: [1]))
+        store.mergeConnectionSnapshots(
+            [1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)],
+            reconnectedSlots: [1]
+        )
+
+        XCTAssertTrue(store.hasUnresolvedConnectedSlot)
+        XCTAssertTrue(store.currentPublishedIdentities().isEmpty)
+    }
+
+    func testReceiverSlotStateStoreTreatsUnsupportedEventKindAsUnresolved() {
+        var store = ReceiverSlotStateStore()
+        let identity = receiverIdentity(slot: 1, name: "Mouse A")
+
+        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
+            1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
+        ], liveReachableSlots: [1]))
+        store.mergeConnectionSnapshots([1: .init(isConnected: true, kind: 0x06)])
+
+        XCTAssertTrue(store.hasUnresolvedConnectedSlot)
+        XCTAssertTrue(store.currentPublishedIdentities().isEmpty)
+    }
+
+    func testReceiverSlotStateStoreUsesExistingIdentityForUnknownEventMarkerAndClearsPresenter() {
+        var store = ReceiverSlotStateStore()
+        let identity = receiverIdentity(slot: 1, name: "Mouse A")
+
+        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
+            1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
+        ], liveReachableSlots: [1]))
+        store.mergeConnectionSnapshots([1: .init(isConnected: true, kind: 0)])
+        XCTAssertFalse(store.hasUnresolvedConnectedSlot)
+        XCTAssertEqual(store.currentPublishedIdentities(), [identity])
+
+        store.mergeConnectionSnapshots([
+            1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.presenter.rawValue)
+        ])
+        XCTAssertFalse(store.hasUnresolvedConnectedSlot)
+        XCTAssertTrue(store.currentPublishedIdentities().isEmpty)
     }
 
     func testReceiverSlotStateStoreTreatsNewUnknownConnectedSlotAsUnresolved() {

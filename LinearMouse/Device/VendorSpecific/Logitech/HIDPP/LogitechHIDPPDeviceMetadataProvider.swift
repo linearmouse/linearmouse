@@ -163,19 +163,34 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         let kind: UInt8?
     }
 
+    struct ReceiverConnectionSnapshotBatch {
+        let snapshots: [UInt8: ReceiverConnectionSnapshot]
+        let reconnectedSlots: Set<UInt8>
+
+        static let empty = Self(snapshots: [:], reconnectedSlots: [])
+    }
+
     /// Accumulates receiver connection notifications. A complete connected
     /// count is only actionable after a quiet wait: buffered follow-up events
     /// for the same slot must be allowed to replace an earlier snapshot.
     struct ReceiverConnectionSnapshotCollector {
         private let expectedConnectedDeviceCount: Int?
         private(set) var snapshots = [UInt8: ReceiverConnectionSnapshot]()
+        private(set) var reconnectedSlots = Set<UInt8>()
 
         init(expectedConnectedDeviceCount: Int?) {
             self.expectedConnectedDeviceCount = expectedConnectedDeviceCount
         }
 
         mutating func record(slot: UInt8, snapshot: ReceiverConnectionSnapshot) {
+            if snapshots[slot]?.isConnected == false, snapshot.isConnected {
+                reconnectedSlots.insert(slot)
+            }
             snapshots[slot] = snapshot
+        }
+
+        var batch: ReceiverConnectionSnapshotBatch {
+            .init(snapshots: snapshots, reconnectedSlots: reconnectedSlots)
         }
 
         var isCompleteAfterQuietWait: Bool {
@@ -591,7 +606,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         for device: VendorSpecificDeviceContext,
         timeout: TimeInterval,
         until shouldContinue: @escaping () -> Bool
-    ) -> [UInt8: ReceiverConnectionSnapshot] {
+    ) -> ReceiverConnectionSnapshotBatch {
         guard device.transport == PointerDeviceTransportName.usb,
               let locationID = device.locationID,
               let receiverChannel = LogitechReceiverChannel.open(locationID: locationID)
@@ -609,7 +624,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             while shouldContinue(), Date() < deadline {
                 Thread.sleep(forTimeInterval: min(0.1, max(0, deadline.timeIntervalSinceNow)))
             }
-            return [:]
+            return .empty
         }
 
         return waitForReceiverConnectionChange(
@@ -625,7 +640,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         using receiverChannel: LogitechReceiverChannel,
         timeout: TimeInterval,
         until shouldContinue: @escaping () -> Bool
-    ) -> [UInt8: ReceiverConnectionSnapshot] {
+    ) -> ReceiverConnectionSnapshotBatch {
         switch Self.receiverProtocolFamily(
             vendorID: device.vendorID,
             productID: device.productID,
@@ -637,7 +652,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         case .bolt:
             return receiverChannel.waitForBoltConnectionSnapshots(timeout: timeout, until: shouldContinue)
         case nil:
-            return [:]
+            return .empty
         }
     }
 
@@ -1605,7 +1620,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
     func waitForConnectionSnapshots(
         timeout: TimeInterval,
         until shouldContinue: (() -> Bool)? = nil
-    ) -> [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot] {
+    ) -> LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotBatch {
         guard let report = waitForInputReport(
             timeout: timeout,
             matching: { response in
@@ -1616,10 +1631,13 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             let initialNotification = LogitechHIDPPDeviceMetadataProvider
             .parseReceiverConnectionNotification(Array(report))
         else {
-            return [:]
+            return .empty
         }
 
-        var snapshots = [initialNotification.slot: initialNotification.snapshot]
+        var collector = LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotCollector(
+            expectedConnectedDeviceCount: nil
+        )
+        collector.record(slot: initialNotification.slot, snapshot: initialNotification.snapshot)
         let deadline = Date().addingTimeInterval(0.1)
         while Date() < deadline {
             guard let followup = waitForInputReport(
@@ -1635,10 +1653,10 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
                 continue
             }
 
-            snapshots[notification.slot] = notification.snapshot
+            collector.record(slot: notification.slot, snapshot: notification.snapshot)
         }
 
-        return snapshots
+        return collector.batch
     }
 
     func waitForHIDPPNotification(
