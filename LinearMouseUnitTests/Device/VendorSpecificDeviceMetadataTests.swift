@@ -7,6 +7,8 @@ import PointerKit
 import XCTest
 
 final class VendorSpecificDeviceMetadataTests: XCTestCase {
+    private final class TestSharedChannel {}
+
     func testMatcherMatchesVendorAndTransport() {
         let matcher = VendorSpecificDeviceMatcher(
             vendorID: 0x046D,
@@ -590,6 +592,17 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
 
         XCTAssertNil(discovery)
         XCTAssertFalse(mutatedReceiverState)
+    }
+
+    func testDetachedOldChannelCannotClaimReplacementOwnership() {
+        let oldChannel = TestSharedChannel()
+        let newChannel = TestSharedChannel()
+        var currentChannel: TestSharedChannel? = oldChannel
+
+        XCTAssertTrue(SharedChannelOwnership.detach(oldChannel, from: &currentChannel))
+        currentChannel = newChannel
+        XCTAssertFalse(SharedChannelOwnership.detach(oldChannel, from: &currentChannel))
+        XCTAssertTrue(currentChannel === newChannel)
     }
 
     func testParseConnectedDeviceCountReadsReceiverConnectionRegister() {

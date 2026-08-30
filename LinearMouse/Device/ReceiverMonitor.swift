@@ -772,8 +772,18 @@ private final class ReceiverContext {
     }
 
     private func invalidateCurrentChannel(_ channel: LogitechReceiverChannel) {
-        setCurrentChannel(nil)
-        LogitechReceiverChannel.discardSharedChannel(locationID: locationID, matching: channel)
+        stateLock.lock()
+        guard isRunning, currentChannel === channel else {
+            stateLock.unlock()
+            return
+        }
+        currentChannel = nil
+        _ = LogitechReceiverChannel.detachSharedChannel(locationID: locationID, matching: channel)
+        stateLock.unlock()
+
+        // Detach shared ownership while lifecycle admission is locked, then do
+        // slow hardware teardown without blocking stop() on stateLock.
+        channel.invalidate()
         stateStore.invalidateChannel()
         lastCompleteConnectedDeviceCount = nil
         publish([])

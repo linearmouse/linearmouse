@@ -1130,6 +1130,19 @@ enum HIDPPCommittedTransaction {
     }
 }
 
+enum SharedChannelOwnership {
+    static func detach<Channel: AnyObject>(
+        _ expected: Channel,
+        from current: inout Channel?
+    ) -> Bool {
+        guard current === expected else {
+            return false
+        }
+        current = nil
+        return true
+    }
+}
+
 final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellableDeviceIO {
     private final class WeakChannelReference {
         weak var channel: LogitechReceiverChannel?
@@ -1250,22 +1263,19 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         return channel
     }
 
-    /// Discards a dead shared receiver channel only if this is still the cached
-    /// instance for the location. A newly opened replacement is never closed by
-    /// a stale lifecycle callback.
-    static func discardSharedChannel(locationID: Int, matching channel: LogitechReceiverChannel) {
+    /// Atomically gives up shared ownership only when `channel` is still the
+    /// cached instance. Hardware teardown happens separately after callers
+    /// release their own lifecycle locks.
+    @discardableResult
+    static func detachSharedChannel(locationID: Int, matching channel: LogitechReceiverChannel) -> Bool {
         sharedChannelsLock.lock()
-        let isCurrentChannel = sharedChannels[locationID]?.channel === channel
-        if isCurrentChannel {
+        var currentChannel = sharedChannels[locationID]?.channel
+        let detached = SharedChannelOwnership.detach(channel, from: &currentChannel)
+        if detached {
             sharedChannels.removeValue(forKey: locationID)
         }
         sharedChannelsLock.unlock()
-
-        guard isCurrentChannel else {
-            return
-        }
-
-        channel.invalidate()
+        return detached
     }
 
     init?(manager: IOHIDManager, device: IOHIDDevice) {
@@ -1326,7 +1336,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         invalidate()
     }
 
-    private func invalidate() {
+    func invalidate() {
         let shouldCancel = lifecycleLock.withLock { () -> Bool in
             guard isActivated else {
                 return false
