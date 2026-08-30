@@ -93,6 +93,19 @@ extension Device {
         logitechSession.needsDPIRestoreRetry
     }
 
+    /// Suspends ordinary Logitech setting I/O without restoring or consuming
+    /// the target-bound DPI and wheel baselines.
+    func suspendLogitechSettings() -> LogitechHardwareSuspension? {
+        logitechSession.suspendHardware()
+    }
+
+    /// Resumes only the exact suspension still owned by this device session.
+    /// A terminal teardown that superseded it makes this a no-op.
+    @discardableResult
+    func resumeLogitechSettings(from suspension: LogitechHardwareSuspension) -> Bool {
+        logitechSession.resumeHardware(from: suspension)
+    }
+
     func applyConfiguredSensorDPI(_ dpi: Int) {
         logitechSession.startDPIApply { [weak self] attempt, token in
             guard let self, !isRemoved, attempt.shouldContinue() else {
@@ -328,33 +341,7 @@ extension Device {
         expectedToken: CancellationToken,
         attempt: LogitechTerminalHardwareRestoreRetry.Attempt
     ) -> Bool {
-        restoreSensorDPIForBoundedLifecycle(
-            expectedToken: expectedToken,
-            attempt: attempt,
-            ownsLifecycle: attempt.shouldContinue
-        )
-    }
-
-    func restoreSensorDPIForSleep(
-        expectedToken: CancellationToken,
-        attempt: LogitechTerminalHardwareRestoreRetry.Attempt,
-        ownsSleepPreparation: @escaping () -> Bool
-    ) -> Bool {
-        restoreSensorDPIForBoundedLifecycle(
-            expectedToken: expectedToken,
-            attempt: attempt,
-            ownsLifecycle: ownsSleepPreparation
-        )
-    }
-
-    private func restoreSensorDPIForBoundedLifecycle(
-        expectedToken: CancellationToken,
-        attempt: LogitechTerminalHardwareRestoreRetry.Attempt,
-        ownsLifecycle: @escaping () -> Bool
-    ) -> Bool {
-        let shouldContinue = {
-            attempt.shouldContinue() && ownsLifecycle()
-        }
+        let shouldContinue = attempt.shouldContinue
         let restored = restoreSensorDPISynchronously(
             expectedToken: expectedToken,
             deadline: attempt.deadline,

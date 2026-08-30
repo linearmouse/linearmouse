@@ -4,6 +4,14 @@
 import Foundation
 import HIDPP
 
+/// Concrete ownership of one suspended hardware-settings lifetime.
+///
+/// Object identity prevents a delayed wake from reopening ordinary HID++
+/// access after a terminal restore has superseded that exact suspension.
+final class LogitechHardwareSuspension {
+    fileprivate init() {}
+}
+
 enum LogitechTerminalHardwareRestoreRetry {
     /// Concrete ownership for one bounded hardware attempt. Cancelling or
     /// leaving its fair time slice makes every subsequent HID request and
@@ -167,17 +175,16 @@ final class LogitechDeviceSession {
     /// Device is leaving this observation lifetime and no new setting mutation
     /// may supersede the restore.
     private final class TerminalHardwareRestoreRequest {}
-    private final class SleepHardwarePreparationRequest {}
 
     private enum LifecycleOwner {
-        case sleep(SleepHardwarePreparationRequest)
+        case suspension(LogitechHardwareSuspension)
         case terminal(TerminalHardwareRestoreRequest)
 
-        func owns(_ request: SleepHardwarePreparationRequest) -> Bool {
-            guard case let .sleep(owner) = self else {
+        func owns(_ suspension: LogitechHardwareSuspension) -> Bool {
+            guard case let .suspension(owner) = self else {
                 return false
             }
-            return owner === request
+            return owner === suspension
         }
 
         func owns(_ request: TerminalHardwareRestoreRequest) -> Bool {
@@ -232,6 +239,7 @@ final class LogitechDeviceSession {
         var dpiRestoreRetryNeeded = false
         var hiResWheelEnabled: Bool?
         var hiResWheelMultiplier: Int?
+        var provisionalHiResWheelMultiplier: Int?
         var initialHiResWheelState: InitialHiResWheelState?
         var hiResWheelRestoreRetryNeeded = false
         var ordinaryHardwareAccess = CancellationSource()
@@ -280,13 +288,26 @@ final class LogitechDeviceSession {
 
     var hiResWheelNormalizationMultiplier: Int? {
         withState { state in
-            guard state.hiResWheelEnabled == true,
-                  let multiplier = state.hiResWheelMultiplier,
+            guard state.lifecycleOwner == nil else {
+                return nil
+            }
+            if state.hiResWheelEnabled == true,
+               let multiplier = state.hiResWheelMultiplier,
+               multiplier > 0 {
+                return multiplier
+            }
+
+            guard state.hiResWheelEnabled != false,
+                  let multiplier = state.provisionalHiResWheelMultiplier,
                   multiplier > 0 else {
                 return nil
             }
             return multiplier
         }
+    }
+
+    var allowsOrdinaryHardwareIO: Bool {
+        withState { Self.ordinaryHardwareIOIsAdmitted($0) }
     }
 
     var dpiReceiverSlotSnapshot: UInt8? {
@@ -422,6 +443,7 @@ final class LogitechDeviceSession {
             state.sensorDPI = nil
             state.hiResWheelEnabled = nil
             state.hiResWheelMultiplier = nil
+            state.provisionalHiResWheelMultiplier = nil
             dpiCoordinator.cancel()
             wheelCoordinator.cancel()
             if let currentRoute {
@@ -565,63 +587,77 @@ final class LogitechDeviceSession {
         ) { _ in coordinator.cancel() }
     }
 
-    /// Atomically closes both configured setting pipelines, then decides
-    /// what sleep must restore from one later snapshot on the same serial
-    /// queue. Cached target leases remain usable by the concrete sleep owner,
-    /// while every configured pre-write check observes the closed admission.
-    /// This closes the gap where an in-flight apply could capture an
-    /// unkeyed baseline after a main-thread read-then-act decision.
-    func runSleepHardwarePreparation(
-        _ operation: @escaping (
-            _ dpiToken: CancellationToken,
-            _ wheelToken: CancellationToken,
-            _ ownsSleepPreparation: @escaping () -> Bool
-        ) -> Void,
-        onCancelled: @escaping () -> Void
-    ) {
-        let request = SleepHardwarePreparationRequest()
-        let snapshot = withState { state -> (
-            tokens: (CancellationToken, CancellationToken),
-            ordinaryAccess: CancellationSource
-        )? in
-            guard state.lifecycleOwner == nil else {
-                return nil
-            }
+    /// Atomically revokes ordinary reads and both configured setting pipelines
+    /// without restoring hardware or consuming their initial baselines.
+    ///
+    /// The replacement feature tokens remain available to a stronger terminal
+    /// owner. A normal resume merely removes this exact suspension owner, so a
+    /// delayed resume can never reopen a session already claimed by teardown.
+    func suspendHardware() -> LogitechHardwareSuspension? {
+        let dpiCoordinator = dpiApplyCoordinator
+        let wheelCoordinator = hiResWheelApplyCoordinator
+        let transition = withState { state -> (
+            suspension: LogitechHardwareSuspension?,
+            previousSources: (CancellationSource, CancellationSource, CancellationSource)?
+        ) in
+            switch state.lifecycleOwner {
+            case let .suspension(existing)?:
+                return (existing, nil)
+            case .terminal?:
+                return (nil, nil)
+            case nil:
+                let suspension = LogitechHardwareSuspension()
+                let previousSources = (
+                    state.ordinaryHardwareAccess,
+                    state.dpiCancellationSource,
+                    state.hiResWheelCancellationSource
+                )
 
-            let ordinaryAccess = state.ordinaryHardwareAccess
-            state.lifecycleOwner = .sleep(request)
-            return (
-                tokens: (
-                    state.dpiCancellationSource.token,
-                    state.hiResWheelCancellationSource.token
-                ),
-                ordinaryAccess: ordinaryAccess
-            )
+                if state.hiResWheelEnabled == true,
+                   let multiplier = state.hiResWheelMultiplier,
+                   multiplier > 0 {
+                    state.provisionalHiResWheelMultiplier = multiplier
+                } else if state.hiResWheelEnabled == false {
+                    state.provisionalHiResWheelMultiplier = nil
+                }
+
+                state.lifecycleOwner = .suspension(suspension)
+                state.ordinaryHardwareAccess = CancellationSource()
+                state.dpiCancellationSource = CancellationSource()
+                state.hiResWheelCancellationSource = CancellationSource()
+                state.adjustableDPI = nil
+                state.hiResWheel = nil
+                state.sensorDPI = nil
+                state.hiResWheelEnabled = nil
+                state.hiResWheelMultiplier = nil
+                dpiCoordinator.cancel()
+                wheelCoordinator.cancel()
+                return (suspension, previousSources)
+            }
         }
-        guard let snapshot else {
-            onCancelled()
-            return
+
+        guard let suspension = transition.suspension else {
+            return nil
         }
-        snapshot.ordinaryAccess.cancel()
+        guard let previousSources = transition.previousSources else {
+            return suspension
+        }
 
-        dpiApplyCoordinator.cancel()
-        hiResWheelApplyCoordinator.cancel()
+        previousSources.0.cancel()
+        previousSources.1.cancel()
+        previousSources.2.cancel()
+        return suspension
+    }
 
-        perform {
-            let ownsSleepPreparation = { [weak self] in
-                self?.withState {
-                    $0.lifecycleOwner?.owns(request) == true
-                } == true
+    /// Reopens ordinary hardware access only for the exact current suspension.
+    @discardableResult
+    func resumeHardware(from suspension: LogitechHardwareSuspension) -> Bool {
+        withState { state in
+            guard state.lifecycleOwner?.owns(suspension) == true else {
+                return false
             }
-            guard ownsSleepPreparation() else {
-                onCancelled()
-                return
-            }
-            operation(
-                snapshot.tokens.0,
-                snapshot.tokens.1,
-                ownsSleepPreparation
-            )
+            state.lifecycleOwner = nil
+            return true
         }
     }
 
@@ -952,6 +988,14 @@ final class LogitechDeviceSession {
             }
             state.hiResWheelEnabled = enabled
             state.hiResWheelMultiplier = enabled == true ? multiplier : nil
+            if enabled == nil,
+               state.provisionalHiResWheelMultiplier != nil,
+               let multiplier,
+               multiplier > 0 {
+                state.provisionalHiResWheelMultiplier = multiplier
+            } else if enabled == false || multiplier.map({ $0 > 0 }) == true {
+                state.provisionalHiResWheelMultiplier = nil
+            }
         }
     }
 
@@ -1093,14 +1137,10 @@ final class LogitechDeviceSession {
         withState { $0.initialHiResWheelState != nil && $0.hiResWheelRestoreRetryNeeded }
     }
 
-    func clearHiResWheelState(includingInitialState: Bool) {
+    func clearConfirmedHiResWheelState() {
         withState {
             $0.hiResWheelEnabled = nil
             $0.hiResWheelMultiplier = nil
-            if includingInitialState {
-                $0.initialHiResWheelState = nil
-                $0.hiResWheelRestoreRetryNeeded = false
-            }
         }
     }
 
@@ -1113,6 +1153,17 @@ final class LogitechDeviceSession {
             }
             state.hiResWheelEnabled = nil
             state.hiResWheelMultiplier = nil
+            state.provisionalHiResWheelMultiplier = nil
+        }
+    }
+
+    func clearProvisionalHiResWheelMultiplier(for token: CancellationToken) {
+        withState { state in
+            guard state.hiResWheelCancellationSource.token == token,
+                  state.hiResWheelEnabled == nil else {
+                return
+            }
+            state.provisionalHiResWheelMultiplier = nil
         }
     }
 
@@ -1135,28 +1186,7 @@ final class LogitechDeviceSession {
             let baselineHandle = initialState.baselineHandle
             state.hiResWheelEnabled = enabled
             state.hiResWheelMultiplier = enabled ? multiplier : nil
-            state.initialHiResWheelState = nil
-            state.hiResWheelRestoreRetryNeeded = false
-            return .committed(baselineHandle)
-        }
-    }
-
-    /// Used by lifecycle teardown, which intentionally clears runtime cache
-    /// rather than retaining the restored mode for normalization.
-    @discardableResult
-    func consumeHiResWheelState(for access: FeatureAccess<HiResWheel>) -> HiResWheelCommit {
-        withState { state -> HiResWheelCommit in
-            guard let initialState = state.initialHiResWheelState,
-                  Self.accessIsCurrent(access, in: state),
-                  Self.initialState(initialState, matches: access.lease),
-                  Self.initialStateRelation(initialState, to: state.discovery?.route) == .compatible
-            else {
-                return .rejected
-            }
-            let baselineHandle = initialState.baselineHandle
-            state.hiResWheel = nil
-            state.hiResWheelEnabled = nil
-            state.hiResWheelMultiplier = nil
+            state.provisionalHiResWheelMultiplier = nil
             state.initialHiResWheelState = nil
             state.hiResWheelRestoreRetryNeeded = false
             return .committed(baselineHandle)

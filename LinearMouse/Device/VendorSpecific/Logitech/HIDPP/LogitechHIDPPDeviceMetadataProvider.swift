@@ -3514,6 +3514,7 @@ final class LogitechReprogrammableControlsMonitor {
         deadline: Date,
         completion: @escaping () -> Void
     ) {
+        state.cancelResumeAfterSleep()
         restorePendingReporting(
             authorization: authorization,
             deadline: deadline,
@@ -3521,6 +3522,13 @@ final class LogitechReprogrammableControlsMonitor {
         )
         releaseButtonIfNeeded()
         subscriptions.removeAll()
+    }
+
+    /// Reconciles ordinary monitoring after the sleep restore-only worker has
+    /// released its completion barrier. Repeated wake requests coalesce in the
+    /// state object, and terminal teardown cancels the pending action.
+    func resumeAfterSleep(_ reconcileDemand: @escaping () -> Void) {
+        state.resumeAfterSleep(reconcileDemand)
     }
 
     /// Drops monitor ownership without attempting HID++ reporting cleanup.
@@ -3541,6 +3549,7 @@ final class LogitechReprogrammableControlsMonitor {
         deadline: Date,
         completion: @escaping () -> Void
     ) {
+        state.cancelResumeAfterSleep()
         restorePendingReporting(
             authorization: authorization,
             deadline: deadline,
@@ -5209,6 +5218,11 @@ struct LogitechMonitorReconfigurationRequest {
 final class LogitechReprogrammableControlsMonitorState {
     final class RestartBarrier {}
 
+    private struct SleepResumeRequest {
+        let restartBarrier: RestartBarrier
+        let action: () -> Void
+    }
+
     private typealias WorkerResources = (Thread?, HIDPPNotificationHandling?, ObservationToken?)
 
     private let queue = DispatchQueue(label: "linearmouse.logitech-controls.state")
@@ -5244,6 +5258,9 @@ final class LogitechReprogrammableControlsMonitorState {
     private var restoreWorkerReplacementRequired = false
     private var hasEstablishedActiveTarget = false
     private var hasStoreBackedActiveTargetValue = false
+    /// A wake can race the restore-only worker. Keep only one demand
+    /// reconciliation and release it with the exact worker restart barrier.
+    private var sleepResumeRequest: SleepResumeRequest?
 
     var shouldContinueRunning: Bool {
         queue.sync { isEnabled } && !Thread.current.isCancelled
@@ -5298,6 +5315,71 @@ final class LogitechReprogrammableControlsMonitorState {
         thread?.start()
     }
 
+    func resumeAfterSleep(_ action: @escaping () -> Void) {
+        let (shouldRunNow, resourcesToStop) = queue.sync { () -> (Bool, WorkerResources) in
+            if let restartBarrier {
+                if sleepResumeRequest?.restartBarrier !== restartBarrier {
+                    sleepResumeRequest = .init(
+                        restartBarrier: restartBarrier,
+                        action: action
+                    )
+                }
+
+                // A fast wake no longer needs to finish returning this target
+                // to native reporting. Cancel only this monitor's restore;
+                // receiver monitors that are still awaiting a verified route
+                // do not call resume and can complete their native restore.
+                guard restoresPendingForTeardown else {
+                    return (false, (nil, nil, nil))
+                }
+                let resources = (
+                    workerThread,
+                    activeNotificationEndpoint,
+                    directDeviceReportObservationToken
+                )
+                isEnabled = false
+                workerTargetIsValid = false
+                allowsTeardownIO = false
+                teardownAuthorization = nil
+                teardownDeadline = nil
+                restoresPendingForTeardown = false
+                restoreWorkerReplacementRequired = false
+                reconfigurationRequest.reset()
+                activeNotificationEndpoint = nil
+                directDeviceReportObservationToken = nil
+                return (false, resources)
+            }
+
+            // The exact barrier may have been released while its completion
+            // callbacks are still running. Coalesce another wake with that
+            // already-authorized delivery instead of running it twice.
+            if sleepResumeRequest != nil {
+                return (false, (nil, nil, nil))
+            }
+            return (true, (nil, nil, nil))
+        }
+
+        reconfigurationSemaphore.signal()
+        resourcesToStop.1?.wake()
+        resourcesToStop.0?.cancel()
+        resourcesToStop.2?.cancel()
+
+        guard shouldRunNow else {
+            return
+        }
+        if Thread.isMainThread {
+            action()
+        } else {
+            DispatchQueue.main.async(execute: action)
+        }
+    }
+
+    func cancelResumeAfterSleep() {
+        queue.sync {
+            sleepResumeRequest = nil
+        }
+    }
+
     func disable() {
         disable(
             allowingTeardownIO: true
@@ -5314,6 +5396,7 @@ final class LogitechReprogrammableControlsMonitorState {
             restoresPendingForTeardown = false
             teardownAuthorization = nil
             teardownDeadline = nil
+            sleepResumeRequest = nil
         }
     }
 
@@ -5436,6 +5519,9 @@ final class LogitechReprogrammableControlsMonitorState {
     ) {
         let (resources, completions) = queue.sync { () -> (WorkerResources, [() -> Void]) in
             let resources = (workerThread, activeNotificationEndpoint, directDeviceReportObservationToken)
+            if overridingPendingRestore {
+                sleepResumeRequest = nil
+            }
             // Restore is the strongest teardown policy. A later ordinary or
             // abandon may override it, but an ordinary disable cannot cancel
             // or weaken the in-flight restore operation.
@@ -5664,15 +5750,29 @@ final class LogitechReprogrammableControlsMonitorState {
         }
 
         DispatchQueue.main.async { [weak self] in
+            var releasedRestartBarrier: RestartBarrier?
             if let expectedRestartBarrier {
                 self?.queue.sync {
                     guard self?.restartBarrier === expectedRestartBarrier else {
                         return
                     }
                     self?.restartBarrier = nil
+                    releasedRestartBarrier = expectedRestartBarrier
                 }
             }
             completions.forEach { $0() }
+
+            guard let releasedRestartBarrier else {
+                return
+            }
+            let resumeAfterSleepAction = self?.queue.sync { () -> (() -> Void)? in
+                guard self?.sleepResumeRequest?.restartBarrier === releasedRestartBarrier else {
+                    return nil
+                }
+                defer { self?.sleepResumeRequest = nil }
+                return self?.sleepResumeRequest?.action
+            }
+            resumeAfterSleepAction?()
         }
     }
 }

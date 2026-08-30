@@ -4,6 +4,15 @@
 import Foundation
 import os.log
 
+/// Concrete ownership of one explicit receiver rediscovery. A wake accepts a
+/// route only when the publication carries the exact request it started.
+final class ReceiverRediscoveryRequest {}
+
+struct ReceiverDiscoveryPublication {
+    let identities: [ReceiverLogicalDeviceIdentity]
+    let rediscoveryRequest: ReceiverRediscoveryRequest?
+}
+
 enum ReceiverConnectionEventPublication {
     static func identities(
         afterEvent identities: [ReceiverLogicalDeviceIdentity],
@@ -227,8 +236,9 @@ final class ReceiverMonitor {
 
     private let provider = LogitechHIDPPDeviceMetadataProvider()
     private var handoffs = [Int: ReceiverMonitorHandoff<ReceiverContext, Device>]()
+    private var pendingRediscoveryRequests = [Int: ReceiverRediscoveryRequest]()
 
-    var onPointingDevicesChanged: ((Int, [ReceiverLogicalDeviceIdentity]) -> Void)?
+    var onPointingDevicesChanged: ((Int, ReceiverDiscoveryPublication) -> Void)?
 
     func startMonitoring(device: Device) {
         guard !device.isRemoved,
@@ -260,9 +270,12 @@ final class ReceiverMonitor {
                 return
             }
 
-            self.onPointingDevicesChanged?(locationID, [])
+            self.onPointingDevicesChanged?(
+                locationID,
+                .init(identities: [], rediscoveryRequest: nil)
+            )
         }
-        context.onSlotsChanged = { [weak self, weak context] identities in
+        context.onSlotsChanged = { [weak self, weak context] publication in
             guard let self,
                   let context,
                   self.handoffs[locationID]?.isActive(context) == true
@@ -270,7 +283,11 @@ final class ReceiverMonitor {
                 return
             }
 
-            self.onPointingDevicesChanged?(locationID, identities)
+            if let request = publication.rediscoveryRequest,
+               self.pendingRediscoveryRequests[locationID] === request {
+                self.pendingRediscoveryRequests.removeValue(forKey: locationID)
+            }
+            self.onPointingDevicesChanged?(locationID, publication)
         }
         context.onStopped = { [weak self, weak context] in
             guard let self, let context else {
@@ -282,13 +299,19 @@ final class ReceiverMonitor {
             return
         }
         context.start()
+        if let request = pendingRediscoveryRequests[locationID] {
+            context.requestRediscovery(request)
+        }
 
         os_log("Started receiver monitor for %{public}@", log: Self.log, type: .info, String(describing: device))
     }
 
     func stopMonitoring(device: Device) {
-        guard let locationID = device.pointerDevice.locationID,
-              var handoff = handoffs[locationID] else {
+        guard let locationID = device.pointerDevice.locationID else {
+            return
+        }
+        guard var handoff = handoffs[locationID] else {
+            pendingRediscoveryRequests.removeValue(forKey: locationID)
             return
         }
 
@@ -297,12 +320,19 @@ final class ReceiverMonitor {
         context?.stop()
     }
 
-    func requestRediscovery(device: Device) {
+    func requestRediscovery(
+        device: Device,
+        request: ReceiverRediscoveryRequest = .init()
+    ) {
         guard let locationID = device.pointerDevice.locationID else {
             return
         }
 
-        handoffs[locationID]?.activeOwner?.requestRediscovery()
+        guard pendingRediscoveryRequests[locationID] !== request else {
+            return
+        }
+        pendingRediscoveryRequests[locationID] = request
+        handoffs[locationID]?.activeOwner?.requestRediscovery(request)
     }
 
     /// Freezes receiver-channel mutation first, then stops every monitor
@@ -314,6 +344,9 @@ final class ReceiverMonitor {
         locationIDs requestedLocationIDs: Set<Int>
     ) -> [LogitechReceiverChannel.TerminalTeardown] {
         let locationIDs = requestedLocationIDs.union(handoffs.keys).sorted()
+        for locationID in locationIDs {
+            pendingRediscoveryRequests.removeValue(forKey: locationID)
+        }
         let teardowns = locationIDs.compactMap { locationID in
             let notificationOwnershipSession = handoffs[locationID]?
                 .currentOwner?
@@ -346,6 +379,9 @@ final class ReceiverMonitor {
         let pending = handoff.didStop(context) { !$0.isRemoved }
         if handoff.isEmpty {
             handoffs.removeValue(forKey: locationID)
+            if pending == nil {
+                pendingRediscoveryRequests.removeValue(forKey: locationID)
+            }
         } else {
             handoffs[locationID] = handoff
         }
@@ -527,7 +563,7 @@ private final class ReceiverContext {
     private var lastPublishedIdentities = [ReceiverLogicalDeviceIdentity]()
     private var stateStore = ReceiverSlotStateStore()
     private var currentChannel: LogitechReceiverChannel?
-    private var rediscoveryRequested = false
+    private var rediscoveryRequest: ReceiverRediscoveryRequest?
     private var lastCompleteConnectedDeviceCount: Int?
     private let retrySemaphore = DispatchSemaphore(value: 0)
     /// Receiver notification flags belong to this monitor context rather than
@@ -539,7 +575,7 @@ private final class ReceiverContext {
     }
 
     var onDiscoveryTimedOut: (() -> Void)?
-    var onSlotsChanged: (([ReceiverLogicalDeviceIdentity]) -> Void)?
+    var onSlotsChanged: ((ReceiverDiscoveryPublication) -> Void)?
     var onStopped: (() -> Void)?
     init(device: Device, locationID: Int, provider: LogitechHIDPPDeviceMetadataProvider) {
         self.device = device
@@ -559,7 +595,7 @@ private final class ReceiverContext {
             return
         }
         isRunning = true
-        rediscoveryRequested = false
+        rediscoveryRequest = nil
         lastCompleteConnectedDeviceCount = nil
         lastPublishedIdentities = []
         stateStore.reset()
@@ -585,14 +621,14 @@ private final class ReceiverContext {
         thread?.cancel()
     }
 
-    func requestRediscovery() {
+    func requestRediscovery(_ request: ReceiverRediscoveryRequest) {
         stateLock.lock()
         guard isRunning else {
             stateLock.unlock()
             return
         }
 
-        rediscoveryRequested = true
+        rediscoveryRequest = request
         let channel = currentChannel
         stateLock.unlock()
 
@@ -605,6 +641,7 @@ private final class ReceiverContext {
         var hasPublishedInitialState = false
         var hasLoggedMissingChannel = false
         var discoveryState = DiscoveryState.pending
+        var rediscoveryInProgress: ReceiverRediscoveryRequest?
         var discoveryBackoff = ExponentialBackoff(
             initialDelay: ReceiverMonitor.channelOpenRetryInterval,
             maximumDelay: ReceiverMonitor.maximumDiscoveryRetryInterval
@@ -622,7 +659,8 @@ private final class ReceiverContext {
         }
 
         workerLoop: while shouldContinueRunning() {
-            if consumeRediscoveryRequest() {
+            if let request = consumeRediscoveryRequest() {
+                rediscoveryInProgress = request
                 discoveryState = .pending
                 discoveryBackoff.reset()
             }
@@ -773,10 +811,22 @@ private final class ReceiverContext {
                     continue
                 }
 
+                // A request arriving during discovery cannot be acknowledged
+                // by an inventory read that may have started before it. Run a
+                // new discovery and publish only the request it actually
+                // follows.
+                if let newerRequest = consumeRediscoveryRequest() {
+                    rediscoveryInProgress = newerRequest
+                    discoveryState = .pending
+                    discoveryBackoff.reset()
+                    continue
+                }
+
                 discoveryState = .ready
                 discoveryBackoff.reset()
                 lastCompleteConnectedDeviceCount = discovery.expectedConnectedDeviceCount
-                _ = consumeRediscoveryRequest()
+                let completedRediscovery = rediscoveryInProgress
+                rediscoveryInProgress = nil
                 let identitiesDescription = identities.map { identity in
                     let battery = identity.batteryLevel.map(String.init) ?? "(nil)"
                     return "slot=\(identity.slot) name=\(identity.name) battery=\(battery)"
@@ -792,11 +842,10 @@ private final class ReceiverContext {
                     identitiesDescription
                 )
 
-                if identities != lastPublishedIdentities {
-                    publish(identities)
-                    hasPublishedInitialState = true
-                } else if !hasPublishedInitialState {
-                    publish(identities)
+                if identities != lastPublishedIdentities
+                    || !hasPublishedInitialState
+                    || completedRediscovery != nil {
+                    publish(identities, rediscoveryRequest: completedRediscovery)
                     hasPublishedInitialState = true
                 }
             }
@@ -948,7 +997,10 @@ private final class ReceiverContext {
         }
     }
 
-    private func publish(_ identities: [ReceiverLogicalDeviceIdentity]) {
+    private func publish(
+        _ identities: [ReceiverLogicalDeviceIdentity],
+        rediscoveryRequest: ReceiverRediscoveryRequest? = nil
+    ) {
         lastPublishedIdentities = identities
 
         let identitiesDescription = identities.map { identity in
@@ -966,7 +1018,10 @@ private final class ReceiverContext {
         )
 
         DispatchQueue.main.async { [weak self] in
-            self?.onSlotsChanged?(identities)
+            self?.onSlotsChanged?(.init(
+                identities: identities,
+                rediscoveryRequest: rediscoveryRequest
+            ))
         }
     }
 
@@ -994,22 +1049,22 @@ private final class ReceiverContext {
     private func hasRediscoveryRequest() -> Bool {
         stateLock.lock()
         defer { stateLock.unlock() }
-        return rediscoveryRequested
+        return rediscoveryRequest != nil
     }
 
     private func shouldContinueWaitingForNotifications() -> Bool {
         stateLock.lock()
         defer { stateLock.unlock() }
-        return isRunning && !rediscoveryRequested
+        return isRunning && rediscoveryRequest == nil
     }
 
-    private func consumeRediscoveryRequest() -> Bool {
+    private func consumeRediscoveryRequest() -> ReceiverRediscoveryRequest? {
         stateLock.lock()
         defer { stateLock.unlock() }
 
-        let requested = rediscoveryRequested
-        rediscoveryRequested = false
-        return requested
+        let request = rediscoveryRequest
+        rediscoveryRequest = nil
+        return request
     }
 
     private func waitBeforeRetryingDiscovery(

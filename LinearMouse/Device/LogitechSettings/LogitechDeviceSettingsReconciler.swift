@@ -54,6 +54,18 @@ final class LogitechDeviceSettingsReconciler {
         device.requestLogitechControlsForcedReconfiguration()
     }
 
+    /// Verifies volatile settings after a system wake without discarding the
+    /// suspension's provisional Hi-Res multiplier. The session already
+    /// invalidated feature transports and confirmed values before sleep.
+    func reapplyAfterWake(_ settings: LogitechDeviceSettings) {
+        guard let device, !device.isRemoved else {
+            return
+        }
+
+        apply(settings, force: true)
+        device.requestLogitechControlsForcedReconfiguration()
+    }
+
     private func apply(_ settings: LogitechDeviceSettings, force: Bool) {
         guard let device, !device.isRemoved else {
             return

@@ -158,6 +158,18 @@ final class InputReportHandlerTests: XCTestCase {
         XCTAssertTrue(recorder.events.isEmpty)
     }
 
+    func testGenericHandlerReleasesPressedButtonsAtLifecycleBoundary() {
+        let recorder = EmissionRecorder()
+        let handler = GenericSideButtonHandler(emit: recorder.emit)
+        let context = InputReportContext(report: Data(), lastButtonStates: 0x18)
+
+        handler.releasePressedButtons(context)
+
+        XCTAssertEqual(recorder.events.map(\.button), [3, 4])
+        XCTAssertTrue(recorder.events.allSatisfy { !$0.down })
+        XCTAssertEqual(context.lastButtonStates, 0)
+    }
+
     // MARK: - KensingtonSlimbladeHandler Tests
 
     func testSlimbladeHandlerMatchesSlimblade() {
@@ -266,6 +278,18 @@ final class InputReportHandlerTests: XCTestCase {
         XCTAssertEqual(context.lastButtonStates, 0x03)
         XCTAssertEqual(recorder.events.map(\.button), [3, 4])
         XCTAssertEqual(recorder.events.map(\.down), [true, true])
+    }
+
+    func testSlimbladeHandlerReleasesPressedButtonsAtLifecycleBoundary() {
+        let recorder = EmissionRecorder()
+        let handler = KensingtonSlimbladeHandler(emit: recorder.emit)
+        let context = InputReportContext(report: Data(), lastButtonStates: 0x03)
+
+        handler.releasePressedButtons(context)
+
+        XCTAssertEqual(recorder.events.map(\.button), [3, 4])
+        XCTAssertTrue(recorder.events.allSatisfy { !$0.down })
+        XCTAssertEqual(context.lastButtonStates, 0)
     }
 
     // MARK: - ElecomTrackballHandler Tests
@@ -421,6 +445,18 @@ final class InputReportHandlerTests: XCTestCase {
         XCTAssertEqual(context.lastButtonStates, 0x00)
     }
 
+    func testElecomHandlerReleasesPressedButtonsAtLifecycleBoundary() {
+        let recorder = EmissionRecorder()
+        let handler = ElecomTrackballHandler(emit: recorder.emit)
+        let context = InputReportContext(report: Data(), lastButtonStates: 0xA0)
+
+        handler.releasePressedButtons(context)
+
+        XCTAssertEqual(recorder.events.map(\.button), [5, 7])
+        XCTAssertTrue(recorder.events.allSatisfy { !$0.down })
+        XCTAssertEqual(context.lastButtonStates, 0)
+    }
+
     // MARK: - InputReportHandlerRegistry Tests
 
     func testRegistryFindsMiMouseHandler() {
@@ -547,5 +583,9 @@ private struct MockHandler: InputReportHandler {
         if callNext {
             next(context)
         }
+    }
+
+    func releasePressedButtons(_ context: InputReportContext) {
+        context.lastButtonStates = 0
     }
 }

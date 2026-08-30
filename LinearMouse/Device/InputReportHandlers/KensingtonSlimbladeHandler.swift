@@ -62,4 +62,14 @@ struct KensingtonSlimbladeHandler: InputReportHandler {
 
         context.lastButtonStates = buttonStates
     }
+
+    func releasePressedButtons(_ context: InputReportContext) {
+        if context.lastButtonStates & Self.topLeftMask != 0 {
+            emit(3, false)
+        }
+        if context.lastButtonStates & Self.topRightMask != 0 {
+            emit(4, false)
+        }
+        context.lastButtonStates &= ~(Self.topLeftMask | Self.topRightMask)
+    }
 }

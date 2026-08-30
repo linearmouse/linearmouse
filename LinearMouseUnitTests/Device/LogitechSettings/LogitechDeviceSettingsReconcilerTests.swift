@@ -108,6 +108,22 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
         ])
     }
 
+    func testWakeReapplyKeepsSuspendedRuntimeStateUntilVerification() {
+        let device = Device()
+        let reconciler = LogitechDeviceSettingsReconciler(device: device)
+        let settings = LogitechDeviceSettings(dpi: 1200, highResolutionWheel: true)
+
+        reconciler.apply(settings)
+        device.resetActions()
+        reconciler.reapplyAfterWake(settings)
+
+        XCTAssertEqual(device.actions, [
+            "dpi:1200",
+            "hiResWheel:true",
+            "controls"
+        ])
+    }
+
     func testReapplyRetriesStoppingUnconfiguredWheelManagement() {
         let device = Device()
         let reconciler = LogitechDeviceSettingsReconciler(device: device)

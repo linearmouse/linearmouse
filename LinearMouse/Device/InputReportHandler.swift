@@ -48,6 +48,10 @@ protocol InputReportHandler {
     /// Handle input report and simulate button events as needed
     /// Call `next(context)` to pass control to the next handler in the chain
     func handleReport(_ context: InputReportContext, next: (InputReportContext) -> Void)
+
+    /// Release synthetic buttons before report processing is suspended or the
+    /// device disappears. Native HID buttons are not represented here.
+    func releasePressedButtons(_ context: InputReportContext)
 }
 
 extension InputReportHandler {

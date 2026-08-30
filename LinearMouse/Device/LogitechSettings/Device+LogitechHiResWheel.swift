@@ -322,7 +322,7 @@ extension Device {
 
     func prepareHighResolutionWheelForReconnect() {
         logitechSession.cancelHiResWheelApply()
-        logitechSession.clearHiResWheelState(includingInitialState: false)
+        logitechSession.clearConfirmedHiResWheelState()
     }
 
     /// Stops managing this setting. Unlike reconnect preparation, this restores
@@ -334,7 +334,6 @@ extension Device {
             }
             return restoreHighResolutionWheelSynchronously(
                 expectedToken: token,
-                trackingRestoredState: true,
                 confirmsRestore: attempt.verifiesCachedValue,
                 until: attempt.shouldContinue
             )
@@ -349,34 +348,9 @@ extension Device {
         expectedToken: CancellationToken,
         attempt: LogitechTerminalHardwareRestoreRetry.Attempt
     ) -> Bool {
-        restoreHighResolutionWheelForBoundedLifecycle(
-            expectedToken: expectedToken,
-            attempt: attempt,
-            ownsLifecycle: attempt.shouldContinue
-        )
-    }
-
-    func restoreHighResolutionWheelForSleep(
-        expectedToken: CancellationToken,
-        attempt: LogitechTerminalHardwareRestoreRetry.Attempt,
-        ownsSleepPreparation: @escaping () -> Bool
-    ) -> Bool {
-        restoreHighResolutionWheelForBoundedLifecycle(
-            expectedToken: expectedToken,
-            attempt: attempt,
-            ownsLifecycle: ownsSleepPreparation
-        )
-    }
-
-    private func restoreHighResolutionWheelForBoundedLifecycle(
-        expectedToken: CancellationToken,
-        attempt: LogitechTerminalHardwareRestoreRetry.Attempt,
-        ownsLifecycle: @escaping () -> Bool
-    ) -> Bool {
         let shouldContinue = {
             expectedToken.shouldContinue
                 && attempt.shouldContinue()
-                && ownsLifecycle()
                 && !self.isRemoved
         }
         guard shouldContinue() else {
@@ -439,7 +413,6 @@ extension Device {
 
     private func restoreHighResolutionWheelSynchronously(
         expectedToken: CancellationToken,
-        trackingRestoredState: Bool,
         confirmsRestore: Bool = false,
         until operationShouldContinue: @escaping () -> Bool = { true }
     ) -> Bool {
@@ -457,9 +430,7 @@ extension Device {
             hasKnownBaseline: hasKnownBaseline
         ) else {
             logitechSession.invalidateHiResWheel(for: expectedToken)
-            if !trackingRestoredState {
-                clearHighResolutionWheelCache()
-            }
+            logitechSession.clearProvisionalHiResWheelMultiplier(for: expectedToken)
             return true
         }
 
@@ -477,9 +448,7 @@ extension Device {
 
         guard logitechSession.hasInitialHiResWheelState else {
             logitechSession.invalidateHiResWheel(for: expectedToken)
-            if !trackingRestoredState {
-                clearHighResolutionWheelCache()
-            }
+            logitechSession.clearProvisionalHiResWheelMultiplier(for: expectedToken)
             return true
         }
 
@@ -516,22 +485,20 @@ extension Device {
                 for: access
             )
             if currentEnabled == initialEnabled {
-                if trackingRestoredState, initialEnabled, currentMultiplier == nil {
+                if initialEnabled, currentMultiplier == nil {
                     return false
                 }
-                if trackingRestoredState {
-                    let commit = logitechSession.completeHiResWheelRestore(
-                        enabled: initialEnabled,
-                        multiplier: currentMultiplier,
-                        for: access
-                    )
-                    consumeStoredHiResWheelBaseline(after: commit)
-                }
+                let commit = logitechSession.completeHiResWheelRestore(
+                    enabled: initialEnabled,
+                    multiplier: currentMultiplier,
+                    for: access
+                )
+                consumeStoredHiResWheelBaseline(after: commit)
                 return true
             }
 
             let restoredMultiplier: Int?
-            if trackingRestoredState, initialEnabled {
+            if initialEnabled {
                 guard let capabilities = access.feature.capabilities(
                     until: operationIsAdmitted
                 ) else {
@@ -559,7 +526,7 @@ extension Device {
         }
 
         let restoredMultiplier: Int?
-        if trackingRestoredState, initialEnabled {
+        if initialEnabled {
             guard let capabilities = access.feature.capabilities(
                 until: operationIsAdmitted
             ) else {
@@ -580,27 +547,18 @@ extension Device {
         ) == initialEnabled
         logitechSession.invalidateHiResWheel(for: expectedToken)
         if restored {
-            if trackingRestoredState {
-                // The write is only an apply-phase result. Retain the initial
-                // target until a later confirmation reads it back.
-                updateHighResolutionWheelCache(
-                    enabled: initialEnabled,
-                    multiplier: restoredMultiplier,
-                    for: access
-                )
-            } else {
-                let commit = logitechSession.consumeHiResWheelState(for: access)
-                consumeStoredHiResWheelBaseline(after: commit)
-            }
+            // The write is only an apply-phase result. Retain the initial
+            // target until a later confirmation reads it back.
+            updateHighResolutionWheelCache(
+                enabled: initialEnabled,
+                multiplier: restoredMultiplier,
+                for: access
+            )
         } else {
             // The device may be temporarily asleep. Keep the original state
             // so a later lifecycle teardown can still restore it.
         }
         return restored
-    }
-
-    private func clearHighResolutionWheelCache() {
-        logitechSession.clearHiResWheelState(includingInitialState: true)
     }
 
     @discardableResult

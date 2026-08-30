@@ -8,12 +8,25 @@ import os.log
 import SwiftUI
 
 struct AppLifecycleAdmission {
+    enum Target: Equatable {
+        case running
+        case suspended
+        case stopped
+    }
+
     var sessionActive = true
     var sleeping = false
     var terminationCleanupStarted = false
 
+    var target: Target {
+        if terminationCleanupStarted || !sessionActive {
+            return .stopped
+        }
+        return sleeping ? .suspended : .running
+    }
+
     var allowsStart: Bool {
-        sessionActive && !sleeping && !terminationCleanupStarted
+        target == .running
     }
 }
 
@@ -25,6 +38,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private let statusItem = StatusItem.shared
     private var subscriptions = Set<AnyCancellable>()
     private var lifecycleAdmission = AppLifecycleAdmission()
+    private var lifecycleReady = false
+    private var workspaceNotificationObservers = [NSObjectProtocol]()
     private var terminationRequest: BoundedCleanupRequest?
 
     /// Runs the one-time legacy -> SMAppService login-item migration on launch.
@@ -33,6 +48,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     /// was lost in 5437d88 and is restored here (issue #1328).
     override init() {
         LaunchAtLogin.migrateIfNeeded()
+    }
+
+    func applicationWillFinishLaunching(_: Notification) {
+        guard ProcessEnvironment.isRunningApp else {
+            return
+        }
+
+        setupNotifications()
     }
 
     func applicationDidFinishLaunching(_: Notification) {
@@ -108,6 +131,7 @@ extension AppDelegate {
         setupConfiguration()
         setupNotifications()
         KeyboardSettingsSnapshot.shared.refresh()
+        lifecycleReady = true
         startIfAllowed()
     }
 
@@ -118,19 +142,24 @@ extension AppDelegate {
     }
 
     func setupNotifications() {
+        guard workspaceNotificationObservers.isEmpty else {
+            return
+        }
+
         // Prepare user notifications for error popups
         Notifier.shared.setup()
-        NSWorkspace.shared.notificationCenter.addObserver(
+        let notificationCenter = NSWorkspace.shared.notificationCenter
+        workspaceNotificationObservers.append(notificationCenter.addObserver(
             forName: NSWorkspace.sessionDidResignActiveNotification,
             object: nil,
             queue: .main
         ) { [weak self] _ in
             os_log("Session inactive", log: Self.log, type: .info)
             self?.lifecycleAdmission.sessionActive = false
-            self?.stop()
-        }
+            self?.reconcileLifecycle()
+        })
 
-        NSWorkspace.shared.notificationCenter.addObserver(
+        workspaceNotificationObservers.append(notificationCenter.addObserver(
             forName: NSWorkspace.sessionDidBecomeActiveNotification,
             object: nil,
             queue: .main
@@ -138,28 +167,28 @@ extension AppDelegate {
             os_log("Session active", log: Self.log, type: .info)
             self?.lifecycleAdmission.sessionActive = true
             KeyboardSettingsSnapshot.shared.refresh()
-            self?.restartIfAllowed()
-        }
+            self?.reconcileLifecycle()
+        })
 
-        NSWorkspace.shared.notificationCenter.addObserver(
+        workspaceNotificationObservers.append(notificationCenter.addObserver(
             forName: NSWorkspace.willSleepNotification,
             object: nil,
             queue: .main
         ) { [weak self] _ in
             os_log("System will sleep", log: Self.log, type: .info)
             self?.lifecycleAdmission.sleeping = true
-            self?.stopForSleep()
-        }
+            self?.reconcileLifecycle()
+        })
 
-        NSWorkspace.shared.notificationCenter.addObserver(
+        workspaceNotificationObservers.append(notificationCenter.addObserver(
             forName: NSWorkspace.didWakeNotification,
             object: nil,
             queue: .main
         ) { [weak self] _ in
             os_log("System did wake", log: Self.log, type: .info)
             self?.lifecycleAdmission.sleeping = false
-            self?.completeSleepStopAndRestartIfAllowed()
-        }
+            self?.reconcileLifecycle()
+        })
     }
 
     func startIfAllowed() {
@@ -167,35 +196,34 @@ extension AppDelegate {
             return
         }
 
-        start()
+        activateRunningLifecycle()
     }
 
-    func restartIfAllowed() {
-        stop { [weak self] in
-            self?.startIfAllowed()
+    func reconcileLifecycle() {
+        guard lifecycleReady else {
+            return
+        }
+
+        switch lifecycleAdmission.target {
+        case .running:
+            activateRunningLifecycle()
+        case .suspended:
+            BatteryDeviceMonitor.shared.disable()
+            GlobalEventTap.shared.stop()
+            DeviceManager.shared.suspendForSleep()
+        case .stopped:
+            stop()
         }
     }
 
-    /// A wake resumes the sleep teardown already in flight; it must not
-    /// upgrade that teardown to terminal hardware restoration and delay the
-    /// new observation lifetime while the receiver is still coming online.
-    func completeSleepStopAndRestartIfAllowed() {
-        stopForSleep { [weak self] in
-            guard let self else {
-                return
-            }
-            startIfAllowed()
-            requestLogitechReceiverRediscoveryAfterWake()
-        }
-    }
-
-    func requestLogitechReceiverRediscoveryAfterWake() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
-            guard let self, self.lifecycleAdmission.allowsStart else {
+    private func activateRunningLifecycle() {
+        DeviceManager.shared.resumeFromSleep { [weak self] in
+            guard let self, self.lifecycleAdmission.target == .running else {
+                self?.reconcileLifecycle()
                 return
             }
 
-            DeviceManager.shared.requestLogitechReceiverRediscovery()
+            start()
         }
     }
 
@@ -213,13 +241,6 @@ extension AppDelegate {
         GlobalEventTap.shared.stop()
         DeviceManager.shared.stop(
             logitechTeardownPolicy: logitechTeardownPolicy,
-            completion: completion
-        )
-    }
-
-    private func stopForSleep(completion: (() -> Void)? = nil) {
-        stop(
-            logitechTeardownPolicy: .sleepRestore,
             completion: completion
         )
     }

@@ -96,6 +96,137 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
         }
     }
 
+    func testFastWakeResumesOnceAfterSleepRestoreBarrier() {
+        let state = LogitechReprogrammableControlsMonitorState()
+        let restoreCompleted = expectation(description: "sleep reporting restore completed")
+        let resumed = expectation(description: "controls resumed after sleep")
+        resumed.assertForOverFulfill = true
+        var resumedCount = 0
+        var ordinaryWorkerCount = 0
+
+        state.enable { Thread {} }
+        state.restorePendingForTeardown(
+            true,
+            makeWorkerThread: { Thread {} },
+            completion: { restoreCompleted.fulfill() }
+        )
+
+        let resume = {
+            resumedCount += 1
+            state.enable {
+                ordinaryWorkerCount += 1
+                return Thread {}
+            }
+            resumed.fulfill()
+        }
+        state.resumeAfterSleep(resume)
+        state.resumeAfterSleep(resume)
+
+        XCTAssertEqual(resumedCount, 0)
+        XCTAssertEqual(ordinaryWorkerCount, 0)
+        XCTAssertFalse(state.isRestoringPendingForTeardown)
+        XCTAssertFalse(state.shouldContinueRunning)
+
+        // Fast wake cancels this monitor's restore-only transition. The exact
+        // retiring worker still owns the barrier until it has safely stopped.
+        state.workerDidStop(restartIfEnabled: false) { Thread {} }
+        wait(for: [restoreCompleted, resumed], timeout: 1)
+
+        XCTAssertEqual(resumedCount, 1)
+        XCTAssertEqual(ordinaryWorkerCount, 1)
+
+        state.disable()
+        state.workerDidStop(restartIfEnabled: false) { Thread {} }
+    }
+
+    func testTerminalAbandonCancelsFastWakeResume() {
+        let state = LogitechReprogrammableControlsMonitorState()
+        let restoreCompleted = expectation(description: "sleep reporting restore completed")
+        var resumedCount = 0
+
+        state.enable { Thread {} }
+        state.restorePendingForTeardown(
+            true,
+            makeWorkerThread: { Thread {} },
+            completion: {
+                // Model a terminal upgrade delivered as the sleep barrier is
+                // completing. It must still cancel the queued fast wake.
+                state.abandon()
+                restoreCompleted.fulfill()
+            }
+        )
+        state.resumeAfterSleep {
+            resumedCount += 1
+        }
+
+        state.workerDidStop(restartIfEnabled: false) { Thread {} }
+        wait(for: [restoreCompleted], timeout: 1)
+
+        XCTAssertEqual(resumedCount, 0)
+        XCTAssertFalse(state.shouldContinueRunning)
+        XCTAssertFalse(state.shouldAllowTeardownIO)
+    }
+
+    func testOldSleepCompletionCannotReleaseNewSleepResume() {
+        let state = LogitechReprogrammableControlsMonitorState()
+        let firstRestoreCompleted = expectation(description: "first sleep restore completed")
+        let secondRestoreCompleted = expectation(description: "second sleep restore completed")
+        let resumed = expectation(description: "second sleep resumed")
+        var resumedCount = 0
+
+        state.enable { Thread {} }
+        state.restorePendingForTeardown(
+            true,
+            makeWorkerThread: { Thread {} },
+            completion: {
+                firstRestoreCompleted.fulfill()
+
+                // Start a new sleep lifetime from the old barrier's completion
+                // delivery. Its resume must remain tied to the new barrier.
+                state.cancelResumeAfterSleep()
+                state.restorePendingForTeardown(
+                    true,
+                    makeWorkerThread: { Thread {} },
+                    completion: { secondRestoreCompleted.fulfill() }
+                )
+                state.resumeAfterSleep {
+                    resumedCount += 1
+                    resumed.fulfill()
+                }
+            }
+        )
+        state.resumeAfterSleep {
+            XCTFail("The first sleep resume should be cancelled by the next sleep")
+        }
+
+        state.workerDidStop(restartIfEnabled: false) { Thread {} }
+        wait(for: [firstRestoreCompleted], timeout: 1)
+        XCTAssertEqual(resumedCount, 0)
+
+        state.workerDidStop(restartIfEnabled: false) { Thread {} }
+        wait(for: [secondRestoreCompleted, resumed], timeout: 1)
+        XCTAssertEqual(resumedCount, 1)
+    }
+
+    func testResumeAfterCompletedSleepIsIdempotentAtWorkerBoundary() {
+        let state = LogitechReprogrammableControlsMonitorState()
+        var workerCount = 0
+        let resume = {
+            state.enable {
+                workerCount += 1
+                return Thread {}
+            }
+        }
+
+        state.resumeAfterSleep(resume)
+        state.resumeAfterSleep(resume)
+
+        XCTAssertEqual(workerCount, 1)
+
+        state.disable()
+        state.workerDidStop(restartIfEnabled: false) { Thread {} }
+    }
+
     func testOrdinaryDisableCanBeReenabledBeforeWorkerStops() {
         let state = LogitechReprogrammableControlsMonitorState()
         var madeReplacementWorker = false

@@ -80,4 +80,11 @@ struct ElecomTrackballHandler: InputReportHandler {
 
         context.lastButtonStates = buttonStates
     }
+
+    func releasePressedButtons(_ context: InputReportContext) {
+        for button in Self.fnButtonBits where context.lastButtonStates & (1 << button) != 0 {
+            emit(button, false)
+        }
+        context.lastButtonStates &= ~Self.fnButtonsMask
+    }
 }

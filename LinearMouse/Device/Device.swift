@@ -14,6 +14,18 @@ import PointerKit
 /// yield before lifecycle teardown performs its main-run-loop restore.
 extension PointerDevice: HIDPPCancellableDeviceIO {}
 
+enum PointerLinearScalingRestoreOperation {
+    static func perform(
+        baseline: Int?,
+        write: (Int) -> Void
+    ) {
+        guard let baseline else {
+            return
+        }
+        write(baseline)
+    }
+}
+
 class Device {
     private static let log = OSLog(
         subsystem: Bundle.main.bundleIdentifier!, category: "Device"
@@ -176,6 +188,7 @@ class Device {
     private var verbosedLoggingOn = Defaults[.verbosedLoggingOn]
 
     private let initialPointerResolution: Double
+    private let initialUseLinearScalingMouseAcceleration: Int?
     lazy var logitechSettingsReconciler = LogitechDeviceSettingsReconciler(device: self)
 
     var logitechReceiverRouteSnapshot: LogitechReceiverRoute? {
@@ -277,6 +290,7 @@ class Device {
 
         initialPointerResolution =
             device.pointerResolution ?? Self.fallbackPointerResolution
+        initialUseLinearScalingMouseAcceleration = device.useLinearScalingMouseAcceleration
 
         // TODO: More elegant way?
         inputObservationToken = device.observeInput { [weak self] in
@@ -327,6 +341,7 @@ class Device {
     }
 
     func markRemoved() {
+        releaseSyntheticInputReportButtons()
         removalLock.withLock { removed = true }
         logitechSession.cancelAll()
 
@@ -358,7 +373,7 @@ class Device {
     }
 
     /// Stops control monitoring and best-effort restores reporting before the
-    /// device becomes unavailable for system sleep.
+    /// app's event pipeline is suspended for system sleep.
     func stopLogitechControlsMonitoringForSleep(
         authorization: CancellationToken,
         deadline: Date,
@@ -377,11 +392,39 @@ class Device {
         )
     }
 
+    /// Reconnects the device-level demand observers after a sleep stop. A fast
+    /// wake may arrive while the reporting restore worker is still draining;
+    /// the monitor coalesces that wake and reconciles demand once its cleanup
+    /// barrier has released.
+    func resumeLogitechControlsAfterSleep() {
+        guard !isRemoved,
+              allowsDeviceWork,
+              let logitechReprogrammableControlsMonitor
+        else {
+            return
+        }
+
+        observeLogitechControlsMonitorDemand()
+        logitechReprogrammableControlsMonitor.resumeAfterSleep { [weak self] in
+            self?.updateLogitechControlsMonitorRunning()
+        }
+    }
+
     /// Final device teardown must not attempt HID++ I/O through an invalidated
     /// transport.
     func abandonLogitechControlsMonitoring() {
         logitechControlsMonitorSubscriptions.removeAll()
         logitechReprogrammableControlsMonitor?.abandon()
+    }
+
+    func releaseSyntheticInputReportButtons() {
+        guard lastButtonStates != 0 else {
+            return
+        }
+
+        let context = InputReportContext(report: Data(), lastButtonStates: lastButtonStates)
+        inputReportHandlers.forEach { $0.releasePressedButtons(context) }
+        lastButtonStates = 0
     }
 
     /// Restores a persisted Logitech controls baseline even when normal
@@ -469,66 +512,6 @@ class Device {
         logitechSession.freezeTerminalHardwareMutations()
     }
 
-    /// Supersedes DPI and wheel applies as one session transaction. Every
-    /// known baseline shares one fair, bounded restore before PointerDevice
-    /// closes, so a later terminal stop cannot inherit managed hardware.
-    func prepareLogitechSettingsForSleep(
-        deadline: Date,
-        until operationShouldContinue: @escaping () -> Bool,
-        completion: @escaping () -> Void
-    ) {
-        logitechSession.runSleepHardwarePreparation { [weak self] dpiToken, wheelToken, ownsSleepPreparation in
-            guard let self else {
-                completion()
-                return
-            }
-
-            // Always attempt both features. Each restore seeds a stable
-            // process baseline before deciding whether I/O is needed, so a
-            // quick second sleep cannot skip a baseline retained by an earlier
-            // failed observation lifetime.
-            let operations = [
-                LogitechTerminalHardwareRestoreRetry.Operation(
-                    shouldContinue: {
-                        dpiToken.shouldContinue
-                            && operationShouldContinue()
-                            && ownsSleepPreparation()
-                    },
-                    attempt: { attempt in
-                        self.restoreSensorDPIForSleep(
-                            expectedToken: dpiToken,
-                            attempt: attempt,
-                            ownsSleepPreparation: ownsSleepPreparation
-                        )
-                    }
-                ),
-                LogitechTerminalHardwareRestoreRetry.Operation(
-                    shouldContinue: {
-                        wheelToken.shouldContinue
-                            && operationShouldContinue()
-                            && ownsSleepPreparation()
-                    },
-                    attempt: { attempt in
-                        self.restoreHighResolutionWheelForSleep(
-                            expectedToken: wheelToken,
-                            attempt: attempt,
-                            ownsSleepPreparation: ownsSleepPreparation
-                        )
-                    }
-                )
-            ]
-
-            _ = LogitechTerminalHardwareRestoreRetry.perform(
-                operations: operations,
-                deadline: deadline,
-                wait: Thread.sleep(forTimeInterval:)
-            )
-            completion()
-        } onCancelled: {
-            completion()
-        }
-    }
-
     /// Revokes every outstanding Logitech teardown owner. Late callbacks are
     /// harmless because the manager's bounded request is already one-shot.
     func cancelLogitechTeardown() {
@@ -552,6 +535,7 @@ class Device {
 
     func prepareLogitechControlsRecording() {
         guard allowsDeviceWork,
+              logitechSession.allowsOrdinaryHardwareIO,
               let logitechReprogrammableControlsMonitor
         else {
             return
@@ -562,6 +546,10 @@ class Device {
     }
 
     private func observeLogitechControlsMonitorDemand() {
+        guard logitechControlsMonitorSubscriptions.isEmpty else {
+            return
+        }
+
         ConfigurationState.shared
             .$configuration
             .dropFirst()
@@ -582,7 +570,9 @@ class Device {
     }
 
     private func updateLogitechControlsMonitorRunning() {
-        guard !isRemoved, allowsDeviceWork else {
+        guard !isRemoved,
+              allowsDeviceWork,
+              logitechSession.allowsOrdinaryHardwareIO else {
             return
         }
 
@@ -752,6 +742,14 @@ extension Device {
         restorePointerAcceleration()
     }
 
+    private func restoreUseLinearScalingMouseAcceleration() {
+        PointerLinearScalingRestoreOperation.perform(
+            baseline: initialUseLinearScalingMouseAcceleration
+        ) { baseline in
+            device.useLinearScalingMouseAcceleration = baseline
+        }
+    }
+
     /// Clears lifecycle-scoped Logitech access after the asynchronous hardware
     /// barrier, then restores the software pointer properties. No HID++ I/O is
     /// performed from this main-thread method.
@@ -759,6 +757,7 @@ extension Device {
         prepareSensorDPIForReconnect()
         prepareHighResolutionWheelForReconnect()
         restorePointerAccelerationAndPointerSpeed()
+        restoreUseLinearScalingMouseAcceleration()
     }
 
     private func inputValueCallback(
@@ -811,6 +810,10 @@ extension Device {
     }
 
     private func inputReportCallback(_ device: PointerDevice, _ report: Data) {
+        guard allowsDeviceWork else {
+            return
+        }
+
         if verbosedLoggingOn {
             let reportHex = report.map { String(format: "%02X", $0) }.joined(separator: " ")
             os_log(

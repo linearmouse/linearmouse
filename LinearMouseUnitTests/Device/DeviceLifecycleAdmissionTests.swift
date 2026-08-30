@@ -24,18 +24,124 @@ final class DeviceLifecycleAdmissionTests: XCTestCase {
         lifecycle.terminationCleanupStarted = true
 
         XCTAssertFalse(lifecycle.allowsStart)
+        XCTAssertEqual(lifecycle.target, .stopped)
+    }
+
+    func testInactiveSessionDominatesSleep() {
+        var lifecycle = AppLifecycleAdmission()
+        lifecycle.sessionActive = false
+        lifecycle.sleeping = true
+
+        XCTAssertEqual(lifecycle.target, .stopped)
+    }
+
+    func testTerminationDominatesActiveAwakeSession() {
+        var lifecycle = AppLifecycleAdmission()
+        lifecycle.terminationCleanupStarted = true
+
+        XCTAssertEqual(lifecycle.target, .stopped)
+    }
+
+    func testActiveSleepingSessionTargetsSuspension() {
+        var lifecycle = AppLifecycleAdmission()
+        lifecycle.sleeping = true
+
+        XCTAssertEqual(lifecycle.target, .suspended)
+        XCTAssertFalse(lifecycle.allowsStart)
+    }
+
+    func testActiveAwakeSessionTargetsRunning() {
+        let lifecycle = AppLifecycleAdmission()
+
+        XCTAssertEqual(lifecycle.target, .running)
+        XCTAssertTrue(lifecycle.allowsStart)
+    }
+
+    func testSessionBecomeActiveBeforeWakeRemainsSuspended() {
+        var lifecycle = AppLifecycleAdmission()
+
+        lifecycle.sleeping = true
+        XCTAssertEqual(lifecycle.target, .suspended)
+
+        lifecycle.sessionActive = true
+        XCTAssertEqual(lifecycle.target, .suspended)
+
+        lifecycle.sleeping = false
+        XCTAssertEqual(lifecycle.target, .running)
+    }
+
+    func testInactiveSleepSequenceDoesNotRunUntilSessionReturns() {
+        var lifecycle = AppLifecycleAdmission()
+
+        lifecycle.sleeping = true
+        lifecycle.sessionActive = false
+        XCTAssertEqual(lifecycle.target, .stopped)
+
+        lifecycle.sleeping = false
+        XCTAssertEqual(lifecycle.target, .stopped)
+
+        lifecycle.sessionActive = true
+        XCTAssertEqual(lifecycle.target, .running)
     }
 
     func testOnlyRunningManagerAdmitsDeviceWork() {
         XCTAssertFalse(DeviceManagerLifecycleState.stopped.allowsDeviceWork)
         XCTAssertTrue(DeviceManagerLifecycleState.running.allowsDeviceWork)
+        XCTAssertFalse(DeviceManagerLifecycleState.suspending.allowsDeviceWork)
+        XCTAssertFalse(DeviceManagerLifecycleState.suspended.allowsDeviceWork)
         XCTAssertFalse(DeviceManagerLifecycleState.stopping.allowsDeviceWork)
         XCTAssertFalse(DeviceManagerLifecycleState.finishing.allowsDeviceWork)
     }
 
-    func testSleepIntentIsUpgradedByTerminalRestore() {
+    func testSuspendedManagerStillAdmitsTopology() {
+        XCTAssertTrue(DeviceManagerLifecycleState.running.allowsDeviceTopology)
+        XCTAssertTrue(DeviceManagerLifecycleState.suspending.allowsDeviceTopology)
+        XCTAssertTrue(DeviceManagerLifecycleState.suspended.allowsDeviceTopology)
+        XCTAssertFalse(DeviceManagerLifecycleState.stopped.allowsDeviceTopology)
+        XCTAssertFalse(DeviceManagerLifecycleState.stopping.allowsDeviceTopology)
+        XCTAssertFalse(DeviceManagerLifecycleState.finishing.allowsDeviceTopology)
+    }
+
+    func testSuspensionCanResumeOnlyOnce() {
+        let request = DeviceManagerSuspensionRequest()
+
+        XCTAssertTrue(request.claimResume())
+        XCTAssertFalse(request.claimResume())
+        XCTAssertEqual(request.disposition, .resumed)
+    }
+
+    func testSupersededSuspensionCannotResume() {
+        let request = DeviceManagerSuspensionRequest()
+
+        request.supersede()
+
+        XCTAssertFalse(request.claimResume())
+        XCTAssertEqual(request.disposition, .superseded)
+    }
+
+    func testFastWakeOfPreviousRequestDoesNotClaimNextSuspension() {
+        let previous = DeviceManagerSuspensionRequest()
+        let current = DeviceManagerSuspensionRequest()
+
+        XCTAssertTrue(previous.claimResume())
+        XCTAssertTrue(current.claimResume())
+        XCTAssertFalse(previous.claimResume())
+        XCTAssertFalse(current.claimResume())
+    }
+
+    func testTerminalSupersedesAlreadyResumedCleanupRequest() {
+        let request = DeviceManagerSuspensionRequest()
+        XCTAssertTrue(request.claimResume())
+
+        request.supersede()
+
+        XCTAssertEqual(request.disposition, .superseded)
+        XCTAssertFalse(request.claimResume())
+    }
+
+    func testAbandonIntentIsUpgradedByTerminalRestore() {
         var intent = DeviceManagerStopIntent(
-            logitechTeardownPolicy: .sleepRestore
+            logitechTeardownPolicy: .abandon
         )
 
         intent.merge(.init(
@@ -45,30 +151,30 @@ final class DeviceLifecycleAdmissionTests: XCTestCase {
         XCTAssertEqual(intent.logitechTeardownPolicy, .restore)
     }
 
-    func testSleepCannotDowngradeTerminalRestoreIntent() {
+    func testAbandonCannotDowngradeTerminalRestoreIntent() {
         var intent = DeviceManagerStopIntent(
             logitechTeardownPolicy: .restore
         )
 
         intent.merge(.init(
-            logitechTeardownPolicy: .sleepRestore
+            logitechTeardownPolicy: .abandon
         ))
 
         XCTAssertEqual(intent.logitechTeardownPolicy, .restore)
     }
 
-    func testSleepControlsCompletionCannotFinishAfterTerminalUpgrade() {
-        let sleep = DeviceManagerStopIntent(
-            logitechTeardownPolicy: .sleepRestore
+    func testAbandonCompletionCannotFinishAfterTerminalUpgrade() {
+        let abandon = DeviceManagerStopIntent(
+            logitechTeardownPolicy: .abandon
         )
-        var terminal = sleep
+        var terminal = abandon
         terminal.merge(.init(
             logitechTeardownPolicy: .restore
         ))
 
         var barrier = DeviceManagerLogitechStopBarrier()
-        XCTAssertEqual(barrier.startNeeded(for: sleep), .sleepRestore)
-        barrier.complete(.sleepRestore)
+        XCTAssertEqual(barrier.startNeeded(for: abandon), .abandon)
+        barrier.complete(.abandon)
         XCTAssertFalse(barrier.isSatisfied(for: terminal))
 
         XCTAssertEqual(barrier.startNeeded(for: terminal), .restore)
@@ -77,13 +183,13 @@ final class DeviceLifecycleAdmissionTests: XCTestCase {
         XCTAssertTrue(barrier.isSatisfied(for: terminal))
     }
 
-    func testTerminalControlsBarrierRemainsSufficientAfterSleepRequest() {
+    func testTerminalControlsBarrierRemainsSufficientAfterAbandonRequest() {
         let terminal = DeviceManagerStopIntent(
             logitechTeardownPolicy: .restore
         )
         var merged = terminal
         merged.merge(.init(
-            logitechTeardownPolicy: .sleepRestore
+            logitechTeardownPolicy: .abandon
         ))
 
         var barrier = DeviceManagerLogitechStopBarrier()
@@ -93,19 +199,19 @@ final class DeviceLifecycleAdmissionTests: XCTestCase {
         XCTAssertTrue(barrier.isSatisfied(for: merged))
     }
 
-    func testStaleSleepCompletionCannotDowngradeRestoreBarrier() {
-        let sleep = DeviceManagerStopIntent(
-            logitechTeardownPolicy: .sleepRestore
+    func testStaleAbandonCompletionCannotDowngradeRestoreBarrier() {
+        let abandon = DeviceManagerStopIntent(
+            logitechTeardownPolicy: .abandon
         )
         let restore = DeviceManagerStopIntent(
             logitechTeardownPolicy: .restore
         )
 
         var barrier = DeviceManagerLogitechStopBarrier()
-        XCTAssertEqual(barrier.startNeeded(for: sleep), .sleepRestore)
+        XCTAssertEqual(barrier.startNeeded(for: abandon), .abandon)
         XCTAssertEqual(barrier.startNeeded(for: restore), .restore)
         barrier.complete(.restore)
-        barrier.complete(.sleepRestore)
+        barrier.complete(.abandon)
 
         XCTAssertEqual(barrier.highestStarted, .restore)
         XCTAssertEqual(barrier.highestCompleted, .restore)
@@ -138,14 +244,14 @@ final class DeviceLifecycleAdmissionTests: XCTestCase {
     }
 
     func testLateCompletionCannotSatisfyANewerStopRequest() {
-        let intent = DeviceManagerStopIntent(logitechTeardownPolicy: .sleepRestore)
+        let intent = DeviceManagerStopIntent(logitechTeardownPolicy: .restore)
         let previous = DeviceManagerStopRequest(intent: intent)
         let current = DeviceManagerStopRequest(intent: intent)
 
-        XCTAssertEqual(previous.logitechBarrier.startNeeded(for: intent), .sleepRestore)
-        XCTAssertEqual(current.logitechBarrier.startNeeded(for: intent), .sleepRestore)
+        XCTAssertEqual(previous.logitechBarrier.startNeeded(for: intent), .restore)
+        XCTAssertEqual(current.logitechBarrier.startNeeded(for: intent), .restore)
 
-        previous.logitechBarrier.complete(.sleepRestore)
+        previous.logitechBarrier.complete(.restore)
 
         XCTAssertTrue(previous.logitechBarrier.isSatisfied(for: intent))
         XCTAssertFalse(current.logitechBarrier.isSatisfied(for: intent))

@@ -118,23 +118,17 @@ final class LogitechDeviceSessionTests: XCTestCase {
         wait(for: [ran], timeout: 1)
     }
 
-    func testCancellingOneQueuedSleepFeatureDoesNotStarveTheOther() {
+    func testRepeatedHardwareSuspensionReturnsTheSameOwner() throws {
         let session = LogitechDeviceSession(deviceID: 1)
-        let queueGate = DispatchSemaphore(value: 0)
-        session.perform { queueGate.wait() }
-        let ran = expectation(description: "sleep preparation ran")
 
-        session.runSleepHardwarePreparation { dpiToken, wheelToken, _ in
-            XCTAssertFalse(dpiToken.shouldContinue)
-            XCTAssertTrue(wheelToken.shouldContinue)
-            ran.fulfill()
-        } onCancelled: {
-            XCTFail("The sleep owner itself remains current")
-        }
+        let first = try XCTUnwrap(session.suspendHardware())
+        let duplicate = try XCTUnwrap(session.suspendHardware())
+        let unrelated = try XCTUnwrap(LogitechDeviceSession(deviceID: 2).suspendHardware())
 
-        session.cancelDPIApply()
-        queueGate.signal()
-        wait(for: [ran], timeout: 1)
+        XCTAssertIdentical(first, duplicate)
+        XCTAssertFalse(session.resumeHardware(from: unrelated))
+        XCTAssertTrue(session.resumeHardware(from: first))
+        XCTAssertFalse(session.resumeHardware(from: duplicate))
     }
 
     func testTerminalHardwareRestoreRejectsNewSettingMutation() {
@@ -220,12 +214,11 @@ final class LogitechDeviceSessionTests: XCTestCase {
         wait(for: [readCancelled, terminalRan], timeout: 1)
     }
 
-    func testSleepCancelsQueuedOrdinaryHardwareRead() {
+    func testHardwareSuspensionCancelsQueuedOrdinaryHardwareRead() throws {
         let session = LogitechDeviceSession(deviceID: 1)
         let queueGate = DispatchSemaphore(value: 0)
         session.perform { queueGate.wait() }
         let readCancelled = expectation(description: "ordinary read cancelled")
-        let sleepRan = expectation(description: "sleep preparation ran")
 
         session.runBoundedOrdinaryHardwareRead(
             deadline: Date().addingTimeInterval(1)
@@ -234,15 +227,11 @@ final class LogitechDeviceSessionTests: XCTestCase {
         } onCancelled: {
             readCancelled.fulfill()
         }
-        session.runSleepHardwarePreparation { _, _, ownsSleepPreparation in
-            XCTAssertTrue(ownsSleepPreparation())
-            sleepRan.fulfill()
-        } onCancelled: {
-            XCTFail("sleep preparation must retain ownership")
-        }
+        let suspension = try XCTUnwrap(session.suspendHardware())
 
         queueGate.signal()
-        wait(for: [readCancelled, sleepRan], timeout: 1)
+        wait(for: [readCancelled], timeout: 1)
+        XCTAssertTrue(session.resumeHardware(from: suspension))
     }
 
     func testTerminalCancelsInFlightOrdinaryHardwareRead() {
@@ -267,6 +256,31 @@ final class LogitechDeviceSessionTests: XCTestCase {
         session.freezeTerminalHardwareMutations()
         inspectAdmission.signal()
         wait(for: [readStopped], timeout: 1)
+    }
+
+    func testHardwareSuspensionCancelsInFlightOrdinaryHardwareRead() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let readStarted = expectation(description: "ordinary read started")
+        let inspectAdmission = DispatchSemaphore(value: 0)
+        let readStopped = expectation(description: "ordinary read stopped")
+
+        session.runBoundedOrdinaryHardwareRead(
+            deadline: Date().addingTimeInterval(1)
+        ) { shouldContinue in
+            XCTAssertTrue(shouldContinue())
+            readStarted.fulfill()
+            inspectAdmission.wait()
+            XCTAssertFalse(shouldContinue())
+            readStopped.fulfill()
+        } onCancelled: {
+            XCTFail("read began before suspension admission")
+        }
+        wait(for: [readStarted], timeout: 1)
+
+        let suspension = try XCTUnwrap(session.suspendHardware())
+        inspectAdmission.signal()
+        wait(for: [readStopped], timeout: 1)
+        XCTAssertTrue(session.resumeHardware(from: suspension))
     }
 
     func testOrdinaryHardwareReadHonorsOneAbsoluteDeadline() {
@@ -411,64 +425,100 @@ final class LogitechDeviceSessionTests: XCTestCase {
         wait(for: [admissionChecked, terminalRan], timeout: 1)
     }
 
-    func testSlowInFlightApplyIsSupersededBeforeUnkeyedSleepDecision() throws {
+    func testHardwareSuspensionSupersedesInFlightAccessAndPreservesRuntimeContext() throws {
         let session = LogitechDeviceSession(deviceID: 1)
         let access = try adjustableDPIAccess(for: session)
         let wheelAccess = try hiResWheelAccess(for: session)
         XCTAssertTrue(session.recordInitialSensorDPI(800, for: access))
         XCTAssertTrue(session.recordInitialHiResWheelState(enabled: false, for: wheelAccess))
+        session.updateSensorDPI(8000, for: access)
+        session.updateHiResWheelState(enabled: true, multiplier: 8, for: wheelAccess)
         let oldApplyStarted = expectation(description: "old apply started")
         let releaseOldApply = DispatchSemaphore(value: 0)
-        let sleepDecision = expectation(description: "sleep decision")
+        let admissionChecked = expectation(description: "old access rejected")
 
         session.perform {
             oldApplyStarted.fulfill()
             releaseOldApply.wait()
             XCTAssertFalse(session.allowsConfiguredDPIWrite(for: access))
+            XCTAssertFalse(session.allowsConfiguredHiResWheelWrite(for: wheelAccess))
+            admissionChecked.fulfill()
         }
         wait(for: [oldApplyStarted], timeout: 1)
 
-        session.runSleepHardwarePreparation { dpiToken, wheelToken, ownsSleepPreparation in
-            XCTAssertTrue(dpiToken.shouldContinue)
-            XCTAssertTrue(wheelToken.shouldContinue)
-            XCTAssertTrue(ownsSleepPreparation())
-            XCTAssertTrue(session.hasInitialSensorDPIState)
-            XCTAssertTrue(session.hasInitialHiResWheelState)
-            sleepDecision.fulfill()
-        } onCancelled: {
-            XCTFail("sleep operation should own both superseding setting tokens")
-        }
+        let suspension = try XCTUnwrap(session.suspendHardware())
         XCTAssertFalse(session.allowsConfiguredDPIWrite(for: access))
         XCTAssertFalse(session.allowsConfiguredHiResWheelWrite(for: wheelAccess))
+        XCTAssertNil(session.sensorDPI)
+        XCTAssertNil(session.hiResWheelEnabled)
+        XCTAssertNil(session.hiResWheelNormalizationMultiplier)
+        XCTAssertTrue(session.hasInitialSensorDPIState)
+        XCTAssertTrue(session.hasInitialHiResWheelState)
         releaseOldApply.signal()
+        wait(for: [admissionChecked], timeout: 1)
 
-        wait(for: [sleepDecision], timeout: 1)
+        XCTAssertTrue(session.resumeHardware(from: suspension))
+        XCTAssertEqual(session.hiResWheelNormalizationMultiplier, 8)
+        let resumedDPIAccess = try adjustableDPIAccess(for: session)
+        let resumedWheelAccess = try hiResWheelAccess(for: session)
+        XCTAssertEqual(session.initialSensorDPI(for: resumedDPIAccess), 800)
+        XCTAssertFalse(try XCTUnwrap(session.initialHiResWheelEnabled(for: resumedWheelAccess)))
     }
 
-    func testTerminalRestoreSupersedesQueuedSleepPreparation() {
+    func testTerminalRestoreSupersedesSuspensionAndRejectsLateResume() throws {
         let session = LogitechDeviceSession(deviceID: 1)
         let queueGate = DispatchSemaphore(value: 0)
         session.perform { queueGate.wait() }
-        let sleepCancelled = expectation(description: "sleep preparation cancelled")
         let terminalRan = expectation(description: "terminal restore ran")
+        let suspension = try XCTUnwrap(session.suspendHardware())
 
-        session.runSleepHardwarePreparation { _, _, _ in
-            XCTFail("terminal restore must supersede queued sleep work")
-        } onCancelled: {
-            sleepCancelled.fulfill()
-        }
         session.runTerminalHardwareRestore { _, _, ownsTerminalRestore in
             XCTAssertTrue(ownsTerminalRestore())
             terminalRan.fulfill()
         } onCancelled: {
             XCTFail("terminal restore is the stronger concrete owner")
         }
+        XCTAssertFalse(session.resumeHardware(from: suspension))
+        XCTAssertNil(session.suspendHardware())
         queueGate.signal()
 
-        wait(for: [sleepCancelled, terminalRan], timeout: 1)
+        wait(for: [terminalRan], timeout: 1)
     }
 
-    func testSleepRestoresStoreBackedAndUnkeyedInitialStateEqually() throws {
+    func testTerminalRestoreAfterSuspensionUsesFreshTokensAndPreservedBaselines() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let dpiAccess = try adjustableDPIAccess(for: session)
+        let wheelAccess = try hiResWheelAccess(for: session)
+        XCTAssertTrue(session.recordInitialSensorDPI(800, for: dpiAccess))
+        XCTAssertTrue(session.recordInitialHiResWheelState(enabled: false, for: wheelAccess))
+        let suspension = try XCTUnwrap(session.suspendHardware())
+        let terminalRan = expectation(description: "terminal restore ran")
+
+        session.runTerminalHardwareRestore { dpiToken, wheelToken, ownsTerminalRestore in
+            XCTAssertTrue(ownsTerminalRestore())
+            guard let terminalDPIAccess = try? self.adjustableDPIAccess(
+                for: session,
+                expectedToken: dpiToken
+            ), let terminalWheelAccess = try? self.hiResWheelAccess(
+                for: session,
+                expectedToken: wheelToken
+            ) else {
+                XCTFail("terminal owner must recreate both suspended features")
+                terminalRan.fulfill()
+                return
+            }
+            XCTAssertEqual(session.initialSensorDPI(for: terminalDPIAccess), 800)
+            XCTAssertFalse(session.initialHiResWheelEnabled(for: terminalWheelAccess) ?? true)
+            terminalRan.fulfill()
+        } onCancelled: {
+            XCTFail("terminal owner must supersede suspension")
+        }
+
+        wait(for: [terminalRan], timeout: 1)
+        XCTAssertFalse(session.resumeHardware(from: suspension))
+    }
+
+    func testSuspensionPreservesStoreBackedAndUnkeyedInitialState() throws {
         let session = LogitechDeviceSession(deviceID: 1)
         let target = try XCTUnwrap(LogitechHardwareTargetKey.direct(
             transport: "Bluetooth Low Energy",
@@ -488,8 +538,38 @@ final class LogitechDeviceSessionTests: XCTestCase {
         let claim = store.captureDPIBaseline(promotion.dpi, for: target)
         XCTAssertTrue(session.attachDPIBaseline(claim, to: promotion))
 
+        let suspension = try XCTUnwrap(session.suspendHardware())
         XCTAssertTrue(session.hasInitialSensorDPIState)
         XCTAssertTrue(session.hasInitialHiResWheelState)
+        XCTAssertEqual(store.dpiBaseline(for: target)?.baseline, .init(value: 800))
+        XCTAssertTrue(session.resumeHardware(from: suspension))
+    }
+
+    func testSuspensionRejectsOrdinaryMutationUntilExactResume() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let suspension = try XCTUnwrap(session.suspendHardware())
+        let unrelated = try XCTUnwrap(LogitechDeviceSession(deviceID: 2).suspendHardware())
+        let rejected = expectation(description: "suspended mutation rejected")
+        XCTAssertFalse(session.allowsOrdinaryHardwareIO)
+
+        session.runDPIOperation { _ in
+            XCTFail("suspended session must reject ordinary mutation")
+        } onCancelled: {
+            rejected.fulfill()
+        }
+        wait(for: [rejected], timeout: 1)
+
+        XCTAssertFalse(session.resumeHardware(from: unrelated))
+        XCTAssertTrue(session.resumeHardware(from: suspension))
+        XCTAssertTrue(session.allowsOrdinaryHardwareIO)
+
+        let resumed = expectation(description: "resumed mutation admitted")
+        session.runDPIOperation { _ in
+            resumed.fulfill()
+        } onCancelled: {
+            XCTFail("exact resume must reopen ordinary mutation")
+        }
+        wait(for: [resumed], timeout: 1)
     }
 
     func testTerminalRestoreRetryUsesTheRemainingDeadlineBudget() {
@@ -778,6 +858,77 @@ final class LogitechDeviceSessionTests: XCTestCase {
         session.updateHiResWheelState(enabled: true, multiplier: 1, for: access)
 
         XCTAssertEqual(session.hiResWheelNormalizationMultiplier, 1)
+    }
+
+    func testCapabilityRefreshesProvisionalMultiplierWhileModeIsUnknown() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let access = try hiResWheelAccess(for: session)
+        session.updateHiResWheelState(enabled: true, multiplier: 8, for: access)
+        let suspension = try XCTUnwrap(session.suspendHardware())
+        XCTAssertTrue(session.resumeHardware(from: suspension))
+        let resumedAccess = try hiResWheelAccess(for: session)
+
+        session.updateHiResWheelState(enabled: nil, multiplier: 12, for: resumedAccess)
+
+        XCTAssertNil(session.hiResWheelEnabled)
+        XCTAssertEqual(session.hiResWheelNormalizationMultiplier, 12)
+    }
+
+    func testDefinitiveWheelModeClearsSuspensionMultiplier() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let access = try hiResWheelAccess(for: session)
+        session.updateHiResWheelState(enabled: true, multiplier: 8, for: access)
+        let suspension = try XCTUnwrap(session.suspendHardware())
+        XCTAssertTrue(session.resumeHardware(from: suspension))
+        let resumedAccess = try hiResWheelAccess(for: session)
+
+        session.updateHiResWheelState(enabled: false, multiplier: nil, for: resumedAccess)
+
+        XCTAssertFalse(try XCTUnwrap(session.hiResWheelEnabled))
+        XCTAssertNil(session.hiResWheelNormalizationMultiplier)
+    }
+
+    func testUnconfirmedNativeWheelStateClearsSuspensionMultiplier() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let access = try hiResWheelAccess(for: session)
+        session.updateHiResWheelState(enabled: true, multiplier: 8, for: access)
+        let suspension = try XCTUnwrap(session.suspendHardware())
+        XCTAssertTrue(session.resumeHardware(from: suspension))
+        let restoreToken = session.startHiResWheelRestore { _, _ in false }
+
+        session.clearProvisionalHiResWheelMultiplier(for: restoreToken)
+
+        XCTAssertNil(session.hiResWheelNormalizationMultiplier)
+        session.cancelHiResWheelApply()
+    }
+
+    func testRepeatedSuspensionKeepsProvisionalMultiplierWhileModeIsUnknown() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let access = try hiResWheelAccess(for: session)
+        session.updateHiResWheelState(enabled: true, multiplier: 8, for: access)
+
+        let first = try XCTUnwrap(session.suspendHardware())
+        XCTAssertTrue(session.resumeHardware(from: first))
+        let second = try XCTUnwrap(session.suspendHardware())
+
+        XCTAssertNil(session.hiResWheelEnabled)
+        XCTAssertNil(session.hiResWheelNormalizationMultiplier)
+        XCTAssertTrue(session.resumeHardware(from: second))
+        XCTAssertEqual(session.hiResWheelNormalizationMultiplier, 8)
+    }
+
+    func testHardwareTargetChangeClearsSuspensionMultiplier() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        _ = session.updateDiscovery(discovery(serialNumber: "AAAAAAAA", productID: 0xB034))
+        let access = try hiResWheelAccess(for: session, receiverSlot: 2)
+        session.updateHiResWheelState(enabled: true, multiplier: 8, for: access)
+        let suspension = try XCTUnwrap(session.suspendHardware())
+        XCTAssertNil(session.hiResWheelNormalizationMultiplier)
+
+        _ = session.updateDiscovery(discovery(serialNumber: "BBBBBBBB", productID: 0xB034))
+
+        XCTAssertTrue(session.resumeHardware(from: suspension))
+        XCTAssertNil(session.hiResWheelNormalizationMultiplier)
     }
 
     func testInitialWheelStateIsBoundToLegacyReceiverSlot() throws {
@@ -1107,6 +1258,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
 
     private func hiResWheelAccess(
         for session: LogitechDeviceSession,
+        expectedToken: CancellationToken? = nil,
         receiverSlot: UInt8? = nil,
         stableTargetKey: LogitechHardwareTargetKey? = nil
     ) throws -> LogitechDeviceSession.FeatureAccess<HiResWheel> {
@@ -1118,7 +1270,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
             maxOutputReportSize: 20
         )
         let transport = try XCTUnwrap(HIDPPTransport(device: device, deviceIndex: receiverSlot))
-        return try XCTUnwrap(session.hiResWheel { _, _ in
+        return try XCTUnwrap(session.hiResWheel(expectedToken: expectedToken) { _, _ in
             .init(
                 feature: HiResWheel(transport: transport, featureIndex: 1),
                 stableTargetKey: stableTargetKey,
@@ -1129,6 +1281,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
 
     private func adjustableDPIAccess(
         for session: LogitechDeviceSession,
+        expectedToken: CancellationToken? = nil,
         receiverSlot: UInt8? = nil,
         stableTargetKey: LogitechHardwareTargetKey? = nil
     ) throws -> LogitechDeviceSession.FeatureAccess<AdjustableDPI> {
@@ -1140,7 +1293,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
             maxOutputReportSize: 20
         )
         let transport = try XCTUnwrap(HIDPPTransport(device: device, deviceIndex: receiverSlot))
-        return try XCTUnwrap(session.adjustableDPI { _, _ in
+        return try XCTUnwrap(session.adjustableDPI(expectedToken: expectedToken) { _, _ in
             .init(
                 feature: AdjustableDPI(
                     transport: transport,

@@ -56,4 +56,11 @@ struct GenericSideButtonHandler: InputReportHandler {
 
         context.lastButtonStates = buttonStates
     }
+
+    func releasePressedButtons(_ context: InputReportContext) {
+        for button in 3 ... 4 where context.lastButtonStates & (1 << button) != 0 {
+            emit(button, false)
+        }
+        context.lastButtonStates &= ~0x18
+    }
 }

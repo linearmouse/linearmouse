@@ -10,19 +10,23 @@ import PointerKit
 enum DeviceManagerLifecycleState: Equatable {
     case stopped
     case running
+    case suspending
+    case suspended
     case stopping
     case finishing
 
     var allowsDeviceWork: Bool {
         self == .running
     }
+
+    var allowsDeviceTopology: Bool {
+        self == .running || self == .suspending || self == .suspended
+    }
 }
 
 enum DeviceManagerLogitechTeardownPolicy: Int, Comparable {
     /// Drop monitor ownership without any HID++ reporting I/O.
     case abandon
-    /// Best-effort restore reachable hardware before the system sleeps.
-    case sleepRestore
     /// Restore every pending baseline before invalidating PointerDevice.
     case restore
 
@@ -31,10 +35,8 @@ enum DeviceManagerLogitechTeardownPolicy: Int, Comparable {
     }
 }
 
-/// The strongest teardown request received for the current observation
-/// lifetime. Sleep uses a shorter best-effort restore, but once a
-/// caller asks to restore hardware, a later sleep notification must never
-/// weaken that request.
+/// The strongest terminal teardown request received for the current
+/// observation lifetime.
 struct DeviceManagerStopIntent: Equatable {
     private(set) var logitechTeardownPolicy: DeviceManagerLogitechTeardownPolicy
 
@@ -44,8 +46,7 @@ struct DeviceManagerStopIntent: Equatable {
 }
 
 /// Tracks the asynchronous Logitech teardown separately from the final stop
-/// intent. A completed sleep barrier cannot satisfy a subsequently upgraded
-/// terminal restore.
+/// intent.
 struct DeviceManagerLogitechStopBarrier: Equatable {
     typealias Start = DeviceManagerLogitechTeardownPolicy
 
@@ -80,7 +81,6 @@ final class DeviceManagerStopRequest {
     var intent: DeviceManagerStopIntent
     var logitechBarrier = DeviceManagerLogitechStopBarrier()
     var completions = [() -> Void]()
-    var sleepLogitechCleanup: BoundedCleanupRequest?
     var terminalLogitechCleanup: BoundedCleanupRequest?
 
     init(intent: DeviceManagerStopIntent) {
@@ -88,11 +88,40 @@ final class DeviceManagerStopRequest {
     }
 }
 
+/// Owns one running -> suspended transition. Object identity prevents a late
+/// controls-cleanup callback or wake from resolving another sleep cycle.
+final class DeviceManagerSuspensionRequest {
+    enum Disposition: Equatable {
+        case active
+        case resumed
+        case superseded
+    }
+
+    private(set) var disposition = Disposition.active
+    var controlsCleanup: BoundedCleanupRequest?
+    var logitechSettings = [
+        ObjectIdentifier: (device: WeakRef<Device>, suspension: LogitechHardwareSuspension)
+    ]()
+
+    @discardableResult
+    func claimResume() -> Bool {
+        guard disposition == .active else {
+            return false
+        }
+        disposition = .resumed
+        return true
+    }
+
+    func supersede() {
+        disposition = .superseded
+    }
+}
+
 class DeviceManager: ObservableObject {
     static let shared = DeviceManager()
 
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "DeviceManager")
-    private static let sleepLogitechTeardownTimeout: TimeInterval = 1
+    private static let sleepControlsTeardownTimeout: TimeInterval = 1
     // A monitor request committed just before stop retains the channel lock for
     // at most the HID++ 2s transaction deadline. Leave a small margin for the
     // targeted identity probe, then reserve the remaining global budget for
@@ -127,8 +156,8 @@ class DeviceManager: ObservableObject {
         }
         .tieToLifetime(of: self)
 
-        receiverMonitor.onPointingDevicesChanged = { [weak self] locationID, identities in
-            self?.receiverPointingDevicesChanged(locationID: locationID, identities: identities)
+        receiverMonitor.onPointingDevicesChanged = { [weak self] locationID, publication in
+            self?.receiverPointingDevicesChanged(locationID: locationID, publication: publication)
         }
 
         for property in [
@@ -152,6 +181,12 @@ class DeviceManager: ObservableObject {
 
     private var state: DeviceManagerLifecycleState = .stopped
     private var stopRequest: DeviceManagerStopRequest?
+    private var suspensionRequest: DeviceManagerSuspensionRequest?
+    private var retainedSuspensionRequests = [ObjectIdentifier: DeviceManagerSuspensionRequest]()
+    private var receiverWakeRediscoveryRequests = [Int: ReceiverRediscoveryRequest]()
+    private var receiverWakeHardwareSuspensions = [
+        ObjectIdentifier: (device: WeakRef<Device>, suspension: LogitechHardwareSuspension)
+    ]()
 
     private var subscriptions = Set<AnyCancellable>()
 
@@ -159,6 +194,166 @@ class DeviceManager: ObservableObject {
 
     var allowsDeviceWork: Bool {
         state.allowsDeviceWork
+    }
+
+    func suspendForSleep() {
+        switch state {
+        case .stopped, .suspending, .suspended, .stopping, .finishing:
+            return
+        case .running:
+            break
+        }
+
+        state = .suspending
+        pointerDeviceToDevice.values.forEach { $0.releaseSyntheticInputReportButtons() }
+        receiverWakeRediscoveryRequests.removeAll()
+        receiverWakeHardwareSuspensions.removeAll()
+        let request = DeviceManagerSuspensionRequest()
+        suspensionRequest = request
+        retainedSuspensionRequests[ObjectIdentifier(request)] = request
+
+        let logitechDevices = pointerDeviceToDevice.values.filter {
+            $0.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID
+        }
+        for device in logitechDevices {
+            guard let suspension = device.suspendLogitechSettings() else {
+                continue
+            }
+            request.logitechSettings[ObjectIdentifier(device)] = (
+                WeakRef(device),
+                suspension
+            )
+        }
+
+        startSleepControlsCleanup(devices: logitechDevices, request: request)
+    }
+
+    /// Resumes only the exact current sleep owner. A fast wake does not wait
+    /// for controls restoration; each monitor records one pending resume and
+    /// restarts after its restore-only worker has released the barrier.
+    func resumeFromSleep(completion: @escaping () -> Void = {}) {
+        switch state {
+        case .stopped, .running:
+            completion()
+            return
+        case .stopping, .finishing:
+            guard let stopRequest else {
+                DispatchQueue.main.async(execute: completion)
+                return
+            }
+            stopRequest.completions.append(completion)
+            return
+        case .suspending, .suspended:
+            break
+        }
+
+        guard let request = suspensionRequest,
+              request.claimResume()
+        else {
+            return
+        }
+        suspensionRequest = nil
+
+        for (identifier, entry) in request.logitechSettings {
+            guard let device = entry.device.value else {
+                continue
+            }
+            if shouldMonitorReceiver(device) {
+                receiverWakeHardwareSuspensions[identifier] = entry
+            } else {
+                _ = device.resumeLogitechSettings(from: entry.suspension)
+            }
+        }
+
+        // A receiver's logical slot may have changed during sleep. Keep the
+        // last route only as dormant state so the Hi-Res multiplier remains
+        // continuous; no receiver work is admitted until an exact fresh
+        // rediscovery completes.
+        let receiverDevices = devices.filter(shouldMonitorReceiver)
+        let receiverLocationIDs = Set(receiverDevices.compactMap(\.pointerDevice.locationID))
+        for locationID in receiverLocationIDs {
+            receiverPairedDeviceIdentities.removeValue(forKey: locationID)
+            receiverWakeRediscoveryRequests[locationID] = ReceiverRediscoveryRequest()
+        }
+
+        lastActiveDeviceId = nil
+        lastActiveDeviceRef = nil
+        state = .running
+
+        updatePointerSpeed()
+        for device in devices {
+            if shouldMonitorReceiver(device) {
+                receiverMonitor.startMonitoring(device: device)
+                if let locationID = device.pointerDevice.locationID,
+                   let rediscovery = receiverWakeRediscoveryRequests[locationID] {
+                    receiverMonitor.requestRediscovery(device: device, request: rediscovery)
+                }
+            } else if device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID {
+                device.logitechSettingsReconciler.reapplyAfterWake(configuredLogitechDeviceSettings(for: device))
+                device.resumeLogitechControlsAfterSleep()
+            }
+        }
+        completion()
+    }
+
+    private func startSleepControlsCleanup(
+        devices: [Device],
+        request: DeviceManagerSuspensionRequest
+    ) {
+        let deadline = Date().addingTimeInterval(Self.sleepControlsTeardownTimeout)
+        let group = DispatchGroup()
+        let cleanup = BoundedCleanupRequest(
+            timeout: Self.sleepControlsTeardownTimeout,
+            onTimeout: {
+                os_log(
+                    "Timed out restoring Logitech controls for sleep",
+                    log: Self.log,
+                    type: .error
+                )
+            },
+            completion: { [weak self, weak request] _ in
+                guard let self, let request else {
+                    return
+                }
+                request.controlsCleanup = nil
+                retainedSuspensionRequests.removeValue(forKey: ObjectIdentifier(request))
+                guard suspensionRequest === request, state == .suspending else {
+                    return
+                }
+                state = .suspended
+            }
+        )
+        request.controlsCleanup = cleanup
+        let authorization = cleanup.authorizationToken
+
+        for device in devices {
+            group.enter()
+            device.stopLogitechControlsMonitoringForSleep(
+                authorization: authorization,
+                deadline: deadline
+            ) {
+                group.leave()
+            }
+        }
+        group.notify(queue: .global(qos: .utility)) { [weak cleanup] in
+            cleanup?.complete()
+        }
+    }
+
+    private func supersedeSuspensionRequestsForTerminalStop() {
+        receiverWakeRediscoveryRequests.removeAll()
+        receiverWakeHardwareSuspensions.removeAll()
+        let activeRequest = suspensionRequest
+        suspensionRequest = nil
+        var requests = Array(retainedSuspensionRequests.values)
+        if let activeRequest,
+           retainedSuspensionRequests[ObjectIdentifier(activeRequest)] == nil {
+            requests.append(activeRequest)
+        }
+        for request in requests {
+            request.supersede()
+            request.controlsCleanup?.complete()
+        }
     }
 
     func stop(
@@ -193,7 +388,7 @@ class DeviceManager: ObservableObject {
             // intent before invalidating PointerDevice.
             startLogitechBarrierIfNeeded(for: request)
             return
-        case .running:
+        case .running, .suspending, .suspended:
             state = .stopping
             let request = DeviceManagerStopRequest(intent: requestedIntent)
             if let completion {
@@ -201,6 +396,9 @@ class DeviceManager: ObservableObject {
             }
             stopRequest = request
         }
+
+        pointerDeviceToDevice.values.forEach { $0.releaseSyntheticInputReportButtons() }
+        supersedeSuspensionRequestsForTerminalStop()
 
         subscriptions.removeAll()
 
@@ -236,70 +434,7 @@ class DeviceManager: ObservableObject {
             return
         }
 
-        if start == .restore {
-            // Revoking the weaker request's authorization makes every sleep
-            // setting operation yield before terminal restoration starts.
-            request.sleepLogitechCleanup?.complete()
-            startTerminalLogitechRestore(devices: devices, request: request, start: start)
-            return
-        }
-
-        startSleepLogitechTeardown(devices: devices, request: request, start: start)
-    }
-
-    private func startSleepLogitechTeardown(
-        devices: [Device],
-        request: DeviceManagerStopRequest,
-        start: DeviceManagerLogitechStopBarrier.Start
-    ) {
-        let deadline = Date().addingTimeInterval(Self.sleepLogitechTeardownTimeout)
-        let group = DispatchGroup()
-        let cleanup = BoundedCleanupRequest(
-            timeout: Self.sleepLogitechTeardownTimeout,
-            onTimeout: {
-                os_log(
-                    "Timed out restoring Logitech hardware for sleep",
-                    log: Self.log,
-                    type: .error
-                )
-            },
-            completion: { [weak self, weak request] _ in
-                guard let self,
-                      let request,
-                      self.stopRequest === request
-                else {
-                    return
-                }
-                request.sleepLogitechCleanup = nil
-                request.logitechBarrier.complete(start)
-                self.attemptFinishStop(request)
-            }
-        )
-        request.sleepLogitechCleanup = cleanup
-        let cleanupAuthorization = cleanup.authorizationToken
-
-        for device in devices
-            where device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID {
-            group.enter()
-            device.stopLogitechControlsMonitoringForSleep(
-                authorization: cleanupAuthorization,
-                deadline: deadline
-            ) {
-                group.leave()
-            }
-
-            group.enter()
-            device.prepareLogitechSettingsForSleep(
-                deadline: deadline,
-                until: { cleanupAuthorization.shouldContinue }
-            ) {
-                group.leave()
-            }
-        }
-
-        group.notify(queue: .global(qos: .utility)) { [weak cleanup] in
-            cleanup?.complete()
-        }
+        startTerminalLogitechRestore(devices: devices, request: request, start: start)
     }
 
     /// Restores every Logitech mutation while PointerDevice and receiver
@@ -593,7 +728,6 @@ class DeviceManager: ObservableObject {
 
         let completions = request.completions
         request.completions.removeAll()
-        request.sleepLogitechCleanup = nil
         request.terminalLogitechCleanup = nil
         completions.forEach { $0() }
     }
@@ -603,6 +737,8 @@ class DeviceManager: ObservableObject {
             return
         }
         state = .running
+        receiverWakeRediscoveryRequests.removeAll()
+        receiverWakeHardwareSuspensions.removeAll()
 
         // Input callbacks suppress events from the device that was previously
         // active. A new observation lifetime needs its first physical input to
@@ -658,7 +794,7 @@ class DeviceManager: ObservableObject {
     }
 
     private func deviceAdded(_: PointerDeviceManager, _ pointerDevice: PointerDevice) {
-        guard allowsDeviceWork else {
+        guard state.allowsDeviceTopology else {
             os_log(
                 "Drop device added while lifecycle does not admit device work: %{public}@",
                 log: Self.log,
@@ -681,6 +817,21 @@ class DeviceManager: ObservableObject {
             type: .info,
             String(describing: device)
         )
+
+        // PointerKit emits an addition only once per observation lifetime.
+        // Keep devices that appear while suspended, then configure them when
+        // the exact sleep owner resumes.
+        guard allowsDeviceWork else {
+            if device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID,
+               let request = suspensionRequest,
+               let suspension = device.suspendLogitechSettings() {
+                request.logitechSettings[ObjectIdentifier(device)] = (
+                    WeakRef(device),
+                    suspension
+                )
+            }
+            return
+        }
 
         if shouldMonitorReceiver(device) {
             receiverMonitor.startMonitoring(device: device)
@@ -723,9 +874,11 @@ class DeviceManager: ObservableObject {
             } else {
                 receiverMonitor.stopMonitoring(device: device)
                 receiverPairedDeviceIdentities.removeValue(forKey: locationID)
+                receiverWakeRediscoveryRequests.removeValue(forKey: locationID)
             }
         }
 
+        receiverWakeHardwareSuspensions.removeValue(forKey: ObjectIdentifier(device))
         pointerDeviceToDevice.removeValue(forKey: pointerDevice)
         refreshVisibleDevices()
 
@@ -954,24 +1107,6 @@ class DeviceManager: ObservableObject {
         reapplyLogitechDeviceSettings(for: device)
     }
 
-    func requestLogitechReceiverRediscovery() {
-        guard state == .running else {
-            return
-        }
-
-        for device in devices where shouldMonitorReceiver(device) {
-            // The wake poke is for receiver route recovery only. Direct
-            // devices may already have a confirmation attempt scheduled;
-            // restarting it here would cancel that work.
-            let identities = device.pointerDevice.locationID.flatMap {
-                receiverPairedDeviceIdentities[$0]
-            }
-            if identities?.isEmpty != false {
-                receiverMonitor.requestRediscovery(device: device)
-            }
-        }
-    }
-
     private func reapplyLogitechDeviceSettings(for device: Device) {
         guard state == .running,
               device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID else {
@@ -980,7 +1115,7 @@ class DeviceManager: ObservableObject {
 
         guard updateLogitechReceiverDiscovery(for: device).isReady else {
             if shouldMonitorReceiver(device) {
-                receiverMonitor.requestRediscovery(device: device)
+                requestReceiverRediscovery(for: device)
             }
             return
         }
@@ -994,14 +1129,18 @@ class DeviceManager: ObservableObject {
     @discardableResult
     private func updateLogitechReceiverDiscovery(
         for device: Device
-    ) -> (isReady: Bool, update: LogitechDeviceSession.DiscoveryUpdate) {
+    ) -> (isReady: Bool, update: LogitechDeviceSession.DiscoveryUpdate?) {
         guard shouldMonitorReceiver(device) else {
             return (true, device.updateLogitechReceiverDiscovery(nil))
         }
 
-        guard let locationID = device.pointerDevice.locationID,
-              let identities = receiverPairedDeviceIdentities[locationID]
-        else {
+        guard let locationID = device.pointerDevice.locationID else {
+            return (false, nil)
+        }
+        guard receiverWakeRediscoveryRequests[locationID] == nil else {
+            return (false, nil)
+        }
+        guard let identities = receiverPairedDeviceIdentities[locationID] else {
             return (false, device.updateLogitechReceiverDiscovery(nil))
         }
 
@@ -1014,6 +1153,17 @@ class DeviceManager: ObservableObject {
             route: route
         ))
         return (route != nil, update)
+    }
+
+    private func requestReceiverRediscovery(for device: Device) {
+        guard let locationID = device.pointerDevice.locationID else {
+            return
+        }
+        if let wakeRequest = receiverWakeRediscoveryRequests[locationID] {
+            receiverMonitor.requestRediscovery(device: device, request: wakeRequest)
+        } else {
+            receiverMonitor.requestRediscovery(device: device)
+        }
     }
 
     func pairedReceiverDevices(for device: Device) -> [ReceiverLogicalDeviceIdentity] {
@@ -1045,8 +1195,12 @@ class DeviceManager: ObservableObject {
         )
     }
 
-    private func receiverPointingDevicesChanged(locationID: Int, identities: [ReceiverLogicalDeviceIdentity]) {
-        guard state == .running,
+    private func receiverPointingDevicesChanged(
+        locationID: Int,
+        publication: ReceiverDiscoveryPublication
+    ) {
+        let identities = publication.identities
+        guard state.allowsDeviceTopology,
               pointerDeviceToDevice.values.contains(where: { $0.pointerDevice.locationID == locationID }) else {
             os_log(
                 "Drop receiver logical device update because no visible device matches locationID=%{public}d count=%{public}u",
@@ -1059,6 +1213,13 @@ class DeviceManager: ObservableObject {
         }
 
         receiverPairedDeviceIdentities[locationID] = identities
+
+        let expectedWakeRequest = receiverWakeRediscoveryRequests[locationID]
+        let completedWakeRediscovery = expectedWakeRequest != nil
+            && publication.rediscoveryRequest === expectedWakeRequest
+        if completedWakeRediscovery {
+            receiverWakeRediscoveryRequests.removeValue(forKey: locationID)
+        }
 
         let identitiesDescription = identities.map { identity in
             let battery = identity.batteryLevel.map(String.init) ?? "(nil)"
@@ -1075,17 +1236,43 @@ class DeviceManager: ObservableObject {
         )
 
         for (_, device) in pointerDeviceToDevice where device.pointerDevice.locationID == locationID {
+            // Publications from before the exact wake request remain useful
+            // topology, but cannot reopen the stale receiver route or hardware
+            // admission.
+            guard receiverWakeRediscoveryRequests[locationID] == nil else {
+                continue
+            }
+
             let previousRoute = device.logitechReceiverRouteSnapshot
             let discovery = updateLogitechReceiverDiscovery(for: device)
+            let deviceIdentifier = ObjectIdentifier(device)
+            let wakeRecoveryPending = receiverWakeHardwareSuspensions[deviceIdentifier] != nil
+            let resumedAfterWake: Bool
+            if discovery.isReady,
+               let suspension = receiverWakeHardwareSuspensions[deviceIdentifier] {
+                resumedAfterWake = device.resumeLogitechSettings(from: suspension.suspension)
+                if resumedAfterWake {
+                    receiverWakeHardwareSuspensions.removeValue(forKey: deviceIdentifier)
+                }
+            } else {
+                resumedAfterWake = false
+            }
+
+            guard allowsDeviceWork else {
+                continue
+            }
             guard discovery.isReady, let route = device.logitechReceiverRouteSnapshot else {
-                if !identities.isEmpty {
+                if !wakeRecoveryPending, !identities.isEmpty {
                     device.requestLogitechControlsForcedReconfiguration()
                 }
                 continue
             }
 
             let identityChanged = previousRoute != route
-            if discovery.update.hardwareTargetChanged {
+            if resumedAfterWake {
+                device.logitechSettingsReconciler.reapplyAfterWake(configuredLogitechDeviceSettings(for: device))
+                device.resumeLogitechControlsAfterSleep()
+            } else if discovery.update?.hardwareTargetChanged == true {
                 device.logitechSettingsReconciler.reapply(configuredLogitechDeviceSettings(for: device))
             } else if identityChanged {
                 device.requestLogitechControlsForcedReconfiguration()
