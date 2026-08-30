@@ -654,10 +654,41 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         let activeSlots = Set(connectionSnapshots.compactMap { slot, snapshot in
             snapshot.isConnected ? slot : nil
         }).union(slots.filter(\.hasLiveMetadata).map(\.slot))
-        let activeCandidates = slots.filter { activeSlots.contains($0.slot) }
+        let completenessCandidates = slots.filter { candidate in
+            guard activeSlots.contains(candidate.slot) else {
+                return false
+            }
+
+            guard let snapshotKind = connectionSnapshots[candidate.slot]?.kind
+                .flatMap(ReceiverLogicalDeviceKind.init(rawValue:))
+            else {
+                return true
+            }
+
+            guard let candidateKind = ReceiverLogicalDeviceKind(rawValue: candidate.kind) else {
+                return false
+            }
+            return candidateKind.isPointingDevice == snapshotKind.isPointingDevice
+        }
+
+        let desiredKinds = preferredReceiverDeviceKinds(for: device)
+        let routeCandidates = completenessCandidates.filter { candidate in
+            guard !desiredKinds.isEmpty else {
+                return true
+            }
+
+            let snapshotKind = connectionSnapshots[candidate.slot]?.kind
+                .flatMap(ReceiverLogicalDeviceKind.init(rawValue:))
+            let candidateKind = ReceiverLogicalDeviceKind(rawValue: candidate.kind)
+            let effectiveKind = snapshotKind ?? candidateKind
+            guard let effectiveKind else {
+                return true
+            }
+            return desiredKinds.contains(effectiveKind.rawValue)
+        }
 
         let normalizedSerial = normalizeSerial(device.serialNumber)
-        let serialMatches = activeCandidates.filter {
+        let serialMatches = routeCandidates.filter {
             normalizedSerial != nil && normalizeSerial($0.serialNumber) == normalizedSerial
         }
         if let serialMatch = uniqueSlotMatch(serialMatches) {
@@ -666,7 +697,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             return serialMatch
         }
 
-        let activeCandidateSlots = Set(activeCandidates.map(\.slot))
+        let activeCandidateSlots = Set(completenessCandidates.map(\.slot))
         guard inventoryAvailable,
               activeSlots.count == expectedConnectedDeviceCount,
               activeCandidateSlots == activeSlots
@@ -674,7 +705,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             return nil
         }
 
-        return resolveReceiverSlotCandidate(for: device, slots: activeCandidates)
+        return resolveReceiverSlotCandidate(for: device, slots: routeCandidates)
     }
 
     private func resolveReceiverSlotCandidate(

@@ -136,6 +136,75 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         ))
     }
 
+    func testKnownKeyboardSnapshotRejectsStaleMouseCandidate() {
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+
+        XCTAssertNil(provider.receiverSlotCandidate(
+            for: mouseDevice(),
+            slots: [slot(slot: 1, kind: ReceiverLogicalDeviceKind.mouse.rawValue, name: "Mouse")],
+            connectionSnapshots: [1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.keyboard.rawValue)],
+            expectedConnectedDeviceCount: 1,
+            inventoryAvailable: true
+        ))
+    }
+
+    func testKnownMouseSnapshotRejectsStaleKeyboardCandidate() {
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+
+        XCTAssertNil(provider.receiverSlotCandidate(
+            for: mouseDevice(),
+            slots: [slot(slot: 1, kind: ReceiverLogicalDeviceKind.keyboard.rawValue, name: "Keyboard")],
+            connectionSnapshots: [1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)],
+            expectedConnectedDeviceCount: 1,
+            inventoryAvailable: true
+        ))
+    }
+
+    func testCompleteMouseAndKeyboardInventoryRoutesOnlyMouseCandidate() throws {
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+
+        let candidate = try XCTUnwrap(provider.receiverSlotCandidate(
+            for: mouseDevice(),
+            slots: [
+                slot(slot: 1, kind: ReceiverLogicalDeviceKind.mouse.rawValue, name: "Mouse"),
+                slot(slot: 2, kind: ReceiverLogicalDeviceKind.keyboard.rawValue, name: "Keyboard")
+            ],
+            connectionSnapshots: [
+                1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue),
+                2: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.keyboard.rawValue)
+            ],
+            expectedConnectedDeviceCount: 2,
+            inventoryAvailable: true
+        ))
+
+        XCTAssertEqual(candidate.slot, 1)
+    }
+
+    func testMouseContextRejectsExactSerialOnKeyboardSnapshot() {
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: nil,
+            product: "Mouse",
+            serialNumber: "ABC123",
+            transport: PointerDeviceTransportName.usb,
+            primaryUsagePage: kHIDPage_GenericDesktop,
+            primaryUsage: kHIDUsage_GD_Mouse
+        )
+
+        XCTAssertNil(provider.receiverSlotCandidate(
+            for: device,
+            slots: [slot(
+                slot: 1,
+                kind: ReceiverLogicalDeviceKind.keyboard.rawValue,
+                serialNumber: "ABC123"
+            )],
+            connectionSnapshots: [1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.keyboard.rawValue)],
+            expectedConnectedDeviceCount: 1,
+            inventoryAvailable: true
+        ))
+    }
+
     func testPendingUnavailableChannelRequestsReopen() {
         XCTAssertEqual(
             ReceiverPendingDiscoveryDisposition.resolve(
