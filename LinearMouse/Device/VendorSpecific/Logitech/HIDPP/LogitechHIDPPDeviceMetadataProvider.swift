@@ -2490,6 +2490,15 @@ final class LogitechReprogrammableControlsMonitor {
         subscriptions.removeAll()
     }
 
+    func stopForSleep(completion: @escaping () -> Void) {
+        if state.hasStoreBackedActiveTarget {
+            disableForSleep()
+            DispatchQueue.main.async(execute: completion)
+        } else {
+            disable(completion: completion)
+        }
+    }
+
     func hasPendingBaselineForCurrentTarget() -> Bool {
         guard let store = device.logitechHardwareBaselineStore,
               let target = device.logitechHardwareTargetKey(
@@ -2556,6 +2565,7 @@ final class LogitechReprogrammableControlsMonitor {
             let baselineStore = device.logitechHardwareBaselineStore
             let baselineTarget = device.logitechHardwareTargetKey(receiverSlot: transport.receiverSlot)
             var pendingUnkeyedReportingRestoreByControlID = [UInt16: ReportingInfo]()
+            state.setStoreBackedActiveTarget(baselineTarget != nil)
 
             state.setActiveNotificationEndpoint(monitorTarget.notificationEndpoint)
             monitorTarget.notificationEndpoint.enableNotifications()
@@ -2819,6 +2829,22 @@ final class LogitechReprogrammableControlsMonitor {
                             pendingUnkeyedReportingRestoreByControlID.removeValue(forKey: controlID)
                         }
                         pendingUnkeyedReportingRestoreByControlID.merge(failedRestoreByControlID) { _, new in new }
+                        if !pendingUnkeyedReportingRestoreByControlID.isEmpty, shouldAllowTeardownIO() {
+                            _ = LogitechHardwareRestoreRetry.perform(
+                                operation: {
+                                    pendingUnkeyedReportingRestoreByControlID = self.restoreReportingState(
+                                        pendingUnkeyedReportingRestoreByControlID,
+                                        using: transport,
+                                        featureIndex: featureIndex,
+                                        locationID: locationID,
+                                        slot: slot,
+                                        reason: "retry unkeyed reporting restore"
+                                    )
+                                    return pendingUnkeyedReportingRestoreByControlID.isEmpty
+                                },
+                                wait: Thread.sleep(forTimeInterval:)
+                            )
+                        }
                     }
                     if !shouldContinueRunning(), shouldAllowTeardownIO() {
                         retryStoredReportingRestoration(
@@ -4034,6 +4060,11 @@ final class LogitechReprogrammableControlsMonitorState {
     /// received the completion and started a new lifecycle explicitly.
     private var preventsWorkerRestart = false
     private var allowsTeardownIO = false
+    private var hasStoreBackedActiveTargetValue = false
+
+    var hasStoreBackedActiveTarget: Bool {
+        queue.sync { workerThread != nil && hasStoreBackedActiveTargetValue }
+    }
 
     var shouldContinueRunning: Bool {
         queue.sync { isEnabled } && !Thread.current.isCancelled
@@ -4109,6 +4140,7 @@ final class LogitechReprogrammableControlsMonitorState {
         let (thread, token, completions, releasesRestartBarrier) = queue.sync {
             () -> (Thread?, ObservationToken?, [() -> Void], Bool) in
             workerThread = nil
+            hasStoreBackedActiveTargetValue = false
             activeNotificationEndpoint = nil
             let reportObservationToken = directDeviceReportObservationToken
             directDeviceReportObservationToken = nil
@@ -4198,6 +4230,15 @@ final class LogitechReprogrammableControlsMonitorState {
             }
 
             activeNotificationEndpoint = endpoint
+        }
+    }
+
+    func setStoreBackedActiveTarget(_ value: Bool) {
+        queue.sync {
+            guard workerThread != nil else {
+                return
+            }
+            hasStoreBackedActiveTargetValue = value
         }
     }
 

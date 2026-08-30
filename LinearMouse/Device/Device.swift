@@ -297,16 +297,7 @@ class Device {
             return
         }
 
-        let target = logitechHardwareTargetKey(
-            receiverSlot: logitechReceiverRouteSnapshot?.slot
-        )
-        guard target != nil else {
-            logitechReprogrammableControlsMonitor.disable(completion: completion)
-            return
-        }
-
-        logitechReprogrammableControlsMonitor.disableForSleep()
-        DispatchQueue.main.async(execute: completion)
+        logitechReprogrammableControlsMonitor.stopForSleep(completion: completion)
     }
 
     func requestLogitechControlsForcedReconfiguration() {
