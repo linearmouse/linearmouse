@@ -241,6 +241,47 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
         )
     }
 
+    func testControlsBaselineFirstWriterWinsAndConsumesPerControl() throws {
+        let store = LogitechHardwareBaselineStore()
+        let target = try directTarget(serial: "ABC123")
+        let native = LogitechHardwareBaselineStore.ControlsReportingBaseline(
+            flagsRawValue: 0,
+            mappedControlID: 0x00C3
+        )
+        let diverted = LogitechHardwareBaselineStore.ControlsReportingBaseline(
+            flagsRawValue: 1,
+            mappedControlID: 0x00C3
+        )
+
+        let first = store.captureControlsBaseline(native, controlID: 0x00C3, for: target)
+        let duplicate = store.captureControlsBaseline(diverted, controlID: 0x00C3, for: target)
+        let other = store.captureControlsBaseline(native, controlID: 0x00C4, for: target)
+
+        XCTAssertEqual(duplicate.baseline, native)
+        XCTAssertEqual(duplicate.handle, first.handle)
+        XCTAssertTrue(store.consumeControlsBaseline(first.handle))
+        XCTAssertNil(store.controlsBaseline(for: target, controlID: 0x00C3))
+        XCTAssertEqual(store.controlsBaseline(for: target, controlID: 0x00C4)?.handle, other.handle)
+    }
+
+    func testControlsBaselineRejectsStaleHandleAndDifferentSerial() throws {
+        let store = LogitechHardwareBaselineStore()
+        let original = try directTarget(serial: "AAAA")
+        let replacement = try directTarget(serial: "BBBB")
+        let baseline = LogitechHardwareBaselineStore.ControlsReportingBaseline(
+            flagsRawValue: 0,
+            mappedControlID: 0x00C3
+        )
+
+        let old = store.captureControlsBaseline(baseline, controlID: 0x00C3, for: original)
+        XCTAssertNil(store.controlsBaseline(for: replacement, controlID: 0x00C3))
+        XCTAssertTrue(store.consumeControlsBaseline(old.handle))
+
+        let new = store.captureControlsBaseline(baseline, controlID: 0x00C3, for: original)
+        XCTAssertFalse(store.consumeControlsBaseline(old.handle))
+        XCTAssertEqual(store.controlsBaseline(for: original, controlID: 0x00C3)?.handle, new.handle)
+    }
+
     private func directTarget(serial: String) throws -> LogitechHardwareTargetKey {
         try XCTUnwrap(LogitechHardwareTargetKey.direct(
             transport: "Bluetooth Low Energy",

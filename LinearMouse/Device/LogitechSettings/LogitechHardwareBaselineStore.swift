@@ -62,14 +62,37 @@ final class LogitechHardwareBaselineStore {
         let handle: HiResHandle
     }
 
+    struct ControlsReportingBaseline: Equatable {
+        let flagsRawValue: UInt16
+        let mappedControlID: UInt16
+    }
+
+    struct ControlsHandle: Hashable {
+        fileprivate let target: LogitechHardwareTargetKey
+        fileprivate let controlID: UInt16
+        fileprivate let version: UInt64
+    }
+
+    struct ControlsClaim: Equatable {
+        let controlID: UInt16
+        let baseline: ControlsReportingBaseline
+        let handle: ControlsHandle
+    }
+
     private struct HiResEntry {
         let baseline: HiResBaseline
+        let version: UInt64
+    }
+
+    private struct ControlsEntry {
+        let baseline: ControlsReportingBaseline
         let version: UInt64
     }
 
     private let lock = NSLock()
     private var nextVersion: UInt64 = 0
     private var hiResEntries = [LogitechHardwareTargetKey: HiResEntry]()
+    private var controlsEntries = [LogitechHardwareTargetKey: [UInt16: ControlsEntry]]()
 
     /// First writer wins. A reconstructed Device receives the original mode,
     /// rather than treating LinearMouse's still-applied mode as its baseline.
@@ -116,6 +139,75 @@ final class LogitechHardwareBaselineStore {
                 return false
             }
             hiResEntries.removeValue(forKey: handle.target)
+            return true
+        }
+    }
+
+    /// First writer wins per target and control. A resumed monitor therefore
+    /// keeps the state observed before its first diversion.
+    func captureControlsBaseline(
+        _ baseline: ControlsReportingBaseline,
+        controlID: UInt16,
+        for target: LogitechHardwareTargetKey
+    ) -> ControlsClaim {
+        lock.withLock {
+            if let entry = controlsEntries[target]?[controlID] {
+                return .init(
+                    controlID: controlID,
+                    baseline: entry.baseline,
+                    handle: .init(target: target, controlID: controlID, version: entry.version)
+                )
+            }
+
+            nextVersion &+= 1
+            let entry = ControlsEntry(baseline: baseline, version: nextVersion)
+            controlsEntries[target, default: [:]][controlID] = entry
+            return .init(
+                controlID: controlID,
+                baseline: baseline,
+                handle: .init(target: target, controlID: controlID, version: entry.version)
+            )
+        }
+    }
+
+    func controlsBaseline(
+        for target: LogitechHardwareTargetKey,
+        controlID: UInt16
+    ) -> ControlsClaim? {
+        lock.withLock {
+            guard let entry = controlsEntries[target]?[controlID] else {
+                return nil
+            }
+            return .init(
+                controlID: controlID,
+                baseline: entry.baseline,
+                handle: .init(target: target, controlID: controlID, version: entry.version)
+            )
+        }
+    }
+
+    func pendingControlsBaselines(for target: LogitechHardwareTargetKey) -> [ControlsClaim] {
+        lock.withLock {
+            controlsEntries[target, default: [:]].map { controlID, entry in
+                .init(
+                    controlID: controlID,
+                    baseline: entry.baseline,
+                    handle: .init(target: target, controlID: controlID, version: entry.version)
+                )
+            }
+        }
+    }
+
+    @discardableResult
+    func consumeControlsBaseline(_ handle: ControlsHandle) -> Bool {
+        lock.withLock {
+            guard controlsEntries[handle.target]?[handle.controlID]?.version == handle.version else {
+                return false
+            }
+            controlsEntries[handle.target]?.removeValue(forKey: handle.controlID)
+            if controlsEntries[handle.target]?.isEmpty == true {
+                controlsEntries.removeValue(forKey: handle.target)
+            }
             return true
         }
     }
