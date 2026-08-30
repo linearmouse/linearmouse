@@ -80,10 +80,12 @@ struct ReceiverSlotStateStore {
 
     private var pairedIdentitiesBySlot = [UInt8: ReceiverLogicalDeviceIdentity]()
     private var slotPresenceBySlot = [UInt8: SlotPresenceState]()
+    private var slotsRequiringPointingIdentity = Set<UInt8>()
 
     mutating func reset() {
         pairedIdentitiesBySlot = [:]
         slotPresenceBySlot = [:]
+        slotsRequiringPointingIdentity = []
     }
 
     /// A receiver channel is no longer trustworthy. Its pairing cache must not
@@ -112,6 +114,13 @@ struct ReceiverSlotStateStore {
 
         mergeConnectionSnapshots(discovery.connectionSnapshots)
 
+        // A discovered pointing identity satisfies a previous connection
+        // event's obligation, including a reconnect that cleared its cache.
+        for (slot, identity) in latestIdentitiesBySlot {
+            pairedIdentitiesBySlot[slot] = identity
+            slotsRequiringPointingIdentity.remove(slot)
+        }
+
         for slot in discovery.liveReachableSlots where slotPresenceBySlot[slot] != .connected {
             slotPresenceBySlot[slot] = .connected
         }
@@ -135,12 +144,32 @@ struct ReceiverSlotStateStore {
         for (slot, snapshot) in newSnapshots {
             let newPresence: SlotPresenceState = snapshot.isConnected ? .connected : .disconnected
             let oldPresence = slotPresenceBySlot[slot]
+            let previousIdentity = pairedIdentitiesBySlot[slot]
             slotPresenceBySlot[slot] = newPresence
+
+            guard newPresence == .connected else {
+                slotsRequiringPointingIdentity.remove(slot)
+                continue
+            }
+
+            let reportedKind = snapshot.kind.flatMap(ReceiverLogicalDeviceKind.init(rawValue:))
+            if let reportedKind, !reportedKind.isPointingDevice {
+                // An explicitly non-pointing device cannot inherit a stale
+                // mouse identity or hold up pointing-device discovery.
+                pairedIdentitiesBySlot.removeValue(forKey: slot)
+                slotsRequiringPointingIdentity.remove(slot)
+                continue
+            }
 
             // Clear stale identity when a device reconnects to a slot,
             // so the next needsIdentityRefresh check will trigger a refresh.
-            if newPresence == .connected, oldPresence == .disconnected {
+            if oldPresence == .disconnected {
                 pairedIdentitiesBySlot.removeValue(forKey: slot)
+            }
+
+            if reportedKind?.isPointingDevice == true
+                || oldPresence == .disconnected && previousIdentity != nil {
+                slotsRequiringPointingIdentity.insert(slot)
             }
         }
     }
@@ -148,6 +177,7 @@ struct ReceiverSlotStateStore {
     mutating func updateSlotIdentity(_ identity: ReceiverLogicalDeviceIdentity) {
         pairedIdentitiesBySlot[identity.slot] = identity
         slotPresenceBySlot[identity.slot] = .connected
+        slotsRequiringPointingIdentity.remove(identity.slot)
     }
 
     func needsIdentityRefresh(slot: UInt8) -> Bool {
@@ -157,8 +187,8 @@ struct ReceiverSlotStateStore {
     /// A connected slot without an identity cannot be used as a stable route.
     /// Discovery must retry until its transient identity read succeeds.
     var hasConnectedSlotMissingIdentity: Bool {
-        slotPresenceBySlot.contains { slot, presence in
-            presence == .connected && pairedIdentitiesBySlot[slot] == nil
+        slotsRequiringPointingIdentity.contains { slot in
+            slotPresenceBySlot[slot] == .connected && pairedIdentitiesBySlot[slot] == nil
         }
     }
 

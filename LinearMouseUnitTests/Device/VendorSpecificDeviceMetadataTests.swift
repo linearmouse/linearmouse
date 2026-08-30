@@ -799,6 +799,53 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertEqual(store.currentPublishedIdentities(), [identity])
     }
 
+    func testReceiverSlotStateStoreDoesNotRequireIdentityForConnectedKeyboard() {
+        var store = ReceiverSlotStateStore()
+        let mouse = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 0x1234,
+            slot: 2,
+            kind: .mouse,
+            name: "Mouse A",
+            serialNumber: "AAAA",
+            productID: 0x1234,
+            batteryLevel: 60
+        )
+
+        store.mergeDiscovery(.init(identities: [mouse], connectionSnapshots: [
+            1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.keyboard.rawValue),
+            2: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
+        ], liveReachableSlots: [2]))
+
+        XCTAssertFalse(store.hasConnectedSlotMissingIdentity)
+        XCTAssertEqual(store.currentPublishedIdentities(), [mouse])
+    }
+
+    func testReceiverSlotStateStoreUsesPriorPointingIdentityWhenReconnectKindIsUnknown() {
+        var store = ReceiverSlotStateStore()
+        let identity = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 0x1234,
+            slot: 1,
+            kind: .mouse,
+            name: "Mouse A",
+            serialNumber: "AAAA",
+            productID: 0x1234,
+            batteryLevel: 60
+        )
+
+        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
+            1: .init(isConnected: false, kind: nil)
+        ], liveReachableSlots: []))
+        store.mergeConnectionSnapshots([
+            1: .init(isConnected: true, kind: nil)
+        ])
+
+        XCTAssertTrue(store.hasConnectedSlotMissingIdentity)
+
+        store.updateSlotIdentity(identity)
+
+        XCTAssertFalse(store.hasConnectedSlotMissingIdentity)
+    }
+
     func testReceiverSlotStateStoreTreatsFreshBatteryMetadataAsReconnectEvidence() {
         var store = ReceiverSlotStateStore()
         let disconnectedIdentity = ReceiverLogicalDeviceIdentity(
