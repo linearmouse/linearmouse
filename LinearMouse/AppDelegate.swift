@@ -25,6 +25,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private let statusItem = StatusItem.shared
     private var subscriptions = Set<AnyCancellable>()
     private var lifecycleAdmission = AppLifecycleAdmission()
+    private var terminationRequest: BoundedCleanupRequest?
 
     /// Runs the one-time legacy -> SMAppService login-item migration on launch.
     ///
@@ -76,13 +77,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return .terminateNow
         }
 
-        guard !lifecycleAdmission.terminationCleanupStarted else {
+        guard terminationRequest == nil else {
             return .terminateLater
         }
         lifecycleAdmission.terminationCleanupStarted = true
 
-        stop(restoringHighResolutionWheel: true) { [weak sender] in
-            sender?.reply(toApplicationShouldTerminate: true)
+        let request = BoundedCleanupRequest(
+            onTimeout: {
+                os_log(
+                    "Timed out waiting for application termination cleanup",
+                    log: Self.log,
+                    type: .error
+                )
+            },
+            completion: { _ in
+                sender.reply(toApplicationShouldTerminate: true)
+            }
+        )
+        terminationRequest = request
+
+        stop(restoringHighResolutionWheel: true) {
+            request.complete()
         }
         return .terminateLater
     }
