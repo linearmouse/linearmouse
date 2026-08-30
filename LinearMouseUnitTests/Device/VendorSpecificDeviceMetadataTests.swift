@@ -1157,6 +1157,47 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertFalse(result.inventoryComplete)
     }
 
+    func testReceiverPointingIdentityKindRejectsConflictingLiveMouseAndPairingKeyboard() {
+        XCTAssertNil(resolveReceiverPointingIdentityKind(
+            snapshotRaw: ReceiverLogicalDeviceKind.mouse.rawValue,
+            pairingRaw: ReceiverLogicalDeviceKind.keyboard.rawValue
+        ))
+    }
+
+    func testReceiverPointingIdentityKindPrefersLiveKeyboardOverPairingMouse() {
+        XCTAssertEqual(
+            resolveReceiverPointingIdentityKind(
+                snapshotRaw: ReceiverLogicalDeviceKind.keyboard.rawValue,
+                pairingRaw: ReceiverLogicalDeviceKind.mouse.rawValue
+            ),
+            .keyboard
+        )
+    }
+
+    func testReceiverPointingIdentityKindHandlesUnknownMarkerAndMissingSnapshot() {
+        XCTAssertEqual(
+            resolveReceiverPointingIdentityKind(
+                snapshotRaw: 0,
+                pairingRaw: ReceiverLogicalDeviceKind.mouse.rawValue
+            ),
+            .mouse
+        )
+        XCTAssertEqual(
+            resolveReceiverPointingIdentityKind(
+                snapshotRaw: nil,
+                pairingRaw: ReceiverLogicalDeviceKind.mouse.rawValue
+            ),
+            .mouse
+        )
+        XCTAssertEqual(
+            resolveReceiverPointingIdentityKind(
+                snapshotRaw: ReceiverLogicalDeviceKind.mouse.rawValue,
+                pairingRaw: 0
+            ),
+            .mouse
+        )
+    }
+
     func testReceiverSlotStateStoreDropsStaleMouseForResolvedKeyboardSnapshot() {
         var store = ReceiverSlotStateStore()
         let staleMouse = receiverIdentity(slot: 1, name: "Mouse A")
