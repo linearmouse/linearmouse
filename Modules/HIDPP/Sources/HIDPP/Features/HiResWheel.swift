@@ -3,7 +3,9 @@
 
 import Foundation
 
-public struct HiResWheel {
+public struct HiResWheel: HIDPPFeature {
+    public static let featureID = HIDPPFeatureID.hiresWheel
+
     private enum Constants {
         static let getCapabilitiesFunction: UInt8 = 0x00
         static let getModeFunction: UInt8 = 0x01

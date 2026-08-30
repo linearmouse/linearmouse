@@ -2072,10 +2072,14 @@ final class LogitechReprogrammableControlsMonitor {
             )
         }
 
-        var initializationRetryTimeout = Constants.initializationRetryInitialTimeout
+        var initializationBackoff = ExponentialBackoff(
+            initialDelay: Constants.initializationRetryInitialTimeout,
+            maximumDelay: Constants.initializationRetryMaxTimeout
+        )
 
         targetLoop: while shouldContinueRunning() {
             guard let monitorTarget = resolveMonitorTarget() else {
+                let retryTimeout = initializationBackoff.nextDelay()
                 finishVirtualButtonRecordingPreparationIfNeeded(
                     sessionID: readMainThreadSnapshotFromWorker {
                         SettingsState.shared.buttonMappingRecordingSessionID
@@ -2085,22 +2089,22 @@ final class LogitechReprogrammableControlsMonitor {
                     "Retry Logitech controls monitor initialization because device is not ready: retryTimeout=%{public}.1f device=%{public}@",
                     log: Self.log,
                     type: .info,
-                    initializationRetryTimeout,
+                    retryTimeout,
                     String(describing: device)
                 )
 
-                let waitResult = state.waitForReconfigurationOrRetryTimeout(timeout: initializationRetryTimeout)
+                let waitResult = state.waitForReconfigurationOrRetryTimeout(timeout: retryTimeout)
                 guard waitResult.shouldContinue else {
                     return
                 }
 
-                initializationRetryTimeout = waitResult.timedOut
-                    ? min(initializationRetryTimeout * 2, Constants.initializationRetryMaxTimeout)
-                    : Constants.initializationRetryInitialTimeout
+                if !waitResult.timedOut {
+                    initializationBackoff.reset()
+                }
                 continue
             }
 
-            initializationRetryTimeout = Constants.initializationRetryInitialTimeout
+            initializationBackoff.reset()
 
             let locationID = device.pointerDevice.locationID ?? 0
             let slot = monitorTarget.slot

@@ -186,9 +186,9 @@ enum LogitechHIDPPFeatureTargetResolver {
     }
 }
 
-extension AdjustableDPI {
+extension HIDPPFeature {
     init?(device: VendorSpecificDeviceContext) {
-        guard let target = LogitechHIDPPFeatureTargetResolver.resolve(.adjustableDPI, for: device) else {
+        guard let target = LogitechHIDPPFeatureTargetResolver.resolve(Self.featureID, for: device) else {
             return nil
         }
 
@@ -201,34 +201,7 @@ extension AdjustableDPI {
         shouldContinue: @escaping () -> Bool
     ) {
         guard let target = LogitechHIDPPFeatureTargetResolver.resolve(
-            .adjustableDPI,
-            for: device,
-            receiverSlot: receiverSlot,
-            shouldContinue: shouldContinue
-        ) else {
-            return nil
-        }
-
-        self.init(transport: target.transport, featureIndex: target.featureIndex)
-    }
-}
-
-extension HiResWheel {
-    init?(device: VendorSpecificDeviceContext) {
-        guard let target = LogitechHIDPPFeatureTargetResolver.resolve(.hiresWheel, for: device) else {
-            return nil
-        }
-
-        self.init(transport: target.transport, featureIndex: target.featureIndex)
-    }
-
-    init?(
-        device: VendorSpecificDeviceContext,
-        receiverSlot: UInt8?,
-        shouldContinue: @escaping () -> Bool
-    ) {
-        guard let target = LogitechHIDPPFeatureTargetResolver.resolve(
-            .hiresWheel,
+            Self.featureID,
             for: device,
             receiverSlot: receiverSlot,
             shouldContinue: shouldContinue

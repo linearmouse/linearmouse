@@ -163,17 +163,8 @@ struct ReceiverSlotStateStore {
 
 private final class ReceiverContext {
     private enum DiscoveryState {
-        case pending(retryInterval: TimeInterval)
+        case pending
         case ready
-
-        var retryInterval: TimeInterval {
-            switch self {
-            case let .pending(retryInterval):
-                return retryInterval
-            case .ready:
-                return ReceiverMonitor.channelOpenRetryInterval
-            }
-        }
     }
 
     let device: Device
@@ -248,8 +239,10 @@ private final class ReceiverContext {
         let initialDeadline = Date().addingTimeInterval(ReceiverMonitor.initialDiscoveryTimeout)
         var hasPublishedInitialState = false
         var hasLoggedMissingChannel = false
-        var discoveryState = DiscoveryState.pending(
-            retryInterval: ReceiverMonitor.channelOpenRetryInterval
+        var discoveryState = DiscoveryState.pending
+        var discoveryBackoff = ExponentialBackoff(
+            initialDelay: ReceiverMonitor.channelOpenRetryInterval,
+            maximumDelay: ReceiverMonitor.maximumDiscoveryRetryInterval
         )
         defer {
             setCurrentChannel(nil)
@@ -258,7 +251,8 @@ private final class ReceiverContext {
 
         while shouldContinueRunning() {
             if consumeRediscoveryRequest() {
-                discoveryState = .pending(retryInterval: ReceiverMonitor.channelOpenRetryInterval)
+                discoveryState = .pending
+                discoveryBackoff.reset()
             }
 
             if currentChannelSnapshot() == nil {
@@ -290,9 +284,7 @@ private final class ReceiverContext {
                     hasPublishedInitialState = true
                 }
 
-                let retryInterval = discoveryState.retryInterval
-                waitBeforeRetryingDiscovery(after: retryInterval, until: initialDeadline)
-                discoveryState = .pending(retryInterval: nextDiscoveryRetryInterval(after: retryInterval))
+                waitBeforeRetryingDiscovery(after: discoveryBackoff.nextDelay(), until: initialDeadline)
 
                 continue
             }
@@ -318,14 +310,12 @@ private final class ReceiverContext {
                     }
                     hasPublishedInitialState = true
                 }
-                let retryInterval = discoveryState.retryInterval
-                waitBeforeRetryingDiscovery(after: retryInterval, until: initialDeadline)
-                discoveryState = .pending(retryInterval: nextDiscoveryRetryInterval(after: retryInterval))
+                waitBeforeRetryingDiscovery(after: discoveryBackoff.nextDelay(), until: initialDeadline)
                 continue
             }
 
             // A receiver has no usable route until full discovery succeeds.
-            if case let .pending(retryInterval) = discoveryState {
+            if case .pending = discoveryState {
                 let discovery = provider.receiverPointingDeviceDiscovery(
                     for: device.pointerDevice, using: receiverChannel
                 )
@@ -354,12 +344,12 @@ private final class ReceiverContext {
                         hasPublishedInitialState = true
                     }
 
-                    waitBeforeRetryingDiscovery(after: retryInterval, until: initialDeadline)
-                    discoveryState = .pending(retryInterval: nextDiscoveryRetryInterval(after: retryInterval))
+                    waitBeforeRetryingDiscovery(after: discoveryBackoff.nextDelay(), until: initialDeadline)
                     continue
                 }
 
                 discoveryState = .ready
+                discoveryBackoff.reset()
                 _ = consumeRediscoveryRequest()
                 let identitiesDescription = identities.map { identity in
                     let battery = identity.batteryLevel.map(String.init) ?? "(nil)"
@@ -413,7 +403,8 @@ private final class ReceiverContext {
                         String(describing: device)
                     )
                     setCurrentChannel(nil)
-                    discoveryState = .pending(retryInterval: ReceiverMonitor.channelOpenRetryInterval)
+                    discoveryState = .pending
+                    discoveryBackoff.reset()
                 }
                 continue
             }
@@ -512,10 +503,6 @@ private final class ReceiverContext {
         let requested = rediscoveryRequested
         rediscoveryRequested = false
         return requested
-    }
-
-    private func nextDiscoveryRetryInterval(after interval: TimeInterval) -> TimeInterval {
-        min(interval * 2, ReceiverMonitor.maximumDiscoveryRetryInterval)
     }
 
     private func waitBeforeRetryingDiscovery(

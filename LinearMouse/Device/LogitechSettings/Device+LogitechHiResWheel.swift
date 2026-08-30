@@ -17,11 +17,8 @@ extension Device {
     }
 
     func applyConfiguredHighResolutionWheel(_ enabled: Bool) {
-        renewLogitechHiResWheelTransportGeneration()
-        logitechSettingsQueue.async { [weak self] in
-            self?.invalidateLogitechHiResWheel()
-        }
-        hiResWheelApplyCoordinator.start { [weak self] attempt in
+        logitechSession.renewHiResWheelTransport()
+        logitechSession.hiResWheelApplyCoordinator.start { [weak self] attempt in
             guard let self, !isRemoved, attempt.shouldContinue() else {
                 return false
             }
@@ -70,7 +67,7 @@ extension Device {
     }
 
     func refreshHighResolutionWheelInfo(completion: @escaping (HighResolutionWheelInfo) -> Void) {
-        logitechSettingsQueue.async {
+        logitechSession.queue.async {
             let info = self.highResolutionWheelInfo
 
             DispatchQueue.main.async {
@@ -113,9 +110,7 @@ extension Device {
             return nil
         }
 
-        logitechSettingsLock.lock()
-        let cachedEnabled = cachedHiResWheelEnabled
-        logitechSettingsLock.unlock()
+        let cachedEnabled = logitechSession.withState { $0.hiResWheelEnabled }
 
         if cachedEnabled == enabled {
             if !verifiesCachedValue || controller.isHighResolutionWheelEnabled() == enabled {
@@ -128,11 +123,11 @@ extension Device {
             return nil
         }
 
-        logitechSettingsLock.lock()
-        if initialHiResWheelEnabled == nil {
-            initialHiResWheelEnabled = result.previousEnabled
+        logitechSession.withState { state in
+            if state.initialHiResWheelEnabled == nil {
+                state.initialHiResWheelEnabled = result.previousEnabled
+            }
         }
-        logitechSettingsLock.unlock()
 
         updateHighResolutionWheelCache(
             enabled: result.appliedEnabled,
@@ -143,12 +138,14 @@ extension Device {
     }
 
     var highResolutionWheelNormalizationMultiplier: Int? {
-        logitechSettingsLock.lock()
-        defer { logitechSettingsLock.unlock() }
-
-        guard cachedHiResWheelEnabled == true,
-              let multiplier = cachedHiResWheelMultiplier,
-              multiplier > 1 else {
+        let multiplier = logitechSession.withState { state -> Int? in
+            guard state.hiResWheelEnabled == true,
+                  let multiplier = state.hiResWheelMultiplier else {
+                return nil
+            }
+            return multiplier
+        }
+        guard let multiplier, multiplier > 1 else {
             return nil
         }
 
@@ -156,27 +153,19 @@ extension Device {
     }
 
     func restoreHighResolutionWheel() {
-        hiResWheelApplyCoordinator.cancel()
-        renewLogitechHiResWheelTransportGeneration()
-        logitechSettingsQueue.async { [weak self] in
-            self?.invalidateLogitechHiResWheel()
+        logitechSession.hiResWheelApplyCoordinator.cancel()
+        logitechSession.renewHiResWheelTransport()
+        logitechSession.queue.async { [weak self] in
             self?.restoreHighResolutionWheelSynchronously()
         }
     }
 
     func prepareHighResolutionWheelForReconnect() {
-        hiResWheelApplyCoordinator.cancel()
-        renewLogitechHiResWheelTransportGeneration()
-        logitechSettingsQueue.async { [weak self] in
-            guard let self else {
-                return
-            }
-
-            invalidateLogitechHiResWheel()
-            logitechSettingsLock.lock()
-            cachedHiResWheelEnabled = nil
-            cachedHiResWheelMultiplier = nil
-            logitechSettingsLock.unlock()
+        logitechSession.hiResWheelApplyCoordinator.cancel()
+        logitechSession.renewHiResWheelTransport()
+        logitechSession.withState {
+            $0.hiResWheelEnabled = nil
+            $0.hiResWheelMultiplier = nil
         }
     }
 
@@ -184,34 +173,32 @@ extension Device {
         guard !isRemoved,
               let controller = logitechHiResWheel else {
             clearHighResolutionWheelCache()
-            invalidateLogitechHiResWheel()
+            logitechSession.invalidateHiResWheel()
             return
         }
 
-        logitechSettingsLock.lock()
-        let initialEnabled = initialHiResWheelEnabled
-        logitechSettingsLock.unlock()
+        let initialEnabled = logitechSession.withState { $0.initialHiResWheelEnabled }
 
         if let initialEnabled {
             _ = controller.setHighResolutionWheelEnabled(initialEnabled)
         }
 
-        invalidateLogitechHiResWheel()
+        logitechSession.invalidateHiResWheel()
         clearHighResolutionWheelCache()
     }
 
     private func clearHighResolutionWheelCache() {
-        logitechSettingsLock.lock()
-        cachedHiResWheelEnabled = nil
-        cachedHiResWheelMultiplier = nil
-        initialHiResWheelEnabled = nil
-        logitechSettingsLock.unlock()
+        logitechSession.withState {
+            $0.hiResWheelEnabled = nil
+            $0.hiResWheelMultiplier = nil
+            $0.initialHiResWheelEnabled = nil
+        }
     }
 
     private func updateHighResolutionWheelCache(enabled: Bool?, multiplier: Int?) {
-        logitechSettingsLock.lock()
-        cachedHiResWheelEnabled = enabled
-        cachedHiResWheelMultiplier = enabled == true ? multiplier : nil
-        logitechSettingsLock.unlock()
+        logitechSession.withState {
+            $0.hiResWheelEnabled = enabled
+            $0.hiResWheelMultiplier = enabled == true ? multiplier : nil
+        }
     }
 }

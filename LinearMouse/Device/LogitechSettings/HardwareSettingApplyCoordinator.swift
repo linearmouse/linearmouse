@@ -11,18 +11,22 @@ final class HardwareSettingApplyCoordinator {
         let verifiesCachedValue: Bool
         let number: Int
         let isFinal: Bool
-        let shouldContinue: () -> Bool
+        let cancellationToken: CancellationToken
 
         init(
             verifiesCachedValue: Bool,
             number: Int,
             isFinal: Bool,
-            shouldContinue: @escaping () -> Bool = { true }
+            cancellationToken: CancellationToken = CancellationSource().token
         ) {
             self.verifiesCachedValue = verifiesCachedValue
             self.number = number
             self.isFinal = isFinal
-            self.shouldContinue = shouldContinue
+            self.cancellationToken = cancellationToken
+        }
+
+        func shouldContinue() -> Bool {
+            cancellationToken.shouldContinue
         }
 
         static func == (lhs: Self, rhs: Self) -> Bool {
@@ -44,7 +48,7 @@ final class HardwareSettingApplyCoordinator {
     private let confirmationDelay: TimeInterval
     private let scheduler: Scheduler
     private let lock = NSLock()
-    private var currentRequestID: UUID?
+    private var currentCancellationSource: CancellationSource?
 
     init(
         retryDelays: [TimeInterval] = [0.5, 1, 2, 4],
@@ -57,13 +61,15 @@ final class HardwareSettingApplyCoordinator {
     }
 
     func start(_ operation: @escaping Operation) {
-        let requestID = UUID()
-        lock.lock()
-        currentRequestID = requestID
-        lock.unlock()
+        let cancellationSource = CancellationSource()
+        let previousSource = lock.withLock { () -> CancellationSource? in
+            defer { currentCancellationSource = cancellationSource }
+            return currentCancellationSource
+        }
+        previousSource?.cancel()
 
         schedule(
-            requestID: requestID,
+            cancellationSource: cancellationSource,
             phase: .apply,
             retryIndex: 0,
             delay: 0,
@@ -72,13 +78,15 @@ final class HardwareSettingApplyCoordinator {
     }
 
     func cancel() {
-        lock.lock()
-        currentRequestID = nil
-        lock.unlock()
+        let source = lock.withLock { () -> CancellationSource? in
+            defer { currentCancellationSource = nil }
+            return currentCancellationSource
+        }
+        source?.cancel()
     }
 
     private func schedule(
-        requestID: UUID,
+        cancellationSource: CancellationSource,
         phase: Phase,
         retryIndex: Int,
         delay: TimeInterval,
@@ -86,7 +94,7 @@ final class HardwareSettingApplyCoordinator {
     ) {
         scheduler(delay) { [weak self] in
             self?.run(
-                requestID: requestID,
+                cancellationSource: cancellationSource,
                 phase: phase,
                 retryIndex: retryIndex,
                 operation: operation
@@ -95,46 +103,47 @@ final class HardwareSettingApplyCoordinator {
     }
 
     private func run(
-        requestID: UUID,
+        cancellationSource: CancellationSource,
         phase: Phase,
         retryIndex: Int,
         operation: @escaping Operation
     ) {
-        guard isCurrent(requestID) else {
+        guard isCurrent(cancellationSource) else {
             return
         }
 
         let succeeded = operation(.init(
             verifiesCachedValue: phase == .confirm,
             number: retryIndex + 1,
-            isFinal: retryIndex >= retryDelays.count
-        ) { [weak self] in self?.isCurrent(requestID) == true })
-        guard isCurrent(requestID) else {
+            isFinal: retryIndex >= retryDelays.count,
+            cancellationToken: cancellationSource.token
+        ))
+        guard isCurrent(cancellationSource) else {
             return
         }
 
         if succeeded {
             if phase == .apply {
                 schedule(
-                    requestID: requestID,
+                    cancellationSource: cancellationSource,
                     phase: .confirm,
                     retryIndex: 0,
                     delay: confirmationDelay,
                     operation: operation
                 )
             } else {
-                finish(requestID)
+                finish(cancellationSource)
             }
             return
         }
 
         guard retryIndex < retryDelays.count else {
-            finish(requestID)
+            finish(cancellationSource)
             return
         }
 
         schedule(
-            requestID: requestID,
+            cancellationSource: cancellationSource,
             phase: phase,
             retryIndex: retryIndex + 1,
             delay: retryDelays[retryIndex],
@@ -142,17 +151,17 @@ final class HardwareSettingApplyCoordinator {
         )
     }
 
-    private func isCurrent(_ requestID: UUID) -> Bool {
-        lock.lock()
-        defer { lock.unlock() }
-        return currentRequestID == requestID
+    private func isCurrent(_ cancellationSource: CancellationSource) -> Bool {
+        cancellationSource.token.shouldContinue
+            && lock.withLock { currentCancellationSource === cancellationSource }
     }
 
-    private func finish(_ requestID: UUID) {
-        lock.lock()
-        if currentRequestID == requestID {
-            currentRequestID = nil
+    private func finish(_ cancellationSource: CancellationSource) {
+        lock.withLock {
+            if currentCancellationSource === cancellationSource {
+                currentCancellationSource = nil
+            }
         }
-        lock.unlock()
+        cancellationSource.cancel()
     }
 }

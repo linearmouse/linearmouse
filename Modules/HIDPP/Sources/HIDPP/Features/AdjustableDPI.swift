@@ -3,7 +3,9 @@
 
 import Foundation
 
-public struct AdjustableDPI {
+public struct AdjustableDPI: HIDPPFeature {
+    public static let featureID = HIDPPFeatureID.adjustableDPI
+
     private enum Constants {
         static let getSensorDPIListFunction: UInt8 = 0x01
         static let getSensorDPIFunction: UInt8 = 0x02

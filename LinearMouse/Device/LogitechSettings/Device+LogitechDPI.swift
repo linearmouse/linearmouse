@@ -23,11 +23,8 @@ extension Device {
     }
 
     func applyConfiguredSensorDPI(_ dpi: Int) {
-        renewLogitechDPITransportGeneration()
-        logitechSettingsQueue.async { [weak self] in
-            self?.invalidateLogitechAdjustableDPI()
-        }
-        dpiApplyCoordinator.start { [weak self] attempt in
+        logitechSession.renewDPITransport()
+        logitechSession.dpiApplyCoordinator.start { [weak self] attempt in
             guard let self, !isRemoved, attempt.shouldContinue() else {
                 return false
             }
@@ -76,7 +73,7 @@ extension Device {
     }
 
     func refreshHardwareDPIInfo(completion: @escaping (HardwareDPIInfo) -> Void) {
-        logitechSettingsQueue.async {
+        logitechSession.queue.async {
             let info = self.hardwareDPIInfo
 
             DispatchQueue.main.async {
@@ -86,16 +83,13 @@ extension Device {
     }
 
     func applyHardwareDPI(_ dpi: Int, completion: @escaping (HardwareDPIApplyResult) -> Void) {
-        dpiApplyCoordinator.cancel()
-        renewLogitechDPITransportGeneration()
-        logitechSettingsQueue.async {
-            self.invalidateLogitechAdjustableDPI()
+        logitechSession.dpiApplyCoordinator.cancel()
+        logitechSession.renewDPITransport()
+        logitechSession.queue.async {
             let result: HardwareDPIApplyResult
             if !self.isRemoved, let controller = self.logitechAdjustableDPI {
                 let targetDPI = self.applySensorDPISynchronously(dpi, controller: controller)
-                self.logitechSettingsLock.lock()
-                let currentDPI = targetDPI ?? self.cachedSensorDPI
-                self.logitechSettingsLock.unlock()
+                let currentDPI = self.logitechSession.withState { targetDPI ?? $0.sensorDPI }
                 result = HardwareDPIApplyResult(
                     targetDPI: targetDPI,
                     info: HardwareDPIInfo(
@@ -132,9 +126,7 @@ extension Device {
 
         let currentDPI = controller.currentDPI()
         if let currentDPI {
-            logitechSettingsLock.lock()
-            cachedSensorDPI = currentDPI
-            logitechSettingsLock.unlock()
+            logitechSession.withState { $0.sensorDPI = currentDPI }
         }
 
         return HardwareDPIInfo(
@@ -170,9 +162,7 @@ extension Device {
             return nil
         }
 
-        logitechSettingsLock.lock()
-        let cachedDPI = cachedSensorDPI
-        logitechSettingsLock.unlock()
+        let cachedDPI = logitechSession.withState { $0.sensorDPI }
 
         if cachedDPI == targetDPI {
             if !verifiesCachedValue || controller.currentDPI() == targetDPI {
@@ -184,33 +174,20 @@ extension Device {
             return nil
         }
 
-        logitechSettingsLock.lock()
-        cachedSensorDPI = appliedDPI
-        logitechSettingsLock.unlock()
+        logitechSession.withState { $0.sensorDPI = appliedDPI }
 
         return appliedDPI
     }
 
     func restoreSensorDPI() {
-        dpiApplyCoordinator.cancel()
-        renewLogitechDPITransportGeneration()
-        logitechSettingsLock.lock()
-        cachedSensorDPI = nil
-        logitechSettingsLock.unlock()
+        logitechSession.dpiApplyCoordinator.cancel()
+        logitechSession.renewDPITransport()
+        logitechSession.withState { $0.sensorDPI = nil }
     }
 
     func prepareSensorDPIForReconnect() {
-        dpiApplyCoordinator.cancel()
-        renewLogitechDPITransportGeneration()
-        logitechSettingsQueue.async { [weak self] in
-            guard let self else {
-                return
-            }
-
-            logitechSettingsLock.lock()
-            cachedSensorDPI = nil
-            logitechSettingsLock.unlock()
-            invalidateLogitechAdjustableDPI()
-        }
+        logitechSession.dpiApplyCoordinator.cancel()
+        logitechSession.renewDPITransport()
+        logitechSession.withState { $0.sensorDPI = nil }
     }
 }
