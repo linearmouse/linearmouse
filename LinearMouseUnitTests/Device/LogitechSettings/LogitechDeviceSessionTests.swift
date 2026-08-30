@@ -220,7 +220,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
         let access = try hiResWheelAccess(for: session, stableTargetKey: target)
         let lease = try XCTUnwrap(session.hiResWheelTargetLease(
             receiverSlot: nil
-        )            { _, _ in target })
+        ) { _, _ in target })
         XCTAssertTrue(session.seedInitialHiResWheelState(oldClaim, for: lease))
 
         XCTAssertTrue(store.consumeHiResBaseline(oldClaim.handle))
@@ -247,7 +247,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
         let target = try receiverTarget(for: enriched)
         let lease = try XCTUnwrap(session.hiResWheelTargetLease(
             receiverSlot: 2
-        )            { _, _ in target })
+        ) { _, _ in target })
         let promotion = try XCTUnwrap(session.hiResBaselinePromotion(for: lease))
         let store = LogitechHardwareBaselineStore()
         let claim = store.captureHiResBaseline(enabled: promotion.enabled, for: target)
@@ -278,7 +278,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
         let target = try receiverTarget(for: enriched)
         let currentLease = try XCTUnwrap(session.hiResWheelTargetLease(
             receiverSlot: 2
-        )            { _, _ in target })
+        ) { _, _ in target })
         XCTAssertNil(session.hiResBaselinePromotion(for: currentLease))
 
         XCTAssertTrue(session.recordInitialHiResWheelState(enabled: false, for: accessAtReadStart))
@@ -295,7 +295,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
         let targetA = try receiverTarget(for: discoveryA)
         let leaseA = try XCTUnwrap(session.hiResWheelTargetLease(
             receiverSlot: 2
-        )            { _, _ in targetA })
+        ) { _, _ in targetA })
         let store = LogitechHardwareBaselineStore()
         let claimA = store.captureHiResBaseline(enabled: false, for: targetA)
 
@@ -370,6 +370,60 @@ final class LogitechDeviceSessionTests: XCTestCase {
         _ = session.updateDiscovery(.init(identities: [], route: nil))
 
         XCTAssertFalse(session.hasInitialHiResWheelState)
+    }
+
+    func testImplicitLeaseDoesNotPromoteOnDemandReceiverAsDirectDevice() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let access = try hiResWheelAccess(for: session, receiverSlot: 2)
+        XCTAssertTrue(session.recordInitialHiResWheelState(enabled: false, for: access))
+        let receiverTarget = try XCTUnwrap(LogitechHardwareTargetKey.direct(
+            transport: "USB",
+            locationID: 123,
+            vendorID: 0x046D,
+            productID: 0xC548,
+            serialNumber: "LOGICAL-MOUSE",
+            name: "Mouse"
+        ))
+
+        let lease = try XCTUnwrap(session.hiResWheelTargetLease(receiverSlot: nil) { _, slot in
+            XCTAssertEqual(slot, 2)
+            // This mirrors Device.logitechHardwareTargetKey: a routed slot is
+            // unkeyed, while nil would incorrectly identify the receiver itself.
+            return slot == nil ? receiverTarget : nil
+        })
+
+        XCTAssertEqual(lease.receiverSlot, 2)
+        XCTAssertNil(lease.stableTargetKey)
+        XCTAssertNil(session.hiResBaselinePromotion(for: lease))
+        XCTAssertEqual(session.initialHiResWheelEnabled(for: access), false)
+    }
+
+    func testImplicitLeaseKeepsNilSlotForDirectDevice() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let target = try XCTUnwrap(LogitechHardwareTargetKey.direct(
+            transport: "Bluetooth Low Energy",
+            locationID: 123,
+            vendorID: 0x046D,
+            productID: 0xB034,
+            serialNumber: "DIRECT-MOUSE",
+            name: "Mouse"
+        ))
+        let access = try hiResWheelAccess(for: session, stableTargetKey: target)
+        XCTAssertTrue(session.recordInitialHiResWheelState(enabled: false, for: access))
+
+        let lease = try XCTUnwrap(session.hiResWheelTargetLease(receiverSlot: nil) { route, slot in
+            XCTAssertNil(route)
+            XCTAssertNil(slot)
+            return target
+        })
+
+        XCTAssertNil(lease.receiverSlot)
+        XCTAssertEqual(lease.stableTargetKey, target)
+        let promotion = try XCTUnwrap(session.hiResBaselinePromotion(for: lease))
+        let store = LogitechHardwareBaselineStore()
+        let claim = store.captureHiResBaseline(enabled: promotion.enabled, for: target)
+        XCTAssertTrue(session.attachHiResBaseline(claim, to: promotion))
+        XCTAssertEqual(session.initialHiResWheelEnabled(for: access), false)
     }
 
     private func hiResWheelAccess(

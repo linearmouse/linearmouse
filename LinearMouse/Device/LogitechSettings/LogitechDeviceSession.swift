@@ -457,10 +457,17 @@ final class LogitechDeviceSession {
                 return nil
             }
             let route = state.discovery?.route
-            guard route.map({ receiverSlot == nil || $0.slot == receiverSlot }) ?? true else {
+            // A legacy receiver can resolve its logical slot on demand even
+            // though it has no discovery route. Keep that resolved slot when
+            // promoting or seeding its baseline; otherwise the receiver's own
+            // serial could be mistaken for the logical device identity.
+            let resolvedSlot = receiverSlot
+                ?? state.hiResWheel?.lease.receiverSlot
+                ?? state.initialHiResWheelState?.lease.receiverSlot
+                ?? route?.slot
+            guard route.map({ resolvedSlot == nil || $0.slot == resolvedSlot }) ?? true else {
                 return nil
             }
-            let resolvedSlot = receiverSlot ?? route?.slot
             return .init(
                 route: route,
                 stableTargetKey: stableTargetKey(route, resolvedSlot),
@@ -477,7 +484,7 @@ final class LogitechDeviceSession {
                   let stableTargetKey = lease.stableTargetKey,
                   Self.leaseIsCurrent(lease, in: state),
                   Self.initialStateRelation(initialState, to: lease.route) == .compatible,
-                  initialState.lease.stableTargetKey.map({ $0 == stableTargetKey }) ?? true
+                  Self.initialState(initialState, matches: lease)
             else {
                 return nil
             }
