@@ -47,6 +47,30 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
         XCTAssertNil(store.hiResBaseline(for: direct))
     }
 
+    func testUnmonitoredReceiverBaselineSeedsTheNilSlotPath() throws {
+        let target = try XCTUnwrap(LogitechHardwareTargetKey.direct(
+            transport: "USB",
+            locationID: 123,
+            vendorID: 0x046D,
+            productID: 0xC52B,
+            serialNumber: nil,
+            name: "USB Receiver"
+        ))
+        let store = LogitechHardwareBaselineStore()
+        _ = store.captureHiResBaseline(enabled: false, for: target)
+        let claim = try XCTUnwrap(store.hiResBaseline(for: target))
+        let session = LogitechDeviceSession(deviceID: 3)
+
+        // An unmonitored receiver has no logical route, so both the seed and
+        // the HID++ access use the direct (nil receiver-slot) target.
+        session.seedInitialHiResWheelState(enabled: claim.baseline.enabled, route: nil, receiverSlot: nil)
+
+        XCTAssertEqual(session.initialHiResWheelEnabled(
+            requiresReceiverRoute: false,
+            receiverSlot: nil
+        ), false)
+    }
+
     func testReceiverReplacementWithDifferentSerialCannotClaimBaseline() throws {
         let store = LogitechHardwareBaselineStore()
         let original = try XCTUnwrap(LogitechHardwareTargetKey.receiver(
@@ -91,6 +115,30 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
 
         // A failed hardware write has no consume call.
         XCTAssertEqual(store.hiResBaseline(for: target)?.baseline, .init(enabled: false))
+    }
+
+    func testPreWriteCaptureSurvivesAWriteWhoseReplyIsLost() throws {
+        let target = try directTarget(serial: "ABC123")
+        let store = LogitechHardwareBaselineStore()
+        var hardwareMode = false
+
+        LogitechHiResBaselineCapture.captureIfNeeded(
+            hasInitialState: false,
+            readCurrentMode: { hardwareMode }
+        ) { initialMode in
+            _ = store.captureHiResBaseline(enabled: initialMode, for: target)
+        }
+
+        // The device applies the write but its acknowledgement is lost.
+        hardwareMode = true
+        let rebuiltSession = LogitechDeviceSession(deviceID: 4)
+        let claim = try XCTUnwrap(store.hiResBaseline(for: target))
+        rebuiltSession.seedInitialHiResWheelState(enabled: claim.baseline.enabled, route: nil, receiverSlot: nil)
+
+        XCTAssertEqual(rebuiltSession.initialHiResWheelEnabled(
+            requiresReceiverRoute: false,
+            receiverSlot: nil
+        ), false)
     }
 
     func testLifecycleRestoreRetriesUntilAWriteSucceeds() {

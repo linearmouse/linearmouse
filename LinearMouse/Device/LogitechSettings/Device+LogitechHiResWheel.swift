@@ -25,6 +25,20 @@ enum LogitechHardwareRestoreRetry {
     }
 }
 
+enum LogitechHiResBaselineCapture {
+    static func captureIfNeeded(
+        hasInitialState: Bool,
+        readCurrentMode: () -> Bool?,
+        capture: (Bool) -> Void
+    ) {
+        guard !hasInitialState,
+              let currentMode = readCurrentMode() else {
+            return
+        }
+        capture(currentMode)
+    }
+}
+
 extension Device {
     private static let logitechHiResWheelLog = OSLog(
         subsystem: Bundle.main.bundleIdentifier!,
@@ -144,6 +158,16 @@ extension Device {
 
         let controller = access.feature
         let cachedEnabled = logitechSession.hiResWheelEnabled
+
+        // Capture before a write is attempted. Some devices can apply a mode
+        // change yet lose the reply; waiting for ApplyResult in that case
+        // would incorrectly treat the already-managed mode as original.
+        LogitechHiResBaselineCapture.captureIfNeeded(
+            hasInitialState: logitechSession.hasInitialHiResWheelState,
+            readCurrentMode: controller.isHighResolutionWheelEnabled
+        ) { initialEnabled in
+            recordHiResWheelBaseline(enabled: initialEnabled, for: access)
+        }
 
         if cachedEnabled == enabled, logitechSession.hasInitialHiResWheelState {
             if !verifiesCachedValue || controller.isHighResolutionWheelEnabled() == enabled {
@@ -374,7 +398,6 @@ extension Device {
             route: logitechReceiverRouteSnapshot,
             receiverSlot: logitechReceiverRouteSnapshot?.slot
         )
-        logitechHiResBaselineHandle = claim.handle
     }
 
     private func recordHiResWheelBaseline(
@@ -387,16 +410,16 @@ extension Device {
             return
         }
         let claim = store.captureHiResBaseline(enabled: enabled, for: target)
-        logitechHiResBaselineHandle = claim.handle
         logitechSession.recordInitialHiResWheelState(enabled: claim.baseline.enabled, for: access)
     }
 
     private func consumeStoredHiResWheelBaseline() {
-        guard let handle = logitechHiResBaselineHandle,
-              logitechHardwareBaselineStore?.consumeHiResBaseline(handle) == true else {
+        guard let target = logitechHardwareTargetKey,
+              let store = logitechHardwareBaselineStore,
+              let claim = store.hiResBaseline(for: target) else {
             return
         }
-        logitechHiResBaselineHandle = nil
+        _ = store.consumeHiResBaseline(claim.handle)
     }
 
     private func updateHighResolutionWheelCache(
