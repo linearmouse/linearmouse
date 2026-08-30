@@ -1218,7 +1218,6 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
     private static let receiverNotificationOwnershipStore = ReceiverNotificationOwnershipStore()
     private let receiverNotificationSessionIdentity = ReceiverNotificationSessionIdentity()
     private let receiverNotificationSessionStore = ReceiverNotificationOwnershipStore()
-    private let receiverNotificationMutationLock = NSLock()
 
     // Keep one I/O reader per physical receiver. Opening the same macOS HID
     // interface more than once can route a command response to another callback.
@@ -1610,15 +1609,13 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         let ownership = receiverNotificationOwnership
         let requestedFlags = LogitechHIDPPDeviceMetadataProvider.Constants.receiverWirelessNotifications
             | LogitechHIDPPDeviceMetadataProvider.Constants.receiverSoftwarePresentNotifications
-        let enabled = receiverNotificationMutationLock.withLock {
-            ownership.store.enable(
-                requestedFlags,
-                for: ownership.target,
-                read: readNotificationFlags,
-                write: writeNotificationFlags,
-                shouldContinue: receiverNotificationIOIsCurrent
-            )
-        }
+        let enabled = ownership.store.enable(
+            requestedFlags,
+            for: ownership.target,
+            read: readNotificationFlags,
+            write: writeNotificationFlags,
+            shouldContinue: receiverNotificationIOIsCurrent
+        )
         if !enabled {
             os_log(
                 "Failed to enable receiver wireless notifications: locationID=%{public}@",
@@ -1664,14 +1661,12 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         }
 
         DispatchQueue.global(qos: .utility).async { [self] in
-            let restored = receiverNotificationMutationLock.withLock {
-                ownership.store.restoreOwnedBits(
-                    for: ownership.target,
-                    read: readNotificationFlags,
-                    write: writeNotificationFlags,
-                    shouldContinue: shouldContinue
-                )
-            }
+            let restored = ownership.store.restoreOwnedBits(
+                for: ownership.target,
+                read: readNotificationFlags,
+                write: writeNotificationFlags,
+                shouldContinue: shouldContinue
+            )
             if !restored {
                 os_log(
                     "Failed to restore owned receiver notification flags: locationID=%{public}@",

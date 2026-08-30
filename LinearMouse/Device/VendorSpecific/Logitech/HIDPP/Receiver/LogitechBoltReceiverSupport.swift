@@ -90,6 +90,7 @@ final class ReceiverNotificationOwnershipStore {
         let ownership = EntryOwnership()
     }
 
+    private let mutationLock = NSLock()
     private let lock = NSLock()
     private var entries = [ReceiverNotificationOwnershipTarget: Entry]()
 
@@ -103,6 +104,9 @@ final class ReceiverNotificationOwnershipStore {
         write: (UInt32) -> Bool,
         shouldContinue: () -> Bool = { true }
     ) -> Bool {
+        mutationLock.lock()
+        defer { mutationLock.unlock() }
+
         guard shouldContinue(),
               let current = read()
         else {
@@ -134,6 +138,9 @@ final class ReceiverNotificationOwnershipStore {
         write: (UInt32) -> Bool,
         shouldContinue: () -> Bool = { true }
     ) -> Bool {
+        mutationLock.lock()
+        defer { mutationLock.unlock() }
+
         guard let claim = claim(for: target) else {
             return true
         }
