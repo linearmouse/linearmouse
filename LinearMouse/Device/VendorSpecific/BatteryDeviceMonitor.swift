@@ -345,7 +345,9 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
         let metadata = VendorSpecificDeviceMetadataRegistry.metadata(
             for: device.pointerDevice,
             deadline: deadline
-        )            { [weak self] in self?.isRefreshAuthorized(authorization) == true }
+        ) { [weak self] in
+            self?.isRefreshAuthorized(authorization) == true
+        }
         guard let metadata,
               let batteryLevel = metadata.batteryLevel else {
             stateQueue.sync {
