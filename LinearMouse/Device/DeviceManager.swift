@@ -18,6 +18,81 @@ enum DeviceManagerLifecycleState: Equatable {
     }
 }
 
+/// The strongest teardown request received for the current observation
+/// lifetime.  Sleep is a preservation policy, not a terminal outcome: once a
+/// caller asks to restore hardware, a later sleep notification must never
+/// weaken that request.
+struct DeviceManagerStopIntent: Equatable {
+    var restoresHighResolutionWheel: Bool
+    var restoresLogitechControls: Bool
+    private(set) var appliesSleepHiResPolicy: Bool
+    private(set) var appliesSleepControlsPolicy: Bool
+
+    init(
+        restoringHighResolutionWheel: Bool,
+        restoringLogitechControls: Bool,
+        applyingSleepHiResPolicy: Bool
+    ) {
+        restoresHighResolutionWheel = restoringHighResolutionWheel
+        restoresLogitechControls = restoringLogitechControls
+        appliesSleepHiResPolicy = applyingSleepHiResPolicy && !restoringHighResolutionWheel
+        appliesSleepControlsPolicy = !restoringLogitechControls
+    }
+
+    mutating func merge(_ other: Self) {
+        restoresHighResolutionWheel = restoresHighResolutionWheel || other.restoresHighResolutionWheel
+        restoresLogitechControls = restoresLogitechControls || other.restoresLogitechControls
+        appliesSleepHiResPolicy = (appliesSleepHiResPolicy || other.appliesSleepHiResPolicy)
+            && !restoresHighResolutionWheel
+        appliesSleepControlsPolicy = (appliesSleepControlsPolicy || other.appliesSleepControlsPolicy)
+            && !restoresLogitechControls
+    }
+}
+
+/// Tracks the asynchronous controls barriers separately from the final
+/// teardown intent. A completed sleep barrier cannot satisfy a subsequently
+/// upgraded normal-restore request.
+struct DeviceManagerControlsStopBarrier: Equatable {
+    enum Start: Equatable {
+        case sleep
+        case normal
+    }
+
+    private(set) var sleepStarted = false
+    private(set) var sleepCompleted = false
+    private(set) var normalStarted = false
+    private(set) var normalCompleted = false
+
+    mutating func startNeeded(for intent: DeviceManagerStopIntent) -> Start? {
+        if intent.restoresLogitechControls {
+            guard !normalStarted else {
+                return nil
+            }
+            normalStarted = true
+            return .normal
+        }
+
+        guard !sleepStarted else {
+            return nil
+        }
+        sleepStarted = true
+        return .sleep
+    }
+
+    mutating func complete(_ start: Start) {
+        switch start {
+        case .sleep:
+            sleepCompleted = true
+        case .normal:
+            normalCompleted = true
+        }
+    }
+
+    func isSatisfied(for intent: DeviceManagerStopIntent) -> Bool {
+        intent.restoresLogitechControls ? normalCompleted : sleepCompleted
+    }
+}
+
 class DeviceManager: ObservableObject {
     static let shared = DeviceManager()
 
@@ -78,8 +153,8 @@ class DeviceManager: ObservableObject {
 
     private var state: DeviceManagerLifecycleState = .stopped
     private var stopCompletions = [() -> Void]()
-    private var skipHighResolutionWheelRestore = false
-    private var applyingSleepHiResPolicy = false
+    private var stopIntent: DeviceManagerStopIntent?
+    private var controlsStopBarrier = DeviceManagerControlsStopBarrier()
 
     private var subscriptions = Set<AnyCancellable>()
 
@@ -95,6 +170,11 @@ class DeviceManager: ObservableObject {
         applyingSleepHiResPolicy: Bool = false,
         completion: (() -> Void)? = nil
     ) {
+        let requestedIntent = DeviceManagerStopIntent(
+            restoringHighResolutionWheel: restoringHighResolutionWheel,
+            restoringLogitechControls: restoringLogitechControls,
+            applyingSleepHiResPolicy: applyingSleepHiResPolicy
+        )
         switch state {
         case .stopped:
             if let completion {
@@ -105,14 +185,8 @@ class DeviceManager: ObservableObject {
             if let completion {
                 stopCompletions.append(completion)
             }
-            skipHighResolutionWheelRestore = skipHighResolutionWheelRestore || !restoringHighResolutionWheel
-            self.applyingSleepHiResPolicy = self.applyingSleepHiResPolicy || applyingSleepHiResPolicy
-            if !restoringLogitechControls {
-                stopLogitechControlsForSleep(
-                    Array(pointerDeviceToDevice.values),
-                    restoringHighResolutionWheel: false
-                )
-            }
+            stopIntent?.merge(requestedIntent)
+            startControlsBarrierIfNeeded()
             return
         case .finishing:
             // Main-run-loop HID restoration can deliver lifecycle events
@@ -122,21 +196,17 @@ class DeviceManager: ObservableObject {
             if let completion {
                 stopCompletions.append(completion)
             }
-            self.applyingSleepHiResPolicy = self.applyingSleepHiResPolicy || applyingSleepHiResPolicy
-            if !restoringHighResolutionWheel {
-                skipHighResolutionWheelRestore = true
-                // Cancel the request currently pumping the run loop. The
-                // owning finishStop remains responsible for the teardown;
-                // subsequent devices observe the downgraded no-I/O intent.
-                for value in pointerDeviceToDevice.values {
-                    value.prepareHighResolutionWheelForReconnect()
-                }
-            }
+            stopIntent?.merge(requestedIntent)
+            // A main-run-loop Hi-Res request can deliver lifecycle events
+            // reentrantly. Keep the devices alive, begin any newly-required
+            // normal controls barrier, and let attemptFinish re-evaluate the
+            // merged intent after that request returns.
+            startControlsBarrierIfNeeded()
             return
         case .running:
             state = .stopping
-            skipHighResolutionWheelRestore = !restoringHighResolutionWheel
-            self.applyingSleepHiResPolicy = applyingSleepHiResPolicy
+            stopIntent = requestedIntent
+            controlsStopBarrier = .init()
         }
 
         if let completion {
@@ -150,58 +220,67 @@ class DeviceManager: ObservableObject {
             self.activateApplicationObserver = nil
         }
 
-        let devices = Array(pointerDeviceToDevice.values)
-        guard restoringLogitechControls else {
-            stopLogitechControlsForSleep(
-                devices,
-                restoringHighResolutionWheel: restoringHighResolutionWheel
-            )
+        startControlsBarrierIfNeeded()
+    }
+
+    private func startControlsBarrierIfNeeded() {
+        guard let intent = stopIntent,
+              let start = controlsStopBarrier.startNeeded(for: intent) else {
             return
         }
 
+        let devices = Array(pointerDeviceToDevice.values)
         let group = DispatchGroup()
         for device in devices {
             group.enter()
-            device.disableLogitechControlsMonitoring {
+            let completion = {
                 group.leave()
             }
-        }
-
-        group.notify(queue: .main) { [weak self] in
-            self?.finishStop(restoringHighResolutionWheel: restoringHighResolutionWheel)
-        }
-    }
-
-    private func stopLogitechControlsForSleep(
-        _ devices: [Device],
-        restoringHighResolutionWheel: Bool
-    ) {
-        let group = DispatchGroup()
-        for device in devices {
-            group.enter()
-            device.stopLogitechControlsMonitoringForSleep {
-                group.leave()
+            switch start {
+            case .sleep:
+                device.stopLogitechControlsMonitoringForSleep(completion: completion)
+            case .normal:
+                device.disableLogitechControlsMonitoring(completion: completion)
             }
         }
         group.notify(queue: .main) { [weak self] in
-            self?.finishStop(restoringHighResolutionWheel: restoringHighResolutionWheel)
+            guard let self else {
+                return
+            }
+            self.controlsStopBarrier.complete(start)
+            self.attemptFinishStop()
         }
     }
 
-    private func finishStop(restoringHighResolutionWheel: Bool) {
+    private func attemptFinishStop() {
         guard state == .stopping else {
+            return
+        }
+        guard let intent = stopIntent,
+              controlsStopBarrier.isSatisfied(for: intent) else {
             return
         }
         state = .finishing
 
-        restorePointerSpeedToInitialValue(
-            restoringHighResolutionWheel: restoringHighResolutionWheel,
-            applyingSleepHiResPolicy: applyingSleepHiResPolicy
-        )
+        restorePointerSpeedToInitialValue(intent: intent)
+
+        // The run-loop pump above can reenter stop(). If that upgraded the
+        // intent or introduced a normal controls barrier, do not invalidate
+        // PointerDevice yet. Schedule another non-recursive finish pass.
+        guard let finalIntent = stopIntent,
+              finalIntent == intent,
+              controlsStopBarrier.isSatisfied(for: finalIntent) else {
+            state = .stopping
+            DispatchQueue.main.async { [weak self] in
+                self?.attemptFinishStop()
+            }
+            return
+        }
+
         manager.stopObservation()
         state = .stopped
-        skipHighResolutionWheelRestore = false
-        applyingSleepHiResPolicy = false
+        stopIntent = nil
+        controlsStopBarrier = .init()
 
         let completions = stopCompletions
         stopCompletions.removeAll()
@@ -213,7 +292,6 @@ class DeviceManager: ObservableObject {
             return
         }
         state = .running
-        skipHighResolutionWheelRestore = false
 
         // Input callbacks suppress events from the device that was previously
         // active. A new observation lifetime needs its first physical input to
@@ -509,17 +587,12 @@ class DeviceManager: ObservableObject {
         )
     }
 
-    func restorePointerSpeedToInitialValue(
-        restoringHighResolutionWheel: Bool = true,
-        applyingSleepHiResPolicy: Bool = false
-    ) {
+    private func restorePointerSpeedToInitialValue(intent: DeviceManagerStopIntent) {
         for device in devices {
-            let restoresHighResolutionWheel = restoringHighResolutionWheel
-                && !skipHighResolutionWheelRestore
             device.restorePointerAccelerationAndPointerSpeed(
-                restoringHighResolutionWheel: restoresHighResolutionWheel,
-                waitForHighResolutionWheelRestore: restoresHighResolutionWheel,
-                applyingSleepHiResPolicy: applyingSleepHiResPolicy
+                restoringHighResolutionWheel: intent.restoresHighResolutionWheel,
+                waitForHighResolutionWheelRestore: intent.restoresHighResolutionWheel,
+                applyingSleepHiResPolicy: intent.appliesSleepHiResPolicy
             )
         }
     }
