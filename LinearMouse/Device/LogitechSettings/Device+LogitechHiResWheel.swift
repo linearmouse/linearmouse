@@ -146,12 +146,18 @@ extension Device {
         logitechSession.hiResWheelNormalizationMultiplier
     }
 
-    func restoreHighResolutionWheel(waitUntilFinished: Bool) {
+    func restoreHighResolutionWheel(
+        waitUntilFinished: Bool,
+        trackingRestoredState: Bool = false
+    ) {
         logitechSession.runHiResWheelOperation(waitUntilFinished: waitUntilFinished) { [weak self] token in
             guard let self else {
                 return
             }
-            restoreHighResolutionWheelSynchronously(expectedToken: token)
+            restoreHighResolutionWheelSynchronously(
+                expectedToken: token,
+                trackingRestoredState: trackingRestoredState
+            )
         }
     }
 
@@ -163,13 +169,21 @@ extension Device {
     /// Stops managing this setting. Unlike reconnect preparation, this restores
     /// the target-bound mode that was present before LinearMouse changed it.
     func stopManagingHighResolutionWheel() {
-        restoreHighResolutionWheel(waitUntilFinished: false)
+        restoreHighResolutionWheel(
+            waitUntilFinished: false,
+            trackingRestoredState: true
+        )
     }
 
-    private func restoreHighResolutionWheelSynchronously(expectedToken: CancellationToken) {
+    private func restoreHighResolutionWheelSynchronously(
+        expectedToken: CancellationToken,
+        trackingRestoredState: Bool
+    ) {
         guard logitechSession.hasInitialHiResWheelState else {
             logitechSession.invalidateHiResWheel(for: expectedToken)
-            clearHighResolutionWheelCache()
+            if !trackingRestoredState {
+                clearHighResolutionWheelCache()
+            }
             return
         }
 
@@ -190,14 +204,32 @@ extension Device {
             return
         }
 
+        let restoredMultiplier: Int?
+        if trackingRestoredState, initialEnabled {
+            guard let capabilities = access.feature.capabilities() else {
+                // Enabling Hi-Res without its multiplier would make event
+                // normalization inconsistent with the hardware. Keep the
+                // current mode/cache and retain initial state for a later try.
+                logitechSession.invalidateHiResWheel(for: expectedToken)
+                return
+            }
+            restoredMultiplier = Int(capabilities.multiplier)
+        } else {
+            restoredMultiplier = nil
+        }
+
         let restored = access.feature.setHighResolutionWheelEnabled(initialEnabled) == initialEnabled
         logitechSession.invalidateHiResWheel(for: expectedToken)
         if restored {
-            logitechSession.completeHiResWheelRestore(
-                enabled: initialEnabled,
-                multiplier: initialEnabled ? access.feature.capabilities().map { Int($0.multiplier) } : nil,
-                for: access
-            )
+            if trackingRestoredState {
+                logitechSession.completeHiResWheelRestore(
+                    enabled: initialEnabled,
+                    multiplier: restoredMultiplier,
+                    for: access
+                )
+            } else {
+                clearHighResolutionWheelCache()
+            }
         } else {
             // The device may be temporarily asleep. Keep the original state
             // so a later lifecycle teardown can still restore it.
