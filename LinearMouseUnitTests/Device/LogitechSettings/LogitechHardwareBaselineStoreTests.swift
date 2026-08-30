@@ -47,27 +47,33 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
         XCTAssertNil(store.hiResBaseline(for: direct))
     }
 
-    func testUnmonitoredReceiverBaselineSeedsTheNilSlotPath() throws {
-        let target = try XCTUnwrap(LogitechHardwareTargetKey.direct(
-            transport: "USB",
-            locationID: 123,
-            vendorID: 0x046D,
-            productID: 0xC52B,
+    func testUnmonitoredReceiverBaselineSeedsTheResolvedOnDemandSlot() throws {
+        let legacyIdentity = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 123,
+            slot: 2,
+            kind: .mouse,
+            name: "USB Receiver",
             serialNumber: nil,
-            name: "USB Receiver"
+            productID: 0xC52F,
+            batteryLevel: nil
+        )
+        let target = try XCTUnwrap(LogitechHardwareTargetKey.receiver(
+            vendorID: 0x046D,
+            receiverLocationID: 123,
+            identity: legacyIdentity
         ))
         let store = LogitechHardwareBaselineStore()
         _ = store.captureHiResBaseline(enabled: false, for: target)
         let claim = try XCTUnwrap(store.hiResBaseline(for: target))
         let session = LogitechDeviceSession(deviceID: 3)
 
-        // An unmonitored receiver has no logical route, so both the seed and
-        // the HID++ access use the direct (nil receiver-slot) target.
-        session.seedInitialHiResWheelState(enabled: claim.baseline.enabled, route: nil, receiverSlot: nil)
+        // C52F has no monitor route, but on-demand feature resolution returns
+        // slot 2. The seeded state must use that actual HID++ target slot.
+        session.seedInitialHiResWheelState(enabled: claim.baseline.enabled, route: nil, receiverSlot: 2)
 
         XCTAssertEqual(session.initialHiResWheelEnabled(
             requiresReceiverRoute: false,
-            receiverSlot: nil
+            receiverSlot: 2
         ), false)
     }
 

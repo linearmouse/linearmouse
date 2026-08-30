@@ -16,6 +16,12 @@ final class LogitechDeviceSession {
         let route: LogitechReceiverRoute?
         let receiverSlot: UInt8?
         let enabled: Bool
+        let baselineHandle: LogitechHardwareBaselineStore.HiResHandle?
+    }
+
+    enum HiResWheelCommit {
+        case committed(LogitechHardwareBaselineStore.HiResHandle?)
+        case rejected
     }
 
     private struct State {
@@ -292,7 +298,11 @@ final class LogitechDeviceSession {
         }
     }
 
-    func recordInitialHiResWheelState(enabled: Bool, for access: FeatureAccess<HiResWheel>) {
+    func recordInitialHiResWheelState(
+        enabled: Bool,
+        baselineHandle: LogitechHardwareBaselineStore.HiResHandle? = nil,
+        for access: FeatureAccess<HiResWheel>
+    ) {
         withState { state in
             guard state.hiResWheelCancellationSource.token == access.token,
                   access.token.shouldContinue,
@@ -302,7 +312,8 @@ final class LogitechDeviceSession {
             state.initialHiResWheelState = .init(
                 route: state.discovery?.route,
                 receiverSlot: access.feature.receiverSlot,
-                enabled: enabled
+                enabled: enabled,
+                baselineHandle: baselineHandle
             )
         }
     }
@@ -313,7 +324,8 @@ final class LogitechDeviceSession {
     func seedInitialHiResWheelState(
         enabled: Bool,
         route: LogitechReceiverRoute?,
-        receiverSlot: UInt8?
+        receiverSlot: UInt8?,
+        baselineHandle: LogitechHardwareBaselineStore.HiResHandle? = nil
     ) {
         withState { state in
             guard state.initialHiResWheelState == nil,
@@ -327,7 +339,8 @@ final class LogitechDeviceSession {
             state.initialHiResWheelState = .init(
                 route: route,
                 receiverSlot: receiverSlot,
-                enabled: enabled
+                enabled: enabled,
+                baselineHandle: baselineHandle
             )
         }
     }
@@ -394,35 +407,37 @@ final class LogitechDeviceSession {
         enabled: Bool,
         multiplier: Int?,
         for access: FeatureAccess<HiResWheel>
-    ) -> Bool {
-        withState { state -> Bool in
+    ) -> HiResWheelCommit {
+        withState { state -> HiResWheelCommit in
             guard state.hiResWheelCancellationSource.token == access.token,
                   access.token.shouldContinue else {
-                return false
+                return .rejected
             }
+            let baselineHandle = state.initialHiResWheelState?.baselineHandle
             state.hiResWheelEnabled = enabled
             state.hiResWheelMultiplier = enabled ? multiplier : nil
             state.initialHiResWheelState = nil
             state.hiResWheelRestoreRetryNeeded = false
-            return true
+            return .committed(baselineHandle)
         }
     }
 
     /// Used by lifecycle teardown, which intentionally clears runtime cache
     /// rather than retaining the restored mode for normalization.
     @discardableResult
-    func consumeHiResWheelState(for token: CancellationToken) -> Bool {
-        withState { state -> Bool in
+    func consumeHiResWheelState(for token: CancellationToken) -> HiResWheelCommit {
+        withState { state -> HiResWheelCommit in
             guard state.hiResWheelCancellationSource.token == token,
                   token.shouldContinue else {
-                return false
+                return .rejected
             }
+            let baselineHandle = state.initialHiResWheelState?.baselineHandle
             state.hiResWheel = nil
             state.hiResWheelEnabled = nil
             state.hiResWheelMultiplier = nil
             state.initialHiResWheelState = nil
             state.hiResWheelRestoreRetryNeeded = false
-            return true
+            return .committed(baselineHandle)
         }
     }
 

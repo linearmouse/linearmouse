@@ -120,8 +120,11 @@ class Device {
         logitechSession.discoverySnapshot
     }
 
-    var logitechHardwareTargetKey: LogitechHardwareTargetKey? {
+    func logitechHardwareTargetKey(receiverSlot: UInt8? = nil) -> LogitechHardwareTargetKey? {
         if let route = logitechReceiverRouteSnapshot {
+            guard receiverSlot == nil || receiverSlot == route.slot else {
+                return nil
+            }
             return .receiver(
                 vendorID: vendorID,
                 receiverLocationID: pointerDevice.locationID,
@@ -131,6 +134,32 @@ class Device {
 
         guard !LogitechReceiverRouteResolver.requiresDiscovery(for: pointerDevice) else {
             return nil
+        }
+        if let receiverSlot {
+            guard let vendorID,
+                  let receiverLocationID = pointerDevice.locationID,
+                  let productID else {
+                return nil
+            }
+            let fallbackName = productName ?? name
+            guard !fallbackName.isEmpty else {
+                return nil
+            }
+            let kind: ReceiverLogicalDeviceKind = category == .trackpad ? .touchpad : .mouse
+            let identity = ReceiverLogicalDeviceIdentity(
+                receiverLocationID: receiverLocationID,
+                slot: receiverSlot,
+                kind: kind,
+                name: fallbackName,
+                serialNumber: nil,
+                productID: productID,
+                batteryLevel: nil
+            )
+            return .receiver(
+                vendorID: vendorID,
+                receiverLocationID: receiverLocationID,
+                identity: identity
+            )
         }
         return .direct(
             transport: pointerDevice.transport,

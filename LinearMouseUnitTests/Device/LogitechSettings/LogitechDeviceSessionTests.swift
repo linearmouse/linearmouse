@@ -221,6 +221,38 @@ final class LogitechDeviceSessionTests: XCTestCase {
         })
     }
 
+    func testOldSessionCommitCannotConsumeNewBaselineGeneration() throws {
+        let store = LogitechHardwareBaselineStore()
+        let target = try XCTUnwrap(LogitechHardwareTargetKey.direct(
+            transport: "USB",
+            locationID: 123,
+            vendorID: 0x046D,
+            productID: 0xB034,
+            serialNumber: "ABC123",
+            name: "Mouse"
+        ))
+        let oldClaim = store.captureHiResBaseline(enabled: false, for: target)
+        let session = LogitechDeviceSession(deviceID: 1)
+        let access = try hiResWheelAccess(for: session, receiverSlot: 2)
+        session.seedInitialHiResWheelState(
+            enabled: oldClaim.baseline.enabled,
+            route: nil,
+            receiverSlot: access.feature.receiverSlot,
+            baselineHandle: oldClaim.handle
+        )
+
+        XCTAssertTrue(store.consumeHiResBaseline(oldClaim.handle))
+        let newClaim = store.captureHiResBaseline(enabled: true, for: target)
+
+        let commit = session.completeHiResWheelRestore(enabled: false, multiplier: nil, for: access)
+        guard case let .committed(handle?) = commit else {
+            return XCTFail("current session must commit its restore")
+        }
+
+        XCTAssertFalse(store.consumeHiResBaseline(handle))
+        XCTAssertEqual(store.hiResBaseline(for: target)?.baseline, newClaim.baseline)
+    }
+
     private func hiResWheelAccess(
         for session: LogitechDeviceSession,
         receiverSlot: UInt8? = nil
