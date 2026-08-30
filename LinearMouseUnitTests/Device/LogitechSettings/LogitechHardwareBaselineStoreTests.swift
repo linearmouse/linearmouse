@@ -39,7 +39,7 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
         let claim = try XCTUnwrap(store.hiResBaseline(for: receiver))
         let lease = try XCTUnwrap(rebuiltSession.hiResWheelTargetLease(
             receiverSlot: nil
-        )            { _, _ in receiver })
+        ) { _, _ in receiver })
         XCTAssertTrue(rebuiltSession.seedInitialHiResWheelState(claim, for: lease))
 
         XCTAssertTrue(store.consumeHiResBaseline(claim.handle))
@@ -146,7 +146,7 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
         ))
         let lease = try XCTUnwrap(session.hiResWheelTargetLease(
             receiverSlot: current.slot
-        )            { _, _ in currentTarget })
+        ) { _, _ in currentTarget })
 
         XCTAssertFalse(session.seedInitialHiResWheelState(claim, for: lease))
     }
@@ -178,7 +178,7 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
         let claim = try XCTUnwrap(store.hiResBaseline(for: target))
         let lease = try XCTUnwrap(rebuiltSession.hiResWheelTargetLease(
             receiverSlot: nil
-        )            { _, _ in target })
+        ) { _, _ in target })
         XCTAssertTrue(rebuiltSession.seedInitialHiResWheelState(claim, for: lease))
     }
 
