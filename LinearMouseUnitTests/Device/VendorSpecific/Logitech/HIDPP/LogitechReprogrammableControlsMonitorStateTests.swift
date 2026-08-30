@@ -273,7 +273,7 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
         state.workerDidStop(restartIfEnabled: false) { Thread {} }
     }
 
-    func testUnkeyedRestoreStoreRejectsStaleLeaseWrites() {
+    func testUnkeyedRestoreStoreRejectsStaleEntryOwnershipAfterInvalidation() {
         typealias Monitor = LogitechReprogrammableControlsMonitor
         let store = Monitor.UnkeyedControlsRestoreStore()
         let key = Monitor.EphemeralControlsTargetKey(
@@ -285,7 +285,7 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
         let reporting = Monitor.ReportingInfo(flags: [.diverted], mappedControlID: 0x00C3)
         let firstClaim = store.claim(for: key)
 
-        XCTAssertTrue(store.replace([0x00C3: reporting], for: key, expectedLease: firstClaim.lease))
+        XCTAssertTrue(store.replace([0x00C3: reporting], for: key, expectedOwnership: firstClaim.ownership))
         XCTAssertTrue(store.hasPending)
         XCTAssertTrue(Monitor.needsRestoreWorker(
             hasKeyedPending: false,
@@ -294,7 +294,7 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
         ))
         store.invalidateAll()
 
-        XCTAssertFalse(store.replace([0x00C3: reporting], for: key, expectedLease: firstClaim.lease))
+        XCTAssertFalse(store.replace([0x00C3: reporting], for: key, expectedOwnership: firstClaim.ownership))
         XCTAssertTrue(store.claim(for: key).reporting.isEmpty)
         XCTAssertFalse(store.hasPending)
         XCTAssertFalse(Monitor.needsRestoreWorker(
@@ -302,6 +302,66 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
             hasUnkeyedPending: store.hasPending,
             hasActiveUnkeyedTarget: false
         ))
+    }
+
+    func testUnkeyedRestoreStoreRetainsEntryOwnershipWhenReportingBecomesEmpty() {
+        typealias Monitor = LogitechReprogrammableControlsMonitor
+        let store = Monitor.UnkeyedControlsRestoreStore()
+        let key = Monitor.EphemeralControlsTargetKey(
+            locationID: 1,
+            slot: 2,
+            kind: .mouse,
+            productID: 0x1234
+        )
+        let reporting = Monitor.ReportingInfo(flags: [.diverted], mappedControlID: 0x00C3)
+        let claim = store.claim(for: key)
+
+        XCTAssertTrue(store.replace([0x00C3: reporting], for: key, expectedOwnership: claim.ownership))
+        XCTAssertTrue(store.replace([:], for: key, expectedOwnership: claim.ownership))
+        XCTAssertFalse(store.hasPending)
+
+        XCTAssertTrue(store.replace([0x00C3: reporting], for: key, expectedOwnership: claim.ownership))
+        XCTAssertEqual(store.claim(for: key).reporting, [0x00C3: reporting])
+    }
+
+    func testUnkeyedRestoreStoreOwnsDifferentTargetEntriesIndependently() {
+        typealias Monitor = LogitechReprogrammableControlsMonitor
+        let store = Monitor.UnkeyedControlsRestoreStore()
+        let firstKey = Monitor.EphemeralControlsTargetKey(
+            locationID: 1,
+            slot: 1,
+            kind: .mouse,
+            productID: 0x1234
+        )
+        let secondKey = Monitor.EphemeralControlsTargetKey(
+            locationID: 1,
+            slot: 2,
+            kind: .mouse,
+            productID: 0x5678
+        )
+        let firstReporting = Monitor.ReportingInfo(flags: [.diverted], mappedControlID: 0x00C3)
+        let secondReporting = Monitor.ReportingInfo(flags: [.rawXYDiverted], mappedControlID: 0x00C4)
+        let firstClaim = store.claim(for: firstKey)
+        let secondClaim = store.claim(for: secondKey)
+
+        XCTAssertNotIdentical(firstClaim.ownership, secondClaim.ownership)
+        XCTAssertTrue(store.replace(
+            [0x00C3: firstReporting],
+            for: firstKey,
+            expectedOwnership: firstClaim.ownership
+        ))
+        XCTAssertTrue(store.replace(
+            [0x00C4: secondReporting],
+            for: secondKey,
+            expectedOwnership: secondClaim.ownership
+        ))
+        XCTAssertFalse(store.replace(
+            [0x00C4: secondReporting],
+            for: secondKey,
+            expectedOwnership: firstClaim.ownership
+        ))
+        XCTAssertEqual(store.claim(for: firstKey).reporting, [0x00C3: firstReporting])
+        XCTAssertEqual(store.claim(for: secondKey).reporting, [0x00C4: secondReporting])
     }
 
     func testPendingUnkeyedRestoreStartsWorkerAfterMonitorStopped() {
@@ -315,7 +375,7 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
         )
         let reporting = Monitor.ReportingInfo(flags: [.diverted], mappedControlID: 0x00C3)
         let claim = store.claim(for: key)
-        XCTAssertTrue(store.replace([0x00C3: reporting], for: key, expectedLease: claim.lease))
+        XCTAssertTrue(store.replace([0x00C3: reporting], for: key, expectedOwnership: claim.ownership))
 
         let state = LogitechReprogrammableControlsMonitorState()
         var madeWorker = false
@@ -376,6 +436,35 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
         XCTAssertFalse(state.expirePendingTeardownRestore(request))
     }
 
+    func testConcurrentTeardownRestoreCallersJoinOneRequestAndCompleteExactlyOnce() {
+        let state = LogitechReprogrammableControlsMonitorState()
+        let firstCompletion = expectation(description: "first restore caller completed")
+        firstCompletion.assertForOverFulfill = true
+        let secondCompletion = expectation(description: "second restore caller completed")
+        secondCompletion.assertForOverFulfill = true
+
+        guard let firstRequest = state.restorePendingForTeardown(
+            true,
+            makeWorkerThread: { Thread {} },
+            completion: { firstCompletion.fulfill() }
+        ),
+            let secondRequest = state.restorePendingForTeardown(
+                true,
+                makeWorkerThread: { Thread {} },
+                completion: { secondCompletion.fulfill() }
+            )
+        else {
+            XCTFail("Expected both callers to join pending restoration")
+            return
+        }
+
+        XCTAssertIdentical(firstRequest, secondRequest)
+        XCTAssertTrue(state.expirePendingTeardownRestore(firstRequest))
+        state.workerDidStop(restartIfEnabled: false) { Thread {} }
+        wait(for: [firstCompletion, secondCompletion], timeout: 1)
+        XCTAssertFalse(state.expirePendingTeardownRestore(secondRequest))
+    }
+
     func testOldPendingTeardownRestoreExpiryCannotCancelNewRequest() {
         let state = LogitechReprogrammableControlsMonitorState()
         let firstCompletion = expectation(description: "first timeout completion")
@@ -407,5 +496,76 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
         XCTAssertTrue(state.expirePendingTeardownRestore(secondRequest))
         state.workerDidStop(restartIfEnabled: false) { Thread {} }
         wait(for: [secondCompletion], timeout: 1)
+    }
+
+    func testWeakerSleepStopCannotDowngradePendingTeardownRestore() {
+        let state = LogitechReprogrammableControlsMonitorState()
+        let restoreCompletion = expectation(description: "restore completed")
+        restoreCompletion.assertForOverFulfill = true
+        let sleepCompletion = expectation(description: "joined sleep stop completed")
+        sleepCompletion.assertForOverFulfill = true
+
+        state.enable { Thread {} }
+        guard let request = state.restorePendingForTeardown(
+            true,
+            makeWorkerThread: { Thread {} },
+            completion: { restoreCompletion.fulfill() }
+        ) else {
+            XCTFail("Expected terminal restoration to start")
+            return
+        }
+
+        state.disableForSleep {
+            sleepCompletion.fulfill()
+        }
+
+        XCTAssertTrue(state.shouldContinueRunning)
+        XCTAssertTrue(state.shouldAllowTeardownIO)
+        XCTAssertTrue(state.isRestoringPendingForTeardown)
+        XCTAssertTrue(state.expirePendingTeardownRestore(request))
+        state.workerDidStop(restartIfEnabled: false) { Thread {} }
+        wait(for: [restoreCompletion, sleepCompletion], timeout: 1)
+        XCTAssertFalse(state.expirePendingTeardownRestore(request))
+    }
+
+    func testQueuedSleepCompletionCannotReleaseNewTeardownRestartBarrier() {
+        let state = LogitechReprogrammableControlsMonitorState()
+        let sleepCompletion = expectation(description: "sleep stop completed")
+        sleepCompletion.assertForOverFulfill = true
+        let teardownCompletion = expectation(description: "teardown timeout completed")
+        teardownCompletion.assertForOverFulfill = true
+
+        state.enable { Thread {} }
+        state.disableForSleep {
+            sleepCompletion.fulfill()
+        }
+
+        // The sleep worker has stopped and queued its completion on main, but
+        // that callback has not yet released the old restart barrier.
+        state.workerDidStop(restartIfEnabled: true) { Thread {} }
+
+        var madeRestoreWorker = false
+        guard let request = state.restorePendingForTeardown(
+            true,
+            makeWorkerThread: {
+                madeRestoreWorker = true
+                return Thread {}
+            },
+            completion: {
+                teardownCompletion.fulfill()
+            }
+        ) else {
+            XCTFail("Expected terminal restoration to start")
+            return
+        }
+        XCTAssertTrue(madeRestoreWorker)
+
+        // Delivering the earlier sleep callback must not clear the newer
+        // request's barrier or make its timeout stale.
+        wait(for: [sleepCompletion], timeout: 1)
+        XCTAssertTrue(state.expirePendingTeardownRestore(request))
+        state.workerDidStop(restartIfEnabled: false) { Thread {} }
+        wait(for: [teardownCompletion], timeout: 1)
+        XCTAssertFalse(state.expirePendingTeardownRestore(request))
     }
 }

@@ -2359,24 +2359,35 @@ final class LogitechReprogrammableControlsMonitor {
 
     /// Keeps in-memory baselines for direct/legacy targets that do not have a
     /// stable hardware identity. A receiver route can be replaced while its
-    /// previous worker is unwinding, so every claim holds the store's current
-    /// lease. Invalidating the store makes a stale worker's final write a
-    /// no-op instead of transferring its baseline to the replacement target.
+    /// previous worker is unwinding, so every claim owns its target's current
+    /// entry. Invalidating the store removes those entries, making a stale
+    /// worker's final write a no-op instead of transferring its baseline to a
+    /// replacement target.
     final class UnkeyedControlsRestoreStore {
-        final class Lease {}
+        final class EntryOwnership {}
 
         struct Claim {
-            let lease: Lease
+            let ownership: EntryOwnership
             let reporting: [UInt16: ReportingInfo]
         }
 
+        private struct Entry {
+            let ownership: EntryOwnership
+            var reporting: [UInt16: ReportingInfo]
+        }
+
         private let lock = NSLock()
-        private var pending = [EphemeralControlsTargetKey: [UInt16: ReportingInfo]]()
-        private var lease = Lease()
+        private var entries = [EphemeralControlsTargetKey: Entry]()
 
         func claim(for key: EphemeralControlsTargetKey) -> Claim {
             lock.withLock {
-                Claim(lease: lease, reporting: pending[key] ?? [:])
+                if let entry = entries[key] {
+                    return Claim(ownership: entry.ownership, reporting: entry.reporting)
+                }
+
+                let entry = Entry(ownership: EntryOwnership(), reporting: [:])
+                entries[key] = entry
+                return Claim(ownership: entry.ownership, reporting: entry.reporting)
             }
         }
 
@@ -2384,31 +2395,31 @@ final class LogitechReprogrammableControlsMonitor {
         func replace(
             _ reporting: [UInt16: ReportingInfo],
             for key: EphemeralControlsTargetKey,
-            expectedLease: Lease
+            expectedOwnership: EntryOwnership
         ) -> Bool {
             lock.withLock {
-                guard lease === expectedLease else {
+                guard let entry = entries[key],
+                      entry.ownership === expectedOwnership
+                else {
                     return false
                 }
 
-                if reporting.isEmpty {
-                    pending.removeValue(forKey: key)
-                } else {
-                    pending[key] = reporting
-                }
+                // Keep the empty entry as an ownership reservation for the
+                // active worker. A later failed restore must still be able to
+                // publish its baseline through this same claim.
+                entries[key]?.reporting = reporting
                 return true
             }
         }
 
         func invalidateAll() {
             lock.withLock {
-                pending.removeAll()
-                lease = Lease()
+                entries.removeAll()
             }
         }
 
         var hasPending: Bool {
-            lock.withLock { pending.values.contains { !$0.isEmpty } }
+            lock.withLock { entries.values.contains { !$0.reporting.isEmpty } }
         }
     }
 
@@ -2692,7 +2703,7 @@ final class LogitechReprogrammableControlsMonitor {
                 productID: monitorTarget.identity?.productID
             )
             let unkeyedClaim = unkeyedRestoreStore.claim(for: unkeyedTarget)
-            let unkeyedLease = unkeyedClaim.lease
+            let unkeyedOwnership = unkeyedClaim.ownership
             var pendingUnkeyedReportingRestoreByControlID = unkeyedClaim.reporting
             state.setStoreBackedActiveTarget(baselineTarget != nil)
 
@@ -2736,7 +2747,7 @@ final class LogitechReprogrammableControlsMonitor {
                     guard unkeyedRestoreStore.replace(
                         pendingUnkeyedReportingRestoreByControlID,
                         for: unkeyedTarget,
-                        expectedLease: unkeyedLease
+                        expectedOwnership: unkeyedOwnership
                     ) else {
                         continue targetLoop
                     }
@@ -2786,7 +2797,7 @@ final class LogitechReprogrammableControlsMonitor {
                                 &pendingUnkeyedReportingRestoreByControlID,
                                 store: unkeyedRestoreStore,
                                 target: unkeyedTarget,
-                                expectedLease: unkeyedLease,
+                                expectedOwnership: unkeyedOwnership,
                                 using: transport,
                                 featureIndex: featureIndex,
                                 locationID: locationID,
@@ -2877,7 +2888,7 @@ final class LogitechReprogrammableControlsMonitor {
                         guard unkeyedRestoreStore.replace(
                             pendingUnkeyedReportingRestoreByControlID,
                             for: unkeyedTarget,
-                            expectedLease: unkeyedLease
+                            expectedOwnership: unkeyedOwnership
                         ) else {
                             continue targetLoop
                         }
@@ -2910,7 +2921,7 @@ final class LogitechReprogrammableControlsMonitor {
                                 &pendingUnkeyedReportingRestoreByControlID,
                                 store: unkeyedRestoreStore,
                                 target: unkeyedTarget,
-                                expectedLease: unkeyedLease,
+                                expectedOwnership: unkeyedOwnership,
                                 using: transport,
                                 featureIndex: featureIndex,
                                 locationID: locationID,
@@ -3020,7 +3031,7 @@ final class LogitechReprogrammableControlsMonitor {
                             &pendingUnkeyedReportingRestoreByControlID,
                             store: unkeyedRestoreStore,
                             target: unkeyedTarget,
-                            expectedLease: unkeyedLease,
+                            expectedOwnership: unkeyedOwnership,
                             using: transport,
                             featureIndex: featureIndex,
                             locationID: locationID,
@@ -3749,14 +3760,14 @@ final class LogitechReprogrammableControlsMonitor {
         _ pending: inout [UInt16: ReportingInfo],
         store: UnkeyedControlsRestoreStore,
         target: EphemeralControlsTargetKey,
-        expectedLease: UnkeyedControlsRestoreStore.Lease,
+        expectedOwnership: UnkeyedControlsRestoreStore.EntryOwnership,
         using transport: HIDPPTransport,
         featureIndex: UInt8,
         locationID: Int,
         slot: UInt8
     ) {
         guard shouldAllowTeardownIO(), !pending.isEmpty else {
-            _ = store.replace(pending, for: target, expectedLease: expectedLease)
+            _ = store.replace(pending, for: target, expectedOwnership: expectedOwnership)
             return
         }
 
@@ -3774,7 +3785,7 @@ final class LogitechReprogrammableControlsMonitor {
             },
             wait: Thread.sleep(forTimeInterval:)
         )
-        _ = store.replace(pending, for: target, expectedLease: expectedLease)
+        _ = store.replace(pending, for: target, expectedOwnership: expectedOwnership)
     }
 
     private func consumeRestoredBaselines(
@@ -4239,7 +4250,11 @@ struct LogitechMonitorReconfigurationRequest {
 }
 
 final class LogitechReprogrammableControlsMonitorState {
-    final class TeardownRestoreRequest {}
+    final class RestartBarrier {}
+
+    final class TeardownRestoreRequest {
+        let restartBarrier = RestartBarrier()
+    }
 
     private typealias WorkerResources = (Thread?, HIDPPNotificationHandling?, ObservationToken?)
 
@@ -4257,7 +4272,7 @@ final class LogitechReprogrammableControlsMonitorState {
     /// A completion-backed stop is a terminal teardown for the current worker.
     /// Do not let a demand/configuration enable revive it before its caller has
     /// received the completion and started a new lifecycle explicitly.
-    private var preventsWorkerRestart = false
+    private var restartBarrier: RestartBarrier?
     private var allowsTeardownIO = false
     /// A terminal restore can outlive normal monitor demand. While set, the
     /// worker skips diversion and exits only after its pending baseline drains.
@@ -4290,7 +4305,7 @@ final class LogitechReprogrammableControlsMonitorState {
 
     func enable(makeWorkerThread: () -> Thread) {
         let thread = queue.sync { () -> Thread? in
-            guard !isEnabled, !preventsWorkerRestart else {
+            guard !isEnabled, restartBarrier == nil else {
                 return nil
             }
 
@@ -4326,7 +4341,11 @@ final class LogitechReprogrammableControlsMonitorState {
     /// Final teardown has no safe target for HID++ I/O. Keep this distinct
     /// from the sleep policy, which can selectively preserve a direct target.
     func abandon() {
-        disable(completion: nil, allowingTeardownIO: false)
+        disable(
+            completion: nil,
+            allowingTeardownIO: false,
+            overridingPendingRestore: true
+        )
         queue.sync {
             restoresPendingForTeardown = false
             pendingTeardownRestoreRequest = nil
@@ -4346,6 +4365,12 @@ final class LogitechReprogrammableControlsMonitorState {
     ) -> TeardownRestoreRequest? {
         let (thread, completions, request) = queue.sync {
             () -> (Thread?, [() -> Void], TeardownRestoreRequest?) in
+            if restoresPendingForTeardown,
+               let request = pendingTeardownRestoreRequest {
+                stopCompletions.append(completion)
+                return (nil, [], request)
+            }
+
             guard workerThread != nil || hasPendingBaseline else {
                 return (nil, [completion], nil)
             }
@@ -4353,7 +4378,7 @@ final class LogitechReprogrammableControlsMonitorState {
             let request = TeardownRestoreRequest()
             pendingTeardownRestoreRequest = request
             stopCompletions.append(completion)
-            preventsWorkerRestart = true
+            restartBarrier = request.restartBarrier
             restoresPendingForTeardown = true
             isEnabled = true
             allowsTeardownIO = true
@@ -4386,7 +4411,8 @@ final class LogitechReprogrammableControlsMonitorState {
         let (didExpire, resources, completions) = queue.sync {
             () -> (Bool, WorkerResources, [() -> Void]) in
             guard restoresPendingForTeardown,
-                  pendingTeardownRestoreRequest === request
+                  pendingTeardownRestoreRequest === request,
+                  restartBarrier === request.restartBarrier
             else {
                 return (false, (nil, nil, nil), [])
             }
@@ -4405,7 +4431,10 @@ final class LogitechReprogrammableControlsMonitorState {
 
             let completions = stopCompletions
             stopCompletions.removeAll()
-            preventsWorkerRestart = false
+            if restartBarrier === request.restartBarrier {
+                restartBarrier = nil
+            }
+            pendingTeardownRestoreRequest = nil
             return (true, resources, completions)
         }
 
@@ -4423,16 +4452,25 @@ final class LogitechReprogrammableControlsMonitorState {
 
     func disable(
         completion: (() -> Void)?,
-        allowingTeardownIO: Bool? = true
+        allowingTeardownIO: Bool? = true,
+        overridingPendingRestore: Bool = false
     ) {
         let (resources, completions) = queue.sync { () -> (WorkerResources, [() -> Void]) in
             let resources = (workerThread, activeNotificationEndpoint, directDeviceReportObservationToken)
             if let completion {
                 stopCompletions.append(completion)
                 if workerThread != nil {
-                    preventsWorkerRestart = true
+                    restartBarrier = restartBarrier ?? RestartBarrier()
                 }
             }
+
+            // Restore is the strongest teardown policy. A later ordinary or
+            // sleep stop may join its completion barrier, but cannot cancel or
+            // weaken the in-flight restore operation.
+            if restoresPendingForTeardown, !overridingPendingRestore {
+                return ((nil, nil, nil), [])
+            }
+
             isEnabled = false
             let resolvedAllowsTeardownIO = allowingTeardownIO
                 ?? (hasEstablishedActiveTarget && !hasStoreBackedActiveTargetValue)
@@ -4446,7 +4484,8 @@ final class LogitechReprogrammableControlsMonitorState {
 
             let completions = stopCompletions
             stopCompletions.removeAll()
-            preventsWorkerRestart = false
+            restartBarrier = nil
+            pendingTeardownRestoreRequest = nil
             return (resources, completions)
         }
 
@@ -4458,8 +4497,8 @@ final class LogitechReprogrammableControlsMonitorState {
     }
 
     func workerDidStop(restartIfEnabled: Bool, makeWorkerThread: () -> Thread) {
-        let (thread, token, completions, releasesRestartBarrier, barrierRequest) = queue.sync {
-            () -> (Thread?, ObservationToken?, [() -> Void], Bool, TeardownRestoreRequest?) in
+        let (thread, token, completions, barrierToRelease) = queue.sync {
+            () -> (Thread?, ObservationToken?, [() -> Void], RestartBarrier?) in
             workerThread = nil
             hasEstablishedActiveTarget = false
             hasStoreBackedActiveTargetValue = false
@@ -4473,40 +4512,37 @@ final class LogitechReprogrammableControlsMonitorState {
             // restore-only worker, then keep the barrier until it drains.
             guard isEnabled,
                   restartIfEnabled,
-                  !preventsWorkerRestart || restoresPendingForTeardown
+                  restartBarrier == nil || restoresPendingForTeardown
             else {
                 isEnabled = false
                 allowsTeardownIO = false
                 reconfigurationRequest.reset()
-                let barrierRequest = pendingTeardownRestoreRequest
                 restoresPendingForTeardown = false
                 let completions = stopCompletions
                 stopCompletions.removeAll()
-                let releasesRestartBarrier = preventsWorkerRestart && !completions.isEmpty
-                if !releasesRestartBarrier {
-                    preventsWorkerRestart = false
+                let barrierToRelease = completions.isEmpty ? nil : restartBarrier
+                if barrierToRelease == nil {
+                    restartBarrier = nil
                 }
                 return (
                     nil,
                     reportObservationToken,
                     completions,
-                    releasesRestartBarrier,
-                    barrierRequest
+                    barrierToRelease
                 )
             }
 
             reconfigurationRequest.reset()
             let nextThread = makeWorkerThread()
             workerThread = nextThread
-            return (nextThread, reportObservationToken, [], false, nil)
+            return (nextThread, reportObservationToken, [], nil)
         }
 
         token?.cancel()
         thread?.start()
         dispatchStopCompletions(
             completions,
-            releasesRestartBarrier: releasesRestartBarrier,
-            expectedTeardownRestoreRequest: barrierRequest
+            releasing: barrierToRelease
         )
     }
 
@@ -4630,22 +4666,20 @@ final class LogitechReprogrammableControlsMonitorState {
 
     private func dispatchStopCompletions(
         _ completions: [() -> Void],
-        releasesRestartBarrier: Bool = false,
-        expectedTeardownRestoreRequest: TeardownRestoreRequest? = nil
+        releasing expectedRestartBarrier: RestartBarrier? = nil
     ) {
         guard !completions.isEmpty else {
             return
         }
 
         DispatchQueue.main.async { [weak self] in
-            if releasesRestartBarrier {
+            if let expectedRestartBarrier {
                 self?.queue.sync {
-                    if let expectedTeardownRestoreRequest,
-                       self?.pendingTeardownRestoreRequest !== expectedTeardownRestoreRequest {
+                    guard self?.restartBarrier === expectedRestartBarrier else {
                         return
                     }
                     self?.pendingTeardownRestoreRequest = nil
-                    self?.preventsWorkerRestart = false
+                    self?.restartBarrier = nil
                 }
             }
             completions.forEach { $0() }
