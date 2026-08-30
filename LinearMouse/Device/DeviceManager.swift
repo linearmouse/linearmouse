@@ -48,10 +48,12 @@ class DeviceManager: ObservableObject {
             kIOHIDPointerResolutionKey,
             "HIDUseLinearScalingMouseAcceleration"
         ] {
-            manager.observePropertyChanged(property: property) { [self] _ in
-                os_log("Property %{public}@ changed", log: Self.log, type: .info, property)
-                updatePointerSpeed()
-            }.tieToLifetime(of: self)
+            manager
+                .observePropertyChanged(property: property) { [self] _ in
+                    os_log("Property %{public}@ changed", log: Self.log, type: .info, property)
+                    updatePointerSpeed()
+                }
+                .tieToLifetime(of: self)
         }
     }
 
@@ -71,6 +73,7 @@ class DeviceManager: ObservableObject {
 
     private var state: State = .stopped
     private var stopCompletions = [() -> Void]()
+    private var skipHighResolutionWheelRestore = false
 
     private var subscriptions = Set<AnyCancellable>()
 
@@ -91,6 +94,7 @@ class DeviceManager: ObservableObject {
             if let completion {
                 stopCompletions.append(completion)
             }
+            skipHighResolutionWheelRestore = skipHighResolutionWheelRestore || !restoringHighResolutionWheel
             if !restoringLogitechControls {
                 for value in pointerDeviceToDevice.values {
                     value.stopLogitechControlsMonitoringForSleep()
@@ -106,9 +110,19 @@ class DeviceManager: ObservableObject {
             if let completion {
                 stopCompletions.append(completion)
             }
+            if !restoringHighResolutionWheel {
+                skipHighResolutionWheelRestore = true
+                // Cancel the request currently pumping the run loop. The
+                // owning finishStop remains responsible for the teardown;
+                // subsequent devices observe the downgraded no-I/O intent.
+                for value in pointerDeviceToDevice.values {
+                    value.prepareHighResolutionWheelForReconnect()
+                }
+            }
             return
         case .running:
             state = .stopping
+            skipHighResolutionWheelRestore = !restoringHighResolutionWheel
         }
 
         if let completion {
@@ -153,6 +167,7 @@ class DeviceManager: ObservableObject {
         )
         manager.stopObservation()
         state = .stopped
+        skipHighResolutionWheelRestore = false
 
         let completions = stopCompletions
         stopCompletions.removeAll()
@@ -164,6 +179,7 @@ class DeviceManager: ObservableObject {
             return
         }
         state = .running
+        skipHighResolutionWheelRestore = false
 
         // Input callbacks suppress events from the device that was previously
         // active. A new observation lifetime needs its first physical input to
@@ -451,9 +467,11 @@ class DeviceManager: ObservableObject {
 
     func restorePointerSpeedToInitialValue(restoringHighResolutionWheel: Bool = true) {
         for device in devices {
+            let restoresHighResolutionWheel = restoringHighResolutionWheel
+                && !skipHighResolutionWheelRestore
             device.restorePointerAccelerationAndPointerSpeed(
-                restoringHighResolutionWheel: restoringHighResolutionWheel,
-                waitForHighResolutionWheelRestore: restoringHighResolutionWheel
+                restoringHighResolutionWheel: restoresHighResolutionWheel,
+                waitForHighResolutionWheelRestore: restoresHighResolutionWheel
             )
         }
     }

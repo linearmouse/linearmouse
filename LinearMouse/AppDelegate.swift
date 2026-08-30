@@ -16,7 +16,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var subscriptions = Set<AnyCancellable>()
     private var sessionActive = true
     private var sleeping = false
-    private var terminationCleanupPending = false
+    private var terminationCleanupStarted = false
 
     /// Runs the one-time legacy -> SMAppService login-item migration on launch.
     ///
@@ -68,10 +68,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return .terminateNow
         }
 
-        guard !terminationCleanupPending else {
+        guard !terminationCleanupStarted else {
             return .terminateLater
         }
-        terminationCleanupPending = true
+        terminationCleanupStarted = true
 
         stop(restoringHighResolutionWheel: true) { [weak sender] in
             sender?.reply(toApplicationShouldTerminate: true)
