@@ -40,20 +40,41 @@ final class LogitechDeviceSession {
         }
     }
 
-    fileprivate final class InitialHiResWheelState {
+    fileprivate final class InitialTargetState<Value, Handle> {
         var lease: TargetLease
-        var enabled: Bool
-        var baselineHandle: LogitechHardwareBaselineStore.HiResHandle?
+        var value: Value
+        var baselineHandle: Handle?
 
         init(
             lease: TargetLease,
-            enabled: Bool,
-            baselineHandle: LogitechHardwareBaselineStore.HiResHandle?
+            value: Value,
+            baselineHandle: Handle?
         ) {
             self.lease = lease
-            self.enabled = enabled
+            self.value = value
             self.baselineHandle = baselineHandle
         }
+    }
+
+    fileprivate typealias InitialDPIState = InitialTargetState<
+        Int,
+        LogitechHardwareBaselineStore.DPIHandle
+    >
+    fileprivate typealias InitialHiResWheelState = InitialTargetState<
+        Bool,
+        LogitechHardwareBaselineStore.HiResHandle
+    >
+
+    struct DPIBaselinePromotion {
+        let dpi: Int
+        let target: LogitechHardwareTargetKey
+        fileprivate let initialState: InitialDPIState
+        fileprivate let currentLease: TargetLease
+    }
+
+    enum DPICommit {
+        case committed(LogitechHardwareBaselineStore.DPIHandle?)
+        case rejected
     }
 
     struct HiResBaselinePromotion {
@@ -75,6 +96,8 @@ final class LogitechDeviceSession {
         var dpiCancellationSource = CancellationSource()
         var hiResWheelCancellationSource = CancellationSource()
         var sensorDPI: Int?
+        var initialDPIState: InitialDPIState?
+        var dpiRestoreRetryNeeded = false
         var hiResWheelEnabled: Bool?
         var hiResWheelMultiplier: Int?
         var initialHiResWheelState: InitialHiResWheelState?
@@ -155,35 +178,22 @@ final class LogitechDeviceSession {
             let candidateAvailabilityChanged = previousDiscovery?.identities.isEmpty
                 != discovery?.identities.isEmpty
 
-            let previousInitialStateUsable = state.initialHiResWheelState.map {
-                Self.initialStateRelation($0, to: previousRoute) == .compatible
-            } ?? false
+            let dpiTransition = Self.transitionInitialState(
+                state.initialDPIState,
+                from: previousRoute,
+                to: currentRoute
+            )
+            let wheelTransition = Self.transitionInitialState(
+                state.initialHiResWheelState,
+                from: previousRoute,
+                to: currentRoute
+            )
+            state.initialDPIState = dpiTransition.state
+            state.initialHiResWheelState = wheelTransition.state
+            hardwareTargetChanged = hardwareTargetChanged
+                || dpiTransition.requiresTargetReset
+                || wheelTransition.requiresTargetReset
             state.discovery = discovery
-
-            if currentRoute == nil,
-               let initialState = state.initialHiResWheelState,
-               initialState.lease.route != nil,
-               initialState.lease.stableTargetKey == nil {
-                state.initialHiResWheelState = nil
-            }
-
-            var stableInitialToRebind: InitialHiResWheelState?
-            if let initialState = state.initialHiResWheelState, let currentRoute {
-                switch Self.initialStateRelation(initialState, to: currentRoute) {
-                case .different:
-                    state.initialHiResWheelState = nil
-                    hardwareTargetChanged = true
-                case .compatible:
-                    if initialState.lease.stableTargetKey != nil {
-                        stableInitialToRebind = initialState
-                    }
-                    if !previousInitialStateUsable {
-                        hardwareTargetChanged = true
-                    }
-                case .ambiguous:
-                    break
-                }
-            }
 
             if routeIdentityChanged {
                 // The controller may remain usable across metadata enrichment,
@@ -193,10 +203,15 @@ final class LogitechDeviceSession {
             }
 
             guard hardwareTargetChanged else {
-                if let stableInitialToRebind, let currentRoute {
-                    stableInitialToRebind.lease = Self.reboundLease(
-                        stableInitialToRebind.lease,
-                        route: currentRoute,
+                if let currentRoute {
+                    Self.rebindStableInitialState(
+                        state.initialDPIState,
+                        to: currentRoute,
+                        token: state.dpiCancellationSource.token
+                    )
+                    Self.rebindStableInitialState(
+                        state.initialHiResWheelState,
+                        to: currentRoute,
                         token: state.hiResWheelCancellationSource.token
                     )
                 }
@@ -222,10 +237,15 @@ final class LogitechDeviceSession {
             state.hiResWheelMultiplier = nil
             dpiCoordinator.cancel()
             wheelCoordinator.cancel()
-            if let stableInitialToRebind, let currentRoute {
-                stableInitialToRebind.lease = Self.reboundLease(
-                    stableInitialToRebind.lease,
-                    route: currentRoute,
+            if let currentRoute {
+                Self.rebindStableInitialState(
+                    state.initialDPIState,
+                    to: currentRoute,
+                    token: state.dpiCancellationSource.token
+                )
+                Self.rebindStableInitialState(
+                    state.initialHiResWheelState,
+                    to: currentRoute,
                     token: state.hiResWheelCancellationSource.token
                 )
             }
@@ -251,7 +271,8 @@ final class LogitechDeviceSession {
         let coordinator = dpiApplyCoordinator
         resetFeatureOperation(
             cache: \State.adjustableDPI,
-            cancellationSource: \State.dpiCancellationSource
+            cancellationSource: \State.dpiCancellationSource,
+            mutateState: { $0.dpiRestoreRetryNeeded = false }
         ) { token in
             coordinator.start { attempt in
                 operation(attempt, token)
@@ -264,6 +285,26 @@ final class LogitechDeviceSession {
         }
     }
 
+    /// Retries a return to the pre-managed DPI without discarding its
+    /// baseline when the device is temporarily unavailable.
+    @discardableResult
+    func startDPIRestore(
+        _ operation: @escaping (HardwareSettingApplyCoordinator.Attempt, CancellationToken) -> Bool
+    ) -> CancellationToken {
+        let coordinator = dpiApplyCoordinator
+        return resetFeatureOperation(
+            cache: \State.adjustableDPI,
+            cancellationSource: \State.dpiCancellationSource,
+            mutateState: { $0.dpiRestoreRetryNeeded = false }
+        ) { token in
+            coordinator.start { attempt in
+                operation(attempt, token)
+            } completion: { [weak self] succeeded in
+                self?.finishDPIRestore(succeeded: succeeded, for: token)
+            }
+        }
+    }
+
     func cancelDPIApply() {
         let coordinator = dpiApplyCoordinator
         resetFeatureOperation(
@@ -272,15 +313,17 @@ final class LogitechDeviceSession {
         ) { _ in coordinator.cancel() }
     }
 
+    @discardableResult
     func runDPIOperation(
+        waitUntilFinished: Bool = false,
         _ operation: @escaping (CancellationToken) -> Void,
         onCancelled: @escaping () -> Void
-    ) {
+    ) -> CancellationToken {
         runFeatureOperation(
             cache: \State.adjustableDPI,
             cancellationSource: \State.dpiCancellationSource,
             coordinator: dpiApplyCoordinator,
-            waitUntilFinished: false,
+            waitUntilFinished: waitUntilFinished,
             operation: operation,
             onCancelled: onCancelled
         )
@@ -375,6 +418,198 @@ final class LogitechDeviceSession {
         }
     }
 
+    @discardableResult
+    func recordInitialSensorDPI(
+        _ dpi: Int,
+        for access: FeatureAccess<AdjustableDPI>
+    ) -> Bool {
+        withState { state in
+            guard Self.accessIsCurrent(
+                access,
+                token: state.dpiCancellationSource.token,
+                route: state.discovery?.route
+            ), state.initialDPIState == nil else {
+                return false
+            }
+            state.initialDPIState = .init(
+                lease: access.lease,
+                value: dpi,
+                baselineHandle: nil
+            )
+            return true
+        }
+    }
+
+    /// Seeds a rebuilt session only from a baseline whose stable target still
+    /// belongs to the current immutable DPI lease.
+    @discardableResult
+    func seedInitialSensorDPI(
+        _ claim: LogitechHardwareBaselineStore.DPIClaim,
+        for lease: TargetLease
+    ) -> Bool {
+        withState { state in
+            guard state.initialDPIState == nil,
+                  Self.leaseIsCurrent(
+                      lease,
+                      token: state.dpiCancellationSource.token,
+                      route: state.discovery?.route
+                  ),
+                  lease.stableTargetKey.map({ claim.handle.belongs(to: $0) }) == true
+            else {
+                return false
+            }
+            state.initialDPIState = .init(
+                lease: lease,
+                value: claim.baseline.value,
+                baselineHandle: claim.handle
+            )
+            return true
+        }
+    }
+
+    func initialSensorDPI(for access: FeatureAccess<AdjustableDPI>) -> Int? {
+        withState { state in
+            guard let initialState = state.initialDPIState,
+                  Self.accessIsCurrent(
+                      access,
+                      token: state.dpiCancellationSource.token,
+                      route: state.discovery?.route
+                  ),
+                  Self.initialState(initialState, matches: access.lease),
+                  Self.initialStateRelation(initialState, to: state.discovery?.route) == .compatible
+            else {
+                return nil
+            }
+            return initialState.value
+        }
+    }
+
+    func dpiTargetLease(
+        receiverSlot: UInt8?,
+        stableTargetKey: (LogitechReceiverRoute?, UInt8?) -> LogitechHardwareTargetKey?
+    ) -> TargetLease? {
+        withState { state in
+            Self.targetLease(
+                receiverSlot: receiverSlot,
+                cachedReceiverSlot: state.adjustableDPI?.lease.receiverSlot,
+                initialReceiverSlot: state.initialDPIState?.lease.receiverSlot,
+                route: state.discovery?.route,
+                token: state.dpiCancellationSource.token,
+                stableTargetKey: stableTargetKey
+            )
+        }
+    }
+
+    func dpiBaselinePromotion(for lease: TargetLease) -> DPIBaselinePromotion? {
+        withState { state in
+            guard let initialState = state.initialDPIState,
+                  initialState.baselineHandle == nil,
+                  let stableTargetKey = lease.stableTargetKey,
+                  Self.leaseIsCurrent(
+                      lease,
+                      token: state.dpiCancellationSource.token,
+                      route: state.discovery?.route
+                  ),
+                  Self.initialStateRelation(initialState, to: lease.route) == .compatible,
+                  Self.initialState(initialState, matches: lease)
+            else {
+                return nil
+            }
+            return .init(
+                dpi: initialState.value,
+                target: stableTargetKey,
+                initialState: initialState,
+                currentLease: lease
+            )
+        }
+    }
+
+    @discardableResult
+    func attachDPIBaseline(
+        _ claim: LogitechHardwareBaselineStore.DPIClaim,
+        to promotion: DPIBaselinePromotion
+    ) -> Bool {
+        withState { state in
+            guard state.initialDPIState === promotion.initialState,
+                  promotion.initialState.baselineHandle == nil,
+                  claim.handle.belongs(to: promotion.target),
+                  Self.leaseIsCurrent(
+                      promotion.currentLease,
+                      token: state.dpiCancellationSource.token,
+                      route: state.discovery?.route
+                  ),
+                  Self.initialStateRelation(
+                      promotion.initialState,
+                      to: state.discovery?.route
+                  ) == .compatible
+            else {
+                return false
+            }
+            promotion.initialState.lease = promotion.currentLease
+            promotion.initialState.value = claim.baseline.value
+            promotion.initialState.baselineHandle = claim.handle
+            return true
+        }
+    }
+
+    var hasInitialSensorDPIState: Bool {
+        withState { $0.initialDPIState != nil }
+    }
+
+    var hasStoredSensorDPIBaseline: Bool {
+        withState { $0.initialDPIState?.baselineHandle != nil }
+    }
+
+    var needsDPIRestoreRetry: Bool {
+        withState { $0.initialDPIState != nil && $0.dpiRestoreRetryNeeded }
+    }
+
+    /// Commits a read-back-confirmed restore. The caller may then consume only
+    /// the exact process-store handle returned here.
+    @discardableResult
+    func completeSensorDPIRestore(
+        dpi: Int,
+        for access: FeatureAccess<AdjustableDPI>
+    ) -> DPICommit {
+        withState { state -> DPICommit in
+            guard let initialState = state.initialDPIState,
+                  Self.accessIsCurrent(
+                      access,
+                      token: state.dpiCancellationSource.token,
+                      route: state.discovery?.route
+                  ),
+                  Self.initialState(initialState, matches: access.lease),
+                  Self.initialStateRelation(initialState, to: state.discovery?.route) == .compatible,
+                  initialState.value == dpi
+            else {
+                return .rejected
+            }
+            let baselineHandle = initialState.baselineHandle
+            state.sensorDPI = dpi
+            state.initialDPIState = nil
+            state.dpiRestoreRetryNeeded = false
+            return .committed(baselineHandle)
+        }
+    }
+
+    func invalidateAdjustableDPI(for token: CancellationToken) {
+        withState { state in
+            guard state.dpiCancellationSource.token == token else {
+                return
+            }
+            state.adjustableDPI = nil
+        }
+    }
+
+    private func finishDPIRestore(succeeded: Bool, for token: CancellationToken) {
+        withState { state in
+            guard state.dpiCancellationSource.token == token else {
+                return
+            }
+            state.dpiRestoreRetryNeeded = !succeeded && state.initialDPIState != nil
+        }
+    }
+
     func updateHiResWheelState(
         enabled: Bool?,
         multiplier: Int?,
@@ -401,7 +636,7 @@ final class LogitechDeviceSession {
             }
             state.initialHiResWheelState = .init(
                 lease: access.lease,
-                enabled: enabled,
+                value: enabled,
                 baselineHandle: nil
             )
             return true
@@ -418,14 +653,18 @@ final class LogitechDeviceSession {
     ) -> Bool {
         withState { state in
             guard state.initialHiResWheelState == nil,
-                  Self.leaseIsCurrent(lease, in: state),
+                  Self.leaseIsCurrent(
+                      lease,
+                      token: state.hiResWheelCancellationSource.token,
+                      route: state.discovery?.route
+                  ),
                   lease.stableTargetKey.map({ claim.handle.belongs(to: $0) }) == true
             else {
                 return false
             }
             state.initialHiResWheelState = .init(
                 lease: lease,
-                enabled: claim.baseline.enabled,
+                value: claim.baseline.enabled,
                 baselineHandle: claim.handle
             )
             return true
@@ -441,7 +680,7 @@ final class LogitechDeviceSession {
             else {
                 return nil
             }
-            return initialState.enabled
+            return initialState.value
         }
     }
 
@@ -452,27 +691,13 @@ final class LogitechDeviceSession {
         stableTargetKey: (LogitechReceiverRoute?, UInt8?) -> LogitechHardwareTargetKey?
     ) -> TargetLease? {
         withState { state in
-            let token = state.hiResWheelCancellationSource.token
-            guard token.shouldContinue else {
-                return nil
-            }
-            let route = state.discovery?.route
-            // A legacy receiver can resolve its logical slot on demand even
-            // though it has no discovery route. Keep that resolved slot when
-            // promoting or seeding its baseline; otherwise the receiver's own
-            // serial could be mistaken for the logical device identity.
-            let resolvedSlot = receiverSlot
-                ?? state.hiResWheel?.lease.receiverSlot
-                ?? state.initialHiResWheelState?.lease.receiverSlot
-                ?? route?.slot
-            guard route.map({ resolvedSlot == nil || $0.slot == resolvedSlot }) ?? true else {
-                return nil
-            }
-            return .init(
-                route: route,
-                stableTargetKey: stableTargetKey(route, resolvedSlot),
-                receiverSlot: resolvedSlot,
-                token: token
+            Self.targetLease(
+                receiverSlot: receiverSlot,
+                cachedReceiverSlot: state.hiResWheel?.lease.receiverSlot,
+                initialReceiverSlot: state.initialHiResWheelState?.lease.receiverSlot,
+                route: state.discovery?.route,
+                token: state.hiResWheelCancellationSource.token,
+                stableTargetKey: stableTargetKey
             )
         }
     }
@@ -482,14 +707,18 @@ final class LogitechDeviceSession {
             guard let initialState = state.initialHiResWheelState,
                   initialState.baselineHandle == nil,
                   let stableTargetKey = lease.stableTargetKey,
-                  Self.leaseIsCurrent(lease, in: state),
+                  Self.leaseIsCurrent(
+                      lease,
+                      token: state.hiResWheelCancellationSource.token,
+                      route: state.discovery?.route
+                  ),
                   Self.initialStateRelation(initialState, to: lease.route) == .compatible,
                   Self.initialState(initialState, matches: lease)
             else {
                 return nil
             }
             return .init(
-                enabled: initialState.enabled,
+                enabled: initialState.value,
                 target: stableTargetKey,
                 initialState: initialState,
                 currentLease: lease
@@ -506,7 +735,11 @@ final class LogitechDeviceSession {
             guard state.initialHiResWheelState === promotion.initialState,
                   promotion.initialState.baselineHandle == nil,
                   claim.handle.belongs(to: promotion.target),
-                  Self.leaseIsCurrent(promotion.currentLease, in: state),
+                  Self.leaseIsCurrent(
+                      promotion.currentLease,
+                      token: state.hiResWheelCancellationSource.token,
+                      route: state.discovery?.route
+                  ),
                   Self.initialStateRelation(
                       promotion.initialState,
                       to: state.discovery?.route
@@ -515,7 +748,7 @@ final class LogitechDeviceSession {
                 return false
             }
             promotion.initialState.lease = promotion.currentLease
-            promotion.initialState.enabled = claim.baseline.enabled
+            promotion.initialState.value = claim.baseline.enabled
             promotion.initialState.baselineHandle = claim.handle
             return true
         }
@@ -691,7 +924,16 @@ final class LogitechDeviceSession {
         expectedToken: CancellationToken? = nil,
         create: (LogitechReceiverRoute?, CancellationToken) -> FeatureBinding<AdjustableDPI>?
     ) -> FeatureAccess<AdjustableDPI>? {
-        feature(
+        let admitted = withState { state in
+            guard let initialState = state.initialDPIState else {
+                return true
+            }
+            return Self.initialStateRelation(initialState, to: state.discovery?.route) == .compatible
+        }
+        guard admitted else {
+            return nil
+        }
+        return feature(
             cache: \State.adjustableDPI,
             cancellationSource: \State.dpiCancellationSource,
             expectedToken: expectedToken,
@@ -806,10 +1048,43 @@ final class LogitechDeviceSession {
         )
     }
 
-    private static func leaseIsCurrent(_ lease: TargetLease, in state: State) -> Bool {
-        lease.token == state.hiResWheelCancellationSource.token
+    private static func leaseIsCurrent(
+        _ lease: TargetLease,
+        token: CancellationToken,
+        route: LogitechReceiverRoute?
+    ) -> Bool {
+        lease.token == token
             && lease.token.shouldContinue
-            && routeCanContinue(from: lease.route, to: state.discovery?.route)
+            && routeCanContinue(from: lease.route, to: route)
+    }
+
+    /// Builds a lease from one state snapshot. A legacy on-demand receiver's
+    /// resolved slot must survive cache invalidation so it is never mistaken
+    /// for the directly-addressable receiver itself.
+    private static func targetLease(
+        receiverSlot: UInt8?,
+        cachedReceiverSlot: UInt8?,
+        initialReceiverSlot: UInt8?,
+        route: LogitechReceiverRoute?,
+        token: CancellationToken,
+        stableTargetKey: (LogitechReceiverRoute?, UInt8?) -> LogitechHardwareTargetKey?
+    ) -> TargetLease? {
+        guard token.shouldContinue else {
+            return nil
+        }
+        let resolvedSlot = receiverSlot
+            ?? cachedReceiverSlot
+            ?? initialReceiverSlot
+            ?? route?.slot
+        guard route.map({ resolvedSlot == nil || $0.slot == resolvedSlot }) ?? true else {
+            return nil
+        }
+        return .init(
+            route: route,
+            stableTargetKey: stableTargetKey(route, resolvedSlot),
+            receiverSlot: resolvedSlot,
+            token: token
+        )
     }
 
     /// Directional compatibility for an operation that started at `previous`.
@@ -845,8 +1120,54 @@ final class LogitechDeviceSession {
         case different
     }
 
-    private static func initialState(
-        _ initialState: InitialHiResWheelState,
+    private static func transitionInitialState<Value, Handle>(
+        _ initialState: InitialTargetState<Value, Handle>?,
+        from previousRoute: LogitechReceiverRoute?,
+        to currentRoute: LogitechReceiverRoute?
+    ) -> (state: InitialTargetState<Value, Handle>?, requiresTargetReset: Bool) {
+        guard let initialState else {
+            return (nil, false)
+        }
+
+        let wasUsable = initialStateRelation(initialState, to: previousRoute) == .compatible
+
+        // A receiver baseline without a stable identity cannot safely cross
+        // route loss because its old slot may later address another device.
+        if currentRoute == nil,
+           initialState.lease.route != nil,
+           initialState.lease.stableTargetKey == nil {
+            return (nil, false)
+        }
+
+        guard let currentRoute else {
+            return (initialState, false)
+        }
+
+        switch initialStateRelation(initialState, to: currentRoute) {
+        case .different:
+            return (nil, true)
+        case .compatible:
+            return (initialState, !wasUsable)
+        case .ambiguous:
+            return (initialState, false)
+        }
+    }
+
+    private static func rebindStableInitialState<Value, Handle>(
+        _ initialState: InitialTargetState<Value, Handle>?,
+        to route: LogitechReceiverRoute,
+        token: CancellationToken
+    ) {
+        guard let initialState,
+              initialState.lease.stableTargetKey != nil,
+              initialStateRelation(initialState, to: route) == .compatible else {
+            return
+        }
+        initialState.lease = reboundLease(initialState.lease, route: route, token: token)
+    }
+
+    private static func initialState<Value, Handle>(
+        _ initialState: InitialTargetState<Value, Handle>,
         matches lease: TargetLease
     ) -> Bool {
         guard initialState.lease.receiverSlot == lease.receiverSlot else {
@@ -855,8 +1176,8 @@ final class LogitechDeviceSession {
         return initialState.lease.stableTargetKey.map { $0 == lease.stableTargetKey } ?? true
     }
 
-    private static func initialStateRelation(
-        _ initialState: InitialHiResWheelState,
+    private static func initialStateRelation<Value, Handle>(
+        _ initialState: InitialTargetState<Value, Handle>,
         to currentRoute: LogitechReceiverRoute?
     ) -> InitialStateRelation {
         guard let initialRoute = initialState.lease.route else {

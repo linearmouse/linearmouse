@@ -12,6 +12,7 @@ protocol LogitechDeviceSettingsTarget: AnyObject {
     var isRemoved: Bool { get }
     var confirmedLogitechSensorDPI: Int? { get }
     var confirmedLogitechHighResolutionWheel: Bool? { get }
+    var needsLogitechSensorDPIRestoreRetry: Bool { get }
     var needsLogitechHighResolutionWheelRestoreRetry: Bool { get }
 
     func applyConfiguredSensorDPI(_ dpi: Int)
@@ -19,6 +20,7 @@ protocol LogitechDeviceSettingsTarget: AnyObject {
     func requestLogitechControlsForcedReconfiguration()
     func prepareSensorDPIForReconnect()
     func prepareHighResolutionWheelForReconnect()
+    func stopManagingSensorDPI()
     func stopManagingHighResolutionWheel()
 }
 
@@ -69,10 +71,10 @@ final class LogitechDeviceSettingsReconciler {
         if let dpi = settings.dpi,
            force || dpi != previousSettings.dpi || device.confirmedLogitechSensorDPI != dpi {
             device.applyConfiguredSensorDPI(dpi)
-        } else if settings.dpi == nil, previousSettings.dpi != nil {
-            // A nil transition is a semantic stop, not "leave the old retry
-            // running until it happens to finish".
-            device.prepareSensorDPIForReconnect()
+        } else if settings.dpi == nil,
+                  force || previousSettings.dpi != nil
+                  || device.needsLogitechSensorDPIRestoreRetry {
+            device.stopManagingSensorDPI()
         }
         if let highResolutionWheel = settings.highResolutionWheel,
            force || highResolutionWheel != previousSettings.highResolutionWheel

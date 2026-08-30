@@ -72,8 +72,11 @@ class Device {
             }
             return .init(
                 feature: feature,
-                stableTargetKey: logitechHardwareTargetKey(for: route, receiverSlot: route?.slot),
-                receiverSlot: route?.slot
+                stableTargetKey: logitechHardwareTargetKey(
+                    for: route,
+                    receiverSlot: feature.receiverSlot
+                ),
+                receiverSlot: feature.receiverSlot
             )
         }
     }
@@ -184,6 +187,7 @@ class Device {
     @discardableResult
     func updateLogitechReceiverDiscovery(_ discovery: LogitechReceiverDiscovery?) -> Bool {
         let update = logitechSession.updateDiscovery(discovery)
+        promoteSensorDPIBaselineIfPossible()
         promoteHiResWheelBaselineIfPossible()
         if update.hardwareTargetChanged {
             logitechReprogrammableControlsMonitor?.invalidateTarget()

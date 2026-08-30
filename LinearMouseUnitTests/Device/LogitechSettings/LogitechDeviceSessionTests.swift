@@ -108,6 +108,182 @@ final class LogitechDeviceSessionTests: XCTestCase {
         XCTAssertTrue(recovered.hardwareTargetChanged)
     }
 
+    func testInitialDPIStateIsBoundToHardwareTarget() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        _ = session.updateDiscovery(discovery(serialNumber: "AAAAAAAA", productID: 0xB034))
+        let access = try adjustableDPIAccess(for: session, receiverSlot: 2)
+        XCTAssertTrue(session.recordInitialSensorDPI(800, for: access))
+
+        _ = session.updateDiscovery(discovery(serialNumber: "BBBBBBBB", productID: 0xB037))
+
+        XCTAssertNil(session.initialSensorDPI(for: access))
+        XCTAssertFalse(session.hasInitialSensorDPIState)
+    }
+
+    func testSupersededDPIAccessCannotRecordOrConsumeBaseline() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let access = try adjustableDPIAccess(for: session, receiverSlot: 2)
+
+        session.cancelDPIApply()
+
+        XCTAssertFalse(session.recordInitialSensorDPI(800, for: access))
+        XCTAssertNil(session.initialSensorDPI(for: access))
+        guard case .rejected = session.completeSensorDPIRestore(dpi: 800, for: access) else {
+            XCTFail("A superseded access must not consume a DPI baseline")
+            return
+        }
+    }
+
+    func testInitialDPIStateIsBoundToLegacyReceiverSlot() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let access = try adjustableDPIAccess(for: session, receiverSlot: 2)
+        XCTAssertTrue(session.recordInitialSensorDPI(800, for: access))
+
+        session.cancelDPIApply()
+        let otherAccess = try adjustableDPIAccess(for: session, receiverSlot: 3)
+
+        XCTAssertNil(session.initialSensorDPI(for: otherAccess))
+    }
+
+    func testDPIBaselinePromotionAfterSerialEnrichment() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        _ = session.updateDiscovery(discovery(serialNumber: nil, productID: 0xB034))
+        let access = try adjustableDPIAccess(for: session, receiverSlot: 2)
+        XCTAssertTrue(session.recordInitialSensorDPI(800, for: access))
+
+        let enriched = discovery(serialNumber: "513BBE34", productID: 0xB034)
+        _ = session.updateDiscovery(enriched)
+        let target = try receiverTarget(for: enriched)
+        let lease = try XCTUnwrap(session.dpiTargetLease(receiverSlot: 2) { _, _ in target })
+        let promotion = try XCTUnwrap(session.dpiBaselinePromotion(for: lease))
+        let store = LogitechHardwareBaselineStore()
+        let claim = store.captureDPIBaseline(promotion.dpi, for: target)
+
+        XCTAssertEqual(promotion.dpi, 800)
+        XCTAssertTrue(session.attachDPIBaseline(claim, to: promotion))
+        XCTAssertTrue(session.hasStoredSensorDPIBaseline)
+
+        _ = session.updateDiscovery(.init(identities: [], route: nil))
+        _ = session.updateDiscovery(discovery(serialNumber: nil, productID: 0xB034))
+        XCTAssertTrue(session.hasInitialSensorDPIState)
+        XCTAssertNil(session.adjustableDPI { _, _ in
+            XCTFail("An ambiguous stable target must remain quarantined")
+            return nil
+        })
+    }
+
+    func testDPIBaselineClearsForDifferentSerialAfterQuarantine() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let discoveryA = discovery(serialNumber: "AAAAAAAA", productID: 0xB034)
+        _ = session.updateDiscovery(discoveryA)
+        let targetA = try receiverTarget(for: discoveryA)
+        let accessA = try adjustableDPIAccess(for: session, receiverSlot: 2, stableTargetKey: targetA)
+        XCTAssertTrue(session.recordInitialSensorDPI(800, for: accessA))
+
+        _ = session.updateDiscovery(.init(identities: [], route: nil))
+        _ = session.updateDiscovery(discovery(serialNumber: "BBBBBBBB", productID: 0xB034))
+
+        XCTAssertFalse(session.hasInitialSensorDPIState)
+    }
+
+    func testUnkeyedDPIBaselineClearsWhenReceiverRouteIsLost() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        _ = session.updateDiscovery(discovery(serialNumber: nil, productID: 0xB034))
+        let access = try adjustableDPIAccess(for: session, receiverSlot: 2)
+        XCTAssertTrue(session.recordInitialSensorDPI(800, for: access))
+
+        _ = session.updateDiscovery(.init(identities: [], route: nil))
+
+        XCTAssertFalse(session.hasInitialSensorDPIState)
+    }
+
+    func testSameStableDPIBaselineRebindsAcrossReceiverSlots() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let discoveryA = discovery(serialNumber: "AAAAAAAA", productID: 0xB034, slot: 2)
+        _ = session.updateDiscovery(discoveryA)
+        let targetA = try receiverTarget(for: discoveryA)
+        let accessA = try adjustableDPIAccess(for: session, receiverSlot: 2, stableTargetKey: targetA)
+        XCTAssertTrue(session.recordInitialSensorDPI(800, for: accessA))
+
+        _ = session.updateDiscovery(.init(identities: [], route: nil))
+        _ = session.updateDiscovery(discovery(serialNumber: "AAAAAAAA", productID: 0xB034, slot: 3))
+        let reboundAccess = try adjustableDPIAccess(
+            for: session,
+            receiverSlot: 3,
+            stableTargetKey: targetA
+        )
+
+        XCTAssertEqual(session.initialSensorDPI(for: reboundAccess), 800)
+    }
+
+    func testImplicitDPILeaseRetainsLegacyReceiverSlotWithoutPromotingReceiver() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let access = try adjustableDPIAccess(for: session, receiverSlot: 2)
+        XCTAssertTrue(session.recordInitialSensorDPI(800, for: access))
+        let receiverTarget = try XCTUnwrap(LogitechHardwareTargetKey.direct(
+            transport: "USB",
+            locationID: 123,
+            vendorID: 0x046D,
+            productID: 0xC548,
+            serialNumber: "RECEIVER",
+            name: "USB Receiver"
+        ))
+
+        let lease = try XCTUnwrap(session.dpiTargetLease(receiverSlot: nil) { _, slot in
+            XCTAssertEqual(slot, 2)
+            return slot == nil ? receiverTarget : nil
+        })
+
+        XCTAssertEqual(lease.receiverSlot, 2)
+        XCTAssertNil(lease.stableTargetKey)
+        XCTAssertNil(session.dpiBaselinePromotion(for: lease))
+    }
+
+    func testReadbackConfirmedDPIRestoreReturnsExactConsumableHandle() throws {
+        let store = LogitechHardwareBaselineStore()
+        let target = try XCTUnwrap(LogitechHardwareTargetKey.direct(
+            transport: "Bluetooth Low Energy",
+            locationID: 123,
+            vendorID: 0x046D,
+            productID: 0xB034,
+            serialNumber: "ABC123",
+            name: "Mouse"
+        ))
+        let claim = store.captureDPIBaseline(800, for: target)
+        let session = LogitechDeviceSession(deviceID: 1)
+        let access = try adjustableDPIAccess(for: session, stableTargetKey: target)
+        let lease = try XCTUnwrap(session.dpiTargetLease(receiverSlot: nil) { _, _ in target })
+        XCTAssertTrue(session.seedInitialSensorDPI(claim, for: lease))
+
+        let commit = session.completeSensorDPIRestore(dpi: 800, for: access)
+        guard case let .committed(handle?) = commit else {
+            XCTFail("Expected a confirmed restore commit")
+            return
+        }
+        XCTAssertTrue(store.consumeDPIBaseline(handle))
+        XCTAssertNil(store.dpiBaseline(for: target))
+    }
+
+    func testFailedDPIRestoreRetainsBaselineForLaterAttempt() throws {
+        let store = LogitechHardwareBaselineStore()
+        let target = try XCTUnwrap(LogitechHardwareTargetKey.direct(
+            transport: "Bluetooth Low Energy",
+            locationID: 123,
+            vendorID: 0x046D,
+            productID: 0xB034,
+            serialNumber: "ABC123",
+            name: "Mouse"
+        ))
+        let claim = store.captureDPIBaseline(800, for: target)
+        let session = LogitechDeviceSession(deviceID: 1)
+        let lease = try XCTUnwrap(session.dpiTargetLease(receiverSlot: nil) { _, _ in target })
+        XCTAssertTrue(session.seedInitialSensorDPI(claim, for: lease))
+
+        // No read-back commit is made after the simulated failed write.
+        XCTAssertEqual(store.dpiBaseline(for: target)?.baseline, .init(value: 800))
+        XCTAssertTrue(session.hasInitialSensorDPIState)
+    }
+
     func testInitialWheelStateIsBoundToHardwareTarget() throws {
         let session = LogitechDeviceSession(deviceID: 1)
         _ = session.updateDiscovery(discovery(serialNumber: "AAAAAAAA", productID: 0xB034))
@@ -442,6 +618,32 @@ final class LogitechDeviceSessionTests: XCTestCase {
         return try XCTUnwrap(session.hiResWheel { _, _ in
             .init(
                 feature: HiResWheel(transport: transport, featureIndex: 1),
+                stableTargetKey: stableTargetKey,
+                receiverSlot: receiverSlot
+            )
+        })
+    }
+
+    private func adjustableDPIAccess(
+        for session: LogitechDeviceSession,
+        receiverSlot: UInt8? = nil,
+        stableTargetKey: LogitechHardwareTargetKey? = nil
+    ) throws -> LogitechDeviceSession.FeatureAccess<AdjustableDPI> {
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xB015,
+            transport: PointerDeviceTransportName.usb,
+            maxInputReportSize: 20,
+            maxOutputReportSize: 20
+        )
+        let transport = try XCTUnwrap(HIDPPTransport(device: device, deviceIndex: receiverSlot))
+        return try XCTUnwrap(session.adjustableDPI { _, _ in
+            .init(
+                feature: AdjustableDPI(
+                    transport: transport,
+                    featureIndex: 1,
+                    supportedDPI: [400, 800, 1200, 8000]
+                ),
                 stableTargetKey: stableTargetKey,
                 receiverSlot: receiverSlot
             )

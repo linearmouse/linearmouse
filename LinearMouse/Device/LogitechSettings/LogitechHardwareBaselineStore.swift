@@ -50,6 +50,33 @@ enum LogitechHardwareTargetKey: Hashable {
 final class LogitechHardwareBaselineStore {
     fileprivate final class EntryOwnership {}
 
+    struct DPIBaseline: Equatable {
+        let value: Int
+    }
+
+    struct DPIHandle: Hashable {
+        fileprivate let target: LogitechHardwareTargetKey
+        fileprivate let ownership: EntryOwnership
+
+        static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.target == rhs.target && lhs.ownership === rhs.ownership
+        }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(target)
+            hasher.combine(ObjectIdentifier(ownership))
+        }
+
+        func belongs(to target: LogitechHardwareTargetKey) -> Bool {
+            self.target == target
+        }
+    }
+
+    struct DPIClaim: Equatable {
+        let baseline: DPIBaseline
+        let handle: DPIHandle
+    }
+
     struct HiResBaseline: Equatable {
         let enabled: Bool
     }
@@ -106,19 +133,66 @@ final class LogitechHardwareBaselineStore {
         let handle: ControlsHandle
     }
 
-    private struct HiResEntry {
-        let baseline: HiResBaseline
+    private struct Entry<Baseline> {
+        let baseline: Baseline
         let ownership = EntryOwnership()
     }
 
-    private struct ControlsEntry {
-        let baseline: ControlsReportingBaseline
-        let ownership = EntryOwnership()
-    }
+    private typealias DPIEntry = Entry<DPIBaseline>
+    private typealias HiResEntry = Entry<HiResBaseline>
+    private typealias ControlsEntry = Entry<ControlsReportingBaseline>
 
     private let lock = NSLock()
+    private var dpiEntries = [LogitechHardwareTargetKey: DPIEntry]()
     private var hiResEntries = [LogitechHardwareTargetKey: HiResEntry]()
     private var controlsEntries = [LogitechHardwareTargetKey: [UInt16: ControlsEntry]]()
+
+    /// First writer wins. A reconstructed Device receives the DPI observed
+    /// before LinearMouse's first write, not its still-applied value.
+    func captureDPIBaseline(
+        _ dpi: Int,
+        for target: LogitechHardwareTargetKey
+    ) -> DPIClaim {
+        lock.withLock {
+            if let entry = dpiEntries[target] {
+                return .init(
+                    baseline: entry.baseline,
+                    handle: .init(target: target, ownership: entry.ownership)
+                )
+            }
+
+            let entry = DPIEntry(baseline: .init(value: dpi))
+            dpiEntries[target] = entry
+            return .init(
+                baseline: entry.baseline,
+                handle: .init(target: target, ownership: entry.ownership)
+            )
+        }
+    }
+
+    func dpiBaseline(for target: LogitechHardwareTargetKey) -> DPIClaim? {
+        lock.withLock {
+            guard let entry = dpiEntries[target] else {
+                return nil
+            }
+            return .init(
+                baseline: entry.baseline,
+                handle: .init(target: target, ownership: entry.ownership)
+            )
+        }
+    }
+
+    /// Removes only the exact baseline entry confirmed restored by its owner.
+    @discardableResult
+    func consumeDPIBaseline(_ handle: DPIHandle) -> Bool {
+        lock.withLock {
+            guard dpiEntries[handle.target]?.ownership === handle.ownership else {
+                return false
+            }
+            dpiEntries.removeValue(forKey: handle.target)
+            return true
+        }
+    }
 
     /// First writer wins. A reconstructed Device receives the original mode,
     /// rather than treating LinearMouse's still-applied mode as its baseline.

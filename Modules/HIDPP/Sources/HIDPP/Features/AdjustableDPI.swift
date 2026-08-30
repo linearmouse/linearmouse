@@ -40,6 +40,10 @@ public struct AdjustableDPI: HIDPPFeature {
         self.supportedDPI = Self.normalizedSupportedDPI(supportedDPI)
     }
 
+    public var receiverSlot: UInt8? {
+        transport.receiverSlot
+    }
+
     public var dpiRange: ClosedRange<Int> {
         guard let first = supportedDPI.first, let last = supportedDPI.last else {
             return Constants.defaultDPIRange

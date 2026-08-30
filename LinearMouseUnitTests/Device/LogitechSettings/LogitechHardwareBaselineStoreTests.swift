@@ -5,6 +5,98 @@
 import XCTest
 
 final class LogitechHardwareBaselineStoreTests: XCTestCase {
+    func testDPIFirstWriterWinsAndStaleOwnershipCannotConsumeReplacement() throws {
+        let store = LogitechHardwareBaselineStore()
+        let target = try directTarget(serial: "ABC123")
+
+        let first = store.captureDPIBaseline(800, for: target)
+        let duplicate = store.captureDPIBaseline(8000, for: target)
+
+        XCTAssertEqual(first.baseline, .init(value: 800))
+        XCTAssertEqual(duplicate.baseline, .init(value: 800))
+        XCTAssertEqual(first.handle, duplicate.handle)
+        XCTAssertTrue(first.handle.belongs(to: target))
+        XCTAssertTrue(store.consumeDPIBaseline(first.handle))
+
+        let replacement = store.captureDPIBaseline(1200, for: target)
+        XCTAssertFalse(store.consumeDPIBaseline(first.handle))
+        XCTAssertEqual(store.dpiBaseline(for: target)?.baseline, replacement.baseline)
+    }
+
+    func testDPIIsCapturedBeforeAWriteWhoseAcknowledgementIsLost() throws {
+        let store = LogitechHardwareBaselineStore()
+        let target = try directTarget(serial: "ABC123")
+        var hardwareDPI = 800
+        var captured = false
+
+        XCTAssertTrue(LogitechDPIBaselineCapture.ensureCaptured(
+            hasInitialState: { captured },
+            readCurrentDPI: { hardwareDPI },
+            record: { dpi in
+                _ = store.captureDPIBaseline(dpi, for: target)
+                captured = true
+            }
+        ))
+
+        // The hardware accepts 8000, but the host loses the acknowledgement.
+        hardwareDPI = 8000
+
+        XCTAssertEqual(store.dpiBaseline(for: target)?.baseline, .init(value: 800))
+    }
+
+    func testDPIWriteIsRejectedWhenBaselineCannotBeRead() {
+        var writes = 0
+
+        let admitted = LogitechDPIBaselineCapture.ensureCaptured(
+            hasInitialState: { false },
+            readCurrentDPI: { nil },
+            record: { _ in writes += 1 }
+        )
+
+        XCTAssertFalse(admitted)
+        XCTAssertEqual(writes, 0)
+    }
+
+    func testDPIRestoreUsesReadbackWhenWriteAcknowledgementIsLost() {
+        var hardwareDPI = 8000
+        var writes = 0
+
+        let restored = LogitechDPIRestoreOperation.perform(
+            initialDPI: 800,
+            shouldContinue: { true },
+            readCurrentDPI: { hardwareDPI },
+            writeDPI: { dpi in
+                writes += 1
+                hardwareDPI = dpi
+                // The helper deliberately has no acknowledgement result.
+            }
+        )
+
+        XCTAssertTrue(restored)
+        XCTAssertEqual(writes, 1)
+        XCTAssertEqual(hardwareDPI, 800)
+    }
+
+    func testFailedDPIReadbackDoesNotAuthorizeBaselineConsumption() throws {
+        let store = LogitechHardwareBaselineStore()
+        let target = try directTarget(serial: "ABC123")
+        _ = store.captureDPIBaseline(800, for: target)
+        var hardwareDPI = 8000
+
+        let restored = LogitechDPIRestoreOperation.perform(
+            initialDPI: 800,
+            shouldContinue: { true },
+            readCurrentDPI: { hardwareDPI },
+            writeDPI: { _ in
+                // Simulate a rejected write.
+                hardwareDPI = 8000
+            }
+        )
+
+        XCTAssertFalse(restored)
+        XCTAssertEqual(store.dpiBaseline(for: target)?.baseline, .init(value: 800))
+    }
+
     func testHiResFirstWriterWinsAndStaleOwnershipCannotConsumeReplacement() throws {
         let store = LogitechHardwareBaselineStore()
         let target = try directTarget(serial: "ABC123")
