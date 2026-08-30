@@ -862,6 +862,39 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
     }
 }
 
+enum HIDPPCommittedTransaction {
+    /// A sent transaction retains exclusive ownership until its matching reply,
+    /// transport invalidation, or deadline. Cancellation only discards the
+    /// result so a late reply cannot satisfy the next transaction.
+    static func settle<Response>(
+        until deadline: Date,
+        shouldDeliverResult: () -> Bool,
+        isTransportValid: () -> Bool,
+        wait: (TimeInterval) -> Void,
+        response: () -> Response?
+    ) -> Response? {
+        while Date() < deadline {
+            if let response = response() {
+                return shouldDeliverResult() ? response : nil
+            }
+            guard isTransportValid() else {
+                return nil
+            }
+
+            let remaining = deadline.timeIntervalSinceNow
+            guard remaining > 0 else {
+                break
+            }
+            wait(min(remaining, 0.05))
+        }
+
+        guard let response = response() else {
+            return nil
+        }
+        return shouldDeliverResult() ? response : nil
+    }
+}
+
 final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellableDeviceIO {
     private final class WeakChannelReference {
         weak var channel: LogitechReceiverChannel?
@@ -929,6 +962,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
     private let ioQueue: DispatchQueue
     private let ioQueueKey = DispatchSpecificKey<Void>()
     private let cancellationSemaphore = DispatchSemaphore(value: 0)
+    private let committedRequestPollSemaphore = DispatchSemaphore(value: 0)
     private let lifecycleLock = NSLock()
     private var isActivated = false
     private let inputReportBufferLength: Int
@@ -1084,6 +1118,8 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             return
         }
 
+        wake()
+        committedRequestPollSemaphore.signal()
         IOHIDDeviceCancel(device)
         if DispatchQueue.getSpecific(key: ioQueueKey) == nil {
             cancellationSemaphore.wait()
@@ -1564,7 +1600,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             return nil
         }
 
-        return waitForPendingResponse(
+        return settleCommittedPendingResponse(
             timeout: max(0, deadline.timeIntervalSinceNow),
             until: shouldContinue
         )
@@ -1593,7 +1629,12 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             return nil
         }
 
-        return getMatchingReport(type: responseType, matching: matching, until: shouldContinue)
+        return settleCommittedGetReport(
+            type: responseType,
+            matching: matching,
+            timeout: max(0, deadline.timeIntervalSinceNow),
+            until: shouldContinue
+        )
     }
 
     private func acquireRequestLock(
@@ -1621,10 +1662,9 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
 
     private func getMatchingReport(
         type: IOHIDReportType,
-        matching: @escaping (Data) -> Bool,
-        until shouldContinue: () -> Bool
+        matching: @escaping (Data) -> Bool
     ) -> Data? {
-        for candidate in candidateReportDescriptors() where shouldContinue() {
+        for candidate in candidateReportDescriptors() {
             guard let response = getReport(type: type, reportID: candidate.reportID, length: candidate.length),
                   matching(response) else {
                 continue
@@ -1634,6 +1674,26 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         }
 
         return nil
+    }
+
+    private func settleCommittedGetReport(
+        type: IOHIDReportType,
+        matching: @escaping (Data) -> Bool,
+        timeout: TimeInterval,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Data? {
+        let deadline = Date().addingTimeInterval(timeout)
+        return HIDPPCommittedTransaction.settle(
+            until: deadline,
+            shouldDeliverResult: shouldContinue,
+            isTransportValid: { self.isTransportActive },
+            wait: { [committedRequestPollSemaphore] interval in
+                _ = committedRequestPollSemaphore.wait(timeout: .now() + interval)
+            },
+            response: {
+                self.getMatchingReport(type: type, matching: matching)
+            }
+        )
     }
 
     private func getReport(type: IOHIDReportType, reportID: UInt8, length: Int) -> Data? {
@@ -1738,7 +1798,10 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         }
     }
 
-    private func waitForPendingResponse(timeout: TimeInterval, until shouldContinue: (() -> Bool)? = nil) -> Data? {
+    private func settleCommittedPendingResponse(
+        timeout: TimeInterval,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Data? {
         pendingLock.lock()
         let semaphore = pendingSemaphore
         pendingLock.unlock()
@@ -1748,12 +1811,24 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
 
         defer { clearPendingRequest() }
 
-        return waitForResponse(timeout: timeout, until: shouldContinue, semaphore: semaphore) {
-            self.pendingLock.lock()
-            let response = self.pendingResponse
-            self.pendingLock.unlock()
-            return response
-        }
+        let deadline = Date().addingTimeInterval(timeout)
+        return HIDPPCommittedTransaction.settle(
+            until: deadline,
+            shouldDeliverResult: shouldContinue,
+            isTransportValid: { self.isTransportActive },
+            wait: { interval in
+                _ = semaphore.wait(timeout: .now() + interval)
+            },
+            response: { [weak self] in
+                guard let self else {
+                    return nil
+                }
+                self.pendingLock.lock()
+                let response = self.pendingResponse
+                self.pendingLock.unlock()
+                return response
+            }
+        )
     }
 
     private func waitForResponse(
@@ -1804,6 +1879,11 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
 
         pendingLock.unlock()
         semaphores.forEach { $0.signal() }
+        committedRequestPollSemaphore.signal()
+    }
+
+    private var isTransportActive: Bool {
+        lifecycleLock.withLock { isActivated }
     }
 
     private func clearPendingRequest() {

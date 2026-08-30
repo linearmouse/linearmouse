@@ -30,6 +30,38 @@ func withSynchronousReportRequestGate(
     return nil
 }
 
+/// A sent HID request owns its matcher until a matching response, device
+/// invalidation, or the request deadline. Cancellation controls whether its
+/// result is returned; it cannot make a late response belong to the next
+/// request.
+func settleCommittedSynchronousReportRequest(
+    until deadline: Date,
+    shouldDeliverResult: () -> Bool,
+    isTransportValid: () -> Bool,
+    wait: (TimeInterval) -> Void,
+    response: () -> Data?
+) -> Data? {
+    while Date() < deadline {
+        if let response = response() {
+            return shouldDeliverResult() ? response : nil
+        }
+        guard isTransportValid() else {
+            return nil
+        }
+
+        let remaining = deadline.timeIntervalSinceNow
+        guard remaining > 0 else {
+            break
+        }
+        wait(min(remaining, 0.01))
+    }
+
+    guard let response = response() else {
+        return nil
+    }
+    return shouldDeliverResult() ? response : nil
+}
+
 /// Common IOHID transport names.
 /// This is a shared string namespace, not an exhaustive transport model.
 public enum PointerDeviceTransportName {
@@ -530,6 +562,9 @@ extension PointerDevice {
                 self.synchronousReportRequestGate.signal()
             }
         ) {
+            guard shouldContinue() else {
+                return nil
+            }
             guard ensureInputReportCallbackRegistered(minimumReportLength: max(report.count, maxInputReportSize ?? 0)),
                   valid
             else {
@@ -570,37 +605,34 @@ extension PointerDevice {
                 return nil
             }
 
+            let deadline = Date().addingTimeInterval(timeout)
+            let waitForResponse: (TimeInterval) -> Void
             if CFEqual(CFRunLoopGetCurrent(), runLoop) {
-                let deadline = Date().addingTimeInterval(timeout)
-                while Date() < deadline, shouldContinue() {
-                    pendingReportRequestLock.lock()
-                    let response = pendingReportResponse
-                    pendingReportRequestLock.unlock()
-
-                    if response != nil {
-                        break
-                    }
-
-                    // Pump the run loop that owns IOHIDDevice; sleep would block the input-report callback.
-                    let result = CFRunLoopRunInMode(.defaultMode, 0.01, true)
-                    if result == .finished {
-                        break
-                    }
+                waitForResponse = { interval in
+                    _ = CFRunLoopRunInMode(.defaultMode, interval, true)
                 }
             } else {
-                let deadline = Date().addingTimeInterval(timeout)
-                while Date() < deadline, shouldContinue() {
-                    if semaphore.wait(timeout: .now() + 0.01) == .success {
-                        break
-                    }
+                waitForResponse = { interval in
+                    _ = semaphore.wait(timeout: .now() + interval)
                 }
             }
 
-            pendingReportRequestLock.lock()
-            let response = pendingReportResponse
-            clearPendingReportRequest()
-            pendingReportRequestLock.unlock()
-            return response
+            defer {
+                pendingReportRequestLock.lock()
+                clearPendingReportRequest()
+                pendingReportRequestLock.unlock()
+            }
+            return settleCommittedSynchronousReportRequest(
+                until: deadline,
+                shouldDeliverResult: shouldContinue,
+                isTransportValid: { self.valid },
+                wait: waitForResponse
+            ) {
+                self.pendingReportRequestLock.lock()
+                let response = self.pendingReportResponse
+                self.pendingReportRequestLock.unlock()
+                return response
+            }
         }
     }
 

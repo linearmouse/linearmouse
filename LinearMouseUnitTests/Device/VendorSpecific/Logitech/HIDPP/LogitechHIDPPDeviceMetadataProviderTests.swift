@@ -45,6 +45,44 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         XCTAssertEqual(candidate.slot, 1)
     }
 
+    func testCancelledCommittedCallbackTransactionDrainsItsResponse() {
+        var response: Data?
+        var waitCount = 0
+
+        let result: Data? = HIDPPCommittedTransaction.settle(
+            until: Date().addingTimeInterval(1),
+            shouldDeliverResult: { false },
+            isTransportValid: { true },
+            wait: { _ in
+                waitCount += 1
+                response = Data([0x11, 0xFF, 0x22, 0x18])
+            },
+            response: { response }
+        )
+
+        XCTAssertNil(result)
+        XCTAssertEqual(waitCount, 1)
+    }
+
+    func testCancelledCommittedGetReportTransactionDrainsItsResponse() {
+        var getReportResponse: Data?
+        var pollCount = 0
+
+        let result: Data? = HIDPPCommittedTransaction.settle(
+            until: Date().addingTimeInterval(1),
+            shouldDeliverResult: { false },
+            isTransportValid: { true },
+            wait: { _ in
+                pollCount += 1
+                getReportResponse = Data([0x11, 0xFF, 0x22, 0x18])
+            },
+            response: { getReportResponse }
+        )
+
+        XCTAssertNil(result)
+        XCTAssertEqual(pollCount, 1)
+    }
+
     private func slot(
         slot: UInt8,
         kind: UInt8 = 0x02,

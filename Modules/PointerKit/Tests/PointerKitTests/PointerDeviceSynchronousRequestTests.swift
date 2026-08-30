@@ -113,4 +113,38 @@ final class PointerDeviceSynchronousRequestTests: XCTestCase {
             Data([0x04])
         )
     }
+
+    func testCancellationAfterCommitDrainsResponseBeforeReleasingGate() {
+        let gate = DispatchSemaphore(value: 1)
+        var committedResponse: Data?
+        var waitCount = 0
+
+        let result = withSynchronousReportRequestGate(
+            until: { true },
+            acquirePermit: { gate.wait(timeout: .now()) == .success },
+            releasePermit: { gate.signal() }
+        ) {
+            settleCommittedSynchronousReportRequest(
+                until: Date().addingTimeInterval(1),
+                shouldDeliverResult: { false },
+                isTransportValid: { true },
+                wait: { _ in
+                    waitCount += 1
+                    committedResponse = Data([0x05])
+                },
+                response: { committedResponse }
+            )
+        }
+
+        XCTAssertNil(result)
+        XCTAssertEqual(waitCount, 1)
+        XCTAssertEqual(
+            withSynchronousReportRequestGate(
+                until: { true },
+                acquirePermit: { gate.wait(timeout: .now()) == .success },
+                releasePermit: { gate.signal() }
+            ) { Data([0x06]) },
+            Data([0x06])
+        )
+    }
 }
