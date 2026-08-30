@@ -1,8 +1,20 @@
 # Configuration
 
-The LinearMouse configuration is stored in `~/.config/linearmouse/linearmouse.json`.
+LinearMouse reads its configuration from the first of these paths that exists:
 
-If the configuration file does not exist, LinearMouse will create an empty configuration automatically.
+1. `$XDG_CONFIG_HOME/linearmouse/linearmouse.json`, if `XDG_CONFIG_HOME` is set to an absolute path
+2. `~/Library/Application Support/linearmouse/linearmouse.json`
+3. `~/.config/linearmouse/linearmouse.json`
+
+If the configuration file does not exist, LinearMouse will create an empty configuration automatically,
+at `$XDG_CONFIG_HOME/linearmouse/linearmouse.json` if `XDG_CONFIG_HOME` is set, and at
+`~/.config/linearmouse/linearmouse.json` otherwise.
+
+> **Note**  
+> LinearMouse is launched by macOS, not by your shell, so it does not see `XDG_CONFIG_HOME` exported
+> from `~/.zshrc`, `~/.zprofile` or `~/.bash_profile`. To make it visible, set the variable for the
+> login session with `launchctl setenv XDG_CONFIG_HOME "$XDG_CONFIG_HOME"` and restart LinearMouse.
+> `launchctl setenv` does not persist across reboots; run it from a launch agent to make it permanent.
 
 > **Note**  
 > It's preferable to use the GUI to alter settings rather than manually updating configuration

@@ -34,4 +34,25 @@ enum ProcessEnvironment {
     static var isRunningApp: Bool {
         !(isPreview || isRunningTest)
     }
+
+    /// The base directory for user-specific configuration files, as defined by the
+    /// XDG Base Directory Specification.
+    ///
+    /// Returns `nil` unless `XDG_CONFIG_HOME` holds an absolute path. The specification
+    /// requires unset, empty and relative values to be ignored, so that callers fall back
+    /// to the `~/.config` default.
+    static func xdgConfigHome(from environment: [String: String]) -> URL? {
+        guard let path = environment["XDG_CONFIG_HOME"], path.hasPrefix("/") else {
+            return nil
+        }
+
+        // `isDirectory: true` is required: without it Foundation probes the file system to
+        // decide, and a directory that does not exist yet is treated as a file, which makes
+        // `URL(fileURLWithPath:relativeTo:)` resolve against its parent.
+        return URL(fileURLWithPath: path, isDirectory: true).standardizedFileURL
+    }
+
+    static var xdgConfigHome: URL? {
+        xdgConfigHome(from: ProcessInfo.processInfo.environment)
+    }
 }

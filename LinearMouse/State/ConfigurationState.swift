@@ -16,6 +16,15 @@ class ConfigurationState: ObservableObject {
     var configurationPaths: [URL] {
         var urls: [URL] = []
 
+        if let xdgConfigHome = ProcessEnvironment.xdgConfigHome {
+            urls.append(
+                URL(
+                    fileURLWithPath: "linearmouse/linearmouse.json",
+                    relativeTo: xdgConfigHome
+                )
+            )
+        }
+
         if let applicationSupportURL = FileManager.default
             .urls(for: .applicationSupportDirectory, in: .userDomainMask)
             .first {
@@ -27,19 +36,33 @@ class ConfigurationState: ObservableObject {
             )
         }
 
-        urls.append(
-            URL(
-                fileURLWithPath: ".config/linearmouse/linearmouse.json",
-                relativeTo: FileManager.default.homeDirectoryForCurrentUser
-            )
-        )
+        urls.append(homeConfigurationPath)
 
         return urls
     }
 
+    /// `~/.config/linearmouse/linearmouse.json`, the default location when `XDG_CONFIG_HOME` is unset.
+    private var homeConfigurationPath: URL {
+        URL(
+            fileURLWithPath: ".config/linearmouse/linearmouse.json",
+            relativeTo: FileManager.default.homeDirectoryForCurrentUser
+        )
+    }
+
+    /// Where the configuration is created when none of `configurationPaths` exists yet.
+    private var defaultConfigurationPath: URL {
+        guard let xdgConfigHome = ProcessEnvironment.xdgConfigHome else {
+            return homeConfigurationPath
+        }
+
+        return URL(
+            fileURLWithPath: "linearmouse/linearmouse.json",
+            relativeTo: xdgConfigHome
+        )
+    }
+
     var configurationPath: URL {
-        configurationPaths.first { FileManager.default.fileExists(atPath: $0.path) } ?? configurationPaths
-            .last!
+        configurationPaths.first { FileManager.default.fileExists(atPath: $0.path) } ?? defaultConfigurationPath
     }
 
     private var configurationSaveDebounceTimer: Timer?
