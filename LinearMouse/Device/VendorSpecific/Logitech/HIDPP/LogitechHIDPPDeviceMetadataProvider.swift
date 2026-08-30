@@ -3443,6 +3443,10 @@ final class LogitechReprogrammableControlsMonitorState {
     private var pressedButtons = Set<Int>()
     private var syntheticFallbackCoordinator = LogitechSyntheticFallbackCoordinator()
     private var stopCompletions = [() -> Void]()
+    /// A completion-backed stop is a terminal teardown for the current worker.
+    /// Do not let a demand/configuration enable revive it before its caller has
+    /// received the completion and started a new lifecycle explicitly.
+    private var preventsWorkerRestart = false
     private var allowsTeardownIO = false
 
     var shouldContinueRunning: Bool {
@@ -3455,7 +3459,7 @@ final class LogitechReprogrammableControlsMonitorState {
 
     func enable(makeWorkerThread: () -> Thread) {
         let thread = queue.sync { () -> Thread? in
-            guard !isEnabled else {
+            guard !isEnabled, !preventsWorkerRestart else {
                 return nil
             }
 
@@ -3489,6 +3493,9 @@ final class LogitechReprogrammableControlsMonitorState {
             let resources = (workerThread, activeNotificationEndpoint, directDeviceReportObservationToken)
             if let completion {
                 stopCompletions.append(completion)
+                if workerThread != nil {
+                    preventsWorkerRestart = true
+                }
             }
             isEnabled = false
             allowsTeardownIO = allowingTeardownIO
@@ -3501,6 +3508,7 @@ final class LogitechReprogrammableControlsMonitorState {
 
             let completions = stopCompletions
             stopCompletions.removeAll()
+            preventsWorkerRestart = false
             return (resources, completions)
         }
 
@@ -3512,30 +3520,35 @@ final class LogitechReprogrammableControlsMonitorState {
     }
 
     func workerDidStop(restartIfEnabled: Bool, makeWorkerThread: () -> Thread) {
-        let (thread, token, completions) = queue.sync { () -> (Thread?, ObservationToken?, [() -> Void]) in
+        let (thread, token, completions, releasesRestartBarrier) = queue.sync {
+            () -> (Thread?, ObservationToken?, [() -> Void], Bool) in
             workerThread = nil
             activeNotificationEndpoint = nil
             let reportObservationToken = directDeviceReportObservationToken
             directDeviceReportObservationToken = nil
 
-            guard isEnabled, restartIfEnabled else {
+            guard isEnabled, restartIfEnabled, !preventsWorkerRestart else {
                 isEnabled = false
                 allowsTeardownIO = false
                 reconfigurationRequest.reset()
                 let completions = stopCompletions
                 stopCompletions.removeAll()
-                return (nil, reportObservationToken, completions)
+                let releasesRestartBarrier = preventsWorkerRestart && !completions.isEmpty
+                if !releasesRestartBarrier {
+                    preventsWorkerRestart = false
+                }
+                return (nil, reportObservationToken, completions, releasesRestartBarrier)
             }
 
             reconfigurationRequest.reset()
             let nextThread = makeWorkerThread()
             workerThread = nextThread
-            return (nextThread, reportObservationToken, [])
+            return (nextThread, reportObservationToken, [], false)
         }
 
         token?.cancel()
         thread?.start()
-        dispatchStopCompletions(completions)
+        dispatchStopCompletions(completions, releasesRestartBarrier: releasesRestartBarrier)
     }
 
     func requestReconfiguration(forced: Bool = false) {
@@ -3642,12 +3655,20 @@ final class LogitechReprogrammableControlsMonitorState {
         }
     }
 
-    private func dispatchStopCompletions(_ completions: [() -> Void]) {
+    private func dispatchStopCompletions(
+        _ completions: [() -> Void],
+        releasesRestartBarrier: Bool = false
+    ) {
         guard !completions.isEmpty else {
             return
         }
 
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            if releasesRestartBarrier {
+                self?.queue.sync {
+                    self?.preventsWorkerRestart = false
+                }
+            }
             completions.forEach { $0() }
         }
     }
