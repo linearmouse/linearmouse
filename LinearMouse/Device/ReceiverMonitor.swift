@@ -72,6 +72,10 @@ final class ReceiverMonitor {
 }
 
 struct ReceiverSlotStateStore {
+    struct DiscoveryMergeResult {
+        let inventoryComplete: Bool
+    }
+
     enum SlotPresenceState {
         case unknown
         case connected
@@ -94,84 +98,54 @@ struct ReceiverSlotStateStore {
         reset()
     }
 
-    mutating func mergeDiscovery(_ discovery: LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery) {
+    mutating func mergeDiscovery(
+        _ discovery: LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery
+    ) -> DiscoveryMergeResult {
         let latestIdentitiesBySlot = Dictionary(uniqueKeysWithValues: discovery.identities.map {
             ($0.slot, $0)
         })
-        let previousIdentitiesBySlot = pairedIdentitiesBySlot
-        let previousPresenceBySlot = slotPresenceBySlot
-        let missingPreviousPointingSlots = Set(previousIdentitiesBySlot.keys).subtracting(
-            latestIdentitiesBySlot.keys
-        )
+        pairedIdentitiesBySlot = latestIdentitiesBySlot
+        slotPresenceBySlot = [:]
+        slotsRequiringPointingIdentity = []
 
-        for slot in pairedIdentitiesBySlot.keys where latestIdentitiesBySlot[slot] == nil {
-            pairedIdentitiesBySlot.removeValue(forKey: slot)
-            slotPresenceBySlot.removeValue(forKey: slot)
+        for (slot, snapshot) in discovery.connectionSnapshots {
+            slotPresenceBySlot[slot] = snapshot.isConnected ? .connected : .disconnected
+        }
+        for slot in discovery.liveReachableSlots {
+            slotPresenceBySlot[slot] = .connected
         }
 
-        for (slot, identity) in latestIdentitiesBySlot {
-            pairedIdentitiesBySlot[slot] = identity
-            if slotPresenceBySlot[slot] == nil {
-                slotPresenceBySlot[slot] = .unknown
-            }
-        }
-
-        mergeConnectionSnapshots(discovery.connectionSnapshots)
-
-        // A full discovery can temporarily miss one slot while succeeding for
-        // another. First honor a slot type actually read by the provider: a
-        // keyboard replacement proves that the old mouse identity is stale.
-        // Only an observed/currently connected pointing slot, or a wholly
-        // unobserved slot that was previously connected, needs another read.
-        for slot in missingPreviousPointingSlots {
-            guard previousIdentitiesBySlot[slot]?.kind.isPointingDevice == true else {
-                continue
-            }
-
-            let snapshot = discovery.connectionSnapshots[slot]
-            let reportedKind = snapshot?.kind.flatMap(ReceiverLogicalDeviceKind.init(rawValue:))
-            let observedKind = discovery.observedSlotKinds[slot].flatMap(ReceiverLogicalDeviceKind.init(rawValue:))
-            if snapshot?.isConnected == false
-                || reportedKind?.isPointingDevice == false
-                || observedKind?.isPointingDevice == false {
-                slotsRequiringPointingIdentity.remove(slot)
-                continue
-            }
-
-            guard snapshot?.isConnected == true
-                || discovery.liveReachableSlots.contains(slot)
-                || observedKind?.isPointingDevice == true && previousPresenceBySlot[slot] == .connected
-                || observedKind == nil && previousPresenceBySlot[slot] == .connected
+        let connectedSlots = Set(discovery.connectionSnapshots.compactMap { slot, snapshot in
+            snapshot.isConnected ? slot : nil
+        }).union(discovery.liveReachableSlots)
+        let slotKinds = Dictionary(uniqueKeysWithValues: connectedSlots.compactMap { slot -> (
+            UInt8,
+            ReceiverLogicalDeviceKind
+        )? in
+            let rawKind = discovery.connectionSnapshots[slot]?.kind ?? discovery.observedSlotKinds[slot]
+            guard let rawKind,
+                  let kind = ReceiverLogicalDeviceKind(rawValue: rawKind)
             else {
+                return nil
+            }
+            return (slot, kind)
+        })
+
+        for slot in connectedSlots {
+            guard let kind = slotKinds[slot] else {
                 continue
             }
-
-            slotPresenceBySlot[slot] = .connected
-            slotsRequiringPointingIdentity.insert(slot)
-        }
-
-        // A discovered pointing identity satisfies a previous connection
-        // event's obligation, including a reconnect that cleared its cache.
-        for (slot, identity) in latestIdentitiesBySlot {
-            pairedIdentitiesBySlot[slot] = identity
-            slotsRequiringPointingIdentity.remove(slot)
-        }
-
-        for slot in discovery.liveReachableSlots where slotPresenceBySlot[slot] != .connected {
-            slotPresenceBySlot[slot] = .connected
-        }
-
-        for (slot, identity) in latestIdentitiesBySlot where discovery.connectionSnapshots[slot] == nil {
-            guard slotPresenceBySlot[slot] == .disconnected,
-                  previousIdentitiesBySlot[slot]?.batteryLevel == nil,
-                  identity.batteryLevel != nil,
-                  !discovery.liveReachableSlots.contains(slot)
-            else {
-                continue
+            if kind.isPointingDevice, latestIdentitiesBySlot[slot] == nil {
+                slotsRequiringPointingIdentity.insert(slot)
             }
-
-            slotPresenceBySlot[slot] = .connected
         }
+
+        let inventoryComplete = discovery.inventoryAvailable
+            && discovery.expectedConnectedDeviceCount != nil
+            && connectedSlots.count == discovery.expectedConnectedDeviceCount
+            && slotKinds.count == connectedSlots.count
+            && !hasConnectedSlotMissingIdentity
+        return .init(inventoryComplete: inventoryComplete)
     }
 
     mutating func mergeConnectionSnapshots(
@@ -234,7 +208,7 @@ struct ReceiverSlotStateStore {
                 return nil
             }
 
-            return slotPresenceBySlot[slot] == .disconnected ? nil : identity
+            return slotPresenceBySlot[slot] == .connected ? identity : nil
         }
     }
 }
@@ -399,12 +373,13 @@ private final class ReceiverContext {
                 let discovery = provider.receiverPointingDeviceDiscovery(
                     for: device.pointerDevice, using: receiverChannel
                 )
-                mergeDiscovery(discovery)
+                let mergeResult = mergeDiscovery(discovery)
 
                 let identities = currentPublishedIdentities()
-                if identities.isEmpty || hasConnectedSlotMissingIdentity() {
+                if !mergeResult.inventoryComplete {
+                    publishUnavailable()
                     os_log(
-                        "Receiver initial discovery is not ready, retrying: locationID=%{public}d device=%{public}@",
+                        "Receiver inventory is incomplete, retrying: locationID=%{public}d device=%{public}@",
                         log: ReceiverMonitor.log,
                         type: .info,
                         locationID,
@@ -530,6 +505,7 @@ private final class ReceiverContext {
                 // instead of keeping this incomplete slot in the ready state.
                 discoveryState = .pending
                 discoveryBackoff.reset()
+                publishUnavailable()
             }
             if identities != lastPublishedIdentities {
                 publish(identities)
@@ -557,6 +533,14 @@ private final class ReceiverContext {
         DispatchQueue.main.async { [weak self] in
             self?.onSlotsChanged?(identities)
         }
+    }
+
+    private func publishUnavailable() {
+        guard !lastPublishedIdentities.isEmpty else {
+            return
+        }
+
+        publish([])
     }
 
     private func shouldContinueRunning() -> Bool {
@@ -631,7 +615,9 @@ private final class ReceiverContext {
         return currentChannel
     }
 
-    private func mergeDiscovery(_ discovery: LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery) {
+    private func mergeDiscovery(
+        _ discovery: LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery
+    ) -> ReceiverSlotStateStore.DiscoveryMergeResult {
         stateStore.mergeDiscovery(discovery)
     }
 

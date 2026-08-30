@@ -61,7 +61,13 @@ extension LogitechReceiverMonitoringChannel {
             discoverBoltSlotInfo($0, connectionSnapshot: connectionSnapshots[$0])
         }
 
-        return pairedSlots.isEmpty ? nil : .init(slots: pairedSlots, connectionSnapshots: connectionSnapshots)
+        let inventoryAvailable = connectedDeviceCount != nil || !connectionSnapshots.isEmpty || !pairedSlots.isEmpty
+        return .init(
+            slots: pairedSlots,
+            connectionSnapshots: connectionSnapshots,
+            expectedConnectedDeviceCount: connectedDeviceCount,
+            inventoryAvailable: inventoryAvailable
+        )
     }
 
     func discoverBoltSlotInfo(
@@ -105,7 +111,12 @@ extension LogitechReceiverMonitoringChannel {
         guard let locationID,
               let discovery = discoverBoltSlots()
         else {
-            return .init(identities: [], connectionSnapshots: [:], liveReachableSlots: [])
+            return .init(
+                identities: [],
+                connectionSnapshots: [:],
+                liveReachableSlots: [],
+                inventoryAvailable: false
+            )
         }
 
         let liveReachableSlots = Set(discovery.slots.compactMap { slot in
@@ -132,6 +143,8 @@ extension LogitechReceiverMonitoringChannel {
             identities: identities,
             connectionSnapshots: discovery.connectionSnapshots,
             liveReachableSlots: liveReachableSlots,
+            expectedConnectedDeviceCount: discovery.expectedConnectedDeviceCount,
+            inventoryAvailable: discovery.inventoryAvailable,
             observedSlotKinds: Dictionary(uniqueKeysWithValues: discovery.slots.map {
                 ($0.slot, $0.kind)
             })

@@ -166,12 +166,16 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
     struct ReceiverSlotDiscovery {
         let slots: [ReceiverSlotInfo]
         let connectionSnapshots: [UInt8: ReceiverConnectionSnapshot]
+        let expectedConnectedDeviceCount: Int?
+        let inventoryAvailable: Bool
     }
 
     struct ReceiverPointingDeviceDiscovery {
         let identities: [ReceiverLogicalDeviceIdentity]
         let connectionSnapshots: [UInt8: ReceiverConnectionSnapshot]
         let liveReachableSlots: Set<UInt8>
+        let expectedConnectedDeviceCount: Int?
+        let inventoryAvailable: Bool
         /// Slot types successfully read during discovery, including keyboards
         /// and other non-pointing devices that are intentionally absent from
         /// `identities`.
@@ -181,11 +185,15 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             identities: [ReceiverLogicalDeviceIdentity],
             connectionSnapshots: [UInt8: ReceiverConnectionSnapshot],
             liveReachableSlots: Set<UInt8>,
+            expectedConnectedDeviceCount: Int? = nil,
+            inventoryAvailable: Bool = true,
             observedSlotKinds: [UInt8: UInt8] = [:]
         ) {
             self.identities = identities
             self.connectionSnapshots = connectionSnapshots
             self.liveReachableSlots = liveReachableSlots
+            self.expectedConnectedDeviceCount = expectedConnectedDeviceCount
+            self.inventoryAvailable = inventoryAvailable
             self.observedSlotKinds = observedSlotKinds
         }
     }
@@ -1210,7 +1218,16 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             pairedSummary
         )
 
-        return pairedSlots.isEmpty ? nil : .init(slots: pairedSlots, connectionSnapshots: connectionSnapshots)
+        guard connectedDeviceCount != nil || !connectionSnapshots.isEmpty || !pairedSlots.isEmpty else {
+            return nil
+        }
+
+        return .init(
+            slots: pairedSlots,
+            connectionSnapshots: connectionSnapshots,
+            expectedConnectedDeviceCount: connectedDeviceCount,
+            inventoryAvailable: true
+        )
     }
 
     func discoverSlotInfo(
@@ -1300,8 +1317,10 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
 
     func discoverMatchCandidates(baseName: String)
         -> (
-            [LogitechHIDPPDeviceMetadataProvider.ReceiverSlotMatchCandidate],
-            [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot]
+            slots: [LogitechHIDPPDeviceMetadataProvider.ReceiverSlotMatchCandidate],
+            connectionSnapshots: [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot],
+            expectedConnectedDeviceCount: Int?,
+            inventoryAvailable: Bool
         )? {
         enableWirelessNotifications()
 
@@ -1325,11 +1344,12 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             )
         }
 
-        guard !candidates.isEmpty else {
-            return nil
-        }
-
-        return (candidates, discovery.connectionSnapshots)
+        return (
+            candidates,
+            discovery.connectionSnapshots,
+            discovery.expectedConnectedDeviceCount,
+            discovery.inventoryAvailable
+        )
     }
 
     func enableWirelessNotifications() {
@@ -1343,13 +1363,26 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
 
     func discoverPointingDeviceDiscovery(baseName: String) -> LogitechHIDPPDeviceMetadataProvider
         .ReceiverPointingDeviceDiscovery {
-        guard let locationID,
-              let discovery = discoverMatchCandidates(baseName: baseName)
-        else {
-            return .init(identities: [], connectionSnapshots: [:], liveReachableSlots: [])
+        guard let locationID else {
+            return .init(
+                identities: [],
+                connectionSnapshots: [:],
+                liveReachableSlots: [],
+                inventoryAvailable: false
+            )
         }
 
-        let (slots, connectionSnapshots) = discovery
+        guard let discovery = discoverMatchCandidates(baseName: baseName) else {
+            return .init(
+                identities: [],
+                connectionSnapshots: [:],
+                liveReachableSlots: [],
+                inventoryAvailable: false
+            )
+        }
+
+        let slots = discovery.slots
+        let connectionSnapshots = discovery.connectionSnapshots
         let liveReachableSlots = Set(slots.compactMap { slot in
             slot.hasLiveMetadata ? slot.slot : nil
         })
@@ -1374,6 +1407,8 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             identities: identities,
             connectionSnapshots: connectionSnapshots,
             liveReachableSlots: liveReachableSlots,
+            expectedConnectedDeviceCount: discovery.expectedConnectedDeviceCount,
+            inventoryAvailable: discovery.inventoryAvailable,
             observedSlotKinds: Dictionary(uniqueKeysWithValues: slots.map {
                 ($0.slot, $0.kind)
             })
