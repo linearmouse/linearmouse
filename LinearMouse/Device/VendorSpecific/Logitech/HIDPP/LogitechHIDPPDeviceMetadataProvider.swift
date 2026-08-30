@@ -2319,6 +2319,23 @@ final class LogitechReprogrammableControlsMonitor {
     private struct ReportingInfo {
         let flags: LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.ReportingFlags
         let mappedControlID: UInt16
+
+        init(
+            flags: LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.ReportingFlags,
+            mappedControlID: UInt16
+        ) {
+            self.flags = flags
+            self.mappedControlID = mappedControlID
+        }
+
+        init(baseline: LogitechHardwareBaselineStore.ControlsReportingBaseline) {
+            flags = .init(rawValue: baseline.flagsRawValue)
+            mappedControlID = baseline.mappedControlID
+        }
+
+        var baseline: LogitechHardwareBaselineStore.ControlsReportingBaseline {
+            .init(flagsRawValue: flags.rawValue, mappedControlID: mappedControlID)
+        }
     }
 
     private struct MonitorTarget {
@@ -2473,6 +2490,18 @@ final class LogitechReprogrammableControlsMonitor {
         subscriptions.removeAll()
     }
 
+    func hasPendingBaselineForCurrentTarget() -> Bool {
+        guard let store = device.logitechHardwareBaselineStore,
+              let target = device.logitechHardwareTargetKey(
+                  receiverSlot: device.logitechReceiverRouteSnapshot?.slot
+              )
+        else {
+            return false
+        }
+
+        return !store.pendingControlsBaselines(for: target).isEmpty
+    }
+
     private func workerMain() {
         defer {
             let restartIfEnabled = Thread.current.isCancelled
@@ -2524,24 +2553,14 @@ final class LogitechReprogrammableControlsMonitor {
             let allControls = monitorTarget.controls
             let targetIdentity = monitorTarget.identity
             let targetName = targetIdentity?.name ?? device.productName ?? device.name
-            var pendingReportingRestoreByControlID = [UInt16: ReportingInfo]()
+            let baselineStore = device.logitechHardwareBaselineStore
+            let baselineTarget = device.logitechHardwareTargetKey(receiverSlot: transport.receiverSlot)
 
             state.setActiveNotificationEndpoint(monitorTarget.notificationEndpoint)
             monitorTarget.notificationEndpoint.enableNotifications()
             logAvailableControls(transport: transport, featureIndex: featureIndex, slot: slot, locationID: locationID)
 
             while shouldContinueRunning() {
-                if !pendingReportingRestoreByControlID.isEmpty {
-                    pendingReportingRestoreByControlID = restoreReportingState(
-                        pendingReportingRestoreByControlID,
-                        using: transport,
-                        featureIndex: featureIndex,
-                        locationID: locationID,
-                        slot: slot,
-                        reason: "retry pending restore"
-                    )
-                }
-
                 let controlSnapshot = monitorControlSnapshot(
                     availableControls: allControls,
                     identity: targetIdentity,
@@ -2557,28 +2576,20 @@ final class LogitechReprogrammableControlsMonitor {
                 let reservedVirtualButtonNumber =
                     LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.reservedVirtualButtonNumber
 
-                if !isRecording {
-                    let controlsToRestore = pendingReportingRestoreByControlID
-                        .filter { !desiredControlIDs.contains($0.key) }
-                    if !controlsToRestore.isEmpty {
-                        let failedRestoreByControlID = restoreReportingState(
-                            controlsToRestore,
-                            using: transport,
-                            featureIndex: featureIndex,
-                            locationID: locationID,
-                            slot: slot,
-                            reason: "apply native reporting to unmonitored controls"
-                        )
-
-                        for controlID in Set(controlsToRestore.keys).subtracting(failedRestoreByControlID.keys) {
-                            pendingReportingRestoreByControlID.removeValue(forKey: controlID)
-                        }
-
-                        pendingReportingRestoreByControlID.merge(failedRestoreByControlID) { _, new in new }
-                    }
-                }
+                restoreStoredReportingNotIn(
+                    monitoredControlIDs,
+                    store: baselineStore,
+                    target: baselineTarget,
+                    using: transport,
+                    featureIndex: featureIndex,
+                    locationID: locationID,
+                    slot: slot
+                )
 
                 if monitoredControls.isEmpty {
+                    if !hasPendingBaseline(store: baselineStore, target: baselineTarget) {
+                        return
+                    }
                     finishVirtualButtonRecordingPreparationIfNeeded(sessionID: recordingSessionID)
                     os_log(
                         "Pause Logitech control diversion until configuration changes: locationID=%{public}d slot=%{public}u device=%{public}@ recording=%{public}@",
@@ -2602,18 +2613,14 @@ final class LogitechReprogrammableControlsMonitor {
                     continue
                 }
 
-                let originalReportingByControlID = monitoredControls
-                    .reduce(into: [UInt16: ReportingInfo]()) { result, control in
-                        guard let reportingInfo = readReportingInfo(
-                            for: control.controlID,
-                            using: transport,
-                            featureIndex: featureIndex
-                        ) else {
-                            return
-                        }
-
-                        result[control.controlID] = reportingInfo
-                    }
+                let capturedReporting = captureOriginalReporting(
+                    for: monitoredControls,
+                    store: baselineStore,
+                    target: baselineTarget,
+                    using: transport,
+                    featureIndex: featureIndex
+                )
+                let originalReportingByControlID = capturedReporting.reporting
                 // Never divert a control whose original reporting could not be
                 // read. Without that snapshot we could not safely restore it
                 // during disable or target teardown.
@@ -2724,19 +2731,37 @@ final class LogitechReprogrammableControlsMonitor {
                     )
                     releaseButtonIfNeeded()
 
-                    let failedRestoreByControlID = restoreReportingState(
-                        originalReportingByControlID,
-                        using: transport,
-                        featureIndex: featureIndex,
-                        locationID: locationID,
-                        slot: slot,
-                        reason: "restore original reporting"
-                    )
-
-                    pendingReportingRestoreByControlID.merge(failedRestoreByControlID) { _, new in new }
-                    for controlID in Set(originalReportingByControlID.keys).subtracting(failedRestoreByControlID.keys) {
-                        pendingReportingRestoreByControlID.removeValue(forKey: controlID)
+                    var failedRestoreByControlID = shouldAllowTeardownIO()
+                        ? restoreReportingState(
+                            originalReportingByControlID,
+                            using: transport,
+                            featureIndex: featureIndex,
+                            locationID: locationID,
+                            slot: slot,
+                            reason: "restore original reporting"
+                        )
+                        : originalReportingByControlID
+                    if !shouldContinueRunning(), shouldAllowTeardownIO(), !failedRestoreByControlID.isEmpty {
+                        _ = LogitechHardwareRestoreRetry.perform(
+                            operation: {
+                                failedRestoreByControlID = self.restoreReportingState(
+                                    failedRestoreByControlID,
+                                    using: transport,
+                                    featureIndex: featureIndex,
+                                    locationID: locationID,
+                                    slot: slot,
+                                    reason: "retry terminal reporting restore"
+                                )
+                                return failedRestoreByControlID.isEmpty
+                            },
+                            wait: Thread.sleep(forTimeInterval:)
+                        )
                     }
+                    consumeRestoredBaselines(
+                        capturedReporting.claims,
+                        excluding: Set(failedRestoreByControlID.keys),
+                        store: baselineStore
+                    )
                 }
 
                 while shouldContinueRunning() {
@@ -3313,6 +3338,110 @@ final class LogitechReprogrammableControlsMonitor {
             flags: .init(rawValue: flagsRaw),
             mappedControlID: mappedControlID
         )
+    }
+
+    private func captureOriginalReporting(
+        for controls: [ControlInfo],
+        store: LogitechHardwareBaselineStore?,
+        target: LogitechHardwareTargetKey?,
+        using transport: HIDPPTransport,
+        featureIndex: UInt8
+    ) -> (
+        reporting: [UInt16: ReportingInfo],
+        claims: [UInt16: LogitechHardwareBaselineStore.ControlsClaim]
+    ) {
+        controls.reduce(into: (reporting: [UInt16: ReportingInfo](), claims: [
+            UInt16: LogitechHardwareBaselineStore.ControlsClaim
+        ]())) { result, control in
+            if let store,
+               let target,
+               let claim = store.controlsBaseline(for: target, controlID: control.controlID) {
+                result.reporting[control.controlID] = .init(baseline: claim.baseline)
+                result.claims[control.controlID] = claim
+                return
+            }
+
+            guard let reportingInfo = readReportingInfo(
+                for: control.controlID,
+                using: transport,
+                featureIndex: featureIndex
+            ) else {
+                return
+            }
+
+            if let store, let target {
+                let claim = store.captureControlsBaseline(
+                    reportingInfo.baseline,
+                    controlID: control.controlID,
+                    for: target
+                )
+                result.reporting[control.controlID] = .init(baseline: claim.baseline)
+                result.claims[control.controlID] = claim
+            } else {
+                result.reporting[control.controlID] = reportingInfo
+            }
+        }
+    }
+
+    private func restoreStoredReportingNotIn(
+        _ activeControlIDs: Set<UInt16>,
+        store: LogitechHardwareBaselineStore?,
+        target: LogitechHardwareTargetKey?,
+        using transport: HIDPPTransport,
+        featureIndex: UInt8,
+        locationID: Int,
+        slot: UInt8
+    ) {
+        guard shouldAllowTeardownIO(),
+              let store,
+              let target
+        else {
+            return
+        }
+        let claims = store.pendingControlsBaselines(for: target)
+            .filter { !activeControlIDs.contains($0.controlID) }
+        guard !claims.isEmpty else {
+            return
+        }
+        let reporting = Dictionary(uniqueKeysWithValues: claims.map {
+            ($0.controlID, ReportingInfo(baseline: $0.baseline))
+        })
+        let failed = restoreReportingState(
+            reporting,
+            using: transport,
+            featureIndex: featureIndex,
+            locationID: locationID,
+            slot: slot,
+            reason: "restore no-longer-monitored reporting"
+        )
+        consumeRestoredBaselines(
+            Dictionary(uniqueKeysWithValues: claims.map { ($0.controlID, $0) }),
+            excluding: Set(failed.keys),
+            store: store
+        )
+    }
+
+    private func hasPendingBaseline(
+        store: LogitechHardwareBaselineStore?,
+        target: LogitechHardwareTargetKey?
+    ) -> Bool {
+        guard let store, let target else {
+            return false
+        }
+        return !store.pendingControlsBaselines(for: target).isEmpty
+    }
+
+    private func consumeRestoredBaselines(
+        _ claims: [UInt16: LogitechHardwareBaselineStore.ControlsClaim],
+        excluding failedControlIDs: Set<UInt16>,
+        store: LogitechHardwareBaselineStore?
+    ) {
+        guard let store else {
+            return
+        }
+        for (controlID, claim) in claims where !failedControlIDs.contains(controlID) {
+            _ = store.consumeControlsBaseline(claim.handle)
+        }
     }
 
     private func setDiverted(

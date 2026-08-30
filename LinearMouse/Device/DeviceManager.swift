@@ -108,10 +108,10 @@ class DeviceManager: ObservableObject {
             skipHighResolutionWheelRestore = skipHighResolutionWheelRestore || !restoringHighResolutionWheel
             self.applyingSleepHiResPolicy = self.applyingSleepHiResPolicy || applyingSleepHiResPolicy
             if !restoringLogitechControls {
-                for value in pointerDeviceToDevice.values {
-                    value.stopLogitechControlsMonitoringForSleep()
-                }
-                finishStop(restoringHighResolutionWheel: false)
+                stopLogitechControlsForSleep(
+                    Array(pointerDeviceToDevice.values),
+                    restoringHighResolutionWheel: false
+                )
             }
             return
         case .finishing:
@@ -152,8 +152,10 @@ class DeviceManager: ObservableObject {
 
         let devices = Array(pointerDeviceToDevice.values)
         guard restoringLogitechControls else {
-            devices.forEach { $0.stopLogitechControlsMonitoringForSleep() }
-            finishStop(restoringHighResolutionWheel: restoringHighResolutionWheel)
+            stopLogitechControlsForSleep(
+                devices,
+                restoringHighResolutionWheel: restoringHighResolutionWheel
+            )
             return
         }
 
@@ -165,6 +167,22 @@ class DeviceManager: ObservableObject {
             }
         }
 
+        group.notify(queue: .main) { [weak self] in
+            self?.finishStop(restoringHighResolutionWheel: restoringHighResolutionWheel)
+        }
+    }
+
+    private func stopLogitechControlsForSleep(
+        _ devices: [Device],
+        restoringHighResolutionWheel: Bool
+    ) {
+        let group = DispatchGroup()
+        for device in devices {
+            group.enter()
+            device.stopLogitechControlsMonitoringForSleep {
+                group.leave()
+            }
+        }
         group.notify(queue: .main) { [weak self] in
             self?.finishStop(restoringHighResolutionWheel: restoringHighResolutionWheel)
         }

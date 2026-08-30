@@ -290,9 +290,23 @@ class Device {
 
     /// Stops control monitoring for system sleep without attempting HID++ I/O
     /// against a device that may already be suspended.
-    func stopLogitechControlsMonitoringForSleep() {
+    func stopLogitechControlsMonitoringForSleep(completion: @escaping () -> Void) {
         logitechControlsMonitorSubscriptions.removeAll()
-        logitechReprogrammableControlsMonitor?.disableForSleep()
+        guard let logitechReprogrammableControlsMonitor else {
+            DispatchQueue.main.async(execute: completion)
+            return
+        }
+
+        let target = logitechHardwareTargetKey(
+            receiverSlot: logitechReceiverRouteSnapshot?.slot
+        )
+        guard target != nil else {
+            logitechReprogrammableControlsMonitor.disable(completion: completion)
+            return
+        }
+
+        logitechReprogrammableControlsMonitor.disableForSleep()
+        DispatchQueue.main.async(execute: completion)
     }
 
     func requestLogitechControlsForcedReconfiguration() {
@@ -351,7 +365,9 @@ class Device {
         let receiverDiscovery = logitechReceiverDiscoverySnapshot
         let waitingForReceiverDiscovery = LogitechReceiverRouteResolver.requiresDiscovery(for: pointerDevice)
             && (receiverDiscovery?.identities.isEmpty != false)
-        if LogitechReprogrammableControlsMonitor.isNeeded(for: self), !waitingForReceiverDiscovery {
+        let hasPendingBaseline = logitechReprogrammableControlsMonitor.hasPendingBaselineForCurrentTarget()
+        if LogitechReprogrammableControlsMonitor.isNeeded(for: self) || hasPendingBaseline,
+           !waitingForReceiverDiscovery {
             logitechReprogrammableControlsMonitor.enable()
         } else {
             logitechReprogrammableControlsMonitor.disable()
