@@ -2555,6 +2555,7 @@ final class LogitechReprogrammableControlsMonitor {
             let targetName = targetIdentity?.name ?? device.productName ?? device.name
             let baselineStore = device.logitechHardwareBaselineStore
             let baselineTarget = device.logitechHardwareTargetKey(receiverSlot: transport.receiverSlot)
+            var pendingUnkeyedReportingRestoreByControlID = [UInt16: ReportingInfo]()
 
             state.setActiveNotificationEndpoint(monitorTarget.notificationEndpoint)
             monitorTarget.notificationEndpoint.enableNotifications()
@@ -2576,6 +2577,23 @@ final class LogitechReprogrammableControlsMonitor {
                 let reservedVirtualButtonNumber =
                     LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.reservedVirtualButtonNumber
 
+                if baselineTarget == nil, shouldAllowTeardownIO() {
+                    let retired = pendingUnkeyedReportingRestoreByControlID.filter {
+                        !monitoredControlIDs.contains($0.key)
+                    }
+                    let failed = restoreReportingState(
+                        retired,
+                        using: transport,
+                        featureIndex: featureIndex,
+                        locationID: locationID,
+                        slot: slot,
+                        reason: "restore unkeyed no-longer-monitored reporting"
+                    )
+                    for controlID in Set(retired.keys).subtracting(failed.keys) {
+                        pendingUnkeyedReportingRestoreByControlID.removeValue(forKey: controlID)
+                    }
+                }
+
                 restoreStoredReportingNotIn(
                     monitoredControlIDs,
                     store: baselineStore,
@@ -2587,7 +2605,8 @@ final class LogitechReprogrammableControlsMonitor {
                 )
 
                 if monitoredControls.isEmpty {
-                    if !hasPendingBaseline(store: baselineStore, target: baselineTarget) {
+                    if !hasPendingBaseline(store: baselineStore, target: baselineTarget),
+                       pendingUnkeyedReportingRestoreByControlID.isEmpty {
                         return
                     }
                     finishVirtualButtonRecordingPreparationIfNeeded(sessionID: recordingSessionID)
@@ -2611,6 +2630,23 @@ final class LogitechReprogrammableControlsMonitor {
                             locationID: locationID,
                             slot: slot
                         )
+                        if baselineTarget == nil, !pendingUnkeyedReportingRestoreByControlID.isEmpty,
+                           shouldAllowTeardownIO() {
+                            _ = LogitechHardwareRestoreRetry.perform(
+                                operation: {
+                                    pendingUnkeyedReportingRestoreByControlID = self.restoreReportingState(
+                                        pendingUnkeyedReportingRestoreByControlID,
+                                        using: transport,
+                                        featureIndex: featureIndex,
+                                        locationID: locationID,
+                                        slot: slot,
+                                        reason: "retry terminal unkeyed reporting restore"
+                                    )
+                                    return pendingUnkeyedReportingRestoreByControlID.isEmpty
+                                },
+                                wait: Thread.sleep(forTimeInterval:)
+                            )
+                        }
                         return
                     }
 
@@ -2621,13 +2657,20 @@ final class LogitechReprogrammableControlsMonitor {
                     continue
                 }
 
-                let capturedReporting = captureOriginalReporting(
+                var capturedReporting = captureOriginalReporting(
                     for: monitoredControls,
                     store: baselineStore,
                     target: baselineTarget,
                     using: transport,
                     featureIndex: featureIndex
                 )
+                if baselineTarget == nil {
+                    for control in monitoredControls {
+                        if let pending = pendingUnkeyedReportingRestoreByControlID[control.controlID] {
+                            capturedReporting.reporting[control.controlID] = pending
+                        }
+                    }
+                }
                 let originalReportingByControlID = capturedReporting.reporting
                 // Never divert a control whose original reporting could not be
                 // read. Without that snapshot we could not safely restore it
@@ -2770,6 +2813,39 @@ final class LogitechReprogrammableControlsMonitor {
                         excluding: Set(failedRestoreByControlID.keys),
                         store: baselineStore
                     )
+                    if baselineTarget == nil {
+                        for controlID in Set(originalReportingByControlID.keys)
+                            .subtracting(failedRestoreByControlID.keys) {
+                            pendingUnkeyedReportingRestoreByControlID.removeValue(forKey: controlID)
+                        }
+                        pendingUnkeyedReportingRestoreByControlID.merge(failedRestoreByControlID) { _, new in new }
+                    }
+                    if !shouldContinueRunning(), shouldAllowTeardownIO() {
+                        retryStoredReportingRestoration(
+                            store: baselineStore,
+                            target: baselineTarget,
+                            using: transport,
+                            featureIndex: featureIndex,
+                            locationID: locationID,
+                            slot: slot
+                        )
+                        if baselineTarget == nil, !pendingUnkeyedReportingRestoreByControlID.isEmpty {
+                            _ = LogitechHardwareRestoreRetry.perform(
+                                operation: {
+                                    pendingUnkeyedReportingRestoreByControlID = self.restoreReportingState(
+                                        pendingUnkeyedReportingRestoreByControlID,
+                                        using: transport,
+                                        featureIndex: featureIndex,
+                                        locationID: locationID,
+                                        slot: slot,
+                                        reason: "retry terminal unkeyed reporting restore"
+                                    )
+                                    return pendingUnkeyedReportingRestoreByControlID.isEmpty
+                                },
+                                wait: Thread.sleep(forTimeInterval:)
+                            )
+                        }
+                    }
                 }
 
                 while shouldContinueRunning() {

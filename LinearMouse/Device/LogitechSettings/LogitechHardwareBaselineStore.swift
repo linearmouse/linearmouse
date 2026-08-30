@@ -188,7 +188,7 @@ final class LogitechHardwareBaselineStore {
 
     func pendingControlsBaselines(for target: LogitechHardwareTargetKey) -> [ControlsClaim] {
         lock.withLock {
-            controlsEntries[target, default: [:]].map { controlID, entry in
+            (controlsEntries[target] ?? [:]).map { controlID, entry in
                 .init(
                     controlID: controlID,
                     baseline: entry.baseline,
