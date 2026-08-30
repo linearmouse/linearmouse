@@ -767,6 +767,38 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertEqual(store.currentPublishedIdentities(), [identity])
     }
 
+    func testReceiverSlotStateStoreKeepsDiscoveryPendingAfterReconnectIdentityRefreshFails() {
+        var store = ReceiverSlotStateStore()
+        let identity = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 0x1234,
+            slot: 1,
+            kind: .mouse,
+            name: "Mouse A",
+            serialNumber: "AAAA",
+            productID: 0x1234,
+            batteryLevel: 60
+        )
+
+        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
+            1: .init(isConnected: false, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
+        ], liveReachableSlots: []))
+        store.mergeConnectionSnapshots([
+            1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
+        ])
+
+        // The immediate slot read failed, so the pending discovery path must
+        // retry rather than treating the remaining receiver state as ready.
+        XCTAssertTrue(store.hasConnectedSlotMissingIdentity)
+        XCTAssertTrue(store.currentPublishedIdentities().isEmpty)
+
+        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
+            1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
+        ], liveReachableSlots: [1]))
+
+        XCTAssertFalse(store.hasConnectedSlotMissingIdentity)
+        XCTAssertEqual(store.currentPublishedIdentities(), [identity])
+    }
+
     func testReceiverSlotStateStoreTreatsFreshBatteryMetadataAsReconnectEvidence() {
         var store = ReceiverSlotStateStore()
         let disconnectedIdentity = ReceiverLogicalDeviceIdentity(

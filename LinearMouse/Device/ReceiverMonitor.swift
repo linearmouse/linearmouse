@@ -154,6 +154,14 @@ struct ReceiverSlotStateStore {
         pairedIdentitiesBySlot[slot] == nil
     }
 
+    /// A connected slot without an identity cannot be used as a stable route.
+    /// Discovery must retry until its transient identity read succeeds.
+    var hasConnectedSlotMissingIdentity: Bool {
+        slotPresenceBySlot.contains { slot, presence in
+            presence == .connected && pairedIdentitiesBySlot[slot] == nil
+        }
+    }
+
     func currentPublishedIdentities() -> [ReceiverLogicalDeviceIdentity] {
         pairedIdentitiesBySlot.keys.sorted().compactMap { slot in
             guard let identity = pairedIdentitiesBySlot[slot] else {
@@ -328,7 +336,7 @@ private final class ReceiverContext {
                 mergeDiscovery(discovery)
 
                 let identities = currentPublishedIdentities()
-                if identities.isEmpty {
+                if identities.isEmpty || hasConnectedSlotMissingIdentity() {
                     os_log(
                         "Receiver initial discovery is not ready, retrying: locationID=%{public}d device=%{public}@",
                         log: ReceiverMonitor.log,
@@ -449,6 +457,14 @@ private final class ReceiverContext {
             )
 
             let identities = currentPublishedIdentities()
+            let needsIdentityRefresh = hasConnectedSlotMissingIdentity()
+            if needsIdentityRefresh {
+                // A reconnect identity read can fail transiently. Re-enter the
+                // existing pending-discovery path, which retries with backoff
+                // instead of keeping this incomplete slot in the ready state.
+                discoveryState = .pending
+                discoveryBackoff.reset()
+            }
             if identities != lastPublishedIdentities {
                 publish(identities)
             }
@@ -592,6 +608,10 @@ private final class ReceiverContext {
 
     private func needsIdentityRefresh(slot: UInt8) -> Bool {
         stateStore.needsIdentityRefresh(slot: slot)
+    }
+
+    private func hasConnectedSlotMissingIdentity() -> Bool {
+        stateStore.hasConnectedSlotMissingIdentity
     }
 
     private func currentPublishedIdentities() -> [ReceiverLogicalDeviceIdentity] {
