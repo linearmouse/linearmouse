@@ -136,30 +136,10 @@ class Device {
             return nil
         }
         if let receiverSlot {
-            guard let vendorID,
-                  let receiverLocationID = pointerDevice.locationID,
-                  let productID else {
-                return nil
-            }
-            let fallbackName = productName ?? name
-            guard !fallbackName.isEmpty else {
-                return nil
-            }
-            let kind: ReceiverLogicalDeviceKind = category == .trackpad ? .touchpad : .mouse
-            let identity = ReceiverLogicalDeviceIdentity(
-                receiverLocationID: receiverLocationID,
-                slot: receiverSlot,
-                kind: kind,
-                name: fallbackName,
-                serialNumber: nil,
-                productID: productID,
-                batteryLevel: nil
-            )
-            return .receiver(
-                vendorID: vendorID,
-                receiverLocationID: receiverLocationID,
-                identity: identity
-            )
+            // On-demand legacy routing supplies a slot but no stable logical
+            // identity. Never transfer a process baseline by slot alone.
+            _ = receiverSlot
+            return nil
         }
         return .direct(
             transport: pointerDevice.transport,
@@ -173,21 +153,6 @@ class Device {
 
     var logitechHardwareBaselineStore: LogitechHardwareBaselineStore? {
         manager?.logitechHardwareBaselineStore
-    }
-
-    var logitechLegacyReceiverBaselineDescriptor: LogitechHardwareTargetKey.LegacyReceiverDescriptor? {
-        guard !LogitechReceiverRouteResolver.requiresDiscovery(for: pointerDevice),
-              pointerDevice.transport == PointerDeviceTransportName.usb else {
-            return nil
-        }
-        let kind: ReceiverLogicalDeviceKind = category == .trackpad ? .touchpad : .mouse
-        return LogitechHardwareTargetKey.legacyReceiverDescriptor(
-            vendorID: vendorID,
-            receiverLocationID: pointerDevice.locationID,
-            kind: kind,
-            productID: productID,
-            name: productName ?? name
-        )
     }
 
     @discardableResult
@@ -548,11 +513,14 @@ extension Device {
     /// software-only overload above.
     func restorePointerAccelerationAndPointerSpeed(
         restoringHighResolutionWheel: Bool,
-        waitForHighResolutionWheelRestore: Bool
+        waitForHighResolutionWheelRestore: Bool,
+        applyingSleepHiResPolicy: Bool = false
     ) {
         restoreSensorDPI()
         if restoringHighResolutionWheel {
             restoreHighResolutionWheel(waitUntilFinished: waitForHighResolutionWheelRestore)
+        } else if applyingSleepHiResPolicy {
+            restoreHighResolutionWheelForSleep()
         } else {
             prepareHighResolutionWheelForReconnect()
         }

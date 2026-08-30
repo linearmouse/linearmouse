@@ -135,7 +135,8 @@ extension AppDelegate {
             self?.lifecycleAdmission.sleeping = true
             self?.stop(
                 restoringHighResolutionWheel: false,
-                restoringLogitechControls: false
+                restoringLogitechControls: false,
+                applyingSleepHiResPolicy: true
             )
         }
 
@@ -184,12 +185,14 @@ extension AppDelegate {
     func stop(
         restoringHighResolutionWheel: Bool = true,
         restoringLogitechControls: Bool = true,
+        applyingSleepHiResPolicy: Bool = false,
         completion: (() -> Void)? = nil
     ) {
         BatteryDeviceMonitor.shared.disable()
         DeviceManager.shared.stop(
             restoringHighResolutionWheel: restoringHighResolutionWheel,
             restoringLogitechControls: restoringLogitechControls,
+            applyingSleepHiResPolicy: applyingSleepHiResPolicy,
             completion: completion
         )
         GlobalEventTap.shared.stop()

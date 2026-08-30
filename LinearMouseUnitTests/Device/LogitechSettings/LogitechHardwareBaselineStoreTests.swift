@@ -47,7 +47,7 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
         XCTAssertNil(store.hiResBaseline(for: direct))
     }
 
-    func testUnmonitoredReceiverBaselineSeedsTheResolvedOnDemandSlot() throws {
+    func testReceiverWithoutStableSerialCannotClaimProcessBaseline() {
         let legacyIdentity = ReceiverLogicalDeviceIdentity(
             receiverLocationID: 123,
             slot: 2,
@@ -57,24 +57,26 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
             productID: 0xC52F,
             batteryLevel: nil
         )
-        let target = try XCTUnwrap(LogitechHardwareTargetKey.receiver(
+        let target = LogitechHardwareTargetKey.receiver(
             vendorID: 0x046D,
             receiverLocationID: 123,
             identity: legacyIdentity
-        ))
-        let store = LogitechHardwareBaselineStore()
-        _ = store.captureHiResBaseline(enabled: false, for: target)
-        let claim = try XCTUnwrap(store.hiResBaseline(for: target))
-        let session = LogitechDeviceSession(deviceID: 3)
+        )
 
-        // C52F has no monitor route, but on-demand feature resolution returns
-        // slot 2. The seeded state must use that actual HID++ target slot.
-        session.seedInitialHiResWheelState(enabled: claim.baseline.enabled, route: nil, receiverSlot: 2)
+        XCTAssertNil(target)
+    }
 
-        XCTAssertEqual(session.initialHiResWheelEnabled(
-            requiresReceiverRoute: false,
-            receiverSlot: 2
-        ), false)
+    func testDirectDeviceWithoutStableSerialCannotClaimProcessBaseline() {
+        let target = LogitechHardwareTargetKey.direct(
+            transport: "Bluetooth Low Energy",
+            locationID: 42,
+            vendorID: 0x046D,
+            productID: 0xB034,
+            serialNumber: nil,
+            name: "MX Master"
+        )
+
+        XCTAssertNil(target)
     }
 
     func testReceiverReplacementWithDifferentSerialCannotClaimBaseline() throws {
@@ -186,8 +188,7 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
 
         if LogitechHiResRestoreAdmission.needsFeatureAccess(
             hasSessionInitial: false,
-            hasKnownBaseline: false,
-            hasLegacyReceiverBaseline: false
+            hasKnownBaseline: false
         ) {
             featureAccesses += 1
         }
@@ -195,12 +196,19 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
         XCTAssertEqual(featureAccesses, 0)
     }
 
-    func testLegacyStoredBaselineRequiresOnDemandFeatureAccess() {
-        XCTAssertTrue(LogitechHiResRestoreAdmission.needsFeatureAccess(
-            hasSessionInitial: false,
-            hasKnownBaseline: false,
-            hasLegacyReceiverBaseline: true
-        ))
+    func testSleepPolicyPreservesOnlyStoreBackedBaselines() {
+        XCTAssertEqual(
+            LogitechHiResSleepRestorePolicy.resolve(hasSessionInitial: true, hasStoreBaseline: true),
+            .preserveStoreBaseline
+        )
+        XCTAssertEqual(
+            LogitechHiResSleepRestorePolicy.resolve(hasSessionInitial: true, hasStoreBaseline: false),
+            .restoreBestEffort
+        )
+        XCTAssertEqual(
+            LogitechHiResSleepRestorePolicy.resolve(hasSessionInitial: false, hasStoreBaseline: false),
+            .skip
+        )
     }
 
     private func directTarget(serial: String) throws -> LogitechHardwareTargetKey {

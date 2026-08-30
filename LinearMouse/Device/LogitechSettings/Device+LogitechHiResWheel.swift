@@ -42,10 +42,22 @@ enum LogitechHiResBaselineCapture {
 enum LogitechHiResRestoreAdmission {
     static func needsFeatureAccess(
         hasSessionInitial: Bool,
-        hasKnownBaseline: Bool,
-        hasLegacyReceiverBaseline: Bool
+        hasKnownBaseline: Bool
     ) -> Bool {
-        hasSessionInitial || hasKnownBaseline || hasLegacyReceiverBaseline
+        hasSessionInitial || hasKnownBaseline
+    }
+}
+
+enum LogitechHiResSleepRestorePolicy: Equatable {
+    case preserveStoreBaseline
+    case restoreBestEffort
+    case skip
+
+    static func resolve(hasSessionInitial: Bool, hasStoreBaseline: Bool) -> Self {
+        guard hasSessionInitial else {
+            return .skip
+        }
+        return hasStoreBaseline ? .preserveStoreBaseline : .restoreBestEffort
     }
 }
 
@@ -245,6 +257,18 @@ extension Device {
         logitechSession.clearHiResWheelState(includingInitialState: false)
     }
 
+    func restoreHighResolutionWheelForSleep() {
+        switch LogitechHiResSleepRestorePolicy.resolve(
+            hasSessionInitial: logitechSession.hasInitialHiResWheelState,
+            hasStoreBaseline: logitechSession.hasStoredHiResWheelBaseline
+        ) {
+        case .preserveStoreBaseline, .skip:
+            prepareHighResolutionWheelForReconnect()
+        case .restoreBestEffort:
+            restoreHighResolutionWheel(waitUntilFinished: true)
+        }
+    }
+
     /// Stops managing this setting. Unlike reconnect preparation, this restores
     /// the target-bound mode that was present before LinearMouse changed it.
     func stopManagingHighResolutionWheel() {
@@ -268,13 +292,9 @@ extension Device {
         let hasKnownBaseline = seedStoredHiResWheelBaseline(
             receiverSlot: logitechReceiverRouteSnapshot?.slot
         )
-        let hasLegacyReceiverBaseline = logitechLegacyReceiverBaselineDescriptor.map {
-            logitechHardwareBaselineStore?.hasHiResBaseline(forLegacyReceiver: $0) == true
-        } ?? false
         guard LogitechHiResRestoreAdmission.needsFeatureAccess(
             hasSessionInitial: logitechSession.hasInitialHiResWheelState,
-            hasKnownBaseline: hasKnownBaseline,
-            hasLegacyReceiverBaseline: hasLegacyReceiverBaseline
+            hasKnownBaseline: hasKnownBaseline
         ) else {
             logitechSession.invalidateHiResWheel(for: expectedToken)
             if !trackingRestoredState {

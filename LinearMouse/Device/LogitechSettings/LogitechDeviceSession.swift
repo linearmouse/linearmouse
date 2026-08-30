@@ -373,6 +373,10 @@ final class LogitechDeviceSession {
         withState { $0.initialHiResWheelState != nil }
     }
 
+    var hasStoredHiResWheelBaseline: Bool {
+        withState { $0.initialHiResWheelState?.baselineHandle != nil }
+    }
+
     var needsHiResWheelRestoreRetry: Bool {
         withState { $0.initialHiResWheelState != nil && $0.hiResWheelRestoreRetryNeeded }
     }

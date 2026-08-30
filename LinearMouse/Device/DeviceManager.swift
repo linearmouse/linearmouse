@@ -79,6 +79,7 @@ class DeviceManager: ObservableObject {
     private var state: DeviceManagerLifecycleState = .stopped
     private var stopCompletions = [() -> Void]()
     private var skipHighResolutionWheelRestore = false
+    private var applyingSleepHiResPolicy = false
 
     private var subscriptions = Set<AnyCancellable>()
 
@@ -91,6 +92,7 @@ class DeviceManager: ObservableObject {
     func stop(
         restoringHighResolutionWheel: Bool = true,
         restoringLogitechControls: Bool = true,
+        applyingSleepHiResPolicy: Bool = false,
         completion: (() -> Void)? = nil
     ) {
         switch state {
@@ -104,6 +106,7 @@ class DeviceManager: ObservableObject {
                 stopCompletions.append(completion)
             }
             skipHighResolutionWheelRestore = skipHighResolutionWheelRestore || !restoringHighResolutionWheel
+            self.applyingSleepHiResPolicy = self.applyingSleepHiResPolicy || applyingSleepHiResPolicy
             if !restoringLogitechControls {
                 for value in pointerDeviceToDevice.values {
                     value.stopLogitechControlsMonitoringForSleep()
@@ -119,6 +122,7 @@ class DeviceManager: ObservableObject {
             if let completion {
                 stopCompletions.append(completion)
             }
+            self.applyingSleepHiResPolicy = self.applyingSleepHiResPolicy || applyingSleepHiResPolicy
             if !restoringHighResolutionWheel {
                 skipHighResolutionWheelRestore = true
                 // Cancel the request currently pumping the run loop. The
@@ -132,6 +136,7 @@ class DeviceManager: ObservableObject {
         case .running:
             state = .stopping
             skipHighResolutionWheelRestore = !restoringHighResolutionWheel
+            self.applyingSleepHiResPolicy = applyingSleepHiResPolicy
         }
 
         if let completion {
@@ -172,11 +177,13 @@ class DeviceManager: ObservableObject {
         state = .finishing
 
         restorePointerSpeedToInitialValue(
-            restoringHighResolutionWheel: restoringHighResolutionWheel
+            restoringHighResolutionWheel: restoringHighResolutionWheel,
+            applyingSleepHiResPolicy: applyingSleepHiResPolicy
         )
         manager.stopObservation()
         state = .stopped
         skipHighResolutionWheelRestore = false
+        applyingSleepHiResPolicy = false
 
         let completions = stopCompletions
         stopCompletions.removeAll()
@@ -484,13 +491,17 @@ class DeviceManager: ObservableObject {
         )
     }
 
-    func restorePointerSpeedToInitialValue(restoringHighResolutionWheel: Bool = true) {
+    func restorePointerSpeedToInitialValue(
+        restoringHighResolutionWheel: Bool = true,
+        applyingSleepHiResPolicy: Bool = false
+    ) {
         for device in devices {
             let restoresHighResolutionWheel = restoringHighResolutionWheel
                 && !skipHighResolutionWheelRestore
             device.restorePointerAccelerationAndPointerSpeed(
                 restoringHighResolutionWheel: restoresHighResolutionWheel,
-                waitForHighResolutionWheelRestore: restoresHighResolutionWheel
+                waitForHighResolutionWheelRestore: restoresHighResolutionWheel,
+                applyingSleepHiResPolicy: applyingSleepHiResPolicy
             )
         }
     }
