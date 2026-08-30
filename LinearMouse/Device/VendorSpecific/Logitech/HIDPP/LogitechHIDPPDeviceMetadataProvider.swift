@@ -2573,7 +2573,7 @@ final class LogitechReprogrammableControlsMonitor {
     /// to be written back.
     func restorePendingForTeardown(completion: @escaping () -> Void) {
         guard let restoreGeneration = state.restorePendingForTeardown(
-            hasPendingBaselineForCurrentTarget() || unkeyedRestoreStore.hasPending,
+            needsRestoreWorkerForCurrentTarget(),
             makeWorkerThread: makeWorkerThread,
             completion: completion
         ) else {
@@ -2604,16 +2604,30 @@ final class LogitechReprogrammableControlsMonitor {
         unkeyedRestoreStore.invalidateAll()
     }
 
-    func hasPendingBaselineForCurrentTarget() -> Bool {
-        guard let store = device.logitechHardwareBaselineStore,
-              let target = device.logitechHardwareTargetKey(
-                  receiverSlot: device.logitechReceiverRouteSnapshot?.slot
-              )
-        else {
-            return false
+    func needsRestoreWorkerForCurrentTarget() -> Bool {
+        let keyedTarget = device.logitechHardwareTargetKey(
+            receiverSlot: device.logitechReceiverRouteSnapshot?.slot
+        )
+        let hasKeyedPending: Bool
+        if let store = device.logitechHardwareBaselineStore,
+           let keyedTarget {
+            hasKeyedPending = !store.pendingControlsBaselines(for: keyedTarget).isEmpty
+        } else {
+            hasKeyedPending = false
         }
+        return Self.needsRestoreWorker(
+            hasKeyedPending: hasKeyedPending,
+            hasUnkeyedPending: unkeyedRestoreStore.hasPending,
+            hasActiveUnkeyedTarget: state.hasActiveUnkeyedTarget
+        )
+    }
 
-        return !store.pendingControlsBaselines(for: target).isEmpty
+    static func needsRestoreWorker(
+        hasKeyedPending: Bool,
+        hasUnkeyedPending: Bool,
+        hasActiveUnkeyedTarget: Bool
+    ) -> Bool {
+        hasKeyedPending || hasUnkeyedPending || hasActiveUnkeyedTarget
     }
 
     private func workerMain() {
@@ -4260,6 +4274,14 @@ final class LogitechReprogrammableControlsMonitorState {
 
     var isRestoringPendingForTeardown: Bool {
         queue.sync { restoresPendingForTeardown }
+    }
+
+    var hasActiveUnkeyedTarget: Bool {
+        queue.sync {
+            workerThread != nil
+                && hasEstablishedActiveTarget
+                && !hasStoreBackedActiveTargetValue
+        }
     }
 
     func enable(makeWorkerThread: () -> Thread) {

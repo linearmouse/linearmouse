@@ -248,6 +248,31 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
         state.workerDidStop(restartIfEnabled: false) { Thread {} }
     }
 
+    func testOnlyActiveUnkeyedTargetKeepsRestoreWorkerAdmitted() {
+        let state = LogitechReprogrammableControlsMonitorState()
+        state.enable { Thread {} }
+
+        XCTAssertFalse(state.hasActiveUnkeyedTarget)
+        state.setStoreBackedActiveTarget(false)
+        XCTAssertTrue(state.hasActiveUnkeyedTarget)
+        XCTAssertTrue(LogitechReprogrammableControlsMonitor.needsRestoreWorker(
+            hasKeyedPending: false,
+            hasUnkeyedPending: false,
+            hasActiveUnkeyedTarget: state.hasActiveUnkeyedTarget
+        ))
+
+        state.setStoreBackedActiveTarget(true)
+        XCTAssertFalse(state.hasActiveUnkeyedTarget)
+        XCTAssertFalse(LogitechReprogrammableControlsMonitor.needsRestoreWorker(
+            hasKeyedPending: false,
+            hasUnkeyedPending: false,
+            hasActiveUnkeyedTarget: state.hasActiveUnkeyedTarget
+        ))
+
+        state.disable()
+        state.workerDidStop(restartIfEnabled: false) { Thread {} }
+    }
+
     func testUnkeyedRestoreStoreRejectsStaleGenerationWrites() {
         typealias Monitor = LogitechReprogrammableControlsMonitor
         let store = Monitor.UnkeyedControlsRestoreStore()
@@ -262,11 +287,21 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
 
         XCTAssertTrue(store.replace([0x00C3: reporting], for: key, expectedGeneration: firstClaim.generation))
         XCTAssertTrue(store.hasPending)
+        XCTAssertTrue(Monitor.needsRestoreWorker(
+            hasKeyedPending: false,
+            hasUnkeyedPending: store.hasPending,
+            hasActiveUnkeyedTarget: false
+        ))
         store.invalidateAll()
 
         XCTAssertFalse(store.replace([0x00C3: reporting], for: key, expectedGeneration: firstClaim.generation))
         XCTAssertTrue(store.claim(for: key).reporting.isEmpty)
         XCTAssertFalse(store.hasPending)
+        XCTAssertFalse(Monitor.needsRestoreWorker(
+            hasKeyedPending: false,
+            hasUnkeyedPending: store.hasPending,
+            hasActiveUnkeyedTarget: false
+        ))
     }
 
     func testPendingUnkeyedRestoreStartsWorkerAfterMonitorStopped() {

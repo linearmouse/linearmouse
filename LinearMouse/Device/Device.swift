@@ -377,8 +377,8 @@ class Device {
         let receiverDiscovery = logitechReceiverDiscoverySnapshot
         let waitingForReceiverDiscovery = LogitechReceiverRouteResolver.requiresDiscovery(for: pointerDevice)
             && (receiverDiscovery?.identities.isEmpty != false)
-        let hasPendingBaseline = logitechReprogrammableControlsMonitor.hasPendingBaselineForCurrentTarget()
-        if LogitechReprogrammableControlsMonitor.isNeeded(for: self) || hasPendingBaseline,
+        let needsRestoreWorker = logitechReprogrammableControlsMonitor.needsRestoreWorkerForCurrentTarget()
+        if LogitechReprogrammableControlsMonitor.isNeeded(for: self) || needsRestoreWorker,
            !waitingForReceiverDiscovery {
             logitechReprogrammableControlsMonitor.enable()
         } else {
