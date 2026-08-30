@@ -2359,22 +2359,24 @@ final class LogitechReprogrammableControlsMonitor {
 
     /// Keeps in-memory baselines for direct/legacy targets that do not have a
     /// stable hardware identity. A receiver route can be replaced while its
-    /// previous worker is unwinding, so every claim is tied to a store-wide
-    /// generation. Invalidating the store makes a stale worker's final write a
+    /// previous worker is unwinding, so every claim holds the store's current
+    /// lease. Invalidating the store makes a stale worker's final write a
     /// no-op instead of transferring its baseline to the replacement target.
     final class UnkeyedControlsRestoreStore {
+        final class Lease {}
+
         struct Claim {
-            let generation: UInt64
+            let lease: Lease
             let reporting: [UInt16: ReportingInfo]
         }
 
         private let lock = NSLock()
         private var pending = [EphemeralControlsTargetKey: [UInt16: ReportingInfo]]()
-        private var generation: UInt64 = 0
+        private var lease = Lease()
 
         func claim(for key: EphemeralControlsTargetKey) -> Claim {
             lock.withLock {
-                Claim(generation: generation, reporting: pending[key] ?? [:])
+                Claim(lease: lease, reporting: pending[key] ?? [:])
             }
         }
 
@@ -2382,10 +2384,10 @@ final class LogitechReprogrammableControlsMonitor {
         func replace(
             _ reporting: [UInt16: ReportingInfo],
             for key: EphemeralControlsTargetKey,
-            expectedGeneration: UInt64
+            expectedLease: Lease
         ) -> Bool {
             lock.withLock {
-                guard generation == expectedGeneration else {
+                guard lease === expectedLease else {
                     return false
                 }
 
@@ -2401,7 +2403,7 @@ final class LogitechReprogrammableControlsMonitor {
         func invalidateAll() {
             lock.withLock {
                 pending.removeAll()
-                generation &+= 1
+                lease = Lease()
             }
         }
 
@@ -2572,7 +2574,7 @@ final class LogitechReprogrammableControlsMonitor {
     /// after sleep a monitor may be stopped even though a baseline still needs
     /// to be written back.
     func restorePendingForTeardown(completion: @escaping () -> Void) {
-        guard let restoreGeneration = state.restorePendingForTeardown(
+        guard let restoreRequest = state.restorePendingForTeardown(
             needsRestoreWorkerForCurrentTarget(),
             makeWorkerThread: makeWorkerThread,
             completion: completion
@@ -2584,7 +2586,7 @@ final class LogitechReprogrammableControlsMonitor {
             deadline: .now() + Constants.pendingTeardownRestoreTimeout
         ) { [weak self] in
             guard let self,
-                  self.state.expirePendingTeardownRestore(restoreGeneration)
+                  self.state.expirePendingTeardownRestore(restoreRequest)
             else {
                 return
             }
@@ -2690,7 +2692,7 @@ final class LogitechReprogrammableControlsMonitor {
                 productID: monitorTarget.identity?.productID
             )
             let unkeyedClaim = unkeyedRestoreStore.claim(for: unkeyedTarget)
-            let unkeyedGeneration = unkeyedClaim.generation
+            let unkeyedLease = unkeyedClaim.lease
             var pendingUnkeyedReportingRestoreByControlID = unkeyedClaim.reporting
             state.setStoreBackedActiveTarget(baselineTarget != nil)
 
@@ -2734,7 +2736,7 @@ final class LogitechReprogrammableControlsMonitor {
                     guard unkeyedRestoreStore.replace(
                         pendingUnkeyedReportingRestoreByControlID,
                         for: unkeyedTarget,
-                        expectedGeneration: unkeyedGeneration
+                        expectedLease: unkeyedLease
                     ) else {
                         continue targetLoop
                     }
@@ -2784,7 +2786,7 @@ final class LogitechReprogrammableControlsMonitor {
                                 &pendingUnkeyedReportingRestoreByControlID,
                                 store: unkeyedRestoreStore,
                                 target: unkeyedTarget,
-                                expectedGeneration: unkeyedGeneration,
+                                expectedLease: unkeyedLease,
                                 using: transport,
                                 featureIndex: featureIndex,
                                 locationID: locationID,
@@ -2875,7 +2877,7 @@ final class LogitechReprogrammableControlsMonitor {
                         guard unkeyedRestoreStore.replace(
                             pendingUnkeyedReportingRestoreByControlID,
                             for: unkeyedTarget,
-                            expectedGeneration: unkeyedGeneration
+                            expectedLease: unkeyedLease
                         ) else {
                             continue targetLoop
                         }
@@ -2908,7 +2910,7 @@ final class LogitechReprogrammableControlsMonitor {
                                 &pendingUnkeyedReportingRestoreByControlID,
                                 store: unkeyedRestoreStore,
                                 target: unkeyedTarget,
-                                expectedGeneration: unkeyedGeneration,
+                                expectedLease: unkeyedLease,
                                 using: transport,
                                 featureIndex: featureIndex,
                                 locationID: locationID,
@@ -3018,7 +3020,7 @@ final class LogitechReprogrammableControlsMonitor {
                             &pendingUnkeyedReportingRestoreByControlID,
                             store: unkeyedRestoreStore,
                             target: unkeyedTarget,
-                            expectedGeneration: unkeyedGeneration,
+                            expectedLease: unkeyedLease,
                             using: transport,
                             featureIndex: featureIndex,
                             locationID: locationID,
@@ -3747,14 +3749,14 @@ final class LogitechReprogrammableControlsMonitor {
         _ pending: inout [UInt16: ReportingInfo],
         store: UnkeyedControlsRestoreStore,
         target: EphemeralControlsTargetKey,
-        expectedGeneration: UInt64,
+        expectedLease: UnkeyedControlsRestoreStore.Lease,
         using transport: HIDPPTransport,
         featureIndex: UInt8,
         locationID: Int,
         slot: UInt8
     ) {
         guard shouldAllowTeardownIO(), !pending.isEmpty else {
-            _ = store.replace(pending, for: target, expectedGeneration: expectedGeneration)
+            _ = store.replace(pending, for: target, expectedLease: expectedLease)
             return
         }
 
@@ -3772,7 +3774,7 @@ final class LogitechReprogrammableControlsMonitor {
             },
             wait: Thread.sleep(forTimeInterval:)
         )
-        _ = store.replace(pending, for: target, expectedGeneration: expectedGeneration)
+        _ = store.replace(pending, for: target, expectedLease: expectedLease)
     }
 
     private func consumeRestoredBaselines(
@@ -4237,6 +4239,8 @@ struct LogitechMonitorReconfigurationRequest {
 }
 
 final class LogitechReprogrammableControlsMonitorState {
+    final class TeardownRestoreRequest {}
+
     private typealias WorkerResources = (Thread?, HIDPPNotificationHandling?, ObservationToken?)
 
     private let queue = DispatchQueue(label: "linearmouse.logitech-controls.state")
@@ -4258,9 +4262,9 @@ final class LogitechReprogrammableControlsMonitorState {
     /// A terminal restore can outlive normal monitor demand. While set, the
     /// worker skips diversion and exits only after its pending baseline drains.
     private var restoresPendingForTeardown = false
-    /// Monotonically identifies teardown-restore requests so a delayed timeout
-    /// from an earlier request cannot cancel a newer worker.
-    private var pendingTeardownRestoreGeneration: UInt64 = 0
+    /// Object identity prevents a delayed timeout from an earlier teardown
+    /// request from cancelling a newer worker.
+    private var pendingTeardownRestoreRequest: TeardownRestoreRequest?
     private var hasEstablishedActiveTarget = false
     private var hasStoreBackedActiveTargetValue = false
 
@@ -4325,7 +4329,7 @@ final class LogitechReprogrammableControlsMonitorState {
         disable(completion: nil, allowingTeardownIO: false)
         queue.sync {
             restoresPendingForTeardown = false
-            pendingTeardownRestoreGeneration &+= 1
+            pendingTeardownRestoreRequest = nil
         }
     }
 
@@ -4339,14 +4343,15 @@ final class LogitechReprogrammableControlsMonitorState {
         _ hasPendingBaseline: Bool,
         makeWorkerThread: () -> Thread,
         completion: @escaping () -> Void
-    ) -> UInt64? {
-        let (thread, completions, generation) = queue.sync { () -> (Thread?, [() -> Void], UInt64?) in
+    ) -> TeardownRestoreRequest? {
+        let (thread, completions, request) = queue.sync {
+            () -> (Thread?, [() -> Void], TeardownRestoreRequest?) in
             guard workerThread != nil || hasPendingBaseline else {
                 return (nil, [completion], nil)
             }
 
-            pendingTeardownRestoreGeneration &+= 1
-            let generation = pendingTeardownRestoreGeneration
+            let request = TeardownRestoreRequest()
+            pendingTeardownRestoreRequest = request
             stopCompletions.append(completion)
             preventsWorkerRestart = true
             restoresPendingForTeardown = true
@@ -4358,30 +4363,30 @@ final class LogitechReprogrammableControlsMonitorState {
             reconfigurationRequest.request(forced: true)
 
             guard workerThread == nil else {
-                return (nil, [], generation)
+                return (nil, [], request)
             }
 
             let thread = makeWorkerThread()
             workerThread = thread
-            return (thread, [], generation)
+            return (thread, [], request)
         }
 
         reconfigurationSemaphore.signal()
         queue.sync { activeNotificationEndpoint }?.wake()
         thread?.start()
         dispatchStopCompletions(completions)
-        return generation
+        return request
     }
 
     /// Stops a restore-only worker whose target never became reachable. The
     /// baseline remains in its store, so a later lifecycle can retry it.
     /// Returns false for an already-completed or superseded request.
     @discardableResult
-    func expirePendingTeardownRestore(_ generation: UInt64) -> Bool {
+    func expirePendingTeardownRestore(_ request: TeardownRestoreRequest) -> Bool {
         let (didExpire, resources, completions) = queue.sync {
             () -> (Bool, WorkerResources, [() -> Void]) in
             guard restoresPendingForTeardown,
-                  generation == pendingTeardownRestoreGeneration
+                  pendingTeardownRestoreRequest === request
             else {
                 return (false, (nil, nil, nil), [])
             }
@@ -4453,8 +4458,8 @@ final class LogitechReprogrammableControlsMonitorState {
     }
 
     func workerDidStop(restartIfEnabled: Bool, makeWorkerThread: () -> Thread) {
-        let (thread, token, completions, releasesRestartBarrier, barrierGeneration) = queue.sync {
-            () -> (Thread?, ObservationToken?, [() -> Void], Bool, UInt64?) in
+        let (thread, token, completions, releasesRestartBarrier, barrierRequest) = queue.sync {
+            () -> (Thread?, ObservationToken?, [() -> Void], Bool, TeardownRestoreRequest?) in
             workerThread = nil
             hasEstablishedActiveTarget = false
             hasStoreBackedActiveTargetValue = false
@@ -4473,9 +4478,7 @@ final class LogitechReprogrammableControlsMonitorState {
                 isEnabled = false
                 allowsTeardownIO = false
                 reconfigurationRequest.reset()
-                let barrierGeneration = restoresPendingForTeardown
-                    ? pendingTeardownRestoreGeneration
-                    : nil
+                let barrierRequest = pendingTeardownRestoreRequest
                 restoresPendingForTeardown = false
                 let completions = stopCompletions
                 stopCompletions.removeAll()
@@ -4488,7 +4491,7 @@ final class LogitechReprogrammableControlsMonitorState {
                     reportObservationToken,
                     completions,
                     releasesRestartBarrier,
-                    barrierGeneration
+                    barrierRequest
                 )
             }
 
@@ -4503,7 +4506,7 @@ final class LogitechReprogrammableControlsMonitorState {
         dispatchStopCompletions(
             completions,
             releasesRestartBarrier: releasesRestartBarrier,
-            expectedTeardownRestoreGeneration: barrierGeneration
+            expectedTeardownRestoreRequest: barrierRequest
         )
     }
 
@@ -4628,7 +4631,7 @@ final class LogitechReprogrammableControlsMonitorState {
     private func dispatchStopCompletions(
         _ completions: [() -> Void],
         releasesRestartBarrier: Bool = false,
-        expectedTeardownRestoreGeneration: UInt64? = nil
+        expectedTeardownRestoreRequest: TeardownRestoreRequest? = nil
     ) {
         guard !completions.isEmpty else {
             return
@@ -4637,10 +4640,11 @@ final class LogitechReprogrammableControlsMonitorState {
         DispatchQueue.main.async { [weak self] in
             if releasesRestartBarrier {
                 self?.queue.sync {
-                    if let expectedTeardownRestoreGeneration,
-                       expectedTeardownRestoreGeneration != self?.pendingTeardownRestoreGeneration {
+                    if let expectedTeardownRestoreRequest,
+                       self?.pendingTeardownRestoreRequest !== expectedTeardownRestoreRequest {
                         return
                     }
+                    self?.pendingTeardownRestoreRequest = nil
                     self?.preventsWorkerRestart = false
                 }
             }
@@ -4668,7 +4672,7 @@ final class HIDPPNotificationBuffer {
     private let condition = NSCondition()
     private let onWait: (() -> Void)?
     private var bufferedReports = [[UInt8]]()
-    private var wakeGeneration = 0
+    private var interruptPending = false
 
     init(maximumBufferedReports: Int = 64, onWait: (() -> Void)? = nil) {
         self.maximumBufferedReports = maximumBufferedReports
@@ -4695,14 +4699,13 @@ final class HIDPPNotificationBuffer {
         if bufferedReports.count > maximumBufferedReports {
             bufferedReports.removeFirst(bufferedReports.count - maximumBufferedReports)
         }
-        wakeGeneration &+= 1
         condition.broadcast()
         condition.unlock()
     }
 
     func wake() {
         condition.lock()
-        wakeGeneration &+= 1
+        interruptPending = true
         condition.broadcast()
         condition.unlock()
     }
@@ -4710,7 +4713,6 @@ final class HIDPPNotificationBuffer {
     func discard(matching: @escaping ([UInt8]) -> Bool) {
         condition.lock()
         bufferedReports.removeAll(where: matching)
-        wakeGeneration &+= 1
         condition.broadcast()
         condition.unlock()
     }
@@ -4721,19 +4723,35 @@ final class HIDPPNotificationBuffer {
         until shouldContinue: (() -> Bool)? = nil
     ) -> [UInt8]? {
         let deadline = Date().addingTimeInterval(timeout)
-        var observedWakeGeneration = 0
+        var shouldCallOnWait = true
 
-        while shouldContinue?() ?? true {
-            condition.lock()
+        condition.lock()
+        while true {
+            // Explicit interrupts represent lifecycle/reconfiguration control
+            // flow and therefore take priority over buffered input reports.
+            if interruptPending {
+                interruptPending = false
+                condition.unlock()
+                return nil
+            }
+
             if let index = bufferedReports.firstIndex(where: matching) {
                 let report = bufferedReports.remove(at: index)
                 condition.unlock()
                 return report
             }
 
-            if wakeGeneration != observedWakeGeneration {
-                observedWakeGeneration = wakeGeneration
+            condition.unlock()
+            let continues = shouldContinue?() ?? true
+            condition.lock()
+            guard continues else {
                 condition.unlock()
+                return nil
+            }
+
+            // Recheck state changed while the external continuation predicate
+            // ran without this condition lock.
+            if interruptPending || bufferedReports.contains(where: matching) {
                 continue
             }
 
@@ -4743,16 +4761,18 @@ final class HIDPPNotificationBuffer {
                 return nil
             }
 
-            condition.unlock()
-            onWait?()
-            condition.lock()
-            if wakeGeneration == observedWakeGeneration {
-                _ = condition.wait(until: deadline)
+            if shouldCallOnWait {
+                shouldCallOnWait = false
+                condition.unlock()
+                onWait?()
+                condition.lock()
+                // An append, interrupt, or cancellation can occur while the
+                // diagnostic hook runs without the condition lock.
+                continue
             }
-            condition.unlock()
-        }
 
-        return nil
+            _ = condition.wait(until: deadline)
+        }
     }
 }
 

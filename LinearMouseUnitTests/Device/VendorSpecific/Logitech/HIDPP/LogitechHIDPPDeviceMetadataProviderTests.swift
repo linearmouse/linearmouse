@@ -525,6 +525,87 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         XCTAssertEqual(lock.withLock { waitCount }, 1)
     }
 
+    func testNotificationBufferWakeInterruptsCurrentWaitWhileContinuationRemainsTrue() {
+        let waiting = expectation(description: "notification wait started")
+        let finished = expectation(description: "notification wait interrupted")
+        let lock = NSLock()
+        var didReturnNil = false
+        let buffer = HIDPPNotificationBuffer {
+            waiting.fulfill()
+        }
+
+        DispatchQueue.global().async {
+            let value = buffer.wait(
+                timeout: 5,
+                matching: { _ in false },
+                until: { true }
+            )
+            lock.withLock { didReturnNil = value == nil }
+            finished.fulfill()
+        }
+
+        wait(for: [waiting], timeout: 1)
+        buffer.wake()
+        wait(for: [finished], timeout: 1)
+        XCTAssertTrue(lock.withLock { didReturnNil })
+    }
+
+    func testNotificationBufferConsumesPreWaitWakeExactlyOnce() {
+        let secondWaitStarted = expectation(description: "second wait started")
+        let secondWaitFinished = expectation(description: "second wait received report")
+        let lock = NSLock()
+        var waitCount = 0
+        let report = [UInt8]([0x10, 0x01, 0x41, 0x00, 0x02, 0x00, 0x00])
+        let buffer = HIDPPNotificationBuffer {
+            lock.withLock { waitCount += 1 }
+            secondWaitStarted.fulfill()
+        }
+
+        buffer.wake()
+        XCTAssertNil(buffer.wait(timeout: 5, matching: { _ in true }, until: { true }))
+        XCTAssertEqual(lock.withLock { waitCount }, 0)
+
+        DispatchQueue.global().async {
+            XCTAssertEqual(
+                buffer.wait(timeout: 5, matching: { _ in true }, until: { true }),
+                report
+            )
+            secondWaitFinished.fulfill()
+        }
+
+        wait(for: [secondWaitStarted], timeout: 1)
+        buffer.appendIfUnsolicited(report)
+        wait(for: [secondWaitFinished], timeout: 1)
+        XCTAssertEqual(lock.withLock { waitCount }, 1)
+    }
+
+    func testNotificationBufferInterruptTakesPriorityWithoutDiscardingBufferedReport() {
+        let buffer = HIDPPNotificationBuffer()
+        let report = [UInt8]([0x10, 0x01, 0x41, 0x00, 0x02, 0x00, 0x00])
+
+        buffer.appendIfUnsolicited(report)
+        buffer.wake()
+
+        XCTAssertNil(buffer.wait(timeout: 0, matching: { _ in true }, until: { true }))
+        XCTAssertEqual(buffer.wait(timeout: 0, matching: { _ in true }, until: { true }), report)
+    }
+
+    func testNotificationBufferPreservesOrderingAroundNonmatchingReports() {
+        let buffer = HIDPPNotificationBuffer()
+        let connection = [UInt8]([0x10, 0x01, 0x41, 0x00, 0x02, 0x00, 0x00])
+        let firstControl = [UInt8]([0x11, 0x02, 0x05, 0x00, 0x00, 0xC3, 0x00])
+        let secondControl = [UInt8]([0x11, 0x02, 0x05, 0x00, 0x00, 0xC4, 0x00])
+        let matchesControls: ([UInt8]) -> Bool = { $0[2] == 0x05 }
+
+        buffer.appendIfUnsolicited(connection)
+        buffer.appendIfUnsolicited(firstControl)
+        buffer.appendIfUnsolicited(secondControl)
+
+        XCTAssertEqual(buffer.wait(timeout: 0, matching: matchesControls), firstControl)
+        XCTAssertEqual(buffer.wait(timeout: 0, matching: matchesControls), secondControl)
+        XCTAssertEqual(buffer.wait(timeout: 0) { _ in true }, connection)
+    }
+
     func testCommittedGetReportTransactionsUseIndependentTimedYields() {
         var firstResponse: Data?
         var secondResponse: Data?

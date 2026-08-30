@@ -178,23 +178,23 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
         let state = LogitechReprogrammableControlsMonitorState()
         state.enable { Thread {} }
 
-        let generation = state.restorePendingForTeardown(
+        let restoreRequest = state.restorePendingForTeardown(
             true,
             makeWorkerThread: { Thread {} },
             completion: {}
         )
 
-        let request = state.consumeReconfigurationRequest(
+        let reconfiguration = state.consumeReconfigurationRequest(
             deferringWhileControlsArePressed: true
         )
-        XCTAssertTrue(request.needed)
-        XCTAssertTrue(request.forced)
+        XCTAssertTrue(reconfiguration.needed)
+        XCTAssertTrue(reconfiguration.forced)
 
-        guard let generation else {
+        guard let restoreRequest else {
             XCTFail("Expected pending restoration to start")
             return
         }
-        state.expirePendingTeardownRestore(generation)
+        state.expirePendingTeardownRestore(restoreRequest)
         state.workerDidStop(restartIfEnabled: false) { Thread {} }
     }
 
@@ -273,7 +273,7 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
         state.workerDidStop(restartIfEnabled: false) { Thread {} }
     }
 
-    func testUnkeyedRestoreStoreRejectsStaleGenerationWrites() {
+    func testUnkeyedRestoreStoreRejectsStaleLeaseWrites() {
         typealias Monitor = LogitechReprogrammableControlsMonitor
         let store = Monitor.UnkeyedControlsRestoreStore()
         let key = Monitor.EphemeralControlsTargetKey(
@@ -285,7 +285,7 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
         let reporting = Monitor.ReportingInfo(flags: [.diverted], mappedControlID: 0x00C3)
         let firstClaim = store.claim(for: key)
 
-        XCTAssertTrue(store.replace([0x00C3: reporting], for: key, expectedGeneration: firstClaim.generation))
+        XCTAssertTrue(store.replace([0x00C3: reporting], for: key, expectedLease: firstClaim.lease))
         XCTAssertTrue(store.hasPending)
         XCTAssertTrue(Monitor.needsRestoreWorker(
             hasKeyedPending: false,
@@ -294,7 +294,7 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
         ))
         store.invalidateAll()
 
-        XCTAssertFalse(store.replace([0x00C3: reporting], for: key, expectedGeneration: firstClaim.generation))
+        XCTAssertFalse(store.replace([0x00C3: reporting], for: key, expectedLease: firstClaim.lease))
         XCTAssertTrue(store.claim(for: key).reporting.isEmpty)
         XCTAssertFalse(store.hasPending)
         XCTAssertFalse(Monitor.needsRestoreWorker(
@@ -315,11 +315,11 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
         )
         let reporting = Monitor.ReportingInfo(flags: [.diverted], mappedControlID: 0x00C3)
         let claim = store.claim(for: key)
-        XCTAssertTrue(store.replace([0x00C3: reporting], for: key, expectedGeneration: claim.generation))
+        XCTAssertTrue(store.replace([0x00C3: reporting], for: key, expectedLease: claim.lease))
 
         let state = LogitechReprogrammableControlsMonitorState()
         var madeWorker = false
-        let restoreGeneration = state.restorePendingForTeardown(
+        let restoreRequest = state.restorePendingForTeardown(
             store.hasPending,
             makeWorkerThread: {
                 madeWorker = true
@@ -328,19 +328,19 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
             completion: {}
         )
 
-        guard let restoreGeneration else {
+        guard let restoreRequest else {
             XCTFail("Expected unkeyed pending restoration to start a worker")
             return
         }
         XCTAssertTrue(madeWorker)
-        state.expirePendingTeardownRestore(restoreGeneration)
+        state.expirePendingTeardownRestore(restoreRequest)
         state.workerDidStop(restartIfEnabled: false) { Thread {} }
     }
 
     func testPendingTeardownRestoreExpiryStopsWorkerAndDeliversCompletion() {
         let state = LogitechReprogrammableControlsMonitorState()
         let completion = expectation(description: "restore timeout completion")
-        guard let generation = state.restorePendingForTeardown(
+        guard let request = state.restorePendingForTeardown(
             true,
             makeWorkerThread: { Thread {} },
             completion: { completion.fulfill() }
@@ -349,7 +349,7 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
             return
         }
 
-        XCTAssertTrue(state.expirePendingTeardownRestore(generation))
+        XCTAssertTrue(state.expirePendingTeardownRestore(request))
         XCTAssertFalse(state.shouldContinueRunning)
         XCTAssertFalse(state.shouldAllowTeardownIO)
 
@@ -362,7 +362,7 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
     func testCompletedPendingTeardownRestoreIgnoresLateExpiry() {
         let state = LogitechReprogrammableControlsMonitorState()
         let completion = expectation(description: "restore completion")
-        guard let generation = state.restorePendingForTeardown(
+        guard let request = state.restorePendingForTeardown(
             true,
             makeWorkerThread: { Thread {} },
             completion: { completion.fulfill() }
@@ -373,13 +373,13 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
 
         state.workerDidStop(restartIfEnabled: false) { Thread {} }
         wait(for: [completion], timeout: 1)
-        XCTAssertFalse(state.expirePendingTeardownRestore(generation))
+        XCTAssertFalse(state.expirePendingTeardownRestore(request))
     }
 
     func testOldPendingTeardownRestoreExpiryCannotCancelNewRequest() {
         let state = LogitechReprogrammableControlsMonitorState()
         let firstCompletion = expectation(description: "first timeout completion")
-        guard let firstGeneration = state.restorePendingForTeardown(
+        guard let firstRequest = state.restorePendingForTeardown(
             true,
             makeWorkerThread: { Thread {} },
             completion: { firstCompletion.fulfill() }
@@ -388,12 +388,12 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
             return
         }
 
-        XCTAssertTrue(state.expirePendingTeardownRestore(firstGeneration))
+        XCTAssertTrue(state.expirePendingTeardownRestore(firstRequest))
         state.workerDidStop(restartIfEnabled: false) { Thread {} }
         wait(for: [firstCompletion], timeout: 1)
 
         let secondCompletion = expectation(description: "second timeout completion")
-        guard let secondGeneration = state.restorePendingForTeardown(
+        guard let secondRequest = state.restorePendingForTeardown(
             true,
             makeWorkerThread: { Thread {} },
             completion: { secondCompletion.fulfill() }
@@ -402,9 +402,9 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
             return
         }
 
-        XCTAssertFalse(state.expirePendingTeardownRestore(firstGeneration))
+        XCTAssertFalse(state.expirePendingTeardownRestore(firstRequest))
         XCTAssertTrue(state.shouldContinueRunning)
-        XCTAssertTrue(state.expirePendingTeardownRestore(secondGeneration))
+        XCTAssertTrue(state.expirePendingTeardownRestore(secondRequest))
         state.workerDidStop(restartIfEnabled: false) { Thread {} }
         wait(for: [secondCompletion], timeout: 1)
     }
