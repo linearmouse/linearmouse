@@ -18,6 +18,7 @@ protocol LogitechDeviceSettingsTarget: AnyObject {
     func requestLogitechControlsForcedReconfiguration()
     func prepareSensorDPIForReconnect()
     func prepareHighResolutionWheelForReconnect()
+    func stopManagingHighResolutionWheel()
 }
 
 extension Device: LogitechDeviceSettingsTarget {}
@@ -76,7 +77,7 @@ final class LogitechDeviceSettingsReconciler {
             device.applyConfiguredHighResolutionWheel(highResolutionWheel)
         } else if settings.highResolutionWheel == nil,
                   previousSettings.highResolutionWheel != nil {
-            device.prepareHighResolutionWheelForReconnect()
+            device.stopManagingHighResolutionWheel()
         }
     }
 }

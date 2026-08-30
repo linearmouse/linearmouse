@@ -160,9 +160,15 @@ extension Device {
         logitechSession.clearHiResWheelState(includingInitialState: false)
     }
 
+    /// Stops managing this setting. Unlike reconnect preparation, this restores
+    /// the target-bound mode that was present before LinearMouse changed it.
+    func stopManagingHighResolutionWheel() {
+        restoreHighResolutionWheel(waitUntilFinished: false)
+    }
+
     private func restoreHighResolutionWheelSynchronously(expectedToken: CancellationToken) {
         guard logitechSession.hasInitialHiResWheelState else {
-            logitechSession.invalidateHiResWheel()
+            logitechSession.invalidateHiResWheel(for: expectedToken)
             clearHighResolutionWheelCache()
             return
         }
@@ -171,8 +177,7 @@ extension Device {
               let access = logitechHiResWheel(for: expectedToken) else {
             // Losing transport access is not evidence that the restore worked.
             // Preserve the initial state for a subsequent teardown attempt.
-            logitechSession.invalidateHiResWheel()
-            logitechSession.clearHiResWheelState(includingInitialState: false)
+            logitechSession.invalidateHiResWheel(for: expectedToken)
             return
         }
 
@@ -181,19 +186,21 @@ extension Device {
             receiverSlot: access.feature.receiverSlot
         )
         guard let initialEnabled else {
-            logitechSession.invalidateHiResWheel()
-            logitechSession.clearHiResWheelState(includingInitialState: false)
+            logitechSession.invalidateHiResWheel(for: expectedToken)
             return
         }
 
         let restored = access.feature.setHighResolutionWheelEnabled(initialEnabled) == initialEnabled
-        logitechSession.invalidateHiResWheel()
+        logitechSession.invalidateHiResWheel(for: expectedToken)
         if restored {
-            clearHighResolutionWheelCache()
+            logitechSession.completeHiResWheelRestore(
+                enabled: initialEnabled,
+                multiplier: initialEnabled ? access.feature.capabilities().map { Int($0.multiplier) } : nil,
+                for: access
+            )
         } else {
             // The device may be temporarily asleep. Keep the original state
             // so a later lifecycle teardown can still restore it.
-            logitechSession.clearHiResWheelState(includingInitialState: false)
         }
     }
 

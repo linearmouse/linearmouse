@@ -154,6 +154,57 @@ final class LogitechDeviceSessionTests: XCTestCase {
         ))
     }
 
+    func testWheelRestoreCommitsActualModeBeforeDiscardingInitialState() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let access = try hiResWheelAccess(for: session, receiverSlot: 2)
+        session.recordInitialHiResWheelState(enabled: false, for: access)
+        session.updateHiResWheelState(enabled: true, multiplier: 8, for: access)
+
+        session.completeHiResWheelRestore(enabled: false, multiplier: nil, for: access)
+
+        XCTAssertEqual(session.hiResWheelEnabled, false)
+        XCTAssertNil(session.hiResWheelNormalizationMultiplier)
+        XCTAssertNil(session.initialHiResWheelEnabled(
+            requiresReceiverRoute: false,
+            receiverSlot: access.feature.receiverSlot
+        ))
+    }
+
+    func testWheelRestoreKeepsNormalizerForOriginalHighResolutionMode() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let access = try hiResWheelAccess(for: session, receiverSlot: 2)
+        session.recordInitialHiResWheelState(enabled: true, for: access)
+        session.updateHiResWheelState(enabled: false, multiplier: nil, for: access)
+
+        session.completeHiResWheelRestore(enabled: true, multiplier: 8, for: access)
+
+        XCTAssertEqual(session.hiResWheelEnabled, true)
+        XCTAssertEqual(session.hiResWheelNormalizationMultiplier, 8)
+    }
+
+    func testNewWheelDesiredCancelsQueuedRestore() {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let restoreToken = session.runHiResWheelOperation(waitUntilFinished: false) { _ in }
+
+        session.startHiResWheelApply { _, _ in false }
+
+        XCTAssertTrue(restoreToken.isCancelled)
+    }
+
+    func testSupersededRestoreCannotInvalidateNewWheelAccess() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let restoreToken = session.runHiResWheelOperation(waitUntilFinished: false) { _ in }
+        session.startHiResWheelApply { _, _ in false }
+        _ = try hiResWheelAccess(for: session, receiverSlot: 2)
+
+        session.invalidateHiResWheel(for: restoreToken)
+
+        XCTAssertNotNil(session.hiResWheel { _, _ in
+            XCTFail("superseded restore must not clear the newer wheel access")
+            return nil
+        })
+    }
+
     private func hiResWheelAccess(
         for session: LogitechDeviceSession,
         receiverSlot: UInt8? = nil

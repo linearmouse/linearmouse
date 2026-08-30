@@ -217,10 +217,11 @@ final class LogitechDeviceSession {
         ) { _ in coordinator.cancel() }
     }
 
+    @discardableResult
     func runHiResWheelOperation(
         waitUntilFinished: Bool,
         _ operation: @escaping (CancellationToken) -> Void
-    ) {
+    ) -> CancellationToken {
         runFeatureOperation(
             cache: \State.hiResWheel,
             cancellationSource: \State.hiResWheelCancellationSource,
@@ -333,6 +334,24 @@ final class LogitechDeviceSession {
         }
     }
 
+    /// Commits the hardware mode observed after a successful restore and only
+    /// then consumes the initial mode that made that restore possible.
+    func completeHiResWheelRestore(
+        enabled: Bool,
+        multiplier: Int?,
+        for access: FeatureAccess<HiResWheel>
+    ) {
+        withState { state in
+            guard state.hiResWheelCancellationSource.token == access.token,
+                  access.token.shouldContinue else {
+                return
+            }
+            state.hiResWheelEnabled = enabled
+            state.hiResWheelMultiplier = enabled ? multiplier : nil
+            state.initialHiResWheelState = nil
+        }
+    }
+
     private func resetFeatureOperation<Feature>(
         cache: WritableKeyPath<State, Feature?>,
         cancellationSource: WritableKeyPath<State, CancellationSource>,
@@ -350,6 +369,7 @@ final class LogitechDeviceSession {
         return source.token
     }
 
+    @discardableResult
     private func runFeatureOperation<Feature>(
         cache: WritableKeyPath<State, Feature?>,
         cancellationSource: WritableKeyPath<State, CancellationSource>,
@@ -357,7 +377,7 @@ final class LogitechDeviceSession {
         waitUntilFinished: Bool,
         operation: @escaping (CancellationToken) -> Void,
         onCancelled: @escaping () -> Void
-    ) {
+    ) -> CancellationToken {
         let token = resetFeatureOperation(
             cache: cache,
             cancellationSource: cancellationSource
@@ -382,6 +402,7 @@ final class LogitechDeviceSession {
         } else {
             perform(guardedOperation)
         }
+        return token
     }
 
     private func drainQueueOnCurrentRunLoop() {
@@ -394,8 +415,13 @@ final class LogitechDeviceSession {
         }
     }
 
-    func invalidateHiResWheel() {
-        withState { $0.hiResWheel = nil }
+    func invalidateHiResWheel(for token: CancellationToken) {
+        withState { state in
+            guard state.hiResWheelCancellationSource.token == token else {
+                return
+            }
+            state.hiResWheel = nil
+        }
     }
 
     func adjustableDPI(

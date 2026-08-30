@@ -32,6 +32,10 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
             actions.append("prepareHiResWheel")
         }
 
+        func stopManagingHighResolutionWheel() {
+            actions.append("restoreHiResWheel")
+        }
+
         func resetActions() {
             actions.removeAll()
         }
@@ -69,7 +73,7 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
         XCTAssertEqual(device.actions, ["dpi:1000", "hiResWheel:true"])
     }
 
-    func testNilTransitionCancelsTheOldHardwareWork() {
+    func testNilTransitionCancelsDPIAndRestoresTheOriginalWheelMode() {
         let device = Device()
         let reconciler = LogitechDeviceSettingsReconciler(device: device)
 
@@ -77,7 +81,7 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
         device.resetActions()
         reconciler.apply(.init(dpi: nil, highResolutionWheel: nil))
 
-        XCTAssertEqual(device.actions, ["prepareDPI", "prepareHiResWheel"])
+        XCTAssertEqual(device.actions, ["prepareDPI", "restoreHiResWheel"])
     }
 
     func testReapplyForcesEveryVolatileSettingAndControlReconfiguration() {
