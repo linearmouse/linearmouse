@@ -47,6 +47,36 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
         XCTAssertNil(store.hiResBaseline(for: direct))
     }
 
+    func testStableSerialDoesNotRequireTransportLocationNameOrProductMetadata() throws {
+        let direct = try XCTUnwrap(LogitechHardwareTargetKey.direct(
+            transport: nil,
+            locationID: nil,
+            vendorID: 0x046D,
+            productID: nil,
+            serialNumber: "abc123",
+            name: nil
+        ))
+        let receiver = try XCTUnwrap(LogitechHardwareTargetKey.receiver(
+            vendorID: 0x046D,
+            receiverLocationID: nil,
+            identity: .init(
+                receiverLocationID: 0,
+                slot: 1,
+                kind: .mouse,
+                name: "",
+                serialNumber: "ABC123",
+                productID: nil,
+                batteryLevel: nil
+            )
+        ))
+
+        XCTAssertEqual(direct, receiver)
+    }
+
+    func testDifferentStableSerialsNeverShareABaselineKey() throws {
+        XCTAssertNotEqual(try directTarget(serial: "AAAA"), try directTarget(serial: "BBBB"))
+    }
+
     func testReceiverWithoutStableSerialCannotClaimProcessBaseline() {
         let legacyIdentity = ReceiverLogicalDeviceIdentity(
             receiverLocationID: 123,

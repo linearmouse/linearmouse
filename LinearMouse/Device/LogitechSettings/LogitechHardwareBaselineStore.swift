@@ -6,39 +6,33 @@ import Foundation
 /// A process-lifetime identity for hardware state that must survive a
 /// PointerDevice/session rebuild (notably across system sleep).
 enum LogitechHardwareTargetKey: Hashable {
-    case serial(vendorID: Int, productID: Int, serial: String)
+    case serial(vendorID: Int, serial: String)
 
     static func direct(
-        transport: String?,
-        locationID: Int?,
+        transport _: String?,
+        locationID _: Int?,
         vendorID: Int?,
-        productID: Int?,
+        productID _: Int?,
         serialNumber: String?,
-        name: String?
+        name _: String?
     ) -> Self? {
-        guard transport != nil,
-              locationID != nil,
-              name != nil,
-              let vendorID,
-              let productID,
+        guard let vendorID,
               let serial = normalized(serialNumber) else {
             return nil
         }
-        return .serial(vendorID: vendorID, productID: productID, serial: serial)
+        return .serial(vendorID: vendorID, serial: serial)
     }
 
     static func receiver(
         vendorID: Int?,
-        receiverLocationID: Int?,
+        receiverLocationID _: Int?,
         identity: ReceiverLogicalDeviceIdentity
     ) -> Self? {
-        guard receiverLocationID != nil,
-              let vendorID,
-              let productID = identity.productID,
+        guard let vendorID,
               let serial = normalized(identity.serialNumber) else {
             return nil
         }
-        return .serial(vendorID: vendorID, productID: productID, serial: serial)
+        return .serial(vendorID: vendorID, serial: serial)
     }
 
     private static func normalized(_ value: String?) -> String? {
