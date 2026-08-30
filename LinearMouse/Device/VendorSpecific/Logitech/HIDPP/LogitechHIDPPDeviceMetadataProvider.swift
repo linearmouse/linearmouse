@@ -2780,6 +2780,9 @@ final class LogitechReprogrammableControlsMonitor {
                         store: baselineStore
                     )
                     if baselineTarget == nil {
+                        for controlID in Set(originalReportingByControlID.keys).subtracting(failedRestore.keys) {
+                            pendingUnkeyedReportingRestoreByControlID.removeValue(forKey: controlID)
+                        }
                         pendingUnkeyedReportingRestoreByControlID.merge(failedRestore) { _, new in new }
                         unkeyedRestoreStore.replace(pendingUnkeyedReportingRestoreByControlID, for: unkeyedTarget)
                     }
@@ -2795,6 +2798,14 @@ final class LogitechReprogrammableControlsMonitor {
 
                     let waitResult = state.waitForReconfigurationOrStop(timeout: Constants.notificationTimeout)
                     guard waitResult.shouldContinue else {
+                        retryStoredReportingRestoration(
+                            store: baselineStore,
+                            target: baselineTarget,
+                            using: transport,
+                            featureIndex: featureIndex,
+                            locationID: locationID,
+                            slot: slot
+                        )
                         return
                     }
 
@@ -2911,6 +2922,7 @@ final class LogitechReprogrammableControlsMonitor {
                                 wait: Thread.sleep(forTimeInterval:)
                             )
                         }
+                        unkeyedRestoreStore.replace(pendingUnkeyedReportingRestoreByControlID, for: unkeyedTarget)
                     }
                     if !shouldContinueRunning(), shouldAllowTeardownIO() {
                         retryStoredReportingRestoration(
