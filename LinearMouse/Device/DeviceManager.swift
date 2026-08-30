@@ -7,6 +7,17 @@ import Foundation
 import os.log
 import PointerKit
 
+enum DeviceManagerLifecycleState: Equatable {
+    case stopped
+    case running
+    case stopping
+    case finishing
+
+    var allowsDeviceWork: Bool {
+        self == .running
+    }
+}
+
 class DeviceManager: ObservableObject {
     static let shared = DeviceManager()
 
@@ -64,20 +75,17 @@ class DeviceManager: ObservableObject {
         )
     }
 
-    private enum State {
-        case stopped
-        case running
-        case stopping
-        case finishing
-    }
-
-    private var state: State = .stopped
+    private var state: DeviceManagerLifecycleState = .stopped
     private var stopCompletions = [() -> Void]()
     private var skipHighResolutionWheelRestore = false
 
     private var subscriptions = Set<AnyCancellable>()
 
     private var activateApplicationObserver: Any?
+
+    var allowsDeviceWork: Bool {
+        state.allowsDeviceWork
+    }
 
     func stop(
         restoringHighResolutionWheel: Bool = true,
@@ -235,6 +243,16 @@ class DeviceManager: ObservableObject {
     }
 
     private func deviceAdded(_: PointerDeviceManager, _ pointerDevice: PointerDevice) {
+        guard allowsDeviceWork else {
+            os_log(
+                "Drop device added while lifecycle does not admit device work: %{public}@",
+                log: Self.log,
+                type: .info,
+                String(describing: pointerDevice)
+            )
+            return
+        }
+
         let device = Device(self, pointerDevice)
 
         objectWillChange.send()

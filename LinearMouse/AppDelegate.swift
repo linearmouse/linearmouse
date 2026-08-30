@@ -7,6 +7,16 @@ import LaunchAtLogin
 import os.log
 import SwiftUI
 
+struct AppLifecycleAdmission {
+    var sessionActive = true
+    var sleeping = false
+    var terminationCleanupStarted = false
+
+    var allowsStart: Bool {
+        sessionActive && !sleeping && !terminationCleanupStarted
+    }
+}
+
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "AppDelegate")
@@ -14,9 +24,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private let autoUpdateManager = AutoUpdateManager.shared
     private let statusItem = StatusItem.shared
     private var subscriptions = Set<AnyCancellable>()
-    private var sessionActive = true
-    private var sleeping = false
-    private var terminationCleanupStarted = false
+    private var lifecycleAdmission = AppLifecycleAdmission()
 
     /// Runs the one-time legacy -> SMAppService login-item migration on launch.
     ///
@@ -68,10 +76,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return .terminateNow
         }
 
-        guard !terminationCleanupStarted else {
+        guard !lifecycleAdmission.terminationCleanupStarted else {
             return .terminateLater
         }
-        terminationCleanupStarted = true
+        lifecycleAdmission.terminationCleanupStarted = true
 
         stop(restoringHighResolutionWheel: true) { [weak sender] in
             sender?.reply(toApplicationShouldTerminate: true)
@@ -103,7 +111,7 @@ extension AppDelegate {
             queue: .main
         ) { [weak self] _ in
             os_log("Session inactive", log: Self.log, type: .info)
-            self?.sessionActive = false
+            self?.lifecycleAdmission.sessionActive = false
             self?.stop(restoringHighResolutionWheel: true)
         }
 
@@ -113,7 +121,7 @@ extension AppDelegate {
             queue: .main
         ) { [weak self] _ in
             os_log("Session active", log: Self.log, type: .info)
-            self?.sessionActive = true
+            self?.lifecycleAdmission.sessionActive = true
             KeyboardSettingsSnapshot.shared.refresh()
             self?.restartIfAllowed()
         }
@@ -124,7 +132,7 @@ extension AppDelegate {
             queue: .main
         ) { [weak self] _ in
             os_log("System will sleep", log: Self.log, type: .info)
-            self?.sleeping = true
+            self?.lifecycleAdmission.sleeping = true
             self?.stop(
                 restoringHighResolutionWheel: false,
                 restoringLogitechControls: false
@@ -137,14 +145,14 @@ extension AppDelegate {
             queue: .main
         ) { [weak self] _ in
             os_log("System did wake", log: Self.log, type: .info)
-            self?.sleeping = false
+            self?.lifecycleAdmission.sleeping = false
             self?.restartIfAllowed()
             self?.requestLogitechReceiverRediscoveryAfterWake()
         }
     }
 
     func startIfAllowed() {
-        guard sessionActive, !sleeping else {
+        guard lifecycleAdmission.allowsStart else {
             return
         }
 
@@ -159,7 +167,7 @@ extension AppDelegate {
 
     func requestLogitechReceiverRediscoveryAfterWake() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
-            guard let self, sessionActive, !sleeping else {
+            guard let self, self.lifecycleAdmission.allowsStart else {
                 return
             }
 

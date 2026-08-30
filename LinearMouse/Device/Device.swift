@@ -236,6 +236,10 @@ class Device {
         logitechReprogrammableControlsMonitor != nil
     }
 
+    private var allowsDeviceWork: Bool {
+        manager?.allowsDeviceWork == true
+    }
+
     /// Stops Logitech control monitoring before its pointer device is
     /// invalidated. Completion is delivered asynchronously after the monitor
     /// has restored its original HID++ reporting state.
@@ -259,7 +263,7 @@ class Device {
     func requestLogitechControlsForcedReconfiguration() {
         logitechSession.perform { [weak self] in
             DispatchQueue.main.async {
-                guard let self, !self.isRemoved else {
+                guard let self, !self.isRemoved, self.allowsDeviceWork else {
                     return
                 }
 
@@ -270,7 +274,9 @@ class Device {
     }
 
     func prepareLogitechControlsRecording() {
-        guard let logitechReprogrammableControlsMonitor else {
+        guard allowsDeviceWork,
+              let logitechReprogrammableControlsMonitor
+        else {
             return
         }
 
@@ -299,7 +305,7 @@ class Device {
     }
 
     private func updateLogitechControlsMonitorRunning() {
-        guard !isRemoved else {
+        guard !isRemoved, allowsDeviceWork else {
             return
         }
 
