@@ -488,6 +488,22 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         )
     }
 
+    func connectedDeviceCount(
+        for device: VendorSpecificDeviceContext,
+        using receiverChannel: LogitechReceiverChannel
+    ) -> Int? {
+        switch Self.receiverProtocolFamily(
+            vendorID: device.vendorID,
+            productID: device.productID,
+            transport: device.transport
+        ) {
+        case .bolt:
+            receiverChannel.boltConnectedDeviceCount()
+        case .classic, .lightspeed, nil:
+            receiverChannel.connectedDeviceCount()
+        }
+    }
+
     func waitForReceiverConnectionChange(
         for device: VendorSpecificDeviceContext,
         timeout: TimeInterval,
@@ -600,13 +616,68 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             return nil
         }
 
-        return receiverSlotCandidate(for: device, slots: discovery.0)
+        return receiverSlotCandidate(
+            for: device,
+            slots: discovery.slots,
+            connectionSnapshots: discovery.connectionSnapshots,
+            expectedConnectedDeviceCount: discovery.expectedConnectedDeviceCount,
+            inventoryAvailable: discovery.inventoryAvailable
+        )
     }
 
     /// Resolves a legacy receiver route only when the candidate can be uniquely
     /// identified. Compatibility fallbacks remain available for receivers that
     /// expose no per-device metadata, but they must be unique as well.
     func receiverSlotCandidate(
+        for device: VendorSpecificDeviceContext,
+        slots: [ReceiverSlotMatchCandidate]
+    ) -> ReceiverSlotMatchCandidate? {
+        resolveReceiverSlotCandidate(for: device, slots: slots)
+    }
+
+    func receiverSlotCandidate(
+        for device: VendorSpecificDeviceContext,
+        slots: [ReceiverSlotMatchCandidate],
+        connectionSnapshots: [UInt8: ReceiverConnectionSnapshot],
+        expectedConnectedDeviceCount: Int?,
+        inventoryAvailable: Bool
+    ) -> ReceiverSlotMatchCandidate? {
+        guard let expectedConnectedDeviceCount else {
+            // Legacy receivers that cannot report a count keep the existing,
+            // explicitly compatibility-oriented fallback behavior.
+            return resolveReceiverSlotCandidate(for: device, slots: slots)
+        }
+        guard expectedConnectedDeviceCount > 0 else {
+            return nil
+        }
+
+        let activeSlots = Set(connectionSnapshots.compactMap { slot, snapshot in
+            snapshot.isConnected ? slot : nil
+        }).union(slots.filter(\.hasLiveMetadata).map(\.slot))
+        let activeCandidates = slots.filter { activeSlots.contains($0.slot) }
+
+        let normalizedSerial = normalizeSerial(device.serialNumber)
+        let serialMatches = activeCandidates.filter {
+            normalizedSerial != nil && normalizeSerial($0.serialNumber) == normalizedSerial
+        }
+        if let serialMatch = uniqueSlotMatch(serialMatches) {
+            // A precise active serial match remains safe even while another
+            // connected slot is incompletely observed.
+            return serialMatch
+        }
+
+        let activeCandidateSlots = Set(activeCandidates.map(\.slot))
+        guard inventoryAvailable,
+              activeSlots.count == expectedConnectedDeviceCount,
+              activeCandidateSlots == activeSlots
+        else {
+            return nil
+        }
+
+        return resolveReceiverSlotCandidate(for: device, slots: activeCandidates)
+    }
+
+    private func resolveReceiverSlotCandidate(
         for device: VendorSpecificDeviceContext,
         slots: [ReceiverSlotMatchCandidate]
     ) -> ReceiverSlotMatchCandidate? {
@@ -653,7 +724,13 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         }
 
         if slots.count == 1 {
-            return slots[0]
+            let candidate = slots[0]
+            if !desiredKinds.isEmpty,
+               ReceiverLogicalDeviceKind(rawValue: candidate.kind) != nil,
+               !desiredKinds.contains(candidate.kind) {
+                return nil
+            }
+            return candidate
         }
 
         return nil
@@ -1228,6 +1305,12 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             expectedConnectedDeviceCount: connectedDeviceCount,
             inventoryAvailable: true
         )
+    }
+
+    func connectedDeviceCount() -> Int? {
+        readConnectionState().flatMap {
+            LogitechHIDPPDeviceMetadataProvider.parseConnectedDeviceCount($0)
+        }
     }
 
     func discoverSlotInfo(

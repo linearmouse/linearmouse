@@ -13,6 +13,28 @@ enum ReceiverConnectionEventPublication {
     }
 }
 
+enum ReceiverPendingDiscoveryDisposition {
+    case retryCurrentChannel
+    case reopenChannel
+
+    static func resolve(inventoryAvailable: Bool, channelReachable: Bool) -> Self {
+        !inventoryAvailable && !channelReachable ? .reopenChannel : .retryCurrentChannel
+    }
+}
+
+enum ReceiverReadyCountDisposition {
+    case stayReady
+    case enterPending
+
+    static func resolve(previousCount: Int?, currentCount: Int?) -> Self {
+        guard let currentCount else {
+            return .stayReady
+        }
+
+        return previousCount == currentCount ? .stayReady : .enterPending
+    }
+}
+
 final class ReceiverMonitor {
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ReceiverMonitor")
     static let initialDiscoveryTimeout: TimeInterval = 3
@@ -243,6 +265,7 @@ private final class ReceiverContext {
     private var stateStore = ReceiverSlotStateStore()
     private var currentChannel: LogitechReceiverChannel?
     private var rediscoveryRequested = false
+    private var lastCompleteConnectedDeviceCount: Int?
     private let retrySemaphore = DispatchSemaphore(value: 0)
 
     var onDiscoveryTimedOut: (() -> Void)?
@@ -262,6 +285,7 @@ private final class ReceiverContext {
         }
         isRunning = true
         rediscoveryRequested = false
+        lastCompleteConnectedDeviceCount = nil
         lastPublishedIdentities = []
         stateStore.reset()
 
@@ -392,6 +416,16 @@ private final class ReceiverContext {
                 let identities = currentPublishedIdentities()
                 if !mergeResult.inventoryComplete {
                     publishUnavailable()
+                    if case .reopenChannel = ReceiverPendingDiscoveryDisposition.resolve(
+                        inventoryAvailable: discovery.inventoryAvailable,
+                        channelReachable: provider.receiverChannelIsReachable(
+                            for: device.pointerDevice,
+                            using: receiverChannel
+                        )
+                    ) {
+                        invalidateCurrentChannel(receiverChannel)
+                        lastCompleteConnectedDeviceCount = nil
+                    }
                     os_log(
                         "Receiver inventory is incomplete, retrying: locationID=%{public}d device=%{public}@",
                         log: ReceiverMonitor.log,
@@ -419,6 +453,7 @@ private final class ReceiverContext {
 
                 discoveryState = .ready
                 discoveryBackoff.reset()
+                lastCompleteConnectedDeviceCount = discovery.expectedConnectedDeviceCount
                 _ = consumeRediscoveryRequest()
                 let identitiesDescription = identities.map { identity in
                     let battery = identity.batteryLevel.map(String.init) ?? "(nil)"
@@ -474,6 +509,18 @@ private final class ReceiverContext {
                     invalidateCurrentChannel(receiverChannel)
                     discoveryState = .pending
                     discoveryBackoff.reset()
+                    lastCompleteConnectedDeviceCount = nil
+                } else if case .enterPending = ReceiverReadyCountDisposition.resolve(
+                    previousCount: lastCompleteConnectedDeviceCount,
+                    currentCount: provider.connectedDeviceCount(
+                        for: device.pointerDevice,
+                        using: receiverChannel
+                    )
+                ) {
+                    publishUnavailable()
+                    discoveryState = .pending
+                    discoveryBackoff.reset()
+                    lastCompleteConnectedDeviceCount = nil
                 }
                 continue
             }
@@ -625,6 +672,7 @@ private final class ReceiverContext {
         setCurrentChannel(nil)
         LogitechReceiverChannel.discardSharedChannel(locationID: locationID, matching: channel)
         stateStore.invalidateChannel()
+        lastCompleteConnectedDeviceCount = nil
         publish([])
     }
 

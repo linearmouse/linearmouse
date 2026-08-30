@@ -163,6 +163,12 @@ extension LogitechReceiverMonitoringChannel {
         )
     }
 
+    func boltConnectedDeviceCount() -> Int? {
+        readBoltConnectionState().flatMap {
+            LogitechHIDPPDeviceMetadataProvider.parseConnectedDeviceCount($0.bytes)
+        }
+    }
+
     private func triggerBoltConnectionNotifications() -> Bool {
         boltHIDPP10ShortRequest(
             subID: 0x80,

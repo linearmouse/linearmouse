@@ -45,6 +45,120 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         XCTAssertEqual(candidate.slot, 1)
     }
 
+    func testKnownPartialInventoryRejectsSingletonFallback() {
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+        let device = mouseDevice()
+
+        let candidate = provider.receiverSlotCandidate(
+            for: device,
+            slots: [slot(slot: 1, name: "Mouse")],
+            connectionSnapshots: [1: .init(isConnected: true, kind: 0x02)],
+            expectedConnectedDeviceCount: 2,
+            inventoryAvailable: true
+        )
+
+        XCTAssertNil(candidate)
+    }
+
+    func testKnownCompleteInventoryAllowsSingleActiveCandidate() throws {
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+        let device = mouseDevice()
+
+        let candidate = try XCTUnwrap(provider.receiverSlotCandidate(
+            for: device,
+            slots: [slot(slot: 1, name: "Mouse")],
+            connectionSnapshots: [1: .init(isConnected: true, kind: 0x02)],
+            expectedConnectedDeviceCount: 1,
+            inventoryAvailable: true
+        ))
+
+        XCTAssertEqual(candidate.slot, 1)
+    }
+
+    func testKnownEmptyInventoryHasNoCandidate() {
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+
+        XCTAssertNil(provider.receiverSlotCandidate(
+            for: mouseDevice(),
+            slots: [slot(slot: 1, name: "Mouse")],
+            connectionSnapshots: [:],
+            expectedConnectedDeviceCount: 0,
+            inventoryAvailable: true
+        ))
+    }
+
+    func testKnownPartialInventoryAllowsExactActiveSerialMatch() throws {
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: nil,
+            product: "Mouse",
+            serialNumber: "ABC123",
+            transport: PointerDeviceTransportName.usb,
+            primaryUsagePage: kHIDPage_GenericDesktop,
+            primaryUsage: kHIDUsage_GD_Mouse
+        )
+
+        let candidate = try XCTUnwrap(provider.receiverSlotCandidate(
+            for: device,
+            slots: [slot(slot: 1, name: "Mouse", serialNumber: "ABC123")],
+            connectionSnapshots: [1: .init(isConnected: true, kind: 0x02)],
+            expectedConnectedDeviceCount: 2,
+            inventoryAvailable: true
+        ))
+
+        XCTAssertEqual(candidate.slot, 1)
+    }
+
+    func testUnknownCountKeepsLegacyCompatibilityFallback() throws {
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+
+        let candidate = try XCTUnwrap(provider.receiverSlotCandidate(
+            for: mouseDevice(),
+            slots: [slot(slot: 1, name: "Mouse")],
+            connectionSnapshots: [:],
+            expectedConnectedDeviceCount: nil,
+            inventoryAvailable: false
+        ))
+
+        XCTAssertEqual(candidate.slot, 1)
+    }
+
+    func testMouseContextRejectsSingleKnownKeyboardCandidate() {
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+
+        XCTAssertNil(provider.receiverSlotCandidate(
+            for: mouseDevice(),
+            slots: [slot(slot: 1, kind: ReceiverLogicalDeviceKind.keyboard.rawValue)],
+            connectionSnapshots: [1: .init(isConnected: true, kind: 0x01)],
+            expectedConnectedDeviceCount: 1,
+            inventoryAvailable: true
+        ))
+    }
+
+    func testPendingUnavailableChannelRequestsReopen() {
+        XCTAssertEqual(
+            ReceiverPendingDiscoveryDisposition.resolve(
+                inventoryAvailable: false,
+                channelReachable: false
+            ),
+            .reopenChannel
+        )
+        XCTAssertEqual(
+            ReceiverPendingDiscoveryDisposition.resolve(
+                inventoryAvailable: false,
+                channelReachable: true
+            ),
+            .retryCurrentChannel
+        )
+    }
+
+    func testReadyCountChangeEntersPendingOnlyWhenKnownCountChanges() {
+        XCTAssertEqual(ReceiverReadyCountDisposition.resolve(previousCount: 2, currentCount: 2), .stayReady)
+        XCTAssertEqual(ReceiverReadyCountDisposition.resolve(previousCount: 2, currentCount: 1), .enterPending)
+        XCTAssertEqual(ReceiverReadyCountDisposition.resolve(previousCount: 2, currentCount: nil), .stayReady)
+    }
+
     func testCancelledCommittedCallbackTransactionDrainsItsResponse() {
         var response: Data?
         var waitCount = 0
@@ -131,6 +245,17 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
             productID: productID,
             batteryLevel: nil,
             hasLiveMetadata: name != nil || serialNumber != nil || productID != nil
+        )
+    }
+
+    private func mouseDevice() -> MockVendorSpecificDeviceContext {
+        MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: nil,
+            product: "Mouse",
+            transport: PointerDeviceTransportName.usb,
+            primaryUsagePage: kHIDPage_GenericDesktop,
+            primaryUsage: kHIDUsage_GD_Mouse
         )
     }
 }
