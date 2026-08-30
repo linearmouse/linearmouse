@@ -8,6 +8,8 @@ import XCTest
 final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
     private final class Device: LogitechDeviceSettingsTarget {
         var isRemoved = false
+        var confirmedLogitechSensorDPI: Int?
+        var confirmedLogitechHighResolutionWheel: Bool?
         private(set) var actions = [String]()
 
         func applyConfiguredSensorDPI(_ dpi: Int) {
@@ -43,11 +45,39 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
         XCTAssertEqual(device.actions, ["dpi:1000", "hiResWheel:true"])
 
         device.resetActions()
+        device.confirmedLogitechSensorDPI = 1000
+        device.confirmedLogitechHighResolutionWheel = true
         reconciler.apply(.init(dpi: 1000, highResolutionWheel: true))
         XCTAssertTrue(device.actions.isEmpty)
 
         reconciler.apply(.init(dpi: 1000, highResolutionWheel: false))
         XCTAssertEqual(device.actions, ["hiResWheel:false"])
+    }
+
+    func testUnconfirmedUnchangedSettingsAreAppliedAgain() {
+        let device = Device()
+        let reconciler = LogitechDeviceSettingsReconciler(device: device)
+        let settings = LogitechDeviceSettings(dpi: 1000, highResolutionWheel: true)
+
+        reconciler.apply(settings)
+        device.resetActions()
+
+        // A requested value is not confirmation. This covers initial input,
+        // reconnects, and the unknown state left by exhausted retries.
+        reconciler.apply(settings)
+
+        XCTAssertEqual(device.actions, ["dpi:1000", "hiResWheel:true"])
+    }
+
+    func testNilTransitionCancelsTheOldHardwareWork() {
+        let device = Device()
+        let reconciler = LogitechDeviceSettingsReconciler(device: device)
+
+        reconciler.apply(.init(dpi: 1000, highResolutionWheel: true))
+        device.resetActions()
+        reconciler.apply(.init(dpi: nil, highResolutionWheel: nil))
+
+        XCTAssertEqual(device.actions, ["prepareDPI", "prepareHiResWheel"])
     }
 
     func testReapplyForcesEveryVolatileSettingAndControlReconfiguration() {

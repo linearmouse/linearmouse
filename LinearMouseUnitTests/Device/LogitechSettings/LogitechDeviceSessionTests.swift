@@ -30,13 +30,32 @@ final class LogitechDeviceSessionTests: XCTestCase {
         let queueGate = DispatchSemaphore(value: 0)
         session.perform { queueGate.wait() }
         var operationRan = false
-        session.runDPIOperation { _ in operationRan = true }
+        session.runDPIOperation {
+            _ in operationRan = true
+        } onCancelled: {}
 
         session.cancelDPIApply()
         queueGate.signal()
         session.performSynchronously {}
 
         XCTAssertFalse(operationRan)
+    }
+
+    func testCancellingQueuedDPIOperationCompletesCancellationHandler() {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let queueGate = DispatchSemaphore(value: 0)
+        session.perform { queueGate.wait() }
+        let cancelled = expectation(description: "cancelled")
+
+        session.runDPIOperation { _ in
+            XCTFail("cancelled operation must not start")
+        } onCancelled: {
+            cancelled.fulfill()
+        }
+
+        session.cancelDPIApply()
+        queueGate.signal()
+        wait(for: [cancelled], timeout: 1)
     }
 
     func testMetadataEnrichmentKeepsCurrentHardwareSession() throws {
@@ -67,6 +86,26 @@ final class LogitechDeviceSessionTests: XCTestCase {
 
         XCTAssertTrue(update.hardwareTargetChanged)
         XCTAssertTrue(try XCTUnwrap(token).isCancelled)
+    }
+
+    func testUnavailableChannelThenSameIdentityInvalidatesHardwareSessionTwice() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let initialDiscovery = discovery(serialNumber: "AAAAAAAA", productID: 0xB034)
+        _ = session.updateDiscovery(initialDiscovery)
+        var initialToken: CancellationToken?
+        _ = session.adjustableDPI { _, currentToken in
+            initialToken = currentToken
+            return nil
+        }
+
+        let unavailable = session.updateDiscovery(.init(identities: [], route: nil))
+
+        XCTAssertTrue(unavailable.hardwareTargetChanged)
+        XCTAssertTrue(try XCTUnwrap(initialToken).isCancelled)
+
+        let recovered = session.updateDiscovery(initialDiscovery)
+
+        XCTAssertTrue(recovered.hardwareTargetChanged)
     }
 
     func testInitialWheelStateIsBoundToHardwareTarget() throws {

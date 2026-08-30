@@ -18,8 +18,29 @@ extension Device {
     }
 
     struct HardwareDPIApplyResult: Equatable {
+        enum Outcome: Equatable {
+            case applied
+            case unsupported
+            case cancelled
+        }
+
         let targetDPI: Int?
         let info: HardwareDPIInfo
+        let outcome: Outcome
+
+        init(
+            targetDPI: Int?,
+            info: HardwareDPIInfo,
+            outcome: Outcome = .applied
+        ) {
+            self.targetDPI = targetDPI
+            self.info = info
+            self.outcome = outcome
+        }
+    }
+
+    var confirmedLogitechSensorDPI: Int? {
+        logitechSession.sensorDPI
     }
 
     func applyConfiguredSensorDPI(_ dpi: Int) {
@@ -83,10 +104,43 @@ extension Device {
     }
 
     func applyHardwareDPI(_ dpi: Int, completion: @escaping (HardwareDPIApplyResult) -> Void) {
+        let completionLock = NSLock()
+        var completed = false
+        let deliver: (HardwareDPIApplyResult) -> Void = { result in
+            let shouldDeliver = completionLock.withLock { () -> Bool in
+                guard !completed else {
+                    return false
+                }
+                completed = true
+                return true
+            }
+            guard shouldDeliver else {
+                return
+            }
+            DispatchQueue.main.async {
+                completion(result)
+            }
+        }
+        let cancelledResult = {
+            HardwareDPIApplyResult(
+                targetDPI: nil,
+                info: self.unsupportedHardwareDPIInfo,
+                outcome: .cancelled
+            )
+        }
+
         logitechSession.runDPIOperation { token in
+            guard token.shouldContinue else {
+                deliver(cancelledResult())
+                return
+            }
             let result: HardwareDPIApplyResult
             if !self.isRemoved, let access = self.logitechAdjustableDPI(for: token) {
                 let targetDPI = self.applySensorDPISynchronously(dpi, access: access)
+                guard token.shouldContinue, !self.isRemoved else {
+                    deliver(cancelledResult())
+                    return
+                }
                 let currentDPI = targetDPI ?? self.logitechSession.sensorDPI
                 result = HardwareDPIApplyResult(
                     targetDPI: targetDPI,
@@ -94,18 +148,19 @@ extension Device {
                         supportsAdjustableDPI: true,
                         currentDPI: currentDPI,
                         dpiRange: access.feature.dpiRange
-                    )
+                    ),
+                    outcome: .applied
                 )
             } else {
                 result = HardwareDPIApplyResult(
                     targetDPI: nil,
-                    info: self.unsupportedHardwareDPIInfo
+                    info: self.unsupportedHardwareDPIInfo,
+                    outcome: token.shouldContinue ? .unsupported : .cancelled
                 )
             }
-
-            DispatchQueue.main.async {
-                completion(result)
-            }
+            deliver(result)
+        } onCancelled: {
+            deliver(cancelledResult())
         }
     }
 

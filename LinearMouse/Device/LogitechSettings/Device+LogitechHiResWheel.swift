@@ -17,6 +17,10 @@ extension Device {
         let multiplier: Int?
     }
 
+    var confirmedLogitechHighResolutionWheel: Bool? {
+        logitechSession.hiResWheelEnabled
+    }
+
     func applyConfiguredHighResolutionWheel(_ enabled: Bool) {
         logitechSession.startHiResWheelApply { [weak self] attempt, token in
             guard let self, !isRemoved, attempt.shouldContinue() else {
@@ -160,19 +164,34 @@ extension Device {
         let initialEnabled = logitechSession.initialHiResWheelEnabled(
             requiresReceiverRoute: LogitechReceiverRouteResolver.requiresDiscovery(for: pointerDevice)
         )
-        guard let initialEnabled,
-              !isRemoved,
-              let access = logitechHiResWheel(for: expectedToken) else {
-            clearHighResolutionWheelCache()
+        guard let initialEnabled else {
             logitechSession.invalidateHiResWheel()
+            if logitechSession.hasInitialHiResWheelState {
+                logitechSession.clearHiResWheelState(includingInitialState: false)
+            } else {
+                clearHighResolutionWheelCache()
+            }
             return
         }
 
-        let controller = access.feature
-        _ = controller.setHighResolutionWheelEnabled(initialEnabled)
+        guard !isRemoved,
+              let access = logitechHiResWheel(for: expectedToken) else {
+            // Losing transport access is not evidence that the restore worked.
+            // Preserve the initial state for a subsequent teardown attempt.
+            logitechSession.invalidateHiResWheel()
+            logitechSession.clearHiResWheelState(includingInitialState: false)
+            return
+        }
 
+        let restored = access.feature.setHighResolutionWheelEnabled(initialEnabled) == initialEnabled
         logitechSession.invalidateHiResWheel()
-        clearHighResolutionWheelCache()
+        if restored {
+            clearHighResolutionWheelCache()
+        } else {
+            // The device may be temporarily asleep. Keep the original state
+            // so a later lifecycle teardown can still restore it.
+            logitechSession.clearHiResWheelState(includingInitialState: false)
+        }
     }
 
     private func clearHighResolutionWheelCache() {

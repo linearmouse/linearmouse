@@ -9,6 +9,11 @@ import ObservationToken
 import os.log
 import PointerKit
 
+/// Keep HID++ cancellation at the app boundary so PointerKit remains a
+/// transport-agnostic package. This lets an in-flight direct-device request
+/// yield before lifecycle teardown performs its main-run-loop restore.
+extension PointerDevice: HIDPPCancellableDeviceIO {}
+
 class Device {
     private static let log = OSLog(
         subsystem: Bundle.main.bundleIdentifier!, category: "Device"
@@ -228,6 +233,26 @@ class Device {
         logitechReprogrammableControlsMonitor != nil
     }
 
+    /// Stops Logitech control monitoring before its pointer device is
+    /// invalidated. Completion is delivered asynchronously after the monitor
+    /// has restored its original HID++ reporting state.
+    func disableLogitechControlsMonitoring(completion: @escaping () -> Void) {
+        logitechControlsMonitorSubscriptions.removeAll()
+        guard let logitechReprogrammableControlsMonitor else {
+            DispatchQueue.main.async(execute: completion)
+            return
+        }
+
+        logitechReprogrammableControlsMonitor.disable(completion: completion)
+    }
+
+    /// Stops control monitoring for system sleep without attempting HID++ I/O
+    /// against a device that may already be suspended.
+    func stopLogitechControlsMonitoringForSleep() {
+        logitechControlsMonitorSubscriptions.removeAll()
+        logitechReprogrammableControlsMonitor?.disableForSleep()
+    }
+
     func requestLogitechControlsForcedReconfiguration() {
         logitechSession.perform { [weak self] in
             DispatchQueue.main.async {
@@ -432,9 +457,19 @@ extension Device {
         device.pointerResolution = initialPointerResolution
     }
 
+    /// Restore only software pointer properties. UI-level pointer-speed reset
+    /// must not cancel hardware work that remains configured for the device.
+    func restorePointerAccelerationAndPointerSpeed() {
+        restorePointerSpeed()
+        restorePointerAcceleration()
+    }
+
+    /// Compatibility entry point for the application lifecycle teardown path.
+    /// DeviceManager passes both arguments explicitly so UI callers use the
+    /// software-only overload above.
     func restorePointerAccelerationAndPointerSpeed(
-        restoringHighResolutionWheel: Bool = true,
-        waitForHighResolutionWheelRestore: Bool = false
+        restoringHighResolutionWheel: Bool,
+        waitForHighResolutionWheelRestore: Bool
     ) {
         restoreSensorDPI()
         if restoringHighResolutionWheel {
@@ -442,8 +477,7 @@ extension Device {
         } else {
             prepareHighResolutionWheelForReconnect()
         }
-        restorePointerSpeed()
-        restorePointerAcceleration()
+        restorePointerAccelerationAndPointerSpeed()
     }
 
     private func inputValueCallback(

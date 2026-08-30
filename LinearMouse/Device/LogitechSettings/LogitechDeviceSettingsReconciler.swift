@@ -10,6 +10,8 @@ struct LogitechDeviceSettings: Equatable {
 
 protocol LogitechDeviceSettingsTarget: AnyObject {
     var isRemoved: Bool { get }
+    var confirmedLogitechSensorDPI: Int? { get }
+    var confirmedLogitechHighResolutionWheel: Bool? { get }
 
     func applyConfiguredSensorDPI(_ dpi: Int)
     func applyConfiguredHighResolutionWheel(_ enabled: Bool)
@@ -51,17 +53,30 @@ final class LogitechDeviceSettingsReconciler {
             return
         }
 
-        lock.lock()
-        let previousSettings = desiredSettings
-        desiredSettings = settings
-        lock.unlock()
+        let previousSettings = lock.withLock { () -> LogitechDeviceSettings in
+            let previous = desiredSettings
+            desiredSettings = settings
+            return previous
+        }
 
-        if let dpi = settings.dpi, force || dpi != previousSettings.dpi {
+        // desiredSettings records only the request. The feature caches are
+        // updated from HID++ reads/writes, and become nil after an exhausted
+        // retry budget, so an unchanged configuration can converge again.
+        if let dpi = settings.dpi,
+           force || dpi != previousSettings.dpi || device.confirmedLogitechSensorDPI != dpi {
             device.applyConfiguredSensorDPI(dpi)
+        } else if settings.dpi == nil, previousSettings.dpi != nil {
+            // A nil transition is a semantic stop, not "leave the old retry
+            // running until it happens to finish".
+            device.prepareSensorDPIForReconnect()
         }
         if let highResolutionWheel = settings.highResolutionWheel,
-           force || highResolutionWheel != previousSettings.highResolutionWheel {
+           force || highResolutionWheel != previousSettings.highResolutionWheel
+           || device.confirmedLogitechHighResolutionWheel != highResolutionWheel {
             device.applyConfiguredHighResolutionWheel(highResolutionWheel)
+        } else if settings.highResolutionWheel == nil,
+                  previousSettings.highResolutionWheel != nil {
+            device.prepareHighResolutionWheelForReconnect()
         }
     }
 }

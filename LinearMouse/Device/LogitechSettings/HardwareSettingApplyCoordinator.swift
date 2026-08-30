@@ -37,6 +37,7 @@ final class HardwareSettingApplyCoordinator {
     }
 
     typealias Operation = (_ attempt: Attempt) -> Bool
+    typealias Completion = (_ succeeded: Bool) -> Void
     typealias Scheduler = (_ delay: TimeInterval, _ work: @escaping () -> Void) -> Void
 
     private enum Phase {
@@ -60,7 +61,7 @@ final class HardwareSettingApplyCoordinator {
         self.scheduler = scheduler
     }
 
-    func start(_ operation: @escaping Operation) {
+    func start(_ operation: @escaping Operation, completion: Completion? = nil) {
         let cancellationSource = CancellationSource()
         let previousSource = lock.withLock { () -> CancellationSource? in
             defer { currentCancellationSource = cancellationSource }
@@ -73,7 +74,8 @@ final class HardwareSettingApplyCoordinator {
             phase: .apply,
             retryIndex: 0,
             delay: 0,
-            operation: operation
+            operation: operation,
+            completion: completion
         )
     }
 
@@ -90,14 +92,16 @@ final class HardwareSettingApplyCoordinator {
         phase: Phase,
         retryIndex: Int,
         delay: TimeInterval,
-        operation: @escaping Operation
+        operation: @escaping Operation,
+        completion: Completion?
     ) {
         scheduler(delay) { [weak self] in
             self?.run(
                 cancellationSource: cancellationSource,
                 phase: phase,
                 retryIndex: retryIndex,
-                operation: operation
+                operation: operation,
+                completion: completion
             )
         }
     }
@@ -106,7 +110,8 @@ final class HardwareSettingApplyCoordinator {
         cancellationSource: CancellationSource,
         phase: Phase,
         retryIndex: Int,
-        operation: @escaping Operation
+        operation: @escaping Operation,
+        completion: Completion?
     ) {
         guard isCurrent(cancellationSource) else {
             return
@@ -129,16 +134,17 @@ final class HardwareSettingApplyCoordinator {
                     phase: .confirm,
                     retryIndex: 0,
                     delay: confirmationDelay,
-                    operation: operation
+                    operation: operation,
+                    completion: completion
                 )
             } else {
-                finish(cancellationSource)
+                finish(cancellationSource, succeeded: true, completion: completion)
             }
             return
         }
 
         guard retryIndex < retryDelays.count else {
-            finish(cancellationSource)
+            finish(cancellationSource, succeeded: false, completion: completion)
             return
         }
 
@@ -147,7 +153,8 @@ final class HardwareSettingApplyCoordinator {
             phase: phase,
             retryIndex: retryIndex + 1,
             delay: retryDelays[retryIndex],
-            operation: operation
+            operation: operation,
+            completion: completion
         )
     }
 
@@ -156,12 +163,22 @@ final class HardwareSettingApplyCoordinator {
             && lock.withLock { currentCancellationSource === cancellationSource }
     }
 
-    private func finish(_ cancellationSource: CancellationSource) {
-        lock.withLock {
+    private func finish(
+        _ cancellationSource: CancellationSource,
+        succeeded: Bool,
+        completion: Completion?
+    ) {
+        let wasCurrent = lock.withLock {
             if currentCancellationSource === cancellationSource {
                 currentCancellationSource = nil
+                return true
             }
+            return false
+        }
+        guard wasCurrent else {
+            return
         }
         cancellationSource.cancel()
+        completion?(succeeded)
     }
 }

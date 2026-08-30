@@ -42,7 +42,9 @@ public class PointerDevice {
     private var inputReportBuffer: UnsafeMutablePointer<UInt8>?
     private var inputReportBufferLength = 0
 
-    private let synchronousReportRequestLock = NSLock()
+    /// Serializes HID++ transactions while still allowing a cancelled request
+    /// to relinquish the device promptly during application teardown.
+    private let synchronousReportRequestGate = DispatchSemaphore(value: 1)
     private let pendingReportRequestLock = NSLock()
     private var pendingReportMatcher: ((Data) -> Bool)?
     private var pendingReportResponse: Data?
@@ -477,12 +479,32 @@ extension PointerDevice {
         timeout: TimeInterval,
         matching: @escaping (Data) -> Bool
     ) -> Data? {
+        performSynchronousOutputReportRequest(
+            report,
+            timeout: timeout,
+            matching: matching
+        )            { true }
+    }
+
+    public func performSynchronousOutputReportRequest(
+        _ report: Data,
+        timeout: TimeInterval,
+        matching: @escaping (Data) -> Bool,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Data? {
         guard let device, !report.isEmpty, valid else {
             return nil
         }
 
-        synchronousReportRequestLock.lock()
-        defer { synchronousReportRequestLock.unlock() }
+        while shouldContinue() {
+            if synchronousReportRequestGate.wait(timeout: .now() + 0.01) == .success {
+                break
+            }
+        }
+        guard shouldContinue() else {
+            return nil
+        }
+        defer { synchronousReportRequestGate.signal() }
 
         guard ensureInputReportCallbackRegistered(minimumReportLength: max(report.count, maxInputReportSize ?? 0)),
               valid
@@ -524,9 +546,9 @@ extension PointerDevice {
             return nil
         }
 
-        if Thread.isMainThread {
+        if CFEqual(CFRunLoopGetCurrent(), runLoop) {
             let deadline = Date().addingTimeInterval(timeout)
-            while Date() < deadline {
+            while Date() < deadline, shouldContinue() {
                 pendingReportRequestLock.lock()
                 let response = pendingReportResponse
                 pendingReportRequestLock.unlock()
@@ -542,7 +564,12 @@ extension PointerDevice {
                 }
             }
         } else {
-            _ = semaphore.wait(timeout: .now() + timeout)
+            let deadline = Date().addingTimeInterval(timeout)
+            while Date() < deadline, shouldContinue() {
+                if semaphore.wait(timeout: .now() + 0.01) == .success {
+                    break
+                }
+            }
         }
 
         pendingReportRequestLock.lock()
@@ -550,6 +577,20 @@ extension PointerDevice {
         clearPendingReportRequest()
         pendingReportRequestLock.unlock()
         return response
+    }
+
+    public func performSynchronousOutputReportRequestOnce(
+        _ report: Data,
+        timeout: TimeInterval,
+        matching: @escaping (Data) -> Bool,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Data? {
+        performSynchronousOutputReportRequest(
+            report,
+            timeout: timeout,
+            matching: matching,
+            until: shouldContinue
+        )
     }
 
     public func observeReport(using closure: @escaping InputReportClosure) -> ObservationToken {

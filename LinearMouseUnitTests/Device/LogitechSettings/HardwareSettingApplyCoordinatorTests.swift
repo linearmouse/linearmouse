@@ -172,4 +172,24 @@ final class HardwareSettingApplyCoordinatorTests: XCTestCase {
         XCTAssertEqual(firstAttemptShouldContinue?(), false)
         XCTAssertEqual(scheduler.work.map(\.delay), [0])
     }
+
+    func testReportsFailureAfterRetryBudgetIsExhausted() {
+        let scheduler = Scheduler()
+        let coordinator = HardwareSettingApplyCoordinator(
+            retryDelays: [1],
+            confirmationDelay: 3,
+            scheduler: scheduler.schedule
+        )
+        var completions = [Bool]()
+
+        coordinator.start {
+            _ in false
+        } completion: {
+            completions.append($0)
+        }
+        scheduler.runNext()
+        scheduler.runNext()
+
+        XCTAssertEqual(completions, [false])
+    }
 }

@@ -156,7 +156,14 @@ final class LogitechDeviceSession {
             cache: \State.adjustableDPI,
             cancellationSource: \State.dpiCancellationSource
         ) { token in
-            coordinator.start { attempt in operation(attempt, token) }
+            coordinator.start { attempt in
+                operation(attempt, token)
+            } completion: { [weak self] succeeded in
+                guard !succeeded else {
+                    return
+                }
+                self?.clearSensorDPI(for: token)
+            }
         }
     }
 
@@ -168,13 +175,17 @@ final class LogitechDeviceSession {
         ) { _ in coordinator.cancel() }
     }
 
-    func runDPIOperation(_ operation: @escaping (CancellationToken) -> Void) {
+    func runDPIOperation(
+        _ operation: @escaping (CancellationToken) -> Void,
+        onCancelled: @escaping () -> Void
+    ) {
         runFeatureOperation(
             cache: \State.adjustableDPI,
             cancellationSource: \State.dpiCancellationSource,
             coordinator: dpiApplyCoordinator,
             waitUntilFinished: false,
-            operation: operation
+            operation: operation,
+            onCancelled: onCancelled
         )
     }
 
@@ -186,7 +197,14 @@ final class LogitechDeviceSession {
             cache: \State.hiResWheel,
             cancellationSource: \State.hiResWheelCancellationSource
         ) { token in
-            coordinator.start { attempt in operation(attempt, token) }
+            coordinator.start { attempt in
+                operation(attempt, token)
+            } completion: { [weak self] succeeded in
+                guard !succeeded else {
+                    return
+                }
+                self?.clearHiResWheelState(for: token)
+            }
         }
     }
 
@@ -208,7 +226,7 @@ final class LogitechDeviceSession {
             coordinator: hiResWheelApplyCoordinator,
             waitUntilFinished: waitUntilFinished,
             operation: operation
-        )
+        )            {}
     }
 
     func updateSensorDPI(_ dpi: Int, for access: FeatureAccess<AdjustableDPI>) {
@@ -223,6 +241,15 @@ final class LogitechDeviceSession {
 
     func clearSensorDPI() {
         withState { $0.sensorDPI = nil }
+    }
+
+    func clearSensorDPI(for token: CancellationToken) {
+        withState { state in
+            guard state.dpiCancellationSource.token == token else {
+                return
+            }
+            state.sensorDPI = nil
+        }
     }
 
     func updateHiResWheelState(
@@ -274,6 +301,10 @@ final class LogitechDeviceSession {
         }
     }
 
+    var hasInitialHiResWheelState: Bool {
+        withState { $0.initialHiResWheelState != nil }
+    }
+
     func clearHiResWheelState(includingInitialState: Bool) {
         withState {
             $0.hiResWheelEnabled = nil
@@ -281,6 +312,18 @@ final class LogitechDeviceSession {
             if includingInitialState {
                 $0.initialHiResWheelState = nil
             }
+        }
+    }
+
+    /// An exhausted retry budget makes the cached state unknown. The initial
+    /// state remains available for a later lifecycle restore.
+    func clearHiResWheelState(for token: CancellationToken) {
+        withState { state in
+            guard state.hiResWheelCancellationSource.token == token else {
+                return
+            }
+            state.hiResWheelEnabled = nil
+            state.hiResWheelMultiplier = nil
         }
     }
 
@@ -306,7 +349,8 @@ final class LogitechDeviceSession {
         cancellationSource: WritableKeyPath<State, CancellationSource>,
         coordinator: HardwareSettingApplyCoordinator,
         waitUntilFinished: Bool,
-        operation: @escaping (CancellationToken) -> Void
+        operation: @escaping (CancellationToken) -> Void,
+        onCancelled: @escaping () -> Void
     ) {
         let token = resetFeatureOperation(
             cache: cache,
@@ -314,14 +358,33 @@ final class LogitechDeviceSession {
         ) { _ in coordinator.cancel() }
         let guardedOperation = {
             guard token.shouldContinue else {
+                onCancelled()
                 return
             }
             operation(token)
         }
         if waitUntilFinished {
-            performSynchronously(guardedOperation)
+            if Thread.isMainThread {
+                // Direct HID report callbacks are delivered by the main run
+                // loop. Drain cancelled queued work without blocking it, then
+                // issue the teardown request on that run loop.
+                drainQueueOnCurrentRunLoop()
+                guardedOperation()
+            } else {
+                performSynchronously(guardedOperation)
+            }
         } else {
             perform(guardedOperation)
+        }
+    }
+
+    private func drainQueueOnCurrentRunLoop() {
+        let drained = DispatchSemaphore(value: 0)
+        queue.async {
+            drained.signal()
+        }
+        while drained.wait(timeout: .now()) == .timedOut {
+            _ = CFRunLoopRunInMode(.defaultMode, 0.01, true)
         }
     }
 
