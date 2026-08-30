@@ -163,6 +163,30 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         let kind: UInt8?
     }
 
+    /// Accumulates receiver connection notifications. A complete connected
+    /// count is only actionable after a quiet wait: buffered follow-up events
+    /// for the same slot must be allowed to replace an earlier snapshot.
+    struct ReceiverConnectionSnapshotCollector {
+        private let expectedConnectedDeviceCount: Int?
+        private(set) var snapshots = [UInt8: ReceiverConnectionSnapshot]()
+
+        init(expectedConnectedDeviceCount: Int?) {
+            self.expectedConnectedDeviceCount = expectedConnectedDeviceCount
+        }
+
+        mutating func record(slot: UInt8, snapshot: ReceiverConnectionSnapshot) {
+            snapshots[slot] = snapshot
+        }
+
+        var isCompleteAfterQuietWait: Bool {
+            guard let expectedConnectedDeviceCount else {
+                return false
+            }
+
+            return snapshots.values.filter(\.isConnected).count >= expectedConnectedDeviceCount
+        }
+    }
+
     struct ReceiverSlotDiscovery {
         let slots: [ReceiverSlotInfo]
         let connectionSnapshots: [UInt8: ReceiverConnectionSnapshot]
@@ -1449,15 +1473,16 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             return [:]
         }
 
-        var snapshots = [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot]()
+        var collector = LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotCollector(
+            expectedConnectedDeviceCount: expectedCount
+        )
         let deadline = Date().addingTimeInterval(0.5)
         while Date() < deadline {
             guard let report = waitForInputReport(timeout: 0.05, matching: { response in
                 LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(Array(response)) != nil
             }) else {
                 // No more notifications pending — if we already have enough connected snapshots, exit early
-                if let expectedCount,
-                   snapshots.values.filter(\.isConnected).count >= expectedCount {
+                if collector.isCompleteAfterQuietWait {
                     break
                 }
                 continue
@@ -1468,16 +1493,10 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
                 continue
             }
 
-            snapshots[notification.slot] = notification.snapshot
-
-            // Exit early once we have all expected connected device snapshots
-            if let expectedCount,
-               snapshots.values.filter(\.isConnected).count >= expectedCount {
-                break
-            }
+            collector.record(slot: notification.slot, snapshot: notification.snapshot)
         }
 
-        return snapshots
+        return collector.snapshots
     }
 
     func discoverMatchCandidates(baseName: String)
@@ -2491,6 +2510,13 @@ final class LogitechReprogrammableControlsMonitor {
 
             state.setActiveNotificationEndpoint(monitorTarget.notificationEndpoint)
             monitorTarget.notificationEndpoint.enableNotifications()
+            monitorTarget.notificationEndpoint.discardHIDPPNotifications { response in
+                Self.isDivertedButtonsNotification(
+                    response,
+                    featureIndex: featureIndex,
+                    deviceIndices: monitorTarget.notificationDeviceIndices
+                )
+            }
             logAvailableControls(transport: transport, featureIndex: featureIndex, slot: slot, locationID: locationID)
 
             while shouldContinueRunning() {
@@ -3521,7 +3547,8 @@ final class LogitechReprogrammableControlsMonitor {
         featureIndex: UInt8,
         deviceIndices: Set<UInt8>
     ) -> Bool {
-        guard report.count >= 4,
+        guard LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(report) == nil,
+              report.count >= 4,
               [LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
                LogitechHIDPPDeviceMetadataProvider.Constants.longReportID].contains(report[0]),
               deviceIndices.contains(report[1]),
@@ -3966,6 +3993,7 @@ final class LogitechReprogrammableControlsMonitorState {
 private protocol HIDPPNotificationHandling: AnyObject {
     func enableNotifications()
     func wake()
+    func discardHIDPPNotifications(matching: @escaping ([UInt8]) -> Bool)
     func waitForHIDPPNotification(
         timeout: TimeInterval,
         matching: @escaping ([UInt8]) -> Bool,
@@ -4015,6 +4043,14 @@ final class HIDPPNotificationBuffer {
 
     func wake() {
         condition.lock()
+        wakeGeneration &+= 1
+        condition.broadcast()
+        condition.unlock()
+    }
+
+    func discard(matching: @escaping ([UInt8]) -> Bool) {
+        condition.lock()
+        bufferedReports.removeAll(where: matching)
         wakeGeneration &+= 1
         condition.broadcast()
         condition.unlock()
@@ -4094,6 +4130,10 @@ final class HIDPPNotificationEndpoint: HIDPPNotificationHandling {
         buffer.wake()
     }
 
+    func discardHIDPPNotifications(matching: @escaping ([UInt8]) -> Bool) {
+        buffer.discard(matching: matching)
+    }
+
     func handleInputReport(_ report: Data) {
         buffer.appendIfUnsolicited(report)
     }
@@ -4110,6 +4150,10 @@ final class HIDPPNotificationEndpoint: HIDPPNotificationHandling {
 extension LogitechReceiverChannel: HIDPPNotificationHandling {
     func enableNotifications() {
         enableWirelessNotifications()
+    }
+
+    func discardHIDPPNotifications(matching: @escaping ([UInt8]) -> Bool) {
+        notificationBuffer.discard(matching: matching)
     }
 }
 

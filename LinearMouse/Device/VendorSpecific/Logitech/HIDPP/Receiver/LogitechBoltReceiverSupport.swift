@@ -227,28 +227,25 @@ extension LogitechReceiverMonitoringChannel {
         expectedCount: Int? = nil,
         until shouldContinue: (() -> Bool)? = nil
     ) -> [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot] {
-        var snapshots = [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot]()
+        var collector = LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotCollector(
+            expectedConnectedDeviceCount: expectedCount
+        )
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline, shouldContinue?() ?? true {
             guard let notification = waitForReceiverConnectionNotification(
                 timeout: 0.05,
                 until: shouldContinue
             ) else {
-                if let expectedCount,
-                   snapshots.values.filter(\.isConnected).count >= expectedCount {
+                if collector.isCompleteAfterQuietWait {
                     break
                 }
                 continue
             }
 
-            snapshots[notification.slot] = notification.snapshot
-            if let expectedCount,
-               snapshots.values.filter(\.isConnected).count >= expectedCount {
-                break
-            }
+            collector.record(slot: notification.slot, snapshot: notification.snapshot)
         }
 
-        return snapshots
+        return collector.snapshots
     }
 
     private func boltReceiverInfoRequest(

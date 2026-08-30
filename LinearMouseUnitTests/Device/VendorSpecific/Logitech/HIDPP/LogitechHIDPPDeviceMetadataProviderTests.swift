@@ -407,6 +407,71 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         )
     }
 
+    func testNotificationBufferDiscardRemovesOnlyStaleTargetControlsEvents() {
+        let buffer = HIDPPNotificationBuffer()
+        let stalePress = [UInt8]([0x11, 0x02, 0x05, 0x00, 0x00, 0xC3, 0x00])
+        let connection = [UInt8]([0x10, 0x02, 0x41, 0x00, 0x02, 0x00, 0x00])
+        let freshPress = [UInt8]([0x11, 0x02, 0x05, 0x00, 0x00, 0xC4, 0x00])
+        let matchesTargetControls: ([UInt8]) -> Bool = {
+            LogitechReprogrammableControlsMonitor.isDivertedButtonsNotification(
+                $0,
+                featureIndex: 0x05,
+                deviceIndices: [0x02]
+            )
+        }
+
+        buffer.appendIfUnsolicited(stalePress)
+        buffer.appendIfUnsolicited(connection)
+        buffer.discard(matching: matchesTargetControls)
+
+        XCTAssertNil(buffer.wait(timeout: 0, matching: matchesTargetControls))
+        XCTAssertEqual(
+            buffer.wait(timeout: 0) {
+                LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification($0) != nil
+            },
+            connection
+        )
+
+        buffer.appendIfUnsolicited(freshPress)
+        XCTAssertEqual(buffer.wait(timeout: 0, matching: matchesTargetControls), freshPress)
+    }
+
+    func testDivertedButtonsMatcherRejectsReceiverConnectionReportWithFeatureLikeSubID() {
+        let connection = [UInt8]([0x10, 0x02, 0x41, 0x00, 0x02, 0x00, 0x00])
+
+        XCTAssertFalse(
+            LogitechReprogrammableControlsMonitor.isDivertedButtonsNotification(
+                connection,
+                featureIndex: 0x41,
+                deviceIndices: [0x02]
+            )
+        )
+    }
+
+    func testConnectionSnapshotCollectorRetainsFollowupUntilQuietWait() {
+        var collector = LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotCollector(
+            expectedConnectedDeviceCount: 1
+        )
+        collector.record(slot: 1, snapshot: .init(isConnected: true, kind: 0x02))
+
+        // The caller may stop only when a subsequent wait is quiet. A buffered
+        // disconnect received first replaces the earlier connect.
+        XCTAssertTrue(collector.isCompleteAfterQuietWait)
+        collector.record(slot: 1, snapshot: .init(isConnected: false, kind: 0x02))
+
+        XCTAssertFalse(collector.isCompleteAfterQuietWait)
+        XCTAssertEqual(collector.snapshots[1], .init(isConnected: false, kind: 0x02))
+    }
+
+    func testConnectionSnapshotCollectorCompletesAfterQuietWaitForConnectOnly() {
+        var collector = LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotCollector(
+            expectedConnectedDeviceCount: 1
+        )
+        collector.record(slot: 1, snapshot: .init(isConnected: true, kind: 0x02))
+
+        XCTAssertTrue(collector.isCompleteAfterQuietWait)
+    }
+
     func testNotificationBufferCoalescesHistoricalWakeups() {
         let firstWait = expectation(description: "buffer waits once")
         let finished = expectation(description: "buffer wait cancels")
