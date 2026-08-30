@@ -1081,6 +1081,30 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertTrue(store.currentPublishedIdentities().isEmpty)
     }
 
+    func testReceiverSlotStateStoreCompletesMouseWithPresenterAndHeadset() {
+        var store = ReceiverSlotStateStore()
+        let mouse = receiverIdentity(slot: 1, name: "Mouse A")
+
+        let result = store.mergeDiscovery(.init(
+            identities: [mouse],
+            connectionSnapshots: [
+                1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue),
+                2: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.presenter.rawValue),
+                3: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.headset.rawValue)
+            ],
+            liveReachableSlots: [1, 2, 3],
+            expectedConnectedDeviceCount: 3,
+            observedSlotKinds: [
+                1: ReceiverLogicalDeviceKind.mouse.rawValue,
+                2: ReceiverLogicalDeviceKind.presenter.rawValue,
+                3: ReceiverLogicalDeviceKind.headset.rawValue
+            ]
+        ))
+
+        XCTAssertTrue(result.inventoryComplete)
+        XCTAssertEqual(store.currentPublishedIdentities(), [mouse])
+    }
+
     func testReceiverSlotStateStoreRequiresKnownCountAndPointingIdentityForCompleteInventory() {
         var store = ReceiverSlotStateStore()
 
@@ -1117,6 +1141,20 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         ))
 
         XCTAssertTrue(result.inventoryComplete)
+    }
+
+    func testReceiverSlotStateStoreTreatsUnknownHIDPPKindAsIncomplete() {
+        var store = ReceiverSlotStateStore()
+
+        let result = store.mergeDiscovery(.init(
+            identities: [],
+            connectionSnapshots: [1: .init(isConnected: true, kind: 0x06)],
+            liveReachableSlots: [1],
+            expectedConnectedDeviceCount: 1,
+            observedSlotKinds: [1: 0x06]
+        ))
+
+        XCTAssertFalse(result.inventoryComplete)
     }
 
     func testReceiverSlotStateStoreDropsStaleMouseForResolvedKeyboardSnapshot() {

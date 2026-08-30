@@ -7,14 +7,31 @@ enum ReceiverLogicalDeviceKind: UInt8, Hashable {
     case keyboard = 0x01
     case mouse = 0x02
     case numpad = 0x03
+    case presenter = 0x04
+    case remote = 0x07
     case trackball = 0x08
     case touchpad = 0x09
+    case tablet = 0x0A
+    case gamepad = 0x0B
+    case joystick = 0x0C
+    case headset = 0x0D
+    case remoteControl = 0x0E
+    case receiver = 0x0F
 
     var isPointingDevice: Bool {
         switch self {
         case .mouse, .trackball, .touchpad:
             return true
-        case .keyboard, .numpad:
+        case .keyboard,
+             .numpad,
+             .presenter,
+             .remote,
+             .tablet,
+             .gamepad,
+             .joystick,
+             .headset,
+             .remoteControl,
+             .receiver:
             return false
         }
     }
