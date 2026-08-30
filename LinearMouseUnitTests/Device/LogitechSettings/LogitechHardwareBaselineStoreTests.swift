@@ -181,6 +181,28 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
         XCTAssertEqual(delays, [0.1, 0.2])
     }
 
+    func testLifecycleRestoreSkipsFeatureAccessWithoutInitialOrBaseline() {
+        var featureAccesses = 0
+
+        if LogitechHiResRestoreAdmission.needsFeatureAccess(
+            hasSessionInitial: false,
+            hasKnownBaseline: false,
+            hasLegacyReceiverBaseline: false
+        ) {
+            featureAccesses += 1
+        }
+
+        XCTAssertEqual(featureAccesses, 0)
+    }
+
+    func testLegacyStoredBaselineRequiresOnDemandFeatureAccess() {
+        XCTAssertTrue(LogitechHiResRestoreAdmission.needsFeatureAccess(
+            hasSessionInitial: false,
+            hasKnownBaseline: false,
+            hasLegacyReceiverBaseline: true
+        ))
+    }
+
     private func directTarget(serial: String) throws -> LogitechHardwareTargetKey {
         try XCTUnwrap(LogitechHardwareTargetKey.direct(
             transport: "Bluetooth Low Energy",

@@ -6,6 +6,14 @@ import Foundation
 /// A process-lifetime identity for hardware state that must survive a
 /// PointerDevice/session rebuild (notably across system sleep).
 enum LogitechHardwareTargetKey: Hashable {
+    struct LegacyReceiverDescriptor: Hashable {
+        let vendorID: Int
+        let receiverLocationID: Int
+        let kind: ReceiverLogicalDeviceKind
+        let productID: Int
+        let name: String
+    }
+
     case serial(vendorID: Int, productID: Int, serial: String)
     case receiver(
         vendorID: Int,
@@ -73,6 +81,28 @@ enum LogitechHardwareTargetKey: Hashable {
             receiverLocationID: receiverLocationID,
             slot: identity.slot,
             kind: identity.kind,
+            productID: productID,
+            name: name
+        )
+    }
+
+    static func legacyReceiverDescriptor(
+        vendorID: Int?,
+        receiverLocationID: Int?,
+        kind: ReceiverLogicalDeviceKind,
+        productID: Int?,
+        name: String?
+    ) -> LegacyReceiverDescriptor? {
+        guard let vendorID,
+              let receiverLocationID,
+              let productID,
+              let name = normalized(name) else {
+            return nil
+        }
+        return .init(
+            vendorID: vendorID,
+            receiverLocationID: receiverLocationID,
+            kind: kind,
             productID: productID,
             name: name
         )
@@ -147,6 +177,24 @@ final class LogitechHardwareBaselineStore {
                 baseline: entry.baseline,
                 handle: .init(target: target, version: entry.version)
             )
+        }
+    }
+
+    /// Legacy receivers resolve their logical slot on demand. This conservative
+    /// prefix query decides whether that I/O is justified; the exact slot key
+    /// is still required to claim a baseline afterwards.
+    func hasHiResBaseline(forLegacyReceiver descriptor: LogitechHardwareTargetKey.LegacyReceiverDescriptor) -> Bool {
+        lock.withLock {
+            hiResEntries.keys.contains { target in
+                guard case let .receiver(vendorID, receiverLocationID, _, kind, productID, name) = target else {
+                    return false
+                }
+                return vendorID == descriptor.vendorID
+                    && receiverLocationID == descriptor.receiverLocationID
+                    && kind == descriptor.kind
+                    && productID == descriptor.productID
+                    && name == descriptor.name
+            }
         }
     }
 

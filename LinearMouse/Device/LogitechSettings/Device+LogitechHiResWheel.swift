@@ -39,6 +39,16 @@ enum LogitechHiResBaselineCapture {
     }
 }
 
+enum LogitechHiResRestoreAdmission {
+    static func needsFeatureAccess(
+        hasSessionInitial: Bool,
+        hasKnownBaseline: Bool,
+        hasLegacyReceiverBaseline: Bool
+    ) -> Bool {
+        hasSessionInitial || hasKnownBaseline || hasLegacyReceiverBaseline
+    }
+}
+
 extension Device {
     private static let logitechHiResWheelLog = OSLog(
         subsystem: Bundle.main.bundleIdentifier!,
@@ -154,7 +164,7 @@ extension Device {
               let access = logitechHiResWheel(for: expectedToken) else {
             return nil
         }
-        seedStoredHiResWheelBaseline(for: access)
+        _ = seedStoredHiResWheelBaseline(receiverSlot: access.feature.receiverSlot)
 
         let controller = access.feature
         let cachedEnabled = logitechSession.hiResWheelEnabled
@@ -255,6 +265,24 @@ extension Device {
         trackingRestoredState: Bool,
         confirmsRestore: Bool = false
     ) -> Bool {
+        let hasKnownBaseline = seedStoredHiResWheelBaseline(
+            receiverSlot: logitechReceiverRouteSnapshot?.slot
+        )
+        let hasLegacyReceiverBaseline = logitechLegacyReceiverBaselineDescriptor.map {
+            logitechHardwareBaselineStore?.hasHiResBaseline(forLegacyReceiver: $0) == true
+        } ?? false
+        guard LogitechHiResRestoreAdmission.needsFeatureAccess(
+            hasSessionInitial: logitechSession.hasInitialHiResWheelState,
+            hasKnownBaseline: hasKnownBaseline,
+            hasLegacyReceiverBaseline: hasLegacyReceiverBaseline
+        ) else {
+            logitechSession.invalidateHiResWheel(for: expectedToken)
+            if !trackingRestoredState {
+                clearHighResolutionWheelCache()
+            }
+            return true
+        }
+
         guard !isRemoved,
               let access = logitechHiResWheel(for: expectedToken) else {
             // Losing transport access is not evidence that the restore worked.
@@ -262,7 +290,7 @@ extension Device {
             logitechSession.invalidateHiResWheel(for: expectedToken)
             return false
         }
-        seedStoredHiResWheelBaseline(for: access)
+        _ = seedStoredHiResWheelBaseline(receiverSlot: access.feature.receiverSlot)
 
         guard logitechSession.hasInitialHiResWheelState else {
             logitechSession.invalidateHiResWheel(for: expectedToken)
@@ -386,19 +414,19 @@ extension Device {
         }
     }
 
-    private func seedStoredHiResWheelBaseline(
-        for access: LogitechDeviceSession.FeatureAccess<HiResWheel>
-    ) {
-        guard let target = logitechHardwareTargetKey(receiverSlot: access.feature.receiverSlot),
+    @discardableResult
+    private func seedStoredHiResWheelBaseline(receiverSlot: UInt8?) -> Bool {
+        guard let target = logitechHardwareTargetKey(receiverSlot: receiverSlot),
               let claim = logitechHardwareBaselineStore?.hiResBaseline(for: target) else {
-            return
+            return false
         }
         logitechSession.seedInitialHiResWheelState(
             enabled: claim.baseline.enabled,
             route: logitechReceiverRouteSnapshot,
-            receiverSlot: access.feature.receiverSlot,
+            receiverSlot: receiverSlot,
             baselineHandle: claim.handle
         )
+        return true
     }
 
     private func recordHiResWheelBaseline(

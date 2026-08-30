@@ -175,6 +175,21 @@ class Device {
         manager?.logitechHardwareBaselineStore
     }
 
+    var logitechLegacyReceiverBaselineDescriptor: LogitechHardwareTargetKey.LegacyReceiverDescriptor? {
+        guard !LogitechReceiverRouteResolver.requiresDiscovery(for: pointerDevice),
+              pointerDevice.transport == PointerDeviceTransportName.usb else {
+            return nil
+        }
+        let kind: ReceiverLogicalDeviceKind = category == .trackpad ? .touchpad : .mouse
+        return LogitechHardwareTargetKey.legacyReceiverDescriptor(
+            vendorID: vendorID,
+            receiverLocationID: pointerDevice.locationID,
+            kind: kind,
+            productID: productID,
+            name: productName ?? name
+        )
+    }
+
     @discardableResult
     func updateLogitechReceiverDiscovery(_ discovery: LogitechReceiverDiscovery?) -> Bool {
         let update = logitechSession.updateDiscovery(discovery)
