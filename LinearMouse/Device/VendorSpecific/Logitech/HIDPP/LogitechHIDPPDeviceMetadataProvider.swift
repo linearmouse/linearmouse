@@ -2370,27 +2370,11 @@ final class LogitechReprogrammableControlsMonitor {
             pending[key] ?? [:]
         }
 
-        func merge(_ reporting: [UInt16: ReportingInfo], for key: EphemeralControlsTargetKey) {
-            pending[
-                key,
-                default: [:]
-            ].merge(reporting) { _, new in new }
-        }
-
         func replace(_ reporting: [UInt16: ReportingInfo], for key: EphemeralControlsTargetKey) {
             if reporting.isEmpty {
                 pending.removeValue(forKey: key)
             } else {
                 pending[key] = reporting
-            }
-        }
-
-        func consume(_ controlIDs: Set<UInt16>, for key: EphemeralControlsTargetKey) {
-            for controlID in controlIDs {
-                pending[key]?.removeValue(forKey: controlID)
-            }
-            if pending[key]?.isEmpty == true {
-                pending.removeValue(forKey: key)
             }
         }
     }
@@ -2686,21 +2670,15 @@ final class LogitechReprogrammableControlsMonitor {
                             locationID: locationID,
                             slot: slot
                         )
-                        if baselineTarget == nil, !pendingUnkeyedReportingRestoreByControlID.isEmpty,
-                           shouldAllowTeardownIO() {
-                            _ = LogitechHardwareRestoreRetry.perform(
-                                operation: {
-                                    pendingUnkeyedReportingRestoreByControlID = self.restoreReportingState(
-                                        pendingUnkeyedReportingRestoreByControlID,
-                                        using: transport,
-                                        featureIndex: featureIndex,
-                                        locationID: locationID,
-                                        slot: slot,
-                                        reason: "retry terminal unkeyed reporting restore"
-                                    )
-                                    return pendingUnkeyedReportingRestoreByControlID.isEmpty
-                                },
-                                wait: Thread.sleep(forTimeInterval:)
+                        if baselineTarget == nil {
+                            retryUnkeyedReportingRestoration(
+                                &pendingUnkeyedReportingRestoreByControlID,
+                                store: unkeyedRestoreStore,
+                                target: unkeyedTarget,
+                                using: transport,
+                                featureIndex: featureIndex,
+                                locationID: locationID,
+                                slot: slot
                             )
                         }
                         return
@@ -2806,6 +2784,17 @@ final class LogitechReprogrammableControlsMonitor {
                             locationID: locationID,
                             slot: slot
                         )
+                        if baselineTarget == nil {
+                            retryUnkeyedReportingRestoration(
+                                &pendingUnkeyedReportingRestoreByControlID,
+                                store: unkeyedRestoreStore,
+                                target: unkeyedTarget,
+                                using: transport,
+                                featureIndex: featureIndex,
+                                locationID: locationID,
+                                slot: slot
+                            )
+                        }
                         return
                     }
 
@@ -2905,24 +2894,15 @@ final class LogitechReprogrammableControlsMonitor {
                             pendingUnkeyedReportingRestoreByControlID.removeValue(forKey: controlID)
                         }
                         pendingUnkeyedReportingRestoreByControlID.merge(failedRestoreByControlID) { _, new in new }
-                        unkeyedRestoreStore.replace(pendingUnkeyedReportingRestoreByControlID, for: unkeyedTarget)
-                        if !pendingUnkeyedReportingRestoreByControlID.isEmpty, shouldAllowTeardownIO() {
-                            _ = LogitechHardwareRestoreRetry.perform(
-                                operation: {
-                                    pendingUnkeyedReportingRestoreByControlID = self.restoreReportingState(
-                                        pendingUnkeyedReportingRestoreByControlID,
-                                        using: transport,
-                                        featureIndex: featureIndex,
-                                        locationID: locationID,
-                                        slot: slot,
-                                        reason: "retry unkeyed reporting restore"
-                                    )
-                                    return pendingUnkeyedReportingRestoreByControlID.isEmpty
-                                },
-                                wait: Thread.sleep(forTimeInterval:)
-                            )
-                        }
-                        unkeyedRestoreStore.replace(pendingUnkeyedReportingRestoreByControlID, for: unkeyedTarget)
+                        retryUnkeyedReportingRestoration(
+                            &pendingUnkeyedReportingRestoreByControlID,
+                            store: unkeyedRestoreStore,
+                            target: unkeyedTarget,
+                            using: transport,
+                            featureIndex: featureIndex,
+                            locationID: locationID,
+                            slot: slot
+                        )
                     }
                     if !shouldContinueRunning(), shouldAllowTeardownIO() {
                         retryStoredReportingRestoration(
@@ -2933,22 +2913,6 @@ final class LogitechReprogrammableControlsMonitor {
                             locationID: locationID,
                             slot: slot
                         )
-                        if baselineTarget == nil, !pendingUnkeyedReportingRestoreByControlID.isEmpty {
-                            _ = LogitechHardwareRestoreRetry.perform(
-                                operation: {
-                                    pendingUnkeyedReportingRestoreByControlID = self.restoreReportingState(
-                                        pendingUnkeyedReportingRestoreByControlID,
-                                        using: transport,
-                                        featureIndex: featureIndex,
-                                        locationID: locationID,
-                                        slot: slot,
-                                        reason: "retry terminal unkeyed reporting restore"
-                                    )
-                                    return pendingUnkeyedReportingRestoreByControlID.isEmpty
-                                },
-                                wait: Thread.sleep(forTimeInterval:)
-                            )
-                        }
                     }
                 }
 
@@ -3656,6 +3620,37 @@ final class LogitechReprogrammableControlsMonitor {
             excluding: Set(remaining.keys),
             store: store
         )
+    }
+
+    private func retryUnkeyedReportingRestoration(
+        _ pending: inout [UInt16: ReportingInfo],
+        store: UnkeyedControlsRestoreStore,
+        target: EphemeralControlsTargetKey,
+        using transport: HIDPPTransport,
+        featureIndex: UInt8,
+        locationID: Int,
+        slot: UInt8
+    ) {
+        guard shouldAllowTeardownIO(), !pending.isEmpty else {
+            store.replace(pending, for: target)
+            return
+        }
+
+        _ = LogitechHardwareRestoreRetry.perform(
+            operation: {
+                pending = self.restoreReportingState(
+                    pending,
+                    using: transport,
+                    featureIndex: featureIndex,
+                    locationID: locationID,
+                    slot: slot,
+                    reason: "retry unkeyed reporting restore"
+                )
+                return pending.isEmpty
+            },
+            wait: Thread.sleep(forTimeInterval:)
+        )
+        store.replace(pending, for: target)
     }
 
     private func consumeRestoredBaselines(
