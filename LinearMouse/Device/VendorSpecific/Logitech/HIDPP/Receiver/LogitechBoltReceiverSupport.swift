@@ -10,6 +10,211 @@ private struct BoltHIDPP10Report {
     let bytes: [UInt8]
 }
 
+/// Concrete ownership identity for a receiver channel that lacks a stable
+/// hardware serial. It is intentionally never recreated from metadata.
+final class ReceiverNotificationSessionIdentity: Hashable {
+    static func == (lhs: ReceiverNotificationSessionIdentity, rhs: ReceiverNotificationSessionIdentity) -> Bool {
+        lhs === rhs
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(self))
+    }
+}
+
+/// Identifies the receiver whose notification register LinearMouse changed.
+/// A serial-backed target can survive channel reconstruction. A session target
+/// is deliberately meaningful only to the channel that created it, so an
+/// unidentified replacement receiver cannot inherit its teardown writes.
+enum ReceiverNotificationOwnershipTarget: Hashable {
+    case receiver(vendorID: Int, serialNumber: String)
+    case session(ReceiverNotificationSessionIdentity)
+
+    static func receiver(vendorID: Int?, serialNumber: String?) -> Self? {
+        guard let vendorID,
+              let serialNumber
+        else {
+            return nil
+        }
+
+        let normalizedSerial = serialNumber
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .uppercased()
+        guard !normalizedSerial.isEmpty else {
+            return nil
+        }
+
+        return .receiver(vendorID: vendorID, serialNumber: normalizedSerial)
+    }
+}
+
+/// Owns only the receiver notification bits that this process actually added.
+/// The process-wide instance is used only for serial-backed receivers; an
+/// unidentified receiver uses a channel-local instance of the same primitive.
+final class ReceiverNotificationOwnershipStore {
+    fileprivate final class EntryOwnership {}
+
+    struct Handle: Hashable {
+        fileprivate let target: ReceiverNotificationOwnershipTarget
+        fileprivate let ownership: EntryOwnership
+        fileprivate let ownedBits: UInt32
+
+        static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.target == rhs.target
+                && lhs.ownership === rhs.ownership
+                && lhs.ownedBits == rhs.ownedBits
+        }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(target)
+            hasher.combine(ObjectIdentifier(ownership))
+            hasher.combine(ownedBits)
+        }
+
+        func belongs(to target: ReceiverNotificationOwnershipTarget) -> Bool {
+            self.target == target
+        }
+
+        func ownsSameEntry(as other: Self) -> Bool {
+            target == other.target && ownership === other.ownership
+        }
+    }
+
+    struct Claim: Equatable {
+        let ownedBits: UInt32
+        let handle: Handle
+    }
+
+    private struct Entry {
+        var ownedBits: UInt32
+        let ownership = EntryOwnership()
+    }
+
+    private let lock = NSLock()
+    private var entries = [ReceiverNotificationOwnershipTarget: Entry]()
+
+    /// Enables `requestedBits` with read-modify-write. Bits already set belong
+    /// to someone else and are not captured. Failed writes acquire no ownership.
+    @discardableResult
+    func enable(
+        _ requestedBits: UInt32,
+        for target: ReceiverNotificationOwnershipTarget,
+        read: () -> UInt32?,
+        write: (UInt32) -> Bool,
+        shouldContinue: () -> Bool = { true }
+    ) -> Bool {
+        guard shouldContinue(),
+              let current = read()
+        else {
+            return false
+        }
+
+        let addedBits = requestedBits & ~current
+        guard addedBits != 0 else {
+            return true
+        }
+        guard shouldContinue(), write(current | requestedBits) else {
+            return false
+        }
+
+        // The write happened even if ownership changed immediately afterwards;
+        // retaining the claim lets a reconstructed channel for the same stable
+        // receiver finish the restore.
+        capture(addedBits, for: target)
+        return true
+    }
+
+    /// Clears a snapshot of the bits owned for `target`, using the latest
+    /// register value as the base so unrelated/concurrently-added bits survive.
+    /// A successful write is read back before ownership is consumed.
+    @discardableResult
+    func restoreOwnedBits(
+        for target: ReceiverNotificationOwnershipTarget,
+        read: () -> UInt32?,
+        write: (UInt32) -> Bool,
+        shouldContinue: () -> Bool = { true }
+    ) -> Bool {
+        guard let claim = claim(for: target) else {
+            return true
+        }
+        guard shouldContinue(),
+              let current = read()
+        else {
+            return false
+        }
+
+        let restored = current & ~claim.ownedBits
+        if restored != current {
+            guard shouldContinue(),
+                  write(restored),
+                  shouldContinue(),
+                  let readback = read(),
+                  readback & claim.ownedBits == 0
+            else {
+                return false
+            }
+        }
+
+        guard shouldContinue() else {
+            return false
+        }
+        return consumeRestoredBits(claim.handle)
+    }
+
+    func claim(for target: ReceiverNotificationOwnershipTarget) -> Claim? {
+        lock.withLock {
+            guard let entry = entries[target] else {
+                return nil
+            }
+
+            return Claim(
+                ownedBits: entry.ownedBits,
+                handle: Handle(
+                    target: target,
+                    ownership: entry.ownership,
+                    ownedBits: entry.ownedBits
+                )
+            )
+        }
+    }
+
+    /// Removes only the bits represented by this exact ownership snapshot.
+    /// Bits added to the same entry after the snapshot remain pending.
+    @discardableResult
+    func consumeRestoredBits(_ handle: Handle) -> Bool {
+        lock.withLock {
+            guard var entry = entries[handle.target],
+                  entry.ownership === handle.ownership
+            else {
+                return false
+            }
+
+            entry.ownedBits &= ~handle.ownedBits
+            if entry.ownedBits == 0 {
+                entries.removeValue(forKey: handle.target)
+            } else {
+                entries[handle.target] = entry
+            }
+            return true
+        }
+    }
+
+    private func capture(_ addedBits: UInt32, for target: ReceiverNotificationOwnershipTarget) {
+        guard addedBits != 0 else {
+            return
+        }
+
+        lock.withLock {
+            if var entry = entries[target] {
+                entry.ownedBits |= addedBits
+                entries[target] = entry
+            } else {
+                entries[target] = Entry(ownedBits: addedBits)
+            }
+        }
+    }
+}
+
 protocol LogitechReceiverMonitoringChannel: VendorSpecificDeviceContext {
     func enableWirelessNotifications()
     func waitForReceiverConnectionNotification(

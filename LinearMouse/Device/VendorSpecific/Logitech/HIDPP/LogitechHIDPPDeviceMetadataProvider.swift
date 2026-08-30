@@ -1213,6 +1213,12 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
     private var requestStrategyFailureCount = 0
     private let notificationBuffer = HIDPPNotificationBuffer()
 
+    /// Serial-backed receiver ownership survives channel reconstruction. An
+    /// unidentified receiver remains scoped to this exact channel instance.
+    private static let receiverNotificationOwnershipStore = ReceiverNotificationOwnershipStore()
+    private let receiverNotificationSessionIdentity = ReceiverNotificationSessionIdentity()
+    private let receiverNotificationSessionStore = ReceiverNotificationOwnershipStore()
+
     // Keep one I/O reader per physical receiver. Opening the same macOS HID
     // interface more than once can route a command response to another callback.
     private static var sharedChannels = [Int: WeakChannelReference]()
@@ -1261,6 +1267,44 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
 
         sharedChannels[locationID] = WeakChannelReference(channel)
         return channel
+    }
+
+    /// Restores notification bits through the currently-owned shared channel.
+    /// Completion is always delivered on the main queue. A missing channel or
+    /// an ownership-free receiver completes without attempting HID I/O.
+    static func restoreOwnedNotificationFlags(
+        locationID: Int,
+        completion: @escaping () -> Void
+    ) {
+        guard let channel = currentSharedChannel(locationID: locationID) else {
+            DispatchQueue.main.async(execute: completion)
+            return
+        }
+
+        channel.restoreOwnedNotificationFlags(
+            shouldContinue: { [weak channel] in
+                guard let channel else {
+                    return false
+                }
+                return isCurrentSharedChannel(channel, locationID: locationID)
+            },
+            completion: completion
+        )
+    }
+
+    private static func currentSharedChannel(locationID: Int) -> LogitechReceiverChannel? {
+        sharedChannelsLock.withLock {
+            sharedChannels[locationID]?.channel
+        }
+    }
+
+    private static func isCurrentSharedChannel(
+        _ channel: LogitechReceiverChannel,
+        locationID: Int
+    ) -> Bool {
+        sharedChannelsLock.withLock {
+            sharedChannels[locationID]?.channel === channel
+        }
     }
 
     /// Atomically gives up shared ownership only when `channel` is still the
@@ -1562,11 +1606,76 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
     }
 
     func enableWirelessNotifications() {
-        let currentFlags = readNotificationFlags() ?? 0
-        let desiredFlags = currentFlags | LogitechHIDPPDeviceMetadataProvider.Constants.receiverWirelessNotifications
+        let ownership = receiverNotificationOwnership
+        let requestedFlags = LogitechHIDPPDeviceMetadataProvider.Constants.receiverWirelessNotifications
             | LogitechHIDPPDeviceMetadataProvider.Constants.receiverSoftwarePresentNotifications
-        if desiredFlags != currentFlags {
-            _ = writeNotificationFlags(desiredFlags)
+        let enabled = ownership.store.enable(
+            requestedFlags,
+            for: ownership.target,
+            read: readNotificationFlags,
+            write: writeNotificationFlags,
+            shouldContinue: receiverNotificationIOIsCurrent
+        )
+        if !enabled {
+            os_log(
+                "Failed to enable receiver wireless notifications: locationID=%{public}@",
+                log: LogitechHIDPPDeviceMetadataProvider.log,
+                type: .info,
+                locationID.map(String.init) ?? "(nil)"
+            )
+        }
+    }
+
+    private var receiverNotificationOwnership: (
+        store: ReceiverNotificationOwnershipStore,
+        target: ReceiverNotificationOwnershipTarget
+    ) {
+        if let target = ReceiverNotificationOwnershipTarget.receiver(
+            vendorID: vendorID,
+            serialNumber: serialNumber
+        ) {
+            return (Self.receiverNotificationOwnershipStore, target)
+        }
+
+        return (
+            receiverNotificationSessionStore,
+            .session(receiverNotificationSessionIdentity)
+        )
+    }
+
+    private func receiverNotificationIOIsCurrent() -> Bool {
+        guard let locationID else {
+            return true
+        }
+        return Self.isCurrentSharedChannel(self, locationID: locationID)
+    }
+
+    private func restoreOwnedNotificationFlags(
+        shouldContinue: @escaping () -> Bool,
+        completion: @escaping () -> Void
+    ) {
+        let ownership = receiverNotificationOwnership
+        guard ownership.store.claim(for: ownership.target) != nil else {
+            DispatchQueue.main.async(execute: completion)
+            return
+        }
+
+        DispatchQueue.global(qos: .utility).async { [self] in
+            let restored = ownership.store.restoreOwnedBits(
+                for: ownership.target,
+                read: readNotificationFlags,
+                write: writeNotificationFlags,
+                shouldContinue: shouldContinue
+            )
+            if !restored {
+                os_log(
+                    "Failed to restore owned receiver notification flags: locationID=%{public}@",
+                    log: LogitechHIDPPDeviceMetadataProvider.log,
+                    type: .error,
+                    locationID.map(String.init) ?? "(nil)"
+                )
+            }
+            DispatchQueue.main.async(execute: completion)
         }
     }
 

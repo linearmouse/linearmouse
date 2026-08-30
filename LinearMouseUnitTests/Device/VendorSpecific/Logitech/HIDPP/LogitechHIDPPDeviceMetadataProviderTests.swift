@@ -639,6 +639,232 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         XCTAssertEqual(secondPollCount, 1)
     }
 
+    func testReceiverNotificationOwnershipCapturesOnlyBitsItAddsAndKeepsFirstEntry() throws {
+        let store = ReceiverNotificationOwnershipStore()
+        let target = try XCTUnwrap(ReceiverNotificationOwnershipTarget.receiver(
+            vendorID: 0x046D,
+            serialNumber: " receiver-a "
+        ))
+        let wireless: UInt32 = 0x000100
+        let softwarePresent: UInt32 = 0x000800
+        var flags = wireless // Pre-existing: LinearMouse must not own it.
+
+        XCTAssertTrue(store.enable(
+            wireless | softwarePresent,
+            for: target,
+            read: { flags },
+            write: {
+                flags = $0
+                return true
+            }
+        ))
+        let first = try XCTUnwrap(store.claim(for: target))
+        XCTAssertEqual(first.ownedBits, softwarePresent)
+
+        // If the pre-existing bit later disappears and LinearMouse adds it, it
+        // joins the existing ownership entry rather than replacing that entry.
+        flags &= ~wireless
+        XCTAssertTrue(store.enable(
+            wireless | softwarePresent,
+            for: target,
+            read: { flags },
+            write: {
+                flags = $0
+                return true
+            }
+        ))
+        let second = try XCTUnwrap(store.claim(for: target))
+        XCTAssertEqual(second.ownedBits, wireless | softwarePresent)
+        XCTAssertTrue(first.handle.ownsSameEntry(as: second.handle))
+
+        // Consuming the older snapshot must leave bits acquired later pending.
+        XCTAssertTrue(store.consumeRestoredBits(first.handle))
+        XCTAssertEqual(store.claim(for: target)?.ownedBits, wireless)
+    }
+
+    func testReceiverNotificationRestorePreservesUnrelatedLaterBits() throws {
+        let store = ReceiverNotificationOwnershipStore()
+        let target = try XCTUnwrap(ReceiverNotificationOwnershipTarget.receiver(
+            vendorID: 0x046D,
+            serialNumber: "RECEIVER-A"
+        ))
+        let owned: UInt32 = 0x000100
+        let unrelated: UInt32 = 0x400000
+        var flags: UInt32 = 0
+
+        XCTAssertTrue(store.enable(
+            owned,
+            for: target,
+            read: { flags },
+            write: {
+                flags = $0
+                return true
+            }
+        ))
+        flags |= unrelated
+
+        XCTAssertTrue(store.restoreOwnedBits(
+            for: target,
+            read: { flags },
+            write: {
+                flags = $0
+                return true
+            }
+        ))
+        XCTAssertEqual(flags, unrelated)
+        XCTAssertNil(store.claim(for: target))
+    }
+
+    func testReceiverNotificationEnableWriteFailureDoesNotCaptureOwnership() throws {
+        let store = ReceiverNotificationOwnershipStore()
+        let target = try XCTUnwrap(ReceiverNotificationOwnershipTarget.receiver(
+            vendorID: 0x046D,
+            serialNumber: "RECEIVER-A"
+        ))
+        var writeCount = 0
+
+        XCTAssertFalse(store.enable(
+            0x000100,
+            for: target,
+            read: { 0 },
+            write: { _ in
+                writeCount += 1
+                return false
+            }
+        ))
+        XCTAssertEqual(writeCount, 1)
+        XCTAssertNil(store.claim(for: target))
+    }
+
+    func testReceiverNotificationRestoreFailureRetainsOwnership() throws {
+        let store = ReceiverNotificationOwnershipStore()
+        let target = try XCTUnwrap(ReceiverNotificationOwnershipTarget.receiver(
+            vendorID: 0x046D,
+            serialNumber: "RECEIVER-A"
+        ))
+        var flags: UInt32 = 0
+        XCTAssertTrue(store.enable(
+            0x000100,
+            for: target,
+            read: { flags },
+            write: {
+                flags = $0
+                return true
+            }
+        ))
+        let claim = try XCTUnwrap(store.claim(for: target))
+
+        XCTAssertFalse(store.restoreOwnedBits(
+            for: target,
+            read: { flags },
+            write: { _ in false }
+        ))
+        XCTAssertEqual(store.claim(for: target), claim)
+    }
+
+    func testReceiverNotificationOwnershipRejectsReplacementAndStaleHandle() throws {
+        let store = ReceiverNotificationOwnershipStore()
+        let original = try XCTUnwrap(ReceiverNotificationOwnershipTarget.receiver(
+            vendorID: 0x046D,
+            serialNumber: "RECEIVER-A"
+        ))
+        let replacement = try XCTUnwrap(ReceiverNotificationOwnershipTarget.receiver(
+            vendorID: 0x046D,
+            serialNumber: "RECEIVER-B"
+        ))
+        var flags: UInt32 = 0
+
+        XCTAssertTrue(store.enable(
+            0x000100,
+            for: original,
+            read: { flags },
+            write: {
+                flags = $0
+                return true
+            }
+        ))
+        let stale = try XCTUnwrap(store.claim(for: original))
+        XCTAssertFalse(stale.handle.belongs(to: replacement))
+        XCTAssertNil(store.claim(for: replacement))
+
+        XCTAssertTrue(store.restoreOwnedBits(
+            for: original,
+            read: { flags },
+            write: {
+                flags = $0
+                return true
+            }
+        ))
+        XCTAssertTrue(store.enable(
+            0x000100,
+            for: original,
+            read: { flags },
+            write: {
+                flags = $0
+                return true
+            }
+        ))
+        let current = try XCTUnwrap(store.claim(for: original))
+        XCTAssertFalse(stale.handle.ownsSameEntry(as: current.handle))
+        XCTAssertFalse(store.consumeRestoredBits(stale.handle))
+        XCTAssertEqual(store.claim(for: original), current)
+    }
+
+    func testReceiverNotificationRestoreRejectsStaleChannelAndRetainsOwnership() {
+        let store = ReceiverNotificationOwnershipStore()
+        let session = ReceiverNotificationSessionIdentity()
+        let target = ReceiverNotificationOwnershipTarget.session(session)
+        var flags: UInt32 = 0
+        XCTAssertTrue(store.enable(
+            0x000100,
+            for: target,
+            read: { flags },
+            write: {
+                flags = $0
+                return true
+            }
+        ))
+        var readCount = 0
+        var writeCount = 0
+
+        XCTAssertFalse(store.restoreOwnedBits(
+            for: target,
+            read: {
+                readCount += 1
+                return flags
+            },
+            write: { _ in
+                writeCount += 1
+                return true
+            },
+            shouldContinue: { false }
+        ))
+        XCTAssertEqual(readCount, 0)
+        XCTAssertEqual(writeCount, 0)
+        XCTAssertNotNil(store.claim(for: target))
+    }
+
+    func testReceiverNotificationNoOwnershipRestoresWithoutIO() {
+        let store = ReceiverNotificationOwnershipStore()
+        let target = ReceiverNotificationOwnershipTarget.session(ReceiverNotificationSessionIdentity())
+        var readCount = 0
+        var writeCount = 0
+
+        XCTAssertTrue(store.restoreOwnedBits(
+            for: target,
+            read: {
+                readCount += 1
+                return 0
+            },
+            write: { _ in
+                writeCount += 1
+                return true
+            }
+        ))
+        XCTAssertEqual(readCount, 0)
+        XCTAssertEqual(writeCount, 0)
+    }
+
     private func slot(
         slot: UInt8,
         kind: UInt8 = 0x02,
