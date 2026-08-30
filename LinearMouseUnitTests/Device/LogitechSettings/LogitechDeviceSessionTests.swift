@@ -160,6 +160,13 @@ final class LogitechDeviceSessionTests: XCTestCase {
         session.recordInitialHiResWheelState(enabled: false, for: access)
         session.updateHiResWheelState(enabled: true, multiplier: 8, for: access)
 
+        // An acknowledged write changes the runtime cache but must not consume
+        // the original target before the coordinator's readback phase.
+        XCTAssertFalse(try XCTUnwrap(session.initialHiResWheelEnabled(
+            requiresReceiverRoute: false,
+            receiverSlot: access.feature.receiverSlot
+        )))
+
         session.completeHiResWheelRestore(enabled: false, multiplier: nil, for: access)
 
         XCTAssertEqual(session.hiResWheelEnabled, false)
@@ -185,6 +192,15 @@ final class LogitechDeviceSessionTests: XCTestCase {
     func testNewWheelDesiredCancelsQueuedRestore() {
         let session = LogitechDeviceSession(deviceID: 1)
         let restoreToken = session.runHiResWheelOperation(waitUntilFinished: false) { _ in }
+
+        session.startHiResWheelApply { _, _ in false }
+
+        XCTAssertTrue(restoreToken.isCancelled)
+    }
+
+    func testNewWheelDesiredCancelsRetryingStopManagingRestore() {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let restoreToken = session.startHiResWheelRestore { _, _ in false }
 
         session.startHiResWheelApply { _, _ in false }
 

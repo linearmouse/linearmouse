@@ -21,6 +21,10 @@ extension Device {
         logitechSession.hiResWheelEnabled
     }
 
+    var needsLogitechHighResolutionWheelRestoreRetry: Bool {
+        logitechSession.needsHiResWheelRestoreRetry
+    }
+
     func applyConfiguredHighResolutionWheel(_ enabled: Bool) {
         logitechSession.startHiResWheelApply { [weak self] attempt, token in
             guard let self, !isRemoved, attempt.shouldContinue() else {
@@ -154,7 +158,7 @@ extension Device {
             guard let self else {
                 return
             }
-            restoreHighResolutionWheelSynchronously(
+            _ = restoreHighResolutionWheelSynchronously(
                 expectedToken: token,
                 trackingRestoredState: trackingRestoredState
             )
@@ -169,22 +173,29 @@ extension Device {
     /// Stops managing this setting. Unlike reconnect preparation, this restores
     /// the target-bound mode that was present before LinearMouse changed it.
     func stopManagingHighResolutionWheel() {
-        restoreHighResolutionWheel(
-            waitUntilFinished: false,
-            trackingRestoredState: true
-        )
+        logitechSession.startHiResWheelRestore { [weak self] attempt, token in
+            guard let self, !isRemoved, attempt.shouldContinue() else {
+                return false
+            }
+            return restoreHighResolutionWheelSynchronously(
+                expectedToken: token,
+                trackingRestoredState: true,
+                confirmsRestore: attempt.verifiesCachedValue
+            )
+        }
     }
 
     private func restoreHighResolutionWheelSynchronously(
         expectedToken: CancellationToken,
-        trackingRestoredState: Bool
-    ) {
+        trackingRestoredState: Bool,
+        confirmsRestore: Bool = false
+    ) -> Bool {
         guard logitechSession.hasInitialHiResWheelState else {
             logitechSession.invalidateHiResWheel(for: expectedToken)
             if !trackingRestoredState {
                 clearHighResolutionWheelCache()
             }
-            return
+            return true
         }
 
         guard !isRemoved,
@@ -192,7 +203,7 @@ extension Device {
             // Losing transport access is not evidence that the restore worked.
             // Preserve the initial state for a subsequent teardown attempt.
             logitechSession.invalidateHiResWheel(for: expectedToken)
-            return
+            return false
         }
 
         let initialEnabled = logitechSession.initialHiResWheelEnabled(
@@ -201,7 +212,59 @@ extension Device {
         )
         guard let initialEnabled else {
             logitechSession.invalidateHiResWheel(for: expectedToken)
-            return
+            return false
+        }
+
+        if confirmsRestore {
+            guard let currentEnabled = access.feature.isHighResolutionWheelEnabled() else {
+                return false
+            }
+            let currentMultiplier: Int?
+            if currentEnabled {
+                currentMultiplier = access.feature.capabilities().map { Int($0.multiplier) }
+            } else {
+                currentMultiplier = nil
+            }
+            updateHighResolutionWheelCache(
+                enabled: currentEnabled,
+                multiplier: currentMultiplier,
+                for: access
+            )
+            if currentEnabled == initialEnabled {
+                if trackingRestoredState, initialEnabled, currentMultiplier == nil {
+                    return false
+                }
+                if trackingRestoredState {
+                    logitechSession.completeHiResWheelRestore(
+                        enabled: initialEnabled,
+                        multiplier: currentMultiplier,
+                        for: access
+                    )
+                }
+                return true
+            }
+
+            let restoredMultiplier: Int?
+            if trackingRestoredState, initialEnabled {
+                guard let capabilities = access.feature.capabilities() else {
+                    return false
+                }
+                restoredMultiplier = Int(capabilities.multiplier)
+            } else {
+                restoredMultiplier = nil
+            }
+
+            // The device can reset its mode after accepting an early write.
+            // Reapply it and let the coordinator schedule another read.
+            guard access.feature.setHighResolutionWheelEnabled(initialEnabled) == initialEnabled else {
+                return false
+            }
+            updateHighResolutionWheelCache(
+                enabled: initialEnabled,
+                multiplier: restoredMultiplier,
+                for: access
+            )
+            return false
         }
 
         let restoredMultiplier: Int?
@@ -211,7 +274,7 @@ extension Device {
                 // normalization inconsistent with the hardware. Keep the
                 // current mode/cache and retain initial state for a later try.
                 logitechSession.invalidateHiResWheel(for: expectedToken)
-                return
+                return false
             }
             restoredMultiplier = Int(capabilities.multiplier)
         } else {
@@ -222,7 +285,9 @@ extension Device {
         logitechSession.invalidateHiResWheel(for: expectedToken)
         if restored {
             if trackingRestoredState {
-                logitechSession.completeHiResWheelRestore(
+                // The write is only an apply-phase result. Retain the initial
+                // target until a later confirmation reads it back.
+                updateHighResolutionWheelCache(
                     enabled: initialEnabled,
                     multiplier: restoredMultiplier,
                     for: access
@@ -234,6 +299,7 @@ extension Device {
             // The device may be temporarily asleep. Keep the original state
             // so a later lifecycle teardown can still restore it.
         }
+        return restored
     }
 
     private func clearHighResolutionWheelCache() {

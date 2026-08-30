@@ -28,6 +28,7 @@ final class LogitechDeviceSession {
         var hiResWheelEnabled: Bool?
         var hiResWheelMultiplier: Int?
         var initialHiResWheelState: InitialHiResWheelState?
+        var hiResWheelRestoreRetryNeeded = false
     }
 
     struct DiscoveryUpdate {
@@ -196,7 +197,8 @@ final class LogitechDeviceSession {
         let coordinator = hiResWheelApplyCoordinator
         resetFeatureOperation(
             cache: \State.hiResWheel,
-            cancellationSource: \State.hiResWheelCancellationSource
+            cancellationSource: \State.hiResWheelCancellationSource,
+            mutateState: { $0.hiResWheelRestoreRetryNeeded = false }
         ) { token in
             coordinator.start { attempt in
                 operation(attempt, token)
@@ -205,6 +207,27 @@ final class LogitechDeviceSession {
                     return
                 }
                 self?.clearHiResWheelState(for: token)
+            }
+        }
+    }
+
+    /// Retries a best-effort return to the pre-managed hardware mode. Unlike
+    /// configured-state reconciliation, exhausting this budget must preserve
+    /// the last known runtime cache and initial state for a later attempt.
+    @discardableResult
+    func startHiResWheelRestore(
+        _ operation: @escaping (HardwareSettingApplyCoordinator.Attempt, CancellationToken) -> Bool
+    ) -> CancellationToken {
+        let coordinator = hiResWheelApplyCoordinator
+        return resetFeatureOperation(
+            cache: \State.hiResWheel,
+            cancellationSource: \State.hiResWheelCancellationSource,
+            mutateState: { $0.hiResWheelRestoreRetryNeeded = false }
+        ) { token in
+            coordinator.start { attempt in
+                operation(attempt, token)
+            } completion: { [weak self] succeeded in
+                self?.finishHiResWheelRestore(succeeded: succeeded, for: token)
             }
         }
     }
@@ -312,12 +335,17 @@ final class LogitechDeviceSession {
         withState { $0.initialHiResWheelState != nil }
     }
 
+    var needsHiResWheelRestoreRetry: Bool {
+        withState { $0.initialHiResWheelState != nil && $0.hiResWheelRestoreRetryNeeded }
+    }
+
     func clearHiResWheelState(includingInitialState: Bool) {
         withState {
             $0.hiResWheelEnabled = nil
             $0.hiResWheelMultiplier = nil
             if includingInitialState {
                 $0.initialHiResWheelState = nil
+                $0.hiResWheelRestoreRetryNeeded = false
             }
         }
     }
@@ -349,12 +377,23 @@ final class LogitechDeviceSession {
             state.hiResWheelEnabled = enabled
             state.hiResWheelMultiplier = enabled ? multiplier : nil
             state.initialHiResWheelState = nil
+            state.hiResWheelRestoreRetryNeeded = false
+        }
+    }
+
+    private func finishHiResWheelRestore(succeeded: Bool, for token: CancellationToken) {
+        withState { state in
+            guard state.hiResWheelCancellationSource.token == token else {
+                return
+            }
+            state.hiResWheelRestoreRetryNeeded = !succeeded && state.initialHiResWheelState != nil
         }
     }
 
     private func resetFeatureOperation<Feature>(
         cache: WritableKeyPath<State, Feature?>,
         cancellationSource: WritableKeyPath<State, CancellationSource>,
+        mutateState: (inout State) -> Void = { _ in },
         updateCoordinator: (CancellationToken) -> Void
     ) -> CancellationToken {
         let source = CancellationSource()
@@ -362,6 +401,7 @@ final class LogitechDeviceSession {
             let previousSource = state[keyPath: cancellationSource]
             state[keyPath: cancellationSource] = source
             state[keyPath: cache] = nil
+            mutateState(&state)
             updateCoordinator(source.token)
             return previousSource
         }

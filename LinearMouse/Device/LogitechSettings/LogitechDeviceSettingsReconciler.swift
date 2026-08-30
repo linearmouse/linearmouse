@@ -12,6 +12,7 @@ protocol LogitechDeviceSettingsTarget: AnyObject {
     var isRemoved: Bool { get }
     var confirmedLogitechSensorDPI: Int? { get }
     var confirmedLogitechHighResolutionWheel: Bool? { get }
+    var needsLogitechHighResolutionWheelRestoreRetry: Bool { get }
 
     func applyConfiguredSensorDPI(_ dpi: Int)
     func applyConfiguredHighResolutionWheel(_ enabled: Bool)
@@ -44,7 +45,9 @@ final class LogitechDeviceSettingsReconciler {
         }
 
         device.prepareSensorDPIForReconnect()
-        device.prepareHighResolutionWheelForReconnect()
+        if settings.highResolutionWheel != nil {
+            device.prepareHighResolutionWheelForReconnect()
+        }
         apply(settings, force: true)
         device.requestLogitechControlsForcedReconfiguration()
     }
@@ -76,7 +79,8 @@ final class LogitechDeviceSettingsReconciler {
            || device.confirmedLogitechHighResolutionWheel != highResolutionWheel {
             device.applyConfiguredHighResolutionWheel(highResolutionWheel)
         } else if settings.highResolutionWheel == nil,
-                  previousSettings.highResolutionWheel != nil {
+                  force || previousSettings.highResolutionWheel != nil
+                  || device.needsLogitechHighResolutionWheelRestoreRetry {
             device.stopManagingHighResolutionWheel()
         }
     }

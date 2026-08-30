@@ -192,4 +192,41 @@ final class HardwareSettingApplyCoordinatorTests: XCTestCase {
 
         XCTAssertEqual(completions, [false])
     }
+
+    func testConfirmationRetriesAfterFirmwareResetsAnInitiallySuccessfulWrite() {
+        let scheduler = Scheduler()
+        let coordinator = HardwareSettingApplyCoordinator(
+            retryDelays: [1, 2],
+            confirmationDelay: 3,
+            scheduler: scheduler.schedule
+        )
+        var hardwareEnabled = false
+        var confirmationCount = 0
+        var completions = [Bool]()
+
+        coordinator.start { attempt in
+            if !attempt.verifiesCachedValue {
+                hardwareEnabled = true
+                return true
+            }
+
+            confirmationCount += 1
+            if confirmationCount == 1 {
+                // Firmware finished waking and discarded the first write.
+                hardwareEnabled = false
+                hardwareEnabled = true // Rewrite, then require a fresh read.
+                return false
+            }
+            return hardwareEnabled
+        } completion: {
+            completions.append($0)
+        }
+
+        scheduler.runNext() // Initial write.
+        scheduler.runNext() // First confirmation sees the reset and rewrites.
+        scheduler.runNext() // Retry confirmation reads the rewritten mode.
+
+        XCTAssertEqual(confirmationCount, 2)
+        XCTAssertEqual(completions, [true])
+    }
 }
