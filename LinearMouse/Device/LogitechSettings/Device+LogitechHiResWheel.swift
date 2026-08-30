@@ -82,6 +82,21 @@ enum LogitechHiResRestoreAdmission {
     }
 }
 
+enum LogitechHiResEnabledMultiplier {
+    static func resolve(
+        cached: Int?,
+        load: () -> Int?
+    ) -> Int? {
+        if let cached, cached > 0 {
+            return cached
+        }
+        guard let loaded = load(), loaded > 0 else {
+            return nil
+        }
+        return loaded
+    }
+}
+
 extension Device {
     private static let logitechHiResWheelLog = OSLog(
         subsystem: Bundle.main.bundleIdentifier!,
@@ -154,12 +169,16 @@ extension Device {
     }
 
     func refreshHighResolutionWheelInfo(completion: @escaping (HighResolutionWheelInfo) -> Void) {
-        logitechSession.perform {
-            let info = self.highResolutionWheelInfo
-
+        let deadline = Date().addingTimeInterval(Self.logitechOrdinaryReadTimeout)
+        let deliver: (HighResolutionWheelInfo) -> Void = { info in
             DispatchQueue.main.async {
                 completion(info)
             }
+        }
+        logitechSession.runBoundedOrdinaryHardwareRead(deadline: deadline) { shouldContinue in
+            deliver(self.highResolutionWheelInfo(deadline: deadline, until: shouldContinue))
+        } onCancelled: {
+            deliver(self.unsupportedHighResolutionWheelInfo)
         }
     }
 
@@ -171,14 +190,23 @@ extension Device {
         )
     }
 
-    private var highResolutionWheelInfo: HighResolutionWheelInfo {
-        guard !isRemoved, let access = logitechHiResWheel else {
+    private func highResolutionWheelInfo(
+        deadline: Date,
+        until shouldContinue: @escaping () -> Bool
+    ) -> HighResolutionWheelInfo {
+        guard !isRemoved,
+              shouldContinue(),
+              let access = logitechHiResWheel(
+                  expectedToken: nil,
+                  requestDeadline: deadline,
+                  operationShouldContinue: shouldContinue
+              ) else {
             return unsupportedHighResolutionWheelInfo
         }
 
         let controller = access.feature
-        let capabilities = controller.capabilities()
-        let enabled = controller.isHighResolutionWheelEnabled()
+        let capabilities = controller.capabilities(deadline: deadline, until: shouldContinue)
+        let enabled = controller.isHighResolutionWheelEnabled(deadline: deadline, until: shouldContinue)
         let multiplier = capabilities.map { Int($0.multiplier) }
         updateHighResolutionWheelCache(enabled: enabled, multiplier: multiplier, for: access)
 
@@ -232,14 +260,42 @@ extension Device {
             return nil
         }
 
-        if cachedEnabled == enabled, logitechSession.hasInitialHiResWheelState {
-            if !verifiesCachedValue
-                || controller.isHighResolutionWheelEnabled(until: writeIsAdmitted) == enabled {
-                return enabled
+        let resolveEnabledMultiplier = {
+            LogitechHiResEnabledMultiplier.resolve(
+                cached: self.logitechSession.hiResWheelNormalizationMultiplier
+            ) {
+                controller.capabilities(until: writeIsAdmitted)
+                    .map { Int($0.multiplier) }
             }
         }
 
-        let capabilities = controller.capabilities(until: writeIsAdmitted)
+        if cachedEnabled == enabled,
+           logitechSession.hasInitialHiResWheelState,
+           !verifiesCachedValue
+           || controller.isHighResolutionWheelEnabled(until: writeIsAdmitted) == enabled {
+            guard enabled else {
+                return enabled
+            }
+            guard let multiplier = resolveEnabledMultiplier() else {
+                return nil
+            }
+            updateHighResolutionWheelCache(
+                enabled: true,
+                multiplier: multiplier,
+                for: access
+            )
+            return enabled
+        }
+
+        let multiplier: Int?
+        if enabled {
+            guard let resolvedMultiplier = resolveEnabledMultiplier() else {
+                return nil
+            }
+            multiplier = resolvedMultiplier
+        } else {
+            multiplier = nil
+        }
         guard let result = controller.applyHighResolutionWheelEnabled(
             enabled,
             until: writeIsAdmitted
@@ -251,11 +307,13 @@ extension Device {
 
         updateHighResolutionWheelCache(
             enabled: result.appliedEnabled,
-            multiplier: result.appliedEnabled ? capabilities.map { Int($0.multiplier) } : nil,
+            multiplier: result.appliedEnabled ? multiplier : nil,
             for: access
         )
 
-        return result.appliedEnabled
+        // A confirmation attempt may rewrite a mode that firmware reset
+        // during wake. Require another delayed read before declaring success.
+        return verifiesCachedValue ? nil : result.appliedEnabled
     }
 
     var highResolutionWheelNormalizationMultiplier: Int? {

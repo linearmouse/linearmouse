@@ -20,6 +20,7 @@ final class BoundedCleanupRequestTests: XCTestCase {
         request.complete()
         try scheduler.fire()
 
+        XCTAssertFalse(request.authorizationToken.shouldContinue)
         XCTAssertEqual(outcomes, [.completed])
         XCTAssertEqual(timeoutCount, 0)
     }
@@ -37,7 +38,48 @@ final class BoundedCleanupRequestTests: XCTestCase {
         try scheduler.fire()
         request.complete()
 
+        XCTAssertFalse(request.authorizationToken.shouldContinue)
         XCTAssertEqual(events, ["timeout", "timedOut"])
+    }
+
+    func testDeadlineRevokesAuthorizationBeforeDelivery() throws {
+        let scheduler = TestDeadlineScheduler()
+        var deliveredAction: (() -> Void)?
+        var outcomes = [BoundedCleanupRequest.Outcome]()
+        let request = BoundedCleanupRequest(
+            scheduler: scheduler.schedule,
+            delivery: { deliveredAction = $0 },
+            completion: { outcomes.append($0) }
+        )
+
+        XCTAssertTrue(request.authorizationToken.shouldContinue)
+
+        try scheduler.fire()
+
+        XCTAssertFalse(request.authorizationToken.shouldContinue)
+        XCTAssertTrue(outcomes.isEmpty)
+
+        try XCTUnwrap(deliveredAction)()
+        XCTAssertEqual(outcomes, [.timedOut])
+    }
+
+    func testNormalCompletionRevokesAuthorizationBeforeDelivery() throws {
+        let scheduler = TestDeadlineScheduler()
+        var deliveredAction: (() -> Void)?
+        var outcomes = [BoundedCleanupRequest.Outcome]()
+        let request = BoundedCleanupRequest(
+            scheduler: scheduler.schedule,
+            delivery: { deliveredAction = $0 },
+            completion: { outcomes.append($0) }
+        )
+
+        request.complete()
+
+        XCTAssertFalse(request.authorizationToken.shouldContinue)
+        XCTAssertTrue(outcomes.isEmpty)
+
+        try XCTUnwrap(deliveredAction)()
+        XCTAssertEqual(outcomes, [.completed])
     }
 
     func testNormalCompletionAndDeadlineRaceExactlyOnce() throws {
@@ -67,6 +109,7 @@ final class BoundedCleanupRequestTests: XCTestCase {
             }
 
             let result = lock.withLock { (outcomes, timeoutCount) }
+            XCTAssertFalse(request.authorizationToken.shouldContinue)
             XCTAssertEqual(result.0.count, 1)
             XCTAssertEqual(result.1, result.0 == [.timedOut] ? 1 : 0)
         }

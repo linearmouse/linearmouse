@@ -18,7 +18,7 @@ class Device {
     private static let log = OSLog(
         subsystem: Bundle.main.bundleIdentifier!, category: "Device"
     )
-    private static let logitechSleepRestoreTimeout: TimeInterval = 1
+    static let logitechOrdinaryReadTimeout: TimeInterval = 1
 
     static let fallbackPointerAcceleration = 0.6875
     static let fallbackPointerResolution = 400.0
@@ -44,10 +44,6 @@ class Device {
     private var logitechReprogrammableControlsMonitor: LogitechReprogrammableControlsMonitor?
     lazy var logitechSession = LogitechDeviceSession(deviceID: id)
 
-    var logitechAdjustableDPI: LogitechDeviceSession.FeatureAccess<AdjustableDPI>? {
-        logitechAdjustableDPI(expectedToken: nil)
-    }
-
     func logitechAdjustableDPI(
         for token: CancellationToken,
         deadline: Date? = nil,
@@ -62,7 +58,7 @@ class Device {
         )
     }
 
-    private func logitechAdjustableDPI(
+    func logitechAdjustableDPI(
         expectedToken: CancellationToken?,
         requestDeadline: Date? = nil,
         loadsSupportedDPI: Bool = true,
@@ -89,12 +85,15 @@ class Device {
             }
             let feature: AdjustableDPI
             if loadsSupportedDPI {
-                feature = AdjustableDPI(
+                guard let completeFeature = AdjustableDPI(
                     transport: target.transport,
                     featureIndex: target.featureIndex,
                     deadline: requestDeadline,
                     until: operationShouldContinue
-                )
+                ) else {
+                    return nil
+                }
+                feature = completeFeature
             } else {
                 feature = AdjustableDPI(
                     transport: target.transport,
@@ -113,10 +112,6 @@ class Device {
         }
     }
 
-    var logitechHiResWheel: LogitechDeviceSession.FeatureAccess<HiResWheel>? {
-        logitechHiResWheel(expectedToken: nil)
-    }
-
     func logitechHiResWheel(
         for token: CancellationToken,
         deadline: Date? = nil,
@@ -129,7 +124,7 @@ class Device {
         )
     }
 
-    private func logitechHiResWheel(
+    func logitechHiResWheel(
         expectedToken: CancellationToken?,
         requestDeadline: Date? = nil,
         operationShouldContinue: @escaping () -> Bool = { true }
@@ -234,7 +229,9 @@ class Device {
     }
 
     @discardableResult
-    func updateLogitechReceiverDiscovery(_ discovery: LogitechReceiverDiscovery?) -> Bool {
+    func updateLogitechReceiverDiscovery(
+        _ discovery: LogitechReceiverDiscovery?
+    ) -> LogitechDeviceSession.DiscoveryUpdate {
         let update = logitechSession.updateDiscovery(discovery)
         promoteSensorDPIBaselineIfPossible()
         promoteHiResWheelBaselineIfPossible()
@@ -246,7 +243,7 @@ class Device {
            !update.hasCandidates {
             updateLogitechControlsMonitorRunning()
         }
-        return update.hardwareTargetChanged
+        return update
     }
 
     var isRemoved: Bool {
@@ -360,29 +357,24 @@ class Device {
         manager?.allowsDeviceWork == true
     }
 
-    /// Stops Logitech control monitoring before its pointer device is
-    /// invalidated. Completion is delivered asynchronously after the monitor
-    /// has restored its original HID++ reporting state.
-    func disableLogitechControlsMonitoring(completion: @escaping () -> Void) {
+    /// Stops control monitoring and best-effort restores reporting before the
+    /// device becomes unavailable for system sleep.
+    func stopLogitechControlsMonitoringForSleep(
+        authorization: CancellationToken,
+        deadline: Date,
+        completion: @escaping () -> Void
+    ) {
         logitechControlsMonitorSubscriptions.removeAll()
         guard let logitechReprogrammableControlsMonitor else {
             DispatchQueue.main.async(execute: completion)
             return
         }
 
-        logitechReprogrammableControlsMonitor.disable(completion: completion)
-    }
-
-    /// Stops control monitoring for system sleep without attempting HID++ I/O
-    /// against a device that may already be suspended.
-    func stopLogitechControlsMonitoringForSleep(completion: @escaping () -> Void) {
-        logitechControlsMonitorSubscriptions.removeAll()
-        guard let logitechReprogrammableControlsMonitor else {
-            DispatchQueue.main.async(execute: completion)
-            return
-        }
-
-        logitechReprogrammableControlsMonitor.stopForSleep(completion: completion)
+        logitechReprogrammableControlsMonitor.stopForSleep(
+            authorization: authorization,
+            deadline: deadline,
+            completion: completion
+        )
     }
 
     /// Final device teardown must not attempt HID++ I/O through an invalidated
@@ -394,13 +386,21 @@ class Device {
 
     /// Restores a persisted Logitech controls baseline even when normal
     /// mapping demand no longer keeps the monitor running.
-    func restorePendingLogitechControlsForTeardown(completion: @escaping () -> Void) {
+    func restorePendingLogitechControlsForTeardown(
+        authorization: CancellationToken,
+        deadline: Date,
+        completion: @escaping () -> Void
+    ) {
         guard let logitechReprogrammableControlsMonitor else {
             DispatchQueue.main.async(execute: completion)
             return
         }
 
-        logitechReprogrammableControlsMonitor.restorePendingForTeardown(completion: completion)
+        logitechReprogrammableControlsMonitor.restorePendingForTeardown(
+            authorization: authorization,
+            deadline: deadline,
+            completion: completion
+        )
     }
 
     /// Restores DPI and Hi-Res Wheel on the existing Logitech session queue.
@@ -408,6 +408,7 @@ class Device {
     /// main-thread HID wait and is safe to race with the outer hard deadline.
     func restoreLogitechSettingsForTeardown(
         deadline: Date,
+        until operationShouldContinue: @escaping () -> Bool,
         completion: @escaping (_ restored: Bool) -> Void
     ) {
         let deliver: (Bool) -> Void = { restored in
@@ -426,7 +427,9 @@ class Device {
                 operations: [
                     .init(
                         shouldContinue: {
-                            dpiToken.shouldContinue && ownsTerminalRestore()
+                            dpiToken.shouldContinue
+                                && operationShouldContinue()
+                                && ownsTerminalRestore()
                         },
                         attempt: { attempt in
                             self.restoreSensorDPIForTeardown(
@@ -437,7 +440,9 @@ class Device {
                     ),
                     .init(
                         shouldContinue: {
-                            wheelToken.shouldContinue && ownsTerminalRestore()
+                            wheelToken.shouldContinue
+                                && operationShouldContinue()
+                                && ownsTerminalRestore()
                         },
                         attempt: { attempt in
                             self.restoreHighResolutionWheelForTeardown(
@@ -464,35 +469,29 @@ class Device {
         logitechSession.freezeTerminalHardwareMutations()
     }
 
-    /// Supersedes DPI and wheel applies as one session transaction. Stable
-    /// store-backed baselines survive Device reconstruction; unkeyed baselines
-    /// share one fair, bounded background restore before PointerDevice closes.
-    func prepareLogitechSettingsForSleep(completion: @escaping () -> Void) {
-        let cancellationSource = CancellationSource()
-        let deadline = Date().addingTimeInterval(Self.logitechSleepRestoreTimeout)
-        let cleanup = BoundedCleanupRequest(
-            timeout: Self.logitechSleepRestoreTimeout,
-            onTimeout: {
-                cancellationSource.cancel()
-            },
-            completion: { _ in
-                completion()
-            }
-        )
-
-        logitechSession.runSleepHardwarePreparation { [weak self, cleanup] dpiToken, wheelToken, ownsSleepPreparation in
+    /// Supersedes DPI and wheel applies as one session transaction. Every
+    /// known baseline shares one fair, bounded restore before PointerDevice
+    /// closes, so a later terminal stop cannot inherit managed hardware.
+    func prepareLogitechSettingsForSleep(
+        deadline: Date,
+        until operationShouldContinue: @escaping () -> Bool,
+        completion: @escaping () -> Void
+    ) {
+        logitechSession.runSleepHardwarePreparation { [weak self] dpiToken, wheelToken, ownsSleepPreparation in
             guard let self else {
-                cleanup.complete()
+                completion()
                 return
             }
 
-            let policies = logitechSession.hardwareSleepRestorePolicies
-            var operations = [LogitechTerminalHardwareRestoreRetry.Operation]()
-            if policies.dpi == .restoreBestEffort {
-                operations.append(.init(
+            // Always attempt both features. Each restore seeds a stable
+            // process baseline before deciding whether I/O is needed, so a
+            // quick second sleep cannot skip a baseline retained by an earlier
+            // failed observation lifetime.
+            let operations = [
+                LogitechTerminalHardwareRestoreRetry.Operation(
                     shouldContinue: {
                         dpiToken.shouldContinue
-                            && cancellationSource.token.shouldContinue
+                            && operationShouldContinue()
                             && ownsSleepPreparation()
                     },
                     attempt: { attempt in
@@ -502,13 +501,11 @@ class Device {
                             ownsSleepPreparation: ownsSleepPreparation
                         )
                     }
-                ))
-            }
-            if policies.hiResWheel == .restoreBestEffort {
-                operations.append(.init(
+                ),
+                LogitechTerminalHardwareRestoreRetry.Operation(
                     shouldContinue: {
                         wheelToken.shouldContinue
-                            && cancellationSource.token.shouldContinue
+                            && operationShouldContinue()
                             && ownsSleepPreparation()
                     },
                     attempt: { attempt in
@@ -518,17 +515,17 @@ class Device {
                             ownsSleepPreparation: ownsSleepPreparation
                         )
                     }
-                ))
-            }
+                )
+            ]
 
             _ = LogitechTerminalHardwareRestoreRetry.perform(
                 operations: operations,
                 deadline: deadline,
                 wait: Thread.sleep(forTimeInterval:)
             )
-            cleanup.complete()
-        } onCancelled: { [cleanup] in
-            cleanup.complete()
+            completion()
+        } onCancelled: {
+            completion()
         }
     }
 

@@ -315,9 +315,13 @@ final class ReceiverMonitor {
     ) -> [LogitechReceiverChannel.TerminalTeardown] {
         let locationIDs = requestedLocationIDs.union(handoffs.keys).sorted()
         let teardowns = locationIDs.compactMap { locationID in
-            LogitechReceiverChannel.beginTerminalTeardown(
+            let notificationOwnershipSession = handoffs[locationID]?
+                .currentOwner?
+                .notificationOwnershipSession
+                ?? ReceiverNotificationOwnershipSession()
+            return LogitechReceiverChannel.beginTerminalTeardown(
                 locationID: locationID,
-                notificationOwnershipSession: ReceiverNotificationOwnershipSession()
+                notificationOwnershipSession: notificationOwnershipSession
             )
         }
 
@@ -526,6 +530,14 @@ private final class ReceiverContext {
     private var rediscoveryRequested = false
     private var lastCompleteConnectedDeviceCount: Int?
     private let retrySemaphore = DispatchSemaphore(value: 0)
+    /// Receiver notification flags belong to this monitor context rather than
+    /// one transient IOHID channel. Reopening the same physical receiver can
+    /// therefore retry a restore that the retiring channel could not finish.
+    private let notificationOwnershipRegistration: ReceiverNotificationOwnershipSessionRegistry.Registration
+    var notificationOwnershipSession: ReceiverNotificationOwnershipSession {
+        notificationOwnershipRegistration.session
+    }
+
     var onDiscoveryTimedOut: (() -> Void)?
     var onSlotsChanged: (([ReceiverLogicalDeviceIdentity]) -> Void)?
     var onStopped: (() -> Void)?
@@ -533,6 +545,10 @@ private final class ReceiverContext {
         self.device = device
         self.locationID = locationID
         self.provider = provider
+        notificationOwnershipRegistration = LogitechReceiverChannel.registerNotificationOwnershipSession(
+            locationID: locationID,
+            proposed: ReceiverNotificationOwnershipSession()
+        )
     }
 
     func start() {
@@ -595,6 +611,10 @@ private final class ReceiverContext {
         )
         defer {
             retireCurrentChannel()
+            LogitechReceiverChannel.unregisterNotificationOwnershipSession(
+                locationID: locationID,
+                matching: notificationOwnershipRegistration
+            )
             markStopped()
             DispatchQueue.main.async { [weak self] in
                 self?.onStopped?()
@@ -610,7 +630,7 @@ private final class ReceiverContext {
             if currentChannelSnapshot() == nil {
                 let channel = provider.openReceiverChannel(
                     for: device.pointerDevice,
-                    notificationOwnershipSession: ReceiverNotificationOwnershipSession()
+                    notificationOwnershipSession: notificationOwnershipSession
                 )
                 if let channel {
                     guard adoptCurrentChannelIfRunning(channel) else {

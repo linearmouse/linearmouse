@@ -229,4 +229,68 @@ final class HardwareSettingApplyCoordinatorTests: XCTestCase {
         XCTAssertEqual(confirmationCount, 2)
         XCTAssertEqual(completions, [true])
     }
+
+    func testHiResEnableRetriesUntilMultiplierIsAvailableAndThenConfirmsFromCache() {
+        let scheduler = Scheduler()
+        let coordinator = HardwareSettingApplyCoordinator(
+            retryDelays: [1],
+            confirmationDelay: 3,
+            scheduler: scheduler.schedule
+        )
+        var capabilityResponses: [Int?] = [nil, 8]
+        var capabilityReads = 0
+        var modeSetCalls = 0
+        var cachedMultiplier: Int?
+        var completions = [Bool]()
+
+        coordinator.start { attempt in
+            guard let multiplier = LogitechHiResEnabledMultiplier.resolve(
+                cached: cachedMultiplier,
+                load: {
+                    capabilityReads += 1
+                    return capabilityResponses.removeFirst()
+                }
+            ) else {
+                return false
+            }
+
+            cachedMultiplier = multiplier
+            if !attempt.verifiesCachedValue {
+                // The mode/set path is otherwise healthy; only the first
+                // capabilities read prevents the initial apply from settling.
+                modeSetCalls += 1
+            }
+            return true
+        } completion: {
+            completions.append($0)
+        }
+
+        scheduler.runNext() // Capabilities unavailable; schedule apply retry.
+        XCTAssertEqual(scheduler.work.map(\.delay), [1])
+        scheduler.runNext() // Capabilities and mode/set succeed.
+        XCTAssertEqual(scheduler.work.map(\.delay), [3])
+        scheduler.runNext() // Confirmation reuses the cached multiplier.
+
+        XCTAssertEqual(capabilityReads, 2)
+        XCTAssertEqual(modeSetCalls, 1)
+        XCTAssertEqual(cachedMultiplier, 8)
+        XCTAssertEqual(completions, [true])
+        XCTAssertTrue(scheduler.work.isEmpty)
+    }
+
+    func testHiResMultiplierOneIsValidAndReusable() {
+        var loads = 0
+        let loaded = LogitechHiResEnabledMultiplier.resolve(cached: nil) {
+            loads += 1
+            return 1
+        }
+        let cached = LogitechHiResEnabledMultiplier.resolve(cached: loaded) {
+            loads += 1
+            return nil
+        }
+
+        XCTAssertEqual(loaded, 1)
+        XCTAssertEqual(cached, 1)
+        XCTAssertEqual(loads, 1)
+    }
 }

@@ -63,60 +63,6 @@ final class LogitechReceiverRouteResolverTests: XCTestCase {
         XCTAssertEqual(first, updated)
     }
 
-    func testHardwareTargetIgnoresMetadataEnrichmentForSameDevice() {
-        let initial = LogitechReceiverRoute(
-            slot: 2,
-            identity: receiverIdentity(slot: 2, name: "", productID: 0xB034)
-        )
-        let enriched = LogitechReceiverRoute(
-            slot: 2,
-            identity: receiverIdentity(
-                slot: 2,
-                name: "MX Master 3S",
-                serialNumber: "513BBE34",
-                productID: 0xB034
-            )
-        )
-
-        XCTAssertFalse(LogitechReceiverRoute.hardwareTargetChanged(from: initial, to: enriched))
-    }
-
-    func testHardwareTargetChangesWhenDifferentDeviceOccupiesSameSlot() {
-        let previous = LogitechReceiverRoute(
-            slot: 2,
-            identity: receiverIdentity(
-                slot: 2,
-                name: "MX Master 3S",
-                serialNumber: "AAAAAAAA",
-                productID: 0xB034
-            )
-        )
-        let replacement = LogitechReceiverRoute(
-            slot: 2,
-            identity: receiverIdentity(
-                slot: 2,
-                name: "MX Anywhere 3S",
-                serialNumber: "BBBBBBBB",
-                productID: 0xB037
-            )
-        )
-
-        XCTAssertTrue(LogitechReceiverRoute.hardwareTargetChanged(from: previous, to: replacement))
-    }
-
-    func testHardwareTargetChangesWhenReceiverSlotChanges() {
-        let previous = LogitechReceiverRoute(
-            slot: 1,
-            identity: receiverIdentity(slot: 1, name: "MX Master 3S")
-        )
-        let current = LogitechReceiverRoute(
-            slot: 2,
-            identity: receiverIdentity(slot: 2, name: "MX Master 3S")
-        )
-
-        XCTAssertTrue(LogitechReceiverRoute.hardwareTargetChanged(from: previous, to: current))
-    }
-
     private func receiver(
         productID: Int,
         transport: String = PointerDeviceTransportName.usb

@@ -118,6 +118,25 @@ final class LogitechDeviceSessionTests: XCTestCase {
         wait(for: [ran], timeout: 1)
     }
 
+    func testCancellingOneQueuedSleepFeatureDoesNotStarveTheOther() {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let queueGate = DispatchSemaphore(value: 0)
+        session.perform { queueGate.wait() }
+        let ran = expectation(description: "sleep preparation ran")
+
+        session.runSleepHardwarePreparation { dpiToken, wheelToken, _ in
+            XCTAssertFalse(dpiToken.shouldContinue)
+            XCTAssertTrue(wheelToken.shouldContinue)
+            ran.fulfill()
+        } onCancelled: {
+            XCTFail("The sleep owner itself remains current")
+        }
+
+        session.cancelDPIApply()
+        queueGate.signal()
+        wait(for: [ran], timeout: 1)
+    }
+
     func testTerminalHardwareRestoreRejectsNewSettingMutation() {
         let session = LogitechDeviceSession(deviceID: 1)
         let terminalStarted = expectation(description: "terminal restore started")
@@ -175,6 +194,94 @@ final class LogitechDeviceSessionTests: XCTestCase {
         queueGate.signal()
         wait(for: [ordinaryCancelled, terminalCompleted], timeout: 1)
         XCTAssertFalse(ordinaryOperationRan)
+    }
+
+    func testTerminalCancelsQueuedOrdinaryHardwareRead() {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let queueGate = DispatchSemaphore(value: 0)
+        session.perform { queueGate.wait() }
+        let readCancelled = expectation(description: "ordinary read cancelled")
+        let terminalRan = expectation(description: "terminal restore ran")
+
+        session.runBoundedOrdinaryHardwareRead(
+            deadline: Date().addingTimeInterval(1)
+        ) {
+            _ in XCTFail("queued ordinary read must not start")
+        } onCancelled: {
+            readCancelled.fulfill()
+        }
+        session.runTerminalHardwareRestore { _, _, _ in
+            terminalRan.fulfill()
+        } onCancelled: {
+            XCTFail("terminal restore must retain ownership")
+        }
+
+        queueGate.signal()
+        wait(for: [readCancelled, terminalRan], timeout: 1)
+    }
+
+    func testSleepCancelsQueuedOrdinaryHardwareRead() {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let queueGate = DispatchSemaphore(value: 0)
+        session.perform { queueGate.wait() }
+        let readCancelled = expectation(description: "ordinary read cancelled")
+        let sleepRan = expectation(description: "sleep preparation ran")
+
+        session.runBoundedOrdinaryHardwareRead(
+            deadline: Date().addingTimeInterval(1)
+        ) {
+            _ in XCTFail("queued ordinary read must not start")
+        } onCancelled: {
+            readCancelled.fulfill()
+        }
+        session.runSleepHardwarePreparation { _, _, ownsSleepPreparation in
+            XCTAssertTrue(ownsSleepPreparation())
+            sleepRan.fulfill()
+        } onCancelled: {
+            XCTFail("sleep preparation must retain ownership")
+        }
+
+        queueGate.signal()
+        wait(for: [readCancelled, sleepRan], timeout: 1)
+    }
+
+    func testTerminalCancelsInFlightOrdinaryHardwareRead() {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let readStarted = expectation(description: "ordinary read started")
+        let inspectAdmission = DispatchSemaphore(value: 0)
+        let readStopped = expectation(description: "ordinary read stopped")
+
+        session.runBoundedOrdinaryHardwareRead(
+            deadline: Date().addingTimeInterval(1)
+        ) { shouldContinue in
+            XCTAssertTrue(shouldContinue())
+            readStarted.fulfill()
+            inspectAdmission.wait()
+            XCTAssertFalse(shouldContinue())
+            readStopped.fulfill()
+        } onCancelled: {
+            XCTFail("read began before terminal admission")
+        }
+        wait(for: [readStarted], timeout: 1)
+
+        session.freezeTerminalHardwareMutations()
+        inspectAdmission.signal()
+        wait(for: [readStopped], timeout: 1)
+    }
+
+    func testOrdinaryHardwareReadHonorsOneAbsoluteDeadline() {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let cancelled = expectation(description: "expired read cancelled")
+
+        session.runBoundedOrdinaryHardwareRead(
+            deadline: Date(timeIntervalSince1970: 0)
+        ) {
+            _ in XCTFail("expired read must not start")
+        } onCancelled: {
+            cancelled.fulfill()
+        }
+
+        wait(for: [cancelled], timeout: 1)
     }
 
     func testTerminalRestoreRetriesOnlyUnfinishedSettings() {
@@ -325,8 +432,8 @@ final class LogitechDeviceSessionTests: XCTestCase {
             XCTAssertTrue(dpiToken.shouldContinue)
             XCTAssertTrue(wheelToken.shouldContinue)
             XCTAssertTrue(ownsSleepPreparation())
-            XCTAssertEqual(session.hardwareSleepRestorePolicies.dpi, .restoreBestEffort)
-            XCTAssertEqual(session.hardwareSleepRestorePolicies.hiResWheel, .restoreBestEffort)
+            XCTAssertTrue(session.hasInitialSensorDPIState)
+            XCTAssertTrue(session.hasInitialHiResWheelState)
             sleepDecision.fulfill()
         } onCancelled: {
             XCTFail("sleep operation should own both superseding setting tokens")
@@ -361,34 +468,28 @@ final class LogitechDeviceSessionTests: XCTestCase {
         wait(for: [sleepCancelled, terminalRan], timeout: 1)
     }
 
-    func testUnkeyedDPISleepPolicyRestoresBestEffort() {
-        XCTAssertEqual(
-            LogitechSleepRestorePolicy.resolve(
-                hasSessionInitial: true,
-                hasStoreBaseline: false
-            ),
-            .restoreBestEffort
-        )
-    }
+    func testSleepRestoresStoreBackedAndUnkeyedInitialStateEqually() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let target = try XCTUnwrap(LogitechHardwareTargetKey.direct(
+            transport: "Bluetooth Low Energy",
+            locationID: 123,
+            vendorID: 0x046D,
+            productID: 0xB034,
+            serialNumber: "ABC123",
+            name: "Mouse"
+        ))
+        let dpiAccess = try adjustableDPIAccess(for: session, stableTargetKey: target)
+        let wheelAccess = try hiResWheelAccess(for: session)
+        XCTAssertTrue(session.recordInitialSensorDPI(800, for: dpiAccess))
+        XCTAssertTrue(session.recordInitialHiResWheelState(enabled: false, for: wheelAccess))
+        let lease = try XCTUnwrap(session.dpiTargetLease(receiverSlot: nil) { _, _ in target })
+        let promotion = try XCTUnwrap(session.dpiBaselinePromotion(for: lease))
+        let store = LogitechHardwareBaselineStore()
+        let claim = store.captureDPIBaseline(promotion.dpi, for: target)
+        XCTAssertTrue(session.attachDPIBaseline(claim, to: promotion))
 
-    func testStoreBackedDPISleepPolicyPreservesBaselineWithoutIO() {
-        XCTAssertEqual(
-            LogitechSleepRestorePolicy.resolve(
-                hasSessionInitial: true,
-                hasStoreBaseline: true
-            ),
-            .preserveStoreBaseline
-        )
-    }
-
-    func testDPISleepPolicySkipsWithoutInitialState() {
-        XCTAssertEqual(
-            LogitechSleepRestorePolicy.resolve(
-                hasSessionInitial: false,
-                hasStoreBaseline: false
-            ),
-            .skip
-        )
+        XCTAssertTrue(session.hasInitialSensorDPIState)
+        XCTAssertTrue(session.hasInitialHiResWheelState)
     }
 
     func testTerminalRestoreRetryUsesTheRemainingDeadlineBudget() {
@@ -522,7 +623,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
 
         XCTAssertEqual(promotion.dpi, 800)
         XCTAssertTrue(session.attachDPIBaseline(claim, to: promotion))
-        XCTAssertTrue(session.hasStoredSensorDPIBaseline)
+        XCTAssertTrue(session.hasInitialSensorDPIState)
 
         _ = session.updateDiscovery(.init(identities: [], route: nil))
         _ = session.updateDiscovery(discovery(serialNumber: nil, productID: 0xB034))
@@ -670,6 +771,15 @@ final class LogitechDeviceSessionTests: XCTestCase {
         XCTAssertNil(session.hiResWheelNormalizationMultiplier)
     }
 
+    func testMultiplierOneRemainsAvailableAsValidCapability() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let access = try hiResWheelAccess(for: session)
+
+        session.updateHiResWheelState(enabled: true, multiplier: 1, for: access)
+
+        XCTAssertEqual(session.hiResWheelNormalizationMultiplier, 1)
+    }
+
     func testInitialWheelStateIsBoundToLegacyReceiverSlot() throws {
         let session = LogitechDeviceSession(deviceID: 1)
         let access = try hiResWheelAccess(for: session, receiverSlot: 2)
@@ -782,7 +892,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
 
         XCTAssertFalse(promotion.enabled)
         XCTAssertTrue(session.attachHiResBaseline(claim, to: promotion))
-        XCTAssertTrue(session.hasStoredHiResWheelBaseline)
+        XCTAssertTrue(session.hasInitialHiResWheelState)
         let reboundAccess = try hiResWheelAccess(
             for: session,
             receiverSlot: 2,
@@ -792,7 +902,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
 
         _ = session.updateDiscovery(.init(identities: [], route: nil))
         _ = session.updateDiscovery(discovery(serialNumber: nil, productID: 0xB034))
-        XCTAssertTrue(session.hasStoredHiResWheelBaseline)
+        XCTAssertTrue(session.hasInitialHiResWheelState)
         XCTAssertNil(session.hiResWheel { _, _ in nil })
     }
 
@@ -870,6 +980,36 @@ final class LogitechDeviceSessionTests: XCTestCase {
         XCTAssertFalse(session.hasInitialHiResWheelState)
     }
 
+    func testStableBaselineRecoveryAfterMissingSerialRequiresReapplyAndRebinds() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let stableDiscovery = discovery(serialNumber: "AAAAAAAA", productID: 0xB034)
+        _ = session.updateDiscovery(stableDiscovery)
+        let target = try receiverTarget(for: stableDiscovery)
+        let originalAccess = try hiResWheelAccess(
+            for: session,
+            receiverSlot: 2,
+            stableTargetKey: target
+        )
+        XCTAssertTrue(session.recordInitialHiResWheelState(enabled: false, for: originalAccess))
+
+        let incomplete = session.updateDiscovery(discovery(serialNumber: nil, productID: 0xB034))
+        XCTAssertTrue(incomplete.hardwareTargetChanged)
+        XCTAssertTrue(session.hasInitialHiResWheelState)
+        XCTAssertNil(session.hiResWheel { _, _ in
+            XCTFail("A stable baseline must remain quarantined while serial identity is missing")
+            return nil
+        })
+
+        let recovered = session.updateDiscovery(stableDiscovery)
+        XCTAssertTrue(recovered.hardwareTargetChanged)
+        let reboundAccess = try hiResWheelAccess(
+            for: session,
+            receiverSlot: 2,
+            stableTargetKey: target
+        )
+        XCTAssertEqual(session.initialHiResWheelEnabled(for: reboundAccess), false)
+    }
+
     func testSameStableSerialRebindsAcrossReceiverSlots() throws {
         let session = LogitechDeviceSession(deviceID: 1)
         let discoveryA = discovery(serialNumber: "AAAAAAAA", productID: 0xB034, slot: 2)
@@ -887,6 +1027,17 @@ final class LogitechDeviceSessionTests: XCTestCase {
         )
 
         XCTAssertEqual(session.initialHiResWheelEnabled(for: reboundAccess), false)
+    }
+
+    func testMissingSerialSentinelCannotCarryBaselineToReplacementProduct() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        _ = session.updateDiscovery(discovery(serialNumber: "00000000", productID: 0xB034))
+        let access = try hiResWheelAccess(for: session, receiverSlot: 2)
+        XCTAssertTrue(session.recordInitialHiResWheelState(enabled: false, for: access))
+
+        _ = session.updateDiscovery(discovery(serialNumber: "00000000", productID: 0xB035))
+
+        XCTAssertFalse(session.hasInitialHiResWheelState)
     }
 
     func testUnkeyedReceiverBaselineIsClearedWhenRouteIsLost() throws {

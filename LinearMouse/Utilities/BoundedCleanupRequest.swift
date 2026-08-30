@@ -21,9 +21,18 @@ final class BoundedCleanupRequest {
 
     private let lock = NSLock()
     private var finished = false
+    private let authorization = CancellationSource()
     private let onTimeout: () -> Void
     private let completion: (Outcome) -> Void
     private let delivery: Delivery
+
+    /// Admission shared by the cleanup workers owned by this request.
+    ///
+    /// The one-shot winner revokes it before scheduling completion delivery, so
+    /// reaching the deadline stops new work even when the main run loop is busy.
+    var authorizationToken: CancellationToken {
+        authorization.token
+    }
 
     init(
         timeout: TimeInterval = defaultTimeout,
@@ -64,6 +73,7 @@ final class BoundedCleanupRequest {
                 return false
             }
             finished = true
+            authorization.cancel()
             return true
         }
         guard won else {

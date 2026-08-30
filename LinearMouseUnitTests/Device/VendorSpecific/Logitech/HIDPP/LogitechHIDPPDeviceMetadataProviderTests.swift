@@ -639,6 +639,25 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         XCTAssertEqual(secondPollCount, 1)
     }
 
+    func testReceiverNotificationOwnershipRejectsMissingSerialSentinels() {
+        let vendorID: Int? = 0x046D
+        let target: (String?) -> ReceiverNotificationOwnershipTarget? = {
+            ReceiverNotificationOwnershipTarget.stableReceiver(
+                vendorID: vendorID,
+                serialNumber: $0
+            )
+        }
+
+        XCTAssertNil(target("00000000"))
+        XCTAssertNil(target("FF:FF:FF:FF"))
+        guard case let .receiver(resolvedVendorID, serialNumber)? = target(" ab-cd:12 ") else {
+            XCTFail("Expected a canonical stable receiver identity")
+            return
+        }
+        XCTAssertEqual(resolvedVendorID, 0x046D)
+        XCTAssertEqual(serialNumber, "ABCD12")
+    }
+
     func testReceiverNotificationOwnershipCapturesOnlyBitsItAddsAndKeepsFirstEntry() throws {
         let store = ReceiverNotificationOwnershipStore()
         let target = try XCTUnwrap(ReceiverNotificationOwnershipTarget.receiver(
@@ -959,12 +978,12 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         XCTAssertFalse(registry.isClaimed(locationID: locationID))
     }
 
-    func testUnidentifiedReceiverNotificationOwnershipSurvivesChannelRebuild() {
-        let session = ReceiverNotificationOwnershipSession()
-        let target = ReceiverNotificationOwnershipTarget.session(session.identity)
+    func testUnidentifiedReceiverNotificationOwnershipSurvivesChannelRebuildInSameContext() {
+        let contextSession = ReceiverNotificationOwnershipSession()
+        let target = ReceiverNotificationOwnershipTarget.session(contextSession.identity)
         var flags: UInt32 = 0
 
-        XCTAssertTrue(session.store.enable(
+        XCTAssertTrue(contextSession.store.enable(
             0x000100,
             for: target,
             read: { flags },
@@ -974,9 +993,21 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
             }
         ))
 
-        // A rebuilt channel receives this same concrete session object.
-        XCTAssertEqual(session.store.claim(for: target)?.ownedBits, 0x000100)
-        XCTAssertTrue(session.store.restoreOwnedBits(
+        // Channel A retires while its bounded restore can no longer continue.
+        // The context-owned session must keep the claim for channel B.
+        XCTAssertFalse(contextSession.store.restoreOwnedBits(
+            for: target,
+            read: { flags },
+            write: { _ in
+                XCTFail("A cancelled retirement must not write")
+                return true
+            },
+            shouldContinue: { false }
+        ))
+        XCTAssertEqual(contextSession.store.claim(for: target)?.ownedBits, 0x000100)
+
+        // Channel B receives the same concrete session from ReceiverContext.
+        XCTAssertTrue(contextSession.store.restoreOwnedBits(
             for: target,
             read: { flags },
             write: {
@@ -985,6 +1016,115 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
             }
         ))
         XCTAssertEqual(flags, 0)
+    }
+
+    func testUnidentifiedReceiverNotificationOwnershipDoesNotCrossContexts() {
+        let firstContext = ReceiverNotificationOwnershipSession()
+        let firstTarget = ReceiverNotificationOwnershipTarget.session(firstContext.identity)
+        var flags: UInt32 = 0
+
+        XCTAssertTrue(firstContext.store.enable(
+            0x000100,
+            for: firstTarget,
+            read: { flags },
+            write: {
+                flags = $0
+                return true
+            }
+        ))
+
+        let replacementContext = ReceiverNotificationOwnershipSession()
+        let replacementTarget = ReceiverNotificationOwnershipTarget.session(replacementContext.identity)
+        var replacementReadCount = 0
+        var replacementWriteCount = 0
+        XCTAssertTrue(replacementContext.store.restoreOwnedBits(
+            for: replacementTarget,
+            read: {
+                replacementReadCount += 1
+                return flags
+            },
+            write: { _ in
+                replacementWriteCount += 1
+                return true
+            }
+        ))
+        XCTAssertEqual(replacementReadCount, 0)
+        XCTAssertEqual(replacementWriteCount, 0)
+        XCTAssertEqual(firstContext.store.claim(for: firstTarget)?.ownedBits, 0x000100)
+    }
+
+    func testNotificationSessionRegistrationAdoptsExistingChannelSession() {
+        let registry = ReceiverNotificationOwnershipSessionRegistry()
+        let existingChannelSession = ReceiverNotificationOwnershipSession()
+        let proposedContextSession = ReceiverNotificationOwnershipSession()
+
+        let registration = registry.register(
+            locationID: 1,
+            proposed: proposedContextSession,
+            existingChannelSession: existingChannelSession
+        )
+        let resolution = registry.resolveForOpen(
+            locationID: 1,
+            proposed: ReceiverNotificationOwnershipSession()
+        )
+
+        XCTAssertIdentical(registration.session, existingChannelSession)
+        XCTAssertIdentical(resolution.session, existingChannelSession)
+        XCTAssertTrue(registry.permitsAdoption(locationID: 1, resolution: resolution))
+    }
+
+    func testNotificationSessionRegistrationJoinsExternalOpenPreparedBeforeContext() {
+        let registry = ReceiverNotificationOwnershipSessionRegistry()
+        let externalResolution = registry.resolveForOpen(
+            locationID: 1,
+            proposed: ReceiverNotificationOwnershipSession()
+        )
+        let contextSession = ReceiverNotificationOwnershipSession()
+
+        let registration = registry.register(
+            locationID: 1,
+            proposed: contextSession,
+            existingChannelSession: nil
+        )
+        let contextResolution = registry.resolveForOpen(
+            locationID: 1,
+            proposed: ReceiverNotificationOwnershipSession()
+        )
+
+        XCTAssertIdentical(registration.session, externalResolution.session)
+        XCTAssertTrue(registry.permitsAdoption(locationID: 1, resolution: externalResolution))
+        XCTAssertTrue(registry.permitsAdoption(locationID: 1, resolution: contextResolution))
+        XCTAssertIdentical(contextResolution.session, externalResolution.session)
+    }
+
+    func testNotificationSessionRegistrationUnregistersOnlyExactContext() {
+        let registry = ReceiverNotificationOwnershipSessionRegistry()
+        let contextSession = ReceiverNotificationOwnershipSession()
+        let unrelatedSession = ReceiverNotificationOwnershipSession()
+        let registration = registry.register(
+            locationID: 1,
+            proposed: contextSession,
+            existingChannelSession: nil
+        )
+        let registeredResolution = registry.resolveForOpen(
+            locationID: 1,
+            proposed: ReceiverNotificationOwnershipSession()
+        )
+        let unrelatedRegistration = ReceiverNotificationOwnershipSessionRegistry.Registration(
+            session: unrelatedSession
+        )
+
+        registry.unregister(locationID: 1, registration: unrelatedRegistration)
+        XCTAssertTrue(registry.permitsAdoption(locationID: 1, resolution: registeredResolution))
+
+        registry.unregister(locationID: 1, registration: registration)
+        XCTAssertFalse(registry.permitsAdoption(locationID: 1, resolution: registeredResolution))
+
+        let freshResolution = registry.resolveForOpen(
+            locationID: 1,
+            proposed: unrelatedSession
+        )
+        XCTAssertTrue(registry.permitsAdoption(locationID: 1, resolution: freshResolution))
     }
 
     func testReceiverNotificationEnableWriteFailureDoesNotCaptureOwnership() throws {

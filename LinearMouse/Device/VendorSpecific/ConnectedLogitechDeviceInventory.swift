@@ -7,13 +7,14 @@ import PointerKit
 enum ConnectedLogitechDeviceInventory {
     static func devices<DeviceContext: VendorSpecificDeviceContext>(
         from devices: [DeviceContext],
-        shouldContinue: () -> Bool = { true }
+        deadline: Date? = nil,
+        shouldContinue: @escaping () -> Bool = { true }
     ) -> [ConnectedBatteryDeviceInfo] {
         var results = [ConnectedBatteryDeviceInfo]()
         var seen = Set<String>()
 
         for device in devices where device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID {
-            guard shouldContinue() else {
+            guard shouldContinue(), deadline.map({ Date() < $0 }) != false else {
                 break
             }
 
@@ -28,8 +29,12 @@ enum ConnectedLogitechDeviceInventory {
                 continue
             }
 
-            guard let metadata = VendorSpecificDeviceMetadataRegistry.metadata(for: device),
-                  let batteryLevel = metadata.batteryLevel
+            guard let metadata = VendorSpecificDeviceMetadataRegistry.metadata(
+                for: device,
+                deadline: deadline,
+                until: shouldContinue
+            ),
+                let batteryLevel = metadata.batteryLevel
             else {
                 continue
             }

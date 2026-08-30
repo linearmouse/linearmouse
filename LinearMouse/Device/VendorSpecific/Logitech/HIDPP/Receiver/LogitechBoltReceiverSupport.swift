@@ -22,12 +22,110 @@ final class ReceiverNotificationSessionIdentity: Hashable {
     }
 }
 
-/// Owns notification-register mutations for one concrete channel lifetime.
-/// An ordinary retirement restores this store before another channel opens;
-/// an unidentified replacement must never inherit the old ownership.
+/// Owns notification-register mutations for one concrete receiver-monitor
+/// context. It may span safe channel reconstruction, but an unidentified
+/// replacement context must never inherit the old ownership.
 final class ReceiverNotificationOwnershipSession {
     let identity = ReceiverNotificationSessionIdentity()
     let store = ReceiverNotificationOwnershipStore()
+}
+
+/// Weakly associates one live receiver-monitor context with its notification
+/// ownership session. The registry is used only while the caller holds the
+/// receiver channel registry lock; it does not create another lifetime owner.
+final class ReceiverNotificationOwnershipSessionRegistry {
+    final class Registration {
+        let session: ReceiverNotificationOwnershipSession
+
+        init(session: ReceiverNotificationOwnershipSession) {
+            self.session = session
+        }
+    }
+
+    struct OpenResolution {
+        let session: ReceiverNotificationOwnershipSession
+        fileprivate let registration: Registration
+    }
+
+    private final class WeakRegistration {
+        weak var value: Registration?
+
+        init(_ value: Registration) {
+            self.value = value
+        }
+    }
+
+    private var registrationsByLocation = [Int: WeakRegistration]()
+
+    /// Registers a context. If a channel already exists, its concrete session
+    /// becomes the context session so adoption never splits ownership.
+    func register(
+        locationID: Int,
+        proposed: ReceiverNotificationOwnershipSession,
+        existingChannelSession: ReceiverNotificationOwnershipSession?
+    ) -> Registration {
+        if let existingChannelSession {
+            if let current = registrationsByLocation[locationID]?.value,
+               current.session === existingChannelSession {
+                return current
+            }
+            let registration = Registration(session: existingChannelSession)
+            registrationsByLocation[locationID] = WeakRegistration(registration)
+            return registration
+        }
+        if let current = registrationsByLocation[locationID]?.value {
+            return current
+        }
+
+        let registration = Registration(session: proposed)
+        registrationsByLocation[locationID] = WeakRegistration(registration)
+        return registration
+    }
+
+    /// Every channel creator resolves the registered context session, including
+    /// callers that do not themselves know about ReceiverContext.
+    func resolveForOpen(
+        locationID: Int,
+        proposed: ReceiverNotificationOwnershipSession
+    ) -> OpenResolution {
+        if let registration = registrationsByLocation[locationID]?.value {
+            return OpenResolution(
+                session: registration.session,
+                registration: registration
+            )
+        }
+
+        let registration = Registration(session: proposed)
+        registrationsByLocation[locationID] = WeakRegistration(registration)
+        return OpenResolution(
+            session: proposed,
+            registration: registration
+        )
+    }
+
+    /// A channel prepared before context registration must not publish with the
+    /// now-wrong session. It is closed and the context's next retry opens one
+    /// with the registered session instead.
+    func permitsAdoption(
+        locationID: Int,
+        resolution: OpenResolution
+    ) -> Bool {
+        guard let current = registrationsByLocation[locationID]?.value else {
+            return false
+        }
+        return current === resolution.registration
+            && current.session === resolution.session
+    }
+
+    func unregister(
+        locationID: Int,
+        registration: Registration
+    ) {
+        guard registrationsByLocation[locationID]?.value === registration else {
+            return
+        }
+        registrationsByLocation.removeValue(forKey: locationID)
+    }
 }
 
 /// Concrete identities for the three mutually exclusive receiver lifecycle
@@ -240,17 +338,10 @@ enum ReceiverNotificationOwnershipTarget: Hashable {
     case receiver(vendorID: Int, serialNumber: String)
     case session(ReceiverNotificationSessionIdentity)
 
-    static func receiver(vendorID: Int?, serialNumber: String?) -> Self? {
+    static func stableReceiver(vendorID: Int?, serialNumber: String?) -> Self? {
         guard let vendorID,
-              let serialNumber
+              let normalizedSerial = LogitechStableSerial.normalize(serialNumber)
         else {
-            return nil
-        }
-
-        let normalizedSerial = serialNumber
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .uppercased()
-        guard !normalizedSerial.isEmpty else {
             return nil
         }
 
@@ -1033,7 +1124,7 @@ extension LogitechReceiverMonitoringChannel {
             return nil
         }
 
-        return response[8 ... 11].map { String(format: "%02X", $0) }.joined()
+        return LogitechStableSerial.encode(response[8 ... 11])
     }
 
     static func parseBoltReceiverName(_ response: [UInt8]) -> String? {

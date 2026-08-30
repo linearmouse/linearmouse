@@ -216,6 +216,47 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertEqual(device.outputReportRequestCount, 0)
     }
 
+    func testConnectedLogitechInventoryDoesNotIssueHIDIOAfterDeadline() {
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xB015,
+            product: "Logitech USB Device",
+            name: "Logitech USB Device",
+            transport: PointerDeviceTransportName.usb,
+            locationID: 1,
+            maxInputReportSize: 20,
+            maxOutputReportSize: 20
+        )
+
+        let devices = ConnectedLogitechDeviceInventory.devices(
+            from: [device],
+            deadline: Date(timeIntervalSince1970: 0)
+        )
+
+        XCTAssertTrue(devices.isEmpty)
+        XCTAssertEqual(device.outputReportRequestCount, 0)
+        XCTAssertEqual(device.outputReportRequestOnceCount, 0)
+    }
+
+    func testConnectedLogitechInventoryDoesNotIssueHIDIOAfterCancellation() {
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xB015,
+            product: "Logitech USB Device",
+            name: "Logitech USB Device",
+            transport: PointerDeviceTransportName.usb,
+            locationID: 1,
+            maxInputReportSize: 20,
+            maxOutputReportSize: 20
+        )
+
+        let devices = ConnectedLogitechDeviceInventory.devices(from: [device]) { false }
+
+        XCTAssertTrue(devices.isEmpty)
+        XCTAssertEqual(device.outputReportRequestCount, 0)
+        XCTAssertEqual(device.outputReportRequestOnceCount, 0)
+    }
+
     func testLogitechControlsMonitorUsesReceiverAllowlistForUsbDevices() {
         XCTAssertTrue(
             LogitechReprogrammableControlsMonitor.supports(
@@ -270,6 +311,41 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertEqual(LogitechReceiverChannel.parseBoltReceiverKind(response), 0x02)
         XCTAssertEqual(LogitechReceiverChannel.parseBoltReceiverProductID(response), 0xB03E)
         XCTAssertEqual(LogitechReceiverChannel.parseBoltReceiverSerialNumber(response), "EF0F425B")
+    }
+
+    func testClassicReceiverSerialParserUsesR1ThroughR4WithoutCollidingOnReportTypes() {
+        let first: [UInt8] = [
+            0x11, 0xFF, 0x83, 0xB5, 0x30,
+            0x12, 0x34, 0x56, 0x78, // r1...r4: serial
+            0xAB, 0xCD, 0x00, 0x00
+        ]
+        var second = first
+        second[5] = 0x13
+
+        XCTAssertEqual(LogitechReceiverChannel.parseReceiverSerialNumber(first), "12345678")
+        XCTAssertEqual(LogitechReceiverChannel.parseReceiverSerialNumber(second), "13345678")
+        XCTAssertNotEqual(
+            LogitechReceiverChannel.parseReceiverSerialNumber(first),
+            LogitechReceiverChannel.parseReceiverSerialNumber(second)
+        )
+    }
+
+    func testReceiverSerialParsersRejectMissingIdentitySentinels() {
+        let classicPrefix: [UInt8] = [0x11, 0xFF, 0x83, 0xB5, 0x30]
+        XCTAssertNil(LogitechReceiverChannel.parseReceiverSerialNumber(
+            classicPrefix + [0x00, 0x00, 0x00, 0x00, 0xAA]
+        ))
+        XCTAssertNil(LogitechReceiverChannel.parseReceiverSerialNumber(
+            classicPrefix + [0xFF, 0xFF, 0xFF, 0xFF, 0xAA]
+        ))
+
+        let boltPrefix: [UInt8] = [0x11, 0xFF, 0x83, 0xB5, 0x52, 0x02, 0x3E, 0xB0]
+        XCTAssertNil(LogitechReceiverChannel.parseBoltReceiverSerialNumber(
+            boltPrefix + [0x00, 0x00, 0x00, 0x00]
+        ))
+        XCTAssertNil(LogitechReceiverChannel.parseBoltReceiverSerialNumber(
+            boltPrefix + [0xFF, 0xFF, 0xFF, 0xFF]
+        ))
     }
 
     func testBoltReceiverNameParserUsesAvailableNameFragment() {

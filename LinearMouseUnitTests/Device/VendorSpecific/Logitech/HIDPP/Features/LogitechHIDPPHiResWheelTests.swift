@@ -156,7 +156,7 @@ final class HiResWheelTests: XCTestCase {
 
         XCTAssertNil(controller.setHighResolutionWheelEnabled(
             true
-        )            { admitted })
+        ) { admitted })
         XCTAssertEqual(device.sentReports.count, 1)
         XCTAssertEqual([UInt8](device.sentReports[0])[3], 0x18)
     }

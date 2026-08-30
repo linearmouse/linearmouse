@@ -30,6 +30,22 @@ func withSynchronousReportRequestGate(
     return nil
 }
 
+/// Performs one report send after a short admission check.
+///
+/// Admission is deliberately complete before `send` starts. Once admitted, the
+/// synchronous IOKit call is committed and may outlive logical invalidation;
+/// invalidation must remain free to revoke later requests without waiting for
+/// that external call to return.
+func performAdmittedSynchronousReportSend<Result>(
+    admission: () -> Bool,
+    send: () -> Result
+) -> Result? {
+    guard admission() else {
+        return nil
+    }
+    return send()
+}
+
 /// A sent HID request owns its matcher until a matching response, device
 /// invalidation, or the request deadline. Cancellation controls whether its
 /// result is returned; it cannot make a late response belong to the next
@@ -608,19 +624,25 @@ extension PointerDevice {
                     return kIOReturnBadArgument
                 }
 
-                stateLock.lock()
-                defer { stateLock.unlock() }
-                guard isValid, requestShouldContinue() else {
+                guard requestShouldContinue() else {
                     return kIOReturnNotOpen
                 }
 
-                return IOHIDDeviceSetReport(
-                    device,
-                    kIOHIDReportTypeOutput,
-                    CFIndex(report[0]),
-                    baseAddress,
-                    report.count
-                )
+                return performAdmittedSynchronousReportSend(
+                    admission: {
+                        self.stateLock.withLock { self.isValid }
+                            && requestShouldContinue()
+                    },
+                    send: {
+                        IOHIDDeviceSetReport(
+                            device,
+                            kIOHIDReportTypeOutput,
+                            CFIndex(report[0]),
+                            baseAddress,
+                            report.count
+                        )
+                    }
+                ) ?? kIOReturnNotOpen
             }
 
             guard result == kIOReturnSuccess else {
@@ -648,7 +670,9 @@ extension PointerDevice {
             }
             return settleCommittedSynchronousReportRequest(
                 until: deadline,
-                shouldDeliverResult: requestShouldContinue,
+                shouldDeliverResult: {
+                    requestShouldContinue() && self.valid
+                },
                 isTransportValid: { self.valid },
                 wait: waitForResponse
             ) {

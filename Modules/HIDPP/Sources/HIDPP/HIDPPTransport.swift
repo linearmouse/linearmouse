@@ -19,6 +19,7 @@ public struct HIDPPTransport {
     private let acceptedReplyIndices: Set<UInt8>
     private let shouldContinue: () -> Bool
     private let requestTimeout: TimeInterval
+    private let requestDeadline: Date?
     public let receiverSlot: UInt8?
     public let isReceiverRoutedDevice: Bool
 
@@ -26,6 +27,7 @@ public struct HIDPPTransport {
         device: HIDPPDeviceIO,
         deviceIndex: UInt8?,
         requestTimeout: TimeInterval = HIDPPConstants.timeout,
+        deadline: Date? = nil,
         shouldContinue: @escaping () -> Bool = { true }
     ) {
         let maxOutputReportSize = device.maxOutputReportSize ?? 0
@@ -43,6 +45,7 @@ public struct HIDPPTransport {
         self.deviceIndex = deviceIndex ?? HIDPPConstants.receiverIndex
         self.shouldContinue = shouldContinue
         self.requestTimeout = max(0, requestTimeout)
+        requestDeadline = deadline
         receiverSlot = deviceIndex
         isReceiverRoutedDevice = receiverSlot != nil
         acceptedReplyIndices = deviceIndex.map { Set([$0]) } ?? HIDPPConstants.directReplyIndices
@@ -83,7 +86,7 @@ public struct HIDPPTransport {
             function: function,
             parameters: parameters,
             deadline: nil
-        )            { true }
+        ) { true }
     }
 
     public func request(
@@ -113,7 +116,7 @@ public struct HIDPPTransport {
             function: function,
             parameters: parameters,
             deadline: nil
-        )            { true }
+        ) { true }
     }
 
     public func requestOnce(
@@ -170,10 +173,19 @@ public struct HIDPPTransport {
         deadline: Date?,
         operationShouldContinue: @escaping () -> Bool
     ) -> ResponseResult {
+        let effectiveDeadline: Date?
+        switch (requestDeadline, deadline) {
+        case let (lhs?, rhs?):
+            effectiveDeadline = min(lhs, rhs)
+        case let (value?, nil), let (nil, value?):
+            effectiveDeadline = value
+        case (nil, nil):
+            effectiveDeadline = nil
+        }
         let requestShouldContinue = {
             shouldContinue()
                 && operationShouldContinue()
-                && deadline.map { Date() < $0 } != false
+                && effectiveDeadline.map { Date() < $0 } != false
         }
         // A HID++ report has a four-byte header. Do not silently drop parameters
         // that do not fit in the negotiated report size: callers must know that
@@ -185,7 +197,7 @@ public struct HIDPPTransport {
 
         let timeout = min(
             requestTimeout,
-            deadline.map { max(0, $0.timeIntervalSinceNow) } ?? HIDPPConstants.timeout
+            effectiveDeadline.map { max(0, $0.timeIntervalSinceNow) } ?? requestTimeout
         )
         guard timeout > 0 else {
             return .failure

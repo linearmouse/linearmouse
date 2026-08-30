@@ -6,6 +6,49 @@ import Foundation
 import XCTest
 
 final class PointerDeviceSynchronousRequestTests: XCTestCase {
+    func testInvalidationDoesNotWaitForAnAdmittedSend() {
+        let validityLock = NSLock()
+        var isValid = true
+        let sendStarted = DispatchSemaphore(value: 0)
+        let sendFinished = DispatchSemaphore(value: 0)
+        let invalidationFinished = DispatchSemaphore(value: 0)
+        let releaseSend = DispatchSemaphore(value: 0)
+
+        DispatchQueue.global().async {
+            let result = performAdmittedSynchronousReportSend(
+                admission: {
+                    validityLock.withLock { isValid }
+                },
+                send: {
+                    sendStarted.signal()
+                    releaseSend.wait()
+                    return Data([0x01])
+                }
+            )
+            XCTAssertEqual(result, Data([0x01]))
+            sendFinished.signal()
+        }
+
+        XCTAssertEqual(sendStarted.wait(timeout: .now() + 1), .success)
+        DispatchQueue.global().async {
+            validityLock.withLock { isValid = false }
+            invalidationFinished.signal()
+        }
+
+        // The admitted send is still blocked, but it no longer owns the lock
+        // needed to invalidate the transport.
+        let invalidatedBeforeSendReturned = invalidationFinished.wait(timeout: .now() + 1)
+
+        releaseSend.signal()
+        XCTAssertEqual(sendFinished.wait(timeout: .now() + 1), .success)
+        if invalidatedBeforeSendReturned != .success {
+            _ = invalidationFinished.wait(timeout: .now() + 1)
+        }
+
+        XCTAssertEqual(invalidatedBeforeSendReturned, .success)
+        XCTAssertFalse(validityLock.withLock { isValid })
+    }
+
     func testCancellationAfterGateAcquisitionReleasesPermit() {
         // A zero-count gate models a first request holding the permit. The
         // second request is cancelled immediately after its wait succeeds.
@@ -146,5 +189,19 @@ final class PointerDeviceSynchronousRequestTests: XCTestCase {
             ) { Data([0x06]) },
             Data([0x06])
         )
+    }
+
+    func testInvalidatedCommittedRequestDiscardsAReadyResponse() {
+        let transportIsValid = false
+
+        let result = settleCommittedSynchronousReportRequest(
+            until: Date().addingTimeInterval(1),
+            shouldDeliverResult: { transportIsValid },
+            isTransportValid: { transportIsValid },
+            wait: { _ in XCTFail("A ready response must not wait") },
+            response: { Data([0x07]) }
+        )
+
+        XCTAssertNil(result)
     }
 }

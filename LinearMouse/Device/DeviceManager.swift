@@ -21,8 +21,8 @@ enum DeviceManagerLifecycleState: Equatable {
 enum DeviceManagerLogitechTeardownPolicy: Int, Comparable {
     /// Drop monitor ownership without any HID++ reporting I/O.
     case abandon
-    /// Preserve a store-backed baseline across sleep without restoring it.
-    case sleepPreserve
+    /// Best-effort restore reachable hardware before the system sleeps.
+    case sleepRestore
     /// Restore every pending baseline before invalidating PointerDevice.
     case restore
 
@@ -32,7 +32,7 @@ enum DeviceManagerLogitechTeardownPolicy: Int, Comparable {
 }
 
 /// The strongest teardown request received for the current observation
-/// lifetime. Sleep is a preservation policy, not a terminal outcome: once a
+/// lifetime. Sleep uses a shorter best-effort restore, but once a
 /// caller asks to restore hardware, a later sleep notification must never
 /// weaken that request.
 struct DeviceManagerStopIntent: Equatable {
@@ -81,7 +81,6 @@ final class DeviceManagerStopRequest {
     var logitechBarrier = DeviceManagerLogitechStopBarrier()
     var completions = [() -> Void]()
     var sleepLogitechCleanup: BoundedCleanupRequest?
-    var sleepTimeoutAuthorization: CancellationSource?
     var terminalLogitechCleanup: BoundedCleanupRequest?
 
     init(intent: DeviceManagerStopIntent) {
@@ -170,7 +169,11 @@ class DeviceManager: ObservableObject {
         switch state {
         case .stopped:
             if let completion {
-                DispatchQueue.main.async(execute: completion)
+                if Thread.isMainThread {
+                    completion()
+                } else {
+                    DispatchQueue.main.async(execute: completion)
+                }
             }
             return
         case .stopping, .finishing:
@@ -234,11 +237,8 @@ class DeviceManager: ObservableObject {
         }
 
         if start == .restore {
-            // A terminal request owns every remaining restore. Completing the
-            // weaker sleep bound first prevents its timeout hook from
-            // abandoning controls after terminal restoration has begun.
-            request.sleepTimeoutAuthorization?.cancel()
-            request.sleepTimeoutAuthorization = nil
+            // Revoking the weaker request's authorization makes every sleep
+            // setting operation yield before terminal restoration starts.
             request.sleepLogitechCleanup?.complete()
             startTerminalLogitechRestore(devices: devices, request: request, start: start)
             return
@@ -252,47 +252,16 @@ class DeviceManager: ObservableObject {
         request: DeviceManagerStopRequest,
         start: DeviceManagerLogitechStopBarrier.Start
     ) {
+        let deadline = Date().addingTimeInterval(Self.sleepLogitechTeardownTimeout)
         let group = DispatchGroup()
-        for device in devices {
-            group.enter()
-            let completion = {
-                group.leave()
-            }
-            switch start {
-            case .abandon:
-                break
-            case .sleepPreserve:
-                device.stopLogitechControlsMonitoringForSleep(completion: completion)
-            case .restore:
-                break
-            }
-
-            if device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID {
-                group.enter()
-                device.prepareLogitechSettingsForSleep {
-                    group.leave()
-                }
-            }
-        }
-
-        let logitechDevices = devices.filter {
-            $0.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID
-        }
-        let timeoutAuthorization = CancellationSource()
         let cleanup = BoundedCleanupRequest(
             timeout: Self.sleepLogitechTeardownTimeout,
             onTimeout: {
-                guard timeoutAuthorization.token.shouldContinue else {
-                    return
-                }
                 os_log(
-                    "Timed out preparing Logitech hardware for sleep",
+                    "Timed out restoring Logitech hardware for sleep",
                     log: Self.log,
                     type: .error
                 )
-                for device in logitechDevices {
-                    device.cancelLogitechTeardown()
-                }
             },
             completion: { [weak self, weak request] _ in
                 guard let self,
@@ -302,15 +271,31 @@ class DeviceManager: ObservableObject {
                     return
                 }
                 request.sleepLogitechCleanup = nil
-                if request.sleepTimeoutAuthorization === timeoutAuthorization {
-                    request.sleepTimeoutAuthorization = nil
-                }
                 request.logitechBarrier.complete(start)
                 self.attemptFinishStop(request)
             }
         )
         request.sleepLogitechCleanup = cleanup
-        request.sleepTimeoutAuthorization = timeoutAuthorization
+        let cleanupAuthorization = cleanup.authorizationToken
+
+        for device in devices
+            where device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID {
+            group.enter()
+            device.stopLogitechControlsMonitoringForSleep(
+                authorization: cleanupAuthorization,
+                deadline: deadline
+            ) {
+                group.leave()
+            }
+
+            group.enter()
+            device.prepareLogitechSettingsForSleep(
+                deadline: deadline,
+                until: { cleanupAuthorization.shouldContinue }
+            ) {
+                group.leave()
+            }
+        }
 
         group.notify(queue: .global(qos: .utility)) { [weak cleanup] in
             cleanup?.complete()
@@ -327,7 +312,6 @@ class DeviceManager: ObservableObject {
         start: DeviceManagerLogitechStopBarrier.Start
     ) {
         let deadline = Date().addingTimeInterval(Self.terminalLogitechRestoreTimeout)
-        let cancellationSource = CancellationSource()
         let logitechDevices = devices.filter {
             $0.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID
         }
@@ -354,7 +338,6 @@ class DeviceManager: ObservableObject {
                     log: Self.log,
                     type: .error
                 )
-                cancellationSource.cancel()
                 for device in logitechDevices {
                     device.cancelLogitechTeardown()
                 }
@@ -375,6 +358,7 @@ class DeviceManager: ObservableObject {
             }
         )
         request.terminalLogitechCleanup = cleanup
+        let cleanupAuthorization = cleanup.authorizationToken
 
         // Enter every device before starting asynchronous receiver readiness,
         // so the final group cannot reach zero while a terminal channel is
@@ -392,7 +376,11 @@ class DeviceManager: ObservableObject {
         let preparedReceiverLocations = Set(receiverTeardowns.map(\.locationID))
 
         for device in logitechDevices where !shouldMonitorReceiver(device) {
-            startTerminalLogitechRestore(for: device, deadline: deadline) {
+            startTerminalLogitechRestore(
+                for: device,
+                deadline: deadline,
+                authorization: cleanupAuthorization
+            ) {
                 group.leave()
             }
         }
@@ -412,24 +400,21 @@ class DeviceManager: ObservableObject {
         for teardown in receiverTeardowns {
             group.enter()
             let devices = receiverDevicesByLocation[teardown.locationID] ?? []
-            let restoreIsCurrent = { [weak self, weak request, weak cleanup] in
-                guard let self,
-                      let request,
-                      let cleanup
-                else {
-                    return false
-                }
-                return self.stopRequest === request
-                    && request.terminalLogitechCleanup === cleanup
-                    && cancellationSource.token.shouldContinue
-            }
+            // Workers run outside the main actor. Their sole admission is the
+            // request-owned token, which is revoked before timeout delivery;
+            // main-confined request identities remain checked only by main
+            // completion callbacks.
+            let restoreIsCurrent = { cleanupAuthorization.shouldContinue }
             let validationGroup = DispatchGroup()
 
             for device in devices {
                 guard let expectedRoute = device.logitechReceiverRouteSnapshot,
-                      expectedRoute.identity.serialNumber != nil
-                      || teardown.retainedAdmissionChannel
+                      LogitechStableSerial.normalize(expectedRoute.identity.serialNumber) != nil
                 else {
+                    // Receiver topology and product metadata are not a device
+                    // identity. Without a stable logical-device serial there
+                    // is no safe way to distinguish a same-slot replacement,
+                    // so terminal writes must fail closed.
                     device.updateLogitechReceiverDiscovery(nil)
                     group.leave()
                     continue
@@ -452,8 +437,7 @@ class DeviceManager: ObservableObject {
                           let freshIdentity,
                           Self.terminalIdentityMatches(
                               expected: expectedRoute.identity,
-                              fresh: freshIdentity,
-                              retainedAdmissionChannel: teardown.retainedAdmissionChannel
+                              fresh: freshIdentity
                           )
                     else {
                         device.updateLogitechReceiverDiscovery(nil)
@@ -469,7 +453,11 @@ class DeviceManager: ObservableObject {
                         identities: [freshIdentity],
                         route: route
                     ))
-                    self.startTerminalLogitechRestore(for: device, deadline: deadline) {
+                    self.startTerminalLogitechRestore(
+                        for: device,
+                        deadline: deadline,
+                        authorization: cleanupAuthorization
+                    ) {
                         group.leave()
                     }
                 }
@@ -521,17 +509,28 @@ class DeviceManager: ObservableObject {
     private func startTerminalLogitechRestore(
         for device: Device,
         deadline: Date,
+        authorization: CancellationToken,
         completion: @escaping () -> Void
     ) {
+        guard authorization.shouldContinue else {
+            completion()
+            return
+        }
         let group = DispatchGroup()
         group.enter()
-        device.restorePendingLogitechControlsForTeardown {
+        device.restorePendingLogitechControlsForTeardown(
+            authorization: authorization,
+            deadline: deadline
+        ) {
             group.leave()
         }
 
         group.enter()
-        device.restoreLogitechSettingsForTeardown(deadline: deadline) { restored in
-            if !restored, Date() < deadline {
+        device.restoreLogitechSettingsForTeardown(
+            deadline: deadline,
+            until: { authorization.shouldContinue }
+        ) { restored in
+            if !restored, authorization.shouldContinue, Date() < deadline {
                 os_log(
                     "Failed to restore all Logitech settings before teardown: device=%{public}@",
                     log: Self.log,
@@ -546,31 +545,12 @@ class DeviceManager: ObservableObject {
 
     static func terminalIdentityMatches(
         expected: ReceiverLogicalDeviceIdentity,
-        fresh: ReceiverLogicalDeviceIdentity,
-        retainedAdmissionChannel: Bool
+        fresh: ReceiverLogicalDeviceIdentity
     ) -> Bool {
-        let normalizeSerial: (String?) -> String? = {
-            guard let value = $0 else {
-                return nil
-            }
-            let normalized = value.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-            return normalized.isEmpty ? nil : normalized
-        }
-        if let expectedSerial = normalizeSerial(expected.serialNumber) {
-            return normalizeSerial(fresh.serialNumber) == expectedSerial
-        }
-
-        guard retainedAdmissionChannel,
-              expected.receiverLocationID == fresh.receiverLocationID,
-              expected.slot == fresh.slot,
-              expected.kind == fresh.kind
-        else {
+        guard let expectedSerial = LogitechStableSerial.normalize(expected.serialNumber) else {
             return false
         }
-        if let expectedProductID = expected.productID {
-            return fresh.productID == expectedProductID
-        }
-        return expected.name == fresh.name
+        return LogitechStableSerial.normalize(fresh.serialNumber) == expectedSerial
     }
 
     private func attemptFinishStop(_ request: DeviceManagerStopRequest) {
@@ -613,8 +593,6 @@ class DeviceManager: ObservableObject {
 
         let completions = request.completions
         request.completions.removeAll()
-        request.sleepTimeoutAuthorization?.cancel()
-        request.sleepTimeoutAuthorization = nil
         request.sleepLogitechCleanup = nil
         request.terminalLogitechCleanup = nil
         completions.forEach { $0() }
@@ -895,7 +873,7 @@ class DeviceManager: ObservableObject {
             return
         }
 
-        guard updateLogitechReceiverDiscovery(for: device) else {
+        guard updateLogitechReceiverDiscovery(for: device).isReady else {
             return
         }
 
@@ -1000,7 +978,7 @@ class DeviceManager: ObservableObject {
             return
         }
 
-        guard updateLogitechReceiverDiscovery(for: device) else {
+        guard updateLogitechReceiverDiscovery(for: device).isReady else {
             if shouldMonitorReceiver(device) {
                 receiverMonitor.requestRediscovery(device: device)
             }
@@ -1010,28 +988,32 @@ class DeviceManager: ObservableObject {
         device.logitechSettingsReconciler.reapply(configuredLogitechDeviceSettings(for: device))
     }
 
-    /// Returns false for a monitored receiver until discovery has identified a
-    /// unique pointing-device slot. Direct devices are ready immediately.
+    /// `isReady` remains false for a monitored receiver until discovery has
+    /// identified a unique pointing-device slot. Direct devices are ready
+    /// immediately; the session update is the sole target-change authority.
     @discardableResult
-    private func updateLogitechReceiverDiscovery(for device: Device) -> Bool {
+    private func updateLogitechReceiverDiscovery(
+        for device: Device
+    ) -> (isReady: Bool, update: LogitechDeviceSession.DiscoveryUpdate) {
         guard shouldMonitorReceiver(device) else {
-            device.updateLogitechReceiverDiscovery(nil)
-            return true
+            return (true, device.updateLogitechReceiverDiscovery(nil))
         }
 
         guard let locationID = device.pointerDevice.locationID,
               let identities = receiverPairedDeviceIdentities[locationID]
         else {
-            device.updateLogitechReceiverDiscovery(nil)
-            return false
+            return (false, device.updateLogitechReceiverDiscovery(nil))
         }
 
         let route = LogitechReceiverRouteResolver.resolve(
             for: device.pointerDevice,
             identities: identities
         )
-        device.updateLogitechReceiverDiscovery(.init(identities: identities, route: route))
-        return route != nil
+        let update = device.updateLogitechReceiverDiscovery(.init(
+            identities: identities,
+            route: route
+        ))
+        return (route != nil, update)
     }
 
     func pairedReceiverDevices(for device: Device) -> [ReceiverLogicalDeviceIdentity] {
@@ -1076,7 +1058,6 @@ class DeviceManager: ObservableObject {
             return
         }
 
-        let previousIdentities = receiverPairedDeviceIdentities[locationID] ?? []
         receiverPairedDeviceIdentities[locationID] = identities
 
         let identitiesDescription = identities.map { identity in
@@ -1093,22 +1074,19 @@ class DeviceManager: ObservableObject {
             identitiesDescription
         )
 
-        let previousSlots = Set(previousIdentities.map(\.slot))
         for (_, device) in pointerDeviceToDevice where device.pointerDevice.locationID == locationID {
             let previousRoute = device.logitechReceiverRouteSnapshot
-            let isReady = updateLogitechReceiverDiscovery(for: device)
-            guard isReady, let route = device.logitechReceiverRouteSnapshot else {
+            let discovery = updateLogitechReceiverDiscovery(for: device)
+            guard discovery.isReady, let route = device.logitechReceiverRouteSnapshot else {
                 if !identities.isEmpty {
                     device.requestLogitechControlsForcedReconfiguration()
                 }
                 continue
             }
 
-            let routeChanged = LogitechReceiverRoute.hardwareTargetChanged(from: previousRoute, to: route)
             let identityChanged = previousRoute != route
-            let slotReconnected = !previousSlots.contains(route.slot)
-            if routeChanged || slotReconnected {
-                reapplyLogitechDeviceSettings(for: device)
+            if discovery.update.hardwareTargetChanged {
+                device.logitechSettingsReconciler.reapply(configuredLogitechDeviceSettings(for: device))
             } else if identityChanged {
                 device.requestLogitechControlsForcedReconfiguration()
             }

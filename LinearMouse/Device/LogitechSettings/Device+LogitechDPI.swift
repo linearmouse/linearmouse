@@ -145,12 +145,16 @@ extension Device {
     }
 
     func refreshHardwareDPIInfo(completion: @escaping (HardwareDPIInfo) -> Void) {
-        logitechSession.perform {
-            let info = self.hardwareDPIInfo
-
+        let deadline = Date().addingTimeInterval(Self.logitechOrdinaryReadTimeout)
+        let deliver: (HardwareDPIInfo) -> Void = { info in
             DispatchQueue.main.async {
                 completion(info)
             }
+        }
+        logitechSession.runBoundedOrdinaryHardwareRead(deadline: deadline) { shouldContinue in
+            deliver(self.hardwareDPIInfo(deadline: deadline, until: shouldContinue))
+        } onCancelled: {
+            deliver(self.unsupportedHardwareDPIInfo)
         }
     }
 
@@ -207,13 +211,22 @@ extension Device {
         )
     }
 
-    private var hardwareDPIInfo: HardwareDPIInfo {
-        guard !isRemoved, let access = logitechAdjustableDPI else {
+    private func hardwareDPIInfo(
+        deadline: Date,
+        until shouldContinue: @escaping () -> Bool
+    ) -> HardwareDPIInfo {
+        guard !isRemoved,
+              shouldContinue(),
+              let access = logitechAdjustableDPI(
+                  expectedToken: nil,
+                  requestDeadline: deadline,
+                  operationShouldContinue: shouldContinue
+              ) else {
             return unsupportedHardwareDPIInfo
         }
 
         let controller = access.feature
-        let currentDPI = controller.currentDPI()
+        let currentDPI = controller.currentDPI(deadline: deadline, until: shouldContinue)
         if let currentDPI {
             logitechSession.updateSensorDPI(currentDPI, for: access)
         }
@@ -301,7 +314,10 @@ extension Device {
 
         logitechSession.updateSensorDPI(appliedDPI, for: access)
 
-        return appliedDPI
+        // A confirmation attempt may rewrite a value that firmware reset
+        // during wake. Do not let that write ACK finish confirmation: the
+        // coordinator must schedule another delayed read of the new value.
+        return verifiesCachedValue ? nil : appliedDPI
     }
 
     /// Synchronous only with respect to the Logitech session queue. The
@@ -343,7 +359,7 @@ extension Device {
             expectedToken: expectedToken,
             deadline: attempt.deadline,
             until: shouldContinue
-        )            { _ in shouldContinue() }
+        ) { _ in shouldContinue() }
         if !restored {
             // A receiver monitor may have replaced its shared channel while
             // this feature still retained the old transport. Keep the target

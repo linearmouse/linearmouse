@@ -480,7 +480,7 @@ final class AdjustableDPITests: XCTestCase {
         XCTAssertEqual(device.outputReportRequestCount, 1)
     }
 
-    func testCurrentDPIUsesSupportedDefaultWhenCurrentBytesAreNotSupported() {
+    func testCurrentDPIReportsTheRawCurrentValueEvenWhenItIsNotAdvertised() {
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,
             productID: 0xB015,
@@ -519,7 +519,7 @@ final class AdjustableDPITests: XCTestCase {
             receiverSlot: nil
         ) { true }
 
-        XCTAssertEqual(controller?.currentDPI(), 1000)
+        XCTAssertEqual(controller?.currentDPI(), 260)
     }
 
     private static func boltReceiver(

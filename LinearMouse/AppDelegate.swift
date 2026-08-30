@@ -210,16 +210,16 @@ extension AppDelegate {
         completion: (() -> Void)? = nil
     ) {
         BatteryDeviceMonitor.shared.disable()
+        GlobalEventTap.shared.stop()
         DeviceManager.shared.stop(
             logitechTeardownPolicy: logitechTeardownPolicy,
             completion: completion
         )
-        GlobalEventTap.shared.stop()
     }
 
     private func stopForSleep(completion: (() -> Void)? = nil) {
         stop(
-            logitechTeardownPolicy: .sleepPreserve,
+            logitechTeardownPolicy: .sleepRestore,
             completion: completion
         )
     }

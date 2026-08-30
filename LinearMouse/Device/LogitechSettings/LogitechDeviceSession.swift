@@ -4,19 +4,6 @@
 import Foundation
 import HIDPP
 
-enum LogitechSleepRestorePolicy: Equatable {
-    case preserveStoreBaseline
-    case restoreBestEffort
-    case skip
-
-    static func resolve(hasSessionInitial: Bool, hasStoreBaseline: Bool) -> Self {
-        guard hasSessionInitial else {
-            return .skip
-        }
-        return hasStoreBaseline ? .preserveStoreBaseline : .restoreBestEffort
-    }
-}
-
 enum LogitechTerminalHardwareRestoreRetry {
     /// Concrete ownership for one bounded hardware attempt. Cancelling or
     /// leaving its fair time slice makes every subsequent HID request and
@@ -182,6 +169,25 @@ final class LogitechDeviceSession {
     private final class TerminalHardwareRestoreRequest {}
     private final class SleepHardwarePreparationRequest {}
 
+    private enum LifecycleOwner {
+        case sleep(SleepHardwarePreparationRequest)
+        case terminal(TerminalHardwareRestoreRequest)
+
+        func owns(_ request: SleepHardwarePreparationRequest) -> Bool {
+            guard case let .sleep(owner) = self else {
+                return false
+            }
+            return owner === request
+        }
+
+        func owns(_ request: TerminalHardwareRestoreRequest) -> Bool {
+            guard case let .terminal(owner) = self else {
+                return false
+            }
+            return owner === request
+        }
+    }
+
     fileprivate typealias InitialDPIState = InitialTargetState<
         Int,
         LogitechHardwareBaselineStore.DPIHandle
@@ -228,8 +234,8 @@ final class LogitechDeviceSession {
         var hiResWheelMultiplier: Int?
         var initialHiResWheelState: InitialHiResWheelState?
         var hiResWheelRestoreRetryNeeded = false
-        var sleepHardwarePreparationRequest: SleepHardwarePreparationRequest?
-        var terminalHardwareRestoreRequest: TerminalHardwareRestoreRequest?
+        var ordinaryHardwareAccess = CancellationSource()
+        var lifecycleOwner: LifecycleOwner?
     }
 
     struct DiscoveryUpdate {
@@ -276,7 +282,7 @@ final class LogitechDeviceSession {
         withState { state in
             guard state.hiResWheelEnabled == true,
                   let multiplier = state.hiResWheelMultiplier,
-                  multiplier > 1 else {
+                  multiplier > 0 else {
                 return nil
             }
             return multiplier
@@ -308,6 +314,43 @@ final class LogitechDeviceSession {
             return try work()
         }
         return try queue.sync(execute: work)
+    }
+
+    /// Runs a read-only HID operation under the same admission used by every
+    /// configured mutation. Sleep or terminal teardown closes the concrete
+    /// ordinary-access owner immediately, so queued and in-flight reads yield
+    /// without delaying lifecycle restoration.
+    func runBoundedOrdinaryHardwareRead(
+        deadline: Date,
+        _ operation: @escaping (_ shouldContinue: @escaping () -> Bool) -> Void,
+        onCancelled: @escaping () -> Void
+    ) {
+        let access = withState { state -> CancellationSource? in
+            guard Self.ordinaryHardwareIOIsAdmitted(state) else {
+                return nil
+            }
+            return state.ordinaryHardwareAccess
+        }
+        guard let access else {
+            onCancelled()
+            return
+        }
+
+        perform {
+            let shouldContinue = { [weak self] in
+                access.token.shouldContinue
+                    && Date() < deadline
+                    && self?.withState {
+                        $0.ordinaryHardwareAccess === access
+                            && Self.ordinaryHardwareIOIsAdmitted($0)
+                    } == true
+            }
+            guard shouldContinue() else {
+                onCancelled()
+                return
+            }
+            operation(shouldContinue)
+        }
     }
 
     func updateDiscovery(_ discovery: LogitechReceiverDiscovery?) -> DiscoveryUpdate {
@@ -454,7 +497,7 @@ final class LogitechDeviceSession {
         _ = resetFeatureOperation(
             cache: \State.adjustableDPI,
             cancellationSource: \State.dpiCancellationSource,
-            admittedDuringTerminalRestore: true
+            admittedDuringLifecycle: true
         ) { _ in coordinator.cancel() }
     }
 
@@ -518,7 +561,7 @@ final class LogitechDeviceSession {
         _ = resetFeatureOperation(
             cache: \State.hiResWheel,
             cancellationSource: \State.hiResWheelCancellationSource,
-            admittedDuringTerminalRestore: true
+            admittedDuringLifecycle: true
         ) { _ in coordinator.cancel() }
     }
 
@@ -537,22 +580,29 @@ final class LogitechDeviceSession {
         onCancelled: @escaping () -> Void
     ) {
         let request = SleepHardwarePreparationRequest()
-        let tokens = withState { state -> (CancellationToken, CancellationToken)? in
-            guard state.sleepHardwarePreparationRequest == nil,
-                  state.terminalHardwareRestoreRequest == nil else {
+        let snapshot = withState { state -> (
+            tokens: (CancellationToken, CancellationToken),
+            ordinaryAccess: CancellationSource
+        )? in
+            guard state.lifecycleOwner == nil else {
                 return nil
             }
 
-            state.sleepHardwarePreparationRequest = request
+            let ordinaryAccess = state.ordinaryHardwareAccess
+            state.lifecycleOwner = .sleep(request)
             return (
-                state.dpiCancellationSource.token,
-                state.hiResWheelCancellationSource.token
+                tokens: (
+                    state.dpiCancellationSource.token,
+                    state.hiResWheelCancellationSource.token
+                ),
+                ordinaryAccess: ordinaryAccess
             )
         }
-        guard let tokens else {
+        guard let snapshot else {
             onCancelled()
             return
         }
+        snapshot.ordinaryAccess.cancel()
 
         dpiApplyCoordinator.cancel()
         hiResWheelApplyCoordinator.cancel()
@@ -560,19 +610,16 @@ final class LogitechDeviceSession {
         perform {
             let ownsSleepPreparation = { [weak self] in
                 self?.withState {
-                    $0.sleepHardwarePreparationRequest === request
-                        && $0.terminalHardwareRestoreRequest == nil
+                    $0.lifecycleOwner?.owns(request) == true
                 } == true
             }
-            guard ownsSleepPreparation(),
-                  tokens.0.shouldContinue,
-                  tokens.1.shouldContinue else {
+            guard ownsSleepPreparation() else {
                 onCancelled()
                 return
             }
             operation(
-                tokens.0,
-                tokens.1,
+                snapshot.tokens.0,
+                snapshot.tokens.1,
                 ownsSleepPreparation
             )
         }
@@ -609,7 +656,7 @@ final class LogitechDeviceSession {
         perform {
             let ownsTerminalRestore = { [weak self] in
                 self?.withState {
-                    $0.terminalHardwareRestoreRequest === request
+                    $0.lifecycleOwner?.owns(request) == true
                 } == true
             }
             guard ownsTerminalRestore() else {
@@ -622,16 +669,25 @@ final class LogitechDeviceSession {
 
     private func terminalHardwareRestoreSnapshot() -> (
         request: TerminalHardwareRestoreRequest,
-        tokens: (CancellationToken, CancellationToken)
+        tokens: (CancellationToken, CancellationToken),
+        ordinaryAccess: CancellationSource
     ) {
-        withState { state in
-            let request = state.terminalHardwareRestoreRequest ?? TerminalHardwareRestoreRequest()
-            state.terminalHardwareRestoreRequest = request
+        let snapshot = withState { state in
+            let request: TerminalHardwareRestoreRequest
+            if case let .terminal(owner) = state.lifecycleOwner {
+                request = owner
+            } else {
+                request = TerminalHardwareRestoreRequest()
+                state.lifecycleOwner = .terminal(request)
+            }
             return (
-                request,
-                (state.dpiCancellationSource.token, state.hiResWheelCancellationSource.token)
+                request: request,
+                tokens: (state.dpiCancellationSource.token, state.hiResWheelCancellationSource.token),
+                ordinaryAccess: state.ordinaryHardwareAccess
             )
         }
+        snapshot.ordinaryAccess.cancel()
+        return snapshot
     }
 
     /// Ordinary configured/manual writes lose admission as soon as a concrete
@@ -639,8 +695,7 @@ final class LogitechDeviceSession {
     /// actual report send boundary, after any preceding read has completed.
     func allowsConfiguredDPIOperation(for token: CancellationToken) -> Bool {
         withState { state in
-            state.terminalHardwareRestoreRequest == nil
-                && state.sleepHardwarePreparationRequest == nil
+            Self.ordinaryHardwareIOIsAdmitted(state)
                 && state.dpiCancellationSource.token == token
                 && token.shouldContinue
         }
@@ -648,8 +703,7 @@ final class LogitechDeviceSession {
 
     func allowsConfiguredHiResWheelOperation(for token: CancellationToken) -> Bool {
         withState { state in
-            state.terminalHardwareRestoreRequest == nil
-                && state.sleepHardwarePreparationRequest == nil
+            Self.ordinaryHardwareIOIsAdmitted(state)
                 && state.hiResWheelCancellationSource.token == token
                 && token.shouldContinue
         }
@@ -657,8 +711,7 @@ final class LogitechDeviceSession {
 
     func allowsConfiguredDPIWrite(for access: FeatureAccess<AdjustableDPI>) -> Bool {
         withState { state in
-            state.terminalHardwareRestoreRequest == nil
-                && state.sleepHardwarePreparationRequest == nil
+            Self.ordinaryHardwareIOIsAdmitted(state)
                 && Self.accessIsCurrent(
                     access,
                     token: state.dpiCancellationSource.token,
@@ -669,8 +722,7 @@ final class LogitechDeviceSession {
 
     func allowsConfiguredHiResWheelWrite(for access: FeatureAccess<HiResWheel>) -> Bool {
         withState { state in
-            state.terminalHardwareRestoreRequest == nil
-                && state.sleepHardwarePreparationRequest == nil
+            Self.ordinaryHardwareIOIsAdmitted(state)
                 && Self.accessIsCurrent(access, in: state)
         }
     }
@@ -837,30 +889,6 @@ final class LogitechDeviceSession {
 
     var hasInitialSensorDPIState: Bool {
         withState { $0.initialDPIState != nil }
-    }
-
-    var hasStoredSensorDPIBaseline: Bool {
-        withState { $0.initialDPIState?.baselineHandle != nil }
-    }
-
-    /// One locked snapshot taken only after the caller has superseded previous
-    /// DPI work on this same session queue.
-    var hardwareSleepRestorePolicies: (
-        dpi: LogitechSleepRestorePolicy,
-        hiResWheel: LogitechSleepRestorePolicy
-    ) {
-        withState { state in
-            (
-                dpi: LogitechSleepRestorePolicy.resolve(
-                    hasSessionInitial: state.initialDPIState != nil,
-                    hasStoreBaseline: state.initialDPIState?.baselineHandle != nil
-                ),
-                hiResWheel: LogitechSleepRestorePolicy.resolve(
-                    hasSessionInitial: state.initialHiResWheelState != nil,
-                    hasStoreBaseline: state.initialHiResWheelState?.baselineHandle != nil
-                )
-            )
-        }
     }
 
     var needsDPIRestoreRetry: Bool {
@@ -1061,10 +1089,6 @@ final class LogitechDeviceSession {
         withState { $0.initialHiResWheelState != nil }
     }
 
-    var hasStoredHiResWheelBaseline: Bool {
-        withState { $0.initialHiResWheelState?.baselineHandle != nil }
-    }
-
     var needsHiResWheelRestoreRetry: Bool {
         withState { $0.initialHiResWheelState != nil && $0.hiResWheelRestoreRetryNeeded }
     }
@@ -1153,14 +1177,13 @@ final class LogitechDeviceSession {
         cache: WritableKeyPath<State, FeatureAccess<Feature>?>,
         cancellationSource: WritableKeyPath<State, CancellationSource>,
         mutateState: (inout State) -> Void = { _ in },
-        admittedDuringTerminalRestore: Bool = false,
+        admittedDuringLifecycle: Bool = false,
         updateCoordinator: (CancellationToken) -> Void
     ) -> CancellationToken? {
         let source = CancellationSource()
         let result = withState { state -> (accepted: Bool, previousSource: CancellationSource?) in
-            guard admittedDuringTerminalRestore
-                || (state.terminalHardwareRestoreRequest == nil
-                    && state.sleepHardwarePreparationRequest == nil) else {
+            guard admittedDuringLifecycle
+                || Self.ordinaryHardwareIOIsAdmitted(state) else {
                 return (false, nil)
             }
             let previousSource = state[keyPath: cancellationSource]
@@ -1196,8 +1219,7 @@ final class LogitechDeviceSession {
         }
         let guardedOperation = {
             let mutationIsAdmitted = self.withState {
-                $0.terminalHardwareRestoreRequest == nil
-                    && $0.sleepHardwarePreparationRequest == nil
+                Self.ordinaryHardwareIOIsAdmitted($0)
             }
             guard token.shouldContinue, mutationIsAdmitted else {
                 onCancelled()
@@ -1213,6 +1235,11 @@ final class LogitechDeviceSession {
         let source = CancellationSource()
         source.cancel()
         return source.token
+    }
+
+    private static func ordinaryHardwareIOIsAdmitted(_ state: State) -> Bool {
+        state.lifecycleOwner == nil
+            && state.ordinaryHardwareAccess.token.shouldContinue
     }
 
     func invalidateHiResWheel(for token: CancellationToken) {
@@ -1405,8 +1432,8 @@ final class LogitechDeviceSession {
             return false
         }
 
-        let previousSerial = normalizedSerial(previous.identity.serialNumber)
-        let currentSerial = normalizedSerial(current.identity.serialNumber)
+        let previousSerial = LogitechStableSerial.normalize(previous.identity.serialNumber)
+        let currentSerial = LogitechStableSerial.normalize(current.identity.serialNumber)
         if let previousSerial {
             return currentSerial == previousSerial
         }
@@ -1490,8 +1517,8 @@ final class LogitechDeviceSession {
         guard let currentRoute else {
             return .ambiguous
         }
-        if let initialSerial = normalizedSerial(initialRoute.identity.serialNumber) {
-            guard let currentSerial = normalizedSerial(currentRoute.identity.serialNumber) else {
+        if let initialSerial = LogitechStableSerial.normalize(initialRoute.identity.serialNumber) {
+            guard let currentSerial = LogitechStableSerial.normalize(currentRoute.identity.serialNumber) else {
                 return .ambiguous
             }
             return currentSerial == initialSerial ? .compatible : .different
@@ -1520,14 +1547,6 @@ final class LogitechDeviceSession {
             receiverSlot: route.slot,
             token: token
         )
-    }
-
-    private static func normalizedSerial(_ serial: String?) -> String? {
-        guard let serial else {
-            return nil
-        }
-        let normalized = serial.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-        return normalized.isEmpty ? nil : normalized
     }
 
     private static func makeApplyCoordinator(queue: DispatchQueue) -> HardwareSettingApplyCoordinator {

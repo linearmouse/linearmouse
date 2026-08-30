@@ -17,7 +17,7 @@ enum LogitechHardwareTargetKey: Hashable {
         name _: String?
     ) -> Self? {
         guard let vendorID,
-              let serial = normalized(serialNumber) else {
+              let serial = LogitechStableSerial.normalize(serialNumber) else {
             return nil
         }
         return .serial(vendorID: vendorID, serial: serial)
@@ -29,18 +29,10 @@ enum LogitechHardwareTargetKey: Hashable {
         identity: ReceiverLogicalDeviceIdentity
     ) -> Self? {
         guard let vendorID,
-              let serial = normalized(identity.serialNumber) else {
+              let serial = LogitechStableSerial.normalize(identity.serialNumber) else {
             return nil
         }
         return .serial(vendorID: vendorID, serial: serial)
-    }
-
-    private static func normalized(_ value: String?) -> String? {
-        guard let value else {
-            return nil
-        }
-        let normalized = value.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-        return normalized.isEmpty ? nil : normalized
     }
 }
 

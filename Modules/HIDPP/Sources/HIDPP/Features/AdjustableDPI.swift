@@ -6,6 +6,11 @@ import Foundation
 public struct AdjustableDPI: HIDPPFeature {
     public static let featureID = HIDPPFeatureID.adjustableDPI
 
+    enum SupportedDPIList: Equatable {
+        case complete([Int])
+        case incomplete
+    }
+
     private enum Constants {
         static let getSensorDPIListFunction: UInt8 = 0x01
         static let getSensorDPIFunction: UInt8 = 0x02
@@ -14,38 +19,49 @@ public struct AdjustableDPI: HIDPPFeature {
         static let defaultDPIStep = 50
     }
 
-    public let supportedDPI: [Int]
+    private let supportedDPIList: SupportedDPIList
+
+    public var supportedDPI: [Int] {
+        guard case let .complete(values) = supportedDPIList else {
+            return []
+        }
+        return values
+    }
 
     private let transport: HIDPPTransport
     private let featureIndex: UInt8
 
     public init(transport: HIDPPTransport, featureIndex: UInt8) {
+        let supportedDPIList = Self.loadSupportedDPI(
+            transport: transport,
+            featureIndex: featureIndex,
+            deadline: nil
+        ) { true }
         self.init(
             transport: transport,
             featureIndex: featureIndex,
-            supportedDPI: Self.readSupportedDPI(
-                transport: transport,
-                featureIndex: featureIndex,
-                deadline: nil
-            ) { true }
+            supportedDPIList: supportedDPIList
         )
     }
 
-    public init(
+    public init?(
         transport: HIDPPTransport,
         featureIndex: UInt8,
         deadline: Date?,
         until shouldContinue: @escaping () -> Bool
     ) {
+        guard case let .complete(supportedDPI) = Self.loadSupportedDPI(
+            transport: transport,
+            featureIndex: featureIndex,
+            deadline: deadline,
+            shouldContinue: shouldContinue
+        ) else {
+            return nil
+        }
         self.init(
             transport: transport,
             featureIndex: featureIndex,
-            supportedDPI: Self.readSupportedDPI(
-                transport: transport,
-                featureIndex: featureIndex,
-                deadline: deadline,
-                shouldContinue: shouldContinue
-            )
+            supportedDPIList: .complete(supportedDPI)
         )
     }
 
@@ -54,9 +70,21 @@ public struct AdjustableDPI: HIDPPFeature {
         featureIndex: UInt8,
         supportedDPI: [Int]
     ) {
+        self.init(
+            transport: transport,
+            featureIndex: featureIndex,
+            supportedDPIList: .complete(Self.normalizedSupportedDPI(supportedDPI))
+        )
+    }
+
+    private init(
+        transport: HIDPPTransport,
+        featureIndex: UInt8,
+        supportedDPIList: SupportedDPIList
+    ) {
         self.transport = transport
         self.featureIndex = featureIndex
-        self.supportedDPI = Self.normalizedSupportedDPI(supportedDPI)
+        self.supportedDPIList = supportedDPIList
     }
 
     public var receiverSlot: UInt8? {
@@ -100,16 +128,8 @@ public struct AdjustableDPI: HIDPPFeature {
             return nil
         }
 
-        return currentDPI(from: Self.currentDPICandidates(from: response.payload))
-    }
-
-    private func currentDPI(from candidates: [Int]) -> Int? {
-        if !supportedDPI.isEmpty,
-           let supportedCandidate = candidates.first(where: { supportedDPI.contains($0) }) {
-            return supportedCandidate
-        }
-
-        return candidates.first { $0 > 0 }
+        let current = Self.uint16(response.payload[1], response.payload[2])
+        return current > 0 ? current : nil
     }
 
     public func setDPI(_ dpi: Int) -> Int? {
@@ -183,18 +203,22 @@ public struct AdjustableDPI: HIDPPFeature {
         return supportedDPI.contains(dpi)
     }
 
-    private static func readSupportedDPI(
+    static func loadSupportedDPI(
         transport: HIDPPTransport,
         featureIndex: UInt8,
         deadline: Date?,
         shouldContinue: @escaping () -> Bool
-    ) -> [Int] {
-        parseSupportedDPI(readSupportedDPIBytes(
+    ) -> SupportedDPIList {
+        let result = readSupportedDPIBytes(
             transport: transport,
             featureIndex: featureIndex,
             deadline: deadline,
             shouldContinue: shouldContinue
-        ))
+        )
+        guard result.isComplete else {
+            return .incomplete
+        }
+        return .complete(normalizedSupportedDPI(parseSupportedDPI(result.bytes)))
     }
 
     private static func readSupportedDPIBytes(
@@ -202,7 +226,7 @@ public struct AdjustableDPI: HIDPPFeature {
         featureIndex: UInt8,
         deadline: Date?,
         shouldContinue: @escaping () -> Bool
-    ) -> [UInt8] {
+    ) -> (bytes: [UInt8], isComplete: Bool) {
         var bytes = [UInt8]()
 
         for index in UInt8.min ... UInt8.max {
@@ -222,22 +246,11 @@ public struct AdjustableDPI: HIDPPFeature {
             bytes.append(contentsOf: payload.dropFirst())
 
             if bytes.count >= 2, Array(bytes.suffix(2)) == [0x00, 0x00] {
-                break
+                return (bytes, true)
             }
         }
 
-        return bytes
-    }
-
-    private static func currentDPICandidates(from payload: [UInt8]) -> [Int] {
-        guard payload.count >= 5 else {
-            return []
-        }
-
-        return [
-            uint16(payload[1], payload[2]),
-            uint16(payload[3], payload[4])
-        ]
+        return (bytes, false)
     }
 
     public static func parseSupportedDPI(_ bytes: [UInt8]) -> [Int] {

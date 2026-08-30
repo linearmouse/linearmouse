@@ -73,6 +73,77 @@ final class HIDPPFeatureTests: XCTestCase {
         XCTAssertEqual(Array(report.prefix(7)), [0x11, 0xFF, 0x22, 0x38, 0x00, 0x1F, 0x40])
     }
 
+    func testSupportedDPIListIsIncompleteWhenASecondPageFails() throws {
+        let device = MockHIDPPDevice()
+        device.responseProvider = { report in
+            let bytes = [UInt8](report)
+            guard bytes[3] == 0x18, bytes[6] == 0 else {
+                return nil
+            }
+            return Data([0x11, 0xFF, 0x22, 0x18, 0x00, 0x03, 0x20])
+        }
+        let transport = try XCTUnwrap(HIDPPTransport(device: device, deviceIndex: nil))
+
+        XCTAssertEqual(
+            AdjustableDPI.loadSupportedDPI(
+                transport: transport,
+                featureIndex: 0x22,
+                deadline: nil
+            ) { true },
+            .incomplete
+        )
+        XCTAssertEqual(device.reports.count, 2)
+    }
+
+    func testNormalDPIControllerRejectsAnIncompleteCapabilityList() throws {
+        let device = MockHIDPPDevice()
+        device.responseProvider = { report in
+            let bytes = [UInt8](report)
+            guard bytes[3] == 0x18, bytes[6] == 0 else {
+                return nil
+            }
+            return Data([0x11, 0xFF, 0x22, 0x18, 0x00, 0x03, 0x20])
+        }
+        let transport = try XCTUnwrap(HIDPPTransport(device: device, deviceIndex: nil))
+
+        XCTAssertNil(AdjustableDPI(
+            transport: transport,
+            featureIndex: 0x22,
+            deadline: nil
+        ) { true })
+        XCTAssertEqual(device.reports.count, 2)
+    }
+
+    func testCurrentDPIReadsTheCurrentFieldWithoutSubstitutingTheDefault() throws {
+        let device = MockHIDPPDevice()
+        device.responseProvider = { _ in
+            Data([0x11, 0xFF, 0x22, 0x28, 0x00, 0x01, 0x04, 0x03, 0xE8])
+        }
+        let transport = try XCTUnwrap(HIDPPTransport(device: device, deviceIndex: nil))
+        let dpi = AdjustableDPI(
+            transport: transport,
+            featureIndex: 0x22,
+            supportedDPI: [1000]
+        )
+
+        XCTAssertEqual(dpi.currentDPI(), 260)
+    }
+
+    func testStrictDPIReadingRejectsAnInvalidRawCurrentValue() throws {
+        let device = MockHIDPPDevice()
+        device.responseProvider = { _ in
+            Data([0x11, 0xFF, 0x22, 0x28, 0x00, 0x00, 0x00, 0x03, 0xE8])
+        }
+        let transport = try XCTUnwrap(HIDPPTransport(device: device, deviceIndex: nil))
+        let dpi = AdjustableDPI(
+            transport: transport,
+            featureIndex: 0x22,
+            supportedDPI: [1000]
+        )
+
+        XCTAssertNil(dpi.currentDPI())
+    }
+
     func testPreservesWheelModeBitsWhenEnablingHighResolutionMode() throws {
         let device = MockHIDPPDevice()
         device.responseProvider = { report in

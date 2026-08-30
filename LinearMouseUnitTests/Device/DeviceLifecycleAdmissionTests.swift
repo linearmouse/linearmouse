@@ -35,7 +35,7 @@ final class DeviceLifecycleAdmissionTests: XCTestCase {
 
     func testSleepIntentIsUpgradedByTerminalRestore() {
         var intent = DeviceManagerStopIntent(
-            logitechTeardownPolicy: .sleepPreserve
+            logitechTeardownPolicy: .sleepRestore
         )
 
         intent.merge(.init(
@@ -51,7 +51,7 @@ final class DeviceLifecycleAdmissionTests: XCTestCase {
         )
 
         intent.merge(.init(
-            logitechTeardownPolicy: .sleepPreserve
+            logitechTeardownPolicy: .sleepRestore
         ))
 
         XCTAssertEqual(intent.logitechTeardownPolicy, .restore)
@@ -59,7 +59,7 @@ final class DeviceLifecycleAdmissionTests: XCTestCase {
 
     func testSleepControlsCompletionCannotFinishAfterTerminalUpgrade() {
         let sleep = DeviceManagerStopIntent(
-            logitechTeardownPolicy: .sleepPreserve
+            logitechTeardownPolicy: .sleepRestore
         )
         var terminal = sleep
         terminal.merge(.init(
@@ -67,8 +67,8 @@ final class DeviceLifecycleAdmissionTests: XCTestCase {
         ))
 
         var barrier = DeviceManagerLogitechStopBarrier()
-        XCTAssertEqual(barrier.startNeeded(for: sleep), .sleepPreserve)
-        barrier.complete(.sleepPreserve)
+        XCTAssertEqual(barrier.startNeeded(for: sleep), .sleepRestore)
+        barrier.complete(.sleepRestore)
         XCTAssertFalse(barrier.isSatisfied(for: terminal))
 
         XCTAssertEqual(barrier.startNeeded(for: terminal), .restore)
@@ -83,7 +83,7 @@ final class DeviceLifecycleAdmissionTests: XCTestCase {
         )
         var merged = terminal
         merged.merge(.init(
-            logitechTeardownPolicy: .sleepPreserve
+            logitechTeardownPolicy: .sleepRestore
         ))
 
         var barrier = DeviceManagerLogitechStopBarrier()
@@ -95,17 +95,17 @@ final class DeviceLifecycleAdmissionTests: XCTestCase {
 
     func testStaleSleepCompletionCannotDowngradeRestoreBarrier() {
         let sleep = DeviceManagerStopIntent(
-            logitechTeardownPolicy: .sleepPreserve
+            logitechTeardownPolicy: .sleepRestore
         )
         let restore = DeviceManagerStopIntent(
             logitechTeardownPolicy: .restore
         )
 
         var barrier = DeviceManagerLogitechStopBarrier()
-        XCTAssertEqual(barrier.startNeeded(for: sleep), .sleepPreserve)
+        XCTAssertEqual(barrier.startNeeded(for: sleep), .sleepRestore)
         XCTAssertEqual(barrier.startNeeded(for: restore), .restore)
         barrier.complete(.restore)
-        barrier.complete(.sleepPreserve)
+        barrier.complete(.sleepRestore)
 
         XCTAssertEqual(barrier.highestStarted, .restore)
         XCTAssertEqual(barrier.highestCompleted, .restore)
@@ -138,14 +138,14 @@ final class DeviceLifecycleAdmissionTests: XCTestCase {
     }
 
     func testLateCompletionCannotSatisfyANewerStopRequest() {
-        let intent = DeviceManagerStopIntent(logitechTeardownPolicy: .sleepPreserve)
+        let intent = DeviceManagerStopIntent(logitechTeardownPolicy: .sleepRestore)
         let previous = DeviceManagerStopRequest(intent: intent)
         let current = DeviceManagerStopRequest(intent: intent)
 
-        XCTAssertEqual(previous.logitechBarrier.startNeeded(for: intent), .sleepPreserve)
-        XCTAssertEqual(current.logitechBarrier.startNeeded(for: intent), .sleepPreserve)
+        XCTAssertEqual(previous.logitechBarrier.startNeeded(for: intent), .sleepRestore)
+        XCTAssertEqual(current.logitechBarrier.startNeeded(for: intent), .sleepRestore)
 
-        previous.logitechBarrier.complete(.sleepPreserve)
+        previous.logitechBarrier.complete(.sleepRestore)
 
         XCTAssertTrue(previous.logitechBarrier.isSatisfied(for: intent))
         XCTAssertFalse(current.logitechBarrier.isSatisfied(for: intent))
@@ -156,34 +156,31 @@ final class DeviceLifecycleAdmissionTests: XCTestCase {
 
         XCTAssertTrue(DeviceManager.terminalIdentityMatches(
             expected: expected,
-            fresh: receiverIdentity(serial: "aaa", productID: 2),
-            retainedAdmissionChannel: false
+            fresh: receiverIdentity(serial: "aaa", productID: 2)
         ))
         XCTAssertFalse(DeviceManager.terminalIdentityMatches(
             expected: expected,
-            fresh: receiverIdentity(serial: "BBB", productID: 1),
-            retainedAdmissionChannel: true
+            fresh: receiverIdentity(serial: "BBB", productID: 1)
         ))
     }
 
-    func testUnkeyedTerminalIdentityRequiresRetainedChannelAndSameTargetShape() {
+    func testUnkeyedTerminalIdentityFailsClosedDespiteMatchingTargetShape() {
         let expected = receiverIdentity(serial: nil, productID: 1)
 
         XCTAssertFalse(DeviceManager.terminalIdentityMatches(
             expected: expected,
-            fresh: expected,
-            retainedAdmissionChannel: false
+            fresh: expected
         ))
-        XCTAssertTrue(DeviceManager.terminalIdentityMatches(
-            expected: expected,
-            fresh: expected,
-            retainedAdmissionChannel: true
-        ))
-        XCTAssertFalse(DeviceManager.terminalIdentityMatches(
-            expected: expected,
-            fresh: receiverIdentity(serial: nil, productID: 2),
-            retainedAdmissionChannel: true
-        ))
+    }
+
+    func testMissingSerialSentinelsFailClosedForTerminalIdentity() {
+        for serial in ["00000000", "FF-FF-FF-FF"] {
+            let identity = receiverIdentity(serial: serial, productID: 1)
+            XCTAssertFalse(DeviceManager.terminalIdentityMatches(
+                expected: identity,
+                fresh: identity
+            ))
+        }
     }
 
     private func receiverIdentity(

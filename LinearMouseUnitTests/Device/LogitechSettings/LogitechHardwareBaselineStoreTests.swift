@@ -200,6 +200,24 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
         XCTAssertNil(target)
     }
 
+    func testMissingSerialSentinelsCannotClaimProcessBaseline() {
+        for serial in ["00000000", "FF:FF:FF:FF"] {
+            XCTAssertNil(LogitechHardwareTargetKey.direct(
+                transport: "Bluetooth Low Energy",
+                locationID: 42,
+                vendorID: 0x046D,
+                productID: 0xB034,
+                serialNumber: serial,
+                name: "Mouse"
+            ))
+            XCTAssertNil(LogitechHardwareTargetKey.receiver(
+                vendorID: 0x046D,
+                receiverLocationID: 123,
+                identity: receiverIdentity(serial: serial, productID: 0xB034)
+            ))
+        }
+    }
+
     func testReceiverReplacementWithDifferentSerialCannotClaimBaseline() throws {
         let store = LogitechHardwareBaselineStore()
         let original = try XCTUnwrap(LogitechHardwareTargetKey.receiver(
@@ -367,21 +385,6 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
         }
 
         XCTAssertEqual(featureAccesses, 0)
-    }
-
-    func testSleepPolicyPreservesOnlyStoreBackedBaselines() {
-        XCTAssertEqual(
-            LogitechSleepRestorePolicy.resolve(hasSessionInitial: true, hasStoreBaseline: true),
-            .preserveStoreBaseline
-        )
-        XCTAssertEqual(
-            LogitechSleepRestorePolicy.resolve(hasSessionInitial: true, hasStoreBaseline: false),
-            .restoreBestEffort
-        )
-        XCTAssertEqual(
-            LogitechSleepRestorePolicy.resolve(hasSessionInitial: false, hasStoreBaseline: false),
-            .skip
-        )
     }
 
     func testControlsBaselineFirstWriterWinsAndConsumesPerControl() throws {

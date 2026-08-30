@@ -54,10 +54,18 @@ struct VendorSpecificDeviceMetadata: Equatable {
 
 protocol VendorSpecificDeviceMetadataProvider {
     var matcher: VendorSpecificDeviceMatcher { get }
-    func metadata(for device: VendorSpecificDeviceContext) -> VendorSpecificDeviceMetadata?
+    func metadata(
+        for device: VendorSpecificDeviceContext,
+        deadline: Date?,
+        until shouldContinue: @escaping () -> Bool
+    ) -> VendorSpecificDeviceMetadata?
 }
 
 extension VendorSpecificDeviceMetadataProvider {
+    func metadata(for device: VendorSpecificDeviceContext) -> VendorSpecificDeviceMetadata? {
+        metadata(for: device, deadline: nil) { true }
+    }
+
     func matches(device: VendorSpecificDeviceContext) -> Bool {
         matcher.matches(device: device)
     }
@@ -69,8 +77,23 @@ enum VendorSpecificDeviceMetadataRegistry {
     ]
 
     static func metadata(for device: VendorSpecificDeviceContext) -> VendorSpecificDeviceMetadata? {
+        metadata(for: device, deadline: nil) { true }
+    }
+
+    static func metadata(
+        for device: VendorSpecificDeviceContext,
+        deadline: Date?,
+        until shouldContinue: @escaping () -> Bool
+    ) -> VendorSpecificDeviceMetadata? {
         for provider in providers where provider.matches(device: device) {
-            if let metadata = provider.metadata(for: device) {
+            guard shouldContinue(), deadline.map({ Date() < $0 }) != false else {
+                return nil
+            }
+            if let metadata = provider.metadata(
+                for: device,
+                deadline: deadline,
+                until: shouldContinue
+            ) {
                 return metadata
             }
         }

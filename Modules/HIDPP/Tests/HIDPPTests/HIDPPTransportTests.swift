@@ -104,18 +104,18 @@ final class HIDPPTransportTests: XCTestCase {
             function: 0x01,
             parameters: [],
             deadline: deadline
-        )            { true })
+        ) { true })
         XCTAssertNotNil(transport.requestOnce(
             featureIndex: 0x22,
             function: 0x03,
             parameters: [],
             deadline: deadline
-        )            { true })
+        ) { true })
 
         XCTAssertEqual(device.requestTimeouts.count, 1)
         XCTAssertEqual(device.singleTransactionRequestTimeouts.count, 1)
         XCTAssertGreaterThan(device.requestTimeouts[0], 0)
-        XCTAssertLessThanOrEqual(device.requestTimeouts[0], 0.2)
+        XCTAssertLessThanOrEqual(device.requestTimeouts[0], 0.2 + 1e-6)
         XCTAssertGreaterThan(device.singleTransactionRequestTimeouts[0], 0)
         XCTAssertLessThanOrEqual(device.singleTransactionRequestTimeouts[0], device.requestTimeouts[0])
     }
@@ -129,8 +129,30 @@ final class HIDPPTransportTests: XCTestCase {
             function: 0x01,
             parameters: [],
             deadline: Date(timeIntervalSinceNow: -1)
-        )            { true })
+        ) { true })
         XCTAssertTrue(device.reports.isEmpty)
+    }
+
+    func testTransportDeadlineCapsEveryRequest() throws {
+        let device = MockHIDPPDevice()
+        device.responseProvider = { report in
+            let bytes = [UInt8](report)
+            return Data([0x11, 0xFF, bytes[2], bytes[3], 0x01, 0x00, 0x00])
+        }
+        let transport = try XCTUnwrap(HIDPPTransport(
+            device: device,
+            deviceIndex: nil,
+            deadline: Date().addingTimeInterval(0.1)
+        ))
+
+        XCTAssertNotNil(transport.request(
+            featureIndex: 0x22,
+            function: 0x01,
+            parameters: []
+        ))
+        XCTAssertEqual(device.requestTimeouts.count, 1)
+        XCTAssertGreaterThan(device.requestTimeouts[0], 0)
+        XCTAssertLessThanOrEqual(device.requestTimeouts[0], 0.1 + 1e-6)
     }
 
     func testRejectsParametersThatDoNotFitReportWithoutSendingIO() throws {
