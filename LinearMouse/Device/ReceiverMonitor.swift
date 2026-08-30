@@ -533,6 +533,17 @@ private final class ReceiverContext {
                 continue
             }
 
+            let reconnectsPointingSlot = connectionBatch.reconnectedSlots.contains { slot in
+                currentPublishedIdentities().contains { $0.slot == slot }
+                    || ReceiverLogicalDeviceKind(rawValue: connectionBatch.snapshots[slot]?.kind ?? 0)?
+                    .isPointingDevice == true
+            }
+            if reconnectsPointingSlot {
+                // Preserve a route-loss transition even when the refreshed
+                // identity is available in this same notification batch.
+                publishUnavailable()
+            }
+
             mergeConnectionSnapshots(
                 connectionBatch.snapshots,
                 reconnectedSlots: connectionBatch.reconnectedSlots
