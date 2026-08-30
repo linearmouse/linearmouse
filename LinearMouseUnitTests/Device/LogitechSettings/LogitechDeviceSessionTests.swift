@@ -30,8 +30,8 @@ final class LogitechDeviceSessionTests: XCTestCase {
         let queueGate = DispatchSemaphore(value: 0)
         session.perform { queueGate.wait() }
         var operationRan = false
-        session.runDPIOperation {
-            _ in operationRan = true
+        session.runDPIOperation { _ in
+            operationRan = true
         } onCancelled: {}
 
         session.cancelDPIApply()
@@ -111,30 +111,52 @@ final class LogitechDeviceSessionTests: XCTestCase {
     func testInitialWheelStateIsBoundToHardwareTarget() throws {
         let session = LogitechDeviceSession(deviceID: 1)
         _ = session.updateDiscovery(discovery(serialNumber: "AAAAAAAA", productID: 0xB034))
-        let access = try hiResWheelAccess(for: session)
+        let access = try hiResWheelAccess(for: session, receiverSlot: 2)
         session.recordInitialHiResWheelState(enabled: false, for: access)
 
         _ = session.updateDiscovery(discovery(serialNumber: "BBBBBBBB", productID: 0xB037))
 
-        XCTAssertNil(session.initialHiResWheelEnabled(requiresReceiverRoute: true))
+        XCTAssertNil(session.initialHiResWheelEnabled(
+            requiresReceiverRoute: true,
+            receiverSlot: access.feature.receiverSlot
+        ))
     }
 
     func testSupersededWheelAccessCannotMutateSessionState() throws {
         let session = LogitechDeviceSession(deviceID: 1)
         _ = session.updateDiscovery(discovery(serialNumber: "AAAAAAAA", productID: 0xB034))
-        let access = try hiResWheelAccess(for: session)
+        let access = try hiResWheelAccess(for: session, receiverSlot: 2)
 
         session.cancelHiResWheelApply()
         session.recordInitialHiResWheelState(enabled: false, for: access)
         session.updateHiResWheelState(enabled: true, multiplier: 8, for: access)
 
-        XCTAssertNil(session.initialHiResWheelEnabled(requiresReceiverRoute: true))
+        XCTAssertNil(session.initialHiResWheelEnabled(
+            requiresReceiverRoute: true,
+            receiverSlot: access.feature.receiverSlot
+        ))
         XCTAssertNil(session.hiResWheelEnabled)
         XCTAssertNil(session.hiResWheelNormalizationMultiplier)
     }
 
+    func testInitialWheelStateIsBoundToLegacyReceiverSlot() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let access = try hiResWheelAccess(for: session, receiverSlot: 2)
+        session.recordInitialHiResWheelState(enabled: false, for: access)
+
+        XCTAssertFalse(try XCTUnwrap(session.initialHiResWheelEnabled(
+            requiresReceiverRoute: false,
+            receiverSlot: 2
+        )))
+        XCTAssertNil(session.initialHiResWheelEnabled(
+            requiresReceiverRoute: false,
+            receiverSlot: 3
+        ))
+    }
+
     private func hiResWheelAccess(
-        for session: LogitechDeviceSession
+        for session: LogitechDeviceSession,
+        receiverSlot: UInt8? = nil
     ) throws -> LogitechDeviceSession.FeatureAccess<HiResWheel> {
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,
@@ -143,7 +165,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
             maxInputReportSize: 20,
             maxOutputReportSize: 20
         )
-        let transport = try XCTUnwrap(HIDPPTransport(device: device, deviceIndex: nil))
+        let transport = try XCTUnwrap(HIDPPTransport(device: device, deviceIndex: receiverSlot))
         return try XCTUnwrap(session.hiResWheel { _, _ in
             HiResWheel(transport: transport, featureIndex: 1)
         })

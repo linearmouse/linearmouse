@@ -161,16 +161,9 @@ extension Device {
     }
 
     private func restoreHighResolutionWheelSynchronously(expectedToken: CancellationToken) {
-        let initialEnabled = logitechSession.initialHiResWheelEnabled(
-            requiresReceiverRoute: LogitechReceiverRouteResolver.requiresDiscovery(for: pointerDevice)
-        )
-        guard let initialEnabled else {
+        guard logitechSession.hasInitialHiResWheelState else {
             logitechSession.invalidateHiResWheel()
-            if logitechSession.hasInitialHiResWheelState {
-                logitechSession.clearHiResWheelState(includingInitialState: false)
-            } else {
-                clearHighResolutionWheelCache()
-            }
+            clearHighResolutionWheelCache()
             return
         }
 
@@ -178,6 +171,16 @@ extension Device {
               let access = logitechHiResWheel(for: expectedToken) else {
             // Losing transport access is not evidence that the restore worked.
             // Preserve the initial state for a subsequent teardown attempt.
+            logitechSession.invalidateHiResWheel()
+            logitechSession.clearHiResWheelState(includingInitialState: false)
+            return
+        }
+
+        let initialEnabled = logitechSession.initialHiResWheelEnabled(
+            requiresReceiverRoute: LogitechReceiverRouteResolver.requiresDiscovery(for: pointerDevice),
+            receiverSlot: access.feature.receiverSlot
+        )
+        guard let initialEnabled else {
             logitechSession.invalidateHiResWheel()
             logitechSession.clearHiResWheelState(includingInitialState: false)
             return

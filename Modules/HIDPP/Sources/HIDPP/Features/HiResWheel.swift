@@ -41,6 +41,10 @@ public struct HiResWheel: HIDPPFeature {
         self.featureIndex = featureIndex
     }
 
+    public var receiverSlot: UInt8? {
+        transport.receiverSlot
+    }
+
     public func capabilities() -> Capabilities? {
         guard let response = transport.request(
             featureIndex: featureIndex,

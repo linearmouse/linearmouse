@@ -182,8 +182,8 @@ final class HardwareSettingApplyCoordinatorTests: XCTestCase {
         )
         var completions = [Bool]()
 
-        coordinator.start {
-            _ in false
+        coordinator.start { _ in
+            false
         } completion: {
             completions.append($0)
         }

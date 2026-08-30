@@ -237,6 +237,13 @@ extension PointerSettingsState {
                 return
             }
 
+            if result.outcome == .cancelled {
+                self.pointerHardwareDPIApplying = false
+                self.pointerHardwareDPIRefreshPending = false
+                self.refreshPointerHardwareDPIInfo()
+                return
+            }
+
             if !result.info.supportsAdjustableDPI {
                 self.pointerHardwareDPIStatusMessage = "Unsupported device"
             } else if let targetDPI = result.targetDPI {

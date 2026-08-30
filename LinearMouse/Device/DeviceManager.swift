@@ -56,13 +56,17 @@ class DeviceManager: ObservableObject {
     }
 
     deinit {
-        stop(restoringHighResolutionWheel: false)
+        stop(
+            restoringHighResolutionWheel: false,
+            restoringLogitechControls: false
+        )
     }
 
     private enum State {
         case stopped
         case running
         case stopping
+        case finishing
     }
 
     private var state: State = .stopped
@@ -92,6 +96,15 @@ class DeviceManager: ObservableObject {
                     value.stopLogitechControlsMonitoringForSleep()
                 }
                 finishStop(restoringHighResolutionWheel: false)
+            }
+            return
+        case .finishing:
+            // Main-run-loop HID restoration can deliver lifecycle events
+            // reentrantly. The current teardown already owns the devices;
+            // queue only the caller's continuation and never enter finishStop
+            // recursively.
+            if let completion {
+                stopCompletions.append(completion)
             }
             return
         case .running:
@@ -133,6 +146,7 @@ class DeviceManager: ObservableObject {
         guard state == .stopping else {
             return
         }
+        state = .finishing
 
         restorePointerSpeedToInitialValue(
             restoringHighResolutionWheel: restoringHighResolutionWheel
@@ -471,7 +485,7 @@ class DeviceManager: ObservableObject {
     }
 
     func markDeviceActive(_ device: Device, reason: String) {
-        guard lastActiveDeviceId != device.id else {
+        guard state == .running, lastActiveDeviceId != device.id else {
             return
         }
 
@@ -495,23 +509,26 @@ class DeviceManager: ObservableObject {
     }
 
     func requestLogitechReceiverRediscovery() {
-        for device in devices {
-            if shouldMonitorReceiver(device) {
-                // The wake poke is for receiver route recovery only. Direct
-                // devices may already have a confirmation attempt scheduled;
-                // restarting it here would cancel that work.
-                let identities = device.pointerDevice.locationID.flatMap {
-                    receiverPairedDeviceIdentities[$0]
-                }
-                if identities?.isEmpty != false {
-                    receiverMonitor.requestRediscovery(device: device)
-                }
+        guard state == .running else {
+            return
+        }
+
+        for device in devices where shouldMonitorReceiver(device) {
+            // The wake poke is for receiver route recovery only. Direct
+            // devices may already have a confirmation attempt scheduled;
+            // restarting it here would cancel that work.
+            let identities = device.pointerDevice.locationID.flatMap {
+                receiverPairedDeviceIdentities[$0]
+            }
+            if identities?.isEmpty != false {
+                receiverMonitor.requestRediscovery(device: device)
             }
         }
     }
 
     private func reapplyLogitechDeviceSettings(for device: Device) {
-        guard device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID else {
+        guard state == .running,
+              device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID else {
             return
         }
 
@@ -579,7 +596,8 @@ class DeviceManager: ObservableObject {
     }
 
     private func receiverPointingDevicesChanged(locationID: Int, identities: [ReceiverLogicalDeviceIdentity]) {
-        guard pointerDeviceToDevice.values.contains(where: { $0.pointerDevice.locationID == locationID }) else {
+        guard state == .running,
+              pointerDeviceToDevice.values.contains(where: { $0.pointerDevice.locationID == locationID }) else {
             os_log(
                 "Drop receiver logical device update because no visible device matches locationID=%{public}d count=%{public}u",
                 log: Self.log,

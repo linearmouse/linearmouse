@@ -104,23 +104,6 @@ extension Device {
     }
 
     func applyHardwareDPI(_ dpi: Int, completion: @escaping (HardwareDPIApplyResult) -> Void) {
-        let completionLock = NSLock()
-        var completed = false
-        let deliver: (HardwareDPIApplyResult) -> Void = { result in
-            let shouldDeliver = completionLock.withLock { () -> Bool in
-                guard !completed else {
-                    return false
-                }
-                completed = true
-                return true
-            }
-            guard shouldDeliver else {
-                return
-            }
-            DispatchQueue.main.async {
-                completion(result)
-            }
-        }
         let cancelledResult = {
             HardwareDPIApplyResult(
                 targetDPI: nil,
@@ -128,19 +111,20 @@ extension Device {
                 outcome: .cancelled
             )
         }
+        let deliver: (HardwareDPIApplyResult, CancellationToken?) -> Void = { result, token in
+            DispatchQueue.main.async {
+                guard token?.shouldContinue != false, !self.isRemoved else {
+                    completion(cancelledResult())
+                    return
+                }
+                completion(result)
+            }
+        }
 
         logitechSession.runDPIOperation { token in
-            guard token.shouldContinue else {
-                deliver(cancelledResult())
-                return
-            }
             let result: HardwareDPIApplyResult
             if !self.isRemoved, let access = self.logitechAdjustableDPI(for: token) {
                 let targetDPI = self.applySensorDPISynchronously(dpi, access: access)
-                guard token.shouldContinue, !self.isRemoved else {
-                    deliver(cancelledResult())
-                    return
-                }
                 let currentDPI = targetDPI ?? self.logitechSession.sensorDPI
                 result = HardwareDPIApplyResult(
                     targetDPI: targetDPI,
@@ -158,9 +142,9 @@ extension Device {
                     outcome: token.shouldContinue ? .unsupported : .cancelled
                 )
             }
-            deliver(result)
+            deliver(result, token)
         } onCancelled: {
-            deliver(cancelledResult())
+            deliver(cancelledResult(), nil)
         }
     }
 

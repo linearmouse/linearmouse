@@ -73,8 +73,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         terminationCleanupPending = true
 
-        stop(restoringHighResolutionWheel: true) { [weak self, weak sender] in
-            self?.terminationCleanupPending = false
+        stop(restoringHighResolutionWheel: true) { [weak sender] in
             sender?.reply(toApplicationShouldTerminate: true)
         }
         return .terminateLater

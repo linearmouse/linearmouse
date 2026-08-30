@@ -112,10 +112,8 @@ struct ReceiverSlotStateStore {
 
         mergeConnectionSnapshots(discovery.connectionSnapshots)
 
-        for slot in discovery.liveReachableSlots {
-            if slotPresenceBySlot[slot] != .connected {
-                slotPresenceBySlot[slot] = .connected
-            }
+        for slot in discovery.liveReachableSlots where slotPresenceBySlot[slot] != .connected {
+            slotPresenceBySlot[slot] = .connected
         }
 
         for (slot, identity) in latestIdentitiesBySlot where discovery.connectionSnapshots[slot] == nil {

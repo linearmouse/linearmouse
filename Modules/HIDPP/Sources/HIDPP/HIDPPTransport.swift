@@ -18,6 +18,7 @@ public struct HIDPPTransport {
     private let deviceIndex: UInt8
     private let acceptedReplyIndices: Set<UInt8>
     private let shouldContinue: () -> Bool
+    public let receiverSlot: UInt8?
     public let isReceiverRoutedDevice: Bool
 
     public init?(
@@ -39,7 +40,8 @@ public struct HIDPPTransport {
         self.device = device
         self.deviceIndex = deviceIndex ?? HIDPPConstants.receiverIndex
         self.shouldContinue = shouldContinue
-        isReceiverRoutedDevice = deviceIndex != nil
+        receiverSlot = deviceIndex
+        isReceiverRoutedDevice = receiverSlot != nil
         acceptedReplyIndices = deviceIndex.map { Set([$0]) } ?? HIDPPConstants.directReplyIndices
     }
 

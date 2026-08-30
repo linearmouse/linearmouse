@@ -14,6 +14,7 @@ final class LogitechDeviceSession {
 
     private struct InitialHiResWheelState {
         let route: LogitechReceiverRoute?
+        let receiverSlot: UInt8?
         let enabled: Bool
     }
 
@@ -226,7 +227,7 @@ final class LogitechDeviceSession {
             coordinator: hiResWheelApplyCoordinator,
             waitUntilFinished: waitUntilFinished,
             operation: operation
-        )            {}
+        ) {}
     }
 
     func updateSensorDPI(_ dpi: Int, for access: FeatureAccess<AdjustableDPI>) {
@@ -276,12 +277,16 @@ final class LogitechDeviceSession {
             }
             state.initialHiResWheelState = .init(
                 route: state.discovery?.route,
+                receiverSlot: access.feature.receiverSlot,
                 enabled: enabled
             )
         }
     }
 
-    func initialHiResWheelEnabled(requiresReceiverRoute: Bool) -> Bool? {
+    func initialHiResWheelEnabled(
+        requiresReceiverRoute: Bool,
+        receiverSlot: UInt8?
+    ) -> Bool? {
         withState { state in
             guard let initialState = state.initialHiResWheelState else {
                 return nil
@@ -294,7 +299,8 @@ final class LogitechDeviceSession {
             guard !LogitechReceiverRoute.hardwareTargetChanged(
                 from: initialState.route,
                 to: currentRoute
-            ) else {
+            ), initialState.receiverSlot == receiverSlot
+            else {
                 return nil
             }
             return initialState.enabled

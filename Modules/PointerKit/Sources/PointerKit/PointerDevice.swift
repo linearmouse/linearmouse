@@ -483,7 +483,7 @@ extension PointerDevice {
             report,
             timeout: timeout,
             matching: matching
-        )            { true }
+        ) { true }
     }
 
     public func performSynchronousOutputReportRequest(

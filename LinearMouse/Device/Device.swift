@@ -215,7 +215,10 @@ class Device {
 
         inputObservationToken = nil
         reportObservationToken = nil
-        logitechReprogrammableControlsMonitor?.disable()
+        // The PointerDevice has already been invalidated by this point. Any
+        // reporting cleanup must have completed through DeviceManager's async
+        // stop path; do not re-enable teardown I/O during sleep or removal.
+        logitechReprogrammableControlsMonitor?.disableForSleep()
         logitechReprogrammableControlsMonitor = nil
         logitechControlsMonitorSubscriptions.removeAll()
     }
