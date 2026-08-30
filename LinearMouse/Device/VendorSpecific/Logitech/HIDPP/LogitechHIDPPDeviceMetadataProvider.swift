@@ -576,40 +576,56 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             return nil
         }
 
-        let slots = discovery.0
+        return receiverSlotCandidate(for: device, slots: discovery.0)
+    }
+
+    /// Resolves a legacy receiver route only when the candidate can be uniquely
+    /// identified. Compatibility fallbacks remain available for receivers that
+    /// expose no per-device metadata, but they must be unique as well.
+    func receiverSlotCandidate(
+        for device: VendorSpecificDeviceContext,
+        slots: [ReceiverSlotMatchCandidate]
+    ) -> ReceiverSlotMatchCandidate? {
+        guard !slots.isEmpty else {
+            return nil
+        }
 
         let normalizedProduct = normalizeName(device.product ?? device.name)
         let normalizedSerial = normalizeSerial(device.serialNumber)
         let desiredProductID = device.productID
 
-        if let serialMatch = slots.first(where: {
+        let serialMatches = slots.filter {
             normalizeSerial($0.serialNumber) == normalizedSerial && normalizedSerial != nil
-        }) {
-            return serialMatch
+        }
+        if !serialMatches.isEmpty {
+            return uniqueSlotMatch(serialMatches)
         }
 
-        if let productIDMatch = slots.first(where: { candidate in
+        let productIDMatches = slots.filter { candidate in
             guard let desiredProductID, let productID = candidate.productID else {
                 return false
             }
 
             return productID == desiredProductID
-        }) {
-            return productIDMatch
+        }
+        if !productIDMatches.isEmpty {
+            return uniqueSlotMatch(productIDMatches)
         }
 
-        if let exactNameMatch = slots.first(where: {
+        let nameMatches = slots.filter {
             guard let name = $0.name else {
                 return false
             }
             return normalizeName(name) == normalizedProduct
-        }) {
-            return exactNameMatch
+        }
+        if !nameMatches.isEmpty {
+            return uniqueSlotMatch(nameMatches)
         }
 
         let desiredKinds = preferredReceiverDeviceKinds(for: device)
-        if let kindMatch = slots.first(where: { desiredKinds.contains($0.kind) }) {
-            return kindMatch
+        let kindMatches = slots.filter { desiredKinds.contains($0.kind) }
+        if !kindMatches.isEmpty {
+            return uniqueSlotMatch(kindMatches)
         }
 
         if slots.count == 1 {
@@ -805,6 +821,12 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         return matchingIdentities.count == 1 ? matchingIdentities[0] : nil
     }
 
+    private func uniqueSlotMatch(
+        _ slots: [ReceiverSlotMatchCandidate]
+    ) -> ReceiverSlotMatchCandidate? {
+        slots.count == 1 ? slots[0] : nil
+    }
+
     static func parseReceiverConnectionNotification(
         _ report: [UInt8]
     ) -> (slot: UInt8, snapshot: ReceiverConnectionSnapshot)? {
@@ -907,6 +929,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
     private let ioQueue: DispatchQueue
     private let ioQueueKey = DispatchSpecificKey<Void>()
     private let cancellationSemaphore = DispatchSemaphore(value: 0)
+    private let lifecycleLock = NSLock()
     private var isActivated = false
     private let inputReportBufferLength: Int
     private var inputReportBuffer: UnsafeMutablePointer<UInt8>?
@@ -972,6 +995,24 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         return channel
     }
 
+    /// Discards a dead shared receiver channel only if this is still the cached
+    /// instance for the location. A newly opened replacement is never closed by
+    /// a stale lifecycle callback.
+    static func discardSharedChannel(locationID: Int, matching channel: LogitechReceiverChannel) {
+        sharedChannelsLock.lock()
+        let isCurrentChannel = sharedChannels[locationID]?.channel === channel
+        if isCurrentChannel {
+            sharedChannels.removeValue(forKey: locationID)
+        }
+        sharedChannelsLock.unlock()
+
+        guard isCurrentChannel else {
+            return
+        }
+
+        channel.invalidate()
+    }
+
     init?(manager: IOHIDManager, device: IOHIDDevice) {
         self.manager = manager
         self.device = device
@@ -1021,12 +1062,25 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             cancellationSemaphore.signal()
         }
         IOHIDDeviceActivate(device)
-        isActivated = true
+        lifecycleLock.withLock {
+            isActivated = true
+        }
     }
 
     deinit {
-        // Skip teardown if the device never activated
-        guard isActivated else {
+        invalidate()
+    }
+
+    private func invalidate() {
+        let shouldCancel = lifecycleLock.withLock { () -> Bool in
+            guard isActivated else {
+                return false
+            }
+
+            isActivated = false
+            return true
+        }
+        guard shouldCancel else {
             return
         }
 
@@ -1427,13 +1481,26 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         matching: @escaping (Data) -> Bool,
         until shouldContinue: @escaping () -> Bool
     ) -> Data? {
-        performCallbackRequest(
+        // A write (notably Adjustable DPI) must remain a single transaction.
+        // Reuse a strategy established by a successful read request, but never
+        // probe alternatives here: every probe would repeat the side effect.
+        guard let strategy = currentRequestStrategy(), shouldContinue() else {
+            return nil
+        }
+
+        let response = performRequest(
             report,
             timeout: timeout,
             matching: matching,
-            reportType: kIOHIDReportTypeOutput,
+            strategy: strategy,
             until: shouldContinue
         )
+        if response != nil {
+            recordRequestStrategySuccess(strategy)
+        } else if shouldContinue() {
+            recordRequestStrategyFailure(strategy)
+        }
+        return response
     }
 
     private func performRequest(
@@ -2062,6 +2129,25 @@ final class LogitechReprogrammableControlsMonitor {
         subscriptions.removeAll()
     }
 
+    /// Stops monitoring and invokes `completion` on the main queue after its
+    /// active target has restored original reporting. The completion must be
+    /// used instead of blocking the main thread because direct HID replies are
+    /// delivered through its run loop.
+    func disable(completion: @escaping () -> Void) {
+        state.disable(completion: completion)
+        releaseButtonIfNeeded()
+        subscriptions.removeAll()
+    }
+
+    /// Stops monitoring for system sleep without issuing HID++ restore writes.
+    /// The receiver/direct device may already be suspended, so restoration is
+    /// deferred to the normal wake/reconnect configuration path.
+    func disableForSleep() {
+        state.disableForSleep()
+        releaseButtonIfNeeded()
+        subscriptions.removeAll()
+    }
+
     private func workerMain() {
         defer {
             let restartIfEnabled = Thread.current.isCancelled
@@ -2203,7 +2289,13 @@ final class LogitechReprogrammableControlsMonitor {
 
                         result[control.controlID] = reportingInfo
                     }
-                let activeControlIDs = monitoredControls.compactMap { control -> UInt16? in
+                // Never divert a control whose original reporting could not be
+                // read. Without that snapshot we could not safely restore it
+                // during disable or target teardown.
+                let controlsWithKnownOriginalReporting = monitoredControls.filter {
+                    originalReportingByControlID[$0.controlID] != nil
+                }
+                let activeControlIDs = controlsWithKnownOriginalReporting.compactMap { control -> UInt16? in
                     guard setDivertedWithRetry(
                         true,
                         for: control.controlID,
@@ -2595,7 +2687,7 @@ final class LogitechReprogrammableControlsMonitor {
         guard let transport = HIDPPTransport(
             device: device.pointerDevice,
             deviceIndex: nil,
-            shouldContinue: { [weak self] in self?.shouldContinueRunning() == true }
+            shouldContinue: { [weak self] in self?.shouldAllowTeardownIO() == true }
         ),
             let featureIndex = transport.featureIndex(for: .reprogControlsV4) else {
             return nil
@@ -2647,7 +2739,7 @@ final class LogitechReprogrammableControlsMonitor {
         guard let transport = HIDPPTransport(
             device: receiverChannel,
             deviceIndex: slot,
-            shouldContinue: { [weak self] in self?.shouldContinueRunning() == true }
+            shouldContinue: { [weak self] in self?.shouldAllowTeardownIO() == true }
         ),
             let featureIndex = transport.featureIndex(for: .reprogControlsV4)
         else {
@@ -3045,6 +3137,13 @@ final class LogitechReprogrammableControlsMonitor {
         state.shouldContinueRunning
     }
 
+    /// The monitor loop stops as soon as it is disabled, but its active target
+    /// must still be allowed to restore the reporting state in its defer block.
+    /// This remains true only while that worker owns the target transport.
+    private func shouldAllowTeardownIO() -> Bool {
+        state.shouldAllowTeardownIO
+    }
+
     private func postSyntheticButton(button: Int, down: Bool) {
         let shouldPost = state.updatePressedButton(button, down: down)
 
@@ -3330,7 +3429,7 @@ struct LogitechMonitorReconfigurationRequest {
     }
 }
 
-private final class LogitechReprogrammableControlsMonitorState {
+final class LogitechReprogrammableControlsMonitorState {
     private typealias WorkerResources = (Thread?, HIDPPNotificationHandling?, ObservationToken?)
 
     private let queue = DispatchQueue(label: "linearmouse.logitech-controls.state")
@@ -3343,9 +3442,15 @@ private final class LogitechReprogrammableControlsMonitorState {
     private var reconfigurationRequest = LogitechMonitorReconfigurationRequest()
     private var pressedButtons = Set<Int>()
     private var syntheticFallbackCoordinator = LogitechSyntheticFallbackCoordinator()
+    private var stopCompletions = [() -> Void]()
+    private var allowsTeardownIO = false
 
     var shouldContinueRunning: Bool {
         queue.sync { isEnabled } && !Thread.current.isCancelled
+    }
+
+    var shouldAllowTeardownIO: Bool {
+        queue.sync { workerThread != nil && allowsTeardownIO }
     }
 
     func enable(makeWorkerThread: () -> Thread) {
@@ -3355,6 +3460,7 @@ private final class LogitechReprogrammableControlsMonitorState {
             }
 
             isEnabled = true
+            allowsTeardownIO = true
             guard workerThread == nil else {
                 return nil
             }
@@ -3368,23 +3474,45 @@ private final class LogitechReprogrammableControlsMonitorState {
     }
 
     func disable() {
-        let (thread, endpoint, token) = queue.sync { () -> WorkerResources in
+        disable(completion: nil)
+    }
+
+    func disableForSleep() {
+        disable(completion: nil, allowingTeardownIO: false)
+    }
+
+    func disable(
+        completion: (() -> Void)?,
+        allowingTeardownIO: Bool = true
+    ) {
+        let (resources, completions) = queue.sync { () -> (WorkerResources, [() -> Void]) in
             let resources = (workerThread, activeNotificationEndpoint, directDeviceReportObservationToken)
+            if let completion {
+                stopCompletions.append(completion)
+            }
             isEnabled = false
+            allowsTeardownIO = allowingTeardownIO
             reconfigurationRequest.reset()
             activeNotificationEndpoint = nil
             directDeviceReportObservationToken = nil
-            return resources
+            guard workerThread == nil else {
+                return (resources, [])
+            }
+
+            let completions = stopCompletions
+            stopCompletions.removeAll()
+            return (resources, completions)
         }
 
         reconfigurationSemaphore.signal()
-        endpoint?.wake()
-        thread?.cancel()
-        token?.cancel()
+        resources.1?.wake()
+        resources.0?.cancel()
+        resources.2?.cancel()
+        dispatchStopCompletions(completions)
     }
 
     func workerDidStop(restartIfEnabled: Bool, makeWorkerThread: () -> Thread) {
-        let (thread, _, token) = queue.sync { () -> WorkerResources in
+        let (thread, token, completions) = queue.sync { () -> (Thread?, ObservationToken?, [() -> Void]) in
             workerThread = nil
             activeNotificationEndpoint = nil
             let reportObservationToken = directDeviceReportObservationToken
@@ -3392,18 +3520,22 @@ private final class LogitechReprogrammableControlsMonitorState {
 
             guard isEnabled, restartIfEnabled else {
                 isEnabled = false
+                allowsTeardownIO = false
                 reconfigurationRequest.reset()
-                return (nil, nil, reportObservationToken)
+                let completions = stopCompletions
+                stopCompletions.removeAll()
+                return (nil, reportObservationToken, completions)
             }
 
             reconfigurationRequest.reset()
             let nextThread = makeWorkerThread()
             workerThread = nextThread
-            return (nextThread, nil, reportObservationToken)
+            return (nextThread, reportObservationToken, [])
         }
 
         token?.cancel()
         thread?.start()
+        dispatchStopCompletions(completions)
     }
 
     func requestReconfiguration(forced: Bool = false) {
@@ -3460,7 +3592,7 @@ private final class LogitechReprogrammableControlsMonitorState {
         return (false, false, false)
     }
 
-    func setActiveNotificationEndpoint(_ endpoint: HIDPPNotificationHandling?) {
+    fileprivate func setActiveNotificationEndpoint(_ endpoint: HIDPPNotificationHandling?) {
         queue.sync {
             guard isEnabled else {
                 return
@@ -3507,6 +3639,16 @@ private final class LogitechReprogrammableControlsMonitorState {
                 syntheticFallbackCoordinator.reset()
             }
             return pressedButtons
+        }
+    }
+
+    private func dispatchStopCompletions(_ completions: [() -> Void]) {
+        guard !completions.isEmpty else {
+            return
+        }
+
+        DispatchQueue.main.async {
+            completions.forEach { $0() }
         }
     }
 }

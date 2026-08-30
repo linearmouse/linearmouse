@@ -111,7 +111,11 @@ public struct HIDPPTransport {
         parameters: [UInt8],
         performsSingleTransaction: Bool
     ) -> ResponseResult {
-        guard shouldContinue() else {
+        // A HID++ report has a four-byte header. Do not silently drop parameters
+        // that do not fit in the negotiated report size: callers must know that
+        // the request was not representable before any I/O has taken place.
+        guard parameters.count <= reportLength - 4,
+              shouldContinue() else {
             return .failure
         }
 

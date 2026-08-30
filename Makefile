@@ -29,8 +29,11 @@ lint:
 	swiftformat --lint .
 	swiftlint .
 
-test:
+test: hidpp-test
 	xcodebuild test -project LinearMouse.xcodeproj -scheme LinearMouse $(XCODEBUILD_ARGS)
+
+hidpp-test:
+	swift test --package-path Modules/HIDPP
 
 package: $(TARGET_DMG)
 
@@ -49,4 +52,4 @@ $(TARGET_DMG): $(BUILD_DIR)/Release/LinearMouse.app
 prepublish: package
 	@./Scripts/sign-and-notarize
 
-.PHONY: all configure test build clean package
+.PHONY: all configure test hidpp-test build clean package

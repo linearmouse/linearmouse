@@ -87,4 +87,17 @@ final class HIDPPTransportTests: XCTestCase {
         XCTAssertNil(transport.request(featureIndex: 0x22, function: 0x01, parameters: []))
         XCTAssertTrue(device.reports.isEmpty)
     }
+
+    func testRejectsParametersThatDoNotFitReportWithoutSendingIO() throws {
+        let device = MockHIDPPDevice(maxOutputReportSize: HIDPPConstants.shortReportLength)
+        let transport = try XCTUnwrap(HIDPPTransport(device: device, deviceIndex: nil))
+
+        XCTAssertNil(transport.request(
+            featureIndex: 0x22,
+            function: 0x01,
+            parameters: [0x00, 0x01, 0x02, 0x03]
+        ))
+        XCTAssertTrue(device.reports.isEmpty)
+        XCTAssertEqual(device.regularRequestCount, 0)
+    }
 }

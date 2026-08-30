@@ -1,0 +1,65 @@
+// MIT License
+// Copyright (c) 2021-2026 LinearMouse
+
+@testable import LinearMouse
+import PointerKit
+import XCTest
+
+final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
+    func testLegacyReceiverSlotProbeRejectsAmbiguousIdentity() {
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xB034,
+            product: "MX Master 3S",
+            serialNumber: "ABC123",
+            transport: PointerDeviceTransportName.usb,
+            primaryUsagePage: kHIDPage_GenericDesktop,
+            primaryUsage: kHIDUsage_GD_Mouse
+        )
+
+        let candidate = provider.receiverSlotCandidate(for: device, slots: [
+            slot(slot: 1, name: "MX Master 3S", serialNumber: "ABC123", productID: 0xB034),
+            slot(slot: 2, name: "MX Master 3S", serialNumber: "ABC123", productID: 0xB034)
+        ])
+
+        XCTAssertNil(candidate)
+    }
+
+    func testLegacyReceiverSlotProbeKeepsUniqueCompatibilityKindFallback() throws {
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: nil,
+            product: "Unknown Mouse",
+            transport: PointerDeviceTransportName.usb,
+            primaryUsagePage: kHIDPage_GenericDesktop,
+            primaryUsage: kHIDUsage_GD_Mouse
+        )
+
+        let candidate = try XCTUnwrap(provider.receiverSlotCandidate(for: device, slots: [
+            slot(slot: 1, kind: 0x02),
+            slot(slot: 2, kind: 0x01)
+        ]))
+
+        XCTAssertEqual(candidate.slot, 1)
+    }
+
+    private func slot(
+        slot: UInt8,
+        kind: UInt8 = 0x02,
+        name: String? = nil,
+        serialNumber: String? = nil,
+        productID: Int? = nil
+    ) -> LogitechHIDPPDeviceMetadataProvider.ReceiverSlotMatchCandidate {
+        .init(
+            slot: slot,
+            kind: kind,
+            name: name,
+            serialNumber: serialNumber,
+            productID: productID,
+            batteryLevel: nil,
+            hasLiveMetadata: name != nil || serialNumber != nil || productID != nil
+        )
+    }
+}
