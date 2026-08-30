@@ -172,6 +172,22 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         let identities: [ReceiverLogicalDeviceIdentity]
         let connectionSnapshots: [UInt8: ReceiverConnectionSnapshot]
         let liveReachableSlots: Set<UInt8>
+        /// Slot types successfully read during discovery, including keyboards
+        /// and other non-pointing devices that are intentionally absent from
+        /// `identities`.
+        let observedSlotKinds: [UInt8: UInt8]
+
+        init(
+            identities: [ReceiverLogicalDeviceIdentity],
+            connectionSnapshots: [UInt8: ReceiverConnectionSnapshot],
+            liveReachableSlots: Set<UInt8>,
+            observedSlotKinds: [UInt8: UInt8] = [:]
+        ) {
+            self.identities = identities
+            self.connectionSnapshots = connectionSnapshots
+            self.liveReachableSlots = liveReachableSlots
+            self.observedSlotKinds = observedSlotKinds
+        }
     }
 
     struct ReceiverSlotMatchCandidate {
@@ -1357,7 +1373,10 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         return .init(
             identities: identities,
             connectionSnapshots: connectionSnapshots,
-            liveReachableSlots: liveReachableSlots
+            liveReachableSlots: liveReachableSlots,
+            observedSlotKinds: Dictionary(uniqueKeysWithValues: slots.map {
+                ($0.slot, $0.kind)
+            })
         )
     }
 

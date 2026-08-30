@@ -854,13 +854,18 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         store.mergeDiscovery(.init(identities: [mouseA, mouseB], connectionSnapshots: [
             1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue),
             2: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
-        ], liveReachableSlots: [1, 2]))
+        ], liveReachableSlots: [1, 2], observedSlotKinds: [
+            1: ReceiverLogicalDeviceKind.mouse.rawValue,
+            2: ReceiverLogicalDeviceKind.mouse.rawValue
+        ]))
 
         // Slot A's metadata read was transiently absent while B succeeded.
         store.mergeDiscovery(.init(identities: [mouseB], connectionSnapshots: [
             1: .init(isConnected: true, kind: nil),
             2: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
-        ], liveReachableSlots: [2]))
+        ], liveReachableSlots: [2], observedSlotKinds: [
+            2: ReceiverLogicalDeviceKind.mouse.rawValue
+        ]))
 
         XCTAssertTrue(store.hasConnectedSlotMissingIdentity)
         XCTAssertEqual(store.currentPublishedIdentities(), [mouseB])
@@ -868,7 +873,10 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         store.mergeDiscovery(.init(identities: [mouseA, mouseB], connectionSnapshots: [
             1: .init(isConnected: true, kind: nil),
             2: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
-        ], liveReachableSlots: [1, 2]))
+        ], liveReachableSlots: [1, 2], observedSlotKinds: [
+            1: ReceiverLogicalDeviceKind.mouse.rawValue,
+            2: ReceiverLogicalDeviceKind.mouse.rawValue
+        ]))
 
         XCTAssertFalse(store.hasConnectedSlotMissingIdentity)
         XCTAssertEqual(store.currentPublishedIdentities(), [mouseA, mouseB])
@@ -881,9 +889,12 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         store.mergeDiscovery(.init(identities: [mouse], connectionSnapshots: [
             1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ], liveReachableSlots: [1]))
-        store.mergeDiscovery(.init(identities: [], connectionSnapshots: [
-            1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.keyboard.rawValue)
-        ], liveReachableSlots: []))
+        store.mergeDiscovery(.init(
+            identities: [],
+            connectionSnapshots: [1: .init(isConnected: true, kind: nil)],
+            liveReachableSlots: [],
+            observedSlotKinds: [1: ReceiverLogicalDeviceKind.keyboard.rawValue]
+        ))
 
         XCTAssertFalse(store.hasConnectedSlotMissingIdentity)
         XCTAssertTrue(store.currentPublishedIdentities().isEmpty)
@@ -897,6 +908,23 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ], liveReachableSlots: [1]))
         store.mergeDiscovery(.init(identities: [], connectionSnapshots: [:], liveReachableSlots: []))
+
+        XCTAssertTrue(store.hasConnectedSlotMissingIdentity)
+    }
+
+    func testReceiverSlotStateStoreRetriesObservedConnectedPointingSlotWithoutIdentity() {
+        var store = ReceiverSlotStateStore()
+        let mouse = receiverIdentity(slot: 1, name: "Mouse A")
+
+        store.mergeDiscovery(.init(identities: [mouse], connectionSnapshots: [
+            1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
+        ], liveReachableSlots: [1]))
+        store.mergeDiscovery(.init(
+            identities: [],
+            connectionSnapshots: [1: .init(isConnected: true, kind: nil)],
+            liveReachableSlots: [1],
+            observedSlotKinds: [1: ReceiverLogicalDeviceKind.mouse.rawValue]
+        ))
 
         XCTAssertTrue(store.hasConnectedSlotMissingIdentity)
     }

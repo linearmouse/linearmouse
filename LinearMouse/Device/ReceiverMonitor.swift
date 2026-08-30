@@ -119,9 +119,10 @@ struct ReceiverSlotStateStore {
         mergeConnectionSnapshots(discovery.connectionSnapshots)
 
         // A full discovery can temporarily miss one slot while succeeding for
-        // another. Preserve evidence that a previously pointing slot is still
-        // connected so its absent identity is retried instead of silently
-        // accepting a partial inventory.
+        // another. First honor a slot type actually read by the provider: a
+        // keyboard replacement proves that the old mouse identity is stale.
+        // Only an observed/currently connected pointing slot, or a wholly
+        // unobserved slot that was previously connected, needs another read.
         for slot in missingPreviousPointingSlots {
             guard previousIdentitiesBySlot[slot]?.kind.isPointingDevice == true else {
                 continue
@@ -129,12 +130,19 @@ struct ReceiverSlotStateStore {
 
             let snapshot = discovery.connectionSnapshots[slot]
             let reportedKind = snapshot?.kind.flatMap(ReceiverLogicalDeviceKind.init(rawValue:))
-            if snapshot?.isConnected == false || reportedKind?.isPointingDevice == false {
+            let observedKind = discovery.observedSlotKinds[slot].flatMap(ReceiverLogicalDeviceKind.init(rawValue:))
+            if snapshot?.isConnected == false
+                || reportedKind?.isPointingDevice == false
+                || observedKind?.isPointingDevice == false {
                 slotsRequiringPointingIdentity.remove(slot)
                 continue
             }
 
-            guard snapshot?.isConnected == true || previousPresenceBySlot[slot] == .connected else {
+            guard snapshot?.isConnected == true
+                || discovery.liveReachableSlots.contains(slot)
+                || observedKind?.isPointingDevice == true && previousPresenceBySlot[slot] == .connected
+                || observedKind == nil && previousPresenceBySlot[slot] == .connected
+            else {
                 continue
             }
 

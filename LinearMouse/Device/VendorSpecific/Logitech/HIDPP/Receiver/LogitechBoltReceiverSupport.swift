@@ -131,7 +131,10 @@ extension LogitechReceiverMonitoringChannel {
         return .init(
             identities: identities,
             connectionSnapshots: discovery.connectionSnapshots,
-            liveReachableSlots: liveReachableSlots
+            liveReachableSlots: liveReachableSlots,
+            observedSlotKinds: Dictionary(uniqueKeysWithValues: discovery.slots.map {
+                ($0.slot, $0.kind)
+            })
         )
     }
 
