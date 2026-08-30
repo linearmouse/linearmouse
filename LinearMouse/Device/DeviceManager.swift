@@ -18,13 +18,17 @@ enum DeviceManagerLifecycleState: Equatable {
     }
 }
 
-enum DeviceManagerControlsTeardownPolicy: Int, Equatable {
+enum DeviceManagerControlsTeardownPolicy: Int, Comparable {
     /// Drop monitor ownership without any HID++ reporting I/O.
     case abandon
     /// Preserve a store-backed baseline across sleep without restoring it.
     case sleepPreserve
     /// Restore every pending baseline before invalidating PointerDevice.
     case restore
+
+    static func < (lhs: Self, rhs: Self) -> Bool {
+        lhs.rawValue < rhs.rawValue
+    }
 }
 
 /// The strongest teardown request received for the current observation
@@ -38,21 +42,17 @@ struct DeviceManagerStopIntent: Equatable {
 
     init(
         restoringHighResolutionWheel: Bool,
-        restoringLogitechControls: Bool,
         applyingSleepHiResPolicy: Bool,
-        controlsTeardownPolicy: DeviceManagerControlsTeardownPolicy? = nil
+        controlsTeardownPolicy: DeviceManagerControlsTeardownPolicy
     ) {
         restoresHighResolutionWheel = restoringHighResolutionWheel
         self.controlsTeardownPolicy = controlsTeardownPolicy
-            ?? (restoringLogitechControls ? .restore : .abandon)
         appliesSleepHiResPolicy = applyingSleepHiResPolicy && !restoringHighResolutionWheel
     }
 
     mutating func merge(_ other: Self) {
         restoresHighResolutionWheel = restoresHighResolutionWheel || other.restoresHighResolutionWheel
-        if other.controlsTeardownPolicy.rawValue > controlsTeardownPolicy.rawValue {
-            controlsTeardownPolicy = other.controlsTeardownPolicy
-        }
+        controlsTeardownPolicy = max(controlsTeardownPolicy, other.controlsTeardownPolicy)
         appliesSleepHiResPolicy = (appliesSleepHiResPolicy || other.appliesSleepHiResPolicy)
             && !restoresHighResolutionWheel
     }
@@ -62,60 +62,29 @@ struct DeviceManagerStopIntent: Equatable {
 /// teardown intent. A completed sleep barrier cannot satisfy a subsequently
 /// upgraded normal-restore request.
 struct DeviceManagerControlsStopBarrier: Equatable {
-    enum Start: Equatable {
-        case abandon
-        case sleepPreserve
-        case restore
-    }
+    typealias Start = DeviceManagerControlsTeardownPolicy
 
-    private(set) var abandonCompleted = false
-    private(set) var sleepStarted = false
-    private(set) var sleepCompleted = false
-    private(set) var restoreStarted = false
-    private(set) var restoreCompleted = false
+    private(set) var highestStarted: DeviceManagerControlsTeardownPolicy?
+    private(set) var highestCompleted: DeviceManagerControlsTeardownPolicy?
 
     mutating func startNeeded(for intent: DeviceManagerStopIntent) -> Start? {
-        switch intent.controlsTeardownPolicy {
-        case .abandon:
-            guard !abandonCompleted else {
-                return nil
-            }
-            return .abandon
-        case .sleepPreserve:
-            guard !sleepStarted else {
-                return nil
-            }
-            sleepStarted = true
-            return .sleepPreserve
-        case .restore:
-            guard !restoreStarted else {
-                return nil
-            }
-            restoreStarted = true
-            return .restore
+        let policy = intent.controlsTeardownPolicy
+        guard highestStarted.map({ $0 < policy }) ?? true else {
+            return nil
         }
+        highestStarted = policy
+        return policy
     }
 
     mutating func complete(_ start: Start) {
-        switch start {
-        case .abandon:
-            abandonCompleted = true
-        case .sleepPreserve:
-            sleepCompleted = true
-        case .restore:
-            restoreCompleted = true
-        }
+        highestCompleted = max(highestCompleted ?? .abandon, start)
     }
 
     func isSatisfied(for intent: DeviceManagerStopIntent) -> Bool {
-        switch intent.controlsTeardownPolicy {
-        case .abandon:
-            abandonCompleted
-        case .sleepPreserve:
-            sleepCompleted
-        case .restore:
-            restoreCompleted
+        guard let highestCompleted else {
+            return false
         }
+        return highestCompleted >= intent.controlsTeardownPolicy
     }
 }
 
@@ -173,7 +142,7 @@ class DeviceManager: ObservableObject {
     deinit {
         stop(
             restoringHighResolutionWheel: false,
-            restoringLogitechControls: false
+            controlsTeardownPolicy: .abandon
         )
     }
 
@@ -192,14 +161,12 @@ class DeviceManager: ObservableObject {
 
     func stop(
         restoringHighResolutionWheel: Bool = true,
-        restoringLogitechControls: Bool = true,
         applyingSleepHiResPolicy: Bool = false,
-        controlsTeardownPolicy: DeviceManagerControlsTeardownPolicy? = nil,
+        controlsTeardownPolicy: DeviceManagerControlsTeardownPolicy = .restore,
         completion: (() -> Void)? = nil
     ) {
         let requestedIntent = DeviceManagerStopIntent(
             restoringHighResolutionWheel: restoringHighResolutionWheel,
-            restoringLogitechControls: restoringLogitechControls,
             applyingSleepHiResPolicy: applyingSleepHiResPolicy,
             controlsTeardownPolicy: controlsTeardownPolicy
         )
