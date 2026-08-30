@@ -19,6 +19,8 @@ class PointerSettingsState: ObservableObject {
     @Published private(set) var pointerHardwareDPIStatusMessage: String?
     private var pointerHardwareDPITargetDPIEdited = false
     private var pointerHardwareDPIApplyWorkItem: DispatchWorkItem?
+    private var pointerHardwareDPIRefreshPending = false
+    private var receiverIdentitiesByLocation = [Int: [ReceiverLogicalDeviceIdentity]]()
 
     private static let pointerHardwareDPIApplyDebounceInterval: TimeInterval = 0.25
 
@@ -29,6 +31,36 @@ class PointerSettingsState: ObservableObject {
             .sink { [weak self] _ in
                 self?.resetPointerHardwareDPIState()
                 self?.refreshPointerHardwareDPIInfo()
+            }
+            .store(in: &subscriptions)
+
+        DeviceManager.shared
+            .$receiverPairedDeviceIdentities
+            .sink { [weak self] identitiesByLocation in
+                guard let self,
+                      let device = self.currentDevice,
+                      LogitechReceiverRouteResolver.requiresDiscovery(for: device.pointerDevice),
+                      let locationID = device.pointerDevice.locationID
+                else {
+                    return
+                }
+
+                let identities = identitiesByLocation[locationID] ?? []
+                guard self.receiverIdentitiesByLocation[locationID] != identities else {
+                    return
+                }
+                self.receiverIdentitiesByLocation[locationID] = identities
+
+                // @Published emits before DeviceManager updates the device's
+                // route. Defer to the next main-queue turn so the read sees
+                // either the new route or its explicit unavailable state.
+                DispatchQueue.main.async { [weak self, weak device] in
+                    guard let self, self.currentDevice === device else {
+                        return
+                    }
+
+                    self.refreshPointerHardwareDPIInfo()
+                }
             }
             .store(in: &subscriptions)
     }
@@ -134,6 +166,7 @@ extension PointerSettingsState {
 
     func refreshPointerHardwareDPIInfo() {
         guard !pointerHardwareDPIInfoRefreshing, !pointerHardwareDPIApplying else {
+            pointerHardwareDPIRefreshPending = true
             return
         }
 
@@ -165,6 +198,7 @@ extension PointerSettingsState {
             self.pointerHardwareDPIInfo = info
             self.pointerHardwareDPIStatusMessage = self.pointerHardwareDPIStatusMessage(for: info)
             self.pointerHardwareDPIInfoRefreshing = false
+            self.refreshPointerHardwareDPIInfoIfNeeded()
         }
     }
 
@@ -222,6 +256,7 @@ extension PointerSettingsState {
 
             self.pointerHardwareDPIInfo = result.info
             self.pointerHardwareDPIApplying = false
+            self.refreshPointerHardwareDPIInfoIfNeeded()
         }
     }
 
@@ -235,6 +270,16 @@ extension PointerSettingsState {
         pointerHardwareDPIInfo = nil
         pointerHardwareDPIStatusMessage = nil
         pointerHardwareDPITargetDPIEdited = false
+        pointerHardwareDPIRefreshPending = false
+    }
+
+    private func refreshPointerHardwareDPIInfoIfNeeded() {
+        guard pointerHardwareDPIRefreshPending else {
+            return
+        }
+
+        pointerHardwareDPIRefreshPending = false
+        refreshPointerHardwareDPIInfo()
     }
 
     func updatePointerHardwareDPITargetDPI(_ dpi: Int) {

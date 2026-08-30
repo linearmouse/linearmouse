@@ -60,30 +60,89 @@ class DeviceManager: ObservableObject {
     }
 
     private enum State {
-        case stopped, running
+        case stopped
+        case running
+        case stopping
     }
 
     private var state: State = .stopped
+    private var stopCompletions = [() -> Void]()
 
     private var subscriptions = Set<AnyCancellable>()
 
     private var activateApplicationObserver: Any?
 
-    func stop(restoringHighResolutionWheel: Bool = true) {
-        guard state == .running else {
+    func stop(
+        restoringHighResolutionWheel: Bool = true,
+        restoringLogitechControls: Bool = true,
+        completion: (() -> Void)? = nil
+    ) {
+        switch state {
+        case .stopped:
+            if let completion {
+                DispatchQueue.main.async(execute: completion)
+            }
+            return
+        case .stopping:
+            if let completion {
+                stopCompletions.append(completion)
+            }
+            if !restoringLogitechControls {
+                for value in pointerDeviceToDevice.values {
+                    value.stopLogitechControlsMonitoringForSleep()
+                }
+                finishStop(restoringHighResolutionWheel: false)
+            }
+            return
+        case .running:
+            state = .stopping
+        }
+
+        if let completion {
+            stopCompletions.append(completion)
+        }
+
+        subscriptions.removeAll()
+
+        if let activateApplicationObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(activateApplicationObserver)
+            self.activateApplicationObserver = nil
+        }
+
+        let devices = Array(pointerDeviceToDevice.values)
+        guard restoringLogitechControls else {
+            devices.forEach { $0.stopLogitechControlsMonitoringForSleep() }
+            finishStop(restoringHighResolutionWheel: restoringHighResolutionWheel)
             return
         }
-        state = .stopped
+
+        let group = DispatchGroup()
+        for device in devices {
+            group.enter()
+            device.disableLogitechControlsMonitoring {
+                group.leave()
+            }
+        }
+
+        group.notify(queue: .main) { [weak self] in
+            self?.finishStop(restoringHighResolutionWheel: restoringHighResolutionWheel)
+        }
+    }
+
+    private func finishStop(restoringHighResolutionWheel: Bool) {
+        guard state == .stopping else {
+            return
+        }
 
         restorePointerSpeedToInitialValue(
             restoringHighResolutionWheel: restoringHighResolutionWheel
         )
         manager.stopObservation()
-        subscriptions.removeAll()
+        state = .stopped
 
-        if let activateApplicationObserver {
-            NSWorkspace.shared.notificationCenter.removeObserver(activateApplicationObserver)
-        }
+        let completions = stopCompletions
+        stopCompletions.removeAll()
+        completions.forEach { $0() }
     }
 
     func start() {
@@ -91,6 +150,12 @@ class DeviceManager: ObservableObject {
             return
         }
         state = .running
+
+        // Input callbacks suppress events from the device that was previously
+        // active. A new observation lifetime needs its first physical input to
+        // pass through so it can reconcile hardware state after a wake.
+        lastActiveDeviceId = nil
+        lastActiveDeviceRef = nil
 
         manager.startObservation()
 
@@ -410,7 +475,6 @@ class DeviceManager: ObservableObject {
             return
         }
 
-        let hadActiveDevice = lastActiveDeviceId != nil
         lastActiveDeviceId = device.id
         lastActiveDeviceRef = .init(device)
 
@@ -424,25 +488,24 @@ class DeviceManager: ObservableObject {
         )
 
         updatePointerSpeed()
-        if hadActiveDevice {
-            reapplyLogitechDeviceSettings(for: device)
-        } else {
-            updateLogitechDeviceSettings(for: device)
-        }
+        // A device's first input after observation starts is the reliable
+        // signal that it is ready. Force a full reconciliation even when it
+        // was not previously active.
+        reapplyLogitechDeviceSettings(for: device)
     }
 
-    func requestLogitechDeviceSettingsReconciliation() {
+    func requestLogitechReceiverRediscovery() {
         for device in devices {
             if shouldMonitorReceiver(device) {
-                // Wake only restarts discovery. Settings still wait for a route.
+                // The wake poke is for receiver route recovery only. Direct
+                // devices may already have a confirmation attempt scheduled;
+                // restarting it here would cancel that work.
                 let identities = device.pointerDevice.locationID.flatMap {
                     receiverPairedDeviceIdentities[$0]
                 }
                 if identities?.isEmpty != false {
                     receiverMonitor.requestRediscovery(device: device)
                 }
-            } else {
-                reapplyLogitechDeviceSettings(for: device)
             }
         }
     }
@@ -453,6 +516,9 @@ class DeviceManager: ObservableObject {
         }
 
         guard updateLogitechReceiverDiscovery(for: device) else {
+            if shouldMonitorReceiver(device) {
+                receiverMonitor.requestRediscovery(device: device)
+            }
             return
         }
 

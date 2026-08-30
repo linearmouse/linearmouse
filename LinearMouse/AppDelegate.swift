@@ -16,6 +16,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var subscriptions = Set<AnyCancellable>()
     private var sessionActive = true
     private var sleeping = false
+    private var terminationCleanupPending = false
 
     /// Runs the one-time legacy -> SMAppService login-item migration on launch.
     ///
@@ -62,12 +63,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return false
     }
 
-    func applicationWillTerminate(_: Notification) {
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         guard ProcessEnvironment.isRunningApp else {
-            return
+            return .terminateNow
         }
 
-        stop(restoringHighResolutionWheel: true)
+        guard !terminationCleanupPending else {
+            return .terminateLater
+        }
+        terminationCleanupPending = true
+
+        stop(restoringHighResolutionWheel: true) { [weak self, weak sender] in
+            self?.terminationCleanupPending = false
+            sender?.reply(toApplicationShouldTerminate: true)
+        }
+        return .terminateLater
     }
 }
 
@@ -106,7 +116,7 @@ extension AppDelegate {
             os_log("Session active", log: Self.log, type: .info)
             self?.sessionActive = true
             KeyboardSettingsSnapshot.shared.refresh()
-            self?.startIfAllowed()
+            self?.restartIfAllowed()
         }
 
         NSWorkspace.shared.notificationCenter.addObserver(
@@ -116,7 +126,10 @@ extension AppDelegate {
         ) { [weak self] _ in
             os_log("System will sleep", log: Self.log, type: .info)
             self?.sleeping = true
-            self?.stop(restoringHighResolutionWheel: false)
+            self?.stop(
+                restoringHighResolutionWheel: false,
+                restoringLogitechControls: false
+            )
         }
 
         NSWorkspace.shared.notificationCenter.addObserver(
@@ -127,7 +140,7 @@ extension AppDelegate {
             os_log("System did wake", log: Self.log, type: .info)
             self?.sleeping = false
             self?.restartIfAllowed()
-            self?.requestLogitechDeviceSettingsReconciliationAfterWake()
+            self?.requestLogitechReceiverRediscoveryAfterWake()
         }
     }
 
@@ -140,17 +153,18 @@ extension AppDelegate {
     }
 
     func restartIfAllowed() {
-        stop()
-        startIfAllowed()
+        stop { [weak self] in
+            self?.startIfAllowed()
+        }
     }
 
-    func requestLogitechDeviceSettingsReconciliationAfterWake() {
+    func requestLogitechReceiverRediscoveryAfterWake() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
             guard let self, sessionActive, !sleeping else {
                 return
             }
 
-            DeviceManager.shared.requestLogitechDeviceSettingsReconciliation()
+            DeviceManager.shared.requestLogitechReceiverRediscovery()
         }
     }
 
@@ -160,9 +174,17 @@ extension AppDelegate {
         GlobalEventTap.shared.start()
     }
 
-    func stop(restoringHighResolutionWheel: Bool = true) {
+    func stop(
+        restoringHighResolutionWheel: Bool = true,
+        restoringLogitechControls: Bool = true,
+        completion: (() -> Void)? = nil
+    ) {
         BatteryDeviceMonitor.shared.disable()
-        DeviceManager.shared.stop(restoringHighResolutionWheel: restoringHighResolutionWheel)
+        DeviceManager.shared.stop(
+            restoringHighResolutionWheel: restoringHighResolutionWheel,
+            restoringLogitechControls: restoringLogitechControls,
+            completion: completion
+        )
         GlobalEventTap.shared.stop()
     }
 }

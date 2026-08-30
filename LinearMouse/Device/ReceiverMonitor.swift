@@ -86,6 +86,12 @@ struct ReceiverSlotStateStore {
         slotPresenceBySlot = [:]
     }
 
+    /// A receiver channel is no longer trustworthy. Its pairing cache must not
+    /// keep a logical device routable while a replacement channel is opened.
+    mutating func invalidateChannel() {
+        reset()
+    }
+
     mutating func mergeDiscovery(_ discovery: LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery) {
         let latestIdentitiesBySlot = Dictionary(uniqueKeysWithValues: discovery.identities.map {
             ($0.slot, $0)
@@ -303,7 +309,9 @@ private final class ReceiverContext {
                     locationID,
                     String(describing: device)
                 )
-                setCurrentChannel(nil)
+                invalidateCurrentChannel(receiverChannel)
+                discoveryState = .pending
+                discoveryBackoff.reset()
                 if !hasPublishedInitialState, Date() >= initialDeadline {
                     DispatchQueue.main.async { [weak self] in
                         self?.onDiscoveryTimedOut?()
@@ -402,7 +410,7 @@ private final class ReceiverContext {
                         locationID,
                         String(describing: device)
                     )
-                    setCurrentChannel(nil)
+                    invalidateCurrentChannel(receiverChannel)
                     discoveryState = .pending
                     discoveryBackoff.reset()
                 }
@@ -528,6 +536,13 @@ private final class ReceiverContext {
         stateLock.lock()
         currentChannel = channel
         stateLock.unlock()
+    }
+
+    private func invalidateCurrentChannel(_ channel: LogitechReceiverChannel) {
+        setCurrentChannel(nil)
+        LogitechReceiverChannel.discardSharedChannel(locationID: locationID, matching: channel)
+        stateStore.invalidateChannel()
+        publish([])
     }
 
     private func currentChannelSnapshot() -> LogitechReceiverChannel? {

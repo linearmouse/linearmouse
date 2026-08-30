@@ -848,6 +848,31 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertTrue(store.currentPublishedIdentities().isEmpty)
     }
 
+    func testReceiverSlotStateStoreInvalidatingChannelClearsPublishedIdentity() {
+        var store = ReceiverSlotStateStore()
+        let identity = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 0x1234,
+            slot: 1,
+            kind: .mouse,
+            name: "Mouse A",
+            serialNumber: "AAAA",
+            productID: 0x1234,
+            batteryLevel: 60
+        )
+
+        store.mergeDiscovery(.init(
+            identities: [identity],
+            connectionSnapshots: [1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)],
+            liveReachableSlots: [1]
+        ))
+        XCTAssertEqual(store.currentPublishedIdentities(), [identity])
+
+        store.invalidateChannel()
+
+        XCTAssertTrue(store.currentPublishedIdentities().isEmpty)
+        XCTAssertTrue(store.needsIdentityRefresh(slot: identity.slot))
+    }
+
     func testConnectedBatteryDeviceDirectIdentityPrefersSerialNumber() {
         let identity = ConnectedBatteryDeviceInfo.directIdentity(
             vendorID: 0x046D,

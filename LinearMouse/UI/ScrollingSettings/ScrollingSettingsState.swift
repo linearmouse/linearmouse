@@ -17,6 +17,8 @@ class ScrollingSettingsState: ObservableObject {
 
     @Published private(set) var highResolutionWheelInfo: Device.HighResolutionWheelInfo?
     @Published private(set) var highResolutionWheelInfoRefreshing = false
+    private var highResolutionWheelInfoRefreshPending = false
+    private var receiverIdentitiesByLocation = [Int: [ReceiverLogicalDeviceIdentity]]()
 
     private init() {
         deviceState.$currentDeviceRef
@@ -25,6 +27,36 @@ class ScrollingSettingsState: ObservableObject {
             .sink { [weak self] _ in
                 self?.resetHighResolutionWheelInfo()
                 self?.refreshHighResolutionWheelInfo()
+            }
+            .store(in: &subscriptions)
+
+        DeviceManager.shared
+            .$receiverPairedDeviceIdentities
+            .sink { [weak self] identitiesByLocation in
+                guard let self,
+                      let device = self.currentDevice,
+                      LogitechReceiverRouteResolver.requiresDiscovery(for: device.pointerDevice),
+                      let locationID = device.pointerDevice.locationID
+                else {
+                    return
+                }
+
+                let identities = identitiesByLocation[locationID] ?? []
+                guard self.receiverIdentitiesByLocation[locationID] != identities else {
+                    return
+                }
+                self.receiverIdentitiesByLocation[locationID] = identities
+
+                // @Published emits before DeviceManager updates the device's
+                // route. Defer to the next main-queue turn so the read sees
+                // either the new route or its explicit unavailable state.
+                DispatchQueue.main.async { [weak self, weak device] in
+                    guard let self, self.currentDevice === device else {
+                        return
+                    }
+
+                    self.refreshHighResolutionWheelInfo()
+                }
             }
             .store(in: &subscriptions)
 
@@ -84,6 +116,7 @@ extension ScrollingSettingsState {
 
     func refreshHighResolutionWheelInfo() {
         guard !highResolutionWheelInfoRefreshing else {
+            highResolutionWheelInfoRefreshPending = true
             return
         }
 
@@ -108,12 +141,25 @@ extension ScrollingSettingsState {
             self.highResolutionWheelInfo = info
             self.highResolutionWheelInfoRefreshing = false
             self.applyConfiguredHighResolutionWheelIfNeeded(info: info, device: device)
+            self.refreshHighResolutionWheelInfoIfNeeded()
         }
     }
 
     private func resetHighResolutionWheelInfo() {
         highResolutionWheelInfo = nil
-        highResolutionWheelInfoRefreshing = false
+        // Keep an in-flight read marked as such. Its completion will notice a
+        // new selected device and start one coalesced read for that device;
+        // clearing this here would allow stale and current reads to overlap.
+        highResolutionWheelInfoRefreshPending = false
+    }
+
+    private func refreshHighResolutionWheelInfoIfNeeded() {
+        guard highResolutionWheelInfoRefreshPending else {
+            return
+        }
+
+        highResolutionWheelInfoRefreshPending = false
+        refreshHighResolutionWheelInfo()
     }
 
     private func applyConfiguredHighResolutionWheelIfNeeded(info: Device.HighResolutionWheelInfo, device: Device) {
