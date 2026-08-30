@@ -125,7 +125,7 @@ final class ReceiverNotificationOwnershipStore {
     }
 
     /// Clears a snapshot of the bits owned for `target`, using the latest
-    /// register value as the base so unrelated/concurrently-added bits survive.
+    /// register value as the base so every unrelated bit observed there survives.
     /// A successful write is read back before ownership is consumed.
     @discardableResult
     func restoreOwnedBits(
