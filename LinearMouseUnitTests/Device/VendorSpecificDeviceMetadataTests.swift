@@ -798,14 +798,14 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
 
         // The immediate slot read failed, so the pending discovery path must
         // retry rather than treating the remaining receiver state as ready.
-        XCTAssertTrue(store.hasConnectedSlotMissingIdentity)
+        XCTAssertTrue(store.hasUnresolvedConnectedSlot)
         XCTAssertTrue(store.currentPublishedIdentities().isEmpty)
 
         store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
             1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ], liveReachableSlots: [1]))
 
-        XCTAssertFalse(store.hasConnectedSlotMissingIdentity)
+        XCTAssertFalse(store.hasUnresolvedConnectedSlot)
         XCTAssertEqual(store.currentPublishedIdentities(), [identity])
     }
 
@@ -826,7 +826,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             2: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ], liveReachableSlots: [2]))
 
-        XCTAssertFalse(store.hasConnectedSlotMissingIdentity)
+        XCTAssertFalse(store.hasUnresolvedConnectedSlot)
         XCTAssertEqual(store.currentPublishedIdentities(), [mouse])
     }
 
@@ -849,11 +849,48 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             1: .init(isConnected: true, kind: nil)
         ])
 
-        XCTAssertTrue(store.hasConnectedSlotMissingIdentity)
+        XCTAssertTrue(store.hasUnresolvedConnectedSlot)
 
         store.updateSlotIdentity(identity)
 
-        XCTAssertFalse(store.hasConnectedSlotMissingIdentity)
+        XCTAssertFalse(store.hasUnresolvedConnectedSlot)
+    }
+
+    func testReceiverSlotStateStoreKeepsRepeatedConnectedPointingIdentityResolved() {
+        var store = ReceiverSlotStateStore()
+        let identity = receiverIdentity(slot: 1, name: "Mouse A")
+
+        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
+            1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
+        ], liveReachableSlots: [1]))
+        store.mergeConnectionSnapshots([
+            1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
+        ])
+
+        XCTAssertFalse(store.hasUnresolvedConnectedSlot)
+        XCTAssertEqual(store.currentPublishedIdentities(), [identity])
+    }
+
+    func testReceiverSlotStateStoreTreatsNewUnknownConnectedSlotAsUnresolved() {
+        var store = ReceiverSlotStateStore()
+
+        store.mergeConnectionSnapshots([
+            1: .init(isConnected: true, kind: nil)
+        ])
+
+        XCTAssertTrue(store.hasUnresolvedConnectedSlot)
+    }
+
+    func testReceiverConnectionEventPublicationSuppressesPartialIdentitiesWhenUnresolved() {
+        let identity = receiverIdentity(slot: 1, name: "Mouse A")
+
+        XCTAssertEqual(
+            ReceiverConnectionEventPublication.identities(
+                afterEvent: [identity],
+                hasUnresolvedConnectedSlot: true
+            ),
+            []
+        )
     }
 
     func testReceiverSlotStateStoreRetriesPartialDiscoveryMissingConnectedPointingSlot() {
@@ -878,7 +915,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         ]))
 
         XCTAssertFalse(partial.inventoryComplete)
-        XCTAssertFalse(store.hasConnectedSlotMissingIdentity)
+        XCTAssertFalse(store.hasUnresolvedConnectedSlot)
         XCTAssertEqual(store.currentPublishedIdentities(), [mouseB])
 
         let recovered = store.mergeDiscovery(.init(identities: [mouseA, mouseB], connectionSnapshots: [
@@ -890,7 +927,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         ]))
 
         XCTAssertTrue(recovered.inventoryComplete)
-        XCTAssertFalse(store.hasConnectedSlotMissingIdentity)
+        XCTAssertFalse(store.hasUnresolvedConnectedSlot)
         XCTAssertEqual(store.currentPublishedIdentities(), [mouseA, mouseB])
     }
 
@@ -908,7 +945,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             observedSlotKinds: [1: ReceiverLogicalDeviceKind.keyboard.rawValue]
         ))
 
-        XCTAssertFalse(store.hasConnectedSlotMissingIdentity)
+        XCTAssertFalse(store.hasUnresolvedConnectedSlot)
         XCTAssertTrue(store.currentPublishedIdentities().isEmpty)
     }
 
@@ -943,7 +980,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             observedSlotKinds: [1: ReceiverLogicalDeviceKind.mouse.rawValue]
         ))
 
-        XCTAssertTrue(store.hasConnectedSlotMissingIdentity)
+        XCTAssertTrue(store.hasUnresolvedConnectedSlot)
     }
 
     func testReceiverSlotStateStoreTreatsFreshBatteryMetadataAsReconnectEvidence() {
@@ -1064,7 +1101,38 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             observedSlotKinds: [1: ReceiverLogicalDeviceKind.mouse.rawValue]
         ))
         XCTAssertFalse(missingIdentity.inventoryComplete)
-        XCTAssertTrue(store.hasConnectedSlotMissingIdentity)
+        XCTAssertTrue(store.hasUnresolvedConnectedSlot)
+    }
+
+    func testReceiverSlotStateStoreFallsBackToObservedKindWhenSnapshotKindIsUnknown() {
+        var store = ReceiverSlotStateStore()
+        let identity = receiverIdentity(slot: 1, name: "Mouse A")
+
+        let result = store.mergeDiscovery(.init(
+            identities: [identity],
+            connectionSnapshots: [1: .init(isConnected: true, kind: 0)],
+            liveReachableSlots: [1],
+            expectedConnectedDeviceCount: 1,
+            observedSlotKinds: [1: ReceiverLogicalDeviceKind.mouse.rawValue]
+        ))
+
+        XCTAssertTrue(result.inventoryComplete)
+    }
+
+    func testReceiverSlotStateStoreDropsStaleMouseForResolvedKeyboardSnapshot() {
+        var store = ReceiverSlotStateStore()
+        let staleMouse = receiverIdentity(slot: 1, name: "Mouse A")
+
+        let result = store.mergeDiscovery(.init(
+            identities: [staleMouse],
+            connectionSnapshots: [1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.keyboard.rawValue)],
+            liveReachableSlots: [1],
+            expectedConnectedDeviceCount: 1,
+            observedSlotKinds: [1: ReceiverLogicalDeviceKind.keyboard.rawValue]
+        ))
+
+        XCTAssertTrue(result.inventoryComplete)
+        XCTAssertTrue(store.currentPublishedIdentities().isEmpty)
     }
 
     func testReceiverSlotStateStoreTreatsLiveReachabilityAsReconnectEvidence() {

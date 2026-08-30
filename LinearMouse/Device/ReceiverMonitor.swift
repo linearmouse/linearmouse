@@ -4,6 +4,15 @@
 import Foundation
 import os.log
 
+enum ReceiverConnectionEventPublication {
+    static func identities(
+        afterEvent identities: [ReceiverLogicalDeviceIdentity],
+        hasUnresolvedConnectedSlot: Bool
+    ) -> [ReceiverLogicalDeviceIdentity] {
+        hasUnresolvedConnectedSlot ? [] : identities
+    }
+}
+
 final class ReceiverMonitor {
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ReceiverMonitor")
     static let initialDiscoveryTimeout: TimeInterval = 3
@@ -84,12 +93,12 @@ struct ReceiverSlotStateStore {
 
     private var pairedIdentitiesBySlot = [UInt8: ReceiverLogicalDeviceIdentity]()
     private var slotPresenceBySlot = [UInt8: SlotPresenceState]()
-    private var slotsRequiringPointingIdentity = Set<UInt8>()
+    private var slotsRequiringIdentityResolution = Set<UInt8>()
 
     mutating func reset() {
         pairedIdentitiesBySlot = [:]
         slotPresenceBySlot = [:]
-        slotsRequiringPointingIdentity = []
+        slotsRequiringIdentityResolution = []
     }
 
     /// A receiver channel is no longer trustworthy. Its pairing cache must not
@@ -106,7 +115,7 @@ struct ReceiverSlotStateStore {
         })
         pairedIdentitiesBySlot = latestIdentitiesBySlot
         slotPresenceBySlot = [:]
-        slotsRequiringPointingIdentity = []
+        slotsRequiringIdentityResolution = []
 
         for (slot, snapshot) in discovery.connectionSnapshots {
             slotPresenceBySlot[slot] = snapshot.isConnected ? .connected : .disconnected
@@ -122,9 +131,12 @@ struct ReceiverSlotStateStore {
             UInt8,
             ReceiverLogicalDeviceKind
         )? in
-            let rawKind = discovery.connectionSnapshots[slot]?.kind ?? discovery.observedSlotKinds[slot]
-            guard let rawKind,
-                  let kind = ReceiverLogicalDeviceKind(rawValue: rawKind)
+            let snapshotKind = discovery.connectionSnapshots[slot]?
+                .kind
+                .flatMap(ReceiverLogicalDeviceKind.init(rawValue:))
+            let observedKind = discovery.observedSlotKinds[slot]
+                .flatMap(ReceiverLogicalDeviceKind.init(rawValue:))
+            guard let kind = snapshotKind ?? observedKind
             else {
                 return nil
             }
@@ -136,7 +148,9 @@ struct ReceiverSlotStateStore {
                 continue
             }
             if kind.isPointingDevice, latestIdentitiesBySlot[slot] == nil {
-                slotsRequiringPointingIdentity.insert(slot)
+                slotsRequiringIdentityResolution.insert(slot)
+            } else if !kind.isPointingDevice {
+                pairedIdentitiesBySlot.removeValue(forKey: slot)
             }
         }
 
@@ -144,7 +158,7 @@ struct ReceiverSlotStateStore {
             && discovery.expectedConnectedDeviceCount != nil
             && connectedSlots.count == discovery.expectedConnectedDeviceCount
             && slotKinds.count == connectedSlots.count
-            && !hasConnectedSlotMissingIdentity
+            && !hasUnresolvedConnectedSlot
         return .init(inventoryComplete: inventoryComplete)
     }
 
@@ -154,11 +168,10 @@ struct ReceiverSlotStateStore {
         for (slot, snapshot) in newSnapshots {
             let newPresence: SlotPresenceState = snapshot.isConnected ? .connected : .disconnected
             let oldPresence = slotPresenceBySlot[slot]
-            let previousIdentity = pairedIdentitiesBySlot[slot]
             slotPresenceBySlot[slot] = newPresence
 
             guard newPresence == .connected else {
-                slotsRequiringPointingIdentity.remove(slot)
+                slotsRequiringIdentityResolution.remove(slot)
                 continue
             }
 
@@ -167,7 +180,7 @@ struct ReceiverSlotStateStore {
                 // An explicitly non-pointing device cannot inherit a stale
                 // mouse identity or hold up pointing-device discovery.
                 pairedIdentitiesBySlot.removeValue(forKey: slot)
-                slotsRequiringPointingIdentity.remove(slot)
+                slotsRequiringIdentityResolution.remove(slot)
                 continue
             }
 
@@ -177,9 +190,10 @@ struct ReceiverSlotStateStore {
                 pairedIdentitiesBySlot.removeValue(forKey: slot)
             }
 
-            if reportedKind?.isPointingDevice == true
-                || oldPresence == .disconnected && previousIdentity != nil {
-                slotsRequiringPointingIdentity.insert(slot)
+            if pairedIdentitiesBySlot[slot] == nil {
+                slotsRequiringIdentityResolution.insert(slot)
+            } else {
+                slotsRequiringIdentityResolution.remove(slot)
             }
         }
     }
@@ -187,7 +201,7 @@ struct ReceiverSlotStateStore {
     mutating func updateSlotIdentity(_ identity: ReceiverLogicalDeviceIdentity) {
         pairedIdentitiesBySlot[identity.slot] = identity
         slotPresenceBySlot[identity.slot] = .connected
-        slotsRequiringPointingIdentity.remove(identity.slot)
+        slotsRequiringIdentityResolution.remove(identity.slot)
     }
 
     func needsIdentityRefresh(slot: UInt8) -> Bool {
@@ -196,8 +210,8 @@ struct ReceiverSlotStateStore {
 
     /// A connected slot without an identity cannot be used as a stable route.
     /// Discovery must retry until its transient identity read succeeds.
-    var hasConnectedSlotMissingIdentity: Bool {
-        slotsRequiringPointingIdentity.contains { slot in
+    var hasUnresolvedConnectedSlot: Bool {
+        slotsRequiringIdentityResolution.contains { slot in
             slotPresenceBySlot[slot] == .connected && pairedIdentitiesBySlot[slot] == nil
         }
     }
@@ -498,17 +512,22 @@ private final class ReceiverContext {
             )
 
             let identities = currentPublishedIdentities()
-            let needsIdentityRefresh = hasConnectedSlotMissingIdentity()
-            if needsIdentityRefresh {
+            let hasUnresolvedConnectedSlot = hasUnresolvedConnectedSlot()
+            let identitiesToPublish = ReceiverConnectionEventPublication.identities(
+                afterEvent: identities,
+                hasUnresolvedConnectedSlot: hasUnresolvedConnectedSlot
+            )
+            if hasUnresolvedConnectedSlot {
                 // A reconnect identity read can fail transiently. Re-enter the
                 // existing pending-discovery path, which retries with backoff
                 // instead of keeping this incomplete slot in the ready state.
                 discoveryState = .pending
                 discoveryBackoff.reset()
                 publishUnavailable()
+                continue
             }
-            if identities != lastPublishedIdentities {
-                publish(identities)
+            if identitiesToPublish != lastPublishedIdentities {
+                publish(identitiesToPublish)
             }
         }
     }
@@ -662,8 +681,8 @@ private final class ReceiverContext {
         stateStore.needsIdentityRefresh(slot: slot)
     }
 
-    private func hasConnectedSlotMissingIdentity() -> Bool {
-        stateStore.hasConnectedSlotMissingIdentity
+    private func hasUnresolvedConnectedSlot() -> Bool {
+        stateStore.hasUnresolvedConnectedSlot
     }
 
     private func currentPublishedIdentities() -> [ReceiverLogicalDeviceIdentity] {
