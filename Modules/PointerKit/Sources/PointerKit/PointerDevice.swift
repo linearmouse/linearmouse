@@ -70,6 +70,18 @@ public enum PointerDeviceTransportName {
     public static let bluetoothLowEnergy = "Bluetooth Low Energy"
 }
 
+/// The run-loop mode used for every asynchronous `IOHIDDevice` callback.
+///
+/// AppKit switches the main run loop to its modal mode after an application
+/// returns `terminateLater`. Scheduling in the common modes keeps HID replies
+/// flowing during that bounded termination window. A single policy value is
+/// shared by scheduling and unscheduling so the two operations cannot drift.
+struct PointerDeviceRunLoopScheduling {
+    static let inputCallbacks = Self(mode: .commonModes)
+
+    let mode: CFRunLoopMode
+}
+
 public class PointerDevice {
     let client: IOHIDServiceClient
     let device: IOHIDDevice?
@@ -156,7 +168,11 @@ public class PointerDevice {
             IOHIDDeviceSetInputValueMatching(device, nil)
             let this = Unmanaged.passUnretained(self).toOpaque()
             IOHIDDeviceRegisterInputValueCallback(device, Self.inputValueCallback, this)
-            IOHIDDeviceScheduleWithRunLoop(device, runLoop, CFRunLoopMode.defaultMode.rawValue)
+            IOHIDDeviceScheduleWithRunLoop(
+                device,
+                runLoop,
+                PointerDeviceRunLoopScheduling.inputCallbacks.mode.rawValue
+            )
         }
     }
 
@@ -177,7 +193,11 @@ public class PointerDevice {
         invalidate()
 
         if let device {
-            IOHIDDeviceUnscheduleFromRunLoop(device, runLoop, CFRunLoopMode.defaultMode.rawValue)
+            IOHIDDeviceUnscheduleFromRunLoop(
+                device,
+                runLoop,
+                PointerDeviceRunLoopScheduling.inputCallbacks.mode.rawValue
+            )
             IOHIDDeviceClose(device, IOOptionBits(kIOHIDOptionsTypeNone))
         }
 
