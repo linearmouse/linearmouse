@@ -18,7 +18,6 @@ final class PointerDeviceSynchronousRequestTests: XCTestCase {
 
         DispatchQueue.global().async {
             let response = withSynchronousReportRequestGate(
-                gate,
                 until: {
                     lock.withLock {
                         shouldContinueCallCount += 1
@@ -28,6 +27,12 @@ final class PointerDeviceSynchronousRequestTests: XCTestCase {
                         }
                         return false
                     }
+                },
+                acquirePermit: {
+                    gate.wait(timeout: .now() + 0.01) == .success
+                },
+                releasePermit: {
+                    gate.signal()
                 },
                 perform: {
                     lock.withLock {
@@ -47,8 +52,65 @@ final class PointerDeviceSynchronousRequestTests: XCTestCase {
 
         XCTAssertFalse(lock.withLock { operationWasCalled })
         XCTAssertEqual(
-            withSynchronousReportRequestGate(gate, until: { true }) { Data([0x02]) },
+            withSynchronousReportRequestGate(
+                until: { true },
+                acquirePermit: { gate.wait(timeout: .now()) == .success },
+                releasePermit: { gate.signal() }
+            ) { Data([0x02]) },
             Data([0x02])
+        )
+    }
+
+    func testOwnerWaitHookLetsGateHolderReleaseBeforeRetry() {
+        let gate = DispatchSemaphore(value: 0)
+        let holderReady = expectation(description: "background request holds gate")
+        let ownerWaitHookRan = expectation(description: "owner wait hook ran")
+        let releaseHolder = DispatchSemaphore(value: 0)
+        let hookLock = NSLock()
+        var didRunOwnerWaitHook = false
+
+        DispatchQueue.global().async {
+            holderReady.fulfill()
+            _ = releaseHolder.wait(timeout: .now() + 1)
+            gate.signal()
+        }
+
+        wait(for: [holderReady], timeout: 1)
+        let response = withSynchronousReportRequestGate(
+            until: { true },
+            acquirePermit: {
+                if gate.wait(timeout: .now()) == .success {
+                    return true
+                }
+
+                let shouldRunHook = hookLock.withLock { () -> Bool in
+                    guard !didRunOwnerWaitHook else {
+                        return false
+                    }
+
+                    didRunOwnerWaitHook = true
+                    return true
+                }
+                if shouldRunHook {
+                    ownerWaitHookRan.fulfill()
+                    releaseHolder.signal()
+                }
+                return false
+            },
+            releasePermit: { gate.signal() }
+        ) {
+            Data([0x03])
+        }
+
+        XCTAssertEqual(response, Data([0x03]))
+        wait(for: [ownerWaitHookRan], timeout: 1)
+        XCTAssertEqual(
+            withSynchronousReportRequestGate(
+                until: { true },
+                acquirePermit: { gate.wait(timeout: .now()) == .success },
+                releasePermit: { gate.signal() }
+            ) { Data([0x04]) },
+            Data([0x04])
         )
     }
 }

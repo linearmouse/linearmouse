@@ -9,15 +9,16 @@ import PointerKitC
 /// cancellation check happens after `defer` is installed, so a cancellation
 /// racing with acquisition cannot leak a permit.
 func withSynchronousReportRequestGate(
-    _ gate: DispatchSemaphore,
     until shouldContinue: () -> Bool,
+    acquirePermit: () -> Bool,
+    releasePermit: () -> Void,
     perform operation: () -> Data?
 ) -> Data? {
     while shouldContinue() {
-        guard gate.wait(timeout: .now() + 0.01) == .success else {
+        guard acquirePermit() else {
             continue
         }
-        defer { gate.signal() }
+        defer { releasePermit() }
 
         guard shouldContinue() else {
             return nil
@@ -521,8 +522,13 @@ extension PointerDevice {
         }
 
         return withSynchronousReportRequestGate(
-            synchronousReportRequestGate,
-            until: shouldContinue
+            until: shouldContinue,
+            acquirePermit: {
+                self.acquireSynchronousReportRequestPermit()
+            },
+            releasePermit: {
+                self.synchronousReportRequestGate.signal()
+            }
         ) {
             guard ensureInputReportCallbackRegistered(minimumReportLength: max(report.count, maxInputReportSize ?? 0)),
                   valid
@@ -596,6 +602,22 @@ extension PointerDevice {
             pendingReportRequestLock.unlock()
             return response
         }
+    }
+
+    private func acquireSynchronousReportRequestPermit() -> Bool {
+        if synchronousReportRequestGate.wait(timeout: .now()) == .success {
+            return true
+        }
+
+        if CFEqual(CFRunLoopGetCurrent(), runLoop) {
+            // A background request can hold the gate while waiting for an
+            // input-report callback on this run loop. Process one turn before
+            // retrying instead of blocking the callback that releases it.
+            _ = CFRunLoopRunInMode(.defaultMode, 0.01, true)
+            return false
+        }
+
+        return synchronousReportRequestGate.wait(timeout: .now() + 0.01) == .success
     }
 
     public func performSynchronousOutputReportRequestOnce(
