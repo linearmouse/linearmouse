@@ -303,6 +303,13 @@ class Device {
         logitechReprogrammableControlsMonitor.stopForSleep(completion: completion)
     }
 
+    /// Final device teardown must not attempt HID++ I/O through an invalidated
+    /// transport.
+    func abandonLogitechControlsMonitoring() {
+        logitechControlsMonitorSubscriptions.removeAll()
+        logitechReprogrammableControlsMonitor?.abandon()
+    }
+
     /// Restores a persisted Logitech controls baseline even when normal
     /// mapping demand no longer keeps the monitor running.
     func restorePendingLogitechControlsForTeardown(completion: @escaping () -> Void) {

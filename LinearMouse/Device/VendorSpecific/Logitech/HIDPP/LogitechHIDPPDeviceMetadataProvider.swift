@@ -2305,6 +2305,7 @@ final class LogitechReprogrammableControlsMonitor {
         static let notificationTimeout: TimeInterval = 0.25
         static let initializationRetryInitialTimeout: TimeInterval = 2
         static let initializationRetryMaxTimeout: TimeInterval = 60
+        static let pendingTeardownRestoreTimeout: TimeInterval = 5
     }
 
     private struct ControlInfo {
@@ -2402,6 +2403,10 @@ final class LogitechReprogrammableControlsMonitor {
                 pending.removeAll()
                 generation &+= 1
             }
+        }
+
+        var hasPending: Bool {
+            lock.withLock { pending.values.contains { !$0.isEmpty } }
         }
     }
 
@@ -2553,16 +2558,44 @@ final class LogitechReprogrammableControlsMonitor {
         subscriptions.removeAll()
     }
 
+    /// Drops monitor ownership without attempting HID++ reporting cleanup.
+    /// This is for final device teardown, where the transport can no longer be
+    /// assumed to be valid and no completion barrier should retain the device.
+    func abandon() {
+        state.abandon()
+        releaseButtonIfNeeded()
+        subscriptions.removeAll()
+    }
+
     /// Restores any store-backed reporting baseline before a terminal
     /// teardown. This is deliberately independent from configuration demand:
     /// after sleep a monitor may be stopped even though a baseline still needs
     /// to be written back.
     func restorePendingForTeardown(completion: @escaping () -> Void) {
-        state.restorePendingForTeardown(
-            hasPendingBaselineForCurrentTarget(),
+        guard let restoreGeneration = state.restorePendingForTeardown(
+            hasPendingBaselineForCurrentTarget() || unkeyedRestoreStore.hasPending,
             makeWorkerThread: makeWorkerThread,
             completion: completion
-        )
+        ) else {
+            return
+        }
+
+        DispatchQueue.global(qos: .utility).asyncAfter(
+            deadline: .now() + Constants.pendingTeardownRestoreTimeout
+        ) { [weak self] in
+            guard let self,
+                  self.state.expirePendingTeardownRestore(restoreGeneration)
+            else {
+                return
+            }
+
+            os_log(
+                "Timed out restoring pending Logitech controls reporting: device=%{public}@",
+                log: Self.log,
+                type: .error,
+                String(describing: self.device)
+            )
+        }
     }
 
     /// A logical receiver target changed. Any unkeyed baseline belongs to the
@@ -4211,6 +4244,9 @@ final class LogitechReprogrammableControlsMonitorState {
     /// A terminal restore can outlive normal monitor demand. While set, the
     /// worker skips diversion and exits only after its pending baseline drains.
     private var restoresPendingForTeardown = false
+    /// Monotonically identifies teardown-restore requests so a delayed timeout
+    /// from an earlier request cannot cancel a newer worker.
+    private var pendingTeardownRestoreGeneration: UInt64 = 0
     private var hasEstablishedActiveTarget = false
     private var hasStoreBackedActiveTargetValue = false
 
@@ -4261,21 +4297,34 @@ final class LogitechReprogrammableControlsMonitorState {
         disable(completion: completion, allowingTeardownIO: nil)
     }
 
+    /// Final teardown has no safe target for HID++ I/O. Keep this distinct
+    /// from the sleep policy, which can selectively preserve a direct target.
+    func abandon() {
+        disable(completion: nil, allowingTeardownIO: false)
+        queue.sync {
+            restoresPendingForTeardown = false
+            pendingTeardownRestoreGeneration &+= 1
+        }
+    }
+
     /// Atomically upgrades a sleeping worker to a teardown-capable,
     /// restore-only worker and attaches its completion. If the worker has
     /// already stopped, a worker is created only when a stable baseline is
     /// still pending. In either case completion is retained until the worker
     /// observes that there is nothing left to restore.
+    @discardableResult
     func restorePendingForTeardown(
         _ hasPendingBaseline: Bool,
         makeWorkerThread: () -> Thread,
         completion: @escaping () -> Void
-    ) {
-        let (thread, completions) = queue.sync { () -> (Thread?, [() -> Void]) in
+    ) -> UInt64? {
+        let (thread, completions, generation) = queue.sync { () -> (Thread?, [() -> Void], UInt64?) in
             guard workerThread != nil || hasPendingBaseline else {
-                return (nil, [completion])
+                return (nil, [completion], nil)
             }
 
+            pendingTeardownRestoreGeneration &+= 1
+            let generation = pendingTeardownRestoreGeneration
             stopCompletions.append(completion)
             preventsWorkerRestart = true
             restoresPendingForTeardown = true
@@ -4284,18 +4333,62 @@ final class LogitechReprogrammableControlsMonitorState {
             reconfigurationRequest.reset()
 
             guard workerThread == nil else {
-                return (nil, [])
+                return (nil, [], generation)
             }
 
             let thread = makeWorkerThread()
             workerThread = thread
-            return (thread, [])
+            return (thread, [], generation)
         }
 
         reconfigurationSemaphore.signal()
         queue.sync { activeNotificationEndpoint }?.wake()
         thread?.start()
         dispatchStopCompletions(completions)
+        return generation
+    }
+
+    /// Stops a restore-only worker whose target never became reachable. The
+    /// baseline remains in its store, so a later lifecycle can retry it.
+    /// Returns false for an already-completed or superseded request.
+    @discardableResult
+    func expirePendingTeardownRestore(_ generation: UInt64) -> Bool {
+        let (didExpire, resources, completions) = queue.sync {
+            () -> (Bool, WorkerResources, [() -> Void]) in
+            guard restoresPendingForTeardown,
+                  generation == pendingTeardownRestoreGeneration
+            else {
+                return (false, (nil, nil, nil), [])
+            }
+
+            let resources = (workerThread, activeNotificationEndpoint, directDeviceReportObservationToken)
+            isEnabled = false
+            allowsTeardownIO = false
+            restoresPendingForTeardown = false
+            reconfigurationRequest.reset()
+            activeNotificationEndpoint = nil
+            directDeviceReportObservationToken = nil
+
+            guard workerThread == nil else {
+                return (true, resources, [])
+            }
+
+            let completions = stopCompletions
+            stopCompletions.removeAll()
+            preventsWorkerRestart = false
+            return (true, resources, completions)
+        }
+
+        guard didExpire else {
+            return false
+        }
+
+        reconfigurationSemaphore.signal()
+        resources.1?.wake()
+        resources.0?.cancel()
+        resources.2?.cancel()
+        dispatchStopCompletions(completions)
+        return true
     }
 
     func disable(
@@ -4335,8 +4428,8 @@ final class LogitechReprogrammableControlsMonitorState {
     }
 
     func workerDidStop(restartIfEnabled: Bool, makeWorkerThread: () -> Thread) {
-        let (thread, token, completions, releasesRestartBarrier) = queue.sync {
-            () -> (Thread?, ObservationToken?, [() -> Void], Bool) in
+        let (thread, token, completions, releasesRestartBarrier, barrierGeneration) = queue.sync {
+            () -> (Thread?, ObservationToken?, [() -> Void], Bool, UInt64?) in
             workerThread = nil
             hasEstablishedActiveTarget = false
             hasStoreBackedActiveTargetValue = false
@@ -4355,6 +4448,9 @@ final class LogitechReprogrammableControlsMonitorState {
                 isEnabled = false
                 allowsTeardownIO = false
                 reconfigurationRequest.reset()
+                let barrierGeneration = restoresPendingForTeardown
+                    ? pendingTeardownRestoreGeneration
+                    : nil
                 restoresPendingForTeardown = false
                 let completions = stopCompletions
                 stopCompletions.removeAll()
@@ -4362,18 +4458,28 @@ final class LogitechReprogrammableControlsMonitorState {
                 if !releasesRestartBarrier {
                     preventsWorkerRestart = false
                 }
-                return (nil, reportObservationToken, completions, releasesRestartBarrier)
+                return (
+                    nil,
+                    reportObservationToken,
+                    completions,
+                    releasesRestartBarrier,
+                    barrierGeneration
+                )
             }
 
             reconfigurationRequest.reset()
             let nextThread = makeWorkerThread()
             workerThread = nextThread
-            return (nextThread, reportObservationToken, [], false)
+            return (nextThread, reportObservationToken, [], false, nil)
         }
 
         token?.cancel()
         thread?.start()
-        dispatchStopCompletions(completions, releasesRestartBarrier: releasesRestartBarrier)
+        dispatchStopCompletions(
+            completions,
+            releasesRestartBarrier: releasesRestartBarrier,
+            expectedTeardownRestoreGeneration: barrierGeneration
+        )
     }
 
     func requestReconfiguration(forced: Bool = false) {
@@ -4496,7 +4602,8 @@ final class LogitechReprogrammableControlsMonitorState {
 
     private func dispatchStopCompletions(
         _ completions: [() -> Void],
-        releasesRestartBarrier: Bool = false
+        releasesRestartBarrier: Bool = false,
+        expectedTeardownRestoreGeneration: UInt64? = nil
     ) {
         guard !completions.isEmpty else {
             return
@@ -4505,6 +4612,10 @@ final class LogitechReprogrammableControlsMonitorState {
         DispatchQueue.main.async { [weak self] in
             if releasesRestartBarrier {
                 self?.queue.sync {
+                    if let expectedTeardownRestoreGeneration,
+                       expectedTeardownRestoreGeneration != self?.pendingTeardownRestoreGeneration {
+                        return
+                    }
                     self?.preventsWorkerRestart = false
                 }
             }
