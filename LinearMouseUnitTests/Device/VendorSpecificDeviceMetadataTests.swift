@@ -605,6 +605,37 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertTrue(currentChannel === newChannel)
     }
 
+    func testStoppedReceiverWorkerCannotAdoptOpenedChannel() {
+        let channel = TestSharedChannel()
+        var currentChannel: TestSharedChannel?
+
+        XCTAssertFalse(ReceiverWorkerChannelAdoption.adopt(
+            channel,
+            whileRunning: false,
+            currentChannel: &currentChannel
+        ))
+        XCTAssertNil(currentChannel)
+    }
+
+    func testRunningReceiverWorkerOnlyAdoptsIntoEmptyChannelSlot() {
+        let existingChannel = TestSharedChannel()
+        let replacementChannel = TestSharedChannel()
+        var currentChannel: TestSharedChannel?
+
+        XCTAssertTrue(ReceiverWorkerChannelAdoption.adopt(
+            existingChannel,
+            whileRunning: true,
+            currentChannel: &currentChannel
+        ))
+        XCTAssertTrue(currentChannel === existingChannel)
+        XCTAssertFalse(ReceiverWorkerChannelAdoption.adopt(
+            replacementChannel,
+            whileRunning: true,
+            currentChannel: &currentChannel
+        ))
+        XCTAssertTrue(currentChannel === existingChannel)
+    }
+
     func testParseConnectedDeviceCountReadsReceiverConnectionRegister() {
         XCTAssertEqual(
             LogitechHIDPPDeviceMetadataProvider.parseConnectedDeviceCount([0x10, 0xFF, 0x81, 0x02, 0x00, 0x01, 0x00]),

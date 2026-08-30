@@ -65,6 +65,20 @@ enum ReceiverWorkerPostCallAdmission {
     }
 }
 
+enum ReceiverWorkerChannelAdoption {
+    static func adopt<Channel: AnyObject>(
+        _ channel: Channel,
+        whileRunning isRunning: Bool,
+        currentChannel: inout Channel?
+    ) -> Bool {
+        guard isRunning, currentChannel == nil else {
+            return false
+        }
+        currentChannel = channel
+        return true
+    }
+}
+
 final class ReceiverMonitor {
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ReceiverMonitor")
     static let initialDiscoveryTimeout: TimeInterval = 3
@@ -384,14 +398,14 @@ private final class ReceiverContext {
             }
 
             if currentChannelSnapshot() == nil {
-                guard let admitted = ReceiverWorkerPostCallAdmission.admit(
-                    { provider.openReceiverChannel(for: device.pointerDevice) },
-                    whileRunning: shouldContinueRunning
-                ) else {
+                let channel = provider.openReceiverChannel(for: device.pointerDevice)
+                if let channel {
+                    guard adoptCurrentChannelIfRunning(channel) else {
+                        break
+                    }
+                } else if !shouldContinueRunning() {
                     break
                 }
-                let channel = admitted.value
-                setCurrentChannel(channel)
             }
 
             guard let receiverChannel = currentChannelSnapshot() else {
@@ -769,6 +783,16 @@ private final class ReceiverContext {
         stateLock.lock()
         currentChannel = channel
         stateLock.unlock()
+    }
+
+    private func adoptCurrentChannelIfRunning(_ channel: LogitechReceiverChannel) -> Bool {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        return ReceiverWorkerChannelAdoption.adopt(
+            channel,
+            whileRunning: isRunning,
+            currentChannel: &currentChannel
+        )
     }
 
     private func invalidateCurrentChannel(_ channel: LogitechReceiverChannel) {
