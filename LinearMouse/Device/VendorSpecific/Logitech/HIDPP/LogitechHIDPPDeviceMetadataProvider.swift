@@ -408,6 +408,62 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         return identities[0].slot
     }
 
+    func receiverSlot(
+        for device: VendorSpecificDeviceContext,
+        discovery: ReceiverPointingDeviceDiscovery
+    ) -> UInt8? {
+        guard let expectedConnectedDeviceCount = discovery.expectedConnectedDeviceCount else {
+            // Explicit compatibility path for receivers without a usable
+            // connected-count register.
+            return receiverSlot(for: device, identities: discovery.identities)
+        }
+        guard expectedConnectedDeviceCount > 0 else {
+            return nil
+        }
+
+        let activeSlots = Set(discovery.connectionSnapshots.compactMap { slot, snapshot in
+            snapshot.isConnected ? slot : nil
+        }).union(discovery.liveReachableSlots)
+        let activeKinds = Dictionary(uniqueKeysWithValues: activeSlots.compactMap { slot -> (
+            UInt8,
+            ReceiverLogicalDeviceKind
+        )? in
+            guard let kind = resolveReceiverLogicalDeviceKind(
+                snapshotRaw: discovery.connectionSnapshots[slot]?.kind,
+                pairingRaw: discovery.observedSlotKinds[slot]
+            ) else {
+                return nil
+            }
+            return (slot, kind)
+        })
+        let activeIdentities = discovery.identities.filter { activeSlots.contains($0.slot) }
+
+        let normalizedSerial = normalizeSerial(device.serialNumber)
+        let serialMatches = activeIdentities.filter {
+            normalizedSerial != nil && normalizeSerial($0.serialNumber) == normalizedSerial
+        }
+        if let serialMatch = uniqueIdentityMatch(serialMatches, matching: { _ in true }) {
+            guard activeKinds[serialMatch.slot]?.isPointingDevice == true else {
+                return nil
+            }
+            return serialMatch.slot
+        }
+
+        let pointingActiveSlots = Set(activeKinds.compactMap { slot, kind in
+            kind.isPointingDevice ? slot : nil
+        })
+        let activeIdentitySlots = Set(activeIdentities.map(\.slot))
+        guard discovery.inventoryAvailable,
+              activeSlots.count == expectedConnectedDeviceCount,
+              activeKinds.count == activeSlots.count,
+              activeIdentitySlots == pointingActiveSlots
+        else {
+            return nil
+        }
+
+        return receiverSlot(for: device, identities: activeIdentities)
+    }
+
     func openReceiverChannel(for device: VendorSpecificDeviceContext) -> LogitechReceiverChannel? {
         guard device.transport == PointerDeviceTransportName.usb,
               let locationID = device.locationID
@@ -654,37 +710,40 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         let activeSlots = Set(connectionSnapshots.compactMap { slot, snapshot in
             snapshot.isConnected ? slot : nil
         }).union(slots.filter(\.hasLiveMetadata).map(\.slot))
-        let completenessCandidates = slots.filter { candidate in
-            guard activeSlots.contains(candidate.slot) else {
-                return false
+        let candidatesBySlot = Dictionary(uniqueKeysWithValues: slots.map { ($0.slot, $0) })
+        let resolvedKinds = Dictionary(uniqueKeysWithValues: activeSlots.compactMap { slot -> (
+            UInt8,
+            ReceiverLogicalDeviceKind
+        )? in
+            guard let kind = resolveReceiverLogicalDeviceKind(
+                snapshotRaw: connectionSnapshots[slot]?.kind,
+                pairingRaw: candidatesBySlot[slot]?.kind
+            ) else {
+                return nil
             }
+            return (slot, kind)
+        })
 
-            guard let snapshotKind = connectionSnapshots[candidate.slot]?.kind
-                .flatMap(ReceiverLogicalDeviceKind.init(rawValue:))
+        let pointingSlotsWithCandidates = Set(activeSlots.filter { slot in
+            guard resolvedKinds[slot]?.isPointingDevice == true,
+                  let candidateKind = candidatesBySlot[slot]
+                  .flatMap({ ReceiverLogicalDeviceKind(rawValue: $0.kind) })
             else {
-                return true
-            }
-
-            guard let candidateKind = ReceiverLogicalDeviceKind(rawValue: candidate.kind) else {
                 return false
             }
-            return candidateKind.isPointingDevice == snapshotKind.isPointingDevice
-        }
+            return candidateKind.isPointingDevice
+        })
 
         let desiredKinds = preferredReceiverDeviceKinds(for: device)
-        let routeCandidates = completenessCandidates.filter { candidate in
+        let routeCandidates = slots.filter { candidate in
+            guard pointingSlotsWithCandidates.contains(candidate.slot) else {
+                return false
+            }
             guard !desiredKinds.isEmpty else {
                 return true
             }
 
-            let snapshotKind = connectionSnapshots[candidate.slot]?.kind
-                .flatMap(ReceiverLogicalDeviceKind.init(rawValue:))
-            let candidateKind = ReceiverLogicalDeviceKind(rawValue: candidate.kind)
-            let effectiveKind = snapshotKind ?? candidateKind
-            guard let effectiveKind else {
-                return true
-            }
-            return desiredKinds.contains(effectiveKind.rawValue)
+            return desiredKinds.contains(candidate.kind)
         }
 
         let normalizedSerial = normalizeSerial(device.serialNumber)
@@ -697,10 +756,12 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             return serialMatch
         }
 
-        let activeCandidateSlots = Set(completenessCandidates.map(\.slot))
         guard inventoryAvailable,
               activeSlots.count == expectedConnectedDeviceCount,
-              activeCandidateSlots == activeSlots
+              resolvedKinds.count == activeSlots.count,
+              pointingSlotsWithCandidates == Set(resolvedKinds.compactMap { slot, kind in
+                  kind.isPointingDevice ? slot : nil
+              })
         else {
             return nil
         }
@@ -1366,9 +1427,10 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             return nil
         }
 
-        let kind = connectionSnapshot?.kind
-            ?? pairingResponse.flatMap(Self.parseReceiverKind)
-            ?? 0
+        let kind = resolveReceiverLogicalDeviceKind(
+            snapshotRaw: connectionSnapshot?.kind,
+            pairingRaw: pairingResponse.flatMap(Self.parseReceiverKind)
+        )?.rawValue ?? 0
         let routedTransport = HIDPPTransport(device: self, deviceIndex: slot)
         let routedName = routedTransport.flatMap { transport in
             metadataProvider.readFriendlyName(using: transport) ?? metadataProvider.readName(using: transport)

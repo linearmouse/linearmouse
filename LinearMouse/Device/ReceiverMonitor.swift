@@ -153,12 +153,10 @@ struct ReceiverSlotStateStore {
             UInt8,
             ReceiverLogicalDeviceKind
         )? in
-            let snapshotKind = discovery.connectionSnapshots[slot]?
-                .kind
-                .flatMap(ReceiverLogicalDeviceKind.init(rawValue:))
-            let observedKind = discovery.observedSlotKinds[slot]
-                .flatMap(ReceiverLogicalDeviceKind.init(rawValue:))
-            guard let kind = snapshotKind ?? observedKind
+            guard let kind = resolveReceiverLogicalDeviceKind(
+                snapshotRaw: discovery.connectionSnapshots[slot]?.kind,
+                pairingRaw: discovery.observedSlotKinds[slot]
+            )
             else {
                 return nil
             }

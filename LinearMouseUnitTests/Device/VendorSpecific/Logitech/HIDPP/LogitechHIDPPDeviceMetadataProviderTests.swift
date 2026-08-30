@@ -160,6 +160,62 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         ))
     }
 
+    func testKnownKeyboardSnapshotDoesNotBlockMouseRouteWhenCandidateIsStale() throws {
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+
+        let candidate = try XCTUnwrap(provider.receiverSlotCandidate(
+            for: mouseDevice(),
+            slots: [
+                slot(slot: 1, kind: ReceiverLogicalDeviceKind.mouse.rawValue, name: "Mouse"),
+                slot(slot: 2, kind: ReceiverLogicalDeviceKind.mouse.rawValue, name: "Stale Mouse")
+            ],
+            connectionSnapshots: [
+                1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue),
+                2: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.keyboard.rawValue)
+            ],
+            expectedConnectedDeviceCount: 2,
+            inventoryAvailable: true
+        ))
+
+        XCTAssertEqual(candidate.slot, 1)
+    }
+
+    func testKnownCountKindResolutionAcceptsZeroMarkerAndRejectsUnsupportedKind() throws {
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+        let slots = [slot(slot: 1, kind: ReceiverLogicalDeviceKind.mouse.rawValue, name: "Mouse")]
+
+        let zeroMarker = try XCTUnwrap(provider.receiverSlotCandidate(
+            for: mouseDevice(),
+            slots: slots,
+            connectionSnapshots: [1: .init(isConnected: true, kind: 0)],
+            expectedConnectedDeviceCount: 1,
+            inventoryAvailable: true
+        ))
+        XCTAssertEqual(zeroMarker.slot, 1)
+
+        XCTAssertNil(provider.receiverSlotCandidate(
+            for: mouseDevice(),
+            slots: slots,
+            connectionSnapshots: [1: .init(isConnected: true, kind: 0x06)],
+            expectedConnectedDeviceCount: 1,
+            inventoryAvailable: true
+        ))
+    }
+
+    func testKnownCountKindResolutionAcceptsNilSnapshotWithKnownCandidate() throws {
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+
+        let candidate = try XCTUnwrap(provider.receiverSlotCandidate(
+            for: mouseDevice(),
+            slots: [slot(slot: 1, kind: ReceiverLogicalDeviceKind.mouse.rawValue, name: "Mouse")],
+            connectionSnapshots: [1: .init(isConnected: true, kind: nil)],
+            expectedConnectedDeviceCount: 1,
+            inventoryAvailable: true
+        ))
+
+        XCTAssertEqual(candidate.slot, 1)
+    }
+
     func testCompleteMouseAndKeyboardInventoryRoutesOnlyMouseCandidate() throws {
         let provider = LogitechHIDPPDeviceMetadataProvider()
 
@@ -226,6 +282,40 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         XCTAssertEqual(ReceiverReadyCountDisposition.resolve(previousCount: 2, currentCount: 2), .stayReady)
         XCTAssertEqual(ReceiverReadyCountDisposition.resolve(previousCount: 2, currentCount: 1), .enterPending)
         XCTAssertEqual(ReceiverReadyCountDisposition.resolve(previousCount: 2, currentCount: nil), .stayReady)
+    }
+
+    func testBoltOnDemandDiscoveryRejectsPartialSingletonAndAllowsCompleteInventory() throws {
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+        let identity = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 1,
+            slot: 1,
+            kind: .mouse,
+            name: "Mouse",
+            serialNumber: nil,
+            productID: nil,
+            batteryLevel: nil
+        )
+        let partial = LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery(
+            identities: [identity],
+            connectionSnapshots: [1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)],
+            liveReachableSlots: [1],
+            expectedConnectedDeviceCount: 2,
+            inventoryAvailable: true,
+            observedSlotKinds: [1: ReceiverLogicalDeviceKind.mouse.rawValue]
+        )
+
+        XCTAssertNil(provider.receiverSlot(for: mouseDevice(), discovery: partial))
+
+        let complete = LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery(
+            identities: [identity],
+            connectionSnapshots: [1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)],
+            liveReachableSlots: [1],
+            expectedConnectedDeviceCount: 1,
+            inventoryAvailable: true,
+            observedSlotKinds: [1: ReceiverLogicalDeviceKind.mouse.rawValue]
+        )
+
+        XCTAssertEqual(try XCTUnwrap(provider.receiverSlot(for: mouseDevice(), discovery: complete)), 1)
     }
 
     func testCancelledCommittedCallbackTransactionDrainsItsResponse() {

@@ -89,9 +89,10 @@ extension LogitechReceiverMonitoringChannel {
         let batteryLevel = routedTransport.flatMap {
             metadataProvider.readReceiverBatteryLevel(using: $0)
         }
-        let kind = connectionSnapshot?.kind
-            ?? pairingResponse.flatMap { Self.parseBoltReceiverKind($0.bytes) }
-            ?? 0
+        let kind = resolveReceiverLogicalDeviceKind(
+            snapshotRaw: connectionSnapshot?.kind,
+            pairingRaw: pairingResponse.flatMap { Self.parseBoltReceiverKind($0.bytes) }
+        )?.rawValue ?? 0
         let name = routedName ?? nameResponse.flatMap { Self.parseBoltReceiverName($0.bytes) }
 
         return .init(

@@ -37,6 +37,20 @@ enum ReceiverLogicalDeviceKind: UInt8, Hashable {
     }
 }
 
+/// HID++ uses zero as an unknown device-type marker in some connection
+/// snapshots. A nonzero value that is not modelled is authoritative but
+/// unsupported, so it must not inherit a pairing type.
+func resolveReceiverLogicalDeviceKind(
+    snapshotRaw: UInt8?,
+    pairingRaw: UInt8?
+) -> ReceiverLogicalDeviceKind? {
+    if let snapshotRaw, snapshotRaw != 0 {
+        return ReceiverLogicalDeviceKind(rawValue: snapshotRaw)
+    }
+
+    return pairingRaw.flatMap(ReceiverLogicalDeviceKind.init(rawValue:))
+}
+
 struct ReceiverLogicalDeviceIdentity: Hashable {
     let receiverLocationID: Int
     let slot: UInt8

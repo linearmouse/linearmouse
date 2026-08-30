@@ -153,7 +153,7 @@ enum LogitechHIDPPFeatureTargetResolver {
             return provider.receiverSlot(for: device, using: receiverChannel)
         case .bolt:
             let discovery = provider.receiverPointingDeviceDiscovery(for: device, using: receiverChannel)
-            return provider.receiverSlot(for: device, identities: discovery.identities)
+            return provider.receiverSlot(for: device, discovery: discovery)
         case nil:
             return provider.receiverSlot(for: device, using: receiverChannel)
         }
