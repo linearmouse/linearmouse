@@ -136,7 +136,8 @@ extension AppDelegate {
             self?.stop(
                 restoringHighResolutionWheel: false,
                 restoringLogitechControls: false,
-                applyingSleepHiResPolicy: true
+                applyingSleepHiResPolicy: true,
+                controlsTeardownPolicy: .sleepPreserve
             )
         }
 
@@ -186,6 +187,7 @@ extension AppDelegate {
         restoringHighResolutionWheel: Bool = true,
         restoringLogitechControls: Bool = true,
         applyingSleepHiResPolicy: Bool = false,
+        controlsTeardownPolicy: DeviceManagerControlsTeardownPolicy? = nil,
         completion: (() -> Void)? = nil
     ) {
         BatteryDeviceMonitor.shared.disable()
@@ -193,6 +195,7 @@ extension AppDelegate {
             restoringHighResolutionWheel: restoringHighResolutionWheel,
             restoringLogitechControls: restoringLogitechControls,
             applyingSleepHiResPolicy: applyingSleepHiResPolicy,
+            controlsTeardownPolicy: controlsTeardownPolicy,
             completion: completion
         )
         GlobalEventTap.shared.stop()

@@ -37,7 +37,8 @@ final class DeviceLifecycleAdmissionTests: XCTestCase {
         var intent = DeviceManagerStopIntent(
             restoringHighResolutionWheel: false,
             restoringLogitechControls: false,
-            applyingSleepHiResPolicy: true
+            applyingSleepHiResPolicy: true,
+            controlsTeardownPolicy: .sleepPreserve
         )
 
         intent.merge(.init(
@@ -47,9 +48,8 @@ final class DeviceLifecycleAdmissionTests: XCTestCase {
         ))
 
         XCTAssertTrue(intent.restoresHighResolutionWheel)
-        XCTAssertTrue(intent.restoresLogitechControls)
         XCTAssertFalse(intent.appliesSleepHiResPolicy)
-        XCTAssertFalse(intent.appliesSleepControlsPolicy)
+        XCTAssertEqual(intent.controlsTeardownPolicy, .restore)
     }
 
     func testSleepCannotDowngradeTerminalRestoreIntent() {
@@ -66,16 +66,16 @@ final class DeviceLifecycleAdmissionTests: XCTestCase {
         ))
 
         XCTAssertTrue(intent.restoresHighResolutionWheel)
-        XCTAssertTrue(intent.restoresLogitechControls)
         XCTAssertFalse(intent.appliesSleepHiResPolicy)
-        XCTAssertFalse(intent.appliesSleepControlsPolicy)
+        XCTAssertEqual(intent.controlsTeardownPolicy, .restore)
     }
 
     func testSleepControlsCompletionCannotFinishAfterTerminalUpgrade() {
         let sleep = DeviceManagerStopIntent(
             restoringHighResolutionWheel: false,
             restoringLogitechControls: false,
-            applyingSleepHiResPolicy: true
+            applyingSleepHiResPolicy: true,
+            controlsTeardownPolicy: .sleepPreserve
         )
         var terminal = sleep
         terminal.merge(.init(
@@ -85,13 +85,13 @@ final class DeviceLifecycleAdmissionTests: XCTestCase {
         ))
 
         var barrier = DeviceManagerControlsStopBarrier()
-        XCTAssertEqual(barrier.startNeeded(for: sleep), .sleep)
-        barrier.complete(.sleep)
+        XCTAssertEqual(barrier.startNeeded(for: sleep), .sleepPreserve)
+        barrier.complete(.sleepPreserve)
         XCTAssertFalse(barrier.isSatisfied(for: terminal))
 
-        XCTAssertEqual(barrier.startNeeded(for: terminal), .normal)
+        XCTAssertEqual(barrier.startNeeded(for: terminal), .restore)
         XCTAssertFalse(barrier.isSatisfied(for: terminal))
-        barrier.complete(.normal)
+        barrier.complete(.restore)
         XCTAssertTrue(barrier.isSatisfied(for: terminal))
     }
 
@@ -105,13 +105,43 @@ final class DeviceLifecycleAdmissionTests: XCTestCase {
         merged.merge(.init(
             restoringHighResolutionWheel: false,
             restoringLogitechControls: false,
-            applyingSleepHiResPolicy: true
+            applyingSleepHiResPolicy: true,
+            controlsTeardownPolicy: .sleepPreserve
         ))
 
         var barrier = DeviceManagerControlsStopBarrier()
-        XCTAssertEqual(barrier.startNeeded(for: terminal), .normal)
+        XCTAssertEqual(barrier.startNeeded(for: terminal), .restore)
         XCTAssertNil(barrier.startNeeded(for: merged))
-        barrier.complete(.normal)
+        barrier.complete(.restore)
         XCTAssertTrue(barrier.isSatisfied(for: merged))
+    }
+
+    func testAbandonDoesNotCreateAnAsynchronousControlsBarrier() {
+        let abandon = DeviceManagerStopIntent(
+            restoringHighResolutionWheel: false,
+            restoringLogitechControls: false,
+            applyingSleepHiResPolicy: false
+        )
+
+        XCTAssertEqual(abandon.controlsTeardownPolicy, .abandon)
+
+        var barrier = DeviceManagerControlsStopBarrier()
+        XCTAssertEqual(barrier.startNeeded(for: abandon), .abandon)
+        barrier.complete(.abandon)
+        XCTAssertTrue(barrier.isSatisfied(for: abandon))
+        XCTAssertNil(barrier.startNeeded(for: abandon))
+    }
+
+    func testTerminalControlsPolicyUsesRestorePendingAdmission() {
+        let terminal = DeviceManagerStopIntent(
+            restoringHighResolutionWheel: true,
+            restoringLogitechControls: true,
+            applyingSleepHiResPolicy: false
+        )
+
+        var barrier = DeviceManagerControlsStopBarrier()
+        XCTAssertEqual(terminal.controlsTeardownPolicy, .restore)
+        XCTAssertEqual(barrier.startNeeded(for: terminal), .restore)
+        XCTAssertFalse(barrier.isSatisfied(for: terminal))
     }
 }

@@ -18,34 +18,43 @@ enum DeviceManagerLifecycleState: Equatable {
     }
 }
 
+enum DeviceManagerControlsTeardownPolicy: Int, Equatable {
+    /// Drop monitor ownership without any HID++ reporting I/O.
+    case abandon
+    /// Preserve a store-backed baseline across sleep without restoring it.
+    case sleepPreserve
+    /// Restore every pending baseline before invalidating PointerDevice.
+    case restore
+}
+
 /// The strongest teardown request received for the current observation
-/// lifetime.  Sleep is a preservation policy, not a terminal outcome: once a
+/// lifetime. Sleep is a preservation policy, not a terminal outcome: once a
 /// caller asks to restore hardware, a later sleep notification must never
 /// weaken that request.
 struct DeviceManagerStopIntent: Equatable {
     var restoresHighResolutionWheel: Bool
-    var restoresLogitechControls: Bool
+    private(set) var controlsTeardownPolicy: DeviceManagerControlsTeardownPolicy
     private(set) var appliesSleepHiResPolicy: Bool
-    private(set) var appliesSleepControlsPolicy: Bool
 
     init(
         restoringHighResolutionWheel: Bool,
         restoringLogitechControls: Bool,
-        applyingSleepHiResPolicy: Bool
+        applyingSleepHiResPolicy: Bool,
+        controlsTeardownPolicy: DeviceManagerControlsTeardownPolicy? = nil
     ) {
         restoresHighResolutionWheel = restoringHighResolutionWheel
-        restoresLogitechControls = restoringLogitechControls
+        self.controlsTeardownPolicy = controlsTeardownPolicy
+            ?? (restoringLogitechControls ? .restore : .abandon)
         appliesSleepHiResPolicy = applyingSleepHiResPolicy && !restoringHighResolutionWheel
-        appliesSleepControlsPolicy = !restoringLogitechControls
     }
 
     mutating func merge(_ other: Self) {
         restoresHighResolutionWheel = restoresHighResolutionWheel || other.restoresHighResolutionWheel
-        restoresLogitechControls = restoresLogitechControls || other.restoresLogitechControls
+        if other.controlsTeardownPolicy.rawValue > controlsTeardownPolicy.rawValue {
+            controlsTeardownPolicy = other.controlsTeardownPolicy
+        }
         appliesSleepHiResPolicy = (appliesSleepHiResPolicy || other.appliesSleepHiResPolicy)
             && !restoresHighResolutionWheel
-        appliesSleepControlsPolicy = (appliesSleepControlsPolicy || other.appliesSleepControlsPolicy)
-            && !restoresLogitechControls
     }
 }
 
@@ -54,42 +63,59 @@ struct DeviceManagerStopIntent: Equatable {
 /// upgraded normal-restore request.
 struct DeviceManagerControlsStopBarrier: Equatable {
     enum Start: Equatable {
-        case sleep
-        case normal
+        case abandon
+        case sleepPreserve
+        case restore
     }
 
+    private(set) var abandonCompleted = false
     private(set) var sleepStarted = false
     private(set) var sleepCompleted = false
-    private(set) var normalStarted = false
-    private(set) var normalCompleted = false
+    private(set) var restoreStarted = false
+    private(set) var restoreCompleted = false
 
     mutating func startNeeded(for intent: DeviceManagerStopIntent) -> Start? {
-        if intent.restoresLogitechControls {
-            guard !normalStarted else {
+        switch intent.controlsTeardownPolicy {
+        case .abandon:
+            guard !abandonCompleted else {
                 return nil
             }
-            normalStarted = true
-            return .normal
+            return .abandon
+        case .sleepPreserve:
+            guard !sleepStarted else {
+                return nil
+            }
+            sleepStarted = true
+            return .sleepPreserve
+        case .restore:
+            guard !restoreStarted else {
+                return nil
+            }
+            restoreStarted = true
+            return .restore
         }
-
-        guard !sleepStarted else {
-            return nil
-        }
-        sleepStarted = true
-        return .sleep
     }
 
     mutating func complete(_ start: Start) {
         switch start {
-        case .sleep:
+        case .abandon:
+            abandonCompleted = true
+        case .sleepPreserve:
             sleepCompleted = true
-        case .normal:
-            normalCompleted = true
+        case .restore:
+            restoreCompleted = true
         }
     }
 
     func isSatisfied(for intent: DeviceManagerStopIntent) -> Bool {
-        intent.restoresLogitechControls ? normalCompleted : sleepCompleted
+        switch intent.controlsTeardownPolicy {
+        case .abandon:
+            abandonCompleted
+        case .sleepPreserve:
+            sleepCompleted
+        case .restore:
+            restoreCompleted
+        }
     }
 }
 
@@ -168,12 +194,14 @@ class DeviceManager: ObservableObject {
         restoringHighResolutionWheel: Bool = true,
         restoringLogitechControls: Bool = true,
         applyingSleepHiResPolicy: Bool = false,
+        controlsTeardownPolicy: DeviceManagerControlsTeardownPolicy? = nil,
         completion: (() -> Void)? = nil
     ) {
         let requestedIntent = DeviceManagerStopIntent(
             restoringHighResolutionWheel: restoringHighResolutionWheel,
             restoringLogitechControls: restoringLogitechControls,
-            applyingSleepHiResPolicy: applyingSleepHiResPolicy
+            applyingSleepHiResPolicy: applyingSleepHiResPolicy,
+            controlsTeardownPolicy: controlsTeardownPolicy
         )
         switch state {
         case .stopped:
@@ -225,11 +253,22 @@ class DeviceManager: ObservableObject {
 
     private func startControlsBarrierIfNeeded() {
         guard let intent = stopIntent,
-              let start = controlsStopBarrier.startNeeded(for: intent) else {
+              let start = controlsStopBarrier.startNeeded(for: intent)
+        else {
+            attemptFinishStop()
             return
         }
 
         let devices = Array(pointerDeviceToDevice.values)
+        if start == .abandon {
+            for device in devices {
+                device.abandonLogitechControlsMonitoring()
+            }
+            controlsStopBarrier.complete(.abandon)
+            attemptFinishStop()
+            return
+        }
+
         let group = DispatchGroup()
         for device in devices {
             group.enter()
@@ -237,10 +276,12 @@ class DeviceManager: ObservableObject {
                 group.leave()
             }
             switch start {
-            case .sleep:
+            case .abandon:
+                break
+            case .sleepPreserve:
                 device.stopLogitechControlsMonitoringForSleep(completion: completion)
-            case .normal:
-                device.disableLogitechControlsMonitoring(completion: completion)
+            case .restore:
+                device.restorePendingLogitechControlsForTeardown(completion: completion)
             }
         }
         group.notify(queue: .main) { [weak self] in
