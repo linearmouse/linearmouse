@@ -135,6 +135,70 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
         }
     }
 
+    func testTargetInvalidationPermanentlyRevokesOldWorkerTeardownIO() {
+        let state = LogitechReprogrammableControlsMonitorState()
+        var invalidatedOwnership = false
+        var madeReplacementWorker = false
+
+        state.enable { Thread {} }
+        state.invalidateTarget {
+            invalidatedOwnership = true
+        }
+
+        XCTAssertTrue(invalidatedOwnership)
+        XCTAssertFalse(state.shouldAllowTeardownIO)
+
+        state.enable {
+            madeReplacementWorker = true
+            return Thread {}
+        }
+        XCTAssertFalse(madeReplacementWorker)
+        XCTAssertFalse(state.shouldAllowTeardownIO)
+
+        state.workerDidStop(restartIfEnabled: true) {
+            madeReplacementWorker = true
+            return Thread {}
+        }
+        XCTAssertTrue(madeReplacementWorker)
+        XCTAssertTrue(state.shouldAllowTeardownIO)
+
+        state.disable()
+        state.workerDidStop(restartIfEnabled: false) { Thread {} }
+    }
+
+    func testPendingRestoreWaitsForInvalidWorkerThenAdmitsReplacementTarget() {
+        let state = LogitechReprogrammableControlsMonitorState()
+        let restored = expectation(description: "replacement target restore completed")
+        var madeReplacementWorker = false
+
+        state.enable { Thread {} }
+        state.invalidateTarget {}
+        let request = state.restorePendingForTeardown(
+            true,
+            makeWorkerThread: {
+                madeReplacementWorker = true
+                return Thread {}
+            },
+            completion: {
+                restored.fulfill()
+            }
+        )
+
+        XCTAssertNotNil(request)
+        XCTAssertFalse(madeReplacementWorker)
+        XCTAssertFalse(state.shouldAllowTeardownIO)
+
+        state.workerDidStop(restartIfEnabled: true) {
+            madeReplacementWorker = true
+            return Thread {}
+        }
+
+        XCTAssertTrue(madeReplacementWorker)
+        XCTAssertTrue(state.shouldAllowTeardownIO)
+        state.workerDidStop(restartIfEnabled: false) { Thread {} }
+        wait(for: [restored], timeout: 1)
+    }
+
     func testRestorePendingForTeardownUpgradesSleepingWorkerAtomically() {
         let state = LogitechReprogrammableControlsMonitorState()
         let restored = expectation(description: "pending restore drained")

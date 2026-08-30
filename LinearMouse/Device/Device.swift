@@ -186,9 +186,11 @@ class Device {
         let update = logitechSession.updateDiscovery(discovery)
         promoteHiResWheelBaselineIfPossible()
         if update.hardwareTargetChanged {
-            logitechReprogrammableControlsMonitor?.invalidateUnkeyedBaselinesForTargetChange()
+            logitechReprogrammableControlsMonitor?.invalidateTarget()
         }
-        if update.candidateAvailabilityChanged, !update.hasCandidates {
+        if !update.hardwareTargetChanged,
+           update.candidateAvailabilityChanged,
+           !update.hasCandidates {
             updateLogitechControlsMonitorRunning()
         }
         return update.hardwareTargetChanged

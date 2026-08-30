@@ -2611,10 +2611,14 @@ final class LogitechReprogrammableControlsMonitor {
         }
     }
 
-    /// A logical receiver target changed. Any unkeyed baseline belongs to the
-    /// previous target and must never be written back by its retiring worker.
-    func invalidateUnkeyedBaselinesForTargetChange() {
-        unkeyedRestoreStore.invalidateAll()
+    /// A logical receiver target changed. The retiring worker must never write
+    /// its baseline through a receiver slot that may now address a replacement.
+    /// Keep demand observation alive so a fresh worker can bind the new target.
+    func invalidateTarget() {
+        state.invalidateTarget {
+            unkeyedRestoreStore.invalidateAll()
+        }
+        releaseButtonIfNeeded()
     }
 
     func needsRestoreWorkerForCurrentTarget() -> Bool {
@@ -4263,6 +4267,10 @@ final class LogitechReprogrammableControlsMonitorState {
 
     private var isEnabled = false
     private var workerThread: Thread?
+    /// Teardown I/O belongs to one worker target lifetime. Once invalidated it
+    /// can only become valid again when that worker has fully stopped and a
+    /// replacement worker is created.
+    private var workerTargetIsValid = false
     private weak var activeNotificationEndpoint: HIDPPNotificationHandling?
     private var directDeviceReportObservationToken: ObservationToken?
     private var reconfigurationRequest = LogitechMonitorReconfigurationRequest()
@@ -4288,7 +4296,7 @@ final class LogitechReprogrammableControlsMonitorState {
     }
 
     var shouldAllowTeardownIO: Bool {
-        queue.sync { workerThread != nil && allowsTeardownIO }
+        queue.sync { workerThread != nil && workerTargetIsValid && allowsTeardownIO }
     }
 
     var isRestoringPendingForTeardown: Bool {
@@ -4298,6 +4306,7 @@ final class LogitechReprogrammableControlsMonitorState {
     var hasActiveUnkeyedTarget: Bool {
         queue.sync {
             workerThread != nil
+                && workerTargetIsValid
                 && hasEstablishedActiveTarget
                 && !hasStoreBackedActiveTargetValue
         }
@@ -4310,13 +4319,15 @@ final class LogitechReprogrammableControlsMonitorState {
             }
 
             isEnabled = true
-            allowsTeardownIO = true
             guard workerThread == nil else {
+                allowsTeardownIO = workerTargetIsValid
                 return nil
             }
 
             let thread = makeWorkerThread()
             workerThread = thread
+            workerTargetIsValid = true
+            allowsTeardownIO = true
             return thread
         }
 
@@ -4352,6 +4363,27 @@ final class LogitechReprogrammableControlsMonitorState {
         }
     }
 
+    /// Permanently revokes teardown I/O for the current worker target. The
+    /// invalidation closure runs in the same state transaction, before the old
+    /// worker can observe cancellation or a replacement worker can be created.
+    func invalidateTarget(invalidateOwnership: () -> Void) {
+        let resources = queue.sync { () -> WorkerResources in
+            let resources = (workerThread, activeNotificationEndpoint, directDeviceReportObservationToken)
+            workerTargetIsValid = false
+            allowsTeardownIO = false
+            reconfigurationRequest.reset()
+            activeNotificationEndpoint = nil
+            directDeviceReportObservationToken = nil
+            invalidateOwnership()
+            return resources
+        }
+
+        reconfigurationSemaphore.signal()
+        resources.1?.wake()
+        resources.0?.cancel()
+        resources.2?.cancel()
+    }
+
     /// Atomically upgrades a sleeping worker to a teardown-capable,
     /// restore-only worker and attaches its completion. If the worker has
     /// already stopped, a worker is created only when a stable baseline is
@@ -4381,7 +4413,7 @@ final class LogitechReprogrammableControlsMonitorState {
             restartBarrier = request.restartBarrier
             restoresPendingForTeardown = true
             isEnabled = true
-            allowsTeardownIO = true
+            allowsTeardownIO = workerThread == nil || workerTargetIsValid
             // Route an active notification loop through its existing forced
             // restart path. The next outer iteration then observes the
             // restore-only state and drains baselines without diversion.
@@ -4393,6 +4425,8 @@ final class LogitechReprogrammableControlsMonitorState {
 
             let thread = makeWorkerThread()
             workerThread = thread
+            workerTargetIsValid = true
+            allowsTeardownIO = true
             return (thread, [], request)
         }
 
@@ -4429,6 +4463,7 @@ final class LogitechReprogrammableControlsMonitorState {
                 return (true, resources, [])
             }
 
+            workerTargetIsValid = false
             let completions = stopCompletions
             stopCompletions.removeAll()
             if restartBarrier === request.restartBarrier {
@@ -4474,7 +4509,7 @@ final class LogitechReprogrammableControlsMonitorState {
             isEnabled = false
             let resolvedAllowsTeardownIO = allowingTeardownIO
                 ?? (hasEstablishedActiveTarget && !hasStoreBackedActiveTargetValue)
-            allowsTeardownIO = resolvedAllowsTeardownIO
+            allowsTeardownIO = workerTargetIsValid && resolvedAllowsTeardownIO
             reconfigurationRequest.reset()
             activeNotificationEndpoint = nil
             directDeviceReportObservationToken = nil
@@ -4482,6 +4517,7 @@ final class LogitechReprogrammableControlsMonitorState {
                 return (resources, [])
             }
 
+            workerTargetIsValid = false
             let completions = stopCompletions
             stopCompletions.removeAll()
             restartBarrier = nil
@@ -4500,6 +4536,7 @@ final class LogitechReprogrammableControlsMonitorState {
         let (thread, token, completions, barrierToRelease) = queue.sync {
             () -> (Thread?, ObservationToken?, [() -> Void], RestartBarrier?) in
             workerThread = nil
+            workerTargetIsValid = false
             hasEstablishedActiveTarget = false
             hasStoreBackedActiveTargetValue = false
             activeNotificationEndpoint = nil
@@ -4535,6 +4572,8 @@ final class LogitechReprogrammableControlsMonitorState {
             reconfigurationRequest.reset()
             let nextThread = makeWorkerThread()
             workerThread = nextThread
+            workerTargetIsValid = true
+            allowsTeardownIO = true
             return (nextThread, reportObservationToken, [], nil)
         }
 
@@ -4606,7 +4645,7 @@ final class LogitechReprogrammableControlsMonitorState {
 
     fileprivate func setActiveNotificationEndpoint(_ endpoint: HIDPPNotificationHandling?) {
         queue.sync {
-            guard isEnabled else {
+            guard isEnabled, workerTargetIsValid else {
                 return
             }
 
@@ -4616,7 +4655,7 @@ final class LogitechReprogrammableControlsMonitorState {
 
     func setStoreBackedActiveTarget(_ value: Bool) {
         queue.sync {
-            guard workerThread != nil else {
+            guard workerThread != nil, workerTargetIsValid else {
                 return
             }
             hasEstablishedActiveTarget = true
@@ -4626,7 +4665,7 @@ final class LogitechReprogrammableControlsMonitorState {
 
     func setDirectDeviceReportObservationToken(_ token: ObservationToken) -> ObservationToken? {
         queue.sync {
-            guard isEnabled else {
+            guard isEnabled, workerTargetIsValid else {
                 return token
             }
 
