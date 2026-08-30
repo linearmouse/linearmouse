@@ -89,10 +89,9 @@ extension LogitechReceiverMonitoringChannel {
         let batteryLevel = routedTransport.flatMap {
             metadataProvider.readReceiverBatteryLevel(using: $0)
         }
-        let kind = resolveReceiverLogicalDeviceKind(
-            snapshotRaw: connectionSnapshot?.kind,
-            pairingRaw: pairingResponse.flatMap { Self.parseBoltReceiverKind($0.bytes) }
-        )?.rawValue ?? 0
+        let kind = pairingResponse.flatMap { Self.parseBoltReceiverKind($0.bytes) }
+            ?? connectionSnapshot?.kind
+            ?? 0
         let name = routedName ?? nameResponse.flatMap { Self.parseBoltReceiverName($0.bytes) }
 
         return .init(
@@ -125,7 +124,10 @@ extension LogitechReceiverMonitoringChannel {
         })
 
         let identities = discovery.slots.compactMap { slot -> ReceiverLogicalDeviceIdentity? in
-            guard let kind = ReceiverLogicalDeviceKind(rawValue: slot.kind), kind.isPointingDevice else {
+            guard let kind = resolveReceiverPointingIdentityKind(
+                snapshotRaw: discovery.connectionSnapshots[slot.slot]?.kind,
+                pairingRaw: slot.kind
+            ), kind.isPointingDevice else {
                 return nil
             }
 

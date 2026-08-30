@@ -51,6 +51,23 @@ func resolveReceiverLogicalDeviceKind(
     return pairingRaw.flatMap(ReceiverLogicalDeviceKind.init(rawValue:))
 }
 
+/// Produces a pointing identity only when the live snapshot does not conflict
+/// with the pairing record's pointing/non-pointing classification.
+func resolveReceiverPointingIdentityKind(
+    snapshotRaw: UInt8?,
+    pairingRaw: UInt8?
+) -> ReceiverLogicalDeviceKind? {
+    let snapshotKind = snapshotRaw.flatMap(ReceiverLogicalDeviceKind.init(rawValue:))
+    let pairingKind = pairingRaw.flatMap(ReceiverLogicalDeviceKind.init(rawValue:))
+    if snapshotKind?.isPointingDevice == true,
+       pairingKind?.isPointingDevice == false,
+       snapshotRaw != 0 {
+        return nil
+    }
+
+    return resolveReceiverLogicalDeviceKind(snapshotRaw: snapshotRaw, pairingRaw: pairingRaw)
+}
+
 struct ReceiverLogicalDeviceIdentity: Hashable {
     let receiverLocationID: Int
     let slot: UInt8

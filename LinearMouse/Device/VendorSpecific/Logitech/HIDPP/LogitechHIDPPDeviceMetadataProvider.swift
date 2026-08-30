@@ -529,7 +529,10 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             return nil
         }
 
-        guard let kind = ReceiverLogicalDeviceKind(rawValue: slotInfo.kind), kind.isPointingDevice else {
+        guard let kind = resolveReceiverPointingIdentityKind(
+            snapshotRaw: connectionSnapshot?.kind,
+            pairingRaw: slotInfo.kind
+        ), kind.isPointingDevice else {
             return nil
         }
 
@@ -1427,10 +1430,9 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             return nil
         }
 
-        let kind = resolveReceiverLogicalDeviceKind(
-            snapshotRaw: connectionSnapshot?.kind,
-            pairingRaw: pairingResponse.flatMap(Self.parseReceiverKind)
-        )?.rawValue ?? 0
+        let kind = pairingResponse.flatMap(Self.parseReceiverKind)
+            ?? connectionSnapshot?.kind
+            ?? 0
         let routedTransport = HIDPPTransport(device: self, deviceIndex: slot)
         let routedName = routedTransport.flatMap { transport in
             metadataProvider.readFriendlyName(using: transport) ?? metadataProvider.readName(using: transport)
@@ -1564,7 +1566,10 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         })
 
         let identities = slots.compactMap { slot -> ReceiverLogicalDeviceIdentity? in
-            guard let kind = ReceiverLogicalDeviceKind(rawValue: slot.kind), kind.isPointingDevice else {
+            guard let kind = resolveReceiverPointingIdentityKind(
+                snapshotRaw: connectionSnapshots[slot.slot]?.kind,
+                pairingRaw: slot.kind
+            ), kind.isPointingDevice else {
                 return nil
             }
 
