@@ -174,6 +174,30 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
         wait(for: [restored], timeout: 1)
     }
 
+    func testRestorePendingForTeardownForcesActiveWorkerToOuterLoop() {
+        let state = LogitechReprogrammableControlsMonitorState()
+        state.enable { Thread {} }
+
+        let generation = state.restorePendingForTeardown(
+            true,
+            makeWorkerThread: { Thread {} },
+            completion: {}
+        )
+
+        let request = state.consumeReconfigurationRequest(
+            deferringWhileControlsArePressed: true
+        )
+        XCTAssertTrue(request.needed)
+        XCTAssertTrue(request.forced)
+
+        guard let generation else {
+            XCTFail("Expected pending restoration to start")
+            return
+        }
+        state.expirePendingTeardownRestore(generation)
+        state.workerDidStop(restartIfEnabled: false) { Thread {} }
+    }
+
     func testRestorePendingForTeardownStartsWorkerOnlyWhenBaselineExists() {
         let state = LogitechReprogrammableControlsMonitorState()
         let noWorkCompletion = expectation(description: "no pending baseline")

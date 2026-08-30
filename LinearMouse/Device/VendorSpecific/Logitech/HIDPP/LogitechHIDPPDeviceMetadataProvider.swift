@@ -4330,7 +4330,10 @@ final class LogitechReprogrammableControlsMonitorState {
             restoresPendingForTeardown = true
             isEnabled = true
             allowsTeardownIO = true
-            reconfigurationRequest.reset()
+            // Route an active notification loop through its existing forced
+            // restart path. The next outer iteration then observes the
+            // restore-only state and drains baselines without diversion.
+            reconfigurationRequest.request(forced: true)
 
             guard workerThread == nil else {
                 return (nil, [], generation)
