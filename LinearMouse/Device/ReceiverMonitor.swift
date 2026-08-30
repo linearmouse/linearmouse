@@ -99,6 +99,10 @@ struct ReceiverSlotStateStore {
             ($0.slot, $0)
         })
         let previousIdentitiesBySlot = pairedIdentitiesBySlot
+        let previousPresenceBySlot = slotPresenceBySlot
+        let missingPreviousPointingSlots = Set(previousIdentitiesBySlot.keys).subtracting(
+            latestIdentitiesBySlot.keys
+        )
 
         for slot in pairedIdentitiesBySlot.keys where latestIdentitiesBySlot[slot] == nil {
             pairedIdentitiesBySlot.removeValue(forKey: slot)
@@ -113,6 +117,30 @@ struct ReceiverSlotStateStore {
         }
 
         mergeConnectionSnapshots(discovery.connectionSnapshots)
+
+        // A full discovery can temporarily miss one slot while succeeding for
+        // another. Preserve evidence that a previously pointing slot is still
+        // connected so its absent identity is retried instead of silently
+        // accepting a partial inventory.
+        for slot in missingPreviousPointingSlots {
+            guard previousIdentitiesBySlot[slot]?.kind.isPointingDevice == true else {
+                continue
+            }
+
+            let snapshot = discovery.connectionSnapshots[slot]
+            let reportedKind = snapshot?.kind.flatMap(ReceiverLogicalDeviceKind.init(rawValue:))
+            if snapshot?.isConnected == false || reportedKind?.isPointingDevice == false {
+                slotsRequiringPointingIdentity.remove(slot)
+                continue
+            }
+
+            guard snapshot?.isConnected == true || previousPresenceBySlot[slot] == .connected else {
+                continue
+            }
+
+            slotPresenceBySlot[slot] = .connected
+            slotsRequiringPointingIdentity.insert(slot)
+        }
 
         // A discovered pointing identity satisfies a previous connection
         // event's obligation, including a reconnect that cleared its cache.
