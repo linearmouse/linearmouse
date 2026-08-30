@@ -2603,6 +2603,14 @@ final class LogitechReprogrammableControlsMonitor {
 
                     let waitResult = state.waitForReconfigurationOrStop(timeout: Constants.notificationTimeout)
                     guard waitResult.shouldContinue else {
+                        retryStoredReportingRestoration(
+                            store: baselineStore,
+                            target: baselineTarget,
+                            using: transport,
+                            featureIndex: featureIndex,
+                            locationID: locationID,
+                            slot: slot
+                        )
                         return
                     }
 
@@ -3429,6 +3437,45 @@ final class LogitechReprogrammableControlsMonitor {
             return false
         }
         return !store.pendingControlsBaselines(for: target).isEmpty
+    }
+
+    private func retryStoredReportingRestoration(
+        store: LogitechHardwareBaselineStore?,
+        target: LogitechHardwareTargetKey?,
+        using transport: HIDPPTransport,
+        featureIndex: UInt8,
+        locationID: Int,
+        slot: UInt8
+    ) {
+        guard shouldAllowTeardownIO(), let store, let target else {
+            return
+        }
+        let claims = store.pendingControlsBaselines(for: target)
+        guard !claims.isEmpty else {
+            return
+        }
+        var remaining = Dictionary(uniqueKeysWithValues: claims.map {
+            ($0.controlID, ReportingInfo(baseline: $0.baseline))
+        })
+        _ = LogitechHardwareRestoreRetry.perform(
+            operation: {
+                remaining = self.restoreReportingState(
+                    remaining,
+                    using: transport,
+                    featureIndex: featureIndex,
+                    locationID: locationID,
+                    slot: slot,
+                    reason: "retry terminal stored reporting restore"
+                )
+                return remaining.isEmpty
+            },
+            wait: Thread.sleep(forTimeInterval:)
+        )
+        consumeRestoredBaselines(
+            Dictionary(uniqueKeysWithValues: claims.map { ($0.controlID, $0) }),
+            excluding: Set(remaining.keys),
+            store: store
+        )
     }
 
     private func consumeRestoredBaselines(
