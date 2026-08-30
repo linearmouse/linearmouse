@@ -307,6 +307,31 @@ final class LogitechDeviceSession {
         }
     }
 
+    /// Seeds a rebuilt session from a process-lifetime hardware baseline. The
+    /// current discovery route must agree so a receiver replacement can never
+    /// inherit another target's original mode.
+    func seedInitialHiResWheelState(
+        enabled: Bool,
+        route: LogitechReceiverRoute?,
+        receiverSlot: UInt8?
+    ) {
+        withState { state in
+            guard state.initialHiResWheelState == nil,
+                  !LogitechReceiverRoute.hardwareTargetChanged(
+                      from: state.discovery?.route,
+                      to: route
+                  )
+            else {
+                return
+            }
+            state.initialHiResWheelState = .init(
+                route: route,
+                receiverSlot: receiverSlot,
+                enabled: enabled
+            )
+        }
+    }
+
     func initialHiResWheelEnabled(
         requiresReceiverRoute: Bool,
         receiverSlot: UInt8?
@@ -364,20 +389,40 @@ final class LogitechDeviceSession {
 
     /// Commits the hardware mode observed after a successful restore and only
     /// then consumes the initial mode that made that restore possible.
+    @discardableResult
     func completeHiResWheelRestore(
         enabled: Bool,
         multiplier: Int?,
         for access: FeatureAccess<HiResWheel>
-    ) {
-        withState { state in
+    ) -> Bool {
+        withState { state -> Bool in
             guard state.hiResWheelCancellationSource.token == access.token,
                   access.token.shouldContinue else {
-                return
+                return false
             }
             state.hiResWheelEnabled = enabled
             state.hiResWheelMultiplier = enabled ? multiplier : nil
             state.initialHiResWheelState = nil
             state.hiResWheelRestoreRetryNeeded = false
+            return true
+        }
+    }
+
+    /// Used by lifecycle teardown, which intentionally clears runtime cache
+    /// rather than retaining the restored mode for normalization.
+    @discardableResult
+    func consumeHiResWheelState(for token: CancellationToken) -> Bool {
+        withState { state -> Bool in
+            guard state.hiResWheelCancellationSource.token == token,
+                  token.shouldContinue else {
+                return false
+            }
+            state.hiResWheel = nil
+            state.hiResWheelEnabled = nil
+            state.hiResWheelMultiplier = nil
+            state.initialHiResWheelState = nil
+            state.hiResWheelRestoreRetryNeeded = false
+            return true
         }
     }
 

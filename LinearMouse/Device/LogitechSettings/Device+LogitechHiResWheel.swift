@@ -5,6 +5,26 @@ import Foundation
 import HIDPP
 import os.log
 
+enum LogitechHardwareRestoreRetry {
+    static let maximumAttempts = 3
+
+    static func perform(
+        operation: () -> Bool,
+        wait: (TimeInterval) -> Void
+    ) -> Bool {
+        var backoff = ExponentialBackoff(initialDelay: 0.1, maximumDelay: 0.4)
+        for attempt in 0 ..< maximumAttempts {
+            if operation() {
+                return true
+            }
+            if attempt + 1 < maximumAttempts {
+                wait(backoff.nextDelay())
+            }
+        }
+        return false
+    }
+}
+
 extension Device {
     private static let logitechHiResWheelLog = OSLog(
         subsystem: Bundle.main.bundleIdentifier!,
@@ -116,6 +136,7 @@ extension Device {
         expectedToken: CancellationToken,
         verifiesCachedValue: Bool = false
     ) -> Bool? {
+        seedStoredHiResWheelBaseline()
         guard !isRemoved,
               let access = logitechHiResWheel(for: expectedToken) else {
             return nil
@@ -124,7 +145,7 @@ extension Device {
         let controller = access.feature
         let cachedEnabled = logitechSession.hiResWheelEnabled
 
-        if cachedEnabled == enabled {
+        if cachedEnabled == enabled, logitechSession.hasInitialHiResWheelState {
             if !verifiesCachedValue || controller.isHighResolutionWheelEnabled() == enabled {
                 return enabled
             }
@@ -135,7 +156,7 @@ extension Device {
             return nil
         }
 
-        logitechSession.recordInitialHiResWheelState(enabled: result.previousEnabled, for: access)
+        recordHiResWheelBaseline(enabled: result.previousEnabled, for: access)
 
         updateHighResolutionWheelCache(
             enabled: result.appliedEnabled,
@@ -158,10 +179,30 @@ extension Device {
             guard let self else {
                 return
             }
-            _ = restoreHighResolutionWheelSynchronously(
-                expectedToken: token,
-                trackingRestoredState: trackingRestoredState
-            )
+            if waitUntilFinished {
+                let restored = LogitechHardwareRestoreRetry.perform(
+                    operation: {
+                        token.shouldContinue && self.restoreHighResolutionWheelSynchronously(
+                            expectedToken: token,
+                            trackingRestoredState: trackingRestoredState
+                        )
+                    },
+                    wait: self.pumpMainRunLoop
+                )
+                if !restored, token.shouldContinue {
+                    os_log(
+                        "Logitech Hi-Res Wheel lifecycle restore exhausted retry budget: device=%{public}@",
+                        log: Self.logitechHiResWheelLog,
+                        type: .error,
+                        self.name
+                    )
+                }
+            } else {
+                _ = restoreHighResolutionWheelSynchronously(
+                    expectedToken: token,
+                    trackingRestoredState: trackingRestoredState
+                )
+            }
         }
     }
 
@@ -190,6 +231,7 @@ extension Device {
         trackingRestoredState: Bool,
         confirmsRestore: Bool = false
     ) -> Bool {
+        seedStoredHiResWheelBaseline()
         guard logitechSession.hasInitialHiResWheelState else {
             logitechSession.invalidateHiResWheel(for: expectedToken)
             if !trackingRestoredState {
@@ -235,11 +277,13 @@ extension Device {
                     return false
                 }
                 if trackingRestoredState {
-                    logitechSession.completeHiResWheelRestore(
+                    if logitechSession.completeHiResWheelRestore(
                         enabled: initialEnabled,
                         multiplier: currentMultiplier,
                         for: access
-                    )
+                    ) {
+                        consumeStoredHiResWheelBaseline()
+                    }
                 }
                 return true
             }
@@ -293,7 +337,9 @@ extension Device {
                     for: access
                 )
             } else {
-                clearHighResolutionWheelCache()
+                if logitechSession.consumeHiResWheelState(for: expectedToken) {
+                    consumeStoredHiResWheelBaseline()
+                }
             }
         } else {
             // The device may be temporarily asleep. Keep the original state
@@ -304,6 +350,53 @@ extension Device {
 
     private func clearHighResolutionWheelCache() {
         logitechSession.clearHiResWheelState(includingInitialState: true)
+    }
+
+    private func pumpMainRunLoop(for interval: TimeInterval) {
+        guard Thread.isMainThread else {
+            Thread.sleep(forTimeInterval: interval)
+            return
+        }
+
+        let deadline = Date().addingTimeInterval(interval)
+        while Date() < deadline {
+            _ = CFRunLoopRunInMode(.defaultMode, min(0.01, deadline.timeIntervalSinceNow), true)
+        }
+    }
+
+    private func seedStoredHiResWheelBaseline() {
+        guard let target = logitechHardwareTargetKey,
+              let claim = logitechHardwareBaselineStore?.hiResBaseline(for: target) else {
+            return
+        }
+        logitechSession.seedInitialHiResWheelState(
+            enabled: claim.baseline.enabled,
+            route: logitechReceiverRouteSnapshot,
+            receiverSlot: logitechReceiverRouteSnapshot?.slot
+        )
+        logitechHiResBaselineHandle = claim.handle
+    }
+
+    private func recordHiResWheelBaseline(
+        enabled: Bool,
+        for access: LogitechDeviceSession.FeatureAccess<HiResWheel>
+    ) {
+        guard let target = logitechHardwareTargetKey,
+              let store = logitechHardwareBaselineStore else {
+            logitechSession.recordInitialHiResWheelState(enabled: enabled, for: access)
+            return
+        }
+        let claim = store.captureHiResBaseline(enabled: enabled, for: target)
+        logitechHiResBaselineHandle = claim.handle
+        logitechSession.recordInitialHiResWheelState(enabled: claim.baseline.enabled, for: access)
+    }
+
+    private func consumeStoredHiResWheelBaseline() {
+        guard let handle = logitechHiResBaselineHandle,
+              logitechHardwareBaselineStore?.consumeHiResBaseline(handle) == true else {
+            return
+        }
+        logitechHiResBaselineHandle = nil
     }
 
     private func updateHighResolutionWheelCache(

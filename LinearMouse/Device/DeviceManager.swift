@@ -25,6 +25,7 @@ class DeviceManager: ObservableObject {
 
     private let manager = PointerDeviceManager()
     private let receiverMonitor = ReceiverMonitor()
+    let logitechHardwareBaselineStore = LogitechHardwareBaselineStore()
 
     private var pointerDeviceToDevice = [PointerDevice: Device]()
     @Published private(set) var receiverPairedDeviceIdentities = [Int: [ReceiverLogicalDeviceIdentity]]()

@@ -41,6 +41,7 @@ class Device {
     private weak var manager: DeviceManager?
     private var inputReportHandlers: [InputReportHandler] = []
     private var logitechReprogrammableControlsMonitor: LogitechReprogrammableControlsMonitor?
+    var logitechHiResBaselineHandle: LogitechHardwareBaselineStore.HiResHandle?
     lazy var logitechSession = LogitechDeviceSession(deviceID: id)
 
     var logitechAdjustableDPI: LogitechDeviceSession.FeatureAccess<AdjustableDPI>? {
@@ -120,9 +121,38 @@ class Device {
         logitechSession.discoverySnapshot
     }
 
+    var logitechHardwareTargetKey: LogitechHardwareTargetKey? {
+        if let route = logitechReceiverRouteSnapshot {
+            return .receiver(
+                vendorID: vendorID,
+                receiverLocationID: pointerDevice.locationID,
+                identity: route.identity
+            )
+        }
+
+        guard !LogitechReceiverRouteResolver.requiresDiscovery(for: pointerDevice) else {
+            return nil
+        }
+        return .direct(
+            transport: pointerDevice.transport,
+            locationID: pointerDevice.locationID,
+            vendorID: vendorID,
+            productID: productID,
+            serialNumber: serialNumber,
+            name: productName ?? name
+        )
+    }
+
+    var logitechHardwareBaselineStore: LogitechHardwareBaselineStore? {
+        manager?.logitechHardwareBaselineStore
+    }
+
     @discardableResult
     func updateLogitechReceiverDiscovery(_ discovery: LogitechReceiverDiscovery?) -> Bool {
         let update = logitechSession.updateDiscovery(discovery)
+        if update.hardwareTargetChanged {
+            logitechHiResBaselineHandle = nil
+        }
         if update.candidateAvailabilityChanged, !update.hasCandidates {
             updateLogitechControlsMonitorRunning()
         }
