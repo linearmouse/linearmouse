@@ -79,6 +79,110 @@ enum ReceiverWorkerChannelAdoption {
     }
 }
 
+struct ReceiverMonitorHandoff<Owner: AnyObject, Candidate: AnyObject> {
+    private enum Phase {
+        case active(owner: Owner, candidate: Candidate)
+        case stopping(owner: Owner, stoppedCandidate: Candidate, pending: [Candidate])
+    }
+
+    private var phase: Phase?
+
+    /// Returns true only when the caller owns the empty slot and may create a
+    /// context immediately. A stopping owner retains the slot until onStopped.
+    mutating func requestStart(_ candidate: Candidate) -> Bool {
+        switch phase {
+        case nil:
+            return true
+        case .active:
+            return false
+        case let .stopping(owner, stoppedCandidate, pending):
+            let candidates = pending.contains { $0 === candidate }
+                ? pending
+                : pending + [candidate]
+            phase = .stopping(
+                owner: owner,
+                stoppedCandidate: stoppedCandidate,
+                pending: candidates
+            )
+            return false
+        }
+    }
+
+    @discardableResult
+    mutating func activate(_ owner: Owner, for candidate: Candidate) -> Bool {
+        guard phase == nil else {
+            return false
+        }
+        phase = .active(owner: owner, candidate: candidate)
+        return true
+    }
+
+    /// Transitions an active slot to stopping and returns its owner exactly
+    /// once. A stop from a newer lifecycle clears every pending candidate; the
+    /// old lifecycle's repeated stop cannot cancel its successor.
+    mutating func requestStop(for candidate: Candidate) -> Owner? {
+        switch phase {
+        case nil:
+            return nil
+        case let .active(owner, activeCandidate):
+            phase = .stopping(
+                owner: owner,
+                stoppedCandidate: activeCandidate,
+                pending: []
+            )
+            return owner
+        case let .stopping(owner, stoppedCandidate, pending):
+            if candidate !== stoppedCandidate {
+                phase = .stopping(
+                    owner: owner,
+                    stoppedCandidate: stoppedCandidate,
+                    pending: []
+                )
+            } else {
+                phase = .stopping(
+                    owner: owner,
+                    stoppedCandidate: stoppedCandidate,
+                    pending: pending
+                )
+            }
+            return nil
+        }
+    }
+
+    /// Releases only the matching stopping owner. The caller may start the
+    /// returned live candidate after this transition has made the slot empty.
+    mutating func didStop(
+        _ owner: Owner,
+        candidateIsValid: (Candidate) -> Bool
+    ) -> Candidate? {
+        guard case let .stopping(currentOwner, _, pending) = phase,
+              currentOwner === owner
+        else {
+            return nil
+        }
+        phase = nil
+        return pending.first(where: candidateIsValid)
+    }
+
+    func isActive(_ owner: Owner) -> Bool {
+        guard case let .active(currentOwner, _) = phase else {
+            return false
+        }
+        return currentOwner === owner
+    }
+
+    var isEmpty: Bool {
+        phase == nil
+    }
+
+    var activeOwner: Owner? {
+        guard case let .active(owner, _) = phase else {
+            return nil
+        }
+        return owner
+    }
+}
+
 final class ReceiverMonitor {
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ReceiverMonitor")
     static let initialDiscoveryTimeout: TimeInterval = 3
@@ -87,24 +191,36 @@ final class ReceiverMonitor {
     static let refreshInterval: TimeInterval = 15
 
     private let provider = LogitechHIDPPDeviceMetadataProvider()
-    private var contexts = [Int: ReceiverContext]()
+    private var handoffs = [Int: ReceiverMonitorHandoff<ReceiverContext, Device>]()
 
     var onPointingDevicesChanged: ((Int, [ReceiverLogicalDeviceIdentity]) -> Void)?
 
     func startMonitoring(device: Device) {
-        guard let locationID = device.pointerDevice.locationID else {
+        guard !device.isRemoved,
+              let locationID = device.pointerDevice.locationID else {
             return
         }
 
-        guard contexts[locationID] == nil else {
+        var handoff = handoffs[locationID] ?? .init()
+        guard handoff.requestStart(device) else {
+            handoffs[locationID] = handoff
             return
         }
 
+        startContext(device: device, locationID: locationID, handoff: &handoff)
+        handoffs[locationID] = handoff
+    }
+
+    private func startContext(
+        device: Device,
+        locationID: Int,
+        handoff: inout ReceiverMonitorHandoff<ReceiverContext, Device>
+    ) {
         let context = ReceiverContext(device: device, locationID: locationID, provider: provider)
         context.onDiscoveryTimedOut = { [weak self, weak context] in
             guard let self,
                   let context,
-                  self.contexts[locationID] === context
+                  self.handoffs[locationID]?.isActive(context) == true
             else {
                 return
             }
@@ -114,14 +230,22 @@ final class ReceiverMonitor {
         context.onSlotsChanged = { [weak self, weak context] identities in
             guard let self,
                   let context,
-                  self.contexts[locationID] === context
+                  self.handoffs[locationID]?.isActive(context) == true
             else {
                 return
             }
 
             self.onPointingDevicesChanged?(locationID, identities)
         }
-        contexts[locationID] = context
+        context.onStopped = { [weak self, weak context] in
+            guard let self, let context else {
+                return
+            }
+            self.contextDidStop(context, locationID: locationID)
+        }
+        guard handoff.activate(context, for: device) else {
+            return
+        }
         context.start()
 
         os_log("Started receiver monitor for %{public}@", log: Self.log, type: .info, String(describing: device))
@@ -129,12 +253,13 @@ final class ReceiverMonitor {
 
     func stopMonitoring(device: Device) {
         guard let locationID = device.pointerDevice.locationID,
-              let context = contexts.removeValue(forKey: locationID)
-        else {
+              var handoff = handoffs[locationID] else {
             return
         }
 
-        context.stop()
+        let context = handoff.requestStop(for: device)
+        handoffs[locationID] = handoff
+        context?.stop()
     }
 
     func requestRediscovery(device: Device) {
@@ -142,7 +267,24 @@ final class ReceiverMonitor {
             return
         }
 
-        contexts[locationID]?.requestRediscovery()
+        handoffs[locationID]?.activeOwner?.requestRediscovery()
+    }
+
+    private func contextDidStop(_ context: ReceiverContext, locationID: Int) {
+        guard var handoff = handoffs[locationID] else {
+            return
+        }
+        let pending = handoff.didStop(context) { !$0.isRemoved }
+        if handoff.isEmpty {
+            handoffs.removeValue(forKey: locationID)
+        } else {
+            handoffs[locationID] = handoff
+        }
+
+        guard let pending else {
+            return
+        }
+        startMonitoring(device: pending)
     }
 }
 
@@ -322,6 +464,7 @@ private final class ReceiverContext {
 
     var onDiscoveryTimedOut: (() -> Void)?
     var onSlotsChanged: (([ReceiverLogicalDeviceIdentity]) -> Void)?
+    var onStopped: (() -> Void)?
     init(device: Device, locationID: Int, provider: LogitechHIDPPDeviceMetadataProvider) {
         self.device = device
         self.locationID = locationID
@@ -389,6 +532,9 @@ private final class ReceiverContext {
         defer {
             setCurrentChannel(nil)
             markStopped()
+            DispatchQueue.main.async { [weak self] in
+                self?.onStopped?()
+            }
         }
 
         workerLoop: while shouldContinueRunning() {

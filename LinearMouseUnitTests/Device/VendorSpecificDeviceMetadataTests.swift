@@ -8,6 +8,10 @@ import XCTest
 
 final class VendorSpecificDeviceMetadataTests: XCTestCase {
     private final class TestSharedChannel {}
+    private final class TestReceiverOwner {}
+    private final class TestReceiverCandidate {
+        var isValid = true
+    }
 
     func testMatcherMatchesVendorAndTransport() {
         let matcher = VendorSpecificDeviceMatcher(
@@ -602,7 +606,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertTrue(SharedChannelOwnership.detach(oldChannel, from: &currentChannel))
         currentChannel = newChannel
         XCTAssertFalse(SharedChannelOwnership.detach(oldChannel, from: &currentChannel))
-        XCTAssertTrue(currentChannel === newChannel)
+        XCTAssertIdentical(currentChannel, newChannel)
     }
 
     func testStoppedReceiverWorkerCannotAdoptOpenedChannel() {
@@ -627,13 +631,104 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             whileRunning: true,
             currentChannel: &currentChannel
         ))
-        XCTAssertTrue(currentChannel === existingChannel)
+        XCTAssertIdentical(currentChannel, existingChannel)
         XCTAssertFalse(ReceiverWorkerChannelAdoption.adopt(
             replacementChannel,
             whileRunning: true,
             currentChannel: &currentChannel
         ))
-        XCTAssertTrue(currentChannel === existingChannel)
+        XCTAssertIdentical(currentChannel, existingChannel)
+    }
+
+    func testReceiverHandoffIgnoresDuplicateStartWhileActive() {
+        var handoff = ReceiverMonitorHandoff<TestReceiverOwner, TestReceiverCandidate>()
+        let owner = TestReceiverOwner()
+        let first = TestReceiverCandidate()
+        let duplicate = TestReceiverCandidate()
+
+        XCTAssertTrue(handoff.requestStart(first))
+        XCTAssertTrue(handoff.activate(owner, for: first))
+        XCTAssertFalse(handoff.requestStart(duplicate))
+        XCTAssertIdentical(handoff.activeOwner, owner)
+    }
+
+    func testReceiverHandoffDefersStartUntilOwnerDidStop() {
+        var handoff = ReceiverMonitorHandoff<TestReceiverOwner, TestReceiverCandidate>()
+        let oldOwner = TestReceiverOwner()
+        let newOwner = TestReceiverOwner()
+        let oldCandidate = TestReceiverCandidate()
+        let pending = TestReceiverCandidate()
+        var startCount = 0
+
+        XCTAssertTrue(handoff.requestStart(oldCandidate))
+        XCTAssertTrue(handoff.activate(oldOwner, for: oldCandidate))
+        XCTAssertIdentical(handoff.requestStop(for: oldCandidate), oldOwner)
+        XCTAssertFalse(handoff.requestStart(pending))
+        XCTAssertNil(handoff.activeOwner)
+
+        let admitted = handoff.didStop(oldOwner) { $0.isValid }
+        XCTAssertIdentical(admitted, pending)
+        if let admitted, handoff.requestStart(admitted) {
+            startCount += 1
+            XCTAssertTrue(handoff.activate(newOwner, for: admitted))
+        }
+
+        XCTAssertEqual(startCount, 1)
+        XCTAssertIdentical(handoff.activeOwner, newOwner)
+    }
+
+    func testReceiverHandoffClearsPendingWhenNewLifecycleStops() {
+        var handoff = ReceiverMonitorHandoff<TestReceiverOwner, TestReceiverCandidate>()
+        let oldOwner = TestReceiverOwner()
+        let oldCandidate = TestReceiverCandidate()
+        let pending = TestReceiverCandidate()
+
+        XCTAssertTrue(handoff.requestStart(oldCandidate))
+        XCTAssertTrue(handoff.activate(oldOwner, for: oldCandidate))
+        XCTAssertIdentical(handoff.requestStop(for: oldCandidate), oldOwner)
+        XCTAssertFalse(handoff.requestStart(pending))
+        XCTAssertNil(handoff.requestStop(for: pending))
+        XCTAssertNil(handoff.didStop(oldOwner) { $0.isValid })
+        XCTAssertTrue(handoff.isEmpty)
+    }
+
+    func testReceiverHandoffSelectsLiveCandidateFromSharedLocation() {
+        var handoff = ReceiverMonitorHandoff<TestReceiverOwner, TestReceiverCandidate>()
+        let oldOwner = TestReceiverOwner()
+        let oldCandidate = TestReceiverCandidate()
+        let removedCandidate = TestReceiverCandidate()
+        let liveCandidate = TestReceiverCandidate()
+
+        XCTAssertTrue(handoff.requestStart(oldCandidate))
+        XCTAssertTrue(handoff.activate(oldOwner, for: oldCandidate))
+        XCTAssertIdentical(handoff.requestStop(for: oldCandidate), oldOwner)
+        XCTAssertFalse(handoff.requestStart(removedCandidate))
+        XCTAssertFalse(handoff.requestStart(liveCandidate))
+        removedCandidate.isValid = false
+
+        XCTAssertIdentical(
+            handoff.didStop(oldOwner) { $0.isValid },
+            liveCandidate
+        )
+    }
+
+    func testReceiverHandoffIgnoresStaleDidStopAfterReplacementStarts() {
+        var handoff = ReceiverMonitorHandoff<TestReceiverOwner, TestReceiverCandidate>()
+        let oldOwner = TestReceiverOwner()
+        let newOwner = TestReceiverOwner()
+        let oldCandidate = TestReceiverCandidate()
+        let newCandidate = TestReceiverCandidate()
+
+        XCTAssertTrue(handoff.requestStart(oldCandidate))
+        XCTAssertTrue(handoff.activate(oldOwner, for: oldCandidate))
+        XCTAssertIdentical(handoff.requestStop(for: oldCandidate), oldOwner)
+        XCTAssertFalse(handoff.requestStart(newCandidate))
+        XCTAssertIdentical(handoff.didStop(oldOwner) { $0.isValid }, newCandidate)
+        XCTAssertTrue(handoff.requestStart(newCandidate))
+        XCTAssertTrue(handoff.activate(newOwner, for: newCandidate))
+
+        XCTAssertNil(handoff.didStop(oldOwner) { $0.isValid })
+        XCTAssertIdentical(handoff.activeOwner, newOwner)
     }
 
     func testParseConnectedDeviceCountReadsReceiverConnectionRegister() {
