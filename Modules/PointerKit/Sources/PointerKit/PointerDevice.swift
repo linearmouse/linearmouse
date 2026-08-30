@@ -99,8 +99,9 @@ public class PointerDevice {
     private var inputReportBuffer: UnsafeMutablePointer<UInt8>?
     private var inputReportBufferLength = 0
 
-    /// Serializes HID++ transactions while still allowing a cancelled request
-    /// to relinquish the device promptly during application teardown.
+    /// Serializes HID++ transactions. A request that already sent a report
+    /// retains ownership until it settles, so a late reply cannot be matched
+    /// to its successor.
     private let synchronousReportRequestGate = DispatchSemaphore(value: 1)
     private let pendingReportRequestLock = NSLock()
     private var pendingReportMatcher: ((Data) -> Bool)?

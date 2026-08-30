@@ -962,7 +962,6 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
     private let ioQueue: DispatchQueue
     private let ioQueueKey = DispatchSpecificKey<Void>()
     private let cancellationSemaphore = DispatchSemaphore(value: 0)
-    private let committedRequestPollSemaphore = DispatchSemaphore(value: 0)
     private let lifecycleLock = NSLock()
     private var isActivated = false
     private let inputReportBufferLength: Int
@@ -1119,7 +1118,6 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         }
 
         wake()
-        committedRequestPollSemaphore.signal()
         IOHIDDeviceCancel(device)
         if DispatchQueue.getSpecific(key: ioQueueKey) == nil {
             cancellationSemaphore.wait()
@@ -1683,12 +1681,16 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         until shouldContinue: @escaping () -> Bool
     ) -> Data? {
         let deadline = Date().addingTimeInterval(timeout)
+        // GetReport does not have a transaction-owned callback to wake this
+        // poll. Keep the yield local so notifications from older transactions
+        // cannot accumulate permits and create an I/O burst.
+        let pollYield = DispatchSemaphore(value: 0)
         return HIDPPCommittedTransaction.settle(
             until: deadline,
             shouldDeliverResult: shouldContinue,
             isTransportValid: { self.isTransportActive },
-            wait: { [committedRequestPollSemaphore] interval in
-                _ = committedRequestPollSemaphore.wait(timeout: .now() + interval)
+            wait: { interval in
+                _ = pollYield.wait(timeout: .now() + interval)
             },
             response: {
                 self.getMatchingReport(type: type, matching: matching)
@@ -1879,7 +1881,6 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
 
         pendingLock.unlock()
         semaphores.forEach { $0.signal() }
-        committedRequestPollSemaphore.signal()
     }
 
     private var isTransportActive: Bool {
