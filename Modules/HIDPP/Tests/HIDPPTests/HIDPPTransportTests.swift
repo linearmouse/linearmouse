@@ -90,6 +90,49 @@ final class HIDPPTransportTests: XCTestCase {
         XCTAssertTrue(device.reports.isEmpty)
     }
 
+    func testRequestDeadlineCapsRegularAndSingleTransactionTimeouts() throws {
+        let device = MockHIDPPDevice()
+        device.responseProvider = { report in
+            let bytes = [UInt8](report)
+            return Data([0x11, 0xFF, bytes[2], bytes[3], 0x01, 0x00, 0x00])
+        }
+        let transport = try XCTUnwrap(HIDPPTransport(device: device, deviceIndex: nil))
+        let deadline = Date().addingTimeInterval(0.2)
+
+        XCTAssertNotNil(transport.request(
+            featureIndex: 0x22,
+            function: 0x01,
+            parameters: [],
+            deadline: deadline
+        )            { true })
+        XCTAssertNotNil(transport.requestOnce(
+            featureIndex: 0x22,
+            function: 0x03,
+            parameters: [],
+            deadline: deadline
+        )            { true })
+
+        XCTAssertEqual(device.requestTimeouts.count, 1)
+        XCTAssertEqual(device.singleTransactionRequestTimeouts.count, 1)
+        XCTAssertGreaterThan(device.requestTimeouts[0], 0)
+        XCTAssertLessThanOrEqual(device.requestTimeouts[0], 0.2)
+        XCTAssertGreaterThan(device.singleTransactionRequestTimeouts[0], 0)
+        XCTAssertLessThanOrEqual(device.singleTransactionRequestTimeouts[0], device.requestTimeouts[0])
+    }
+
+    func testExpiredRequestDeadlinePreventsIO() throws {
+        let device = MockHIDPPDevice()
+        let transport = try XCTUnwrap(HIDPPTransport(device: device, deviceIndex: nil))
+
+        XCTAssertNil(transport.request(
+            featureIndex: 0x22,
+            function: 0x01,
+            parameters: [],
+            deadline: Date(timeIntervalSinceNow: -1)
+        )            { true })
+        XCTAssertTrue(device.reports.isEmpty)
+    }
+
     func testRejectsParametersThatDoNotFitReportWithoutSendingIO() throws {
         let device = MockHIDPPDevice(maxOutputReportSize: HIDPPConstants.shortReportLength)
         let transport = try XCTUnwrap(HIDPPTransport(device: device, deviceIndex: nil))

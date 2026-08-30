@@ -130,6 +130,37 @@ final class HiResWheelTests: XCTestCase {
         XCTAssertEqual(device.outputReportRequestCount, requestCount + 2)
     }
 
+    func testWriteLosesAdmissionAfterModeRead() throws {
+        let device = MockVendorSpecificDeviceContext(
+            vendorID: 0x046D,
+            productID: 0xB015,
+            transport: PointerDeviceTransportName.bluetoothLowEnergy,
+            maxInputReportSize: 20,
+            maxOutputReportSize: 20
+        )
+        var admitted = true
+        device.responseProvider = { report in
+            let bytes = [UInt8](report)
+            guard bytes[2] == 0x1E, bytes[3] == 0x18 else {
+                return nil
+            }
+            admitted = false
+            return Self.hidppLongReply(
+                featureIndex: 0x1E,
+                address: 0x18,
+                payload: [0x04, 0x00]
+            )
+        }
+        let transport = try XCTUnwrap(HIDPPTransport(device: device, deviceIndex: nil))
+        let controller = HiResWheel(transport: transport, featureIndex: 0x1E)
+
+        XCTAssertNil(controller.setHighResolutionWheelEnabled(
+            true
+        )            { admitted })
+        XCTAssertEqual(device.sentReports.count, 1)
+        XCTAssertEqual([UInt8](device.sentReports[0])[3], 0x18)
+    }
+
     func testRejectsDeviceWithoutHiresWheelFeature() {
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,

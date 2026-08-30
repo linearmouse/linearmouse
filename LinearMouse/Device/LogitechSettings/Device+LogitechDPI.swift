@@ -103,7 +103,8 @@ extension Device {
             let appliedDPI = applySensorDPISynchronously(
                 dpi,
                 expectedToken: token,
-                verifiesCachedValue: attempt.verifiesCachedValue
+                verifiesCachedValue: attempt.verifiesCachedValue,
+                until: attempt.shouldContinue
             )
             guard !isRemoved, attempt.shouldContinue() else {
                 return false
@@ -227,24 +228,36 @@ extension Device {
     private func applySensorDPISynchronously(
         _ dpi: Int,
         expectedToken: CancellationToken,
-        verifiesCachedValue: Bool = false
+        verifiesCachedValue: Bool = false,
+        until operationShouldContinue: @escaping () -> Bool = { true }
     ) -> Int? {
+        let operationIsAdmitted = {
+            operationShouldContinue()
+                && self.logitechSession.allowsConfiguredDPIOperation(
+                    for: expectedToken
+                )
+        }
         guard !isRemoved,
-              let access = logitechAdjustableDPI(for: expectedToken) else {
+              let access = logitechAdjustableDPI(
+                  for: expectedToken,
+                  until: operationIsAdmitted
+              ) else {
             return nil
         }
 
         return applySensorDPISynchronously(
             dpi,
             access: access,
-            verifiesCachedValue: verifiesCachedValue
+            verifiesCachedValue: verifiesCachedValue,
+            until: operationIsAdmitted
         )
     }
 
     private func applySensorDPISynchronously(
         _ dpi: Int,
         access: LogitechDeviceSession.FeatureAccess<AdjustableDPI>,
-        verifiesCachedValue: Bool = false
+        verifiesCachedValue: Bool = false,
+        until operationShouldContinue: @escaping () -> Bool = { true }
     ) -> Int? {
         let controller = access.feature
         let targetDPI = controller.supportedDPI(nearestTo: dpi)
@@ -252,12 +265,19 @@ extension Device {
             return nil
         }
 
+        let operationIsAdmitted = {
+            operationShouldContinue()
+                && self.logitechSession.allowsConfiguredDPIWrite(for: access)
+        }
+
         _ = seedStoredSensorDPIBaseline(receiverSlot: controller.receiverSlot)
         // Capture before every possible write. A device may apply setDPI even
         // when its acknowledgement is lost.
         guard LogitechDPIBaselineCapture.ensureCaptured(
             hasInitialState: { logitechSession.hasInitialSensorDPIState },
-            readCurrentDPI: controller.currentDPI,
+            readCurrentDPI: {
+                controller.currentDPI(until: operationIsAdmitted)
+            },
             record: { recordSensorDPIBaseline($0, for: access) }
         ), logitechSession.initialSensorDPI(for: access) != nil else {
             return nil
@@ -266,12 +286,16 @@ extension Device {
         let cachedDPI = logitechSession.sensorDPI
 
         if cachedDPI == targetDPI {
-            if !verifiesCachedValue || controller.currentDPI() == targetDPI {
+            if !verifiesCachedValue
+                || controller.currentDPI(until: operationIsAdmitted) == targetDPI {
                 return targetDPI
             }
         }
 
-        guard let appliedDPI = controller.setDPI(targetDPI) else {
+        guard let appliedDPI = controller.setDPI(
+            targetDPI,
+            until: operationIsAdmitted
+        ) else {
             return nil
         }
 
@@ -280,40 +304,54 @@ extension Device {
         return appliedDPI
     }
 
-    /// Restores one read-back-confirmed DPI baseline. The optional deadline is
-    /// checked between HID++ transactions; transport cancellation remains
-    /// bound to the immutable session token.
+    /// Synchronous only with respect to the Logitech session queue. The
+    /// terminal coordinator invokes it from that background queue, never from
+    /// AppKit's main thread.
     @discardableResult
-    func restoreSensorDPI(deadline: Date? = nil) -> Bool {
-        var restored = false
-        logitechSession.runDPIOperation(waitUntilFinished: true) { [weak self] token in
-            restored = self?.restoreSensorDPISynchronously(
-                expectedToken: token,
-                deadline: deadline
-            ) ?? false
-        } onCancelled: {}
-        return restored
+    func restoreSensorDPIForTeardown(
+        expectedToken: CancellationToken,
+        attempt: LogitechTerminalHardwareRestoreRetry.Attempt
+    ) -> Bool {
+        restoreSensorDPIForBoundedLifecycle(
+            expectedToken: expectedToken,
+            attempt: attempt,
+            ownsLifecycle: attempt.shouldContinue
+        )
     }
 
-    /// Asynchronous terminal wrapper used by a bounded teardown coordinator.
-    /// It performs a single attempt; the caller owns any retry/deadline policy.
-    func restoreSensorDPIForTeardown(
-        deadline: Date,
-        completion: @escaping (Bool) -> Void
-    ) {
-        let deliver: (Bool) -> Void = { result in
-            DispatchQueue.main.async {
-                completion(result)
-            }
+    func restoreSensorDPIForSleep(
+        expectedToken: CancellationToken,
+        attempt: LogitechTerminalHardwareRestoreRetry.Attempt,
+        ownsSleepPreparation: @escaping () -> Bool
+    ) -> Bool {
+        restoreSensorDPIForBoundedLifecycle(
+            expectedToken: expectedToken,
+            attempt: attempt,
+            ownsLifecycle: ownsSleepPreparation
+        )
+    }
+
+    private func restoreSensorDPIForBoundedLifecycle(
+        expectedToken: CancellationToken,
+        attempt: LogitechTerminalHardwareRestoreRetry.Attempt,
+        ownsLifecycle: @escaping () -> Bool
+    ) -> Bool {
+        let shouldContinue = {
+            attempt.shouldContinue() && ownsLifecycle()
         }
-        logitechSession.runDPIOperation { [weak self] token in
-            deliver(self?.restoreSensorDPISynchronously(
-                expectedToken: token,
-                deadline: deadline
-            ) ?? false)
-        } onCancelled: {
-            deliver(false)
+        let restored = restoreSensorDPISynchronously(
+            expectedToken: expectedToken,
+            deadline: attempt.deadline,
+            until: shouldContinue
+        )            { _ in shouldContinue() }
+        if !restored {
+            // A receiver monitor may have replaced its shared channel while
+            // this feature still retained the old transport. Keep the target
+            // baseline and token, but force the next bounded attempt to bind a
+            // fresh feature to the current channel.
+            logitechSession.invalidateAdjustableDPI(for: expectedToken)
         }
+        return restored
     }
 
     /// Stops managing DPI at runtime. Failed attempts retain the original
@@ -323,7 +361,10 @@ extension Device {
             guard let self, !isRemoved, attempt.shouldContinue() else {
                 return false
             }
-            return restoreSensorDPISynchronously(expectedToken: token)
+            return restoreSensorDPISynchronously(
+                expectedToken: token,
+                until: attempt.shouldContinue
+            )
         }
     }
 
@@ -334,10 +375,27 @@ extension Device {
 
     private func restoreSensorDPISynchronously(
         expectedToken: CancellationToken,
-        deadline: Date? = nil
+        deadline: Date? = nil,
+        until operationShouldContinue: @escaping () -> Bool = { true },
+        writeAdmission: ((LogitechDeviceSession.FeatureAccess<AdjustableDPI>) -> Bool)? = nil
     ) -> Bool {
-        guard shouldContinueSensorDPIRestore(expectedToken, deadline: deadline) else {
+        let shouldContinue = {
+            self.shouldContinueSensorDPIRestore(
+                expectedToken,
+                deadline: deadline,
+                operationShouldContinue: operationShouldContinue
+            )
+        }
+        guard shouldContinue() else {
             return false
+        }
+        let isBoundedLifecycleRestore = writeAdmission != nil
+        let featureIOShouldContinue = {
+            shouldContinue()
+                && (isBoundedLifecycleRestore
+                    || self.logitechSession.allowsConfiguredDPIOperation(
+                        for: expectedToken
+                    ))
         }
 
         let hasKnownBaseline = seedStoredSensorDPIBaseline(
@@ -350,7 +408,12 @@ extension Device {
         }
 
         guard !isRemoved,
-              let access = logitechAdjustableDPI(for: expectedToken),
+              let access = logitechAdjustableDPI(
+                  for: expectedToken,
+                  deadline: deadline,
+                  loadsSupportedDPI: false,
+                  until: featureIOShouldContinue
+              ),
               let initialDPI = logitechSession.initialSensorDPI(for: access)
         else {
             logitechSession.invalidateAdjustableDPI(for: expectedToken)
@@ -358,13 +421,28 @@ extension Device {
         }
         _ = seedStoredSensorDPIBaseline(receiverSlot: access.feature.receiverSlot)
 
+        let writeIsAdmitted = {
+            shouldContinue()
+                && (writeAdmission?(access)
+                    ?? self.logitechSession.allowsConfiguredDPIWrite(for: access))
+        }
+
         guard LogitechDPIRestoreOperation.perform(
             initialDPI: initialDPI,
-            shouldContinue: {
-                shouldContinueSensorDPIRestore(expectedToken, deadline: deadline)
+            shouldContinue: shouldContinue,
+            readCurrentDPI: {
+                access.feature.currentDPI(
+                    deadline: deadline,
+                    until: featureIOShouldContinue
+                )
             },
-            readCurrentDPI: access.feature.currentDPI,
-            writeDPI: { _ = access.feature.setDPI($0) }
+            writeDPI: {
+                _ = access.feature.setDPIExactly(
+                    $0,
+                    deadline: deadline,
+                    until: writeIsAdmitted
+                )
+            }
         ) else {
             return false
         }
@@ -379,9 +457,13 @@ extension Device {
 
     private func shouldContinueSensorDPIRestore(
         _ token: CancellationToken,
-        deadline: Date?
+        deadline: Date?,
+        operationShouldContinue: () -> Bool
     ) -> Bool {
-        token.shouldContinue && !isRemoved && deadline.map { Date() < $0 } != false
+        token.shouldContinue
+            && operationShouldContinue()
+            && !isRemoved
+            && deadline.map { Date() < $0 } != false
     }
 
     @discardableResult

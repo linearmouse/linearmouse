@@ -257,12 +257,14 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
         let store = LogitechHardwareBaselineStore()
         var hardwareMode = false
 
-        LogitechHiResBaselineCapture.captureIfNeeded(
-            hasInitialState: false,
+        var captured = false
+        XCTAssertTrue(LogitechHiResBaselineCapture.ensureCaptured(
+            hasInitialState: { captured },
             readCurrentMode: { hardwareMode }
         ) { initialMode in
             _ = store.captureHiResBaseline(enabled: initialMode, for: target)
-        }
+            captured = true
+        })
 
         // The device applies the write but its acknowledgement is lost.
         hardwareMode = true
@@ -272,6 +274,52 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
             receiverSlot: nil
         ) { _, _ in target })
         XCTAssertTrue(rebuiltSession.seedInitialHiResWheelState(claim, for: lease))
+    }
+
+    func testHiResWriteIsRejectedWhenBaselineCannotBeRead() {
+        var captured = false
+
+        let admitted = LogitechHiResBaselineCapture.ensureCaptured(
+            hasInitialState: { captured },
+            readCurrentMode: { nil },
+            capture: { _ in captured = true }
+        )
+
+        XCTAssertFalse(admitted)
+        XCTAssertFalse(captured)
+    }
+
+    func testHiResRestoreUsesReadbackWhenWriteAcknowledgementIsLost() {
+        var hardwareMode = false
+        var writes = 0
+
+        let restored = LogitechHiResRestoreOperation.perform(
+            initialEnabled: true,
+            shouldContinue: { true },
+            readCurrentMode: { hardwareMode },
+            writeMode: { enabled in
+                writes += 1
+                hardwareMode = enabled
+                // The helper deliberately has no acknowledgement result.
+            }
+        )
+
+        XCTAssertTrue(restored)
+        XCTAssertEqual(writes, 1)
+        XCTAssertTrue(hardwareMode)
+    }
+
+    func testHiResRestoreRequiresReadbackBeforeSuccess() {
+        var hardwareMode = false
+
+        let restored = LogitechHiResRestoreOperation.perform(
+            initialEnabled: true,
+            shouldContinue: { true },
+            readCurrentMode: { hardwareMode },
+            writeMode: { _ in hardwareMode = false }
+        )
+
+        XCTAssertFalse(restored)
     }
 
     func testLifecycleRestoreRetriesUntilAWriteSucceeds() {
@@ -323,15 +371,15 @@ final class LogitechHardwareBaselineStoreTests: XCTestCase {
 
     func testSleepPolicyPreservesOnlyStoreBackedBaselines() {
         XCTAssertEqual(
-            LogitechHiResSleepRestorePolicy.resolve(hasSessionInitial: true, hasStoreBaseline: true),
+            LogitechSleepRestorePolicy.resolve(hasSessionInitial: true, hasStoreBaseline: true),
             .preserveStoreBaseline
         )
         XCTAssertEqual(
-            LogitechHiResSleepRestorePolicy.resolve(hasSessionInitial: true, hasStoreBaseline: false),
+            LogitechSleepRestorePolicy.resolve(hasSessionInitial: true, hasStoreBaseline: false),
             .restoreBestEffort
         )
         XCTAssertEqual(
-            LogitechHiResSleepRestorePolicy.resolve(hasSessionInitial: false, hasStoreBaseline: false),
+            LogitechSleepRestorePolicy.resolve(hasSessionInitial: false, hasStoreBaseline: false),
             .skip
         )
     }

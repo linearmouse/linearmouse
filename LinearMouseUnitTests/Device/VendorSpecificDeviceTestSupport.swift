@@ -80,8 +80,10 @@ final class MockVendorSpecificDeviceContext: LogitechReceiverMonitoringChannel {
         return response
     }
 
-    func enableWirelessNotifications() {
-        wirelessNotificationEnableCount += 1
+    func enableWirelessNotifications(until shouldContinue: @escaping () -> Bool) {
+        if shouldContinue() {
+            wirelessNotificationEnableCount += 1
+        }
     }
 
     func waitForReceiverConnectionNotification(

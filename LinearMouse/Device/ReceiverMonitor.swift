@@ -149,6 +149,31 @@ struct ReceiverMonitorHandoff<Owner: AnyObject, Candidate: AnyObject> {
         }
     }
 
+    /// Stops whichever owner currently produces receiver events and discards
+    /// every pending replacement. Terminal teardown has already retained the
+    /// exact shared channel, so no candidate may restart this location until a
+    /// new DeviceManager observation lifetime begins.
+    mutating func requestTerminalStop() -> Owner? {
+        switch phase {
+        case nil:
+            return nil
+        case let .active(owner, candidate):
+            phase = .stopping(
+                owner: owner,
+                stoppedCandidate: candidate,
+                pending: []
+            )
+            return owner
+        case let .stopping(owner, stoppedCandidate, _):
+            phase = .stopping(
+                owner: owner,
+                stoppedCandidate: stoppedCandidate,
+                pending: []
+            )
+            return nil
+        }
+    }
+
     /// Releases only the matching stopping owner. The caller may start the
     /// returned live candidate after this transition has made the slot empty.
     mutating func didStop(
@@ -181,12 +206,22 @@ struct ReceiverMonitorHandoff<Owner: AnyObject, Candidate: AnyObject> {
         }
         return owner
     }
+
+    var currentOwner: Owner? {
+        switch phase {
+        case let .active(owner, _), let .stopping(owner, _, _):
+            return owner
+        case nil:
+            return nil
+        }
+    }
 }
 
 final class ReceiverMonitor {
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "ReceiverMonitor")
     static let initialDiscoveryTimeout: TimeInterval = 3
     static let channelOpenRetryInterval: TimeInterval = 0.5
+    static let identityRefreshTimeout: TimeInterval = 0.5
     static let maximumDiscoveryRetryInterval: TimeInterval = 15
     static let refreshInterval: TimeInterval = 15
 
@@ -268,6 +303,36 @@ final class ReceiverMonitor {
         }
 
         handoffs[locationID]?.activeOwner?.requestRediscovery()
+    }
+
+    /// Freezes receiver-channel mutation first, then stops every monitor
+    /// producer. Each returned lease retains an existing channel or owns the
+    /// sole right to open its replacement on the background cleanup worker.
+    /// Callers must keep the leases alive through the whole hardware cleanup
+    /// and finish them on both success and timeout.
+    func beginTerminalTeardown(
+        locationIDs requestedLocationIDs: Set<Int>
+    ) -> [LogitechReceiverChannel.TerminalTeardown] {
+        let locationIDs = requestedLocationIDs.union(handoffs.keys).sorted()
+        let teardowns = locationIDs.compactMap { locationID in
+            LogitechReceiverChannel.beginTerminalTeardown(
+                locationID: locationID,
+                notificationOwnershipSession: ReceiverNotificationOwnershipSession()
+            )
+        }
+
+        var contexts = [ReceiverContext]()
+        for locationID in locationIDs {
+            guard var handoff = handoffs[locationID] else {
+                continue
+            }
+            if let context = handoff.requestTerminalStop() {
+                contexts.append(context)
+            }
+            handoffs[locationID] = handoff
+        }
+        contexts.forEach { $0.stop() }
+        return teardowns
     }
 
     private func contextDidStop(_ context: ReceiverContext, locationID: Int) {
@@ -461,7 +526,6 @@ private final class ReceiverContext {
     private var rediscoveryRequested = false
     private var lastCompleteConnectedDeviceCount: Int?
     private let retrySemaphore = DispatchSemaphore(value: 0)
-
     var onDiscoveryTimedOut: (() -> Void)?
     var onSlotsChanged: (([ReceiverLogicalDeviceIdentity]) -> Void)?
     var onStopped: (() -> Void)?
@@ -530,7 +594,7 @@ private final class ReceiverContext {
             maximumDelay: ReceiverMonitor.maximumDiscoveryRetryInterval
         )
         defer {
-            setCurrentChannel(nil)
+            retireCurrentChannel()
             markStopped()
             DispatchQueue.main.async { [weak self] in
                 self?.onStopped?()
@@ -544,9 +608,16 @@ private final class ReceiverContext {
             }
 
             if currentChannelSnapshot() == nil {
-                let channel = provider.openReceiverChannel(for: device.pointerDevice)
+                let channel = provider.openReceiverChannel(
+                    for: device.pointerDevice,
+                    notificationOwnershipSession: ReceiverNotificationOwnershipSession()
+                )
                 if let channel {
                     guard adoptCurrentChannelIfRunning(channel) else {
+                        _ = LogitechReceiverChannel.retireSharedChannel(
+                            locationID: locationID,
+                            matching: channel
+                        )
                         break
                     }
                 } else if !shouldContinueRunning() {
@@ -585,7 +656,13 @@ private final class ReceiverContext {
                 transport: device.pointerDevice.transport
             ) == .lightspeed {
                 guard let probe = ReceiverWorkerPostCallAdmission.admit(
-                    { provider.receiverChannelIsReachable(for: device.pointerDevice, using: receiverChannel) },
+                    {
+                        provider.receiverChannelIsReachable(
+                            for: device.pointerDevice,
+                            using: receiverChannel,
+                            until: shouldContinueRunning
+                        )
+                    },
                     whileRunning: shouldContinueRunning
                 ) else {
                     break
@@ -618,7 +695,8 @@ private final class ReceiverContext {
                     {
                         provider.receiverPointingDeviceDiscovery(
                             for: device.pointerDevice,
-                            using: receiverChannel
+                            using: receiverChannel,
+                            until: shouldContinueRunning
                         )
                     },
                     whileRunning: shouldContinueRunning
@@ -634,7 +712,8 @@ private final class ReceiverContext {
                         {
                             provider.receiverChannelIsReachable(
                                 for: device.pointerDevice,
-                                using: receiverChannel
+                                using: receiverChannel,
+                                until: shouldContinueRunning
                             )
                         },
                         whileRunning: shouldContinueRunning
@@ -726,7 +805,13 @@ private final class ReceiverContext {
             guard !connectionBatch.snapshots.isEmpty else {
                 // Timeout with no events — verify channel is still alive
                 guard let reachability = ReceiverWorkerPostCallAdmission.admit(
-                    { provider.receiverChannelIsReachable(for: device.pointerDevice, using: receiverChannel) },
+                    {
+                        provider.receiverChannelIsReachable(
+                            for: device.pointerDevice,
+                            using: receiverChannel,
+                            until: shouldContinueRunning
+                        )
+                    },
                     whileRunning: shouldContinueRunning
                 ) else {
                     break
@@ -748,7 +833,8 @@ private final class ReceiverContext {
                         {
                             provider.connectedDeviceCount(
                                 for: device.pointerDevice,
-                                using: receiverChannel
+                                using: receiverChannel,
+                                until: shouldContinueRunning
                             )
                         },
                         whileRunning: shouldContinueRunning
@@ -925,12 +1011,6 @@ private final class ReceiverContext {
         _ = retrySemaphore.wait(timeout: .now() + retryDelay)
     }
 
-    private func setCurrentChannel(_ channel: LogitechReceiverChannel?) {
-        stateLock.lock()
-        currentChannel = channel
-        stateLock.unlock()
-    }
-
     private func adoptCurrentChannelIfRunning(_ channel: LogitechReceiverChannel) -> Bool {
         stateLock.lock()
         defer { stateLock.unlock() }
@@ -948,12 +1028,15 @@ private final class ReceiverContext {
             return
         }
         currentChannel = nil
-        _ = LogitechReceiverChannel.detachSharedChannel(locationID: locationID, matching: channel)
         stateLock.unlock()
 
-        // Detach shared ownership while lifecycle admission is locked, then do
-        // slow hardware teardown without blocking stop() on stateLock.
-        channel.invalidate()
+        // The context gives up its local reference first. Shared retirement
+        // then keeps the physical location closed while cancellation runs,
+        // without blocking stop() on stateLock.
+        _ = LogitechReceiverChannel.retireSharedChannel(
+            locationID: locationID,
+            matching: channel
+        )
         stateStore.invalidateChannel()
         lastCompleteConnectedDeviceCount = nil
         publish([])
@@ -963,6 +1046,20 @@ private final class ReceiverContext {
         stateLock.lock()
         defer { stateLock.unlock() }
         return currentChannel
+    }
+
+    private func retireCurrentChannel() {
+        stateLock.lock()
+        let channel = currentChannel
+        currentChannel = nil
+        stateLock.unlock()
+
+        if let channel {
+            _ = LogitechReceiverChannel.retireSharedChannel(
+                locationID: locationID,
+                matching: channel
+            )
+        }
     }
 
     private func mergeDiscovery(
@@ -989,11 +1086,13 @@ private final class ReceiverContext {
     ) -> Bool {
         guard let admitted = ReceiverWorkerPostCallAdmission.admit(
             {
-                provider.receiverSlotIdentity(
+                provider.validateReceiverSlotIdentity(
                     for: device.pointerDevice,
                     slot: slot,
                     connectionSnapshot: connectionSnapshot,
-                    using: receiverChannel
+                    using: receiverChannel,
+                    deadline: Date().addingTimeInterval(ReceiverMonitor.identityRefreshTimeout),
+                    until: shouldContinueRunning
                 )
             },
             whileRunning: shouldContinueRunning

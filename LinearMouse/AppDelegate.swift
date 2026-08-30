@@ -96,7 +96,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         )
         terminationRequest = request
 
-        stop(restoringHighResolutionWheel: true) {
+        stop {
             request.complete()
         }
         return .terminateLater
@@ -127,7 +127,7 @@ extension AppDelegate {
         ) { [weak self] _ in
             os_log("Session inactive", log: Self.log, type: .info)
             self?.lifecycleAdmission.sessionActive = false
-            self?.stop(restoringHighResolutionWheel: true)
+            self?.stop()
         }
 
         NSWorkspace.shared.notificationCenter.addObserver(
@@ -206,16 +206,12 @@ extension AppDelegate {
     }
 
     func stop(
-        restoringHighResolutionWheel: Bool = true,
-        applyingSleepHiResPolicy: Bool = false,
-        controlsTeardownPolicy: DeviceManagerControlsTeardownPolicy = .restore,
+        logitechTeardownPolicy: DeviceManagerLogitechTeardownPolicy = .restore,
         completion: (() -> Void)? = nil
     ) {
         BatteryDeviceMonitor.shared.disable()
         DeviceManager.shared.stop(
-            restoringHighResolutionWheel: restoringHighResolutionWheel,
-            applyingSleepHiResPolicy: applyingSleepHiResPolicy,
-            controlsTeardownPolicy: controlsTeardownPolicy,
+            logitechTeardownPolicy: logitechTeardownPolicy,
             completion: completion
         )
         GlobalEventTap.shared.stop()
@@ -223,9 +219,7 @@ extension AppDelegate {
 
     private func stopForSleep(completion: (() -> Void)? = nil) {
         stop(
-            restoringHighResolutionWheel: false,
-            applyingSleepHiResPolicy: true,
-            controlsTeardownPolicy: .sleepPreserve,
+            logitechTeardownPolicy: .sleepPreserve,
             completion: completion
         )
     }

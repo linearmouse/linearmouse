@@ -573,9 +573,13 @@ extension PointerDevice {
         guard let device, !report.isEmpty, valid else {
             return nil
         }
+        let deadline = Date().addingTimeInterval(timeout)
+        let requestShouldContinue = {
+            shouldContinue() && Date() < deadline
+        }
 
         return withSynchronousReportRequestGate(
-            until: shouldContinue,
+            until: requestShouldContinue,
             acquirePermit: {
                 self.acquireSynchronousReportRequestPermit()
             },
@@ -583,7 +587,7 @@ extension PointerDevice {
                 self.synchronousReportRequestGate.signal()
             }
         ) {
-            guard shouldContinue() else {
+            guard requestShouldContinue() else {
                 return nil
             }
             guard ensureInputReportCallbackRegistered(minimumReportLength: max(report.count, maxInputReportSize ?? 0)),
@@ -606,7 +610,7 @@ extension PointerDevice {
 
                 stateLock.lock()
                 defer { stateLock.unlock() }
-                guard isValid else {
+                guard isValid, requestShouldContinue() else {
                     return kIOReturnNotOpen
                 }
 
@@ -626,7 +630,6 @@ extension PointerDevice {
                 return nil
             }
 
-            let deadline = Date().addingTimeInterval(timeout)
             let waitForResponse: (TimeInterval) -> Void
             if CFEqual(CFRunLoopGetCurrent(), runLoop) {
                 waitForResponse = { interval in
@@ -645,7 +648,7 @@ extension PointerDevice {
             }
             return settleCommittedSynchronousReportRequest(
                 until: deadline,
-                shouldDeliverResult: shouldContinue,
+                shouldDeliverResult: requestShouldContinue,
                 isTransportValid: { self.valid },
                 wait: waitForResponse
             ) {

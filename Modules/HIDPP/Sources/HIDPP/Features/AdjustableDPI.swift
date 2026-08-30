@@ -25,7 +25,26 @@ public struct AdjustableDPI: HIDPPFeature {
             featureIndex: featureIndex,
             supportedDPI: Self.readSupportedDPI(
                 transport: transport,
-                featureIndex: featureIndex
+                featureIndex: featureIndex,
+                deadline: nil
+            ) { true }
+        )
+    }
+
+    public init(
+        transport: HIDPPTransport,
+        featureIndex: UInt8,
+        deadline: Date?,
+        until shouldContinue: @escaping () -> Bool
+    ) {
+        self.init(
+            transport: transport,
+            featureIndex: featureIndex,
+            supportedDPI: Self.readSupportedDPI(
+                transport: transport,
+                featureIndex: featureIndex,
+                deadline: deadline,
+                shouldContinue: shouldContinue
             )
         )
     }
@@ -62,10 +81,19 @@ public struct AdjustableDPI: HIDPPFeature {
     }
 
     public func currentDPI() -> Int? {
+        currentDPI(deadline: nil) { true }
+    }
+
+    public func currentDPI(
+        deadline: Date? = nil,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Int? {
         guard let response = transport.request(
             featureIndex: featureIndex,
             function: Constants.getSensorDPIFunction,
-            parameters: []
+            parameters: [],
+            deadline: deadline,
+            until: shouldContinue
         ),
             response.payload.count >= 5
         else {
@@ -85,13 +113,53 @@ public struct AdjustableDPI: HIDPPFeature {
     }
 
     public func setDPI(_ dpi: Int) -> Int? {
+        setDPI(dpi, deadline: nil) { true }
+    }
+
+    public func setDPI(
+        _ dpi: Int,
+        deadline: Date? = nil,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Int? {
         let targetDPI = supportedDPI(nearestTo: dpi)
+        return setRepresentableDPI(
+            targetDPI,
+            deadline: deadline,
+            until: shouldContinue
+        )
+    }
+
+    /// Restores a value previously read from this exact sensor without
+    /// quantizing it through a capability list that may be incomplete because
+    /// a bounded request expired between pages.
+    public func setDPIExactly(
+        _ dpi: Int,
+        deadline: Date? = nil,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Int? {
+        guard (1 ... Int(UInt16.max)).contains(dpi) else {
+            return nil
+        }
+        return setRepresentableDPI(
+            dpi,
+            deadline: deadline,
+            until: shouldContinue
+        )
+    }
+
+    private func setRepresentableDPI(
+        _ targetDPI: Int,
+        deadline: Date?,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Int? {
         let parameters = [0x00, UInt8((targetDPI >> 8) & 0xFF), UInt8(targetDPI & 0xFF)]
 
         let response = transport.requestOnce(
             featureIndex: featureIndex,
             function: Constants.setSensorDPIFunction,
-            parameters: parameters
+            parameters: parameters,
+            deadline: deadline,
+            until: shouldContinue
         )
 
         return response == nil ? nil : targetDPI
@@ -115,16 +183,25 @@ public struct AdjustableDPI: HIDPPFeature {
         return supportedDPI.contains(dpi)
     }
 
-    private static func readSupportedDPI(transport: HIDPPTransport, featureIndex: UInt8) -> [Int] {
+    private static func readSupportedDPI(
+        transport: HIDPPTransport,
+        featureIndex: UInt8,
+        deadline: Date?,
+        shouldContinue: @escaping () -> Bool
+    ) -> [Int] {
         parseSupportedDPI(readSupportedDPIBytes(
             transport: transport,
-            featureIndex: featureIndex
+            featureIndex: featureIndex,
+            deadline: deadline,
+            shouldContinue: shouldContinue
         ))
     }
 
     private static func readSupportedDPIBytes(
         transport: HIDPPTransport,
-        featureIndex: UInt8
+        featureIndex: UInt8,
+        deadline: Date?,
+        shouldContinue: @escaping () -> Bool
     ) -> [UInt8] {
         var bytes = [UInt8]()
 
@@ -132,7 +209,9 @@ public struct AdjustableDPI: HIDPPFeature {
             guard let response = transport.request(
                 featureIndex: featureIndex,
                 function: Constants.getSensorDPIListFunction,
-                parameters: [0x00, 0x00, index]
+                parameters: [0x00, 0x00, index],
+                deadline: deadline,
+                until: shouldContinue
             ),
                 response.payload.count > 1
             else {

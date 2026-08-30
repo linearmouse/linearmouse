@@ -58,6 +58,367 @@ final class LogitechDeviceSessionTests: XCTestCase {
         wait(for: [cancelled], timeout: 1)
     }
 
+    func testTerminalHardwareRestoreRetainsCurrentFeatureAccesses() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        _ = try adjustableDPIAccess(for: session)
+        _ = try hiResWheelAccess(for: session)
+        let completed = expectation(description: "terminal restore")
+
+        session.runTerminalHardwareRestore { dpiToken, wheelToken, _ in
+            let retainedDPI = session.adjustableDPI(expectedToken: dpiToken) { _, _ in
+                XCTFail("Terminal restore should reuse the current DPI feature")
+                return nil
+            }
+            let retainedWheel = session.hiResWheel(expectedToken: wheelToken) { _, _ in
+                XCTFail("Terminal restore should reuse the current wheel feature")
+                return nil
+            }
+
+            XCTAssertNotNil(retainedDPI)
+            XCTAssertNotNil(retainedWheel)
+            completed.fulfill()
+        } onCancelled: {
+            XCTFail("Current terminal restore should not be cancelled")
+        }
+
+        wait(for: [completed], timeout: 1)
+    }
+
+    func testPreparedTerminalSessionRunsRestoreThroughTheSameOwner() {
+        let session = LogitechDeviceSession(deviceID: 1)
+        session.freezeTerminalHardwareMutations()
+        let completed = expectation(description: "prepared terminal restore")
+
+        session.runTerminalHardwareRestore { _, _, ownsTerminalRestore in
+            XCTAssertTrue(ownsTerminalRestore())
+            completed.fulfill()
+        } onCancelled: {
+            XCTFail("The prepared terminal owner should be reused")
+        }
+
+        wait(for: [completed], timeout: 1)
+    }
+
+    func testCancellingOneQueuedTerminalFeatureDoesNotStarveTheOther() {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let queueGate = DispatchSemaphore(value: 0)
+        session.perform { queueGate.wait() }
+        let ran = expectation(description: "terminal restore ran")
+
+        session.runTerminalHardwareRestore { dpiToken, wheelToken, _ in
+            XCTAssertFalse(dpiToken.shouldContinue)
+            XCTAssertTrue(wheelToken.shouldContinue)
+            ran.fulfill()
+        } onCancelled: {
+            XCTFail("The terminal owner itself remains current")
+        }
+
+        session.cancelDPIApply()
+        queueGate.signal()
+        wait(for: [ran], timeout: 1)
+    }
+
+    func testTerminalHardwareRestoreRejectsNewSettingMutation() {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let terminalStarted = expectation(description: "terminal restore started")
+        let releaseTerminal = DispatchSemaphore(value: 0)
+
+        session.runTerminalHardwareRestore { _, _, _ in
+            terminalStarted.fulfill()
+            releaseTerminal.wait()
+        } onCancelled: {
+            XCTFail("The first terminal request owns this session")
+        }
+        wait(for: [terminalStarted], timeout: 1)
+
+        var manualOperationRan = false
+        let manualCancelled = expectation(description: "manual mutation rejected")
+        session.runDPIOperation { _ in
+            manualOperationRan = true
+        } onCancelled: {
+            manualCancelled.fulfill()
+        }
+        wait(for: [manualCancelled], timeout: 1)
+
+        var configuredApplyRan = false
+        session.startDPIApply { _, _ in
+            configuredApplyRan = true
+            return true
+        }
+
+        releaseTerminal.signal()
+        session.performSynchronously {}
+        XCTAssertFalse(manualOperationRan)
+        XCTAssertFalse(configuredApplyRan)
+    }
+
+    func testTerminalRequestRejectsOrdinaryOperationAcceptedBeforeItWasInstalled() {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let queueGate = DispatchSemaphore(value: 0)
+        session.perform { queueGate.wait() }
+        var ordinaryOperationRan = false
+        let ordinaryCancelled = expectation(description: "queued ordinary mutation cancelled")
+
+        session.runDPIOperation { _ in
+            ordinaryOperationRan = true
+        } onCancelled: {
+            ordinaryCancelled.fulfill()
+        }
+
+        let terminalCompleted = expectation(description: "terminal restore ran")
+        session.runTerminalHardwareRestore { _, _, _ in
+            terminalCompleted.fulfill()
+        } onCancelled: {
+            XCTFail("terminal restore must retain ownership")
+        }
+
+        queueGate.signal()
+        wait(for: [ordinaryCancelled, terminalCompleted], timeout: 1)
+        XCTAssertFalse(ordinaryOperationRan)
+    }
+
+    func testTerminalRestoreRetriesOnlyUnfinishedSettings() {
+        var currentTime = Date(timeIntervalSince1970: 1000)
+        var dpiAttempts = 0
+        var wheelAttempts = 0
+        var waits = [TimeInterval]()
+
+        let restored = LogitechTerminalHardwareRestoreRetry.perform(
+            operations: [
+                .init(
+                    shouldContinue: { true },
+                    attempt: { _ in
+                        dpiAttempts += 1
+                        return dpiAttempts == 1
+                    }
+                ),
+                .init(
+                    shouldContinue: { true },
+                    attempt: { _ in
+                        wheelAttempts += 1
+                        return wheelAttempts == 2
+                    }
+                )
+            ],
+            deadline: currentTime.addingTimeInterval(1),
+            now: { currentTime },
+            wait: { delay in
+                waits.append(delay)
+                currentTime.addTimeInterval(delay)
+            }
+        )
+
+        XCTAssertTrue(restored)
+        XCTAssertEqual(dpiAttempts, 1)
+        XCTAssertEqual(wheelAttempts, 2)
+        XCTAssertEqual(waits, [0.05])
+    }
+
+    func testTerminalRestoreRetryStopsWhenOwnerIsCancelled() {
+        var currentTime = Date(timeIntervalSince1970: 1000)
+        var shouldContinue = true
+        var attempts = 0
+
+        let restored = LogitechTerminalHardwareRestoreRetry.perform(
+            operations: [
+                .init(
+                    shouldContinue: { shouldContinue },
+                    attempt: { _ in
+                        attempts += 1
+                        return false
+                    }
+                )
+            ],
+            deadline: currentTime.addingTimeInterval(1),
+            now: { currentTime },
+            wait: { delay in
+                currentTime.addTimeInterval(delay)
+                shouldContinue = false
+            }
+        )
+
+        XCTAssertFalse(restored)
+        XCTAssertEqual(attempts, 1)
+    }
+
+    func testSlowDPIAttemptCannotStarveWheelRestore() {
+        var currentTime = Date(timeIntervalSince1970: 1000)
+        let deadline = currentTime.addingTimeInterval(4)
+        var dpiAttempts = 0
+        var wheelAttempts = 0
+
+        let restored = LogitechTerminalHardwareRestoreRetry.perform(
+            operations: [
+                .init(
+                    shouldContinue: { true },
+                    attempt: { attempt in
+                        dpiAttempts += 1
+                        // Model a read/set/read path that consumes every second
+                        // granted to this setting.
+                        currentTime = attempt.deadline
+                        return false
+                    }
+                ),
+                .init(
+                    shouldContinue: { true },
+                    attempt: { _ in
+                        wheelAttempts += 1
+                        return true
+                    }
+                )
+            ],
+            deadline: deadline,
+            now: { currentTime },
+            wait: { currentTime.addTimeInterval($0) }
+        )
+
+        XCTAssertFalse(restored)
+        XCTAssertGreaterThanOrEqual(dpiAttempts, 1)
+        XCTAssertEqual(wheelAttempts, 1)
+    }
+
+    func testInFlightConfiguredWriteLosesAdmissionWhenTerminalRestoreBegins() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let access = try adjustableDPIAccess(for: session)
+        let operationStarted = expectation(description: "configured operation started")
+        let inspectAdmission = DispatchSemaphore(value: 0)
+        let admissionChecked = expectation(description: "write admission checked")
+
+        session.perform {
+            operationStarted.fulfill()
+            inspectAdmission.wait()
+            XCTAssertFalse(session.allowsConfiguredDPIWrite(for: access))
+            admissionChecked.fulfill()
+        }
+        wait(for: [operationStarted], timeout: 1)
+
+        let terminalRan = expectation(description: "terminal restore ran")
+        session.runTerminalHardwareRestore { _, _, ownsTerminalRestore in
+            XCTAssertTrue(ownsTerminalRestore())
+            terminalRan.fulfill()
+        } onCancelled: {
+            XCTFail("terminal owner should remain current")
+        }
+        inspectAdmission.signal()
+
+        wait(for: [admissionChecked, terminalRan], timeout: 1)
+    }
+
+    func testSlowInFlightApplyIsSupersededBeforeUnkeyedSleepDecision() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let access = try adjustableDPIAccess(for: session)
+        let wheelAccess = try hiResWheelAccess(for: session)
+        XCTAssertTrue(session.recordInitialSensorDPI(800, for: access))
+        XCTAssertTrue(session.recordInitialHiResWheelState(enabled: false, for: wheelAccess))
+        let oldApplyStarted = expectation(description: "old apply started")
+        let releaseOldApply = DispatchSemaphore(value: 0)
+        let sleepDecision = expectation(description: "sleep decision")
+
+        session.perform {
+            oldApplyStarted.fulfill()
+            releaseOldApply.wait()
+            XCTAssertFalse(session.allowsConfiguredDPIWrite(for: access))
+        }
+        wait(for: [oldApplyStarted], timeout: 1)
+
+        session.runSleepHardwarePreparation { dpiToken, wheelToken, ownsSleepPreparation in
+            XCTAssertTrue(dpiToken.shouldContinue)
+            XCTAssertTrue(wheelToken.shouldContinue)
+            XCTAssertTrue(ownsSleepPreparation())
+            XCTAssertEqual(session.hardwareSleepRestorePolicies.dpi, .restoreBestEffort)
+            XCTAssertEqual(session.hardwareSleepRestorePolicies.hiResWheel, .restoreBestEffort)
+            sleepDecision.fulfill()
+        } onCancelled: {
+            XCTFail("sleep operation should own both superseding setting tokens")
+        }
+        XCTAssertFalse(session.allowsConfiguredDPIWrite(for: access))
+        XCTAssertFalse(session.allowsConfiguredHiResWheelWrite(for: wheelAccess))
+        releaseOldApply.signal()
+
+        wait(for: [sleepDecision], timeout: 1)
+    }
+
+    func testTerminalRestoreSupersedesQueuedSleepPreparation() {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let queueGate = DispatchSemaphore(value: 0)
+        session.perform { queueGate.wait() }
+        let sleepCancelled = expectation(description: "sleep preparation cancelled")
+        let terminalRan = expectation(description: "terminal restore ran")
+
+        session.runSleepHardwarePreparation { _, _, _ in
+            XCTFail("terminal restore must supersede queued sleep work")
+        } onCancelled: {
+            sleepCancelled.fulfill()
+        }
+        session.runTerminalHardwareRestore { _, _, ownsTerminalRestore in
+            XCTAssertTrue(ownsTerminalRestore())
+            terminalRan.fulfill()
+        } onCancelled: {
+            XCTFail("terminal restore is the stronger concrete owner")
+        }
+        queueGate.signal()
+
+        wait(for: [sleepCancelled, terminalRan], timeout: 1)
+    }
+
+    func testUnkeyedDPISleepPolicyRestoresBestEffort() {
+        XCTAssertEqual(
+            LogitechSleepRestorePolicy.resolve(
+                hasSessionInitial: true,
+                hasStoreBaseline: false
+            ),
+            .restoreBestEffort
+        )
+    }
+
+    func testStoreBackedDPISleepPolicyPreservesBaselineWithoutIO() {
+        XCTAssertEqual(
+            LogitechSleepRestorePolicy.resolve(
+                hasSessionInitial: true,
+                hasStoreBaseline: true
+            ),
+            .preserveStoreBaseline
+        )
+    }
+
+    func testDPISleepPolicySkipsWithoutInitialState() {
+        XCTAssertEqual(
+            LogitechSleepRestorePolicy.resolve(
+                hasSessionInitial: false,
+                hasStoreBaseline: false
+            ),
+            .skip
+        )
+    }
+
+    func testTerminalRestoreRetryUsesTheRemainingDeadlineBudget() {
+        var currentTime = Date(timeIntervalSince1970: 1000)
+        var attempts = 0
+        var waits = [TimeInterval]()
+
+        let restored = LogitechTerminalHardwareRestoreRetry.perform(
+            operations: [
+                .init(
+                    shouldContinue: { true },
+                    attempt: { _ in
+                        attempts += 1
+                        return false
+                    }
+                )
+            ],
+            deadline: currentTime.addingTimeInterval(1),
+            now: { currentTime },
+            wait: { delay in
+                waits.append(delay)
+                currentTime.addTimeInterval(delay)
+            }
+        )
+
+        XCTAssertFalse(restored)
+        XCTAssertEqual(attempts, 5)
+        XCTAssertEqual(waits, [0.05, 0.1, 0.2, 0.4, 0.25])
+    }
+
     func testMetadataEnrichmentKeepsCurrentHardwareSession() throws {
         let session = LogitechDeviceSession(deviceID: 1)
         _ = session.updateDiscovery(discovery(serialNumber: nil, productID: 0xB034))
@@ -349,15 +710,6 @@ final class LogitechDeviceSessionTests: XCTestCase {
         XCTAssertEqual(session.hiResWheelNormalizationMultiplier, 8)
     }
 
-    func testNewWheelDesiredCancelsQueuedRestore() {
-        let session = LogitechDeviceSession(deviceID: 1)
-        let restoreToken = session.runHiResWheelOperation(waitUntilFinished: false) { _ in }
-
-        session.startHiResWheelApply { _, _ in false }
-
-        XCTAssertTrue(restoreToken.isCancelled)
-    }
-
     func testNewWheelDesiredCancelsRetryingStopManagingRestore() {
         let session = LogitechDeviceSession(deviceID: 1)
         let restoreToken = session.startHiResWheelRestore { _, _ in false }
@@ -369,7 +721,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
 
     func testSupersededRestoreCannotInvalidateNewWheelAccess() throws {
         let session = LogitechDeviceSession(deviceID: 1)
-        let restoreToken = session.runHiResWheelOperation(waitUntilFinished: false) { _ in }
+        let restoreToken = session.startHiResWheelRestore { _, _ in false }
         session.startHiResWheelApply { _, _ in false }
         _ = try hiResWheelAccess(for: session, receiverSlot: 2)
 

@@ -692,6 +692,40 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertTrue(handoff.isEmpty)
     }
 
+    func testReceiverHandoffTerminalStopClearsPendingAndReturnsOwnerOnce() {
+        var handoff = ReceiverMonitorHandoff<TestReceiverOwner, TestReceiverCandidate>()
+        let owner = TestReceiverOwner()
+        let active = TestReceiverCandidate()
+        let pending = TestReceiverCandidate()
+
+        XCTAssertTrue(handoff.requestStart(active))
+        XCTAssertTrue(handoff.activate(owner, for: active))
+        XCTAssertIdentical(handoff.requestStop(for: active), owner)
+        XCTAssertIdentical(handoff.currentOwner, owner)
+        XCTAssertFalse(handoff.requestStart(pending))
+
+        // The producer is already stopping, so terminal stop only discards
+        // its queued replacement and never asks the caller to stop it twice.
+        XCTAssertNil(handoff.requestTerminalStop())
+        XCTAssertNil(handoff.didStop(owner) { $0.isValid })
+        XCTAssertTrue(handoff.isEmpty)
+        XCTAssertNil(handoff.currentOwner)
+    }
+
+    func testReceiverHandoffTerminalStopOwnsActiveProducer() {
+        var handoff = ReceiverMonitorHandoff<TestReceiverOwner, TestReceiverCandidate>()
+        let owner = TestReceiverOwner()
+        let active = TestReceiverCandidate()
+
+        XCTAssertTrue(handoff.requestStart(active))
+        XCTAssertTrue(handoff.activate(owner, for: active))
+        XCTAssertIdentical(handoff.currentOwner, owner)
+        XCTAssertIdentical(handoff.requestTerminalStop(), owner)
+        XCTAssertNil(handoff.requestTerminalStop())
+        XCTAssertNil(handoff.didStop(owner) { $0.isValid })
+        XCTAssertTrue(handoff.isEmpty)
+    }
+
     func testReceiverHandoffSelectsLiveCandidateFromSharedLocation() {
         var handoff = ReceiverMonitorHandoff<TestReceiverOwner, TestReceiverCandidate>()
         let oldOwner = TestReceiverOwner()

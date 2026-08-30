@@ -56,6 +56,23 @@ final class HIDPPFeatureTests: XCTestCase {
         XCTAssertEqual(dpi.receiverSlot, 3)
     }
 
+    func testExactDPIRestoreDoesNotUseAPartialSupportedList() throws {
+        let device = MockHIDPPDevice()
+        device.responseProvider = { report in
+            Data([0x11, 0xFF, 0x22, [UInt8](report)[3], 0x00, 0x00, 0x00])
+        }
+        let transport = try XCTUnwrap(HIDPPTransport(device: device, deviceIndex: nil))
+        let dpi = AdjustableDPI(
+            transport: transport,
+            featureIndex: 0x22,
+            supportedDPI: [400, 800]
+        )
+
+        XCTAssertEqual(dpi.setDPIExactly(8000) { true }, 8000)
+        let report = try XCTUnwrap(device.reports.last)
+        XCTAssertEqual(Array(report.prefix(7)), [0x11, 0xFF, 0x22, 0x38, 0x00, 0x1F, 0x40])
+    }
+
     func testPreservesWheelModeBitsWhenEnablingHighResolutionMode() throws {
         let device = MockHIDPPDevice()
         device.responseProvider = { report in

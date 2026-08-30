@@ -11,6 +11,8 @@ final class MockHIDPPDevice: HIDPPCancellableDeviceIO {
     private(set) var reports = [Data]()
     private(set) var regularRequestCount = 0
     private(set) var singleTransactionRequestCount = 0
+    private(set) var requestTimeouts = [TimeInterval]()
+    private(set) var singleTransactionRequestTimeouts = [TimeInterval]()
 
     init(maxOutputReportSize: Int? = HIDPPConstants.longReportLength) {
         self.maxOutputReportSize = maxOutputReportSize
@@ -18,25 +20,27 @@ final class MockHIDPPDevice: HIDPPCancellableDeviceIO {
 
     func performSynchronousOutputReportRequest(
         _ report: Data,
-        timeout _: TimeInterval,
+        timeout: TimeInterval,
         matching: @escaping (Data) -> Bool
     ) -> Data? {
         regularRequestCount += 1
+        requestTimeouts.append(timeout)
         return response(to: report, matching: matching)
     }
 
     func performSynchronousOutputReportRequestOnce(
         _ report: Data,
-        timeout _: TimeInterval,
+        timeout: TimeInterval,
         matching: @escaping (Data) -> Bool
     ) -> Data? {
         singleTransactionRequestCount += 1
+        singleTransactionRequestTimeouts.append(timeout)
         return response(to: report, matching: matching)
     }
 
     func performSynchronousOutputReportRequest(
         _ report: Data,
-        timeout _: TimeInterval,
+        timeout: TimeInterval,
         matching: @escaping (Data) -> Bool,
         until shouldContinue: @escaping () -> Bool
     ) -> Data? {
@@ -45,12 +49,13 @@ final class MockHIDPPDevice: HIDPPCancellableDeviceIO {
         }
 
         regularRequestCount += 1
+        requestTimeouts.append(timeout)
         return response(to: report, matching: matching)
     }
 
     func performSynchronousOutputReportRequestOnce(
         _ report: Data,
-        timeout _: TimeInterval,
+        timeout: TimeInterval,
         matching: @escaping (Data) -> Bool,
         until shouldContinue: @escaping () -> Bool
     ) -> Data? {
@@ -59,6 +64,7 @@ final class MockHIDPPDevice: HIDPPCancellableDeviceIO {
         }
 
         singleTransactionRequestCount += 1
+        singleTransactionRequestTimeouts.append(timeout)
         return response(to: report, matching: matching)
     }
 

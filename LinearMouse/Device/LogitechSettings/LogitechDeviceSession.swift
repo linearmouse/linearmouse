@@ -4,6 +4,126 @@
 import Foundation
 import HIDPP
 
+enum LogitechSleepRestorePolicy: Equatable {
+    case preserveStoreBaseline
+    case restoreBestEffort
+    case skip
+
+    static func resolve(hasSessionInitial: Bool, hasStoreBaseline: Bool) -> Self {
+        guard hasSessionInitial else {
+            return .skip
+        }
+        return hasStoreBaseline ? .preserveStoreBaseline : .restoreBestEffort
+    }
+}
+
+enum LogitechTerminalHardwareRestoreRetry {
+    /// Concrete ownership for one bounded hardware attempt. Cancelling or
+    /// leaving its fair time slice makes every subsequent HID request and
+    /// pre-write check fail without relying on a shared counter.
+    final class Attempt {
+        let deadline: Date
+
+        private let cancellationSource = CancellationSource()
+        private let parentShouldContinue: () -> Bool
+        private let now: () -> Date
+
+        fileprivate init(
+            deadline: Date,
+            parentShouldContinue: @escaping () -> Bool,
+            now: @escaping () -> Date
+        ) {
+            self.deadline = deadline
+            self.parentShouldContinue = parentShouldContinue
+            self.now = now
+        }
+
+        func shouldContinue() -> Bool {
+            cancellationSource.token.shouldContinue
+                && parentShouldContinue()
+                && now() < deadline
+        }
+
+        fileprivate func cancel() {
+            cancellationSource.cancel()
+        }
+    }
+
+    struct Operation {
+        let shouldContinue: () -> Bool
+        let attempt: (Attempt) -> Bool
+    }
+
+    /// Retries only unfinished settings while their concrete owners and the
+    /// shared teardown deadline remain valid. Independent results prevent one
+    /// unavailable feature from starving restoration of another.
+    static func perform(
+        operations: [Operation],
+        deadline: Date,
+        now: @escaping () -> Date = Date.init,
+        wait: (TimeInterval) -> Void
+    ) -> Bool {
+        guard !operations.isEmpty else {
+            return true
+        }
+
+        var completed = [Bool](repeating: false, count: operations.count)
+        var backoff = ExponentialBackoff(initialDelay: 0.05, maximumDelay: 0.5)
+
+        while now() < deadline {
+            let runnable = operations.indices.filter {
+                !completed[$0]
+                    && operations[$0].shouldContinue()
+            }
+            var attempted = false
+            for (position, index) in runnable.enumerated() {
+                let operation = operations[index]
+                guard operation.shouldContinue(), now() < deadline else {
+                    continue
+                }
+                let remainingOperationCount = runnable.count - position
+                let attemptStart = now()
+                let remaining = deadline.timeIntervalSince(attemptStart)
+                guard remaining > 0 else {
+                    break
+                }
+                let attempt = Attempt(
+                    deadline: min(
+                        deadline,
+                        attemptStart.addingTimeInterval(
+                            remaining / Double(remainingOperationCount)
+                        )
+                    ),
+                    parentShouldContinue: operation.shouldContinue,
+                    now: now
+                )
+                attempted = true
+                completed[index] = operation.attempt(attempt)
+                attempt.cancel()
+            }
+
+            if completed.allSatisfy(\.self) {
+                return true
+            }
+            let hasRunnableOperation = operations.indices.contains {
+                !completed[$0]
+                    && operations[$0].shouldContinue()
+            }
+            guard attempted, hasRunnableOperation else {
+                break
+            }
+
+            let remaining = deadline.timeIntervalSince(now())
+            guard remaining > 0 else {
+                break
+            }
+            wait(min(backoff.nextDelay(), remaining))
+        }
+
+        return completed.allSatisfy(\.self)
+    }
+}
+
 final class LogitechDeviceSession {
     /// Hardware target invariants:
     /// 1. A TargetLease is immutable and binds one operation to its token, route,
@@ -56,6 +176,12 @@ final class LogitechDeviceSession {
         }
     }
 
+    /// Concrete ownership for the final hardware restore. Once installed, the
+    /// Device is leaving this observation lifetime and no new setting mutation
+    /// may supersede the restore.
+    private final class TerminalHardwareRestoreRequest {}
+    private final class SleepHardwarePreparationRequest {}
+
     fileprivate typealias InitialDPIState = InitialTargetState<
         Int,
         LogitechHardwareBaselineStore.DPIHandle
@@ -102,6 +228,8 @@ final class LogitechDeviceSession {
         var hiResWheelMultiplier: Int?
         var initialHiResWheelState: InitialHiResWheelState?
         var hiResWheelRestoreRetryNeeded = false
+        var sleepHardwarePreparationRequest: SleepHardwarePreparationRequest?
+        var terminalHardwareRestoreRequest: TerminalHardwareRestoreRequest?
     }
 
     struct DiscoveryUpdate {
@@ -152,6 +280,22 @@ final class LogitechDeviceSession {
                 return nil
             }
             return multiplier
+        }
+    }
+
+    var dpiReceiverSlotSnapshot: UInt8? {
+        withState {
+            $0.discovery?.route?.slot
+                ?? $0.adjustableDPI?.lease.receiverSlot
+                ?? $0.initialDPIState?.lease.receiverSlot
+        }
+    }
+
+    var hiResWheelReceiverSlotSnapshot: UInt8? {
+        withState {
+            $0.discovery?.route?.slot
+                ?? $0.hiResWheel?.lease.receiverSlot
+                ?? $0.initialHiResWheelState?.lease.receiverSlot
         }
     }
 
@@ -302,20 +446,20 @@ final class LogitechDeviceSession {
             } completion: { [weak self] succeeded in
                 self?.finishDPIRestore(succeeded: succeeded, for: token)
             }
-        }
+        } ?? Self.cancelledToken()
     }
 
     func cancelDPIApply() {
         let coordinator = dpiApplyCoordinator
-        resetFeatureOperation(
+        _ = resetFeatureOperation(
             cache: \State.adjustableDPI,
-            cancellationSource: \State.dpiCancellationSource
+            cancellationSource: \State.dpiCancellationSource,
+            admittedDuringTerminalRestore: true
         ) { _ in coordinator.cancel() }
     }
 
     @discardableResult
     func runDPIOperation(
-        waitUntilFinished: Bool = false,
         _ operation: @escaping (CancellationToken) -> Void,
         onCancelled: @escaping () -> Void
     ) -> CancellationToken {
@@ -323,7 +467,6 @@ final class LogitechDeviceSession {
             cache: \State.adjustableDPI,
             cancellationSource: \State.dpiCancellationSource,
             coordinator: dpiApplyCoordinator,
-            waitUntilFinished: waitUntilFinished,
             operation: operation,
             onCancelled: onCancelled
         )
@@ -367,29 +510,169 @@ final class LogitechDeviceSession {
             } completion: { [weak self] succeeded in
                 self?.finishHiResWheelRestore(succeeded: succeeded, for: token)
             }
-        }
+        } ?? Self.cancelledToken()
     }
 
     func cancelHiResWheelApply() {
         let coordinator = hiResWheelApplyCoordinator
-        resetFeatureOperation(
+        _ = resetFeatureOperation(
             cache: \State.hiResWheel,
-            cancellationSource: \State.hiResWheelCancellationSource
+            cancellationSource: \State.hiResWheelCancellationSource,
+            admittedDuringTerminalRestore: true
         ) { _ in coordinator.cancel() }
     }
 
-    @discardableResult
-    func runHiResWheelOperation(
-        waitUntilFinished: Bool,
-        _ operation: @escaping (CancellationToken) -> Void
-    ) -> CancellationToken {
-        runFeatureOperation(
-            cache: \State.hiResWheel,
-            cancellationSource: \State.hiResWheelCancellationSource,
-            coordinator: hiResWheelApplyCoordinator,
-            waitUntilFinished: waitUntilFinished,
-            operation: operation
-        ) {}
+    /// Atomically closes both configured setting pipelines, then decides
+    /// what sleep must restore from one later snapshot on the same serial
+    /// queue. Cached target leases remain usable by the concrete sleep owner,
+    /// while every configured pre-write check observes the closed admission.
+    /// This closes the gap where an in-flight apply could capture an
+    /// unkeyed baseline after a main-thread read-then-act decision.
+    func runSleepHardwarePreparation(
+        _ operation: @escaping (
+            _ dpiToken: CancellationToken,
+            _ wheelToken: CancellationToken,
+            _ ownsSleepPreparation: @escaping () -> Bool
+        ) -> Void,
+        onCancelled: @escaping () -> Void
+    ) {
+        let request = SleepHardwarePreparationRequest()
+        let tokens = withState { state -> (CancellationToken, CancellationToken)? in
+            guard state.sleepHardwarePreparationRequest == nil,
+                  state.terminalHardwareRestoreRequest == nil else {
+                return nil
+            }
+
+            state.sleepHardwarePreparationRequest = request
+            return (
+                state.dpiCancellationSource.token,
+                state.hiResWheelCancellationSource.token
+            )
+        }
+        guard let tokens else {
+            onCancelled()
+            return
+        }
+
+        dpiApplyCoordinator.cancel()
+        hiResWheelApplyCoordinator.cancel()
+
+        perform {
+            let ownsSleepPreparation = { [weak self] in
+                self?.withState {
+                    $0.sleepHardwarePreparationRequest === request
+                        && $0.terminalHardwareRestoreRequest == nil
+                } == true
+            }
+            guard ownsSleepPreparation(),
+                  tokens.0.shouldContinue,
+                  tokens.1.shouldContinue else {
+                onCancelled()
+                return
+            }
+            operation(
+                tokens.0,
+                tokens.1,
+                ownsSleepPreparation
+            )
+        }
+    }
+
+    /// Runs the final DPI and wheel restore on the existing per-device queue.
+    ///
+    /// Normal apply/confirmation work is cancelled first, but the current
+    /// feature transports and target leases are retained. This avoids
+    /// rebuilding a feature (and re-reading its capabilities) during the
+    /// bounded termination window. A later target transition or timeout still
+    /// cancels the captured tokens in the usual way.
+    func freezeTerminalHardwareMutations() {
+        _ = terminalHardwareRestoreSnapshot()
+        dpiApplyCoordinator.cancel()
+        hiResWheelApplyCoordinator.cancel()
+    }
+
+    func runTerminalHardwareRestore(
+        _ operation: @escaping (
+            _ dpiToken: CancellationToken,
+            _ wheelToken: CancellationToken,
+            _ ownsTerminalRestore: @escaping () -> Bool
+        ) -> Void,
+        onCancelled: @escaping () -> Void
+    ) {
+        let snapshot = terminalHardwareRestoreSnapshot()
+        let request = snapshot.request
+        let tokens = snapshot.tokens
+
+        dpiApplyCoordinator.cancel()
+        hiResWheelApplyCoordinator.cancel()
+
+        perform {
+            let ownsTerminalRestore = { [weak self] in
+                self?.withState {
+                    $0.terminalHardwareRestoreRequest === request
+                } == true
+            }
+            guard ownsTerminalRestore() else {
+                onCancelled()
+                return
+            }
+            operation(tokens.0, tokens.1, ownsTerminalRestore)
+        }
+    }
+
+    private func terminalHardwareRestoreSnapshot() -> (
+        request: TerminalHardwareRestoreRequest,
+        tokens: (CancellationToken, CancellationToken)
+    ) {
+        withState { state in
+            let request = state.terminalHardwareRestoreRequest ?? TerminalHardwareRestoreRequest()
+            state.terminalHardwareRestoreRequest = request
+            return (
+                request,
+                (state.dpiCancellationSource.token, state.hiResWheelCancellationSource.token)
+            )
+        }
+    }
+
+    /// Ordinary configured/manual writes lose admission as soon as a concrete
+    /// terminal owner is installed. Feature transports check this again at the
+    /// actual report send boundary, after any preceding read has completed.
+    func allowsConfiguredDPIOperation(for token: CancellationToken) -> Bool {
+        withState { state in
+            state.terminalHardwareRestoreRequest == nil
+                && state.sleepHardwarePreparationRequest == nil
+                && state.dpiCancellationSource.token == token
+                && token.shouldContinue
+        }
+    }
+
+    func allowsConfiguredHiResWheelOperation(for token: CancellationToken) -> Bool {
+        withState { state in
+            state.terminalHardwareRestoreRequest == nil
+                && state.sleepHardwarePreparationRequest == nil
+                && state.hiResWheelCancellationSource.token == token
+                && token.shouldContinue
+        }
+    }
+
+    func allowsConfiguredDPIWrite(for access: FeatureAccess<AdjustableDPI>) -> Bool {
+        withState { state in
+            state.terminalHardwareRestoreRequest == nil
+                && state.sleepHardwarePreparationRequest == nil
+                && Self.accessIsCurrent(
+                    access,
+                    token: state.dpiCancellationSource.token,
+                    route: state.discovery?.route
+                )
+        }
+    }
+
+    func allowsConfiguredHiResWheelWrite(for access: FeatureAccess<HiResWheel>) -> Bool {
+        withState { state in
+            state.terminalHardwareRestoreRequest == nil
+                && state.sleepHardwarePreparationRequest == nil
+                && Self.accessIsCurrent(access, in: state)
+        }
     }
 
     func updateSensorDPI(_ dpi: Int, for access: FeatureAccess<AdjustableDPI>) {
@@ -558,6 +841,26 @@ final class LogitechDeviceSession {
 
     var hasStoredSensorDPIBaseline: Bool {
         withState { $0.initialDPIState?.baselineHandle != nil }
+    }
+
+    /// One locked snapshot taken only after the caller has superseded previous
+    /// DPI work on this same session queue.
+    var hardwareSleepRestorePolicies: (
+        dpi: LogitechSleepRestorePolicy,
+        hiResWheel: LogitechSleepRestorePolicy
+    ) {
+        withState { state in
+            (
+                dpi: LogitechSleepRestorePolicy.resolve(
+                    hasSessionInitial: state.initialDPIState != nil,
+                    hasStoreBaseline: state.initialDPIState?.baselineHandle != nil
+                ),
+                hiResWheel: LogitechSleepRestorePolicy.resolve(
+                    hasSessionInitial: state.initialHiResWheelState != nil,
+                    hasStoreBaseline: state.initialHiResWheelState?.baselineHandle != nil
+                )
+            )
+        }
     }
 
     var needsDPIRestoreRetry: Bool {
@@ -850,18 +1153,27 @@ final class LogitechDeviceSession {
         cache: WritableKeyPath<State, FeatureAccess<Feature>?>,
         cancellationSource: WritableKeyPath<State, CancellationSource>,
         mutateState: (inout State) -> Void = { _ in },
+        admittedDuringTerminalRestore: Bool = false,
         updateCoordinator: (CancellationToken) -> Void
-    ) -> CancellationToken {
+    ) -> CancellationToken? {
         let source = CancellationSource()
-        let previousSource = withState { state -> CancellationSource in
+        let result = withState { state -> (accepted: Bool, previousSource: CancellationSource?) in
+            guard admittedDuringTerminalRestore
+                || (state.terminalHardwareRestoreRequest == nil
+                    && state.sleepHardwarePreparationRequest == nil) else {
+                return (false, nil)
+            }
             let previousSource = state[keyPath: cancellationSource]
             state[keyPath: cancellationSource] = source
             state[keyPath: cache] = nil
             mutateState(&state)
             updateCoordinator(source.token)
-            return previousSource
+            return (true, previousSource)
         }
-        previousSource.cancel()
+        guard result.accepted else {
+            return nil
+        }
+        result.previousSource?.cancel()
         return source.token
     }
 
@@ -870,45 +1182,37 @@ final class LogitechDeviceSession {
         cache: WritableKeyPath<State, FeatureAccess<Feature>?>,
         cancellationSource: WritableKeyPath<State, CancellationSource>,
         coordinator: HardwareSettingApplyCoordinator,
-        waitUntilFinished: Bool,
         operation: @escaping (CancellationToken) -> Void,
         onCancelled: @escaping () -> Void
     ) -> CancellationToken {
-        let token = resetFeatureOperation(
+        guard let token = resetFeatureOperation(
             cache: cache,
-            cancellationSource: cancellationSource
-        ) { _ in coordinator.cancel() }
+            cancellationSource: cancellationSource,
+            updateCoordinator: { _ in coordinator.cancel() }
+        ) else {
+            let token = Self.cancelledToken()
+            onCancelled()
+            return token
+        }
         let guardedOperation = {
-            guard token.shouldContinue else {
+            let mutationIsAdmitted = self.withState {
+                $0.terminalHardwareRestoreRequest == nil
+                    && $0.sleepHardwarePreparationRequest == nil
+            }
+            guard token.shouldContinue, mutationIsAdmitted else {
                 onCancelled()
                 return
             }
             operation(token)
         }
-        if waitUntilFinished {
-            if Thread.isMainThread {
-                // Direct HID report callbacks are delivered by the main run
-                // loop. Drain cancelled queued work without blocking it, then
-                // issue the teardown request on that run loop.
-                drainQueueOnCurrentRunLoop()
-                guardedOperation()
-            } else {
-                performSynchronously(guardedOperation)
-            }
-        } else {
-            perform(guardedOperation)
-        }
+        perform(guardedOperation)
         return token
     }
 
-    private func drainQueueOnCurrentRunLoop() {
-        let drained = DispatchSemaphore(value: 0)
-        queue.async {
-            drained.signal()
-        }
-        while drained.wait(timeout: .now()) == .timedOut {
-            _ = CFRunLoopRunInMode(.defaultMode, 0.01, true)
-        }
+    private static func cancelledToken() -> CancellationToken {
+        let source = CancellationSource()
+        source.cancel()
+        return source.token
     }
 
     func invalidateHiResWheel(for token: CancellationToken) {

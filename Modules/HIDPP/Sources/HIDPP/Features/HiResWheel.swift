@@ -46,10 +46,19 @@ public struct HiResWheel: HIDPPFeature {
     }
 
     public func capabilities() -> Capabilities? {
+        capabilities(deadline: nil) { true }
+    }
+
+    public func capabilities(
+        deadline: Date? = nil,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Capabilities? {
         guard let response = transport.request(
             featureIndex: featureIndex,
             function: Constants.getCapabilitiesFunction,
-            parameters: []
+            parameters: [],
+            deadline: deadline,
+            until: shouldContinue
         ),
             response.payload.count >= 2
         else {
@@ -60,15 +69,49 @@ public struct HiResWheel: HIDPPFeature {
     }
 
     public func isHighResolutionWheelEnabled() -> Bool? {
-        readMode().map { $0 & Constants.highResolutionModeBit != 0 }
+        isHighResolutionWheelEnabled(deadline: nil) { true }
+    }
+
+    public func isHighResolutionWheelEnabled(
+        deadline: Date? = nil,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Bool? {
+        readMode(deadline: deadline, until: shouldContinue)
+            .map { $0 & Constants.highResolutionModeBit != 0 }
     }
 
     public func setHighResolutionWheelEnabled(_ enabled: Bool) -> Bool? {
-        applyHighResolutionWheelEnabled(enabled)?.appliedEnabled
+        setHighResolutionWheelEnabled(
+            enabled,
+            deadline: nil
+        ) { true }
+    }
+
+    public func setHighResolutionWheelEnabled(
+        _ enabled: Bool,
+        deadline: Date? = nil,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Bool? {
+        applyHighResolutionWheelEnabled(
+            enabled,
+            deadline: deadline,
+            until: shouldContinue
+        )?.appliedEnabled
     }
 
     public func applyHighResolutionWheelEnabled(_ enabled: Bool) -> ApplyResult? {
-        guard var mode = readMode() else {
+        applyHighResolutionWheelEnabled(
+            enabled,
+            deadline: nil
+        ) { true }
+    }
+
+    public func applyHighResolutionWheelEnabled(
+        _ enabled: Bool,
+        deadline: Date? = nil,
+        until shouldContinue: @escaping () -> Bool
+    ) -> ApplyResult? {
+        guard var mode = readMode(deadline: deadline, until: shouldContinue) else {
             return nil
         }
 
@@ -86,7 +129,9 @@ public struct HiResWheel: HIDPPFeature {
         guard transport.request(
             featureIndex: featureIndex,
             function: Constants.setModeFunction,
-            parameters: [mode]
+            parameters: [mode],
+            deadline: deadline,
+            until: shouldContinue
         ) != nil else {
             return nil
         }
@@ -94,11 +139,16 @@ public struct HiResWheel: HIDPPFeature {
         return ApplyResult(previousEnabled: currentlyEnabled, appliedEnabled: enabled)
     }
 
-    private func readMode() -> UInt8? {
+    private func readMode(
+        deadline: Date?,
+        until shouldContinue: @escaping () -> Bool
+    ) -> UInt8? {
         guard let response = transport.request(
             featureIndex: featureIndex,
             function: Constants.getModeFunction,
-            parameters: []
+            parameters: [],
+            deadline: deadline,
+            until: shouldContinue
         ),
             let mode = response.payload.first
         else {

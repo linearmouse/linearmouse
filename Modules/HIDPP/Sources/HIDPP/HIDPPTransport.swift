@@ -18,12 +18,14 @@ public struct HIDPPTransport {
     private let deviceIndex: UInt8
     private let acceptedReplyIndices: Set<UInt8>
     private let shouldContinue: () -> Bool
+    private let requestTimeout: TimeInterval
     public let receiverSlot: UInt8?
     public let isReceiverRoutedDevice: Bool
 
     public init?(
         device: HIDPPDeviceIO,
         deviceIndex: UInt8?,
+        requestTimeout: TimeInterval = HIDPPConstants.timeout,
         shouldContinue: @escaping () -> Bool = { true }
     ) {
         let maxOutputReportSize = device.maxOutputReportSize ?? 0
@@ -40,15 +42,30 @@ public struct HIDPPTransport {
         self.device = device
         self.deviceIndex = deviceIndex ?? HIDPPConstants.receiverIndex
         self.shouldContinue = shouldContinue
+        self.requestTimeout = max(0, requestTimeout)
         receiverSlot = deviceIndex
         isReceiverRoutedDevice = receiverSlot != nil
         acceptedReplyIndices = deviceIndex.map { Set([$0]) } ?? HIDPPConstants.directReplyIndices
     }
 
     public func featureIndex(for featureID: HIDPPFeatureID) -> UInt8? {
-        guard let response = request(featureIndex: 0x00, function: 0x00, parameters: featureID.bytes),
-              let featureIndex = response.payload.first,
-              featureIndex != 0
+        featureIndex(for: featureID, deadline: nil) { true }
+    }
+
+    public func featureIndex(
+        for featureID: HIDPPFeatureID,
+        deadline: Date? = nil,
+        until operationShouldContinue: @escaping () -> Bool
+    ) -> UInt8? {
+        guard let response = request(
+            featureIndex: 0x00,
+            function: 0x00,
+            parameters: featureID.bytes,
+            deadline: deadline,
+            until: operationShouldContinue
+        ),
+            let featureIndex = response.payload.first,
+            featureIndex != 0
         else {
             return nil
         }
@@ -65,7 +82,24 @@ public struct HIDPPTransport {
             featureIndex: featureIndex,
             function: function,
             parameters: parameters,
-            performsSingleTransaction: false
+            deadline: nil
+        )            { true }
+    }
+
+    public func request(
+        featureIndex: UInt8,
+        function: UInt8,
+        parameters: [UInt8],
+        deadline: Date? = nil,
+        until operationShouldContinue: @escaping () -> Bool
+    ) -> HIDPPResponse? {
+        request(
+            featureIndex: featureIndex,
+            function: function,
+            parameters: parameters,
+            performsSingleTransaction: false,
+            deadline: deadline,
+            operationShouldContinue: operationShouldContinue
         )
     }
 
@@ -74,11 +108,28 @@ public struct HIDPPTransport {
         function: UInt8,
         parameters: [UInt8]
     ) -> HIDPPResponse? {
+        requestOnce(
+            featureIndex: featureIndex,
+            function: function,
+            parameters: parameters,
+            deadline: nil
+        )            { true }
+    }
+
+    public func requestOnce(
+        featureIndex: UInt8,
+        function: UInt8,
+        parameters: [UInt8],
+        deadline: Date? = nil,
+        until operationShouldContinue: @escaping () -> Bool
+    ) -> HIDPPResponse? {
         request(
             featureIndex: featureIndex,
             function: function,
             parameters: parameters,
-            performsSingleTransaction: true
+            performsSingleTransaction: true,
+            deadline: deadline,
+            operationShouldContinue: operationShouldContinue
         )
     }
 
@@ -86,14 +137,18 @@ public struct HIDPPTransport {
         featureIndex: UInt8,
         function: UInt8,
         parameters: [UInt8],
-        performsSingleTransaction: Bool
+        performsSingleTransaction: Bool,
+        deadline: Date?,
+        operationShouldContinue: @escaping () -> Bool
     ) -> HIDPPResponse? {
         for attempt in 1 ... Self.maximumBusyAttempts {
             switch response(
                 featureIndex: featureIndex,
                 function: function,
                 parameters: parameters,
-                performsSingleTransaction: performsSingleTransaction
+                performsSingleTransaction: performsSingleTransaction,
+                deadline: deadline,
+                operationShouldContinue: operationShouldContinue
             ) {
             case let .response(response):
                 return response
@@ -111,13 +166,28 @@ public struct HIDPPTransport {
         featureIndex: UInt8,
         function: UInt8,
         parameters: [UInt8],
-        performsSingleTransaction: Bool
+        performsSingleTransaction: Bool,
+        deadline: Date?,
+        operationShouldContinue: @escaping () -> Bool
     ) -> ResponseResult {
+        let requestShouldContinue = {
+            shouldContinue()
+                && operationShouldContinue()
+                && deadline.map { Date() < $0 } != false
+        }
         // A HID++ report has a four-byte header. Do not silently drop parameters
         // that do not fit in the negotiated report size: callers must know that
         // the request was not representable before any I/O has taken place.
         guard parameters.count <= reportLength - 4,
-              shouldContinue() else {
+              requestShouldContinue() else {
+            return .failure
+        }
+
+        let timeout = min(
+            requestTimeout,
+            deadline.map { max(0, $0.timeIntervalSinceNow) } ?? HIDPPConstants.timeout
+        )
+        guard timeout > 0 else {
             return .failure
         }
 
@@ -147,33 +217,33 @@ public struct HIDPPTransport {
             if performsSingleTransaction {
                 response = cancellableDevice.performSynchronousOutputReportRequestOnce(
                     report,
-                    timeout: HIDPPConstants.timeout,
+                    timeout: timeout,
                     matching: matching,
-                    until: shouldContinue
+                    until: requestShouldContinue
                 )
             } else {
                 response = cancellableDevice.performSynchronousOutputReportRequest(
                     report,
-                    timeout: HIDPPConstants.timeout,
+                    timeout: timeout,
                     matching: matching,
-                    until: shouldContinue
+                    until: requestShouldContinue
                 )
             }
         } else if performsSingleTransaction {
             response = device.performSynchronousOutputReportRequestOnce(
                 report,
-                timeout: HIDPPConstants.timeout,
+                timeout: timeout,
                 matching: matching
             )
         } else {
             response = device.performSynchronousOutputReportRequest(
                 report,
-                timeout: HIDPPConstants.timeout,
+                timeout: timeout,
                 matching: matching
             )
         }
 
-        guard shouldContinue(), let response else {
+        guard requestShouldContinue(), let response else {
             return .failure
         }
 

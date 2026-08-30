@@ -299,6 +299,71 @@ final class LogitechReprogrammableControlsMonitorStateTests: XCTestCase {
         wait(for: [restored], timeout: 1)
     }
 
+    func testTerminalTeardownOnlyStopsWorkerThatNeverEstablishedATarget() {
+        let state = LogitechReprogrammableControlsMonitorState()
+        let stopped = expectation(description: "unresolved worker stopped")
+        var madeRestoreWorker = false
+        let unresolvedWorker = Thread {}
+
+        state.enable { unresolvedWorker }
+        let request = state.restorePendingForTeardown(
+            false,
+            makeWorkerThread: {
+                madeRestoreWorker = true
+                return Thread {}
+            },
+            completion: {
+                stopped.fulfill()
+            }
+        )
+
+        XCTAssertNil(request)
+        XCTAssertFalse(madeRestoreWorker)
+        XCTAssertFalse(state.shouldContinueRunning)
+        XCTAssertFalse(state.shouldAllowTeardownIO)
+        XCTAssertFalse(state.isRestoringPendingForTeardown)
+        XCTAssertTrue(unresolvedWorker.isCancelled)
+
+        state.workerDidStop(restartIfEnabled: true) {
+            madeRestoreWorker = true
+            return Thread {}
+        }
+
+        XCTAssertFalse(madeRestoreWorker)
+        wait(for: [stopped], timeout: 1)
+    }
+
+    func testEstablishedUnkeyedTargetStillUsesTerminalRestoreWhenSnapshotIsStale() {
+        let state = LogitechReprogrammableControlsMonitorState()
+        let restored = expectation(description: "active unkeyed target restored")
+
+        state.enable { Thread {} }
+        state.setStoreBackedActiveTarget(false)
+
+        // Model teardown taking its store snapshot just before the worker
+        // publishes the active unkeyed target. The state transaction must use
+        // the established target as the authoritative admission signal.
+        let request = state.restorePendingForTeardown(
+            false,
+            makeWorkerThread: { Thread {} },
+            completion: {
+                restored.fulfill()
+            }
+        )
+
+        guard let request else {
+            XCTFail("Expected the active unkeyed target to retain its restore worker")
+            return
+        }
+        XCTAssertTrue(state.shouldContinueRunning)
+        XCTAssertTrue(state.shouldAllowTeardownIO)
+        XCTAssertTrue(state.isRestoringPendingForTeardown)
+
+        XCTAssertTrue(state.expirePendingTeardownRestore(request))
+        state.workerDidStop(restartIfEnabled: false) { Thread {} }
+        wait(for: [restored], timeout: 1)
+    }
+
     func testRetryWaitReturnsAfterTimeout() {
         let state = LogitechReprogrammableControlsMonitorState()
         state.enable { Thread {} }

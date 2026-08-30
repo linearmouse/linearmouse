@@ -715,6 +715,278 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         XCTAssertNil(store.claim(for: target))
     }
 
+    func testTerminalAdmissionPreventsInFlightProducerFromReaddingNotificationBits() throws {
+        let admission = ReceiverChannelTerminalAdmission()
+        let store = ReceiverNotificationOwnershipStore()
+        let target = try XCTUnwrap(ReceiverNotificationOwnershipTarget.receiver(
+            vendorID: 0x046D,
+            serialNumber: "RECEIVER-A"
+        ))
+        let originalOwnedBit: UInt32 = 0x000100
+        let lateProducerBit: UInt32 = 0x000800
+        var flags: UInt32 = 0
+
+        XCTAssertTrue(store.enable(
+            originalOwnedBit,
+            for: target,
+            read: { flags },
+            write: {
+                flags = $0
+                return true
+            },
+            shouldContinue: { admission.allowsProducerMutation }
+        ))
+
+        let readStarted = DispatchSemaphore(value: 0)
+        let allowReadToReturn = DispatchSemaphore(value: 0)
+        let producerFinished = DispatchSemaphore(value: 0)
+        let resultLock = NSLock()
+        var lateProducerResult: Bool?
+        DispatchQueue.global(qos: .utility)
+            .async {
+                let result = store.enable(
+                    lateProducerBit,
+                    for: target,
+                    read: {
+                        readStarted.signal()
+                        allowReadToReturn.wait()
+                        return flags
+                    },
+                    write: {
+                        flags = $0
+                        return true
+                    },
+                    shouldContinue: { admission.allowsProducerMutation }
+                )
+                resultLock.withLock { lateProducerResult = result }
+                producerFinished.signal()
+            }
+
+        XCTAssertEqual(readStarted.wait(timeout: .now() + 1), .success)
+        let ownership = ReceiverChannelTerminalOwnership()
+        XCTAssertTrue(admission.begin(ownership: ownership))
+        allowReadToReturn.signal()
+        XCTAssertEqual(producerFinished.wait(timeout: .now() + 1), .success)
+        XCTAssertEqual(resultLock.withLock { lateProducerResult }, false)
+
+        XCTAssertTrue(store.restoreOwnedBits(
+            for: target,
+            read: { flags },
+            write: {
+                flags = $0
+                return true
+            },
+            shouldContinue: { admission.isOwned(by: ownership) }
+        ))
+        XCTAssertEqual(flags, 0)
+        XCTAssertNil(store.claim(for: target))
+    }
+
+    func testNotificationRestoreWaitsForInFlightEnableToCaptureOwnership() throws {
+        let store = ReceiverNotificationOwnershipStore()
+        let target = try XCTUnwrap(ReceiverNotificationOwnershipTarget.receiver(
+            vendorID: 0x046D,
+            serialNumber: "RECEIVER-A"
+        ))
+        let ownedBit: UInt32 = 0x000800
+        let stateLock = NSLock()
+        var flags: UInt32 = 0
+        let writeCommitted = DispatchSemaphore(value: 0)
+        let allowEnableToFinish = DispatchSemaphore(value: 0)
+        let enableFinished = DispatchSemaphore(value: 0)
+        let restoreStarted = DispatchSemaphore(value: 0)
+        let restoreFinished = DispatchSemaphore(value: 0)
+
+        DispatchQueue.global(qos: .utility).async {
+            _ = store.enable(
+                ownedBit,
+                for: target,
+                read: { stateLock.withLock { flags } },
+                write: { value in
+                    stateLock.withLock { flags = value }
+                    writeCommitted.signal()
+                    allowEnableToFinish.wait()
+                    return true
+                }
+            )
+            enableFinished.signal()
+        }
+
+        XCTAssertEqual(writeCommitted.wait(timeout: .now() + 1), .success)
+        DispatchQueue.global(qos: .utility).async {
+            restoreStarted.signal()
+            _ = store.restoreOwnedBits(
+                for: target,
+                read: { stateLock.withLock { flags } },
+                write: { value in
+                    stateLock.withLock { flags = value }
+                    return true
+                }
+            )
+            restoreFinished.signal()
+        }
+
+        XCTAssertEqual(restoreStarted.wait(timeout: .now() + 1), .success)
+        XCTAssertEqual(restoreFinished.wait(timeout: .now() + 0.05), .timedOut)
+        allowEnableToFinish.signal()
+        XCTAssertEqual(enableFinished.wait(timeout: .now() + 1), .success)
+        XCTAssertEqual(restoreFinished.wait(timeout: .now() + 1), .success)
+        XCTAssertEqual(stateLock.withLock { flags }, 0)
+        XCTAssertNil(store.claim(for: target))
+    }
+
+    func testNotificationRestoreCanCancelWhileAnotherMutationOwnsTheLock() throws {
+        let store = ReceiverNotificationOwnershipStore()
+        let target = try XCTUnwrap(ReceiverNotificationOwnershipTarget.receiver(
+            vendorID: 0x046D,
+            serialNumber: "RECEIVER-A"
+        ))
+        let writeStarted = DispatchSemaphore(value: 0)
+        let releaseWrite = DispatchSemaphore(value: 0)
+        let enableFinished = DispatchSemaphore(value: 0)
+        let restoreFinished = DispatchSemaphore(value: 0)
+
+        DispatchQueue.global(qos: .utility).async {
+            _ = store.enable(
+                0x000800,
+                for: target,
+                read: { 0 },
+                write: { _ in
+                    writeStarted.signal()
+                    releaseWrite.wait()
+                    return true
+                }
+            )
+            enableFinished.signal()
+        }
+        XCTAssertEqual(writeStarted.wait(timeout: .now() + 1), .success)
+
+        let checkLock = NSLock()
+        var continuationChecks = 0
+        DispatchQueue.global(qos: .utility).async {
+            _ = store.restoreOwnedBits(
+                for: target,
+                read: { 0x000800 },
+                write: { _ in true },
+                shouldContinue: {
+                    checkLock.withLock {
+                        continuationChecks += 1
+                        return continuationChecks == 1
+                    }
+                }
+            )
+            restoreFinished.signal()
+        }
+
+        XCTAssertEqual(restoreFinished.wait(timeout: .now() + 0.2), .success)
+        releaseWrite.signal()
+        XCTAssertEqual(enableFinished.wait(timeout: .now() + 1), .success)
+    }
+
+    func testTerminalAdmissionUsesExactOwnership() {
+        let admission = ReceiverChannelTerminalAdmission()
+        let ownership = ReceiverChannelTerminalOwnership()
+        let unrelatedOwnership = ReceiverChannelTerminalOwnership()
+
+        XCTAssertTrue(admission.begin(ownership: ownership))
+        XCTAssertFalse(admission.allowsProducerMutation)
+        XCTAssertTrue(admission.isOwned(by: ownership))
+        XCTAssertFalse(admission.isOwned(by: unrelatedOwnership))
+        XCTAssertFalse(admission.begin(ownership: unrelatedOwnership))
+    }
+
+    func testTerminalFinishClosesOnceAndCompletesEveryCallerExactlyOnce() {
+        let finishState = ReceiverChannelTerminalFinishState { $0() }
+        var firstCompletionCount = 0
+        var joinedCompletionCount = 0
+        var lateCompletionCount = 0
+
+        XCTAssertTrue(finishState.begin { firstCompletionCount += 1 })
+        XCTAssertFalse(finishState.allowsRestore)
+        XCTAssertFalse(finishState.begin { joinedCompletionCount += 1 })
+
+        finishState.complete()
+        finishState.complete()
+
+        XCTAssertEqual(firstCompletionCount, 1)
+        XCTAssertEqual(joinedCompletionCount, 1)
+        XCTAssertFalse(finishState.begin { lateCompletionCount += 1 })
+        XCTAssertEqual(lateCompletionCount, 1)
+    }
+
+    func testTerminalResourceRejectsLateOpenAfterFinishBegins() {
+        final class Resource {}
+
+        let initial = Resource()
+        let late = Resource()
+        let state = ReceiverChannelTerminalResource(initial)
+
+        XCTAssertIdentical(state.current, initial)
+        XCTAssertFalse(state.accept(late))
+        XCTAssertIdentical(state.takeForFinish(), initial)
+        XCTAssertNil(state.current)
+        XCTAssertFalse(state.accept(late))
+        XCTAssertNil(state.takeForFinish())
+    }
+
+    func testTerminalResourcePublishesAcceptedOpenBeforeFinishCanTakeIt() {
+        final class Resource {}
+
+        let opened = Resource()
+        let state = ReceiverChannelTerminalResource<Resource>(nil)
+
+        XCTAssertTrue(state.accept(opened))
+        XCTAssertIdentical(state.takeForFinish(), opened)
+    }
+
+    func testStaleChannelCloseCannotReleaseReplacementClosingOwnership() {
+        var registry = ReceiverChannelOwnershipRegistry<ReceiverChannelClosingOwnership>()
+        let first = ReceiverChannelClosingOwnership()
+        let replacement = ReceiverChannelClosingOwnership()
+        let unrelated = ReceiverChannelClosingOwnership()
+        let locationID = 123
+
+        XCTAssertTrue(registry.begin(locationID: locationID, ownership: first))
+        XCTAssertFalse(registry.begin(locationID: locationID, ownership: replacement))
+        XCTAssertFalse(registry.release(locationID: locationID, ownership: unrelated))
+        XCTAssertTrue(registry.isClaimed(locationID: locationID))
+        XCTAssertTrue(registry.release(locationID: locationID, ownership: first))
+
+        XCTAssertTrue(registry.begin(locationID: locationID, ownership: replacement))
+        XCTAssertFalse(registry.release(locationID: locationID, ownership: first))
+        XCTAssertTrue(registry.isClaimed(locationID: locationID))
+        XCTAssertTrue(registry.release(locationID: locationID, ownership: replacement))
+        XCTAssertFalse(registry.isClaimed(locationID: locationID))
+    }
+
+    func testUnidentifiedReceiverNotificationOwnershipSurvivesChannelRebuild() {
+        let session = ReceiverNotificationOwnershipSession()
+        let target = ReceiverNotificationOwnershipTarget.session(session.identity)
+        var flags: UInt32 = 0
+
+        XCTAssertTrue(session.store.enable(
+            0x000100,
+            for: target,
+            read: { flags },
+            write: {
+                flags = $0
+                return true
+            }
+        ))
+
+        // A rebuilt channel receives this same concrete session object.
+        XCTAssertEqual(session.store.claim(for: target)?.ownedBits, 0x000100)
+        XCTAssertTrue(session.store.restoreOwnedBits(
+            for: target,
+            read: { flags },
+            write: {
+                flags = $0
+                return true
+            }
+        ))
+        XCTAssertEqual(flags, 0)
+    }
+
     func testReceiverNotificationEnableWriteFailureDoesNotCaptureOwnership() throws {
         let store = ReceiverNotificationOwnershipStore()
         let target = try XCTUnwrap(ReceiverNotificationOwnershipTarget.receiver(
@@ -734,6 +1006,55 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         ))
         XCTAssertEqual(writeCount, 1)
         XCTAssertNil(store.claim(for: target))
+    }
+
+    func testReceiverNotificationEnableClaimsCommittedWriteWhenReplyIsLost() throws {
+        let store = ReceiverNotificationOwnershipStore()
+        let target = try XCTUnwrap(ReceiverNotificationOwnershipTarget.receiver(
+            vendorID: 0x046D,
+            serialNumber: "RECEIVER-A"
+        ))
+        let preexisting: UInt32 = 0x000100
+        let added: UInt32 = 0x000800
+        var flags = preexisting
+        var writeCount = 0
+
+        XCTAssertTrue(store.enable(
+            preexisting | added,
+            for: target,
+            read: { flags },
+            write: { value in
+                writeCount += 1
+                flags = value
+                return false // The receiver committed it, but its reply was lost.
+            }
+        ))
+
+        XCTAssertEqual(writeCount, 1)
+        XCTAssertEqual(store.claim(for: target)?.ownedBits, added)
+    }
+
+    func testReceiverNotificationCommitIsOwnedBeforeTerminalAdmissionCancelsAckWait() throws {
+        let store = ReceiverNotificationOwnershipStore()
+        let target = try XCTUnwrap(ReceiverNotificationOwnershipTarget.receiver(
+            vendorID: 0x046D,
+            serialNumber: "RECEIVER-A"
+        ))
+        var producerAdmitted = true
+
+        XCTAssertFalse(store.enable(
+            0x000100,
+            for: target,
+            read: { 0 },
+            committingWrite: { _, didCommit in
+                didCommit() // IOHIDDeviceSetReport returned success.
+                producerAdmitted = false // Terminal admission closes before ACK.
+                return false
+            },
+            shouldContinue: { producerAdmitted }
+        ))
+
+        XCTAssertEqual(store.claim(for: target)?.ownedBits, 0x000100)
     }
 
     func testReceiverNotificationRestoreFailureRetainsOwnership() throws {
@@ -760,6 +1081,38 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
             write: { _ in false }
         ))
         XCTAssertEqual(store.claim(for: target), claim)
+    }
+
+    func testReceiverNotificationRestoreUsesReadbackWhenReplyIsLost() throws {
+        let store = ReceiverNotificationOwnershipStore()
+        let target = try XCTUnwrap(ReceiverNotificationOwnershipTarget.receiver(
+            vendorID: 0x046D,
+            serialNumber: "RECEIVER-A"
+        ))
+        let ownedBit: UInt32 = 0x000800
+        var flags: UInt32 = 0
+
+        XCTAssertTrue(store.enable(
+            ownedBit,
+            for: target,
+            read: { flags },
+            write: {
+                flags = $0
+                return true
+            }
+        ))
+
+        XCTAssertTrue(store.restoreOwnedBits(
+            for: target,
+            read: { flags },
+            write: {
+                flags = $0
+                return false // The write committed, but its reply was lost.
+            }
+        ))
+
+        XCTAssertEqual(flags, 0)
+        XCTAssertNil(store.claim(for: target))
     }
 
     func testReceiverNotificationOwnershipRejectsReplacementAndStaleHandle() throws {
@@ -842,6 +1195,45 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         XCTAssertEqual(readCount, 0)
         XCTAssertEqual(writeCount, 0)
         XCTAssertNotNil(store.claim(for: target))
+    }
+
+    func testOrdinaryRetirementBudgetCancelsRemainingRestoreIOAndRetainsOwnership() {
+        let start = Date(timeIntervalSince1970: 1000)
+        let budget = ReceiverChannelRetirementBudget(now: start)
+        let store = ReceiverNotificationOwnershipStore()
+        let target = ReceiverNotificationOwnershipTarget.session(ReceiverNotificationSessionIdentity())
+        var now = start
+        var flags: UInt32 = 0
+        XCTAssertTrue(store.enable(
+            0x000100,
+            for: target,
+            read: { flags },
+            write: {
+                flags = $0
+                return true
+            }
+        ))
+        var writeCount = 0
+
+        XCTAssertFalse(store.restoreOwnedBits(
+            for: target,
+            read: {
+                now = budget.deadline
+                return flags
+            },
+            write: { _ in
+                writeCount += 1
+                return true
+            },
+            shouldContinue: {
+                budget.shouldContinue(now: now, transportIsActive: true)
+            }
+        ))
+
+        XCTAssertEqual(writeCount, 0)
+        XCTAssertNotNil(store.claim(for: target))
+        XCTAssertFalse(budget.shouldContinue(now: start, transportIsActive: false))
+        XCTAssertEqual(budget.deadline.timeIntervalSince(start), 0.25, accuracy: 0.001)
     }
 
     func testReceiverNotificationNoOwnershipRestoresWithoutIO() {

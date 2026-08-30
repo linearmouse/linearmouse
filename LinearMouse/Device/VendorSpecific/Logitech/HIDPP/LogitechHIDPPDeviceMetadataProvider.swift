@@ -24,6 +24,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         static let shortReportLength = HIDPPConstants.shortReportLength
         static let longReportLength = HIDPPConstants.longReportLength
         static let timeout = HIDPPConstants.timeout
+        static let receiverProbeTimeout: TimeInterval = 0.25
 
         static let receiverIndex = HIDPPConstants.receiverIndex
         static let directReplyIndices = HIDPPConstants.directReplyIndices
@@ -503,14 +504,20 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         return receiverSlot(for: device, identities: activeIdentities)
     }
 
-    func openReceiverChannel(for device: VendorSpecificDeviceContext) -> LogitechReceiverChannel? {
+    func openReceiverChannel(
+        for device: VendorSpecificDeviceContext,
+        notificationOwnershipSession: ReceiverNotificationOwnershipSession = .init()
+    ) -> LogitechReceiverChannel? {
         guard device.transport == PointerDeviceTransportName.usb,
               let locationID = device.locationID
         else {
             return nil
         }
 
-        return LogitechReceiverChannel.open(locationID: locationID)
+        return LogitechReceiverChannel.open(
+            locationID: locationID,
+            notificationOwnershipSession: notificationOwnershipSession
+        )
     }
 
     func receiverSlot(for device: VendorSpecificDeviceContext) -> UInt8? {
@@ -530,24 +537,32 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
 
     func receiverPointingDeviceDiscovery(
         for device: VendorSpecificDeviceContext,
-        using receiverChannel: LogitechReceiverChannel
+        using receiverChannel: LogitechReceiverChannel,
+        until shouldContinue: @escaping () -> Bool = { true }
     ) -> ReceiverPointingDeviceDiscovery {
         if Self.receiverProtocolFamily(
             vendorID: device.vendorID,
             productID: device.productID,
             transport: device.transport
         ) == .bolt {
-            return receiverChannel.discoverBoltPointingDeviceDiscovery(baseName: device.product ?? device.name)
+            return receiverChannel.discoverBoltPointingDeviceDiscovery(
+                baseName: device.product ?? device.name,
+                until: shouldContinue
+            )
         }
 
-        return receiverChannel.discoverPointingDeviceDiscovery(baseName: device.product ?? device.name)
+        return receiverChannel.discoverPointingDeviceDiscovery(
+            baseName: device.product ?? device.name,
+            until: shouldContinue
+        )
     }
 
     func receiverSlotIdentity(
         for device: VendorSpecificDeviceContext,
         slot: UInt8,
         connectionSnapshot: ReceiverConnectionSnapshot?,
-        using receiverChannel: LogitechReceiverChannel
+        using receiverChannel: LogitechReceiverChannel,
+        until shouldContinue: @escaping () -> Bool = { true }
     ) -> ReceiverLogicalDeviceIdentity? {
         guard let locationID = receiverChannel.locationID else {
             return nil
@@ -559,9 +574,17 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             productID: device.productID,
             transport: device.transport
         ) == .bolt {
-            slotInfo = receiverChannel.discoverBoltSlotInfo(slot, connectionSnapshot: connectionSnapshot)
+            slotInfo = receiverChannel.discoverBoltSlotInfo(
+                slot,
+                connectionSnapshot: connectionSnapshot,
+                until: shouldContinue
+            )
         } else {
-            slotInfo = receiverChannel.discoverSlotInfo(slot, connectionSnapshot: connectionSnapshot)
+            slotInfo = receiverChannel.discoverSlotInfo(
+                slot,
+                connectionSnapshot: connectionSnapshot,
+                until: shouldContinue
+            )
         }
 
         guard let slotInfo else {
@@ -586,19 +609,77 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         )
     }
 
+    func validateReceiverSlotIdentity(
+        for device: VendorSpecificDeviceContext,
+        slot: UInt8,
+        connectionSnapshot: ReceiverConnectionSnapshot? = nil,
+        using receiverChannel: LogitechReceiverChannel,
+        deadline: Date,
+        until shouldContinue: @escaping () -> Bool
+    ) -> ReceiverLogicalDeviceIdentity? {
+        guard let locationID = receiverChannel.locationID else {
+            return nil
+        }
+        let slotInfo: ReceiverSlotInfo?
+        if Self.receiverProtocolFamily(
+            vendorID: device.vendorID,
+            productID: device.productID,
+            transport: device.transport
+        ) == .bolt {
+            slotInfo = receiverChannel.validateBoltSlotIdentity(
+                slot,
+                deadline: deadline,
+                until: shouldContinue
+            )
+        } else {
+            slotInfo = receiverChannel.validateSlotIdentity(
+                slot,
+                deadline: deadline,
+                until: shouldContinue
+            )
+        }
+        guard let slotInfo,
+              let kind = resolveReceiverPointingIdentityKind(
+                  snapshotRaw: connectionSnapshot?.kind,
+                  pairingRaw: slotInfo.kind
+              ),
+              kind.isPointingDevice
+        else {
+            return nil
+        }
+
+        return ReceiverLogicalDeviceIdentity(
+            receiverLocationID: locationID,
+            slot: slot,
+            kind: kind,
+            name: device.product ?? device.name,
+            serialNumber: slotInfo.serialNumber,
+            productID: slotInfo.productID,
+            batteryLevel: nil
+        )
+    }
+
     func connectedDeviceCount(
         for device: VendorSpecificDeviceContext,
-        using receiverChannel: LogitechReceiverChannel
+        using receiverChannel: LogitechReceiverChannel,
+        until shouldContinue: @escaping () -> Bool = { true }
     ) -> Int? {
+        let deadline = Date().addingTimeInterval(Constants.receiverProbeTimeout)
         switch Self.receiverProtocolFamily(
             vendorID: device.vendorID,
             productID: device.productID,
             transport: device.transport
         ) {
         case .bolt:
-            receiverChannel.boltConnectedDeviceCount()
+            return receiverChannel.boltConnectedDeviceCount(
+                deadline: deadline,
+                until: shouldContinue
+            )
         case .classic, .lightspeed, nil:
-            receiverChannel.connectedDeviceCount()
+            return receiverChannel.connectedDeviceCount(
+                deadline: deadline,
+                until: shouldContinue
+            )
         }
     }
 
@@ -647,7 +728,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             transport: device.transport
         ) {
         case .classic, .lightspeed:
-            receiverChannel.enableWirelessNotifications()
+            receiverChannel.enableWirelessNotifications(until: shouldContinue)
             return receiverChannel.waitForConnectionSnapshots(timeout: timeout, until: shouldContinue)
         case .bolt:
             return receiverChannel.waitForBoltConnectionSnapshots(timeout: timeout, until: shouldContinue)
@@ -658,17 +739,25 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
 
     func receiverChannelIsReachable(
         for device: VendorSpecificDeviceContext,
-        using receiverChannel: LogitechReceiverChannel
+        using receiverChannel: LogitechReceiverChannel,
+        until shouldContinue: @escaping () -> Bool = { true }
     ) -> Bool {
+        let deadline = Date().addingTimeInterval(Constants.receiverProbeTimeout)
         switch Self.receiverProtocolFamily(
             vendorID: device.vendorID,
             productID: device.productID,
             transport: device.transport
         ) {
         case .classic, .lightspeed:
-            return receiverChannel.readNotificationFlags() != nil
+            return receiverChannel.readNotificationFlags(
+                deadline: deadline,
+                until: shouldContinue
+            ) != nil
         case .bolt:
-            return receiverChannel.isBoltReceiverReachable()
+            return receiverChannel.isBoltReceiverReachable(
+                deadline: deadline,
+                until: shouldContinue
+            )
         case nil:
             return false
         }
@@ -1152,6 +1241,182 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         }
     }
 
+    private struct ChannelClose {
+        let channel: LogitechReceiverChannel
+        let ownership: ReceiverChannelClosingOwnership
+    }
+
+    private enum OpenPreparation {
+        case existing(LogitechReceiverChannel)
+        case create(ReceiverChannelOpeningOwnership)
+        case unavailable
+    }
+
+    /// Retains one exact receiver channel while its monitor producer is being
+    /// stopped and terminal hardware restoration is in progress.
+    ///
+    /// Finishing first detaches only this channel from the shared cache, then
+    /// invalidates it away from the main thread. A stale lease can therefore
+    /// neither detach nor close a replacement channel.
+    final class TerminalTeardown {
+        let locationID: Int
+        let retainedAdmissionChannel: Bool
+
+        private let ownership: ReceiverChannelTerminalOwnership
+        private let notificationOwnershipSession: ReceiverNotificationOwnershipSession
+        private let finishState: ReceiverChannelTerminalFinishState
+        private let channel: ReceiverChannelTerminalResource<LogitechReceiverChannel>
+
+        fileprivate init(
+            locationID: Int,
+            channel: LogitechReceiverChannel?,
+            ownership: ReceiverChannelTerminalOwnership,
+            notificationOwnershipSession: ReceiverNotificationOwnershipSession
+        ) {
+            self.locationID = locationID
+            retainedAdmissionChannel = channel != nil
+            self.channel = ReceiverChannelTerminalResource(channel)
+            self.ownership = ownership
+            self.notificationOwnershipSession = notificationOwnershipSession
+            finishState = ReceiverChannelTerminalFinishState { action in
+                let runLoop = CFRunLoopGetMain()
+                CFRunLoopPerformBlock(
+                    runLoop,
+                    CFRunLoopMode.commonModes.rawValue,
+                    action
+                )
+                CFRunLoopWakeUp(runLoop)
+            }
+        }
+
+        deinit {
+            finish()
+        }
+
+        func restoreOwnedNotificationFlags(
+            until shouldContinue: @escaping () -> Bool = { true },
+            completion: @escaping () -> Void
+        ) {
+            DispatchQueue.global(qos: .utility).async { [self] in
+                guard shouldContinue(), finishState.allowsRestore,
+                      let channel = resolvedChannel(until: shouldContinue)
+                else {
+                    LogitechReceiverChannel.deliverOnMainRunLoop(completion)
+                    return
+                }
+                let hasStableReceiverIdentity = channel.serialNumber?
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                    .isEmpty == false
+                guard retainedAdmissionChannel || hasStableReceiverIdentity else {
+                    // A newly opened serial-less channel might be a physical
+                    // replacement at the same USB topology. Session ownership
+                    // cannot authorize a write to that unverified receiver.
+                    LogitechReceiverChannel.deliverOnMainRunLoop(completion)
+                    return
+                }
+
+                channel.restoreOwnedNotificationFlags(
+                    shouldContinue: { [self, channel] in
+                        shouldContinue() && isCurrentOwner(channel)
+                    },
+                    completion: completion
+                )
+            }
+        }
+
+        /// Re-reads only the expected logical slot on the exact terminal-owned
+        /// channel. A full six-slot inventory can exceed the quit budget; this
+        /// targeted check is sufficient to prove a stable route before writing.
+        func validateLogicalDevice(
+            for device: VendorSpecificDeviceContext,
+            slot: UInt8,
+            deadline: Date,
+            until shouldContinue: @escaping () -> Bool,
+            completion: @escaping (ReceiverLogicalDeviceIdentity?) -> Void
+        ) {
+            DispatchQueue.global(qos: .utility).async { [self] in
+                guard shouldContinue(), finishState.allowsRestore,
+                      let channel = resolvedChannel(until: shouldContinue)
+                else {
+                    LogitechReceiverChannel.deliverOnMainRunLoop { completion(nil) }
+                    return
+                }
+
+                let identity = LogitechHIDPPDeviceMetadataProvider()
+                    .validateReceiverSlotIdentity(
+                        for: device,
+                        slot: slot,
+                        using: channel,
+                        deadline: deadline,
+                        until: shouldContinue
+                    )
+                LogitechReceiverChannel.deliverOnMainRunLoop {
+                    completion(shouldContinue() ? identity : nil)
+                }
+            }
+        }
+
+        /// Idempotently releases terminal ownership. IOHID cancellation is not
+        /// allowed to hold AppKit's termination run loop hostage.
+        func finish(completion: @escaping () -> Void = {}) {
+            let finishState = finishState
+            guard finishState.begin(completion: completion) else {
+                return
+            }
+
+            let closingLocationID = locationID
+            let terminalOwnership = ownership
+            let retainedChannel = channel.takeForFinish()
+            let close = LogitechReceiverChannel.beginTerminalChannelClose(
+                locationID: closingLocationID,
+                matching: retainedChannel,
+                terminalOwnership: terminalOwnership
+            )
+            guard let close else {
+                finishState.complete()
+                return
+            }
+
+            DispatchQueue.global(qos: .utility).async {
+                close.channel.invalidate()
+                LogitechReceiverChannel.completeSharedChannelClose(
+                    locationID: closingLocationID,
+                    closingOwnership: close.ownership
+                )
+                finishState.complete()
+            }
+        }
+
+        private func resolvedChannel(
+            until shouldContinue: @escaping () -> Bool
+        ) -> LogitechReceiverChannel? {
+            if let channel = channel.current {
+                return channel
+            }
+            guard let resolvedChannel = LogitechReceiverChannel.openTerminalChannel(
+                locationID: locationID,
+                terminalOwnership: ownership,
+                notificationOwnershipSession: notificationOwnershipSession,
+                until: shouldContinue,
+                accept: { [channel] candidate in
+                    shouldContinue() && channel.accept(candidate)
+                }
+            ) else {
+                return nil
+            }
+            return resolvedChannel
+        }
+
+        private func isCurrentOwner(_ channel: LogitechReceiverChannel) -> Bool {
+            finishState.allowsRestore
+                && channel.terminalAdmission.isOwned(by: ownership)
+                && LogitechReceiverChannel.isCurrentSharedChannel(
+                    channel,
+                    locationID: locationID
+                )
+        }
+    }
+
     private enum RequestStrategy: CaseIterable {
         case outputCallback
         case featureCallback
@@ -1212,16 +1477,20 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
     private var requestStrategy: RequestStrategy?
     private var requestStrategyFailureCount = 0
     private let notificationBuffer = HIDPPNotificationBuffer()
+    private let terminalAdmission = ReceiverChannelTerminalAdmission()
 
-    /// Serial-backed receiver ownership survives channel reconstruction. An
-    /// unidentified receiver remains scoped to this exact channel instance.
+    /// Serial-backed receiver ownership survives the process. An unidentified
+    /// receiver remains scoped to its concrete monitor session, which can span
+    /// safe channel reconstruction but is never recreated from a location ID.
     private static let receiverNotificationOwnershipStore = ReceiverNotificationOwnershipStore()
-    private let receiverNotificationSessionIdentity = ReceiverNotificationSessionIdentity()
-    private let receiverNotificationSessionStore = ReceiverNotificationOwnershipStore()
+    private let receiverNotificationOwnershipSession: ReceiverNotificationOwnershipSession
 
     // Keep one I/O reader per physical receiver. Opening the same macOS HID
     // interface more than once can route a command response to another callback.
     private static var sharedChannels = [Int: WeakChannelReference]()
+    private static var openingChannels = ReceiverChannelOwnershipRegistry<ReceiverChannelOpeningOwnership>()
+    private static var closingChannels = ReceiverChannelOwnershipRegistry<ReceiverChannelClosingOwnership>()
+    private static var terminalChannels = ReceiverChannelOwnershipRegistry<ReceiverChannelTerminalOwnership>()
     private static let sharedChannelsLock = NSLock()
 
     private static let inputReportCallback: IOHIDReportCallback = { context, _, _, _, _, report, reportLength in
@@ -1233,14 +1502,73 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         this.handleInputReport(Data(bytes: report, count: reportLength))
     }
 
-    static func open(locationID: Int) -> LogitechReceiverChannel? {
-        sharedChannelsLock.lock()
-        defer { sharedChannelsLock.unlock() }
+    private static func deliverOnMainRunLoop(_ action: @escaping () -> Void) {
+        let runLoop = CFRunLoopGetMain()
+        CFRunLoopPerformBlock(
+            runLoop,
+            CFRunLoopMode.commonModes.rawValue,
+            action
+        )
+        CFRunLoopWakeUp(runLoop)
+    }
 
-        if let channel = sharedChannels[locationID]?.channel {
-            return channel
+    static func open(
+        locationID: Int,
+        notificationOwnershipSession: ReceiverNotificationOwnershipSession = .init()
+    ) -> LogitechReceiverChannel? {
+        let preparation = sharedChannelsLock.withLock {
+            prepareNormalOpenLocked(locationID: locationID)
         }
+        switch preparation {
+        case let .existing(channel):
+            return channel
+        case .unavailable:
+            return nil
+        case let .create(openingOwnership):
+            let channel = makeChannel(
+                locationID: locationID,
+                notificationOwnershipSession: notificationOwnershipSession
+            )
+            return completeNormalOpen(
+                channel,
+                locationID: locationID,
+                openingOwnership: openingOwnership
+            )
+        }
+    }
 
+    /// Main-thread terminal admission is deliberately lock-only. A missing
+    /// channel is opened later by TerminalTeardown's utility worker, inside the
+    /// existing hard cleanup deadline.
+    static func beginTerminalTeardown(
+        locationID: Int,
+        notificationOwnershipSession: ReceiverNotificationOwnershipSession
+    ) -> TerminalTeardown? {
+        sharedChannelsLock.withLock {
+            let ownership = ReceiverChannelTerminalOwnership()
+            guard terminalChannels.begin(locationID: locationID, ownership: ownership) else {
+                return nil
+            }
+
+            let channel = sharedChannels[locationID]?.channel
+            if let channel, !channel.terminalAdmission.begin(ownership: ownership) {
+                _ = terminalChannels.release(locationID: locationID, ownership: ownership)
+                return nil
+            }
+
+            return TerminalTeardown(
+                locationID: locationID,
+                channel: channel,
+                ownership: ownership,
+                notificationOwnershipSession: notificationOwnershipSession
+            )
+        }
+    }
+
+    private static func makeChannel(
+        locationID: Int,
+        notificationOwnershipSession: ReceiverNotificationOwnershipSession
+    ) -> LogitechReceiverChannel? {
         let manager = IOHIDManagerCreate(kCFAllocatorDefault, IOOptionBits(kIOHIDOptionsTypeNone))
 
         let matching: [String: Any] = [
@@ -1261,41 +1589,185 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             return nil
         }
 
-        guard let channel = LogitechReceiverChannel(manager: manager, device: hidDevice) else {
+        guard let channel = LogitechReceiverChannel(
+            manager: manager,
+            device: hidDevice,
+            notificationOwnershipSession: notificationOwnershipSession
+        ) else {
             return nil
         }
-
-        sharedChannels[locationID] = WeakChannelReference(channel)
         return channel
     }
 
-    /// Restores notification bits through the currently-owned shared channel.
-    /// Completion is always delivered on the main queue. A missing channel or
-    /// an ownership-free receiver completes without attempting HID I/O.
-    static func restoreOwnedNotificationFlags(
-        locationID: Int,
-        completion: @escaping () -> Void
-    ) {
-        guard let channel = currentSharedChannel(locationID: locationID) else {
-            DispatchQueue.main.async(execute: completion)
-            return
+    private static func prepareNormalOpenLocked(locationID: Int) -> OpenPreparation {
+        // A terminal claim forbids creating another reader, but the exact
+        // retained shared channel remains the transport for DPI, wheel and
+        // controls restoration after their feature caches are invalidated.
+        if let channel = sharedChannels[locationID]?.channel {
+            return .existing(channel)
+        }
+        guard !terminalChannels.isClaimed(locationID: locationID),
+              !openingChannels.isClaimed(locationID: locationID),
+              !closingChannels.isClaimed(locationID: locationID)
+        else {
+            return .unavailable
         }
 
-        channel.restoreOwnedNotificationFlags(
-            shouldContinue: { [weak channel] in
-                guard let channel else {
-                    return false
-                }
-                return isCurrentSharedChannel(channel, locationID: locationID)
-            },
-            completion: completion
-        )
+        let ownership = ReceiverChannelOpeningOwnership()
+        guard openingChannels.begin(locationID: locationID, ownership: ownership) else {
+            return .unavailable
+        }
+        return .create(ownership)
     }
 
-    private static func currentSharedChannel(locationID: Int) -> LogitechReceiverChannel? {
-        sharedChannelsLock.withLock {
-            sharedChannels[locationID]?.channel
+    private static func completeNormalOpen(
+        _ channel: LogitechReceiverChannel?,
+        locationID: Int,
+        openingOwnership: ReceiverChannelOpeningOwnership
+    ) -> LogitechReceiverChannel? {
+        let adopted = sharedChannelsLock.withLock { () -> Bool in
+            guard openingChannels.isOwned(locationID: locationID, by: openingOwnership) else {
+                return false
+            }
+            guard let channel,
+                  sharedChannels[locationID]?.channel == nil,
+                  !closingChannels.isClaimed(locationID: locationID),
+                  !terminalChannels.isClaimed(locationID: locationID)
+            else {
+                return false
+            }
+
+            sharedChannels[locationID] = WeakChannelReference(channel)
+            _ = openingChannels.release(locationID: locationID, ownership: openingOwnership)
+            return true
         }
+        if adopted {
+            return channel
+        }
+
+        // Retain the opening claim through cancellation so another opener can
+        // never overlap this rejected physical reader.
+        channel?.invalidate()
+        sharedChannelsLock.withLock {
+            _ = openingChannels.release(locationID: locationID, ownership: openingOwnership)
+        }
+        return nil
+    }
+
+    private static func openTerminalChannel(
+        locationID: Int,
+        terminalOwnership: ReceiverChannelTerminalOwnership,
+        notificationOwnershipSession: ReceiverNotificationOwnershipSession,
+        until shouldContinue: @escaping () -> Bool,
+        accept: @escaping (LogitechReceiverChannel) -> Bool
+    ) -> LogitechReceiverChannel? {
+        var backoff = ExponentialBackoff(initialDelay: 0.02, maximumDelay: 0.2)
+        while shouldContinue() {
+            let preparation = sharedChannelsLock.withLock {
+                prepareTerminalOpenLocked(
+                    locationID: locationID,
+                    terminalOwnership: terminalOwnership
+                )
+            }
+            switch preparation {
+            case let .existing(channel):
+                return channel
+            case .unavailable:
+                Thread.sleep(forTimeInterval: backoff.nextDelay())
+            case let .create(openingOwnership):
+                guard shouldContinue() else {
+                    _ = completeTerminalOpen(
+                        nil,
+                        locationID: locationID,
+                        openingOwnership: openingOwnership,
+                        terminalOwnership: terminalOwnership,
+                        accept: accept
+                    )
+                    return nil
+                }
+                let channel = makeChannel(
+                    locationID: locationID,
+                    notificationOwnershipSession: notificationOwnershipSession
+                )
+                if let adopted = completeTerminalOpen(
+                    channel,
+                    locationID: locationID,
+                    openingOwnership: openingOwnership,
+                    terminalOwnership: terminalOwnership,
+                    accept: accept
+                ) {
+                    return adopted
+                }
+                if shouldContinue() {
+                    Thread.sleep(forTimeInterval: backoff.nextDelay())
+                }
+            }
+        }
+        return nil
+    }
+
+    private static func prepareTerminalOpenLocked(
+        locationID: Int,
+        terminalOwnership: ReceiverChannelTerminalOwnership
+    ) -> OpenPreparation {
+        guard terminalChannels.isOwned(locationID: locationID, by: terminalOwnership) else {
+            return .unavailable
+        }
+        if let channel = sharedChannels[locationID]?.channel {
+            guard channel.terminalAdmission.isOwned(by: terminalOwnership)
+                || channel.terminalAdmission.begin(ownership: terminalOwnership)
+            else {
+                return .unavailable
+            }
+            return .existing(channel)
+        }
+        guard !openingChannels.isClaimed(locationID: locationID),
+              !closingChannels.isClaimed(locationID: locationID)
+        else {
+            return .unavailable
+        }
+
+        let ownership = ReceiverChannelOpeningOwnership()
+        guard openingChannels.begin(locationID: locationID, ownership: ownership) else {
+            return .unavailable
+        }
+        return .create(ownership)
+    }
+
+    private static func completeTerminalOpen(
+        _ channel: LogitechReceiverChannel?,
+        locationID: Int,
+        openingOwnership: ReceiverChannelOpeningOwnership,
+        terminalOwnership: ReceiverChannelTerminalOwnership,
+        accept: (LogitechReceiverChannel) -> Bool
+    ) -> LogitechReceiverChannel? {
+        let adopted = sharedChannelsLock.withLock { () -> Bool in
+            guard openingChannels.isOwned(locationID: locationID, by: openingOwnership) else {
+                return false
+            }
+            guard let channel,
+                  terminalChannels.isOwned(locationID: locationID, by: terminalOwnership),
+                  sharedChannels[locationID]?.channel == nil,
+                  !closingChannels.isClaimed(locationID: locationID),
+                  channel.terminalAdmission.begin(ownership: terminalOwnership),
+                  accept(channel)
+            else {
+                return false
+            }
+
+            sharedChannels[locationID] = WeakChannelReference(channel)
+            _ = openingChannels.release(locationID: locationID, ownership: openingOwnership)
+            return true
+        }
+        if adopted {
+            return channel
+        }
+
+        channel?.invalidate()
+        sharedChannelsLock.withLock {
+            _ = openingChannels.release(locationID: locationID, ownership: openingOwnership)
+        }
+        return nil
     }
 
     private static func isCurrentSharedChannel(
@@ -1307,24 +1779,100 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         }
     }
 
-    /// Atomically gives up shared ownership only when `channel` is still the
-    /// cached instance. Hardware teardown happens separately after callers
-    /// release their own lifecycle locks.
+    /// Retires an ordinary monitor channel with exact close ownership. The
+    /// location remains unavailable until IOHID cancellation has completed,
+    /// so a replacement reader can never overlap the old one.
     @discardableResult
-    static func detachSharedChannel(locationID: Int, matching channel: LogitechReceiverChannel) -> Bool {
-        sharedChannelsLock.lock()
+    static func retireSharedChannel(locationID: Int, matching channel: LogitechReceiverChannel) -> Bool {
+        let close = sharedChannelsLock.withLock { () -> ChannelClose? in
+            guard channel.terminalAdmission.allowsProducerMutation else {
+                return nil
+            }
+            return beginSharedChannelCloseLocked(locationID: locationID, matching: channel)
+        }
+        guard let close else {
+            return false
+        }
+
+        let budget = ReceiverChannelRetirementBudget()
+        _ = close.channel.restoreOwnedNotificationFlagsSynchronously(deadline: budget.deadline) {
+            budget.shouldContinue(transportIsActive: close.channel.isTransportActive)
+        }
+        close.channel.invalidate()
+        completeSharedChannelClose(
+            locationID: locationID,
+            closingOwnership: close.ownership
+        )
+        return true
+    }
+
+    private static func beginTerminalChannelClose(
+        locationID: Int,
+        matching channel: LogitechReceiverChannel?,
+        terminalOwnership: ReceiverChannelTerminalOwnership
+    ) -> ChannelClose? {
+        sharedChannelsLock.withLock {
+            guard terminalChannels.isOwned(locationID: locationID, by: terminalOwnership) else {
+                return nil
+            }
+            defer {
+                _ = terminalChannels.release(locationID: locationID, ownership: terminalOwnership)
+            }
+            guard let channel,
+                  channel.terminalAdmission.isOwned(by: terminalOwnership) else {
+                return nil
+            }
+            return beginSharedChannelCloseLocked(locationID: locationID, matching: channel)
+        }
+    }
+
+    private static func completeSharedChannelClose(
+        locationID: Int,
+        closingOwnership: ReceiverChannelClosingOwnership
+    ) {
+        sharedChannelsLock.withLock {
+            _ = closingChannels.release(
+                locationID: locationID,
+                ownership: closingOwnership
+            )
+        }
+    }
+
+    private static func beginSharedChannelCloseLocked(
+        locationID: Int,
+        matching channel: LogitechReceiverChannel
+    ) -> ChannelClose? {
+        let ownership = ReceiverChannelClosingOwnership()
+        guard !openingChannels.isClaimed(locationID: locationID),
+              closingChannels.begin(locationID: locationID, ownership: ownership),
+              detachSharedChannelLocked(locationID: locationID, matching: channel)
+        else {
+            _ = closingChannels.release(locationID: locationID, ownership: ownership)
+            return nil
+        }
+        return ChannelClose(channel: channel, ownership: ownership)
+    }
+
+    private static func detachSharedChannelLocked(
+        locationID: Int,
+        matching channel: LogitechReceiverChannel
+    ) -> Bool {
         var currentChannel = sharedChannels[locationID]?.channel
         let detached = SharedChannelOwnership.detach(channel, from: &currentChannel)
         if detached {
             sharedChannels.removeValue(forKey: locationID)
         }
-        sharedChannelsLock.unlock()
         return detached
     }
 
-    init?(manager: IOHIDManager, device: IOHIDDevice) {
+    init?(
+        manager: IOHIDManager,
+        device: IOHIDDevice,
+        notificationOwnershipSession: ReceiverNotificationOwnershipSession
+    ) {
         self.manager = manager
         self.device = device
+        receiverNotificationOwnershipSession = notificationOwnershipSession
         vendorID = Self.getProperty(kIOHIDVendorIDKey, from: device)
         productID = Self.getProperty(kIOHIDProductIDKey, from: device)
         product = Self.getProperty(kIOHIDProductKey, from: device)
@@ -1401,11 +1949,27 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         inputReportBuffer = nil
     }
 
-    func discoverSlots() -> LogitechHIDPPDeviceMetadataProvider.ReceiverSlotDiscovery? {
-        let connectedDeviceCount = readConnectionState().flatMap { response in
+    func discoverSlots(
+        until shouldContinue: @escaping () -> Bool = { true }
+    ) -> LogitechHIDPPDeviceMetadataProvider.ReceiverSlotDiscovery? {
+        guard shouldContinue() else {
+            return nil
+        }
+        let connectedDeviceCount = readConnectionState(
+            deadline: Date().addingTimeInterval(
+                LogitechHIDPPDeviceMetadataProvider.Constants.receiverProbeTimeout
+            ),
+            until: shouldContinue
+        ).flatMap { response in
             LogitechHIDPPDeviceMetadataProvider.parseConnectedDeviceCount(response)
         }
-        let connectionSnapshots = discoverConnectionSnapshots(expectedCount: connectedDeviceCount)
+        guard shouldContinue() else {
+            return nil
+        }
+        let connectionSnapshots = discoverConnectionSnapshots(
+            expectedCount: connectedDeviceCount,
+            until: shouldContinue
+        )
         let snapshotSummary = connectionSnapshots.keys
             .sorted()
             .compactMap { slot -> String? in
@@ -1437,7 +2001,14 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
 
         var pairedSlots = [LogitechHIDPPDeviceMetadataProvider.ReceiverSlotInfo]()
         for slot in orderedSlots {
-            guard let slotInfo = discoverSlotInfo(slot, connectionSnapshot: connectionSnapshots[slot]) else {
+            guard shouldContinue() else {
+                return nil
+            }
+            guard let slotInfo = discoverSlotInfo(
+                slot,
+                connectionSnapshot: connectionSnapshots[slot],
+                until: shouldContinue
+            ) else {
                 continue
             }
 
@@ -1482,28 +2053,44 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         )
     }
 
-    func connectedDeviceCount() -> Int? {
-        readConnectionState().flatMap {
+    func connectedDeviceCount(
+        deadline: Date? = nil,
+        until shouldContinue: @escaping () -> Bool = { true }
+    ) -> Int? {
+        readConnectionState(deadline: deadline, until: shouldContinue).flatMap {
             LogitechHIDPPDeviceMetadataProvider.parseConnectedDeviceCount($0)
         }
     }
 
     func discoverSlotInfo(
         _ slot: UInt8,
-        connectionSnapshot: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot? = nil
+        connectionSnapshot: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot? = nil,
+        until shouldContinue: @escaping () -> Bool = { true }
     ) -> LogitechHIDPPDeviceMetadataProvider.ReceiverSlotInfo? {
         let metadataProvider = LogitechHIDPPDeviceMetadataProvider()
         let pairingResponse = hidpp10LongRequest(
             register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverInfoRegister,
-            subregister: UInt8(0x20 + Int(slot) - 1)
+            subregister: UInt8(0x20 + Int(slot) - 1),
+            deadline: Date().addingTimeInterval(
+                LogitechHIDPPDeviceMetadataProvider.Constants.receiverProbeTimeout
+            ),
+            until: shouldContinue
         )
         let extendedPairingResponse = hidpp10LongRequest(
             register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverInfoRegister,
-            subregister: UInt8(0x30 + Int(slot) - 1)
+            subregister: UInt8(0x30 + Int(slot) - 1),
+            deadline: Date().addingTimeInterval(
+                LogitechHIDPPDeviceMetadataProvider.Constants.receiverProbeTimeout
+            ),
+            until: shouldContinue
         )
         let nameResponse = hidpp10LongRequest(
             register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverInfoRegister,
-            subregister: UInt8(0x40 + Int(slot) - 1)
+            subregister: UInt8(0x40 + Int(slot) - 1),
+            deadline: Date().addingTimeInterval(
+                LogitechHIDPPDeviceMetadataProvider.Constants.receiverProbeTimeout
+            ),
+            until: shouldContinue
         )
 
         guard pairingResponse != nil || nameResponse != nil else {
@@ -1513,7 +2100,12 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         let kind = pairingResponse.flatMap(Self.parseReceiverKind)
             ?? connectionSnapshot?.kind
             ?? 0
-        let routedTransport = HIDPPTransport(device: self, deviceIndex: slot)
+        let routedTransport = HIDPPTransport(
+            device: self,
+            deviceIndex: slot,
+            requestTimeout: LogitechHIDPPDeviceMetadataProvider.Constants.receiverProbeTimeout,
+            shouldContinue: shouldContinue
+        )
         let routedName = routedTransport.flatMap { transport in
             metadataProvider.readFriendlyName(using: transport) ?? metadataProvider.readName(using: transport)
         }
@@ -1535,10 +2127,51 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         )
     }
 
+    func validateSlotIdentity(
+        _ slot: UInt8,
+        deadline: Date,
+        until shouldContinue: @escaping () -> Bool
+    ) -> LogitechHIDPPDeviceMetadataProvider.ReceiverSlotInfo? {
+        let pairingResponse = hidpp10LongRequest(
+            register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverInfoRegister,
+            subregister: UInt8(0x20 + Int(slot) - 1),
+            deadline: deadline,
+            until: shouldContinue
+        )
+        guard shouldContinue(), let pairingResponse else {
+            return nil
+        }
+        let extendedPairingResponse = hidpp10LongRequest(
+            register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverInfoRegister,
+            subregister: UInt8(0x30 + Int(slot) - 1),
+            deadline: deadline,
+            until: shouldContinue
+        )
+        guard shouldContinue() else {
+            return nil
+        }
+
+        return .init(
+            slot: slot,
+            kind: Self.parseReceiverKind(pairingResponse) ?? 0,
+            name: nil,
+            productID: Self.parseReceiverProductID(pairingResponse),
+            serialNumber: extendedPairingResponse.flatMap(Self.parseReceiverSerialNumber),
+            batteryLevel: nil,
+            hasLiveMetadata: false
+        )
+    }
+
     private func discoverConnectionSnapshots(
-        expectedCount: Int? = nil
+        expectedCount: Int? = nil,
+        until shouldContinue: @escaping () -> Bool = { true }
     ) -> [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot] {
-        guard triggerConnectionNotifications() else {
+        guard triggerConnectionNotifications(
+            deadline: Date().addingTimeInterval(
+                LogitechHIDPPDeviceMetadataProvider.Constants.receiverProbeTimeout
+            ),
+            until: shouldContinue
+        ) else {
             return [:]
         }
 
@@ -1546,10 +2179,10 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             expectedConnectedDeviceCount: expectedCount
         )
         let deadline = Date().addingTimeInterval(0.5)
-        while Date() < deadline {
+        while shouldContinue(), Date() < deadline {
             guard let report = waitForInputReport(timeout: 0.05, matching: { response in
                 LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(Array(response)) != nil
-            }) else {
+            }, until: shouldContinue) else {
                 // No more notifications pending — if we already have enough connected snapshots, exit early
                 if collector.isCompleteAfterQuietWait {
                     break
@@ -1568,16 +2201,19 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         return collector.snapshots
     }
 
-    func discoverMatchCandidates(baseName: String)
+    func discoverMatchCandidates(
+        baseName: String,
+        until shouldContinue: @escaping () -> Bool = { true }
+    )
         -> (
             slots: [LogitechHIDPPDeviceMetadataProvider.ReceiverSlotMatchCandidate],
             connectionSnapshots: [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot],
             expectedConnectedDeviceCount: Int?,
             inventoryAvailable: Bool
         )? {
-        enableWirelessNotifications()
+        enableWirelessNotifications(until: shouldContinue)
 
-        guard let discovery = discoverSlots() else {
+        guard let discovery = discoverSlots(until: shouldContinue) else {
             return nil
         }
 
@@ -1591,8 +2227,13 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
                 name: slot.name ?? baseName,
                 serialNumber: slot.serialNumber,
                 productID: slot.productID,
-                batteryLevel: slot.batteryLevel ?? HIDPPTransport(device: self, deviceIndex: slot.slot)
-                    .flatMap { provider.readReceiverBatteryLevel(using: $0) },
+                batteryLevel: slot.batteryLevel ?? HIDPPTransport(
+                    device: self,
+                    deviceIndex: slot.slot,
+                    requestTimeout: LogitechHIDPPDeviceMetadataProvider.Constants.receiverProbeTimeout,
+                    shouldContinue: shouldContinue
+                )
+                .flatMap { provider.readReceiverBatteryLevel(using: $0) },
                 hasLiveMetadata: slot.hasLiveMetadata
             )
         }
@@ -1605,16 +2246,27 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         )
     }
 
-    func enableWirelessNotifications() {
+    func enableWirelessNotifications(
+        until producerShouldContinue: @escaping () -> Bool = { true }
+    ) {
         let ownership = receiverNotificationOwnership
         let requestedFlags = LogitechHIDPPDeviceMetadataProvider.Constants.receiverWirelessNotifications
             | LogitechHIDPPDeviceMetadataProvider.Constants.receiverSoftwarePresentNotifications
+        let shouldContinue = { [self] in
+            producerShouldContinue() && receiverNotificationIOIsCurrent()
+        }
         let enabled = ownership.store.enable(
             requestedFlags,
             for: ownership.target,
-            read: readNotificationFlags,
-            write: writeNotificationFlags,
-            shouldContinue: receiverNotificationIOIsCurrent
+            read: { [self] in readNotificationFlags(until: shouldContinue) },
+            committingWrite: { [self] value, didCommit in
+                writeNotificationFlags(
+                    value,
+                    until: shouldContinue,
+                    onCommitted: didCommit
+                )
+            },
+            shouldContinue: shouldContinue
         )
         if !enabled {
             os_log(
@@ -1638,12 +2290,15 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         }
 
         return (
-            receiverNotificationSessionStore,
-            .session(receiverNotificationSessionIdentity)
+            receiverNotificationOwnershipSession.store,
+            .session(receiverNotificationOwnershipSession.identity)
         )
     }
 
     private func receiverNotificationIOIsCurrent() -> Bool {
+        guard terminalAdmission.allowsProducerMutation else {
+            return false
+        }
         guard let locationID else {
             return true
         }
@@ -1654,17 +2309,8 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         shouldContinue: @escaping () -> Bool,
         completion: @escaping () -> Void
     ) {
-        let ownership = receiverNotificationOwnership
-        guard ownership.store.claim(for: ownership.target) != nil else {
-            DispatchQueue.main.async(execute: completion)
-            return
-        }
-
         DispatchQueue.global(qos: .utility).async { [self] in
-            let restored = ownership.store.restoreOwnedBits(
-                for: ownership.target,
-                read: readNotificationFlags,
-                write: writeNotificationFlags,
+            let restored = restoreOwnedNotificationFlagsSynchronously(
                 shouldContinue: shouldContinue
             )
             if !restored {
@@ -1675,11 +2321,32 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
                     locationID.map(String.init) ?? "(nil)"
                 )
             }
-            DispatchQueue.main.async(execute: completion)
+            Self.deliverOnMainRunLoop(completion)
         }
     }
 
-    func discoverPointingDeviceDiscovery(baseName: String) -> LogitechHIDPPDeviceMetadataProvider
+    @discardableResult
+    private func restoreOwnedNotificationFlagsSynchronously(
+        deadline: Date? = nil,
+        shouldContinue: @escaping () -> Bool
+    ) -> Bool {
+        let ownership = receiverNotificationOwnership
+        return ownership.store.restoreOwnedBits(
+            for: ownership.target,
+            read: { [self] in
+                readNotificationFlags(deadline: deadline, until: shouldContinue)
+            },
+            write: { [self] value in
+                writeNotificationFlags(value, deadline: deadline, until: shouldContinue)
+            },
+            shouldContinue: shouldContinue
+        )
+    }
+
+    func discoverPointingDeviceDiscovery(
+        baseName: String,
+        until shouldContinue: @escaping () -> Bool = { true }
+    ) -> LogitechHIDPPDeviceMetadataProvider
         .ReceiverPointingDeviceDiscovery {
         guard let locationID else {
             return .init(
@@ -1690,7 +2357,10 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             )
         }
 
-        guard let discovery = discoverMatchCandidates(baseName: baseName) else {
+        guard let discovery = discoverMatchCandidates(
+            baseName: baseName,
+            until: shouldContinue
+        ) else {
             return .init(
                 identities: [],
                 connectionSnapshots: [:],
@@ -1791,11 +2461,16 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         .map(Array.init)
     }
 
-    func readNotificationFlags() -> UInt32? {
+    func readNotificationFlags(
+        deadline: Date? = nil,
+        until shouldContinue: @escaping () -> Bool = { true }
+    ) -> UInt32? {
         guard let response = hidpp10ShortRequest(
             subID: 0x81,
             register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverNotificationFlagsRegister,
-            parameters: [0, 0, 0]
+            parameters: [0, 0, 0],
+            deadline: deadline,
+            until: shouldContinue
         ) else {
             return nil
         }
@@ -1803,11 +2478,19 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         return UInt32(response[4]) << 16 | UInt32(response[5]) << 8 | UInt32(response[6])
     }
 
-    func writeNotificationFlags(_ value: UInt32) -> Bool {
+    func writeNotificationFlags(
+        _ value: UInt32,
+        deadline: Date? = nil,
+        until shouldContinue: @escaping () -> Bool = { true },
+        onCommitted: () -> Void = {}
+    ) -> Bool {
         hidpp10ShortRequest(
             subID: 0x80,
             register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverNotificationFlagsRegister,
-            parameters: [UInt8((value >> 16) & 0xFF), UInt8((value >> 8) & 0xFF), UInt8(value & 0xFF)]
+            parameters: [UInt8((value >> 16) & 0xFF), UInt8((value >> 8) & 0xFF), UInt8(value & 0xFF)],
+            deadline: deadline,
+            until: shouldContinue,
+            onReportCommitted: onCommitted
         ) != nil
     }
 
@@ -1829,17 +2512,41 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         matching: @escaping (Data) -> Bool,
         until shouldContinue: @escaping () -> Bool
     ) -> Data? {
+        performSynchronousOutputReportRequest(
+            report,
+            timeout: timeout,
+            matching: matching,
+            until: shouldContinue
+        ) {}
+    }
+
+    private func performSynchronousOutputReportRequest(
+        _ report: Data,
+        timeout: TimeInterval,
+        matching: @escaping (Data) -> Bool,
+        until shouldContinue: @escaping () -> Bool,
+        onReportCommitted: () -> Void
+    ) -> Data? {
         guard shouldContinue() else {
             return nil
         }
+        let deadline = Date().addingTimeInterval(timeout)
+        let remainingTimeout = {
+            max(0, deadline.timeIntervalSinceNow)
+        }
 
         if let strategy = currentRequestStrategy(), shouldContinue() {
+            let remaining = remainingTimeout()
+            guard remaining > 0 else {
+                return nil
+            }
             let response = performRequest(
                 report,
-                timeout: timeout,
+                timeout: remaining,
                 matching: matching,
                 strategy: strategy,
-                until: shouldContinue
+                until: shouldContinue,
+                onReportCommitted: onReportCommitted
             )
             if response != nil {
                 recordRequestStrategySuccess(strategy)
@@ -1851,18 +2558,19 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
 
         // Strategy detection should be quick. Giving every callback strategy the
         // full HID++ timeout can turn one failed request into several seconds.
-        let probeTimeout = min(timeout, 0.25)
         for strategy in RequestStrategy.allCases {
-            guard shouldContinue() else {
+            let remaining = remainingTimeout()
+            guard shouldContinue(), remaining > 0 else {
                 return nil
             }
 
             guard let response = performRequest(
                 report,
-                timeout: probeTimeout,
+                timeout: min(remaining, 0.25),
                 matching: matching,
                 strategy: strategy,
-                until: shouldContinue
+                until: shouldContinue,
+                onReportCommitted: onReportCommitted
             ) else {
                 continue
             }
@@ -1920,7 +2628,8 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         timeout: TimeInterval,
         matching: @escaping (Data) -> Bool,
         strategy: RequestStrategy,
-        until shouldContinue: @escaping () -> Bool
+        until shouldContinue: @escaping () -> Bool,
+        onReportCommitted: () -> Void = {}
     ) -> Data? {
         guard !report.isEmpty, shouldContinue() else {
             return nil
@@ -1933,7 +2642,8 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
                 matching: matching,
                 requestType: strategy.requestType,
                 responseType: responseType,
-                until: shouldContinue
+                until: shouldContinue,
+                onReportCommitted: onReportCommitted
             )
         }
 
@@ -1942,7 +2652,8 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             timeout: timeout,
             matching: matching,
             reportType: strategy.requestType,
-            until: shouldContinue
+            until: shouldContinue,
+            onReportCommitted: onReportCommitted
         )
     }
 
@@ -1951,7 +2662,8 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         timeout: TimeInterval,
         matching: @escaping (Data) -> Bool,
         reportType: IOHIDReportType,
-        until shouldContinue: @escaping () -> Bool
+        until shouldContinue: @escaping () -> Bool,
+        onReportCommitted: () -> Void
     ) -> Data? {
         let deadline = Date().addingTimeInterval(timeout)
         guard acquireRequestLock(until: deadline, while: shouldContinue) else {
@@ -1975,6 +2687,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             clearPendingRequest()
             return nil
         }
+        onReportCommitted()
 
         return settleCommittedPendingResponse(
             timeout: max(0, deadline.timeIntervalSinceNow),
@@ -1988,7 +2701,8 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         matching: @escaping (Data) -> Bool,
         requestType: IOHIDReportType,
         responseType: IOHIDReportType,
-        until shouldContinue: @escaping () -> Bool
+        until shouldContinue: @escaping () -> Bool,
+        onReportCommitted: () -> Void
     ) -> Data? {
         let deadline = Date().addingTimeInterval(timeout)
         guard acquireRequestLock(until: deadline, while: shouldContinue) else {
@@ -2004,6 +2718,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         guard sendReport(report, type: requestType) == kIOReturnSuccess else {
             return nil
         }
+        onReportCommitted()
 
         return settleCommittedGetReport(
             type: responseType,
@@ -2265,23 +2980,51 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         notificationBuffer.wake()
     }
 
-    private func readConnectionState() -> [UInt8]? {
+    private func readConnectionState(
+        deadline: Date? = nil,
+        until shouldContinue: @escaping () -> Bool = { true }
+    ) -> [UInt8]? {
         hidpp10ShortRequest(
             subID: 0x81,
             register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverConnectionStateRegister,
-            parameters: [0, 0, 0]
+            parameters: [0, 0, 0],
+            deadline: deadline,
+            until: shouldContinue
         )
     }
 
-    private func triggerConnectionNotifications() -> Bool {
+    private func triggerConnectionNotifications(
+        deadline: Date? = nil,
+        until shouldContinue: @escaping () -> Bool = { true }
+    ) -> Bool {
         hidpp10ShortRequest(
             subID: 0x80,
             register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverConnectionStateRegister,
-            parameters: [0x02, 0x00, 0x00]
+            parameters: [0x02, 0x00, 0x00],
+            deadline: deadline,
+            until: shouldContinue
         ) != nil
     }
 
-    private func hidpp10ShortRequest(subID: UInt8, register: UInt8, parameters: [UInt8]) -> [UInt8]? {
+    private func hidpp10ShortRequest(
+        subID: UInt8,
+        register: UInt8,
+        parameters: [UInt8],
+        deadline: Date? = nil,
+        until shouldContinue: @escaping () -> Bool = { true },
+        onReportCommitted: () -> Void = {}
+    ) -> [UInt8]? {
+        let requestShouldContinue = {
+            shouldContinue() && deadline.map { Date() < $0 } != false
+        }
+        let timeout = min(
+            LogitechHIDPPDeviceMetadataProvider.Constants.timeout,
+            deadline.map { max(0, $0.timeIntervalSinceNow) }
+                ?? LogitechHIDPPDeviceMetadataProvider.Constants.timeout
+        )
+        guard timeout > 0, requestShouldContinue() else {
+            return nil
+        }
         var bytes = [UInt8](repeating: 0, count: LogitechHIDPPDeviceMetadataProvider.Constants.shortReportLength)
         bytes[0] = LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID
         bytes[1] = LogitechHIDPPDeviceMetadataProvider.Constants.receiverIndex
@@ -2293,27 +3036,30 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
 
         let response = performSynchronousOutputReportRequest(
             Data(bytes),
-            timeout: LogitechHIDPPDeviceMetadataProvider.Constants.timeout
-        ) { report in
-            let reply = [UInt8](report)
-            guard reply.count >= LogitechHIDPPDeviceMetadataProvider.Constants.shortReportLength else {
-                return false
-            }
+            timeout: timeout,
+            matching: { report in
+                let reply = [UInt8](report)
+                guard reply.count >= LogitechHIDPPDeviceMetadataProvider.Constants.shortReportLength else {
+                    return false
+                }
 
-            guard [
-                LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
-                LogitechHIDPPDeviceMetadataProvider.Constants.longReportID
-            ].contains(reply[0]), reply[1] == LogitechHIDPPDeviceMetadataProvider.Constants.receiverIndex else {
-                return false
-            }
+                guard [
+                    LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
+                    LogitechHIDPPDeviceMetadataProvider.Constants.longReportID
+                ].contains(reply[0]), reply[1] == LogitechHIDPPDeviceMetadataProvider.Constants.receiverIndex else {
+                    return false
+                }
 
-            if reply[2] == 0x8F {
-                return reply[3] == subID && reply[4] == register
-            }
+                if reply[2] == 0x8F {
+                    return reply[3] == subID && reply[4] == register
+                }
 
-            return reply[2] == subID
-                && reply[3] == register
-        }
+                return reply[2] == subID
+                    && reply[3] == register
+            },
+            until: requestShouldContinue,
+            onReportCommitted: onReportCommitted
+        )
 
         guard let response else {
             return nil
@@ -2323,7 +3069,23 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         return responseBytes[2] == 0x8F ? nil : responseBytes
     }
 
-    private func hidpp10LongRequest(register: UInt8, subregister: UInt8) -> [UInt8]? {
+    private func hidpp10LongRequest(
+        register: UInt8,
+        subregister: UInt8,
+        deadline: Date? = nil,
+        until shouldContinue: @escaping () -> Bool = { true }
+    ) -> [UInt8]? {
+        let requestShouldContinue = {
+            shouldContinue() && deadline.map { Date() < $0 } != false
+        }
+        let timeout = min(
+            LogitechHIDPPDeviceMetadataProvider.Constants.timeout,
+            deadline.map { max(0, $0.timeIntervalSinceNow) }
+                ?? LogitechHIDPPDeviceMetadataProvider.Constants.timeout
+        )
+        guard timeout > 0, requestShouldContinue() else {
+            return nil
+        }
         var bytes = [UInt8](repeating: 0, count: LogitechHIDPPDeviceMetadataProvider.Constants.shortReportLength)
         bytes[0] = LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID
         bytes[1] = LogitechHIDPPDeviceMetadataProvider.Constants.receiverIndex
@@ -2335,28 +3097,30 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
 
         let response = performSynchronousOutputReportRequest(
             request,
-            timeout: LogitechHIDPPDeviceMetadataProvider.Constants.timeout
-        ) { report in
-            let reply = [UInt8](report)
-            guard reply.count >= 5 else {
-                return false
-            }
+            timeout: timeout,
+            matching: { report in
+                let reply = [UInt8](report)
+                guard reply.count >= 5 else {
+                    return false
+                }
 
-            guard [
-                LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
-                LogitechHIDPPDeviceMetadataProvider.Constants.longReportID
-            ].contains(reply[0]), reply[1] == LogitechHIDPPDeviceMetadataProvider.Constants.receiverIndex else {
-                return false
-            }
+                guard [
+                    LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
+                    LogitechHIDPPDeviceMetadataProvider.Constants.longReportID
+                ].contains(reply[0]), reply[1] == LogitechHIDPPDeviceMetadataProvider.Constants.receiverIndex else {
+                    return false
+                }
 
-            if reply[2] == 0x8F {
-                return reply[3] == 0x83 && reply[4] == register
-            }
+                if reply[2] == 0x8F {
+                    return reply[3] == 0x83 && reply[4] == register
+                }
 
-            return reply[2] == 0x83
-                && reply[3] == register
-                && reply[4] == subregister
-        }
+                return reply[2] == 0x83
+                    && reply[3] == register
+                    && reply[4] == subregister
+            },
+            until: requestShouldContinue
+        )
 
         guard let response else {
             return nil
@@ -2831,7 +3595,9 @@ final class LogitechReprogrammableControlsMonitor {
             state.setStoreBackedActiveTarget(baselineTarget != nil)
 
             state.setActiveNotificationEndpoint(monitorTarget.notificationEndpoint)
-            monitorTarget.notificationEndpoint.enableNotifications()
+            monitorTarget.notificationEndpoint.enableNotifications { [state] in
+                state.shouldContinueRunning
+            }
             logAvailableControls(transport: transport, featureIndex: featureIndex, slot: slot, locationID: locationID)
 
             while shouldContinueRunning() {
@@ -4505,25 +5271,44 @@ final class LogitechReprogrammableControlsMonitorState {
 
     /// Atomically upgrades a sleeping worker to a teardown-capable,
     /// restore-only worker and attaches its completion. If the worker has
-    /// already stopped, a worker is created only when a stable baseline is
-    /// still pending. In either case completion is retained until the worker
-    /// observes that there is nothing left to restore.
+    /// already stopped, a worker is created only when a baseline is still
+    /// pending. A worker that never established a target has changed no
+    /// reporting state, so it is cancelled instead of spending the terminal
+    /// budget retrying target discovery.
     @discardableResult
     func restorePendingForTeardown(
-        _ hasPendingBaseline: Bool,
+        _ requiresRestoreWorker: Bool,
         makeWorkerThread: () -> Thread,
         completion: @escaping () -> Void
     ) -> TeardownRestoreRequest? {
-        let (thread, completions, request) = queue.sync {
-            () -> (Thread?, [() -> Void], TeardownRestoreRequest?) in
+        let (thread, resourcesToStop, completions, request) = queue.sync {
+            () -> (Thread?, WorkerResources, [() -> Void], TeardownRestoreRequest?) in
             if restoresPendingForTeardown,
                let request = pendingTeardownRestoreRequest {
                 stopCompletions.append(completion)
-                return (nil, [], request)
+                return (nil, (nil, nil, nil), [], request)
             }
 
-            guard workerThread != nil || hasPendingBaseline else {
-                return (nil, [completion], nil)
+            if !requiresRestoreWorker,
+               let workerThread,
+               !hasEstablishedActiveTarget {
+                let resources: WorkerResources = (
+                    workerThread,
+                    activeNotificationEndpoint,
+                    directDeviceReportObservationToken
+                )
+                stopCompletions.append(completion)
+                restartBarrier = restartBarrier ?? RestartBarrier()
+                isEnabled = false
+                allowsTeardownIO = false
+                reconfigurationRequest.reset()
+                activeNotificationEndpoint = nil
+                directDeviceReportObservationToken = nil
+                return (nil, resources, [], nil)
+            }
+
+            guard workerThread != nil || requiresRestoreWorker else {
+                return (nil, (nil, nil, nil), [completion], nil)
             }
 
             let request = TeardownRestoreRequest()
@@ -4539,18 +5324,20 @@ final class LogitechReprogrammableControlsMonitorState {
             reconfigurationRequest.request(forced: true)
 
             guard workerThread == nil else {
-                return (nil, [], request)
+                return (nil, (nil, nil, nil), [], request)
             }
 
             let thread = makeWorkerThread()
             workerThread = thread
             workerTargetIsValid = true
             allowsTeardownIO = true
-            return (thread, [], request)
+            return (thread, (nil, nil, nil), [], request)
         }
 
         reconfigurationSemaphore.signal()
-        queue.sync { activeNotificationEndpoint }?.wake()
+        (resourcesToStop.1 ?? queue.sync { activeNotificationEndpoint })?.wake()
+        resourcesToStop.0?.cancel()
+        resourcesToStop.2?.cancel()
         thread?.start()
         dispatchStopCompletions(completions)
         return request
@@ -4846,7 +5633,7 @@ final class LogitechReprogrammableControlsMonitorState {
 }
 
 private protocol HIDPPNotificationHandling: AnyObject {
-    func enableNotifications()
+    func enableNotifications(until shouldContinue: @escaping () -> Bool)
     func wake()
     func discardHIDPPNotifications(matching: @escaping ([UInt8]) -> Bool)
     func waitForHIDPPNotification(
@@ -4995,7 +5782,7 @@ final class HIDPPNotificationEndpoint: HIDPPNotificationHandling {
 
     private let buffer = HIDPPNotificationBuffer(maximumBufferedReports: maxBufferedReports)
 
-    func enableNotifications() {}
+    func enableNotifications(until _: @escaping () -> Bool) {}
 
     func wake() {
         buffer.wake()
@@ -5019,8 +5806,8 @@ final class HIDPPNotificationEndpoint: HIDPPNotificationHandling {
 }
 
 extension LogitechReceiverChannel: HIDPPNotificationHandling {
-    func enableNotifications() {
-        enableWirelessNotifications()
+    func enableNotifications(until shouldContinue: @escaping () -> Bool) {
+        enableWirelessNotifications(until: shouldContinue)
     }
 
     func discardHIDPPNotifications(matching: @escaping ([UInt8]) -> Bool) {

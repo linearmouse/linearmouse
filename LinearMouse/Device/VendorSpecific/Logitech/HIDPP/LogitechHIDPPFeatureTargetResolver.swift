@@ -1,6 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
+import Foundation
 import HIDPP
 import PointerKit
 
@@ -17,6 +18,8 @@ enum LogitechHIDPPFeatureTargetResolver {
         _ featureID: HIDPPFeatureID,
         for device: VendorSpecificDeviceContext,
         receiverSlot: UInt8?,
+        requestDeadline: Date? = nil,
+        requestShouldContinue: @escaping () -> Bool = { true },
         shouldContinue: @escaping () -> Bool
     ) -> Target? {
         guard device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID,
@@ -37,7 +40,13 @@ enum LogitechHIDPPFeatureTargetResolver {
         )
 
         if !isKnownReceiver {
-            if let directTarget = directTarget(featureID, for: device, shouldContinue: shouldContinue) {
+            if let directTarget = directTarget(
+                featureID,
+                for: device,
+                requestDeadline: requestDeadline,
+                requestShouldContinue: requestShouldContinue,
+                shouldContinue: shouldContinue
+            ) {
                 return directTarget
             }
 
@@ -49,6 +58,8 @@ enum LogitechHIDPPFeatureTargetResolver {
                 featureID,
                 for: device,
                 provider: LogitechHIDPPDeviceMetadataProvider(),
+                requestDeadline: requestDeadline,
+                requestShouldContinue: requestShouldContinue,
                 shouldContinue: shouldContinue
             )
         }
@@ -60,8 +71,16 @@ enum LogitechHIDPPFeatureTargetResolver {
                 featureID,
                 for: device,
                 provider: LogitechHIDPPDeviceMetadataProvider(),
+                requestDeadline: requestDeadline,
+                requestShouldContinue: requestShouldContinue,
                 shouldContinue: shouldContinue
-            ) ?? directTarget(featureID, for: device, shouldContinue: shouldContinue)
+            ) ?? directTarget(
+                featureID,
+                for: device,
+                requestDeadline: requestDeadline,
+                requestShouldContinue: requestShouldContinue,
+                shouldContinue: shouldContinue
+            )
         }
 
         guard let receiverSlot else {
@@ -77,6 +96,8 @@ enum LogitechHIDPPFeatureTargetResolver {
             featureID,
             receiverChannel: receiverChannel,
             slot: receiverSlot,
+            requestDeadline: requestDeadline,
+            requestShouldContinue: requestShouldContinue,
             shouldContinue: shouldContinue
         )
     }
@@ -84,6 +105,8 @@ enum LogitechHIDPPFeatureTargetResolver {
     private static func directTarget(
         _ featureID: HIDPPFeatureID,
         for device: VendorSpecificDeviceContext,
+        requestDeadline: Date?,
+        requestShouldContinue: @escaping () -> Bool,
         shouldContinue: @escaping () -> Bool = { true }
     ) -> Target? {
         guard let transport = HIDPPTransport(
@@ -91,7 +114,11 @@ enum LogitechHIDPPFeatureTargetResolver {
             deviceIndex: nil,
             shouldContinue: shouldContinue
         ),
-            let featureIndex = transport.featureIndex(for: featureID)
+            let featureIndex = transport.featureIndex(
+                for: featureID,
+                deadline: requestDeadline,
+                until: requestShouldContinue
+            )
         else {
             return nil
         }
@@ -103,6 +130,8 @@ enum LogitechHIDPPFeatureTargetResolver {
         _ featureID: HIDPPFeatureID,
         for device: VendorSpecificDeviceContext,
         provider: LogitechHIDPPDeviceMetadataProvider,
+        requestDeadline: Date?,
+        requestShouldContinue: @escaping () -> Bool,
         shouldContinue: @escaping () -> Bool = { true }
     ) -> Target? {
         guard device.transport == PointerDeviceTransportName.usb,
@@ -116,6 +145,8 @@ enum LogitechHIDPPFeatureTargetResolver {
             featureID,
             receiverChannel: receiverChannel,
             slot: slot,
+            requestDeadline: requestDeadline,
+            requestShouldContinue: requestShouldContinue,
             shouldContinue: shouldContinue
         )
     }
@@ -124,6 +155,8 @@ enum LogitechHIDPPFeatureTargetResolver {
         _ featureID: HIDPPFeatureID,
         receiverChannel: LogitechReceiverChannel,
         slot: UInt8,
+        requestDeadline: Date?,
+        requestShouldContinue: @escaping () -> Bool,
         shouldContinue: @escaping () -> Bool = { true }
     ) -> Target? {
         guard let transport = HIDPPTransport(
@@ -131,7 +164,11 @@ enum LogitechHIDPPFeatureTargetResolver {
             deviceIndex: slot,
             shouldContinue: shouldContinue
         ),
-            let featureIndex = transport.featureIndex(for: featureID)
+            let featureIndex = transport.featureIndex(
+                for: featureID,
+                deadline: requestDeadline,
+                until: requestShouldContinue
+            )
         else {
             return nil
         }
@@ -164,12 +201,16 @@ extension HIDPPFeature {
     init?(
         device: VendorSpecificDeviceContext,
         receiverSlot: UInt8?,
+        requestDeadline: Date? = nil,
+        requestShouldContinue: @escaping () -> Bool = { true },
         shouldContinue: @escaping () -> Bool
     ) {
         guard let target = LogitechHIDPPFeatureTargetResolver.resolve(
             Self.featureID,
             for: device,
             receiverSlot: receiverSlot,
+            requestDeadline: requestDeadline,
+            requestShouldContinue: requestShouldContinue,
             shouldContinue: shouldContinue
         ) else {
             return nil
