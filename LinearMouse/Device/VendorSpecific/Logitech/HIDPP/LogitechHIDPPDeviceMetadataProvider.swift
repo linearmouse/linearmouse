@@ -2510,13 +2510,6 @@ final class LogitechReprogrammableControlsMonitor {
 
             state.setActiveNotificationEndpoint(monitorTarget.notificationEndpoint)
             monitorTarget.notificationEndpoint.enableNotifications()
-            monitorTarget.notificationEndpoint.discardHIDPPNotifications { response in
-                Self.isDivertedButtonsNotification(
-                    response,
-                    featureIndex: featureIndex,
-                    deviceIndices: monitorTarget.notificationDeviceIndices
-                )
-            }
             logAvailableControls(transport: transport, featureIndex: featureIndex, slot: slot, locationID: locationID)
 
             while shouldContinueRunning() {
@@ -2608,6 +2601,13 @@ final class LogitechReprogrammableControlsMonitor {
                 // during disable or target teardown.
                 let controlsWithKnownOriginalReporting = monitoredControls.filter {
                     originalReportingByControlID[$0.controlID] != nil
+                }
+                monitorTarget.notificationEndpoint.discardHIDPPNotifications { response in
+                    Self.isDivertedButtonsNotification(
+                        response,
+                        featureIndex: featureIndex,
+                        deviceIndices: monitorTarget.notificationDeviceIndices
+                    )
                 }
                 let activeControlIDs = controlsWithKnownOriginalReporting.compactMap { control -> UInt16? in
                     guard setDivertedWithRetry(

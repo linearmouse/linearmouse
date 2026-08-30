@@ -407,11 +407,12 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         )
     }
 
-    func testNotificationBufferDiscardRemovesOnlyStaleTargetControlsEvents() {
+    func testNotificationBufferDiscardRemovesStaleEventsForEachControlsConfigurationCycle() {
         let buffer = HIDPPNotificationBuffer()
-        let stalePress = [UInt8]([0x11, 0x02, 0x05, 0x00, 0x00, 0xC3, 0x00])
+        let staleBeforeFirstCycle = [UInt8]([0x11, 0x02, 0x05, 0x00, 0x00, 0xC3, 0x00])
         let connection = [UInt8]([0x10, 0x02, 0x41, 0x00, 0x02, 0x00, 0x00])
-        let freshPress = [UInt8]([0x11, 0x02, 0x05, 0x00, 0x00, 0xC4, 0x00])
+        let residualFromFirstCycle = [UInt8]([0x11, 0x02, 0x05, 0x00, 0x00, 0xC4, 0x00])
+        let freshPress = [UInt8]([0x11, 0x02, 0x05, 0x00, 0x00, 0xC5, 0x00])
         let matchesTargetControls: ([UInt8]) -> Bool = {
             LogitechReprogrammableControlsMonitor.isDivertedButtonsNotification(
                 $0,
@@ -420,7 +421,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
             )
         }
 
-        buffer.appendIfUnsolicited(stalePress)
+        buffer.appendIfUnsolicited(staleBeforeFirstCycle)
         buffer.appendIfUnsolicited(connection)
         buffer.discard(matching: matchesTargetControls)
 
@@ -431,6 +432,13 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
             },
             connection
         )
+
+        // A configuration change ends the first diversion loop with this
+        // report still buffered. The next cycle must discard it before
+        // diverting controls again.
+        buffer.appendIfUnsolicited(residualFromFirstCycle)
+        buffer.discard(matching: matchesTargetControls)
+        XCTAssertNil(buffer.wait(timeout: 0, matching: matchesTargetControls))
 
         buffer.appendIfUnsolicited(freshPress)
         XCTAssertEqual(buffer.wait(timeout: 0, matching: matchesTargetControls), freshPress)
