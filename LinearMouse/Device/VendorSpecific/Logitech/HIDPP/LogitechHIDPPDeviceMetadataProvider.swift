@@ -1100,17 +1100,6 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         }
     }
 
-    private final class InputReportWaiter {
-        let id = UUID()
-        let matching: (Data) -> Bool
-        let semaphore = DispatchSemaphore(value: 0)
-        var response: Data?
-
-        init(matching: @escaping (Data) -> Bool) {
-            self.matching = matching
-        }
-    }
-
     private enum RequestStrategy: CaseIterable {
         case outputCallback
         case featureCallback
@@ -1170,9 +1159,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
     private var pendingSemaphore: DispatchSemaphore?
     private var requestStrategy: RequestStrategy?
     private var requestStrategyFailureCount = 0
-    /// Passive notification consumers are independent of the single synchronous
-    /// request slot, so one input report can be fanned out without blocking commands.
-    private var inputReportWaiters = [UUID: InputReportWaiter]()
+    private let notificationBuffer = HIDPPNotificationBuffer()
 
     // Keep one I/O reader per physical receiver. Opening the same macOS HID
     // interface more than once can route a command response to another callback.
@@ -2013,26 +2000,12 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         matching: @escaping (Data) -> Bool,
         until shouldContinue: (() -> Bool)? = nil
     ) -> Data? {
-        let waiter = InputReportWaiter(matching: matching)
-        pendingLock.lock()
-        inputReportWaiters[waiter.id] = waiter
-        pendingLock.unlock()
-        defer {
-            pendingLock.lock()
-            inputReportWaiters.removeValue(forKey: waiter.id)
-            pendingLock.unlock()
-        }
-
-        return waitForResponse(
+        notificationBuffer.wait(
             timeout: timeout,
-            until: shouldContinue,
-            semaphore: waiter.semaphore
-        ) {
-            self.pendingLock.lock()
-            let response = waiter.response
-            self.pendingLock.unlock()
-            return response
-        }
+            matching: { matching(Data($0)) },
+            until: shouldContinue
+        )
+        .map { Data($0) }
     }
 
     private func settleCommittedPendingResponse(
@@ -2098,24 +2071,22 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
     private func handleInputReport(_ report: Data) {
         pendingLock.lock()
         var semaphores = [DispatchSemaphore]()
+        var wasClaimedByTransaction = false
 
         if let reportMatcher = pendingMatcher, reportMatcher(report) {
             pendingResponse = report
             pendingMatcher = nil
+            wasClaimedByTransaction = true
             if let pendingSemaphore {
                 semaphores.append(pendingSemaphore)
             }
         }
 
-        let matchingWaiters = inputReportWaiters.values.filter { $0.matching(report) }
-        for waiter in matchingWaiters {
-            waiter.response = report
-            inputReportWaiters.removeValue(forKey: waiter.id)
-            semaphores.append(waiter.semaphore)
-        }
-
         pendingLock.unlock()
         semaphores.forEach { $0.signal() }
+        if !wasClaimedByTransaction {
+            notificationBuffer.appendIfUnsolicited(report)
+        }
     }
 
     private var isTransportActive: Bool {
@@ -2132,9 +2103,10 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
 
     func wake() {
         pendingLock.lock()
-        let semaphores = [pendingSemaphore].compactMap(\.self) + inputReportWaiters.values.map(\.semaphore)
+        let semaphores = [pendingSemaphore].compactMap(\.self)
         pendingLock.unlock()
         semaphores.forEach { $0.signal() }
+        notificationBuffer.wake()
     }
 
     private func readConnectionState() -> [UInt8]? {
@@ -3553,7 +3525,8 @@ final class LogitechReprogrammableControlsMonitor {
               [LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
                LogitechHIDPPDeviceMetadataProvider.Constants.longReportID].contains(report[0]),
               deviceIndices.contains(report[1]),
-              report[2] == featureIndex
+              report[2] == featureIndex,
+              report[3] & 0x0F == 0
         else {
             return false
         }
@@ -4000,34 +3973,129 @@ private protocol HIDPPNotificationHandling: AnyObject {
     ) -> [UInt8]?
 }
 
-private final class HIDPPNotificationEndpoint: HIDPPNotificationHandling {
+/// Retains unsolicited HID++ notifications across consumer gaps. Its condition
+/// wake is coalesced, so historical reports cannot build up a counting-
+/// semaphore burst when a later matcher has no matching report.
+final class HIDPPNotificationBuffer {
+    private let maximumBufferedReports: Int
+    private let condition = NSCondition()
+    private let onWait: (() -> Void)?
+    private var bufferedReports = [[UInt8]]()
+    private var wakeGeneration = 0
+
+    init(maximumBufferedReports: Int = 64, onWait: (() -> Void)? = nil) {
+        self.maximumBufferedReports = maximumBufferedReports
+        self.onWait = onWait
+    }
+
+    var bufferedReportCount: Int {
+        condition.lock()
+        defer { condition.unlock() }
+        return bufferedReports.count
+    }
+
+    func appendIfUnsolicited(_ report: Data) {
+        appendIfUnsolicited([UInt8](report))
+    }
+
+    func appendIfUnsolicited(_ report: [UInt8]) {
+        guard HIDPPUnsolicitedNotification.matches(report) else {
+            return
+        }
+
+        condition.lock()
+        bufferedReports.append(report)
+        if bufferedReports.count > maximumBufferedReports {
+            bufferedReports.removeFirst(bufferedReports.count - maximumBufferedReports)
+        }
+        wakeGeneration &+= 1
+        condition.broadcast()
+        condition.unlock()
+    }
+
+    func wake() {
+        condition.lock()
+        wakeGeneration &+= 1
+        condition.broadcast()
+        condition.unlock()
+    }
+
+    func wait(
+        timeout: TimeInterval,
+        matching: @escaping ([UInt8]) -> Bool,
+        until shouldContinue: (() -> Bool)? = nil
+    ) -> [UInt8]? {
+        let deadline = Date().addingTimeInterval(timeout)
+        var observedWakeGeneration = 0
+
+        while shouldContinue?() ?? true {
+            condition.lock()
+            if let index = bufferedReports.firstIndex(where: matching) {
+                let report = bufferedReports.remove(at: index)
+                condition.unlock()
+                return report
+            }
+
+            if wakeGeneration != observedWakeGeneration {
+                observedWakeGeneration = wakeGeneration
+                condition.unlock()
+                continue
+            }
+
+            let remaining = deadline.timeIntervalSinceNow
+            guard remaining > 0 else {
+                condition.unlock()
+                return nil
+            }
+
+            condition.unlock()
+            onWait?()
+            condition.lock()
+            if wakeGeneration == observedWakeGeneration {
+                _ = condition.wait(until: deadline)
+            }
+            condition.unlock()
+        }
+
+        return nil
+    }
+}
+
+private enum HIDPPUnsolicitedNotification {
+    static func matches(_ report: [UInt8]) -> Bool {
+        guard report.count >= LogitechHIDPPDeviceMetadataProvider.Constants.shortReportLength,
+              [LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
+               LogitechHIDPPDeviceMetadataProvider.Constants.longReportID].contains(report[0])
+        else {
+            return false
+        }
+
+        if LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(report) != nil {
+            return true
+        }
+
+        // HID++ 1.0 receiver command replies use register sub-IDs. HID++ 2.0
+        // notifications use software ID 0, whereas host command replies use 8.
+        guard ![0x80, 0x81, 0x83, 0x8F].contains(report[2]) else {
+            return false
+        }
+        return report[3] & 0x0F == 0
+    }
+}
+
+final class HIDPPNotificationEndpoint: HIDPPNotificationHandling {
     private static let maxBufferedReports = 64
 
-    private let queue = DispatchQueue(label: "linearmouse.logitech-controls.notifications")
-    private let semaphore = DispatchSemaphore(value: 0)
-    private var bufferedReports = [[UInt8]]()
+    private let buffer = HIDPPNotificationBuffer(maximumBufferedReports: maxBufferedReports)
 
     func enableNotifications() {}
 
     func wake() {
-        semaphore.signal()
+        buffer.wake()
     }
 
     func handleInputReport(_ report: Data) {
-        let bytes = [UInt8](report)
-        guard let reportID = bytes.first,
-              [LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
-               LogitechHIDPPDeviceMetadataProvider.Constants.longReportID].contains(reportID) else {
-            return
-        }
-
-        queue.sync {
-            bufferedReports.append(bytes)
-            if bufferedReports.count > Self.maxBufferedReports {
-                bufferedReports.removeFirst(bufferedReports.count - Self.maxBufferedReports)
-            }
-        }
-        semaphore.signal()
+        buffer.appendIfUnsolicited(report)
     }
 
     func waitForHIDPPNotification(
@@ -4035,35 +4103,7 @@ private final class HIDPPNotificationEndpoint: HIDPPNotificationHandling {
         matching: @escaping ([UInt8]) -> Bool,
         until shouldContinue: (() -> Bool)? = nil
     ) -> [UInt8]? {
-        let deadline = Date().addingTimeInterval(timeout)
-        while Date() < deadline {
-            if let shouldContinue, !shouldContinue() {
-                return nil
-            }
-
-            if let report = dequeueFirstMatchingReport(matching: matching) {
-                return report
-            }
-
-            let remaining = deadline.timeIntervalSinceNow
-            guard remaining > 0 else {
-                break
-            }
-
-            _ = semaphore.wait(timeout: .now() + remaining)
-        }
-
-        return dequeueFirstMatchingReport(matching: matching)
-    }
-
-    private func dequeueFirstMatchingReport(matching: ([UInt8]) -> Bool) -> [UInt8]? {
-        queue.sync {
-            guard let index = bufferedReports.firstIndex(where: matching) else {
-                return nil
-            }
-
-            return bufferedReports.remove(at: index)
-        }
+        buffer.wait(timeout: timeout, matching: matching, until: shouldContinue)
     }
 }
 

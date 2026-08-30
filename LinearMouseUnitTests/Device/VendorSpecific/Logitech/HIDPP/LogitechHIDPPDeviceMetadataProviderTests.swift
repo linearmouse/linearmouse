@@ -356,6 +356,90 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         XCTAssertEqual(pollCount, 1)
     }
 
+    func testNotificationBufferRetainsConnectionEventsAcrossWaiterGapInOrder() {
+        let buffer = HIDPPNotificationBuffer()
+        let disconnect = [UInt8]([0x10, 0x01, 0x41, 0x00, 0x42, 0x00, 0x00])
+        let connect = [UInt8]([0x10, 0x02, 0x41, 0x00, 0x02, 0x00, 0x00])
+
+        buffer.appendIfUnsolicited(disconnect)
+        buffer.appendIfUnsolicited(connect)
+
+        XCTAssertEqual(
+            buffer.wait(timeout: 0) {
+                LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification($0) != nil
+            },
+            disconnect
+        )
+        XCTAssertEqual(
+            buffer.wait(timeout: 0) {
+                LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification($0) != nil
+            },
+            connect
+        )
+    }
+
+    func testNotificationEndpointRetainsControlsNotificationsButRejectsCommandReplies() {
+        let buffer = HIDPPNotificationBuffer()
+        let commandReply = Data([0x11, 0x02, 0x05, 0x08, 0x00, 0xC3, 0x00])
+        let notification = Data([0x11, 0x02, 0x05, 0x00, 0x00, 0xC3, 0x00])
+
+        buffer.appendIfUnsolicited(commandReply)
+        XCTAssertEqual(buffer.bufferedReportCount, 0)
+        buffer.appendIfUnsolicited(notification)
+        XCTAssertEqual(buffer.bufferedReportCount, 1)
+
+        let endpoint = HIDPPNotificationEndpoint()
+        endpoint.handleInputReport(commandReply)
+        endpoint.handleInputReport(notification)
+
+        XCTAssertEqual(
+            endpoint.waitForHIDPPNotification(
+                timeout: 0,
+                matching: { LogitechReprogrammableControlsMonitor.isDivertedButtonsNotification(
+                    $0,
+                    featureIndex: 0x05,
+                    deviceIndices: [0x02]
+                )
+                },
+                until: nil
+            ),
+            [UInt8](notification)
+        )
+    }
+
+    func testNotificationBufferCoalescesHistoricalWakeups() {
+        let firstWait = expectation(description: "buffer waits once")
+        let finished = expectation(description: "buffer wait cancels")
+        let lock = NSLock()
+        var waitCount = 0
+        var shouldContinue = true
+        let buffer = HIDPPNotificationBuffer(maximumBufferedReports: 2) {
+            lock.withLock {
+                waitCount += 1
+            }
+            firstWait.fulfill()
+        }
+
+        for slot in UInt8(1) ... UInt8(10) {
+            buffer.appendIfUnsolicited([0x10, slot, 0x41, 0x00, 0x02, 0x00, 0x00])
+        }
+
+        DispatchQueue.global().async {
+            _ = buffer.wait(
+                timeout: 1,
+                matching: { $0[2] == 0x05 },
+                until: { lock.withLock { shouldContinue } }
+            )
+            finished.fulfill()
+        }
+
+        wait(for: [firstWait], timeout: 1)
+        lock.withLock { shouldContinue = false }
+        buffer.wake()
+        wait(for: [finished], timeout: 1)
+        XCTAssertEqual(lock.withLock { waitCount }, 1)
+    }
+
     func testCommittedGetReportTransactionsUseIndependentTimedYields() {
         var firstResponse: Data?
         var secondResponse: Data?
