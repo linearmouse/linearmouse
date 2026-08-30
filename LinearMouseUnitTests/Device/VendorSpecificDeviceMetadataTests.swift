@@ -534,7 +534,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
     func testLogitechDivertedButtonsNotificationMatchesGestureButtonEvent() {
         XCTAssertTrue(
             LogitechReprogrammableControlsMonitor.isDivertedButtonsNotification(
-                [0x10, 0x02, 0x05, 0x08, 0x00, 0xC3, 0x00],
+                [0x10, 0x02, 0x05, 0x00, 0x00, 0xC3, 0x00],
                 featureIndex: 0x05,
                 deviceIndices: Set([0x02])
             )
@@ -545,7 +545,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         for deviceIndex in LogitechHIDPPDeviceMetadataProvider.Constants.directReplyIndices {
             XCTAssertTrue(
                 LogitechReprogrammableControlsMonitor.isDivertedButtonsNotification(
-                    [0x10, deviceIndex, 0x05, 0x08, 0x00, 0xD0, 0x00],
+                    [0x10, deviceIndex, 0x05, 0x00, 0x00, 0xD0, 0x00],
                     featureIndex: 0x05,
                     deviceIndices: LogitechHIDPPDeviceMetadataProvider.Constants.directReplyIndices
                 )
@@ -559,7 +559,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
                 0x10,
                 0x02,
                 0x05,
-                0x08,
+                0x00,
                 0x00,
                 0xC3,
                 0x00,
@@ -572,7 +572,17 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
     func testLogitechDivertedButtonsNotificationRejectsWrongSlot() {
         XCTAssertFalse(
             LogitechReprogrammableControlsMonitor.isDivertedButtonsNotification(
-                [0x10, 0x03, 0x05, 0x08, 0x00, 0xC3, 0x00],
+                [0x10, 0x03, 0x05, 0x00, 0x00, 0xC3, 0x00],
+                featureIndex: 0x05,
+                deviceIndices: Set([0x02])
+            )
+        )
+    }
+
+    func testLogitechDivertedButtonsNotificationRejectsCommandResponse() {
+        XCTAssertFalse(
+            LogitechReprogrammableControlsMonitor.isDivertedButtonsNotification(
+                [0x10, 0x02, 0x05, 0x08, 0x00, 0xC3, 0x00],
                 featureIndex: 0x05,
                 deviceIndices: Set([0x02])
             )
