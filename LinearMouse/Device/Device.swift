@@ -632,6 +632,18 @@ extension Device {
             && appleBuiltInTrackpadProductIDs.contains(productID)
     }
 
+    /// Whether this device is an Apple Magic Mouse, as opposed to any other
+    /// mouse. Unlike `category`, which lumps every non-trackpad pointer
+    /// device into `.mouse`, this identifies the one mouse model with a
+    /// multitouch surface - used to scope Magic-Mouse-specific behavior like
+    /// `RequireTwoFingerScrollTransformer`.
+    var isAppleMagicMouse: Bool {
+        guard let vendorID, let productID else {
+            return false
+        }
+        return Self.isAppleMagicMouse(vendorID: vendorID, productID: productID)
+    }
+
     var showsPointerSpeedLimitationNotice: Bool {
         guard let vendorID, let productID else {
             return false
