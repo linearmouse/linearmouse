@@ -1223,7 +1223,10 @@ class DeviceManager: ObservableObject {
 
         let identitiesDescription = identities.map { identity in
             let battery = identity.batteryLevel.map(String.init) ?? "(nil)"
-            return "slot=\(identity.slot) name=\(identity.name) battery=\(battery)"
+            let productID = identity.productID.map { String(format: "0x%04X", $0) } ?? "(nil)"
+            let serial = identity.serialNumber ?? "(nil)"
+            return "slot=\(identity.slot) name=\(identity.name) productID=\(productID) "
+                + "serial=\(serial) battery=\(battery)"
         }
         .joined(separator: ", ")
 
@@ -1235,6 +1238,16 @@ class DeviceManager: ObservableObject {
             identitiesDescription
         )
 
+        var matchIdentityChanged = false
+        defer {
+            // A resolved route changes which identity the device is matched
+            // under, so the visible device list is republished for the device
+            // picker and scheme state to pick the new identity up.
+            if matchIdentityChanged {
+                refreshVisibleDevices()
+            }
+        }
+
         for (_, device) in pointerDeviceToDevice where device.pointerDevice.locationID == locationID {
             // Publications from before the exact wake request remain useful
             // topology, but cannot reopen the stale receiver route or hardware
@@ -1244,7 +1257,11 @@ class DeviceManager: ObservableObject {
             }
 
             let previousRoute = device.logitechReceiverRouteSnapshot
+            let previousMatchCandidates = device.matchCandidates
             let discovery = updateLogitechReceiverDiscovery(for: device)
+            if device.matchCandidates != previousMatchCandidates {
+                matchIdentityChanged = true
+            }
             let deviceIdentifier = ObjectIdentifier(device)
             let wakeRecoveryPending = receiverWakeHardwareSuspensions[deviceIdentifier] != nil
             let resumedAfterWake: Bool
