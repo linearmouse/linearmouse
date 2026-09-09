@@ -1238,12 +1238,16 @@ class DeviceManager: ObservableObject {
             identitiesDescription
         )
 
-        var matchIdentityChanged = false
+        var devicesWithChangedMatchIdentity = [Device]()
         defer {
             // A resolved route changes which identity the device is matched
-            // under, so the visible device list is republished for the device
-            // picker and scheme state to pick the new identity up.
-            if matchIdentityChanged {
+            // under, so the pointer settings are re-read from the schemes
+            // that now match, and the visible device list is republished for
+            // the device picker and scheme state to pick the new identity up.
+            if !devicesWithChangedMatchIdentity.isEmpty {
+                for device in devicesWithChangedMatchIdentity {
+                    updatePointerSpeed(for: device)
+                }
                 refreshVisibleDevices()
             }
         }
@@ -1260,7 +1264,7 @@ class DeviceManager: ObservableObject {
             let previousMatchCandidates = device.matchCandidates
             let discovery = updateLogitechReceiverDiscovery(for: device)
             if device.matchCandidates != previousMatchCandidates {
-                matchIdentityChanged = true
+                devicesWithChangedMatchIdentity.append(device)
             }
             let deviceIdentifier = ObjectIdentifier(device)
             let wakeRecoveryPending = receiverWakeHardwareSuspensions[deviceIdentifier] != nil
