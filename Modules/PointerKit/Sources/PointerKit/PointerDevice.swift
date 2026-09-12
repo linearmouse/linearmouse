@@ -103,6 +103,10 @@ public class PointerDevice {
     let device: IOHIDDevice?
     private let runLoop: CFRunLoop
 
+    /// The service identity carried by `IOHIDEventGetSenderID`. Cache it while
+    /// the service is connected so event routing does not query a live client.
+    public let registryID: UInt64?
+
     private let stateLock = NSLock()
     private var isValid = true
 
@@ -163,6 +167,7 @@ public class PointerDevice {
 
     init(_ client: IOHIDServiceClient) {
         self.client = client
+        registryID = IOHIDServiceClientGetRegistryID(client) as? UInt64
         let device = client.device
         self.device = device
         runLoop = CFRunLoopGetCurrent()
