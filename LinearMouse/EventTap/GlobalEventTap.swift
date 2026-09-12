@@ -2,6 +2,7 @@
 // Copyright (c) 2021-2026 LinearMouse
 
 import AppKit
+import Combine
 import Foundation
 import ObservationToken
 import os.log
@@ -16,7 +17,32 @@ class GlobalEventTap {
     private let eventThread = EventThread.shared
     private var shouldRun = false
 
-    init() {}
+    /// The event types the current tap was created with.
+    private var observedEventTypes = Set<CGEventType>()
+    private var requiredEventTypesSubscription: AnyCancellable?
+
+    init() {
+        // The set of event types worth observing depends on which features are
+        // configured. Recreate the tap when that set changes so that, for
+        // example, enabling a button mapping starts observing drags for that
+        // button, and removing the last one stops observing them again.
+        requiredEventTypesSubscription = ConfigurationState.shared
+            .$configuration
+            .map { Set(EventType.required(for: $0.schemes)) }
+            .removeDuplicates()
+            .debounce(for: .milliseconds(200), scheduler: RunLoop.main)
+            .sink { [weak self] requiredEventTypes in
+                self?.requiredEventTypesDidChange(requiredEventTypes)
+            }
+    }
+
+    private func requiredEventTypesDidChange(_ requiredEventTypes: Set<CGEventType>) {
+        guard shouldRun, observationToken != nil, requiredEventTypes != observedEventTypes else {
+            return
+        }
+
+        restartIfNeeded(reason: "required event types changed")
+    }
 
     private func callback(_ event: CGEvent) -> CGEvent? {
         PointerLocationTriggerController.shared.handle(event)
@@ -67,12 +93,7 @@ class GlobalEventTap {
             return
         }
 
-        var eventTypes: [CGEventType] = EventType.all
-        if SchemeState.shared.schemes.contains(where: { $0.pointer.redirectsToScroll ?? false }) ||
-            SchemeState.shared.schemes.contains(where: { $0.buttons.$autoScroll?.enabled ?? false }) ||
-            SchemeState.shared.schemes.contains(where: { $0.buttons.$gesture?.enabled ?? false }) {
-            eventTypes.append(EventType.mouseMoved)
-        }
+        let eventTypes = EventType.required(for: SchemeState.shared.schemes)
 
         eventThread.onWillStop = {
             EventTransformerManager.shared.resetForRestart()
@@ -96,6 +117,13 @@ class GlobalEventTap {
         switch observationResult {
         case let .success(token):
             observationToken = token
+            observedEventTypes = Set(eventTypes)
+            os_log(
+                "GlobalEventTap observes %{public}@",
+                log: Self.log,
+                type: .info,
+                eventTypes.map { String($0.rawValue) }.joined(separator: ",")
+            )
         case let .failure(error):
             eventThread.stop()
             NSAlert(error: error).runModal()
