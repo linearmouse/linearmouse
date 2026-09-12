@@ -188,14 +188,41 @@ final class ButtonMappingRecordingEngineTests: XCTestCase {
         XCTAssertNil(recorder.snapshot.recognition)
     }
 
-    func testLongPressPreventsLaterSwipeReclassification() {
-        var recorder = ButtonMappingRecordingEngine()
+    func testSwipeCanReplaceProvisionalLongPressWhileButtonRemainsHeld() {
+        let movements: [(Double, Double, ButtonMappingEngine.SwipeDirection)] = [
+            (60, 0, .right),
+            (-60, 0, .left),
+            (0, 60, .down),
+            (0, -60, .up)
+        ]
 
+        for (deltaX, deltaY, direction) in movements {
+            var recorder = ButtonMappingRecordingEngine()
+            let button: Mapping.Button = .logitechControl(.init(controlID: 0xC3))
+            recorder.buttonDown(button, modifierFlags: [], at: ms(0))
+            recorder.advance(to: ms(500))
+            XCTAssertEqual(recorder.snapshot.recognition, .longPress)
+
+            recorder.pointerMoved(deltaX: deltaX / 2, deltaY: deltaY / 2, at: ms(700))
+            XCTAssertEqual(recorder.snapshot.recognition, .longPress)
+            recorder.pointerMoved(deltaX: deltaX / 2, deltaY: deltaY / 2, at: ms(800))
+            recorder.buttonUp(button, at: ms(900))
+
+            XCTAssertEqual(recorder.snapshot.recognition, .swipe(direction))
+            XCTAssertNil(recorder.snapshot.mapping?.outcomes?.longPress)
+            XCTAssertNotNil(swipeAction(in: recorder.snapshot.mapping, direction: direction))
+            XCTAssertTrue(recorder.snapshot.isComplete)
+        }
+    }
+
+    func testReleasedLongPressCannotBecomeSwipe() {
+        var recorder = ButtonMappingRecordingEngine()
         recorder.buttonDown(.mouse(4), modifierFlags: [], at: ms(0))
-        recorder.advance(to: ms(500))
-        recorder.pointerMoved(deltaX: 100, deltaY: 0, at: ms(510))
+        recorder.buttonUp(.mouse(4), at: ms(700))
+        recorder.pointerMoved(deltaX: 100, deltaY: 0, at: ms(800))
 
         XCTAssertEqual(recorder.snapshot.recognition, .longPress)
+        XCTAssertTrue(recorder.snapshot.isComplete)
     }
 
     func testRecordsPlainWheelImmediately() {
