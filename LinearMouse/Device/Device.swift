@@ -40,7 +40,7 @@ class Device {
 
     private static var nextID: Int32 = 0
 
-    private(set) lazy var id: Int32 = OSAtomicIncrement32(&Self.nextID)
+    let id: Int32
 
     var name: String
     var productName: String?
@@ -54,7 +54,7 @@ class Device {
     private weak var manager: DeviceManager?
     private var inputReportHandlers: [InputReportHandler] = []
     private var logitechReprogrammableControlsMonitor: LogitechReprogrammableControlsMonitor?
-    lazy var logitechSession = LogitechDeviceSession(deviceID: id)
+    let logitechSession: LogitechDeviceSession
 
     func logitechAdjustableDPI(
         for token: CancellationToken,
@@ -273,6 +273,11 @@ class Device {
     }
 
     init(_ manager: DeviceManager, _ device: PointerDevice) {
+        // Initialize shared identity and session before publishing this device
+        // to the event thread; Swift's lazy initialization is not thread-safe.
+        let id = OSAtomicIncrement32(&Self.nextID)
+        self.id = id
+        logitechSession = LogitechDeviceSession(deviceID: id)
         self.manager = manager
         self.device = device
 

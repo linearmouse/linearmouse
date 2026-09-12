@@ -134,11 +134,16 @@ class DeviceManager: ObservableObject {
     let logitechHardwareBaselineStore = LogitechHardwareBaselineStore()
 
     private var pointerDeviceToDevice = [PointerDevice: Device]()
+    private let eventDeviceSnapshot = EventDeviceSnapshot<Device>()
     @Published private(set) var receiverPairedDeviceIdentities = [Int: [ReceiverLogicalDeviceIdentity]]()
     @Published var devices: [Device] = []
 
     var lastActiveDeviceId: Int32?
-    @Published var lastActiveDeviceRef: WeakRef<Device>?
+    @Published var lastActiveDeviceRef: WeakRef<Device>? {
+        didSet {
+            eventDeviceSnapshot.setLastActiveDevice(lastActiveDeviceRef?.value)
+        }
+    }
 
     init() {
         manager.observeDeviceAdded { [weak self] in
@@ -915,22 +920,16 @@ class DeviceManager: ObservableObject {
     func deviceFromCGEvent(_ cgEvent: CGEvent) -> Device? {
         // Issue: https://github.com/linearmouse/linearmouse/issues/677#issuecomment-1938208542
         guard ![.flagsChanged, .keyDown, .keyUp].contains(cgEvent.type) else {
-            return lastActiveDeviceRef?.value
+            return eventDeviceSnapshot.device(for: nil)
         }
 
         guard let ioHIDEvent = CGEventCopyIOHIDEvent(cgEvent) else {
-            return lastActiveDeviceRef?.value
+            return eventDeviceSnapshot.device(for: nil)
         }
 
-        guard let pointerDevice = manager.pointerDeviceFromIOHIDEvent(ioHIDEvent) else {
-            return lastActiveDeviceRef?.value
-        }
-
-        guard let physicalDevice = pointerDeviceToDevice[pointerDevice] else {
-            return lastActiveDeviceRef?.value
-        }
-
-        return physicalDevice
+        // EventThread must not read either manager's live device dictionary:
+        // main-thread removal can release its storage during a lookup.
+        return eventDeviceSnapshot.device(for: IOHIDEventGetSenderID(ioHIDEvent))
     }
 
     func updatePointerSpeed() {
@@ -1281,7 +1280,15 @@ class DeviceManager: ObservableObject {
     }
 
     private func refreshVisibleDevices() {
-        devices = pointerDeviceToDevice.values.sorted { $0.id < $1.id }
+        let visibleDevices = pointerDeviceToDevice.values.sorted { $0.id < $1.id }
+        var devicesByRegistryID = [UInt64: Device]()
+        for device in visibleDevices {
+            if let registryID = device.pointerDevice.registryID {
+                devicesByRegistryID[registryID] = device
+            }
+        }
+        eventDeviceSnapshot.replaceDevices(devicesByRegistryID)
+        devices = visibleDevices
     }
 
     static func displayName(baseName: String, pairedDevices: [ReceiverLogicalDeviceIdentity]) -> String {
