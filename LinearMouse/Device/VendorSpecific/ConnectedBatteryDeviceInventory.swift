@@ -40,7 +40,10 @@ struct ConnectedBatteryDeviceInfo: Hashable {
         directDeviceIdentity: String?,
         inventory: [Self]
     ) -> Int? {
-        let pairedBatteryLevels = pairedDevices.compactMap(\.batteryLevel)
+        let pairedBatteryLevels = pairedDevices.compactMap { identity in
+            let id = receiverIdentity(receiverLocationID: identity.receiverLocationID, slot: identity.slot)
+            return inventory.first { $0.id == id }?.batteryLevel ?? identity.batteryLevel
+        }
         if let lowestPairedBatteryLevel = pairedBatteryLevels.min() {
             return lowestPairedBatteryLevel
         }

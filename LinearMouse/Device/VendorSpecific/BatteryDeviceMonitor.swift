@@ -3,423 +3,306 @@
 
 import Combine
 import Foundation
-import LRUCache
+import HIDPP
+import ObservationToken
 import PointerKit
 
+/// Lifecycle and published state belong to the main thread. Only initial HID++
+/// reads and system-property enumeration run on the worker queue.
 final class BatteryDeviceMonitor: NSObject, ObservableObject {
     static let shared = BatteryDeviceMonitor()
-
     @Published private(set) var devices: [ConnectedBatteryDeviceInfo] = []
 
-    private static let pollingInterval: TimeInterval = 60
-    private static let directLogitechBluetoothActiveRefreshInterval: TimeInterval = 30 * 60
-    private static let directLogitechBluetoothFailedRefreshInterval: TimeInterval = 10
-    private static let directLogitechBluetoothCacheLimit = 16
-    private static let hidppRefreshTimeout: TimeInterval = 1
+    private struct Source: Equatable {
+        let deviceID: Int32
+        var channelID: ObjectIdentifier?
+        var serialNumber: String?
+        var productID: Int?
+    }
 
-    private struct DirectLogitechBluetoothBatteryCacheEntry {
+    private struct Connection {
+        let source: Source
+        let generation: UUID
+        let name: String
+        let observer: HIDPPBatteryObservation
+        let token: ObservationToken
+        var sequence: UInt64 = 0
         var info: ConnectedBatteryDeviceInfo?
-        var successfulRefreshDate: Date?
-        var failedRefreshDate: Date?
     }
 
     private let queue = DispatchQueue(label: "linearmouse.battery-monitor", qos: .utility)
-    private let stateQueue = DispatchQueue(label: "linearmouse.battery-monitor.state", qos: .utility)
-    private let timerQueue = DispatchQueue(label: "linearmouse.battery-monitor.timer", qos: .utility)
+    private var connections = [String: Connection]()
+    private var propertyDevices = [ConnectedBatteryDeviceInfo]()
+    private var fallbackDevices = [ConnectedBatteryDeviceInfo]()
+    private var gattDevices = [ConnectedBatteryDeviceInfo]()
+    private var gattTargetNames = [String: String]()
+    private lazy var gatt = GATTBatteryMonitor { [weak self] values in
+        guard let self, self.isRunning else {
+            return
+        }
+        self.gattDevices = values.compactMap { value in
+            guard let name = self.gattTargetNames[value.targetID] else {
+                return nil
+            }
+            return ConnectedBatteryDeviceInfo(id: value.targetID, name: name, batteryLevel: value.level)
+        }
+        self.publish()
+    }
 
+    private var subscriptions = Set<AnyCancellable>()
+    private var authorization = CancellationSource()
     private var timer: DispatchSourceTimer?
     private var isRunning = false
-    private var isRefreshing = false
-    private var needsRefresh = false
-    private var refreshAuthorization = CancellationSource()
-    private let directLogitechBluetoothCache = LRUCache<String, DirectLogitechBluetoothBatteryCacheEntry>(
-        countLimit: directLogitechBluetoothCacheLimit
-    )
-    private var subscriptions = Set<AnyCancellable>()
+    private var propertyRefreshInFlight = false
 
     override init() {
         super.init()
-
         DeviceManager.shared
             .$devices
             .receive(on: RunLoop.main)
             .debounce(for: .milliseconds(250), scheduler: RunLoop.main)
-            .sink { [weak self] _ in
-                self?.refreshIfNeeded()
-            }
+            .sink { [weak self] _ in self?.refresh() }
             .store(in: &subscriptions)
-
         DeviceManager.shared
             .$receiverPairedDeviceIdentities
             .receive(on: RunLoop.main)
-            .debounce(for: .milliseconds(250), scheduler: RunLoop.main)
-            .sink { [weak self] _ in
-                self?.refreshIfNeeded()
+            .sink { [weak self] identities in
+                guard let self else {
+                    return
+                }
+                let present = Set(identities.values.flatMap(\.self).map {
+                    ConnectedBatteryDeviceInfo.receiverIdentity(
+                        receiverLocationID: $0.receiverLocationID, slot: $0.slot
+                    )
+                })
+                let receiverIDs = Set(self.connections.filter { $0.value.source.channelID != nil }.keys)
+                for id in receiverIDs.subtracting(present) {
+                    self.retire(id)
+                }
+                self.refresh()
             }
             .store(in: &subscriptions)
     }
 
     func enable() {
-        let previousAuthorization = stateQueue.sync { () -> CancellationSource? in
-            guard !isRunning else {
-                return nil
-            }
-            let previousAuthorization = refreshAuthorization
-            refreshAuthorization = CancellationSource()
-            isRunning = true
-            isRefreshing = false
-            directLogitechBluetoothCache.removeAllValues()
-
-            let timer = DispatchSource.makeTimerSource(queue: timerQueue)
-            timer.schedule(deadline: .now(), repeating: Self.pollingInterval)
-            timer.setEventHandler { [weak self] in
-                self?.refreshIfNeeded()
-            }
-            self.timer = timer
-            timer.resume()
-            return previousAuthorization
+        guard !isRunning else {
+            return
         }
-        previousAuthorization?.cancel()
+        authorization = CancellationSource()
+        isRunning = true
+        // This timer reads OS-maintained properties only. Existing HID++
+        // connections are observed, never polled, including after a failed read.
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now(), repeating: 60)
+        timer.setEventHandler { [weak self] in self?.refresh() }
+        self.timer = timer
+        timer.resume()
     }
 
     func disable() {
-        let authorization = stateQueue.sync { () -> CancellationSource? in
-            directLogitechBluetoothCache.removeAllValues()
-            guard isRunning else {
-                return nil
-            }
-
-            isRunning = false
-            isRefreshing = false
-            needsRefresh = false
-            timer?.setEventHandler {}
-            timer?.cancel()
-            timer = nil
-            return refreshAuthorization
+        isRunning = false
+        authorization.cancel()
+        timer?.cancel()
+        timer = nil
+        for value in connections.values {
+            value.observer.stop()
+            value.token.cancel()
         }
-        authorization?.cancel()
+        connections.removeAll()
+        gatt.stop()
+        gattDevices.removeAll()
+        propertyRefreshInFlight = false
     }
 
     func currentDeviceBatteryLevel(for device: Device) -> Int? {
-        let pairedDevices = DeviceManager.shared.pairedReceiverDevices(for: device)
-        let directDeviceIdentity = Self.directIdentity(for: device)
-
-        let inventoryLevel = ConnectedBatteryDeviceInfo.currentDeviceBatteryLevel(
-            pairedDevices: pairedDevices,
-            directDeviceIdentity: directDeviceIdentity,
+        ConnectedBatteryDeviceInfo.currentDeviceBatteryLevel(
+            pairedDevices: DeviceManager.shared.pairedReceiverDevices(for: device),
+            directDeviceIdentity: Self.directIdentity(for: device),
             inventory: devices
         )
-        if let inventoryLevel {
-            return inventoryLevel
-        }
-
-        guard Self.isDirectLogitechBluetoothDevice(device, pairedDevices: pairedDevices) else {
-            return nil
-        }
-
-        return cachedDirectLogitechBluetoothInfo(for: device)?.batteryLevel
     }
 
-    func refreshDirectLogitechBluetoothBatteryIfNeeded(for device: Device) {
-        let pairedDevices = DeviceManager.shared.pairedReceiverDevices(for: device)
-        guard Self.isDirectLogitechBluetoothDevice(device, pairedDevices: pairedDevices) else {
+    private func refresh() {
+        guard isRunning else {
             return
         }
-
-        let cacheKey = Self.directLogitechBluetoothCacheKey(for: device)
-        guard let authorization = currentRefreshAuthorization else {
+        synchronizeConnections()
+        publish()
+        guard !propertyRefreshInFlight else {
             return
         }
-
-        queue.async { [weak self, weak device] in
-            guard let self else {
+        propertyRefreshInFlight = true
+        let token = authorization.token
+        queue.async { [weak self] in
+            guard token.shouldContinue else {
                 return
             }
-
-            guard let device,
-                  self.isRefreshAuthorized(authorization) else {
-                return
-            }
-
-            self.refreshDirectLogitechBluetoothDevice(
-                device,
-                cacheKey: cacheKey,
-                now: Date(),
-                active: true,
-                authorization: authorization
-            )
-            self.refreshIfNeeded()
-        }
-    }
-
-    private func refreshIfNeeded() {
-        let authorization = stateQueue.sync { () -> CancellationToken? in
-            guard isRunning, !isRefreshing else {
-                if isRunning {
-                    needsRefresh = true
+            let values = ConnectedBatteryDeviceInventory.devices()
+            DispatchQueue.main.async {
+                guard let self, self.isRunning, self.authorization.token == token else {
+                    return
                 }
+                self.propertyRefreshInFlight = false
+                self.propertyDevices = values
+                self.publish()
+            }
+        }
+    }
+
+    private func synchronizeConnections() {
+        var present = Set<String>()
+        var fallback = [ConnectedBatteryDeviceInfo]()
+        for device in DeviceManager.shared.devices where !device.isRemoved {
+            let paired = DeviceManager.shared.pairedReceiverDevices(for: device)
+            for identity in paired {
+                let id = ConnectedBatteryDeviceInfo.receiverIdentity(
+                    receiverLocationID: identity.receiverLocationID, slot: identity.slot
+                )
+                if let level = identity.batteryLevel {
+                    fallback.append(.init(id: id, name: identity.name, batteryLevel: level))
+                }
+                guard let channel = LogitechReceiverChannel.existingChannel(locationID: identity.receiverLocationID)
+                else {
+                    continue
+                }
+                guard present.insert(id).inserted else {
+                    continue
+                }
+                observe(
+                    id: id,
+                    source: Source(
+                        deviceID: device.id,
+                        channelID: ObjectIdentifier(channel),
+                        serialNumber: identity.serialNumber,
+                        productID: identity.productID
+                    ),
+                    name: identity.name,
+                    device: device,
+                    io: channel,
+                    slot: identity.slot,
+                    subscribe: channel.observeReports
+                )
+            }
+            guard paired.isEmpty else {
+                continue
+            }
+            let id = Self.directIdentity(for: device)
+            if let level = device.batteryLevel {
+                fallback.append(.init(id: id, name: device.name, batteryLevel: level))
+            }
+            guard device.vendorID == HIDPPConstants.vendorID,
+                  !LogitechHIDPPDeviceMetadataProvider.isKnownReceiver(
+                      vendorID: device.vendorID, productID: device.productID
+                  ) else {
+                continue
+            }
+            guard present.insert(id).inserted else {
+                continue
+            }
+            observe(
+                id: id,
+                source: Source(deviceID: device.id),
+                name: device.name,
+                device: device,
+                io: device.pointerDevice,
+                slot: nil
+            ) { callback in
+                device.pointerDevice.observeReport { _, report in callback(report) }
+            }
+        }
+        for id in Set(connections.keys).subtracting(present) {
+            retire(id)
+        }
+        fallbackDevices = fallback
+        let targets = DeviceManager.shared.devices.compactMap { device -> GATTBatteryTarget? in
+            guard !device.isRemoved,
+                  [PointerDeviceTransportName.bluetooth, PointerDeviceTransportName.bluetoothLowEnergy]
+                  .contains(device.pointerDevice.transport ?? "") else {
                 return nil
             }
-
-            isRefreshing = true
-            needsRefresh = false
-            return refreshAuthorization.token
+            return GATTBatteryTarget(
+                id: Self.directIdentity(for: device),
+                generation: device.id,
+                name: device.name,
+                serialNumber: device.serialNumber,
+                vendorID: device.vendorID,
+                productID: device.productID
+            )
         }
-        guard let authorization else {
+        gattTargetNames = Dictionary(targets.map { ($0.id, $0.name) }) { first, _ in first }
+        gatt.updateTargets(targets)
+    }
+
+    private func observe(
+        id: String,
+        source: Source,
+        name: String,
+        device: Device,
+        io: HIDPPDeviceIO,
+        slot: UInt8?,
+        subscribe: (@escaping (Data) -> Void) -> ObservationToken
+    ) {
+        guard connections[id]?.source != source else {
             return
         }
-
-        queue.async { [weak self] in
-            guard let self else {
-                return
-            }
-
-            guard self.isRefreshAuthorized(authorization) else {
-                self.finishRefreshCycle(authorization: authorization)
-                return
-            }
-
-            let deviceInfos = self.deviceBatteryMonitoringInfos()
-            let receiverPairedBatteries = deviceInfos.flatMap { _, pairedDevices in
-                pairedDevices.compactMap { identity -> ConnectedBatteryDeviceInfo? in
-                    guard let batteryLevel = identity.batteryLevel else {
-                        return nil
-                    }
-
-                    return ConnectedBatteryDeviceInfo(
-                        id: ConnectedBatteryDeviceInfo.receiverIdentity(
-                            receiverLocationID: identity.receiverLocationID,
-                            slot: identity.slot
-                        ),
-                        name: identity.name,
-                        batteryLevel: batteryLevel
-                    )
-                }
-            }
-            let visibleDeviceBatteries = deviceInfos
-                .compactMap { device, pairedDevices -> ConnectedBatteryDeviceInfo? in
-                    guard pairedDevices.isEmpty,
-                          let batteryLevel = device.batteryLevel
-                    else {
-                        return nil
-                    }
-
-                    return ConnectedBatteryDeviceInfo(
-                        id: ConnectedBatteryDeviceInfo.directIdentity(
-                            vendorID: device.vendorID,
-                            productID: device.productID,
-                            serialNumber: device.serialNumber,
-                            locationID: device.pointerDevice.locationID,
-                            transport: device.pointerDevice.transport,
-                            fallbackName: device.productName ?? device.name
-                        ),
-                        name: device.name,
-                        batteryLevel: batteryLevel
-                    )
-                }
-            let propertyBackedDevices = ConnectedBatteryDeviceInventory.devices()
-            let directlyAddressableLogitechDevices = deviceInfos.compactMap { device, pairedDevices in
-                pairedDevices.isEmpty ? device : nil
-            }
-            guard self.isRefreshAuthorized(authorization) else {
-                self.finishRefreshCycle(authorization: authorization)
-                return
-            }
-
-            let directLogitechBluetoothBatteries = self.cachedDirectLogitechBluetoothBatteries(
-                for: directlyAddressableLogitechDevices,
-                authorization: authorization
-            )
-            guard self.isRefreshAuthorized(authorization) else {
-                self.finishRefreshCycle(authorization: authorization)
-                return
-            }
-
-            let metadataDeadline = Date().addingTimeInterval(Self.hidppRefreshTimeout)
-            let logitechDevices = ConnectedLogitechDeviceInventory
-                .devices(
-                    from: directlyAddressableLogitechDevices.map(\.pointerDevice),
-                    deadline: metadataDeadline
-                ) { [weak self] in self?.isRefreshAuthorized(authorization) == true }
-            guard self.isRefreshAuthorized(authorization) else {
-                self.finishRefreshCycle(authorization: authorization)
-                return
-            }
-
+        retire(id)
+        let generation = UUID()
+        let observer = HIDPPBatteryObservation(receiverSlot: slot) { [weak self] update in
             DispatchQueue.main.async {
-                guard self.isRefreshAuthorized(authorization) else {
+                guard let self, self.isRunning,
+                      var connection = self.connections[id], connection.generation == generation,
+                      update.sequence > connection.sequence else {
                     return
                 }
-
-                self.devices = self.merge(
-                    logitechDevices: receiverPairedBatteries
-                        + visibleDeviceBatteries
-                        + directLogitechBluetoothBatteries
-                        + logitechDevices,
-                    propertyBackedDevices: propertyBackedDevices
-                )
-            }
-
-            self.finishRefreshCycle(authorization: authorization)
-        }
-    }
-
-    private func deviceBatteryMonitoringInfos() -> [(device: Device, pairedDevices: [ReceiverLogicalDeviceIdentity])] {
-        DispatchQueue.main.sync {
-            DeviceManager.shared.devices.map { device in
-                (device, DeviceManager.shared.pairedReceiverDevices(for: device))
-            }
-        }
-    }
-
-    private func cachedDirectLogitechBluetoothBatteries(
-        for devices: [Device],
-        authorization: CancellationToken
-    ) -> [ConnectedBatteryDeviceInfo] {
-        let directBluetoothDevices = devices.filter {
-            $0.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID
-                && $0.pointerDevice.transport == PointerDeviceTransportName.bluetoothLowEnergy
-        }
-
-        refreshDirectLogitechBluetoothDevices(
-            directBluetoothDevices,
-            active: false,
-            authorization: authorization
-        )
-
-        return stateQueue.sync {
-            directBluetoothDevices.compactMap { device in
-                let cacheKey = Self.directLogitechBluetoothCacheKey(for: device)
-                guard let cachedInfo = directLogitechBluetoothCache.value(forKey: cacheKey)?.info else {
-                    return nil
+                connection.sequence = update.sequence
+                if let level = update.reading.level {
+                    connection.info = .init(id: id, name: connection.name, batteryLevel: level)
                 }
-
-                return ConnectedBatteryDeviceInfo(
-                    id: Self.directIdentity(for: device),
-                    name: cachedInfo.name,
-                    batteryLevel: cachedInfo.batteryLevel
-                )
+                self.connections[id] = connection
+                self.publish()
             }
         }
-    }
-
-    private func refreshDirectLogitechBluetoothDevices(
-        _ devices: [Device],
-        now: Date = Date(),
-        active: Bool,
-        authorization: CancellationToken
-    ) {
-        for device in devices {
-            let cacheKey = Self.directLogitechBluetoothCacheKey(for: device)
-            refreshDirectLogitechBluetoothDevice(
-                device,
-                cacheKey: cacheKey,
-                now: now,
-                active: active,
-                authorization: authorization
-            )
-        }
-    }
-
-    private func refreshDirectLogitechBluetoothDevice(
-        _ device: Device,
-        cacheKey: String,
-        now: Date,
-        active: Bool,
-        authorization: CancellationToken
-    ) {
-        let shouldRefresh = stateQueue.sync { () -> Bool in
-            guard isRunning,
-                  refreshAuthorization.token == authorization,
-                  authorization.shouldContinue else {
-                return false
-            }
-            let entry = directLogitechBluetoothCache.value(forKey: cacheKey) ?? .init()
-            return shouldRefreshDirectLogitechBluetoothDevice(entry, now: now, active: active)
-        }
-        guard shouldRefresh else {
-            return
-        }
-
-        let deadline = Date().addingTimeInterval(Self.hidppRefreshTimeout)
-        let metadata = VendorSpecificDeviceMetadataRegistry.metadata(
-            for: device.pointerDevice,
-            deadline: deadline
-        ) { [weak self] in
-            self?.isRefreshAuthorized(authorization) == true
-        }
-        guard let metadata,
-              let batteryLevel = metadata.batteryLevel else {
-            stateQueue.sync {
-                guard isRunning,
-                      refreshAuthorization.token == authorization,
-                      authorization.shouldContinue else {
-                    return
-                }
-                var entry = directLogitechBluetoothCache.value(forKey: cacheKey) ?? .init()
-                entry.failedRefreshDate = now
-                directLogitechBluetoothCache.setValue(entry, forKey: cacheKey)
-            }
-            return
-        }
-
-        let info = ConnectedBatteryDeviceInfo(
-            id: Self.directIdentity(for: device),
-            name: metadata.name ?? device.productName ?? device.name,
-            batteryLevel: batteryLevel
+        // Subscribe before discovery/initial reads so charging notifications
+        // arriving during those requests are retained by the observer.
+        let subscription = subscribe { [weak observer] report in observer?.receive(report) }
+        connections[id] = Connection(
+            source: source,
+            generation: generation,
+            name: name,
+            observer: observer,
+            token: subscription
         )
-        stateQueue.sync {
-            guard isRunning,
-                  refreshAuthorization.token == authorization,
-                  authorization.shouldContinue else {
+        let token = authorization.token
+        queue.async { [weak device] in
+            guard let device, token.shouldContinue, observer.isActive, !device.isRemoved,
+                  let transport = HIDPPTransport(
+                      device: io,
+                      deviceIndex: slot,
+                      deadline: Date().addingTimeInterval(1),
+                      shouldContinue: { token.shouldContinue && observer.isActive && !device.isRemoved }
+                  ) else {
                 return
             }
-            var entry = directLogitechBluetoothCache.value(forKey: cacheKey) ?? .init()
-            entry.info = info
-            entry.successfulRefreshDate = now
-            entry.failedRefreshDate = nil
-            directLogitechBluetoothCache.setValue(entry, forKey: cacheKey)
+            observer.readInitial(using: transport)
         }
     }
 
-    private func shouldRefreshDirectLogitechBluetoothDevice(
-        _ entry: DirectLogitechBluetoothBatteryCacheEntry,
-        now: Date,
-        active: Bool
-    ) -> Bool {
-        if let latestFailure = entry.failedRefreshDate,
-           now.timeIntervalSince(latestFailure) < Self.directLogitechBluetoothFailedRefreshInterval {
-            return false
+    private func retire(_ id: String) {
+        guard let connection = connections.removeValue(forKey: id) else {
+            return
         }
-
-        guard active else {
-            return entry.info == nil
-        }
-
-        guard entry.info != nil else {
-            return true
-        }
-
-        guard let latestSuccess = entry.successfulRefreshDate else {
-            return true
-        }
-
-        return now.timeIntervalSince(latestSuccess) >= Self.directLogitechBluetoothActiveRefreshInterval
+        connection.observer.stop()
+        connection.token.cancel()
     }
 
-    private func cachedDirectLogitechBluetoothInfo(for device: Device) -> ConnectedBatteryDeviceInfo? {
-        stateQueue.sync {
-            directLogitechBluetoothCache.value(forKey: Self.directLogitechBluetoothCacheKey(for: device))?.info
+    private func publish() {
+        // An OS property read is not necessarily a new measurement. A valid
+        // HID++ observation owns that device's value; OS data is a fallback.
+        let values = connections.values.compactMap(\.info) + gattDevices + fallbackDevices + propertyDevices
+        var seen = Set<String>()
+        devices = values.filter { seen.insert($0.id).inserted }.sorted {
+            $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
         }
-    }
-
-    private static func isDirectLogitechBluetoothDevice(
-        _ device: Device,
-        pairedDevices: [ReceiverLogicalDeviceIdentity]
-    ) -> Bool {
-        device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID
-            && device.pointerDevice.transport == PointerDeviceTransportName.bluetoothLowEnergy
-            && pairedDevices.isEmpty
     }
 
     private static func directIdentity(for device: Device) -> String {
@@ -431,67 +314,5 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
             transport: device.pointerDevice.transport,
             fallbackName: device.productName ?? device.name
         )
-    }
-
-    private static func directLogitechBluetoothCacheKey(for device: Device) -> String {
-        "logitech-ble|\(directIdentity(for: device))"
-    }
-
-    private func isRefreshAuthorized(_ authorization: CancellationToken) -> Bool {
-        stateQueue.sync {
-            isRunning
-                && refreshAuthorization.token == authorization
-                && authorization.shouldContinue
-        }
-    }
-
-    private var currentRefreshAuthorization: CancellationToken? {
-        stateQueue.sync {
-            let authorization = refreshAuthorization.token
-            guard isRunning, authorization.shouldContinue else {
-                return nil
-            }
-            return authorization
-        }
-    }
-
-    private func finishRefreshCycle(authorization: CancellationToken) {
-        let shouldRefreshAgain = stateQueue.sync { () -> Bool in
-            guard refreshAuthorization.token == authorization else {
-                return false
-            }
-            isRefreshing = false
-            defer { needsRefresh = false }
-            return needsRefresh
-        }
-
-        if shouldRefreshAgain {
-            refreshIfNeeded()
-        }
-    }
-
-    private func merge(
-        logitechDevices: [ConnectedBatteryDeviceInfo],
-        propertyBackedDevices: [ConnectedBatteryDeviceInfo]
-    ) -> [ConnectedBatteryDeviceInfo] {
-        var merged = [ConnectedBatteryDeviceInfo]()
-        var seen = Set<String>()
-
-        for device in logitechDevices + propertyBackedDevices {
-            guard seen.insert(device.id).inserted else {
-                continue
-            }
-
-            merged.append(device)
-        }
-
-        return merged.sorted {
-            let byName = $0.name.localizedCaseInsensitiveCompare($1.name)
-            if byName == .orderedSame {
-                return $0.batteryLevel > $1.batteryLevel
-            }
-
-            return byName == .orderedAscending
-        }
     }
 }
