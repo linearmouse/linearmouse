@@ -311,6 +311,20 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
             }
         }
 
+        // Preserve the best completed chord, even while its recognizer waits
+        // for a longer extension. Unrelated partial chords cannot replace it.
+        if let completed = trials.compactMap(\.output.completedChord).max(by: { $0.priority < $1.priority }) {
+            trials.removeAll { trial in
+                guard trial.output.recognitionPriority != nil, !trial.output.recognitionComplete else {
+                    return false
+                }
+                guard let pending = trial.output.recognitionChord else {
+                    return true
+                }
+                return !completed.buttons.isStrictSubset(of: pending)
+            }
+        }
+
         guard let selected = trials.max(by: recognitionTrialIsLowerPriority) else {
             return .init(lane: nil, output: .init())
         }
@@ -330,18 +344,35 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
     }
 
     private func recognitionTrialIsLowerPriority(_ lhs: RecognitionTrial, _ rhs: RecognitionTrial) -> Bool {
+        // Continue an owned physical stream before considering a new mapping.
+        switch (lhs.output.recognitionPriority, rhs.output.recognitionPriority) {
+        case (nil, .some):
+            return false
+        case (.some, nil):
+            return true
+        default:
+            break
+        }
+
+        let lhsPriority = lhs.output.recognitionPriority ?? Int.min
+        let rhsPriority = rhs.output.recognitionPriority ?? Int.min
+        if lhsPriority != rhsPriority {
+            return lhsPriority < rhsPriority
+        }
+
+        // An action recognized by this event outranks pending tracking, even
+        // when that other lane also owns an unrelated committed hold.
+        if lhs.output.actions.isEmpty != rhs.output.actions.isEmpty {
+            return lhs.output.actions.isEmpty
+        }
+
         let lhsStatePriority = recognitionStatePriority(lhs.engine.state)
         let rhsStatePriority = recognitionStatePriority(rhs.engine.state)
         if lhsStatePriority != rhsStatePriority {
             return lhsStatePriority < rhsStatePriority
         }
 
-        let lhsPriority = lhs.output.recognitionPriority ?? Int.min
-        let rhsPriority = rhs.output.recognitionPriority ?? Int.min
-        if lhsPriority == rhsPriority {
-            return lhs.order > rhs.order
-        }
-        return lhsPriority < rhsPriority
+        return lhs.order > rhs.order
     }
 
     private func recognitionStatePriority(_ state: ButtonMappingEngine.State) -> Int {
