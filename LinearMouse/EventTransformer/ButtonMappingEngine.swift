@@ -52,6 +52,11 @@ struct ButtonMappingEngine {
     }
 
     struct Output: Equatable {
+        struct CompletedChord: Equatable {
+            var buttons: Set<Button>
+            var priority: Int
+        }
+
         var consumesEvent = false
         /// The current physical event belongs to an unresolved interaction and
         /// must be retained until that interaction commits or falls back.
@@ -69,7 +74,20 @@ struct ButtonMappingEngine {
         /// Internal precedence used when concurrent recognizers can accept the
         /// same physical event. Higher values follow the normal mapping
         /// specificity and configuration-order rules.
+        /// A consumed event without a priority continues an already-owned stream.
         var recognitionPriority: Int?
+        /// The button chord considered by this event, excluding held modifiers.
+        // swiftlint:disable:next discouraged_optional_collection
+        var recognitionChord: Set<Button>?
+        var recognitionComplete = false
+        var recognitionFallback: CompletedChord?
+
+        var completedChord: CompletedChord? {
+            if recognitionComplete, let buttons = recognitionChord, let priority = recognitionPriority {
+                return .init(buttons: buttons, priority: priority)
+            }
+            return recognitionFallback
+        }
 
         mutating func append(_ output: Self) {
             consumesEvent = consumesEvent || output.consumesEvent
@@ -80,9 +98,16 @@ struct ButtonMappingEngine {
             discardsBufferedEvents = discardsBufferedEvents || output.discardsBufferedEvents
             forwardsCapturedEvent = forwardsCapturedEvent || output.forwardsCapturedEvent
             pointerHandling = output.pointerHandling ?? pointerHandling
-            recognitionPriority = max(recognitionPriority ?? Int.min, output.recognitionPriority ?? Int.min)
-            if recognitionPriority == Int.min {
-                recognitionPriority = nil
+            if let chord = output.recognitionChord {
+                recognitionChord = chord
+                recognitionComplete = output.recognitionComplete
+                recognitionFallback = output.recognitionFallback
+                recognitionPriority = output.recognitionPriority
+            } else {
+                recognitionPriority = max(recognitionPriority ?? Int.min, output.recognitionPriority ?? Int.min)
+                if recognitionPriority == Int.min {
+                    recognitionPriority = nil
+                }
             }
         }
     }
@@ -115,15 +140,28 @@ struct ButtonMappingEngine {
         var candidates: [Candidate]
         var capturesHeldPrefix: Bool
         var capturedButtons: Set<Button>
+        var heldPrefixButtons: Set<Button>
         var resolution: Resolution?
         var commitment: Commitment?
         var deltaX = 0.0
         var deltaY = 0.0
+
+        /// Includes reused modifiers whose down events were consumed by an
+        /// earlier mapping and are therefore absent from this session's buffer.
+        var involvedButtons: Set<Button> {
+            if let resolution {
+                return capturedButtons.union(resolution.candidate.trigger.whileHeld ?? [])
+            }
+            return candidates.reduce(into: capturedButtons) {
+                $0.formUnion($1.trigger.whileHeld ?? [])
+            }
+        }
     }
 
     private struct ActiveCapture {
         var buttons: Set<Button>
         var remainingButtons: Set<Button>
+        var heldButtons: Set<Button>
         var pressAction: PressAction?
         var blocksImpulses: Bool
     }
@@ -134,6 +172,9 @@ struct ButtonMappingEngine {
     private var pressedAt = [Button: UInt64]()
     private var session: Session?
     private var activeCaptures = [ActiveCapture]()
+    /// Prefixes already consumed by a completed mapping remain available as
+    /// modifiers, while their physical releases still belong to this engine.
+    private var retainedHeldButtons = Set<Button>()
     /// Buttons whose buffered down event has already been replayed after a
     /// failed match. Keep ownership until release so the stream stays balanced.
     private var passthroughButtons = Set<Button>()
@@ -168,7 +209,7 @@ struct ButtonMappingEngine {
             return .committed
         }
         guard let session else {
-            return .idle
+            return retainedHeldButtons.isEmpty ? .idle : .committed
         }
         if session.commitment != nil {
             return .committed
@@ -186,12 +227,13 @@ struct ButtonMappingEngine {
     /// events must follow the same transformer route to keep the click stream
     /// balanced.
     var hasActiveInteraction: Bool {
-        session != nil || !activeCaptures.isEmpty || !passthroughButtons.isEmpty
+        session != nil || !activeCaptures.isEmpty || !retainedHeldButtons.isEmpty || !passthroughButtons.isEmpty
     }
 
     func ownsInteraction(containing button: Button) -> Bool {
         session?.capturedButtons.contains(button) == true ||
             activeCaptures.contains { $0.remainingButtons.contains(button) } ||
+            retainedHeldButtons.contains(button) ||
             passthroughButtons.contains(button)
     }
 
@@ -202,6 +244,7 @@ struct ButtonMappingEngine {
 
         return session.map { containsOverlappingButton($0.capturedButtons) } == true ||
             activeCaptures.contains { containsOverlappingButton($0.remainingButtons) } ||
+            containsOverlappingButton(retainedHeldButtons) ||
             containsOverlappingButton(passthroughButtons)
     }
 
@@ -235,6 +278,7 @@ struct ButtonMappingEngine {
                 output.consumesEvent = true
                 output.forwardsCapturedEvent = true
             } else if activeCaptures.contains(where: { $0.remainingButtons.contains(button) }) ||
+                retainedHeldButtons.contains(button) ||
                 session?.capturedButtons.contains(button) == true {
                 output.consumesEvent = true
             }
@@ -249,6 +293,14 @@ struct ButtonMappingEngine {
             return output
         }
 
+        // A released modifier can be pressed again before the previous input
+        // is released. Keep its new physical stream in the same interaction.
+        if activeCaptures.contains(where: { $0.heldButtons.contains(button) }) {
+            retainedHeldButtons.insert(button)
+            output.consumesEvent = true
+            return output
+        }
+
         if var session {
             if session.capturedButtons.contains(button) {
                 output.consumesEvent = true
@@ -259,19 +311,23 @@ struct ButtonMappingEngine {
             let orderedCandidates = buttonCandidates(containing: button, modifierFlags: genericFlags)
             let takesOverHeldPrefix = session.commitment == nil && orderedCandidates.contains { candidate in
                 let heldButtons = Set(candidate.trigger.whileHeld ?? [])
-                return !heldButtons.isEmpty && heldButtons.isSubset(of: session.capturedButtons)
+                return !heldButtons.isEmpty &&
+                    !heldButtons.isDisjoint(with: session.capturedButtons) &&
+                    heldButtons.isSubset(of: session.capturedButtons.union(retainedHeldButtons))
             }
             if takesOverHeldPrefix {
                 session = .init(
                     startedAt: timestamp,
                     candidates: orderedCandidates,
                     capturesHeldPrefix: hasHeldPrefix(button, modifierFlags: genericFlags),
-                    capturedButtons: session.capturedButtons.union([button])
+                    capturedButtons: session.capturedButtons.union([button]),
+                    heldPrefixButtons: session.heldPrefixButtons
                 )
                 self.session = session
                 output.consumesEvent = true
                 output.buffersEvent = true
                 output.recognitionPriority = recognitionPriority(of: orderedCandidates)
+                output.recognitionChord = orderedCandidates.max(by: candidateIsLessSpecific)?.trigger.chordButtons
                 output.append(resolveIfPossible(at: timestamp, force: false))
                 return output
             }
@@ -283,6 +339,7 @@ struct ButtonMappingEngine {
                 output.consumesEvent = true
                 output.buffersEvent = true
                 output.recognitionPriority = recognitionPriority(of: session.candidates)
+                output.recognitionChord = session.candidates.max(by: candidateIsLessSpecific)?.trigger.chordButtons
                 output.append(resolveIfPossible(at: timestamp, force: false))
                 return output
             }
@@ -294,6 +351,7 @@ struct ButtonMappingEngine {
                    modifierFlags: genericFlags
                ) {
                 session.capturedButtons.insert(button)
+                session.heldPrefixButtons.insert(button)
                 self.session = session
                 output.consumesEvent = true
                 output.buffersEvent = true
@@ -313,25 +371,38 @@ struct ButtonMappingEngine {
             return output
         }
 
+        // Keep unrelated clicks in their own recognition lane so a pending
+        // single-button action cannot prevent reuse of these held modifiers.
+        if !retainedHeldButtons.isEmpty {
+            let reusesHeldPrefix = candidates.contains {
+                !retainedHeldButtons.isDisjoint(with: $0.trigger.whileHeld ?? [])
+            }
+            let extendsRetainedPrefix = mappings.contains {
+                $0.trigger?.modifierFlags == genericFlags &&
+                    $0.trigger?.whileHeld?.contains(button) == true &&
+                    !retainedHeldButtons.isDisjoint(with: $0.trigger?.whileHeld ?? [])
+            }
+            guard reusesHeldPrefix || extendsRetainedPrefix else {
+                return output
+            }
+        }
+
         session = .init(
             startedAt: timestamp,
             candidates: candidates,
             capturesHeldPrefix: capturesHeldPrefix,
-            capturedButtons: [button]
+            capturedButtons: [button],
+            heldPrefixButtons: capturesHeldPrefix ? [button] : []
         )
         output.consumesEvent = true
         output.buffersEvent = true
-        output.recognitionPriority = max(
-            recognitionPriority(of: candidates) ?? Int.min,
+        output.recognitionPriority = recognitionPriority(of: candidates) ??
             heldPrefixRecognitionPriority(
                 adding: button,
                 to: [],
                 modifierFlags: genericFlags
-            ) ?? Int.min
-        )
-        if output.recognitionPriority == Int.min {
-            output.recognitionPriority = nil
-        }
+            )
+        output.recognitionChord = candidates.max(by: candidateIsLessSpecific)?.trigger.chordButtons
         output.append(resolveIfPossible(at: timestamp, force: false))
         return output
     }
@@ -383,57 +454,38 @@ struct ButtonMappingEngine {
             return output
         }
 
-        if let activeIndex = activeCaptures.firstIndex(where: { $0.remainingButtons.contains(button) }) {
-            var active = activeCaptures[activeIndex]
-            output.consumesEvent = true
-            if let pressAction = active.pressAction {
-                output.lifecycleEvents.append(.ended(pressAction, buttons: active.buttons))
-                active.pressAction = nil
-            }
-            active.remainingButtons.remove(button)
-            if active.remainingButtons.isEmpty {
-                activeCaptures.remove(at: activeIndex)
-            } else {
-                activeCaptures[activeIndex] = active
-            }
+        let releasesRetainedHeldButton = retainedHeldButtons.remove(button) != nil
+        output.consumesEvent = output.consumesEvent || releasesRetainedHeldButton
+
+        if let release = releaseActiveCapture(containing: button) {
+            output.append(release)
             return output
         }
 
-        guard var session, session.capturedButtons.contains(button) else {
+        guard var session, session.involvedButtons.contains(button) else {
             return output
         }
 
         output.consumesEvent = true
-        output.buffersEvent = true
+        output.buffersEvent = !releasesRetainedHeldButton
+
+        if let resolution = session.resolution,
+           !resolution.candidate.trigger.statefulButtons.contains(button) {
+            session.capturedButtons.remove(button)
+            session.heldPrefixButtons.remove(button)
+            self.session = session
+            return output
+        }
 
         if session.resolution == nil {
             output.append(resolveIfPossible(at: timestamp, force: true, releasingButton: button))
             guard let updatedSession = self.session else {
+                if let release = releaseActiveCapture(containing: button) {
+                    output.append(release)
+                }
                 return output
             }
             session = updatedSession
-        }
-
-        if let resolution = session.resolution,
-           !resolution.candidate.trigger.chordButtons.contains(button) {
-            if session.commitment == nil {
-                if let action = configuredAction(resolution.candidate.mapping.outcomes?.shortPress) {
-                    output.actions.append(action)
-                    session.commitment = .statefulAction
-                    output.discardsBufferedEvents = true
-                } else {
-                    output.append(abandon(session, releasingButton: button))
-                    return output
-                }
-            }
-
-            let remainingCapturedButtons = session.capturedButtons.subtracting([button])
-            if remainingCapturedButtons.isDisjoint(with: pressedButtons.subtracting([button])) {
-                self.session = nil
-            } else {
-                self.session = session
-            }
-            return output
         }
 
         if session.commitment == nil {
@@ -441,16 +493,15 @@ struct ButtonMappingEngine {
                 output.actions.append(action)
                 session.commitment = .statefulAction
                 output.discardsBufferedEvents = true
-                self.session = session
             } else {
                 output.append(abandon(session, releasingButton: button))
                 return output
             }
         }
 
-        let remainingCapturedButtons = session.capturedButtons.subtracting([button])
-        if remainingCapturedButtons.isDisjoint(with: pressedButtons.subtracting([button])) {
-            self.session = nil
+        commit(session, blocksImpulses: false)
+        if let release = releaseActiveCapture(containing: button) {
+            output.append(release)
         }
 
         return output
@@ -514,16 +565,21 @@ struct ButtonMappingEngine {
             return output
         }
 
+        if let button, retainedHeldButtons.contains(button), session?.involvedButtons.contains(button) != true {
+            output.consumesEvent = true
+            return output
+        }
+
         guard var session else {
             return output
         }
 
-        if let button, !session.capturedButtons.contains(button) {
+        if let button, !session.involvedButtons.contains(button) {
             return output
         }
 
         output.consumesEvent = true
-        output.buffersEvent = true
+        output.buffersEvent = button.map { !retainedHeldButtons.contains($0) } ?? true
         guard session.commitment == nil else {
             return output
         }
@@ -587,9 +643,9 @@ struct ButtonMappingEngine {
         output.recognitionPriority = recognitionPriority(of: candidate)
 
         let heldButtons = Set(candidate.trigger.whileHeld ?? [])
-        if var session, !heldButtons.isDisjoint(with: session.capturedButtons) {
+        if var session, !heldButtons.isDisjoint(with: session.involvedButtons) {
             session.commitment = .impulse
-            commit(session, blocksImpulses: false)
+            commit(session, blocksImpulses: false, additionalHeldButtons: heldButtons)
             output.discardsBufferedEvents = true
         }
 
@@ -633,6 +689,7 @@ struct ButtonMappingEngine {
         }
         session = nil
         activeCaptures.removeAll()
+        retainedHeldButtons.removeAll()
         passthroughButtons.removeAll()
         pressedButtons.removeAll()
         pressedAt.removeAll()
@@ -645,26 +702,33 @@ struct ButtonMappingEngine {
         containing button: Button,
         replayingBufferedEvents: Bool = false
     ) -> Output {
-        var canceled = false
+        var canceled = retainedHeldButtons.remove(button) != nil
         var canceledPendingSession = false
         var lifecycleEvents = [LifecycleEvent]()
 
-        if session?.capturedButtons.contains(button) == true {
-            session = nil
+        if let session, session.involvedButtons.contains(button) {
+            if replayingBufferedEvents {
+                self.session = nil
+            } else {
+                // Discarding a pending interaction consumes its physical
+                // prefix too. Keep the other buttons until their releases.
+                commit(session)
+            }
             canceled = true
             canceledPendingSession = true
         }
 
         for index in activeCaptures.indices.reversed()
-            where activeCaptures[index].buttons.contains(button) {
+            where activeCaptures[index].buttons.contains(button) ||
+            activeCaptures[index].remainingButtons.contains(button) {
             var active = activeCaptures[index]
-            if let pressAction = active.pressAction {
+            if active.buttons.contains(button), let pressAction = active.pressAction {
                 lifecycleEvents.append(.ended(pressAction, buttons: active.buttons))
+                active.pressAction = nil
             }
 
-            active.pressAction = nil
             active.remainingButtons.remove(button)
-            if active.remainingButtons.isEmpty {
+            if retainHeldButtons(from: active) {
                 activeCaptures.remove(at: index)
             } else {
                 activeCaptures[index] = active
@@ -785,19 +849,34 @@ struct ButtonMappingEngine {
         }
 
         guard let best = completed.max(by: candidateIsLessSpecific) else {
-            if force, !session.capturesHeldPrefix {
-                return abandon(session, releasingButton: releasingButton)
+            if force {
+                if !session.capturesHeldPrefix {
+                    return abandon(session, releasingButton: releasingButton)
+                }
+                // The prefix can still be used by a later ordered or wheel
+                // mapping, but these simultaneous candidates have expired.
+                session.candidates.removeAll()
+                self.session = session
             }
             return .init()
         }
 
-        let shouldWaitForLongerChord = !force && session.candidates.contains { candidate in
-            candidate.trigger.chordButtons.count > best.trigger.chordButtons.count &&
-                best.trigger.chordButtons.isSubset(of: candidate.trigger.chordButtons) &&
-                !candidate.trigger.chordButtons.isSubset(of: pressedButtons)
-        }
-        guard !shouldWaitForLongerChord else {
-            return .init()
+        let longerChord = session.candidates
+            .filter { candidate in
+                !force && candidateIsLessSpecific(best, candidate) &&
+                    best.trigger.chordButtons.isStrictSubset(of: candidate.trigger.chordButtons) &&
+                    !candidate.trigger.chordButtons.isSubset(of: pressedButtons)
+            }
+            .max(by: candidateIsLessSpecific)
+        if let longerChord {
+            return .init(
+                recognitionPriority: recognitionPriority(of: longerChord),
+                recognitionChord: longerChord.trigger.chordButtons,
+                recognitionFallback: .init(
+                    buttons: best.trigger.chordButtons,
+                    priority: recognitionPriority(of: best)
+                )
+            )
         }
 
         let activatedAt = best.trigger.chordButtons.compactMap { pressedAt[$0] }.max() ?? timestamp
@@ -809,17 +888,30 @@ struct ButtonMappingEngine {
             commit(session, pressAction: pressAction)
             return .init(
                 lifecycleEvents: [.began(pressAction, buttons: buttons)],
-                discardsBufferedEvents: true
+                discardsBufferedEvents: true,
+                recognitionPriority: recognitionPriority(of: best),
+                recognitionChord: best.trigger.chordButtons,
+                recognitionComplete: true
             )
         }
         if let direction = swipeDirection(deltaX: session.deltaX, deltaY: session.deltaY),
            let action = configuredAction(swipeAction(in: session, direction: direction)) {
             session.commitment = .statefulAction
             commit(session)
-            return .init(actions: [action], discardsBufferedEvents: true)
+            return .init(
+                actions: [action],
+                discardsBufferedEvents: true,
+                recognitionPriority: recognitionPriority(of: best),
+                recognitionChord: best.trigger.chordButtons,
+                recognitionComplete: true
+            )
         }
         self.session = session
-        return .init()
+        return .init(
+            recognitionPriority: recognitionPriority(of: best),
+            recognitionChord: best.trigger.chordButtons,
+            recognitionComplete: true
+        )
     }
 
     private func candidateIsLessSpecific(_ lhs: Candidate, _ rhs: Candidate) -> Bool {
@@ -935,18 +1027,57 @@ struct ButtonMappingEngine {
         return .init(replaysBufferedEvents: true)
     }
 
+    private mutating func releaseActiveCapture(containing button: Button) -> Output? {
+        guard let index = activeCaptures.firstIndex(where: { $0.remainingButtons.contains(button) }) else {
+            return nil
+        }
+
+        var active = activeCaptures[index]
+        var output = Output(consumesEvent: true)
+        if active.buttons.contains(button), let pressAction = active.pressAction {
+            output.lifecycleEvents.append(.ended(pressAction, buttons: active.buttons))
+            active.pressAction = nil
+        }
+        active.remainingButtons.remove(button)
+        if retainHeldButtons(from: active) {
+            activeCaptures.remove(at: index)
+        } else {
+            activeCaptures[index] = active
+        }
+        return output
+    }
+
+    private mutating func retainHeldButtons(from active: ActiveCapture) -> Bool {
+        guard active.pressAction == nil, active.remainingButtons.isSubset(of: active.heldButtons) else {
+            return false
+        }
+        retainedHeldButtons.formUnion(active.remainingButtons)
+        return true
+    }
+
     private mutating func commit(
         _ session: Session,
         pressAction: PressAction? = nil,
-        blocksImpulses: Bool = true
+        blocksImpulses: Bool = true,
+        additionalHeldButtons: Set<Button> = []
     ) {
-        let buttons = session.resolution?.candidate.trigger.statefulButtons ?? session.capturedButtons
-        activeCaptures.append(.init(
+        let trigger = session.resolution?.candidate.trigger
+        let buttons = (trigger?.statefulButtons ?? session.capturedButtons).union(additionalHeldButtons)
+        let heldButtons = session.heldPrefixButtons
+            .union(trigger?.whileHeld ?? [])
+            .union(additionalHeldButtons)
+            .subtracting((trigger?.chordButtons ?? []).subtracting(additionalHeldButtons))
+        let active = ActiveCapture(
             buttons: buttons,
-            remainingButtons: buttons.intersection(pressedButtons),
+            remainingButtons: buttons.union(session.capturedButtons).intersection(pressedButtons),
+            heldButtons: heldButtons,
             pressAction: pressAction,
             blocksImpulses: blocksImpulses
-        ))
+        )
+        retainedHeldButtons.subtract(active.remainingButtons)
+        if !retainHeldButtons(from: active) {
+            activeCaptures.append(active)
+        }
         self.session = nil
     }
 }
