@@ -4,6 +4,11 @@ MARKETING_VERSION = $(CURRENT_PROJECT_VERSION)
 PRODUCT_BUNDLE_IDENTIFIER = com.lujjjh.dev.LinearMouse
 ASSETCATALOG_COMPILER_APPICON_NAME = AppIconDev
 
+// Xcode 27 raises Swift package deployment targets to macOS 12.
+// TODO: Require macOS 12+ for all builds in the next major LinearMouse release.
+LM_DEPLOYMENT_TARGET = 10.15
+LM_DEPLOYMENT_TARGET[sdk=macosx27.*] = 12.0
+
 #include? "Signing.xcconfig"
 #include? "Version.xcconfig"
 #include? "Release.xcconfig"
