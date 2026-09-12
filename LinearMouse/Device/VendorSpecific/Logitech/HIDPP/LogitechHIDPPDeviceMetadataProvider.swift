@@ -1513,6 +1513,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
     private var requestStrategy: RequestStrategy?
     private var requestStrategyFailureCount = 0
     private let notificationBuffer = HIDPPNotificationBuffer()
+    private let reportObservers = HIDPPReportObservers()
     private let terminalAdmission = ReceiverChannelTerminalAdmission()
 
     /// Serial-backed receiver ownership survives the process. An unidentified
@@ -1547,6 +1548,17 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             action
         )
         CFRunLoopWakeUp(runLoop)
+    }
+
+    /// Battery observation must share an existing transport, never open a
+    /// receiver independently of its lifecycle owner.
+    static func existingChannel(locationID: Int) -> LogitechReceiverChannel? {
+        let channel = sharedChannelsLock.withLock { sharedChannels[locationID]?.channel }
+        return channel?.isTransportActive == true ? channel : nil
+    }
+
+    func observeReports(_ callback: @escaping (Data) -> Void) -> ObservationToken {
+        reportObservers.observe(callback)
     }
 
     static func open(
@@ -3031,6 +3043,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
 
         pendingLock.unlock()
         semaphores.forEach { $0.signal() }
+        reportObservers.receive(report)
         if !wasClaimedByTransaction {
             notificationBuffer.appendIfUnsolicited(report)
         }

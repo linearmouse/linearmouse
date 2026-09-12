@@ -366,7 +366,6 @@ class Device {
         }
 
         manager?.markDeviceActive(self, reason: reason)
-        BatteryDeviceMonitor.shared.refreshDirectLogitechBluetoothBatteryIfNeeded(for: self)
     }
 
     var hasLogitechControlsMonitor: Bool {
