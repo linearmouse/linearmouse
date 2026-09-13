@@ -79,6 +79,21 @@ public enum SymbolicHotKey: UInt32 {
 
 public enum CGSError: Error {
     case CoreGraphicsError(CGError)
+    case symbolicHotKeyNotConfigured
+}
+
+/// `CGSGetSymbolicHotKeyValue` succeeds even for hot keys that have no key assigned: a shortcut
+/// cleared in System Settings reports `0xFFFF` and one that was never assigned reports `0`, both
+/// without a key equivalent. Posting those would send a stray keystroke (`0` is the A key) rather
+/// than trigger the hot key.
+func symbolicHotKeyVirtualKeyCode(keyEquivalent: unichar, virtualKeyCode: unichar) -> CGKeyCode? {
+    guard virtualKeyCode != 0xFFFF else {
+        return nil
+    }
+    guard virtualKeyCode != 0 || keyEquivalent != 0xFFFF else {
+        return nil
+    }
+    return CGKeyCode(virtualKeyCode)
 }
 
 public func postSymbolicHotKey(_ hotkey: SymbolicHotKey) throws {
@@ -96,6 +111,13 @@ public func postSymbolicHotKey(_ hotkey: SymbolicHotKey) throws {
     )
     guard error == .success else {
         throw CGSError.CoreGraphicsError(error)
+    }
+
+    guard let virtualKeyCode = symbolicHotKeyVirtualKeyCode(
+        keyEquivalent: keyEquivalent,
+        virtualKeyCode: virtualKeyCode
+    ) else {
+        throw CGSError.symbolicHotKeyNotConfigured
     }
 
     let hotkeyEnabled = CGSIsSymbolicHotKeyEnabled(hotkey)
