@@ -262,6 +262,13 @@ final class KeyKitTests: XCTestCase {
         try keySimulator.press(.home)
     }
 
+    func testSymbolicHotKeyVirtualKeyCodeRejectsHotKeysWithoutAKey() {
+        XCTAssertNil(symbolicHotKeyVirtualKeyCode(keyEquivalent: 0xFFFF, virtualKeyCode: 0xFFFF))
+        XCTAssertNil(symbolicHotKeyVirtualKeyCode(keyEquivalent: 0xFFFF, virtualKeyCode: 0))
+        XCTAssertEqual(symbolicHotKeyVirtualKeyCode(keyEquivalent: 0xFFFF, virtualKeyCode: 123), 123)
+        XCTAssertEqual(symbolicHotKeyVirtualKeyCode(keyEquivalent: 0x61, virtualKeyCode: 0), 0)
+    }
+
     func testPostSymbolicHotKey() throws {
         try skipUnlessIntegrationEnabled()
         try postSymbolicHotKey(.spaceLeft)
