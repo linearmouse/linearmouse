@@ -291,7 +291,8 @@ final class AutoScrollTransformerTests: XCTestCase {
             modes: [.toggle],
             toggleActivation: .longPress,
             speed: 1,
-            longPressTimerScheduler: timer.schedule
+            longPressTimerScheduler: timer.schedule,
+            activationHitProvider: nil
         ) { replayedEvents.append($0.type) }
 
         XCTAssertNil(try transformer.transform(

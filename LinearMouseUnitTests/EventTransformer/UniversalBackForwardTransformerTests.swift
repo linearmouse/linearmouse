@@ -31,7 +31,7 @@ final class UniversalBackForwardTransformerTests: XCTestCase {
         XCTAssertEqual(
             UniversalBackForwardTransformer.replacement(
                 for: .back,
-                universalBackForward: .none,
+                universalBackForward: Scheme.Buttons.UniversalBackForward.none,
                 targetBundleIdentifier: "com.apple.Safari"
             ),
             .mouseButton(.back)

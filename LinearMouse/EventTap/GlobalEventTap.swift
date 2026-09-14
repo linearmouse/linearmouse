@@ -80,7 +80,7 @@ class GlobalEventTap {
         }
         eventThread.start()
 
-        guard let observationResult = eventThread.performAndWait({
+        guard let observationResult = eventThread.performAndWait({ [self] in
             Result {
                 try EventTap.observe(eventTypes, onInvalidated: { [weak self] in
                     DispatchQueue.main.async {

@@ -409,8 +409,10 @@ public extension PointerDevice {
         set {
             setDynamicPropertyIOFixed(newValue.map { $0.clamp(10, 1995) }, forKey: kIOHIDPointerResolutionKey)
 
-            // HACK: Trigger a `pointerAcceleration` change to make `pointerResolution` take affect
-            pointerAcceleration = pointerAcceleration
+            // HACK: Reapply an available acceleration value to make `pointerResolution` take effect.
+            if let acceleration = pointerAcceleration {
+                pointerAcceleration = acceleration
+            }
         }
     }
 

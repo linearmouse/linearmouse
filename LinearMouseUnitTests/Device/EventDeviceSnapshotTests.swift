@@ -69,13 +69,14 @@ final class EventDeviceSnapshotTests: XCTestCase {
     func testFallbackDoesNotKeepRemovedDeviceAlive() {
         let snapshot = EventDeviceSnapshot<TestDevice>()
         snapshot.replaceDevices([7: TestDevice(senderID: 7)])
-        weak var weakDevice = snapshot.device(for: 7)
+        let weakDevice = WeakRef<TestDevice>()
+        weakDevice.value = snapshot.device(for: 7)
         snapshot.setLastActiveDevice(snapshot.device(for: 7))
 
-        XCTAssertNotNil(weakDevice)
+        XCTAssertNotNil(weakDevice.value)
         snapshot.replaceDevices([:])
 
-        XCTAssertNil(weakDevice)
+        XCTAssertNil(weakDevice.value)
         XCTAssertNil(snapshot.device(for: nil))
     }
 
@@ -83,17 +84,18 @@ final class EventDeviceSnapshotTests: XCTestCase {
         let snapshot = EventDeviceSnapshot<TestDevice>()
         snapshot.replaceDevices([7: TestDevice(senderID: 7)])
         var result = snapshot.device(for: 7)
-        weak var weakDevice = result
+        let weakDevice = WeakRef<TestDevice>()
+        weakDevice.value = result
 
         snapshot.replaceDevices([:])
 
         XCTAssertNil(snapshot.device(for: 7))
-        XCTAssertNotNil(weakDevice)
+        XCTAssertNotNil(weakDevice.value)
         XCTAssertEqual(result?.senderID, 7)
 
         result = nil
 
-        XCTAssertNil(weakDevice)
+        XCTAssertNil(weakDevice.value)
     }
 
     func testRetiredDeviceCanReenterSnapshotDuringDeinit() {

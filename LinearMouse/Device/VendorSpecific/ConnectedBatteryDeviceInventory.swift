@@ -214,7 +214,7 @@ enum ConnectedBatteryDeviceInventory {
         var iterator = io_iterator_t()
 
         guard IOServiceGetMatchingServices(
-            kIOMasterPortDefault,
+            mach_port_t(MACH_PORT_NULL),
             IOServiceMatching("AppleDeviceManagementHIDEventService"),
             &iterator
         ) == KERN_SUCCESS else {

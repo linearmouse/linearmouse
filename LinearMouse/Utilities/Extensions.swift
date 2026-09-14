@@ -229,7 +229,7 @@ extension CGMouseButton {
     }
 }
 
-extension CGMouseButton: Codable {}
+extension CoreGraphics.CGMouseButton: Swift.Codable {}
 
 extension Binding {
     func `default`<UnwrappedValue>(_ value: UnwrappedValue) -> Binding<UnwrappedValue> where Value == UnwrappedValue? {

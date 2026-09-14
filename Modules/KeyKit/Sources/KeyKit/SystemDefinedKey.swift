@@ -3,6 +3,7 @@
 
 import AppKit
 import Foundation
+import KeyKitC
 
 /// See NX_KEYTYPE_SOUND_UP
 public enum SystemDefinedKey: Int {
@@ -35,7 +36,7 @@ public enum SystemDefinedKey: Int {
 public func postSystemDefinedKey(_ key: SystemDefinedKey, keyDown: Bool) {
     var iter: mach_port_t = 0
 
-    guard IOServiceGetMatchingServices(kIOMasterPortDefault, IOServiceMatching(kIOHIDSystemClass), &iter) ==
+    guard IOServiceGetMatchingServices(mach_port_t(MACH_PORT_NULL), IOServiceMatching(kIOHIDSystemClass), &iter) ==
         KERN_SUCCESS else {
         return
     }
@@ -56,15 +57,7 @@ public func postSystemDefinedKey(_ key: SystemDefinedKey, keyDown: Bool) {
     var event = NXEventData()
     event.compound.subType = Int16(NX_SUBTYPE_AUX_CONTROL_BUTTONS)
     event.compound.misc.L.0 = Int32(key.rawValue) << 16 | (keyDown ? NX_KEYDOWN : NX_KEYUP) << 8
-    IOHIDPostEvent(
-        handle,
-        UInt32(NX_SYSDEFINED),
-        .init(x: 0, y: 0),
-        &event,
-        UInt32(kNXEventDataVersion),
-        IOOptionBits(0),
-        IOOptionBits(kIOHIDSetGlobalEventFlags)
-    )
+    KeyKitPostAuxControlButton(handle, &event)
 }
 
 public func postSystemDefinedKey(_ key: SystemDefinedKey) {

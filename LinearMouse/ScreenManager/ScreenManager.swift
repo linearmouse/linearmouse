@@ -123,7 +123,7 @@ extension NSScreen {
         }
 
         var iter = io_iterator_t()
-        guard IOServiceGetMatchingServices(kIOMasterPortDefault, IOServiceMatching("IODisplayConnect"), &iter) ==
+        guard IOServiceGetMatchingServices(mach_port_t(MACH_PORT_NULL), IOServiceMatching("IODisplayConnect"), &iter) ==
             KERN_SUCCESS else {
             return nil
         }

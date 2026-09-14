@@ -59,8 +59,19 @@ struct ClickDebouncingSection: View {
     }
 
     @ViewBuilder private var classicButtonPicker: some View {
+        classicButtonSelection
+
+        if !state.clickDebouncingHasSelectedButtons {
+            Text("Select at least one mouse button.")
+                .foregroundColor(.red)
+                .controlSize(.small)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var classicButtonSelection: some View {
         if #available(macOS 11.0, *) {
-            HStack {
+            return AnyView(HStack {
                 Text("Apply to")
 
                 Spacer()
@@ -76,9 +87,9 @@ struct ClickDebouncingSection: View {
                 }
                 .menuStyle(.borderlessButton)
                 .fixedSize()
-            }
+            })
         } else {
-            VStack(alignment: .leading, spacing: 8) {
+            return AnyView(VStack(alignment: .leading, spacing: 8) {
                 Text("Apply to")
 
                 HStack(spacing: 16) {
@@ -91,14 +102,7 @@ struct ClickDebouncingSection: View {
                     buttonCheckbox("Back button", for: .back)
                     buttonCheckbox("Forward button", for: .forward)
                 }
-            }
-        }
-
-        if !state.clickDebouncingHasSelectedButtons {
-            Text("Select at least one mouse button.")
-                .foregroundColor(.red)
-                .controlSize(.small)
-                .fixedSize(horizontal: false, vertical: true)
+            })
         }
     }
 

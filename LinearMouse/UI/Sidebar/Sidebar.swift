@@ -20,22 +20,22 @@ private struct SidebarRow: View {
 
     var body: some View {
         if #available(macOS 11.0, *) {
-            Label {
+            return AnyView(Label {
                 Text(item.title)
             } icon: {
                 Image(item.imageName)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 16, height: 16)
-            }
+            })
         } else {
-            HStack {
+            return AnyView(HStack {
                 Image(item.imageName)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 16, height: 16)
                 Text(item.title)
-            }
+            })
         }
     }
 }
