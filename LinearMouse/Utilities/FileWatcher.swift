@@ -12,6 +12,7 @@ final class FileWatcher {
     private var stream: FSEventStreamRef?
     private var isRunning = false
     private var watchedRootPaths: [String] = []
+    private var relevantPaths = RelevantPaths()
 
     init(
         fileURLsProvider: @escaping () -> [URL],
@@ -43,7 +44,9 @@ final class FileWatcher {
             return
         }
 
-        let rootPaths = Self.rootPaths(for: fileURLsProvider())
+        let fileURLs = fileURLsProvider()
+        relevantPaths = Self.relevantPaths(for: fileURLs)
+        let rootPaths = Self.rootPaths(for: fileURLs)
         guard force || rootPaths != watchedRootPaths else {
             return
         }
@@ -118,17 +121,19 @@ final class FileWatcher {
             return watcher.shouldNotify(for: eventPath, flags: eventFlags[index])
         }
 
-        if shouldNotify {
-            watcher.onChange()
+        // Only an event that touches the watched files or their ancestors can move the watch roots.
+        guard shouldNotify else {
+            return
         }
 
+        watcher.onChange()
         watcher.queue.async { [weak watcher] in
             watcher?.updateStream()
         }
     }
 
     private func shouldNotify(for eventPath: String, flags: FSEventStreamEventFlags) -> Bool {
-        if Self.isRelevant(eventPath: eventPath, to: fileURLsProvider()) {
+        if relevantPaths.contains(eventPath) {
             return true
         }
 
@@ -191,33 +196,41 @@ final class FileWatcher {
         return "/"
     }
 
-    private static func isRelevant(eventPath: String, to fileURLs: [URL]) -> Bool {
-        let eventPath = canonicalPath(eventPath)
+    /// Paths an event must touch to affect the watched files. FSEvents reports paths with every
+    /// directory resolved, so only a symlink in the last component differs from its canonical form.
+    /// These paths are resolved when the stream is updated, and event paths are compared as reported.
+    struct RelevantPaths {
+        var overlappingPaths: Set<String> = []
+        var exactPaths: Set<String> = []
 
-        return fileURLs.contains { fileURL in
-            let filePath = filePathPreservingLastSymlink(fileURL.path)
-            let fileDirectoryPath = canonicalPath(fileURL.deletingLastPathComponent().path)
-            let parentDirectoryPath = canonicalPath(
-                fileURL.deletingLastPathComponent().deletingLastPathComponent().path
-            )
-
-            if pathsOverlap(eventPath, filePath) ||
-                pathsOverlap(eventPath, fileDirectoryPath) ||
-                eventPath == parentDirectoryPath {
-                return true
+        func contains(_ eventPath: String) -> Bool {
+            let eventPath = eventPath.trimmedTrailingSlashes()
+            return exactPaths.contains(eventPath) || overlappingPaths.contains {
+                FileWatcher.pathsOverlap(eventPath, $0)
             }
+        }
+    }
+
+    static func relevantPaths(for fileURLs: [URL]) -> RelevantPaths {
+        var relevantPaths = RelevantPaths()
+
+        for fileURL in fileURLs {
+            let directoryURL = fileURL.deletingLastPathComponent()
+            relevantPaths.overlappingPaths.formUnion([
+                filePathPreservingLastSymlink(fileURL.path),
+                filePathPreservingLastSymlink(directoryURL.path),
+                canonicalPath(directoryURL.path)
+            ])
+            relevantPaths.exactPaths.insert(canonicalPath(directoryURL.deletingLastPathComponent().path))
 
             let resolvedFilePath = canonicalPath(fileURL.path)
-            if resolvedFilePath != filePath {
-                let resolvedDirectoryPath = canonicalPath(
-                    URL(fileURLWithPath: resolvedFilePath).deletingLastPathComponent().path
-                )
-                return pathsOverlap(eventPath, resolvedFilePath) ||
-                    eventPath == resolvedDirectoryPath
-            }
-
-            return false
+            relevantPaths.overlappingPaths.insert(resolvedFilePath)
+            relevantPaths.exactPaths.insert(
+                canonicalPath(URL(fileURLWithPath: resolvedFilePath).deletingLastPathComponent().path)
+            )
         }
+
+        return relevantPaths
     }
 
     private static func hasAny(_ flags: FSEventStreamEventFlags, _ candidates: [FSEventStreamEventFlags]) -> Bool {
