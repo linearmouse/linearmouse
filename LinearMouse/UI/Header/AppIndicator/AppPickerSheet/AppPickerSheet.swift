@@ -57,6 +57,8 @@ struct AppPickerSheet: View {
                     return (try? readInstalledApp(bundleIdentifier: bundleIdentifier)?.bundleName) ?? bundleIdentifier
                 case let .executable(path):
                     return URL(fileURLWithPath: path).lastPathComponent
+                case let .executableName(name):
+                    return name
                 }
             } ?? NSLocalizedString("All Apps", comment: "")
 

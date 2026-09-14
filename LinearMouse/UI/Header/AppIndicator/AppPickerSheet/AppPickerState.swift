@@ -51,6 +51,25 @@ class AppPickerState: ObservableObject {
         Array(configuredExecutableSet).sorted()
     }
 
+    private var configuredExecutableNameSet: Set<String> {
+        Set(schemeState.targetSpecificSchemes.compactMap { $0.element.if?.first?.processName })
+    }
+
+    var configuredExecutableNames: [String] {
+        Array(configuredExecutableNameSet).sorted()
+    }
+
+    var runningBundlelessProcesses: [String] {
+        let configuredExecutableNameSet = configuredExecutableNameSet
+        let names = NSWorkspace.shared
+            .runningApplications
+            .filter { $0.activationPolicy == .regular && $0.bundleIdentifier == nil }
+            .compactMap { $0.executableURL?.lastPathComponent }
+        return Array(Set(names))
+            .filter { !configuredExecutableNameSet.contains($0) }
+            .sorted()
+    }
+
     var runningApps: [InstalledApp] {
         let runningAppSet = runningAppSet
         let configuredAppSet = configuredAppSet

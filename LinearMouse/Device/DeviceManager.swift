@@ -1038,6 +1038,7 @@ class DeviceManager: ObservableObject {
             ofDevice: device,
             ofApp: nil,
             ofProcessPath: nil,
+            ofProcessName: nil,
             ofDisplay: nil
         ) else {
             return LogitechDeviceSettings(dpi: nil, highResolutionWheel: nil)

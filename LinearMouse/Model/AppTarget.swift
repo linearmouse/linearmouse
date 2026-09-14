@@ -6,4 +6,5 @@ import Foundation
 enum AppTarget: Hashable {
     case bundle(String)
     case executable(String)
+    case executableName(String)
 }

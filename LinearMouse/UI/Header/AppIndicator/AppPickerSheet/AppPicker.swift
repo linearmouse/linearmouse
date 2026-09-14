@@ -72,6 +72,10 @@ struct AppPicker: View {
 
         case let .executable(path):
             return state.configuredExecutables.contains(path)
+
+        case let .executableName(name):
+            return state.configuredExecutableNames.contains(name)
+                || state.runningBundlelessProcesses.contains(name)
         }
     }
 
@@ -85,13 +89,12 @@ struct AppPicker: View {
                         .tag(PickerSelection.value(.bundle(installedApp.bundleIdentifier)))
                 }
                 ForEach(state.configuredExecutables, id: \.self) { path in
-                    HStack(spacing: 8) {
-                        if #available(macOS 11.0, *) {
-                            Image(systemName: "terminal")
-                        }
-                        Text(URL(fileURLWithPath: path).lastPathComponent)
-                    }
-                    .tag(PickerSelection.value(.executable(path)))
+                    ExecutablePickerItem(name: URL(fileURLWithPath: path).lastPathComponent)
+                        .tag(PickerSelection.value(.executable(path)))
+                }
+                ForEach(state.configuredExecutableNames, id: \.self) { name in
+                    ExecutablePickerItem(name: name)
+                        .tag(PickerSelection.value(.executableName(name)))
                 }
             }
 
@@ -99,6 +102,10 @@ struct AppPicker: View {
                 ForEach(state.runningApps) { installedApp in
                     AppPickerItem(installedApp: installedApp)
                         .tag(PickerSelection.value(.bundle(installedApp.bundleIdentifier)))
+                }
+                ForEach(state.runningBundlelessProcesses, id: \.self) { name in
+                    ExecutablePickerItem(name: name)
+                        .tag(PickerSelection.value(.executableName(name)))
                 }
             }
 
@@ -121,13 +128,12 @@ struct AppPicker: View {
                     }
 
                 case let .executable(path):
-                    HStack(spacing: 8) {
-                        if #available(macOS 11.0, *) {
-                            Image(systemName: "terminal")
-                        }
-                        Text(URL(fileURLWithPath: path).lastPathComponent)
-                    }
-                    .tag(PickerSelection.value(selectedApp))
+                    ExecutablePickerItem(name: URL(fileURLWithPath: path).lastPathComponent)
+                        .tag(PickerSelection.value(selectedApp))
+
+                case let .executableName(name):
+                    ExecutablePickerItem(name: name)
+                        .tag(PickerSelection.value(selectedApp))
                 }
             }
 
@@ -155,6 +161,19 @@ struct AppPickerItem: View {
         HStack(spacing: 8) {
             Image(nsImage: installedApp.bundleIcon)
             Text(installedApp.bundleName)
+        }
+    }
+}
+
+struct ExecutablePickerItem: View {
+    var name: String
+
+    var body: some View {
+        HStack(spacing: 8) {
+            if #available(macOS 11.0, *) {
+                Image(systemName: "terminal")
+            }
+            Text(name)
         }
     }
 }

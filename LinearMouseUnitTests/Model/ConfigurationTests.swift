@@ -102,6 +102,7 @@ final class ConfigurationTests: XCTestCase {
             ofDeviceCategory: .mouse,
             ofApp: nil,
             ofProcessPath: nil,
+            ofProcessName: nil,
             ofDisplay: nil
         )
 
@@ -111,6 +112,76 @@ final class ConfigurationTests: XCTestCase {
         }
 
         XCTAssertEqual(insertIndex, 0)
+    }
+
+    func testSchemeIndexMatchesProcessNameWithoutCrossMatching() {
+        var matcher = DeviceMatcher(category: .mouse)
+        matcher.vendorID = 1
+        matcher.productID = 2
+
+        // The device-only scheme comes last so that a lookup without app conditions
+        // has to skip the processName and processPath schemes to reach it.
+        let schemes = [
+            Scheme(if: [.init(device: matcher, processName: "Foo.exe")]),
+            Scheme(if: [.init(device: matcher, processPath: "/tmp/Foo.exe")]),
+            Scheme(if: [.init(device: matcher)])
+        ]
+
+        XCTAssertEqual(
+            schemes.schemeIndex(
+                ofDeviceMatcher: matcher,
+                ofApp: nil,
+                ofProcessPath: nil,
+                ofProcessName: "Foo.exe",
+                ofDisplay: nil
+            ),
+            .at(0)
+        )
+        XCTAssertEqual(
+            schemes.schemeIndex(
+                ofDeviceMatcher: matcher,
+                ofApp: nil,
+                ofProcessPath: "/tmp/Foo.exe",
+                ofProcessName: nil,
+                ofDisplay: nil
+            ),
+            .at(1)
+        )
+        XCTAssertEqual(
+            schemes.schemeIndex(
+                ofDeviceMatcher: matcher,
+                ofApp: nil,
+                ofProcessPath: nil,
+                ofProcessName: nil,
+                ofDisplay: nil
+            ),
+            .at(2)
+        )
+        XCTAssertEqual(
+            schemes.schemeIndex(
+                ofDeviceMatcher: matcher,
+                ofApp: nil,
+                ofProcessPath: nil,
+                ofProcessName: "Bar.exe",
+                ofDisplay: nil
+            ),
+            .insertAt(3)
+        )
+
+        // A processName scheme alone must not satisfy a lookup without app conditions.
+        let processNameOnlySchemes = [
+            Scheme(if: [.init(device: matcher, processName: "Foo.exe")])
+        ]
+        XCTAssertEqual(
+            processNameOnlySchemes.schemeIndex(
+                ofDeviceMatcher: matcher,
+                ofApp: nil,
+                ofProcessPath: nil,
+                ofProcessName: nil,
+                ofDisplay: nil
+            ),
+            .insertAt(0)
+        )
     }
 
     func testMergeAutoScroll() {

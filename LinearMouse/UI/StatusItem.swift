@@ -417,8 +417,11 @@ class StatusItem: NSObject, NSMenuDelegate {
     }
 
     @objc private func openSettingsForFrontmostApplication() {
-        if let bundleIdentifier = NSWorkspace.shared.frontmostApplication?.bundleIdentifier {
+        let frontmostApplication = NSWorkspace.shared.frontmostApplication
+        if let bundleIdentifier = frontmostApplication?.bundleIdentifier {
             SchemeState.shared.currentApp = .bundle(bundleIdentifier)
+        } else if let executableName = frontmostApplication?.executableURL?.lastPathComponent {
+            SchemeState.shared.currentApp = .executableName(executableName)
         } else {
             SchemeState.shared.currentApp = nil
         }

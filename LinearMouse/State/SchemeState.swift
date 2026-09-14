@@ -79,7 +79,7 @@ extension SchemeState {
         app: AppTarget?,
         display: String?
     ) -> Bool {
-        let (appId, processPath) = extractAppComponents(from: app)
+        let (appId, processPath, processName) = extractAppComponents(from: app)
 
         return schemes.contains { scheme in
             guard let conditions = scheme.if else {
@@ -93,6 +93,7 @@ extension SchemeState {
                 }
 
                 let appMatches = condition.app == appId && condition.processPath == processPath
+                    && condition.processName == processName
                 let displayMatches = condition.display == display
 
                 return appMatches && displayMatches
@@ -106,7 +107,7 @@ extension SchemeState {
         app: AppTarget?,
         display: String?
     ) {
-        let (appId, processPath) = extractAppComponents(from: app)
+        let (appId, processPath, processName) = extractAppComponents(from: app)
 
         schemes.removeAll { scheme in
             guard let conditions = scheme.if else {
@@ -120,6 +121,7 @@ extension SchemeState {
                 }
 
                 let appMatches = condition.app == appId && condition.processPath == processPath
+                    && condition.processName == processName
                 let displayMatches = condition.display == display
 
                 return appMatches && displayMatches
@@ -148,6 +150,8 @@ extension SchemeState {
             return try? readInstalledApp(bundleIdentifier: bundleIdentifier)?.bundleName ?? bundleIdentifier
         case let .executable(path):
             return URL(fileURLWithPath: path).lastPathComponent
+        case let .executableName(name):
+            return name
         }
     }
 
@@ -169,12 +173,13 @@ extension SchemeState {
                 return Scheme()
             }
 
-            let (app, processPath) = extractAppComponents(from: currentApp)
+            let (app, processPath, processName) = extractAppComponents(from: currentApp)
 
             if case let .at(index) = schemes.schemeIndex(
                 ofDeviceMatcher: deviceMatcher,
                 ofApp: app,
                 ofProcessPath: processPath,
+                ofProcessName: processName,
                 ofDisplay: currentDisplay
             ) {
                 return schemes[index]
@@ -183,6 +188,7 @@ extension SchemeState {
             var ifCondition = Scheme.If(device: deviceMatcher)
             ifCondition.app = app
             ifCondition.processPath = processPath
+            ifCondition.processName = processName
             ifCondition.display = currentDisplay
 
             return Scheme(if: [ifCondition])
@@ -193,12 +199,13 @@ extension SchemeState {
                 return
             }
 
-            let (app, processPath) = extractAppComponents(from: currentApp)
+            let (app, processPath, processName) = extractAppComponents(from: currentApp)
 
             switch schemes.schemeIndex(
                 ofDeviceMatcher: deviceMatcher,
                 ofApp: app,
                 ofProcessPath: processPath,
+                ofProcessName: processName,
                 ofDisplay: currentDisplay
             ) {
             case let .at(index):
@@ -219,6 +226,7 @@ extension SchemeState {
                 ofDevice: device,
                 ofApp: nil,
                 ofProcessPath: nil,
+                ofProcessName: nil,
                 ofDisplay: nil
             ) {
                 return schemes[index]
@@ -236,6 +244,7 @@ extension SchemeState {
                 ofDevice: device,
                 ofApp: nil,
                 ofProcessPath: nil,
+                ofProcessName: nil,
                 ofDisplay: nil
             ) {
             case let .at(index):
@@ -246,14 +255,18 @@ extension SchemeState {
         }
     }
 
-    private func extractAppComponents(from target: AppTarget?) -> (app: String?, processPath: String?) {
+    private func extractAppComponents(
+        from target: AppTarget?
+    ) -> (app: String?, processPath: String?, processName: String?) {
         switch target {
         case .none:
-            return (nil, nil)
+            return (nil, nil, nil)
         case let .bundle(bundleIdentifier):
-            return (bundleIdentifier, nil)
+            return (bundleIdentifier, nil, nil)
         case let .executable(path):
-            return (nil, path)
+            return (nil, path, nil)
+        case let .executableName(name):
+            return (nil, nil, name)
         }
     }
 
@@ -262,12 +275,13 @@ extension SchemeState {
             return Scheme()
         }
 
-        let (app, processPath) = extractAppComponents(from: currentApp)
+        let (app, processPath, processName) = extractAppComponents(from: currentApp)
 
         return configurationState.configuration.matchScheme(
             withDeviceMatcher: deviceMatcher,
             withApp: app,
             withDisplay: currentDisplay,
+            withProcessName: processName,
             withProcessPath: processPath
         )
     }
