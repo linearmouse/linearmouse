@@ -13,7 +13,7 @@ public extension IOHIDElement {
     }
 }
 
-extension IOHIDElement: CustomStringConvertible {
+extension IOKit.IOHIDElement: Swift.CustomStringConvertible {
     public var description: String {
         String(format: "usagePage: %02X usage: %02X", usagePage, usage)
     }

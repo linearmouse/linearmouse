@@ -162,8 +162,9 @@ class SettingsSidebarViewController: NSViewController, NSTableViewDataSource, NS
         tableView.rowHeight = 32
         if #available(macOS 11.0, *) {
             tableView.style = .sourceList
+        } else {
+            tableView.selectionHighlightStyle = .sourceList
         }
-        tableView.selectionHighlightStyle = .sourceList
 
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("SidebarColumn"))
         column.isEditable = false

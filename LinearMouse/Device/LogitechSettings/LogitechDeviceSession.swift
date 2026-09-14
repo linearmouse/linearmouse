@@ -357,7 +357,7 @@ final class LogitechDeviceSession {
             return
         }
 
-        perform {
+        perform { [self] in
             let shouldContinue = { [weak self] in
                 access.token.shouldContinue
                     && Date() < deadline
@@ -689,7 +689,7 @@ final class LogitechDeviceSession {
         dpiApplyCoordinator.cancel()
         hiResWheelApplyCoordinator.cancel()
 
-        perform {
+        perform { [self] in
             let ownsTerminalRestore = { [weak self] in
                 self?.withState {
                     $0.lifecycleOwner?.owns(request) == true

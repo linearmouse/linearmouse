@@ -1067,10 +1067,10 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             batteryLevel: 60
         )
 
-        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
+        _ = store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
             1: .init(isConnected: false, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ], liveReachableSlots: []))
-        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [:], liveReachableSlots: []))
+        _ = store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [:], liveReachableSlots: []))
 
         XCTAssertTrue(store.currentPublishedIdentities().isEmpty)
     }
@@ -1087,7 +1087,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             batteryLevel: 60
         )
 
-        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
+        _ = store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
             1: .init(isConnected: false, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ], liveReachableSlots: []))
 
@@ -1116,7 +1116,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             batteryLevel: 60
         )
 
-        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
+        _ = store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
             1: .init(isConnected: false, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ], liveReachableSlots: []))
         store.mergeConnectionSnapshots([
@@ -1128,7 +1128,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertTrue(store.hasUnresolvedConnectedSlot)
         XCTAssertTrue(store.currentPublishedIdentities().isEmpty)
 
-        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
+        _ = store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
             1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ], liveReachableSlots: [1]))
 
@@ -1148,7 +1148,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             batteryLevel: 60
         )
 
-        store.mergeDiscovery(.init(identities: [mouse], connectionSnapshots: [
+        _ = store.mergeDiscovery(.init(identities: [mouse], connectionSnapshots: [
             1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.keyboard.rawValue),
             2: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ], liveReachableSlots: [2]))
@@ -1169,7 +1169,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             batteryLevel: 60
         )
 
-        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
+        _ = store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
             1: .init(isConnected: false, kind: nil)
         ], liveReachableSlots: []))
         store.mergeConnectionSnapshots([
@@ -1187,7 +1187,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         var store = ReceiverSlotStateStore()
         let identity = receiverIdentity(slot: 1, name: "Mouse A")
 
-        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
+        _ = store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
             1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ], liveReachableSlots: [1]))
         store.mergeConnectionSnapshots([
@@ -1202,7 +1202,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         var store = ReceiverSlotStateStore()
         let identity = receiverIdentity(slot: 1, name: "Mouse A")
 
-        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
+        _ = store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
             1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ], liveReachableSlots: [1]))
         store.mergeConnectionSnapshots(
@@ -1218,7 +1218,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         var store = ReceiverSlotStateStore()
         let identity = receiverIdentity(slot: 1, name: "Mouse A")
 
-        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
+        _ = store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
             1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ], liveReachableSlots: [1]))
         store.mergeConnectionSnapshots([1: .init(isConnected: true, kind: 0x06)])
@@ -1231,7 +1231,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         var store = ReceiverSlotStateStore()
         let identity = receiverIdentity(slot: 1, name: "Mouse A")
 
-        store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
+        _ = store.mergeDiscovery(.init(identities: [identity], connectionSnapshots: [
             1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ], liveReachableSlots: [1]))
         store.mergeConnectionSnapshots([1: .init(isConnected: true, kind: 0)])
@@ -1272,7 +1272,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         let mouseA = receiverIdentity(slot: 1, name: "Mouse A")
         let mouseB = receiverIdentity(slot: 2, name: "Mouse B")
 
-        store.mergeDiscovery(.init(identities: [mouseA, mouseB], connectionSnapshots: [
+        _ = store.mergeDiscovery(.init(identities: [mouseA, mouseB], connectionSnapshots: [
             1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue),
             2: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ], liveReachableSlots: [1, 2], expectedConnectedDeviceCount: 2, observedSlotKinds: [
@@ -1309,10 +1309,10 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         var store = ReceiverSlotStateStore()
         let mouse = receiverIdentity(slot: 1, name: "Mouse A")
 
-        store.mergeDiscovery(.init(identities: [mouse], connectionSnapshots: [
+        _ = store.mergeDiscovery(.init(identities: [mouse], connectionSnapshots: [
             1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ], liveReachableSlots: [1]))
-        store.mergeDiscovery(.init(
+        _ = store.mergeDiscovery(.init(
             identities: [],
             connectionSnapshots: [1: .init(isConnected: true, kind: nil)],
             liveReachableSlots: [],
@@ -1327,7 +1327,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         var store = ReceiverSlotStateStore()
         let mouse = receiverIdentity(slot: 1, name: "Mouse A")
 
-        store.mergeDiscovery(.init(identities: [mouse], connectionSnapshots: [
+        _ = store.mergeDiscovery(.init(identities: [mouse], connectionSnapshots: [
             1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ], liveReachableSlots: [1]))
         let result = store.mergeDiscovery(.init(
@@ -1344,10 +1344,10 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         var store = ReceiverSlotStateStore()
         let mouse = receiverIdentity(slot: 1, name: "Mouse A")
 
-        store.mergeDiscovery(.init(identities: [mouse], connectionSnapshots: [
+        _ = store.mergeDiscovery(.init(identities: [mouse], connectionSnapshots: [
             1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ], liveReachableSlots: [1]))
-        store.mergeDiscovery(.init(
+        _ = store.mergeDiscovery(.init(
             identities: [],
             connectionSnapshots: [1: .init(isConnected: true, kind: nil)],
             liveReachableSlots: [1],
@@ -1378,10 +1378,10 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             batteryLevel: 60
         )
 
-        store.mergeDiscovery(.init(identities: [disconnectedIdentity], connectionSnapshots: [
+        _ = store.mergeDiscovery(.init(identities: [disconnectedIdentity], connectionSnapshots: [
             1: .init(isConnected: false, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
         ], liveReachableSlots: []))
-        store.mergeDiscovery(.init(
+        _ = store.mergeDiscovery(.init(
             identities: [reconnectedIdentity],
             connectionSnapshots: [:],
             liveReachableSlots: [1],
@@ -1600,12 +1600,12 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             batteryLevel: nil
         )
 
-        store.mergeDiscovery(.init(
+        _ = store.mergeDiscovery(.init(
             identities: [identity],
             connectionSnapshots: [1: .init(isConnected: false, kind: ReceiverLogicalDeviceKind.mouse.rawValue)],
             liveReachableSlots: []
         ))
-        store.mergeDiscovery(.init(
+        _ = store.mergeDiscovery(.init(
             identities: [identity],
             connectionSnapshots: [:],
             liveReachableSlots: [1]
@@ -1626,12 +1626,12 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             batteryLevel: nil
         )
 
-        store.mergeDiscovery(.init(
+        _ = store.mergeDiscovery(.init(
             identities: [identity],
             connectionSnapshots: [1: .init(isConnected: false, kind: ReceiverLogicalDeviceKind.mouse.rawValue)],
             liveReachableSlots: []
         ))
-        store.mergeDiscovery(.init(
+        _ = store.mergeDiscovery(.init(
             identities: [identity],
             connectionSnapshots: [:],
             liveReachableSlots: []
@@ -1652,7 +1652,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             batteryLevel: 60
         )
 
-        store.mergeDiscovery(.init(
+        _ = store.mergeDiscovery(.init(
             identities: [identity],
             connectionSnapshots: [1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)],
             liveReachableSlots: [1]

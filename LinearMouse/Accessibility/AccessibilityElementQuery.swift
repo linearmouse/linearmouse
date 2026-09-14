@@ -82,7 +82,8 @@ struct AccessibilityElementQuery: AccessibilityElementQuerying {
                 return .success(nil)
             }
 
-            return .success(value as! AXUIElement)
+            let element = value as! AXUIElement
+            return .success(element)
         case .noValue, .attributeUnsupported:
             return .success(nil)
         default:

@@ -25,7 +25,7 @@ public extension IOHIDValue {
     }
 }
 
-extension IOHIDValue: CustomStringConvertible {
+extension IOKit.IOHIDValue: Swift.CustomStringConvertible {
     public var description: String {
         "timestamp: \(timestamp) length: \(length) data: \(data.map(\.self)) integerValue: \(integerValue) element=(\(element))"
     }

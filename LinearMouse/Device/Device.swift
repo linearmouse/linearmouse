@@ -12,7 +12,7 @@ import PointerKit
 /// Keep HID++ cancellation at the app boundary so PointerKit remains a
 /// transport-agnostic package. This lets an in-flight direct-device request
 /// yield before lifecycle teardown performs its main-run-loop restore.
-extension PointerDevice: HIDPPCancellableDeviceIO {}
+extension PointerKit.PointerDevice: HIDPP.HIDPPCancellableDeviceIO {}
 
 enum PointerLinearScalingRestoreOperation {
     static func perform(

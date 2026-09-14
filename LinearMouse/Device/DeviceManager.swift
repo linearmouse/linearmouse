@@ -1057,7 +1057,10 @@ class DeviceManager: ObservableObject {
     }
 
     func getSystemProperty<T>(forKey key: String) -> T? {
-        let service = IORegistryEntryFromPath(kIOMasterPortDefault, "\(kIOServicePlane):/IOResources/IOHIDSystem")
+        let service = IORegistryEntryFromPath(
+            mach_port_t(MACH_PORT_NULL),
+            "\(kIOServicePlane):/IOResources/IOHIDSystem"
+        )
         guard service != .zero else {
             return nil
         }
