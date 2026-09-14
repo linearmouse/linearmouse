@@ -10,7 +10,7 @@ Instructions for building LinearMouse on macOS.
 
 ### Dependencies
 
-- [Xcode](https://apps.apple.com/app/xcode/id497799835), obviously
+- [Xcode](https://apps.apple.com/app/xcode/id497799835), with a Swift 6.0 or newer toolchain
 - [SwiftLint](https://github.com/realm/SwiftLint), used to lint Swift files
 - [SwiftFormat](https://github.com/nicklockwood/SwiftFormat), used to format Swift files
 - `npm` & [ts-json-schema-generator](https://www.npmjs.com/package/ts-json-schema-generator), used to generate and document the custom configuration JSON scheme

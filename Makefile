@@ -29,11 +29,17 @@ lint:
 	swiftformat --lint .
 	swiftlint .
 
-test: hidpp-test pointerkit-test
+test: hidpp-test gesturekit-test dockkit-test pointerkit-test
 	xcodebuild test -project LinearMouse.xcodeproj -scheme LinearMouse $(XCODEBUILD_ARGS)
 
 hidpp-test:
 	swift test --package-path Modules/HIDPP
+
+gesturekit-test:
+	swift test --package-path Modules/GestureKit
+
+dockkit-test:
+	swift test --package-path Modules/DockKit
 
 pointerkit-test:
 	swift test --package-path Modules/PointerKit
@@ -55,4 +61,4 @@ $(TARGET_DMG): $(BUILD_DIR)/Release/LinearMouse.app
 prepublish: package
 	@./Scripts/sign-and-notarize
 
-.PHONY: all configure test hidpp-test pointerkit-test build clean package
+.PHONY: all configure test hidpp-test gesturekit-test dockkit-test pointerkit-test build clean package
