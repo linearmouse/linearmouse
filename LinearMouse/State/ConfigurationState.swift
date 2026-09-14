@@ -115,7 +115,7 @@ extension ConfigurationState {
 
         configurationFileWatcher = FileWatcher(
             fileURLsProvider: { [weak self] in
-                self?.configurationPaths ?? []
+                self.map { [$0.configurationPath] } ?? []
             },
             queue: .main
         ) { [weak self] in

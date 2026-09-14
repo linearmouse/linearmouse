@@ -151,7 +151,7 @@ final class FileWatcher {
         }
     }
 
-    private static func rootPaths(for fileURLs: [URL]) -> [String] {
+    static func rootPaths(for fileURLs: [URL]) -> [String] {
         Array(Set(fileURLs.flatMap(rootPaths(for:)))).sorted()
     }
 
@@ -159,9 +159,10 @@ final class FileWatcher {
         var rootPaths: [String] = []
         let filePath = filePathPreservingLastSymlink(fileURL.path)
         let fileDirectory = URL(fileURLWithPath: filePath).deletingLastPathComponent()
-        let parentDirectory = fileDirectory.deletingLastPathComponent()
 
-        if let rootPath = existingDirectory(atOrAbove: parentDirectory) {
+        // Watch the file's own directory. Only while it is missing, fall back to the nearest
+        // existing ancestor so its recreation is noticed; `updateStream` then narrows back.
+        if let rootPath = existingDirectory(atOrAbove: fileDirectory) {
             rootPaths.append(rootPath)
         }
 

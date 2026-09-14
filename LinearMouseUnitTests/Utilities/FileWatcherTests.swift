@@ -26,6 +26,34 @@ final class FileWatcherTests: XCTestCase {
         try super.tearDownWithError()
     }
 
+    func testWatchesFileDirectoryInsteadOfItsParent() throws {
+        let watchedDirectory = try XCTUnwrap(temporaryDirectory)
+            .appendingPathComponent("config", isDirectory: true)
+        let watchedFile = watchedDirectory.appendingPathComponent("linearmouse.json")
+
+        try FileManager.default.createDirectory(at: watchedDirectory, withIntermediateDirectories: true)
+
+        XCTAssertEqual(FileWatcher.rootPaths(for: [watchedFile]), [realPath(watchedDirectory)])
+    }
+
+    func testWatchesNearestExistingAncestorWhileFileDirectoryIsMissing() throws {
+        let watchedFile = try XCTUnwrap(temporaryDirectory)
+            .appendingPathComponent("config", isDirectory: true)
+            .appendingPathComponent("linearmouse.json")
+
+        XCTAssertEqual(FileWatcher.rootPaths(for: [watchedFile]), [realPath(temporaryDirectory)])
+    }
+
+    private func realPath(_ url: URL) -> String {
+        guard let path = realpath(url.path, nil) else {
+            return url.path
+        }
+        defer {
+            free(path)
+        }
+        return String(cString: path)
+    }
+
     func testReportsChangesAfterWatchedDirectoryIsRecreated() throws {
         let watchedDirectory = try XCTUnwrap(temporaryDirectory)
             .appendingPathComponent("config", isDirectory: true)
