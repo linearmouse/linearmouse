@@ -15,7 +15,7 @@ public enum HIDPPConstants {
     public static let directReplyIndices: Set<UInt8> = [0x00, 0xFF]
 }
 
-public enum HIDPPFeatureID: UInt16 {
+public enum HIDPPFeatureID: UInt16, Sendable {
     case root = 0x0000
     case deviceName = 0x0005
     case deviceFriendlyName = 0x0007
@@ -32,7 +32,7 @@ public enum HIDPPFeatureID: UInt16 {
     }
 }
 
-public struct HIDPPResponse: Equatable {
+public struct HIDPPResponse: Equatable, Sendable {
     public let payload: [UInt8]
 
     public init(payload: [UInt8]) {

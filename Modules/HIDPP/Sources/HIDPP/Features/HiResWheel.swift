@@ -13,7 +13,7 @@ public struct HiResWheel: HIDPPFeature {
         static let highResolutionModeBit: UInt8 = 0x02
     }
 
-    public struct Capabilities: Equatable {
+    public struct Capabilities: Equatable, Sendable {
         public let multiplier: UInt8
         public let flags: UInt8
 
@@ -23,7 +23,7 @@ public struct HiResWheel: HIDPPFeature {
         }
     }
 
-    public struct ApplyResult: Equatable {
+    public struct ApplyResult: Equatable, Sendable {
         public let previousEnabled: Bool
         public let appliedEnabled: Bool
 
