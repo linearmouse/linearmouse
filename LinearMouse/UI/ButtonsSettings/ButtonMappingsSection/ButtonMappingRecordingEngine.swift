@@ -138,9 +138,12 @@ struct ButtonMappingRecordingEngine {
 
     mutating func pointerMoved(deltaX: Double, deltaY: Double, at timestamp: UInt64) {
         advance(to: timestamp)
+        // Long press is provisional until release, just as it is for ordered
+        // buttons and wheel inputs. Keep collecting movement while held so a
+        // user can record a swipe without racing the long-press timer.
         guard !pressedButtons.isEmpty,
               wheelMapping == nil,
-              recognition == nil else {
+              recognition == nil || recognition == .longPress else {
             return
         }
 
