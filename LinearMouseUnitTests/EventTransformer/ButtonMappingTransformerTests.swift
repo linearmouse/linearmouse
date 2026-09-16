@@ -1327,14 +1327,18 @@ final class ButtonMappingTransformerTests: XCTestCase {
     }
 
     func testHorizontalWheelUsesDominantAxis() throws {
-        let scheduler = ButtonMappingTestTimerScheduler()
+        var now: UInt64 = 0
         let mapping = Mapping(trigger: .init(input: .wheel(.left)), action: .arg0(.none))
-        let transformer = makeTransformer(mappings: [mapping], scheduler: scheduler)
+        let transformer = ButtonMappingTransformer(
+            mappings: [mapping],
+            monotonicClock: { now }
+        )
 
         XCTAssertNil(try transformer.transform(
             scrollEvent(horizontal: 40, vertical: 1),
             in: .init(device: nil)
         ))
+        now = ms(150)
         XCTAssertNotNil(try transformer.transform(
             scrollEvent(horizontal: -40, vertical: 1),
             in: .init(device: nil)
@@ -1380,13 +1384,41 @@ final class ButtonMappingTransformerTests: XCTestCase {
         let ended = try scrollEvent()
         ScrollWheelEventView(ended).scrollPhase = .ended
 
-        XCTAssertNil(try transformer.transform(began, in: context))
-        XCTAssertNil(try transformer.transform(changed, in: context))
+        XCTAssertNotNil(try transformer.transform(began, in: context))
+        XCTAssertNotNil(try transformer.transform(changed, in: context))
         XCTAssertNotNil(try transformer.transform(ended, in: context))
 
         let actionsPerformed = expectation(description: "one action per horizontal gesture")
         DispatchQueue.main.async {
             XCTAssertEqual(keySimulator.events, [.press([.a]), .reset])
+            actionsPerformed.fulfill()
+        }
+        wait(for: [actionsPerformed], timeout: 1)
+    }
+
+    func testHorizontalWheelMappingUsesNetDisplacementAtGestureEnd() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let keySimulator = ButtonMappingTestKeySimulator()
+        let transformer = makeTransformer(
+            mappings: [Mapping(trigger: .init(input: .wheel(.left)), action: .arg1(.keyPress([.a])))],
+            scheduler: scheduler,
+            keySimulator: keySimulator
+        )
+        let context = EventTransformerContext(device: nil)
+        let began = try scrollEvent(horizontal: 60)
+        ScrollWheelEventView(began).scrollPhase = .began
+        let reversed = try scrollEvent(horizontal: -50)
+        ScrollWheelEventView(reversed).scrollPhase = .changed
+        let ended = try scrollEvent()
+        ScrollWheelEventView(ended).scrollPhase = .ended
+
+        XCTAssertNotNil(try transformer.transform(began, in: context))
+        XCTAssertNotNil(try transformer.transform(reversed, in: context))
+        XCTAssertNotNil(try transformer.transform(ended, in: context))
+
+        let actionsPerformed = expectation(description: "reversed gesture does not trigger a horizontal mapping")
+        DispatchQueue.main.async {
+            XCTAssertTrue(keySimulator.events.isEmpty)
             actionsPerformed.fulfill()
         }
         wait(for: [actionsPerformed], timeout: 1)
@@ -1454,6 +1486,34 @@ final class ButtonMappingTransformerTests: XCTestCase {
         }
         wait(for: [actionPerformed], timeout: 1)
         XCTAssertFalse(transformer.hasActiveInteraction)
+    }
+
+    func testHorizontalWheelMappingDoesNotThrottleAnUnmatchedHeldMapping() throws {
+        var now: UInt64 = 0
+        let keySimulator = ButtonMappingTestKeySimulator()
+        let transformer = ButtonMappingTransformer(
+            mappings: [
+                Mapping(
+                    trigger: .init(input: .wheel(.left), whileHeld: [.mouse(4)]),
+                    action: .arg1(.keyPress([.a]))
+                )
+            ],
+            monotonicClock: { now },
+            keySimulator: keySimulator
+        )
+        let context = EventTransformerContext(device: nil)
+
+        XCTAssertNotNil(try transformer.transform(scrollEvent(horizontal: 40), in: context))
+        now = ms(100)
+        XCTAssertNil(try transformer.transform(buttonEvent(button: 4, pressed: true), in: context))
+        XCTAssertNil(try transformer.transform(scrollEvent(horizontal: 40), in: context))
+
+        let actionsPerformed = expectation(description: "matched held mapping is not throttled")
+        DispatchQueue.main.async {
+            XCTAssertEqual(keySimulator.events, [.press([.a]), .reset])
+            actionsPerformed.fulfill()
+        }
+        wait(for: [actionsPerformed], timeout: 1)
     }
 
     func testUnrelatedActiveHoldDoesNotRaiseAPendingSwipeAboveACompletedSwipe() throws {
