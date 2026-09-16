@@ -1341,6 +1341,57 @@ final class ButtonMappingTransformerTests: XCTestCase {
         ))
     }
 
+    func testHorizontalWheelMappingSuppressesRepeatedEventsWithinCooldown() throws {
+        var now: UInt64 = 0
+        let keySimulator = ButtonMappingTestKeySimulator()
+        let transformer = ButtonMappingTransformer(
+            mappings: [Mapping(trigger: .init(input: .wheel(.left)), action: .arg1(.keyPress([.a])))],
+            monotonicClock: { now },
+            keySimulator: keySimulator
+        )
+        let context = EventTransformerContext(device: nil)
+
+        XCTAssertNil(try transformer.transform(scrollEvent(horizontal: 1), in: context))
+        XCTAssertNil(try transformer.transform(scrollEvent(horizontal: 1), in: context))
+        now = ms(500)
+        XCTAssertNil(try transformer.transform(scrollEvent(horizontal: 1), in: context))
+
+        let actionsPerformed = expectation(description: "horizontal wheel actions performed")
+        DispatchQueue.main.async {
+            XCTAssertEqual(keySimulator.events, [.press([.a]), .reset, .press([.a]), .reset])
+            actionsPerformed.fulfill()
+        }
+        wait(for: [actionsPerformed], timeout: 1)
+    }
+
+    func testHorizontalWheelMappingSuppressesChangedEventsUntilGestureEnds() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let keySimulator = ButtonMappingTestKeySimulator()
+        let transformer = makeTransformer(
+            mappings: [Mapping(trigger: .init(input: .wheel(.left)), action: .arg1(.keyPress([.a])))],
+            scheduler: scheduler,
+            keySimulator: keySimulator
+        )
+        let context = EventTransformerContext(device: nil)
+        let began = try scrollEvent(horizontal: 1)
+        ScrollWheelEventView(began).scrollPhase = .began
+        let changed = try scrollEvent(horizontal: 1)
+        ScrollWheelEventView(changed).scrollPhase = .changed
+        let ended = try scrollEvent()
+        ScrollWheelEventView(ended).scrollPhase = .ended
+
+        XCTAssertNil(try transformer.transform(began, in: context))
+        XCTAssertNil(try transformer.transform(changed, in: context))
+        XCTAssertNotNil(try transformer.transform(ended, in: context))
+
+        let actionsPerformed = expectation(description: "one action per horizontal gesture")
+        DispatchQueue.main.async {
+            XCTAssertEqual(keySimulator.events, [.press([.a]), .reset])
+            actionsPerformed.fulfill()
+        }
+        wait(for: [actionsPerformed], timeout: 1)
+    }
+
     func testRepeatedPendingChordDoesNotSuppressIndependentCompletedSwipe() throws {
         let scheduler = ButtonMappingTestTimerScheduler()
         let keySimulator = ButtonMappingTestKeySimulator()

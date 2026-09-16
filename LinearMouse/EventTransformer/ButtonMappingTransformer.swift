@@ -67,6 +67,7 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
         category: "ButtonMapping"
     )
     private static let syntheticClickReleaseDelay: TimeInterval = 0.015
+    private static let horizontalWheelActionCooldown: UInt64 = 500_000_000
 
     let mappings: [Mapping]
     let universalBackForward: Scheme.Buttons.UniversalBackForward?
@@ -86,6 +87,8 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
     private var scheduledDeadline: UInt64?
     private var recognitionLanes = [RecognitionLane]()
     private var targetBundleIdentifier: String?
+    private var horizontalWheelGestureActive = false
+    private var lastHorizontalWheelActionTime = [Mapping.ScrollDirection: UInt64]()
 
     init(
         mappings: [Mapping],
@@ -228,8 +231,20 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
             guard !isRecording else {
                 return event
             }
+            let scrollWheelEventView = ScrollWheelEventView(event)
+            if scrollWheelEventView.scrollPhase == .ended || scrollWheelEventView.scrollPhase == .cancelled {
+                horizontalWheelGestureActive = false
+                return event
+            }
             guard let direction = wheelDirection(of: event) else {
                 return event
+            }
+            guard shouldHandleWheel(
+                direction: direction,
+                phase: scrollWheelEventView.scrollPhase,
+                at: now
+            ) else {
+                return nil
             }
             recognition = recognize(includingFreshLane: true) { engine in
                 engine.wheel(direction, modifierFlags: event.flags, at: now)
@@ -452,6 +467,31 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
             return deltaY > 0 ? .up : .down
         }
         return deltaX > 0 ? .left : .right
+    }
+
+    private func shouldHandleWheel(
+        direction: Mapping.ScrollDirection,
+        phase: CGScrollPhase?,
+        at now: UInt64
+    ) -> Bool {
+        guard direction == .left || direction == .right else {
+            return true
+        }
+
+        if phase == .began {
+            horizontalWheelGestureActive = true
+            lastHorizontalWheelActionTime[direction] = now
+            return true
+        }
+        if phase == .changed, horizontalWheelGestureActive {
+            return false
+        }
+        if let last = lastHorizontalWheelActionTime[direction],
+           now - last < Self.horizontalWheelActionCooldown {
+            return false
+        }
+        lastHorizontalWheelActionTime[direction] = now
+        return true
     }
 
     private func process(_ output: ButtonMappingEngine.Output, in lane: RecognitionLane?) {
