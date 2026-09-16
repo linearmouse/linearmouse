@@ -1332,11 +1332,11 @@ final class ButtonMappingTransformerTests: XCTestCase {
         let transformer = makeTransformer(mappings: [mapping], scheduler: scheduler)
 
         XCTAssertNil(try transformer.transform(
-            scrollEvent(horizontal: 3, vertical: 1),
+            scrollEvent(horizontal: 40, vertical: 1),
             in: .init(device: nil)
         ))
         XCTAssertNotNil(try transformer.transform(
-            scrollEvent(horizontal: -3, vertical: 1),
+            scrollEvent(horizontal: -40, vertical: 1),
             in: .init(device: nil)
         ))
     }
@@ -1351,10 +1351,10 @@ final class ButtonMappingTransformerTests: XCTestCase {
         )
         let context = EventTransformerContext(device: nil)
 
-        XCTAssertNil(try transformer.transform(scrollEvent(horizontal: 1), in: context))
-        XCTAssertNil(try transformer.transform(scrollEvent(horizontal: 1), in: context))
+        XCTAssertNil(try transformer.transform(scrollEvent(horizontal: 40), in: context))
+        XCTAssertNil(try transformer.transform(scrollEvent(horizontal: 40), in: context))
         now = ms(500)
-        XCTAssertNil(try transformer.transform(scrollEvent(horizontal: 1), in: context))
+        XCTAssertNil(try transformer.transform(scrollEvent(horizontal: 40), in: context))
 
         let actionsPerformed = expectation(description: "horizontal wheel actions performed")
         DispatchQueue.main.async {
@@ -1373,9 +1373,9 @@ final class ButtonMappingTransformerTests: XCTestCase {
             keySimulator: keySimulator
         )
         let context = EventTransformerContext(device: nil)
-        let began = try scrollEvent(horizontal: 1)
+        let began = try scrollEvent(horizontal: 20)
         ScrollWheelEventView(began).scrollPhase = .began
-        let changed = try scrollEvent(horizontal: 1)
+        let changed = try scrollEvent(horizontal: 20)
         ScrollWheelEventView(changed).scrollPhase = .changed
         let ended = try scrollEvent()
         ScrollWheelEventView(ended).scrollPhase = .ended
@@ -1387,6 +1387,31 @@ final class ButtonMappingTransformerTests: XCTestCase {
         let actionsPerformed = expectation(description: "one action per horizontal gesture")
         DispatchQueue.main.async {
             XCTAssertEqual(keySimulator.events, [.press([.a]), .reset])
+            actionsPerformed.fulfill()
+        }
+        wait(for: [actionsPerformed], timeout: 1)
+    }
+
+    func testHorizontalWheelMappingIgnoresVerticalScrollDrift() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let keySimulator = ButtonMappingTestKeySimulator()
+        let transformer = makeTransformer(
+            mappings: [Mapping(trigger: .init(input: .wheel(.left)), action: .arg1(.keyPress([.a])))],
+            scheduler: scheduler,
+            keySimulator: keySimulator
+        )
+        let context = EventTransformerContext(device: nil)
+        let began = try scrollEvent(horizontal: 10, vertical: 50)
+        ScrollWheelEventView(began).scrollPhase = .began
+        let changed = try scrollEvent(horizontal: 35, vertical: 100)
+        ScrollWheelEventView(changed).scrollPhase = .changed
+
+        XCTAssertNotNil(try transformer.transform(began, in: context))
+        XCTAssertNotNil(try transformer.transform(changed, in: context))
+
+        let actionsPerformed = expectation(description: "vertical scroll does not trigger horizontal mapping")
+        DispatchQueue.main.async {
+            XCTAssertTrue(keySimulator.events.isEmpty)
             actionsPerformed.fulfill()
         }
         wait(for: [actionsPerformed], timeout: 1)

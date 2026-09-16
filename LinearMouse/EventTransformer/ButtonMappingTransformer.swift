@@ -68,6 +68,8 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
     )
     private static let syntheticClickReleaseDelay: TimeInterval = 0.015
     private static let horizontalWheelActionCooldown: UInt64 = 500_000_000
+    private static let horizontalWheelActivationDistance = 40.0
+    private static let wheelGestureGap: UInt64 = 150_000_000
 
     let mappings: [Mapping]
     let universalBackForward: Scheme.Buttons.UniversalBackForward?
@@ -87,7 +89,10 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
     private var scheduledDeadline: UInt64?
     private var recognitionLanes = [RecognitionLane]()
     private var targetBundleIdentifier: String?
-    private var horizontalWheelGestureActive = false
+    private var activeHorizontalWheelDirection: Mapping.ScrollDirection?
+    private var horizontalWheelDistance = 0.0
+    private var verticalWheelDistance = 0.0
+    private var lastWheelEventTime: UInt64?
     private var lastHorizontalWheelActionTime = [Mapping.ScrollDirection: UInt64]()
 
     init(
@@ -233,9 +238,10 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
             }
             let scrollWheelEventView = ScrollWheelEventView(event)
             if scrollWheelEventView.scrollPhase == .ended || scrollWheelEventView.scrollPhase == .cancelled {
-                horizontalWheelGestureActive = false
+                resetWheelGesture()
                 return event
             }
+            updateWheelGesture(with: scrollWheelEventView, phase: scrollWheelEventView.scrollPhase, at: now)
             guard let direction = wheelDirection(of: event) else {
                 return event
             }
@@ -478,20 +484,45 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
             return true
         }
 
-        if phase == .began {
-            horizontalWheelGestureActive = true
-            lastHorizontalWheelActionTime[direction] = now
-            return true
+        guard horizontalWheelDistance >= Self.horizontalWheelActivationDistance,
+              horizontalWheelDistance > verticalWheelDistance else {
+            return false
         }
-        if phase == .changed, horizontalWheelGestureActive {
+
+        if activeHorizontalWheelDirection == direction {
             return false
         }
         if let last = lastHorizontalWheelActionTime[direction],
            now - last < Self.horizontalWheelActionCooldown {
             return false
         }
+        activeHorizontalWheelDirection = direction
         lastHorizontalWheelActionTime[direction] = now
         return true
+    }
+
+    private func updateWheelGesture(
+        with event: ScrollWheelEventView,
+        phase: CGScrollPhase?,
+        at now: UInt64
+    ) {
+        if phase == .began ||
+            (phase == nil && lastWheelEventTime.map { now - $0 >= Self.wheelGestureGap } != false) {
+            resetWheelGesture()
+        }
+
+        let deltaX = event.continuous ? event.deltaXPt : Double(event.deltaX)
+        let deltaY = event.continuous ? event.deltaYPt : Double(event.deltaY)
+        horizontalWheelDistance += abs(deltaX)
+        verticalWheelDistance += abs(deltaY)
+        lastWheelEventTime = now
+    }
+
+    private func resetWheelGesture() {
+        activeHorizontalWheelDirection = nil
+        horizontalWheelDistance = 0
+        verticalWheelDistance = 0
+        lastWheelEventTime = nil
     }
 
     private func process(_ output: ButtonMappingEngine.Output, in lane: RecognitionLane?) {
