@@ -30,6 +30,10 @@ struct PointerSettings: View {
                         }
                     }
 
+                    if state.pointerRedirectsToScroll {
+                        pointerRedirectsToScrollTriggerControl
+                    }
+
                     if !state.pointerDisableAcceleration {
                         HStack(alignment: .firstTextBaseline) {
                             Slider(
@@ -174,6 +178,35 @@ struct PointerSettings: View {
 
     private func revertPointerSpeed() {
         state.revertPointerSpeed()
+    }
+
+    private var pointerRedirectsToScrollTriggerControl: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Trigger")
+                .font(.headline)
+
+            HStack {
+                ButtonMappingButtonRecorder(
+                    mapping: state.pointerRedirectsToScrollTriggerBinding
+                )
+
+                if state.pointerRedirectsToScrollTrigger != nil {
+                    Button("Clear") {
+                        state.pointerRedirectsToScrollTrigger = nil
+                    }
+                }
+            }
+
+            if !state.pointerRedirectsToScrollTriggerValid {
+                Text("Choose a mouse button trigger. Left click without modifier keys is not allowed.")
+                    .foregroundColor(.red)
+                    .controlSize(.small)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Text("Convert only while the trigger is held. Without a trigger, pointer movement is always converted.")
+                .settingsDescriptionStyle()
+        }
     }
 
     private var pointerHardwareDPIControl: some View {

@@ -51,6 +51,9 @@ extension Scheme {
 
         var disableAcceleration: Bool?
         var redirectsToScroll: Bool?
+        /// When set, pointer movement is redirected to scrolling only while
+        /// this trigger is held. Requires `redirectsToScroll`.
+        var redirectsToScrollTrigger: Trigger?
     }
 }
 
@@ -75,6 +78,10 @@ extension Scheme.Pointer {
         if let redirectsToScroll {
             pointer.redirectsToScroll = redirectsToScroll
         }
+
+        if let redirectsToScrollTrigger {
+            pointer.redirectsToScrollTrigger = redirectsToScrollTrigger
+        }
     }
 
     func merge(into pointer: inout Self?) {
@@ -83,5 +90,22 @@ extension Scheme.Pointer {
         }
 
         merge(into: &pointer!)
+    }
+}
+
+extension Scheme.Trigger {
+    /// Whether this trigger can be held to redirect pointer movement to scrolling.
+    ///
+    /// Only a single mouse button, optionally with modifier keys, is supported.
+    /// The primary button without modifier keys is rejected because it would
+    /// take over every click.
+    var isValidRedirectsToScrollTrigger: Bool {
+        guard case let .button(.mouse(buttonNumber)) = input,
+              (simultaneous ?? []).isEmpty,
+              (whileHeld ?? []).isEmpty else {
+            return false
+        }
+
+        return buttonNumber != 0 || !modifierFlags.isEmpty
     }
 }

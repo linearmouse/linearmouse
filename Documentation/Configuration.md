@@ -1005,3 +1005,26 @@ The `redirectsToScroll` property allows you to redirect pointer movements to scr
 ```
 
 When `redirectsToScroll` is set to `true`, horizontal mouse movements will generate horizontal scroll events, and vertical mouse movements will generate vertical scroll events.
+
+To convert movement only while a button is held, add `redirectsToScrollTrigger`. The trigger press is not sent to applications, and normal pointer movement resumes when the button is released. The trigger is a mouse button with optional `modifiers`; the primary button (`0`) requires at least one modifier.
+
+```json
+{
+  "schemes": [
+    {
+      "if": {
+        "device": {
+          "category": "mouse"
+        }
+      },
+      "pointer": {
+        "redirectsToScroll": true,
+        "redirectsToScrollTrigger": {
+          "input": { "button": 3 },
+          "modifiers": ["option"]
+        }
+      }
+    }
+  ]
+}
+```

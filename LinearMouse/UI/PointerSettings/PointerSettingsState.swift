@@ -4,6 +4,7 @@
 import Combine
 import Foundation
 import PublishedObject
+import SwiftUI
 
 class PointerSettingsState: ObservableObject {
     static let shared: PointerSettingsState = .init()
@@ -106,6 +107,41 @@ extension PointerSettingsState {
             GlobalEventTap.shared.stop()
             GlobalEventTap.shared.start()
         }
+    }
+
+    var pointerRedirectsToScrollTrigger: Scheme.Trigger? {
+        get {
+            mergedScheme.pointer.redirectsToScrollTrigger
+        }
+        set {
+            scheme.pointer.redirectsToScrollTrigger = newValue
+        }
+    }
+
+    /// Adapts the trigger to the mapping shape used by `ButtonMappingButtonRecorder`.
+    var pointerRedirectsToScrollTriggerBinding: Binding<Scheme.Buttons.Mapping> {
+        Binding(
+            get: { [self] in
+                var mapping = Scheme.Buttons.Mapping()
+                if case let .button(button) = pointerRedirectsToScrollTrigger?.input {
+                    mapping.button = button
+                }
+                mapping.modifierFlags = pointerRedirectsToScrollTrigger?.modifierFlags ?? []
+                return mapping
+            },
+            set: { [self] in
+                // The recorder clears its mapping when recording starts. Keep the
+                // current trigger until a new one is recorded so movement is not
+                // redirected unconditionally in the meantime.
+                if let trigger = $0.effectiveTrigger {
+                    pointerRedirectsToScrollTrigger = trigger
+                }
+            }
+        )
+    }
+
+    var pointerRedirectsToScrollTriggerValid: Bool {
+        pointerRedirectsToScrollTrigger?.isValidRedirectsToScrollTrigger ?? true
     }
 
     var pointerAcceleration: Double {

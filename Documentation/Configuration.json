@@ -1436,6 +1436,11 @@
           "title": "Redirects to scroll",
           "type": "boolean"
         },
+        "redirectsToScrollTrigger": {
+          "$ref": "#/definitions/Scheme.Pointer.RedirectsToScrollTrigger",
+          "description": "If set, pointer movements are redirected to scroll events only while this trigger is held. The trigger press is not sent to applications. Requires redirectsToScroll to be true.",
+          "title": "Redirects to scroll trigger"
+        },
         "speed": {
           "anyOf": [
             {
@@ -1451,6 +1456,35 @@
           "title": "Pointer speed"
         }
       },
+      "type": "object"
+    },
+    "Scheme.Pointer.RedirectsToScrollTrigger": {
+      "additionalProperties": false,
+      "description": "A mouse button, optionally with modifier keys. The primary button requires at least one modifier key.",
+      "properties": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "button": {
+              "$ref": "#/definitions/PhysicalButton"
+            }
+          },
+          "required": [
+            "button"
+          ],
+          "type": "object"
+        },
+        "modifiers": {
+          "description": "Keyboard modifiers that must match exactly when the button is pressed.",
+          "items": {
+            "$ref": "#/definitions/Scheme.Buttons.Mapping.Modifier"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "input"
+      ],
       "type": "object"
     },
     "Scheme.Scrolling": {

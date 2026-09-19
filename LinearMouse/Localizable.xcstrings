@@ -13803,6 +13803,9 @@
         }
       }
     },
+    "Clear" : {
+      "comment" : "Button that removes the recorded trigger for converting pointer movement to scroll events."
+    },
     "Click and release to keep autoscroll active, or hold and drag to scroll only until you let go." : {
       "localizations" : {
         "af" : {
@@ -16092,6 +16095,9 @@
           }
         }
       }
+    },
+    "Convert only while the trigger is held. Without a trigger, pointer movement is always converted." : {
+      "comment" : "Description of the trigger for converting pointer movement to scroll events."
     },
     "Convert pointer movement to scroll events" : {
       "localizations" : {

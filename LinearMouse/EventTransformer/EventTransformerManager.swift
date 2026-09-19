@@ -815,6 +815,14 @@ class EventTransformerManager {
             eventTransformer.append(autoScrollTransformer)
         }
 
+        // A held redirects-to-scroll trigger is consumed before button mappings
+        // so the same button does not also click or run a mapping.
+        if scheme.pointer.redirectsToScroll == true,
+           let trigger = scheme.pointer.redirectsToScrollTrigger,
+           let transformer = PointerRedirectsToScrollTriggerTransformer(trigger: trigger) {
+            eventTransformer.append(transformer)
+        }
+
         if !buttonMappings.isEmpty {
             eventTransformer.append(ButtonMappingTransformer(
                 mappings: buttonMappings,
@@ -909,7 +917,8 @@ class EventTransformerManager {
             eventTransformer.append(UniversalBackForwardTransformer(universalBackForward: universalBackForward))
         }
 
-        if let redirectsToScroll = scheme.pointer.redirectsToScroll, redirectsToScroll {
+        if let redirectsToScroll = scheme.pointer.redirectsToScroll, redirectsToScroll,
+           scheme.pointer.redirectsToScrollTrigger == nil {
             eventTransformer.append(PointerRedirectsToScrollTransformer())
         }
 

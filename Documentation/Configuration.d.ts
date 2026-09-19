@@ -444,7 +444,27 @@ declare namespace Scheme {
      * @default false
      */
     redirectsToScroll?: boolean;
+
+    /**
+     * @title Redirects to scroll trigger
+     * @description If set, pointer movements are redirected to scroll events only while this trigger is held. The trigger press is not sent to applications. Requires redirectsToScroll to be true.
+     */
+    redirectsToScrollTrigger?: Pointer.RedirectsToScrollTrigger;
   };
+
+  namespace Pointer {
+    /**
+     * @description A mouse button, optionally with modifier keys. The primary button requires at least one modifier key.
+     */
+    type RedirectsToScrollTrigger = {
+      input: { button: PhysicalButton };
+
+      /**
+       * @description Keyboard modifiers that must match exactly when the button is pressed.
+       */
+      modifiers?: Buttons.Mapping.Modifier[];
+    };
+  }
 
   type Logitech = {
     /**
