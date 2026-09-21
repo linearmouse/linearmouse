@@ -22,17 +22,7 @@ struct PointerSettings: View {
                         }
                     }
 
-                    HStack(spacing: 15) {
-                        Toggle(isOn: $state.pointerRedirectsToScroll.animation()) {
-                            Text("Convert pointer movement to scroll events")
-                            Text("Scrolling settings are applied to converted events.")
-                                .settingsDescriptionStyle()
-                        }
-                    }
-
-                    if state.pointerRedirectsToScroll {
-                        pointerRedirectsToScrollTriggerControl
-                    }
+                    pointerRedirectsToScrollControl
 
                     if !state.pointerDisableAcceleration {
                         HStack(alignment: .firstTextBaseline) {
@@ -180,6 +170,84 @@ struct PointerSettings: View {
         state.revertPointerSpeed()
     }
 
+    private var pointerRedirectsToScrollControl: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 15) {
+                Picker(selection: $state.pointerRedirectsToScrollMode.animation()) {
+                    Text("Off")
+                        .tag(PointerSettingsState.RedirectsToScrollMode.off)
+                    Text("While holding a trigger")
+                        .tag(PointerSettingsState.RedirectsToScrollMode.whileHoldingTrigger)
+                    Text("Always")
+                        .tag(PointerSettingsState.RedirectsToScrollMode.always)
+                } label: {
+                    withDescription {
+                        Text("Convert pointer movement to scroll events")
+                        Text("Scrolling settings are applied to converted events.")
+                    }
+                }
+                .modifier(PickerViewModifier())
+            }
+
+            if state.pointerRedirectsToScrollMode == .whileHoldingTrigger {
+                pointerRedirectsToScrollTriggerControl
+            }
+
+            if state.redirectsToScrollAlwaysSecondsUntilRevert != nil {
+                pointerRedirectsToScrollAlwaysRevertNotice
+            }
+        }
+        .alert(isPresented: $state.redirectsToScrollAlwaysConfirmationPresented) {
+            Alert(
+                title: Text("Always convert pointer movement to scroll events?"),
+                message: Text(
+                    "This device will stop moving the pointer. To undo it you will need the keyboard or another mouse or trackpad, so it is reverted automatically unless you confirm."
+                ),
+                primaryButton: .default(Text("Turn On")) {
+                    state.confirmRedirectsToScrollAlways()
+                },
+                secondaryButton: .cancel {
+                    state.cancelRedirectsToScrollAlways()
+                }
+            )
+        }
+    }
+
+    /// Mirrors how macOS confirms a display change: the setting is already
+    /// live, and goes back by itself unless it is kept. Where the API is
+    /// available, "Keep" is the default button and "Revert" the cancel one, so
+    /// both are reachable from the keyboard while the pointer is unusable.
+    private var pointerRedirectsToScrollAlwaysRevertNotice: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let seconds = state.redirectsToScrollAlwaysSecondsUntilRevert {
+                Text("Reverting in \(seconds) second(s) unless you keep this setting.")
+                    .settingsDescriptionStyle()
+            }
+
+            HStack {
+                if #available(macOS 11.0, *) {
+                    Button("Keep") {
+                        state.keepRedirectsToScrollAlways()
+                    }
+                    .keyboardShortcut(.defaultAction)
+
+                    Button("Revert") {
+                        state.revertRedirectsToScrollAlways()
+                    }
+                    .keyboardShortcut(.cancelAction)
+                } else {
+                    Button("Keep") {
+                        state.keepRedirectsToScrollAlways()
+                    }
+
+                    Button("Revert") {
+                        state.revertRedirectsToScrollAlways()
+                    }
+                }
+            }
+        }
+    }
+
     private var pointerRedirectsToScrollTriggerControl: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Trigger")
@@ -204,8 +272,13 @@ struct PointerSettings: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            Text("Convert only while the trigger is held. Without a trigger, pointer movement is always converted.")
-                .settingsDescriptionStyle()
+            if state.pointerRedirectsToScrollTrigger == nil {
+                Text("Record a trigger to start converting. Until then, pointer movement is left alone.")
+                    .settingsDescriptionStyle()
+            } else {
+                Text("Convert only while the trigger is held.")
+                    .settingsDescriptionStyle()
+            }
         }
     }
 

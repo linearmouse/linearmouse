@@ -6716,6 +6716,9 @@
         }
       }
     },
+    "Always convert pointer movement to scroll events?" : {
+      "comment" : "Title of the alert confirming that pointer movement is always converted to scroll events."
+    },
     "Always show" : {
       "localizations" : {
         "af" : {
@@ -16096,7 +16099,7 @@
         }
       }
     },
-    "Convert only while the trigger is held. Without a trigger, pointer movement is always converted." : {
+    "Convert only while the trigger is held." : {
       "comment" : "Description of the trigger for converting pointer movement to scroll events."
     },
     "Convert pointer movement to scroll events" : {
@@ -34424,6 +34427,9 @@
         }
       }
     },
+    "Keep" : {
+      "comment" : "Button that keeps always converting pointer movement to scroll events."
+    },
     "Keep scrolling after release" : {
       "comment" : "Checkbox label for keeping autoscroll active after releasing its trigger.",
       "localizations" : {
@@ -50470,6 +50476,9 @@
         }
       }
     },
+    "Record a trigger to start converting. Until then, pointer movement is left alone." : {
+      "comment" : "Description shown while the hold-to-convert mode has no trigger recorded yet."
+    },
     "Recording" : {
       "localizations" : {
         "af" : {
@@ -53174,6 +53183,9 @@
         }
       }
     },
+    "Revert" : {
+      "comment" : "Button that undoes always converting pointer movement to scroll events."
+    },
     "Revert to system defaults" : {
       "localizations" : {
         "af" : {
@@ -53381,6 +53393,9 @@
           }
         }
       }
+    },
+    "Reverting in %lld second(s) unless you keep this setting." : {
+      "comment" : "Countdown shown after always converting pointer movement to scroll events is applied."
     },
     "Rewind" : {
       "localizations" : {
@@ -68600,6 +68615,9 @@
         }
       }
     },
+    "This device will stop moving the pointer. To undo it you will need the keyboard or another mouse or trackpad, so it is reverted automatically unless you confirm." : {
+      "comment" : "Message of the alert confirming that pointer movement is always converted to scroll events."
+    },
     "This will delete all settings for \"%@\"." : {
       "localizations" : {
         "af" : {
@@ -70055,6 +70073,9 @@
           }
         }
       }
+    },
+    "Turn On" : {
+      "comment" : "Button that confirms always converting pointer movement to scroll events."
     },
     "Type mismatch: expected %1$@ at %2$@" : {
       "localizations" : {
@@ -73599,6 +73620,9 @@
           }
         }
       }
+    },
+    "While holding a trigger" : {
+      "comment" : "Mode that converts pointer movement to scroll events only while a trigger is held."
     },
     "While pressed action" : {
       "localizations" : {
