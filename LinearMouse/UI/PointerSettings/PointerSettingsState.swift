@@ -49,6 +49,15 @@ class PointerSettingsState: ObservableObject {
 
     private var redirectsToScrollAlwaysRevertTimer: Timer?
 
+    /// What the trigger recorder shows while it is recording.
+    ///
+    /// The recorder clears its mapping when recording starts, but the stored
+    /// trigger has to stay in place until a new one is recorded, or movement
+    /// would be converted unconditionally in the meantime. The cleared (or
+    /// partially recorded) mapping is kept here instead, so the recorder shows
+    /// "Recording" rather than the old trigger. `nil` when not recording.
+    @Published private var redirectsToScrollTriggerRecordingMapping: Scheme.Buttons.Mapping?
+
     /// What to put back if "Always" is not kept in time.
     private var redirectsToScrollStateBeforeAlways: RedirectsToScrollState?
 
@@ -84,6 +93,17 @@ class PointerSettingsState: ObservableObject {
                 // settings back while a different one is selected.
                 self?.resetRedirectsToScrollModeState()
                 self?.refreshPointerHardwareDPIInfo()
+            }
+            .store(in: &subscriptions)
+
+        // Recording can end without a new trigger (clicking the recorder
+        // again, or switching away). Drop the in-progress mapping so the
+        // recorder goes back to showing the stored trigger.
+        SettingsState.shared
+            .$buttonMappingRecordingSession
+            .filter { $0 == nil }
+            .sink { [weak self] _ in
+                self?.redirectsToScrollTriggerRecordingMapping = nil
             }
             .store(in: &subscriptions)
 
@@ -291,6 +311,7 @@ extension PointerSettingsState {
         cancelRedirectsToScrollAlwaysRevert()
         redirectsToScrollAlwaysConfirmationPresented = false
         pendingRedirectsToScrollMode = nil
+        redirectsToScrollTriggerRecordingMapping = nil
     }
 
     /// Writes both fields in one update so the scheme never passes through a
@@ -331,6 +352,10 @@ extension PointerSettingsState {
     var pointerRedirectsToScrollTriggerBinding: Binding<Scheme.Buttons.Mapping> {
         Binding(
             get: { [self] in
+                if let redirectsToScrollTriggerRecordingMapping {
+                    return redirectsToScrollTriggerRecordingMapping
+                }
+
                 var mapping = Scheme.Buttons.Mapping()
                 if case let .button(button) = pointerRedirectsToScrollTrigger?.input {
                     mapping.button = button
@@ -339,12 +364,16 @@ extension PointerSettingsState {
                 return mapping
             },
             set: { [self] in
-                // The recorder clears its mapping when recording starts. Keep the
-                // current trigger until a new one is recorded so movement is not
-                // redirected unconditionally in the meantime.
-                if let trigger = $0.effectiveTrigger {
-                    pointerRedirectsToScrollTrigger = trigger
+                guard let trigger = $0.effectiveTrigger else {
+                    // Recording has started or is part way through. Show that
+                    // in the recorder, but keep the stored trigger until a new
+                    // one is recorded.
+                    redirectsToScrollTriggerRecordingMapping = $0
+                    return
                 }
+
+                redirectsToScrollTriggerRecordingMapping = nil
+                pointerRedirectsToScrollTrigger = trigger
             }
         )
     }
