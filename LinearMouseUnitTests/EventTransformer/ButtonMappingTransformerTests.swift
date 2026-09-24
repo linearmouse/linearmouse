@@ -87,6 +87,15 @@ private final class ButtonMappingTestKeySimulator: KeySimulating {
         events.append(.reset)
     }
 
+    func press(
+        keyCode _: CGKeyCode,
+        modifierFlags _: CGEventFlags,
+        restoringModifierFlags _: CGEventFlags,
+        tap _: CGEventTapLocation?
+    ) throws {
+        XCTFail("Button mappings should send configured keys, not resolved zoom shortcuts")
+    }
+
     func modifiedCGEventFlags(of _: CGEvent) -> CGEventFlags? {
         nil
     }
