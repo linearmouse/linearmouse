@@ -131,6 +131,7 @@ extension AppDelegate {
         setupConfiguration()
         setupNotifications()
         KeyboardSettingsSnapshot.shared.refresh()
+        ModifierActionsTransformer.zoomShortcutResolver.refresh()
         lifecycleReady = true
         startIfAllowed()
     }
@@ -167,6 +168,7 @@ extension AppDelegate {
             os_log("Session active", log: Self.log, type: .info)
             self?.lifecycleAdmission.sessionActive = true
             KeyboardSettingsSnapshot.shared.refresh()
+            ModifierActionsTransformer.zoomShortcutResolver.refresh()
             self?.reconcileLifecycle()
         })
 

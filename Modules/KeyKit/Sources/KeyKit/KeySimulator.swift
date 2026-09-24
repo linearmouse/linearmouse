@@ -21,6 +21,12 @@ public protocol KeySimulating: AnyObject {
         restoringModifierFlags: CGEventFlags,
         tap: CGEventTapLocation?
     ) throws
+    func press(
+        keyCode: CGKeyCode,
+        modifierFlags: CGEventFlags,
+        restoringModifierFlags: CGEventFlags,
+        tap: CGEventTapLocation?
+    ) throws
     func reset()
     func modifiedCGEventFlags(of event: CGEvent) -> CGEventFlags?
 }
@@ -193,16 +199,18 @@ public class KeySimulator: KeySimulating {
         let simulatedGenericFlags = simulatedModifierFlags.intersection(Self.genericModifierFlags)
         let genericFlagsToRestore = restoringGenericFlags.subtracting(simulatedGenericFlags)
 
-        guard !genericFlagsToRestore.isEmpty,
+        let genericFlagsToRelease = simulatedGenericFlags.subtracting(restoringGenericFlags)
+        let isRestoring = !genericFlagsToRestore.isEmpty
+        guard isRestoring || !genericFlagsToRelease.isEmpty,
               let key = Self.modifierKey(
-                  in: restoringModifierFlags,
-                  matching: genericFlagsToRestore
+                  in: isRestoring ? restoringModifierFlags : simulatedModifierFlags,
+                  matching: isRestoring ? genericFlagsToRestore : genericFlagsToRelease
               ),
               let keyCode = keyCodeResolver.keyCode(for: key) else {
             return
         }
 
-        guard let event = CGEvent.makeHardwareLikeKeyEvent(virtualKey: keyCode, keyDown: true) else {
+        guard let event = CGEvent.makeHardwareLikeKeyEvent(virtualKey: keyCode, keyDown: isRestoring) else {
             return
         }
 
@@ -337,6 +345,32 @@ public extension KeySimulator {
             }
 
             return event.flags.union(flags)
+        }
+    }
+
+    /// Sends a resolved physical shortcut without translating its key code through the layout again.
+    func press(
+        keyCode: CGKeyCode,
+        modifierFlags: CGEventFlags,
+        restoringModifierFlags: CGEventFlags,
+        tap: CGEventTapLocation? = nil
+    ) throws {
+        try lock.withLock {
+            for keyDown in [true, false] {
+                guard let event = CGEvent.makeHardwareLikeKeyEvent(virtualKey: keyCode, keyDown: keyDown) else {
+                    continue
+                }
+                event.flags = Self.replacingKeyboardModifierFlags(in: event.flags, with: modifierFlags)
+                if let eventSourceUserData {
+                    event.setIntegerValueField(.eventSourceUserData, value: eventSourceUserData)
+                }
+                eventPoster(event, tap)
+            }
+            try restoreModifierFlagsLocked(
+                restoringModifierFlags,
+                afterUsing: modifierFlags,
+                tap: tap
+            )
         }
     }
 }

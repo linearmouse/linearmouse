@@ -7,9 +7,9 @@ import XCTest
 
 private final class RecordingModifierKeySimulator: KeySimulating {
     struct ModifiedPress: Equatable {
-        let keys: [Key]
+        let keyCode: CGKeyCode
         let modifierFlags: CGEventFlags
-        let restoringModifierFlags: CGEventFlags?
+        let restoringModifierFlags: CGEventFlags
     }
 
     private(set) var unmodifiedPresses: [[Key]] = []
@@ -22,26 +22,27 @@ private final class RecordingModifierKeySimulator: KeySimulating {
         unmodifiedPresses.append(keys)
     }
 
-    func press(
-        keys: [Key],
-        modifierFlags: CGEventFlags,
-        tap _: CGEventTapLocation?
-    ) throws {
-        modifiedPresses.append(.init(
-            keys: keys,
-            modifierFlags: modifierFlags,
-            restoringModifierFlags: nil
-        ))
+    func press(keys _: [Key], modifierFlags _: CGEventFlags, tap _: CGEventTapLocation?) throws {
+        XCTFail("Zoom should send a resolved physical shortcut")
     }
 
     func press(
-        keys: [Key],
+        keys _: [Key],
+        modifierFlags _: CGEventFlags,
+        restoringModifierFlags _: CGEventFlags,
+        tap _: CGEventTapLocation?
+    ) throws {
+        XCTFail("Zoom should send a resolved physical shortcut")
+    }
+
+    func press(
+        keyCode: CGKeyCode,
         modifierFlags: CGEventFlags,
         restoringModifierFlags: CGEventFlags,
         tap _: CGEventTapLocation?
     ) throws {
         modifiedPresses.append(.init(
-            keys: keys,
+            keyCode: keyCode,
             modifierFlags: modifierFlags,
             restoringModifierFlags: restoringModifierFlags
         ))
@@ -55,6 +56,11 @@ private final class RecordingModifierKeySimulator: KeySimulating {
 }
 
 final class ModifierActionsTransformerTests: XCTestCase {
+    /// A layout where zoom-out is not on the US minus key, and zoom-in needs Shift.
+    private static func zoomShortcut(zoomIn: Bool) -> KeyEquivalentResolver.Shortcut? {
+        .init(keyCode: zoomIn ? 24 : 44, modifierFlags: zoomIn ? [.maskCommand, .maskShift] : .maskCommand)
+    }
+
     func testModifierActions() throws {
         var event = try XCTUnwrap(CGEvent(
             scrollWheelEvent2Source: nil,
@@ -102,7 +108,8 @@ final class ModifierActionsTransformerTests: XCTestCase {
         let modifiers = Scheme.Scrolling.Modifiers(command: .zoom)
         let transformer = ModifierActionsTransformer(
             modifiers: .init(vertical: modifiers, horizontal: modifiers),
-            keySimulator: keySimulator
+            keySimulator: keySimulator,
+            zoomShortcut: Self.zoomShortcut
         )
         let event = try XCTUnwrap(CGEvent(
             scrollWheelEvent2Source: nil,
@@ -125,12 +132,12 @@ final class ModifierActionsTransformerTests: XCTestCase {
             keySimulator.modifiedPresses,
             [
                 .init(
-                    keys: [.numpadPlus],
-                    modifierFlags: .maskCommand,
+                    keyCode: 24,
+                    modifierFlags: [.maskCommand, .maskShift],
                     restoringModifierFlags: .maskCommand
                 ),
                 .init(
-                    keys: [.numpadMinus],
+                    keyCode: 44,
                     modifierFlags: .maskCommand,
                     restoringModifierFlags: .maskCommand
                 )
@@ -143,7 +150,8 @@ final class ModifierActionsTransformerTests: XCTestCase {
         let modifiers = Scheme.Scrolling.Modifiers(option: .zoom)
         let transformer = ModifierActionsTransformer(
             modifiers: .init(vertical: modifiers, horizontal: modifiers),
-            keySimulator: keySimulator
+            keySimulator: keySimulator,
+            zoomShortcut: Self.zoomShortcut
         )
         let event = try XCTUnwrap(CGEvent(
             scrollWheelEvent2Source: nil,
@@ -161,11 +169,55 @@ final class ModifierActionsTransformerTests: XCTestCase {
             keySimulator.modifiedPresses,
             [
                 .init(
-                    keys: [.numpadPlus],
-                    modifierFlags: .maskCommand,
+                    keyCode: 24,
+                    modifierFlags: [.maskCommand, .maskShift],
                     restoringModifierFlags: [.maskAlternate, leftOptionFlag]
                 )
             ]
         )
+    }
+
+    func testHorizontalReversedZoomUsesTheOppositeResolvedShortcut() throws {
+        let simulator = RecordingModifierKeySimulator()
+        let transformer = ModifierActionsTransformer(
+            modifiers: .init(vertical: nil, horizontal: .init(control: .zoomReversed)),
+            keySimulator: simulator,
+            zoomShortcut: Self.zoomShortcut
+        )
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: 0,
+            wheel2: 1,
+            wheel3: 0
+        ))
+        event.flags = .maskControl
+
+        XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+        XCTAssertEqual(simulator.modifiedPresses, [
+            .init(keyCode: 44, modifierFlags: .maskCommand, restoringModifierFlags: .maskControl)
+        ])
+    }
+
+    func testZoomDoesNotSendAnOldOrGuessedShortcutWhileLayoutIsUnresolved() throws {
+        let simulator = RecordingModifierKeySimulator()
+        let transformer = ModifierActionsTransformer(
+            modifiers: .init(vertical: .init(command: .zoom), horizontal: nil),
+            keySimulator: simulator
+        ) { _ in nil }
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 1,
+            wheel1: 1,
+            wheel2: 0,
+            wheel3: 0
+        ))
+        event.flags = .maskCommand
+
+        XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+        XCTAssertTrue(simulator.modifiedPresses.isEmpty)
+        XCTAssertTrue(simulator.unmodifiedPresses.isEmpty)
     }
 }

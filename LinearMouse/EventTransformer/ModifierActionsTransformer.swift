@@ -1,6 +1,7 @@
 // MIT License
 // Copyright (c) 2021-2026 LinearMouse
 
+import Carbon
 import Foundation
 import GestureKit
 import KeyKit
@@ -16,18 +17,37 @@ class ModifierActionsTransformer {
         eventSourceUserData: CGEvent.linearMouseSyntheticEventUserData
     )
 
+    static let zoomShortcutResolver = KeyEquivalentResolver(keyEquivalents: ["+", "-"])
+
     typealias Modifiers = Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Modifiers>
     typealias Action = Scheme.Scrolling.Modifiers.Action
 
     private let modifiers: Modifiers
     private let keySimulator: KeySimulating
+    private let zoomShortcut: (Bool) -> KeyEquivalentResolver.Shortcut?
 
     private var pinchZoomBegan = false
     private var pinchZoomReversed = false
 
-    init(modifiers: Modifiers, keySimulator: KeySimulating? = nil) {
+    init(
+        modifiers: Modifiers,
+        keySimulator: KeySimulating? = nil,
+        zoomShortcut: @escaping (Bool) -> KeyEquivalentResolver.Shortcut? = defaultZoomShortcut
+    ) {
         self.modifiers = modifiers
         self.keySimulator = keySimulator ?? Self.defaultKeySimulator
+        self.zoomShortcut = zoomShortcut
+    }
+
+    static func defaultZoomShortcut(zoomIn: Bool) -> KeyEquivalentResolver.Shortcut? {
+        if #available(macOS 12, *) {
+            return zoomShortcutResolver.shortcut(for: zoomIn ? "+" : "-")
+        }
+        // Preserve the legacy behavior on systems without AppKit's automatic shortcut localization.
+        return .init(
+            keyCode: CGKeyCode(zoomIn ? kVK_ANSI_KeypadPlus : kVK_ANSI_KeypadMinus),
+            modifierFlags: .maskCommand
+        )
     }
 }
 
@@ -90,17 +110,10 @@ extension ModifierActionsTransformer: EventTransformer {
                 return event
             }
             let restoringModifierFlags = ModifierState.normalize(event.flags)
-            if deltaSignum > 0 {
+            if let shortcut = zoomShortcut(deltaSignum > 0) {
                 try? keySimulator.press(
-                    keys: [.numpadPlus],
-                    modifierFlags: .maskCommand,
-                    restoringModifierFlags: restoringModifierFlags,
-                    tap: .cgSessionEventTap
-                )
-            } else {
-                try? keySimulator.press(
-                    keys: [.numpadMinus],
-                    modifierFlags: .maskCommand,
+                    keyCode: shortcut.keyCode,
+                    modifierFlags: shortcut.modifierFlags,
                     restoringModifierFlags: restoringModifierFlags,
                     tap: .cgSessionEventTap
                 )
