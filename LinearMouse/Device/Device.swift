@@ -199,6 +199,15 @@ class Device {
         logitechSession.discoverySnapshot
     }
 
+    /// The identities this device is matched under. Behind a resolved receiver
+    /// route the primary identity is the paired device, not the receiver.
+    var matchCandidates: DeviceMatchCandidates {
+        DeviceMatchCandidates(
+            physical: .physical(of: self),
+            logicalIdentity: logitechReceiverRouteSnapshot?.identity
+        )
+    }
+
     func logitechHardwareTargetKey(receiverSlot: UInt8? = nil) -> LogitechHardwareTargetKey? {
         logitechHardwareTargetKey(for: logitechReceiverRouteSnapshot, receiverSlot: receiverSlot)
     }
