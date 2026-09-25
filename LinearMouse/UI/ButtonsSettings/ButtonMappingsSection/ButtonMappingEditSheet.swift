@@ -54,10 +54,6 @@ struct ButtonMappingEditSheet: View {
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Action")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-
                     ScrollView {
                         if valid {
                             if mapping.isStructured {
