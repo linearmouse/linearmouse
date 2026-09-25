@@ -140,6 +140,70 @@ final class EventTransformerManagerTests: XCTestCase {
         XCTAssertLessThan(autoScrollIndex, gestureIndex)
     }
 
+    func testRedirectsToScrollWithoutTriggerAlwaysRedirects() throws {
+        var scheme = Scheme()
+        scheme.pointer.redirectsToScroll = true
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+
+        let transformers = try XCTUnwrap(EventTransformerManager().get(
+            withDevice: nil,
+            withPid: nil,
+            withDisplay: nil
+        ) as? [EventTransformer])
+
+        XCTAssertTrue(transformers.last is PointerRedirectsToScrollTransformer)
+        XCTAssertFalse(transformers.contains { $0 is PointerRedirectsToScrollTriggerTransformer })
+    }
+
+    func testRedirectsToScrollTriggerPrecedesButtonMappings() throws {
+        var scheme = Scheme()
+        scheme.pointer.redirectsToScroll = true
+        scheme.pointer.redirectsToScrollTrigger = .init(input: .button(.mouse(3)))
+        scheme.buttons.mappings = [
+            .init(
+                trigger: .init(input: .button(.mouse(3))),
+                outcomes: .init(shortPress: .arg0(.none))
+            )
+        ]
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+
+        let transformers = try XCTUnwrap(EventTransformerManager().get(
+            withDevice: nil,
+            withPid: nil,
+            withDisplay: nil
+        ) as? [EventTransformer])
+        let triggerIndex = try XCTUnwrap(transformers.firstIndex { $0 is PointerRedirectsToScrollTriggerTransformer })
+        let buttonMappingIndex = try XCTUnwrap(transformers.firstIndex { $0 is ButtonMappingTransformer })
+
+        XCTAssertLessThan(triggerIndex, buttonMappingIndex)
+        XCTAssertFalse(transformers.contains { $0 is PointerRedirectsToScrollTransformer })
+    }
+
+    func testRedirectsToScrollTriggerRequiresRedirectsToScroll() {
+        var scheme = Scheme()
+        scheme.pointer.redirectsToScrollTrigger = .init(input: .button(.mouse(3)))
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+
+        let transformer = EventTransformerManager().get(withDevice: nil, withPid: nil, withDisplay: nil)
+        let transformers = transformer as? [EventTransformer] ?? [transformer]
+
+        XCTAssertFalse(transformers.contains { $0 is PointerRedirectsToScrollTriggerTransformer })
+        XCTAssertFalse(transformers.contains { $0 is PointerRedirectsToScrollTransformer })
+    }
+
+    func testInvalidRedirectsToScrollTriggerDisablesRedirecting() {
+        var scheme = Scheme()
+        scheme.pointer.redirectsToScroll = true
+        scheme.pointer.redirectsToScrollTrigger = .init(input: .button(.mouse(0)))
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+
+        let transformer = EventTransformerManager().get(withDevice: nil, withPid: nil, withDisplay: nil)
+        let transformers = transformer as? [EventTransformer] ?? [transformer]
+
+        XCTAssertFalse(transformers.contains { $0 is PointerRedirectsToScrollTriggerTransformer })
+        XCTAssertFalse(transformers.contains { $0 is PointerRedirectsToScrollTransformer })
+    }
+
     func testStandaloneGestureDoesNotInterceptButtonMappingRecording() throws {
         var gesture = Scheme.Buttons.Gesture()
         gesture.enabled = true

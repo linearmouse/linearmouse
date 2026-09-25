@@ -10,6 +10,12 @@ class PointerRedirectsToScrollTransformer: EventTransformer {
             return event
         }
 
+        Self.redirectToScroll(event)
+        return nil
+    }
+
+    /// Posts a scroll event for the pointer movement in `event` and keeps the cursor in place.
+    static func redirectToScroll(_ event: CGEvent) {
         // Despite making this function return nil, the mouseMoved event
         // still causes the cursor to move, so we need to manually move
         // the cursor to maintain a fixed position during scrolling.
@@ -30,7 +36,5 @@ class PointerRedirectsToScrollTransformer: EventTransformer {
         ) {
             scrollEvent.post(tap: .cghidEventTap)
         }
-
-        return nil
     }
 }

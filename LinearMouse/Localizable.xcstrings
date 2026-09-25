@@ -6716,6 +6716,215 @@
         }
       }
     },
+    "Always convert pointer movement to scroll events?" : {
+      "comment" : "Title of the alert confirming that pointer movement is always converted to scroll events.",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wyserbeweging altyd na blaai-gebeurtenisse omskakel?"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هل تريد تحويل حركة المؤشر دائمًا إلى أحداث تمرير؟"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uvijek pretvarati pokrete pokazivača u događaje skrolanja?"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Convertir sempre el moviment del punter en esdeveniments de desplaçament?"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vždy převádět pohyb ukazatele na události rolování?"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konverter altid markørbevægelse til rullehændelser?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeigerbewegung immer in Scrollereignisse umwandeln?"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Να μετατρέπεται πάντα η κίνηση του δείκτη σε συμβάντα κύλισης;"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Convertir siempre el movimiento del puntero en eventos de desplazamiento?"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muunnetaanko osoittimen liike aina vieritystapahtumiksi?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toujours convertir les mouvements du pointeur en événements de défilement ?"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "להמיר תמיד תנועות מצביע לאירועי גלילה?"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mindig alakítsa görgetési eseményekké a mutatómozgatást?"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selalu ubah gerakan penunjuk menjadi peristiwa gulir?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Convertire sempre il movimento del puntatore in eventi di scorrimento?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ポインターの動きを常にスクロールイベントに変換しますか？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "포인터 움직임을 항상 스크롤 이벤트로 변환하시겠습니까?"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pointer ရွေ့လျားမှုကို scroll ဖြစ်ရပ်များအဖြစ် အမြဲ ပြောင်းလဲမလား။"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vil du alltid konvertere pekerbevegelse til rullingshendelser?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verplaatsing van de aanwijzer altijd omzetten in scrollgebeurtenissen?"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zawsze konwertować ruch wskaźnika na zdarzenia przewijania?"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Converter sempre o movimento do ponteiro em eventos de rolagem?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sempre converter o movimento do ponteiro em eventos de rolagem?"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Convertiți întotdeauna mișcarea indicatorului în evenimente de derulare?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Всегда преобразовывать движение указателя в события прокрутки?"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vždy prevádzať pohyb ukazovateľa na udalosti rolovania?"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Увек претварати померање показивача у догађаје скроловања?"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konvertera alltid pekarrörelser till rullningshändelser?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İşaretçi hareketi her zaman kaydırma olaylarına dönüştürülsün mü?"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завжди перетворювати рух вказівника на події прокручування?"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Luôn chuyển đổi chuyển động con trỏ thành sự kiện cuộn?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "始终将指针移动转换为滚动事件？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一律將指標移動轉換為捲動事件？"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一律將指標移動轉換為捲動事件？"
+          }
+        }
+      }
+    },
     "Always show" : {
       "localizations" : {
         "af" : {
@@ -13803,6 +14012,215 @@
         }
       }
     },
+    "Clear" : {
+      "comment" : "Button that removes the recorded trigger for converting pointer movement to scroll events.",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maak skoon"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مسح"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Očisti"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esborra"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vymazat"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ryd"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Löschen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εκκαθάριση"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tyhjennä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effacer"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ניקוי"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Törlés"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hapus"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancella"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クリア"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지우기"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ရှင်းလင်းရန်"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tøm"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wis"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wyczyść"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limpar"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limpar"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ștergeți"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Очистить"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vymazať"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обриши"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rensa"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temizle"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Очистити"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xóa"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除"
+          }
+        }
+      }
+    },
     "Click and release to keep autoscroll active, or hold and drag to scroll only until you let go." : {
       "localizations" : {
         "af" : {
@@ -16089,6 +16507,215 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "設定長按後，此按鍵的一般點按可能會延遲。"
+          }
+        }
+      }
+    },
+    "Convert only while the trigger is held." : {
+      "comment" : "Description of the trigger for converting pointer movement to scroll events.",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skakel slegs om terwyl die sneller ingehou word."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التحويل فقط أثناء الضغط على المشغل."
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pretvaraj samo dok je okidač pritisnut."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Converteix només mentre es manté premut el desencadenant."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Převádět pouze při držení spouštěče."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konverter kun, mens udløseren holdes nede."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur umwandeln, während der Auslöser gedrückt gehalten wird."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μετατροπή μόνο όσο κρατιέται πατημένη η ενεργοποίηση."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Convertir solo mientras se mantiene pulsado el disparador."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muunna vain, kun laukaisinta pidetään painettuna."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Convertir uniquement lorsque le déclencheur est maintenu."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המרה רק כל עוד הטריגר מוחזק."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Átalakítás csak a kiváltó nyomva tartása közben."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ubah hanya saat pemicu ditahan."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Converti solo mentre il trigger è premuto."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "トリガーを押している間だけ変換します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "트리거를 누르고 있는 동안에만 변환합니다."
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "လှုံ့ဆော်မှုကို ဖိထားစဉ်သာ ပြောင်းလဲပါ။"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konverter bare mens utløseren holdes inne."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alleen omzetten terwijl de trigger wordt ingedrukt."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konwertuj tylko podczas przytrzymywania wyzwalacza."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Converter apenas enquanto o gatilho estiver premido."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Converter somente enquanto o gatilho estiver pressionado."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Convertiți doar cât timp declanșatorul este ținut apăsat."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Преобразовывать только пока удерживается триггер."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prevádzať iba počas držania spúšťača."
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Претварај само док се окидач држи."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konvertera endast medan utlösaren hålls ned."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yalnızca tetikleyici basılı tutulurken dönüştür."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перетворювати лише поки утримується тригер."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chỉ chuyển đổi khi đang giữ nút kích hoạt."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仅在按住触发器时转换。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "僅在按住觸發條件時轉換。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "僅在按住觸發條件時轉換。"
           }
         }
       }
@@ -34418,6 +35045,215 @@
         }
       }
     },
+    "Keep" : {
+      "comment" : "Button that keeps always converting pointer movement to scroll events.",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behou"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإبقاء"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zadrži"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantén"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ponechat"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behold"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beibehalten"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Διατήρηση"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantener"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Säilytä"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conserver"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שמירה"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Megtartás"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pertahankan"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantieni"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "維持"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "유지"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ဆက်ထားရန်"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behold"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behoud"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zachowaj"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manter"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manter"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Păstrați"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оставить"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ponechať"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Задржи"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behåll"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koru"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Залишити"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giữ lại"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保留"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保留"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保留"
+          }
+        }
+      }
+    },
     "Keep scrolling after release" : {
       "comment" : "Checkbox label for keeping autoscroll active after releasing its trigger.",
       "localizations" : {
@@ -50464,6 +51300,215 @@
         }
       }
     },
+    "Record a trigger to start converting. Until then, pointer movement is left alone." : {
+      "comment" : "Description shown while the hold-to-convert mode has no trigger recorded yet.",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neem 'n sneller op om met omskakeling te begin. Tot dan word wyserbeweging nie verander nie."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سجّل مشغلًا لبدء التحويل. حتى ذلك الحين، لن تتأثر حركة المؤشر."
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snimite okidač da biste započeli pretvaranje. Do tada se pokreti pokazivača ne mijenjaju."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistra un desencadenant per començar a convertir. Fins aleshores, el moviment del punter no es modifica."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nahrajte spouštěč, abyste mohli začít převádět. Do té doby zůstane pohyb ukazatele beze změny."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optag en udløser for at begynde at konvertere. Indtil da påvirkes markørbevægelser ikke."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nehmen Sie einen Auslöser auf, um mit dem Umwandeln zu beginnen. Bis dahin bleibt die Zeigerbewegung unverändert."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Καταγράψτε μια ενεργοποίηση για να ξεκινήσει η μετατροπή. Μέχρι τότε, η κίνηση του δείκτη δεν επηρεάζεται."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Graba un disparador para empezar a convertir. Hasta entonces, el movimiento del puntero no se modifica."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tallenna laukaisin aloittaaksesi muuntamisen. Siihen asti osoittimen liikettä ei muuteta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrez un déclencheur pour commencer la conversion. D’ici là, les mouvements du pointeur ne sont pas modifiés."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הקלט טריגר כדי להתחיל בהמרה. עד אז, תנועות המצביע לא ישתנו."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rögzítsen egy kiváltót az átalakítás elindításához. Addig a mutatómozgatás változatlan marad."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rekam pemicu untuk mulai mengubah. Hingga saat itu, gerakan penunjuk tidak diubah."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra un trigger per iniziare la conversione. Fino ad allora, il movimento del puntatore non viene modificato."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "変換を開始するにはトリガーを記録してください。それまではポインターの動きは変更されません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "변환을 시작하려면 트리거를 기록하세요. 그 전까지는 포인터 움직임이 변경되지 않습니다."
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ပြောင်းလဲခြင်း စတင်ရန် လှုံ့ဆော်မှုတစ်ခုကို မှတ်တမ်းတင်ပါ။ ထိုအချိန်အထိ pointer ရွေ့လျားမှုကို မပြောင်းလဲပါ။"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ta opp en utløser for å begynne å konvertere. Inntil da blir pekerbevegelse ikke endret."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neem een trigger op om te beginnen met omzetten. Tot die tijd blijft de verplaatsing van de aanwijzer ongewijzigd."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nagraj wyzwalacz, aby rozpocząć konwersję. Do tego czasu ruch wskaźnika pozostaje bez zmian."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grave um gatilho para começar a converter. Até lá, o movimento do ponteiro não é alterado."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grave um gatilho para começar a converter. Até lá, o movimento do ponteiro não é alterado."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Înregistrați un declanșator pentru a începe conversia. Până atunci, mișcarea indicatorului nu este modificată."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запишите триггер, чтобы начать преобразование. До этого движение указателя не изменяется."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nahrajte spúšťač, aby sa začalo prevádzanie. Dovtedy zostane pohyb ukazovateľa bez zmeny."
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Снимите окидач да бисте почели претварање. До тада се померање показивача не мења."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spela in en utlösare för att börja konvertera. Tills dess lämnas pekarrörelser orörda."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dönüştürmeye başlamak için bir tetikleyici kaydedin. O zamana kadar işaretçi hareketi değiştirilmez."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запишіть тригер, щоб почати перетворення. Доти рух вказівника не змінюється."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hãy ghi một nút kích hoạt để bắt đầu chuyển đổi. Cho đến lúc đó, chuyển động con trỏ không bị thay đổi."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "录制触发器后开始转换。在此之前，指针移动不受影响。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "錄製觸發條件後開始轉換。在此之前，指標移動不受影響。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "錄製觸發條件後開始轉換。在此之前，指標移動不受影響。"
+          }
+        }
+      }
+    },
     "Recording" : {
       "localizations" : {
         "af" : {
@@ -53168,6 +54213,215 @@
         }
       }
     },
+    "Revert" : {
+      "comment" : "Button that undoes always converting pointer movement to scroll events.",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stel terug"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تراجع"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vrati"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reverteix"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vrátit"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fortryd"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zurücksetzen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επαναφορά"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revertir"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Palauta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rétablir"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "החזרה"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visszaállítás"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kembalikan"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ripristina"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "元に戻す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "되돌리기"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ပြန်ပြောင်းရန်"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tilbakestill"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Herstel"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przywróć"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reverter"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reverter"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reveniți"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вернуть"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vrátiť"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Врати"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Återställ"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geri Al"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повернути"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoàn nguyên"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "还原"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "還原"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "還原"
+          }
+        }
+      }
+    },
     "Revert to system defaults" : {
       "localizations" : {
         "af" : {
@@ -53372,6 +54626,707 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "恢復到系統預設值"
+          }
+        }
+      }
+    },
+    "Reverting in %lld second(s) unless you keep this setting." : {
+      "comment" : "Countdown shown after always converting pointer movement to scroll events is applied.",
+      "localizations" : {
+        "af" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Word oor %lld sekonde teruggestel tensy jy hierdie instelling behou."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Word oor %lld sekondes teruggestel tensy jy hierdie instelling behou."
+                }
+              }
+            }
+          }
+        },
+        "ar" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "سيتم التراجع خلال %lld ثوانٍ ما لم تحتفظ بهذا الإعداد."
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "سيتم التراجع خلال %lld ثانية ما لم تحتفظ بهذا الإعداد."
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "سيتم التراجع خلال %lld ثانية ما لم تحتفظ بهذا الإعداد."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "سيتم التراجع خلال %lld ثانية ما لم تحتفظ بهذا الإعداد."
+                }
+              },
+              "two" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "سيتم التراجع خلال %lld ثانيتين ما لم تحتفظ بهذا الإعداد."
+                }
+              },
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "سيتم التراجع خلال %lld ثانية ما لم تحتفظ بهذا الإعداد."
+                }
+              }
+            }
+          }
+        },
+        "bs" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Vraćanje za %lld sekunde ako ne zadržite ovu postavku."
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Vraćanje za %lld sekundu ako ne zadržite ovu postavku."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Vraćanje za %lld sekundi ako ne zadržite ovu postavku."
+                }
+              }
+            }
+          }
+        },
+        "ca" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Es revertirà d'aquí a %lld segon tret que mantinguis aquesta configuració."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Es revertirà d'aquí a %lld segons tret que mantinguis aquesta configuració."
+                }
+              }
+            }
+          }
+        },
+        "cs" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Vrácení za %lld sekundy, pokud toto nastavení neponecháte."
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Vrácení za %lld sekundy, pokud toto nastavení neponecháte."
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Vrácení za %lld sekundu, pokud toto nastavení neponecháte."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Vrácení za %lld sekund, pokud toto nastavení neponecháte."
+                }
+              }
+            }
+          }
+        },
+        "da" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Fortrydes om %lld sekund, medmindre du beholder denne indstilling."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Fortrydes om %lld sekunder, medmindre du beholder denne indstilling."
+                }
+              }
+            }
+          }
+        },
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Wird in %lld Sekunde zurückgesetzt, sofern Sie diese Einstellung nicht beibehalten."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Wird in %lld Sekunden zurückgesetzt, sofern Sie diese Einstellung nicht beibehalten."
+                }
+              }
+            }
+          }
+        },
+        "el" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Επαναφορά σε %lld δευτερόλεπτο, εκτός αν διατηρήσετε αυτή τη ρύθμιση."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Επαναφορά σε %lld δευτερόλεπτα, εκτός αν διατηρήσετε αυτή τη ρύθμιση."
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Reverting in %lld second unless you keep this setting."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Reverting in %lld seconds unless you keep this setting."
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Se revertirá en %lld segundo a menos que mantengas este ajuste."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Se revertirá en %lld segundos a menos que mantengas este ajuste."
+                }
+              }
+            }
+          }
+        },
+        "fi" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Palautetaan %lld sekunnin kuluttua, ellet säilytä tätä asetusta."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Palautetaan %lld sekunnin kuluttua, ellet säilytä tätä asetusta."
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Rétablissement dans %lld seconde, sauf si vous conservez ce réglage."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Rétablissement dans %lld secondes, sauf si vous conservez ce réglage."
+                }
+              }
+            }
+          }
+        },
+        "he" : {
+          "variations" : {
+            "plural" : {
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "ההגדרה תוחזר בעוד %lld שניות אלא אם תשמור אותה."
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "ההגדרה תוחזר בעוד %lld שנייה אלא אם תשמור אותה."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "ההגדרה תוחזר בעוד %lld שניות אלא אם תשמור אותה."
+                }
+              },
+              "two" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "ההגדרה תוחזר בעוד %lld שניות אלא אם תשמור אותה."
+                }
+              }
+            }
+          }
+        },
+        "hu" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Visszaállítás %lld másodperc múlva, hacsak meg nem tartja ezt a beállítást."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Visszaállítás %lld másodperc múlva, hacsak meg nem tartja ezt a beállítást."
+                }
+              }
+            }
+          }
+        },
+        "id" : {
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dikembalikan dalam %lld detik kecuali Anda mempertahankan pengaturan ini."
+                }
+              }
+            }
+          }
+        },
+        "it" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ripristino tra %lld secondo, a meno che tu non mantenga questa impostazione."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ripristino tra %lld secondi, a meno che tu non mantenga questa impostazione."
+                }
+              }
+            }
+          }
+        },
+        "ja" : {
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "この設定を維持しない場合、%lld 秒後に元に戻ります。"
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "이 설정을 유지하지 않으면 %lld초 후에 되돌립니다."
+                }
+              }
+            }
+          }
+        },
+        "my" : {
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "ဤဆက်တင်ကို ဆက်မထားပါက %lld စက္ကန့်အတွင်း ပြန်ပြောင်းပါမည်။"
+                }
+              }
+            }
+          }
+        },
+        "nb-NO" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Tilbakestilles om %lld sekund med mindre du beholder denne innstillingen."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Tilbakestilles om %lld sekunder med mindre du beholder denne innstillingen."
+                }
+              }
+            }
+          }
+        },
+        "nl" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Wordt over %lld seconde hersteld, tenzij je deze instelling behoudt."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Wordt over %lld seconden hersteld, tenzij je deze instelling behoudt."
+                }
+              }
+            }
+          }
+        },
+        "pl" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Przywrócenie za %lld sekundy, jeśli nie zachowasz tego ustawienia."
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Przywrócenie za %lld sekund, jeśli nie zachowasz tego ustawienia."
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Przywrócenie za %lld sekundę, jeśli nie zachowasz tego ustawienia."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Przywrócenie za %lld sekundy, jeśli nie zachowasz tego ustawienia."
+                }
+              }
+            }
+          }
+        },
+        "pt" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "A reverter dentro de %lld segundo, a menos que mantenha esta definição."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "A reverter dentro de %lld segundos, a menos que mantenha esta definição."
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Revertendo em %lld segundo, a menos que você mantenha esta configuração."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Revertendo em %lld segundos, a menos que você mantenha esta configuração."
+                }
+              }
+            }
+          }
+        },
+        "ro" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Revenire în %lld secunde, dacă nu păstrați această setare."
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Revenire în %lld secundă, dacă nu păstrați această setare."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Revenire în %lld de secunde, dacă nu păstrați această setare."
+                }
+              }
+            }
+          }
+        },
+        "ru" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Возврат через %lld секунды, если вы не оставите эту настройку."
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Возврат через %lld секунд, если вы не оставите эту настройку."
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Возврат через %lld секунду, если вы не оставите эту настройку."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Возврат через %lld секунды, если вы не оставите эту настройку."
+                }
+              }
+            }
+          }
+        },
+        "sk" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Vrátenie o %lld sekundy, ak si toto nastavenie neponecháte."
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Vrátenie o %lld sekundy, ak si toto nastavenie neponecháte."
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Vrátenie o %lld sekundu, ak si toto nastavenie neponecháte."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Vrátenie o %lld sekúnd, ak si toto nastavenie neponecháte."
+                }
+              }
+            }
+          }
+        },
+        "sr" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Враћање за %lld секунде ако не задржите ово подешавање."
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Враћање за %lld секунду ако не задржите ово подешавање."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Враћање за %lld секунди ако не задржите ово подешавање."
+                }
+              }
+            }
+          }
+        },
+        "sv" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Återställs om %lld sekund om du inte behåller inställningen."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Återställs om %lld sekunder om du inte behåller inställningen."
+                }
+              }
+            }
+          }
+        },
+        "tr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Bu ayarı korumazsanız %lld saniye içinde geri alınacak."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Bu ayarı korumazsanız %lld saniye içinde geri alınacak."
+                }
+              }
+            }
+          }
+        },
+        "uk" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Повернення через %lld секунди, якщо ви не залишите це налаштування."
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Повернення через %lld секунд, якщо ви не залишите це налаштування."
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Повернення через %lld секунду, якщо ви не залишите це налаштування."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Повернення через %lld секунди, якщо ви не залишите це налаштування."
+                }
+              }
+            }
+          }
+        },
+        "vi" : {
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Sẽ hoàn nguyên sau %lld giây trừ khi bạn giữ lại cài đặt này."
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans" : {
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld 秒后将还原，除非你保留此设置。"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hant" : {
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld 秒後將還原，除非你保留此設定。"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hant-HK" : {
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld 秒後將還原，除非你保留此設定。"
+                }
+              }
+            }
           }
         }
       }
@@ -68594,6 +70549,215 @@
         }
       }
     },
+    "This device will stop moving the pointer. To undo it you will need the keyboard or another mouse or trackpad, so it is reverted automatically unless you confirm." : {
+      "comment" : "Message of the alert confirming that pointer movement is always converted to scroll events.",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hierdie toestel sal ophou om die wyser te beweeg. Om dit ongedaan te maak, sal jy die sleutelbord of 'n ander muis of spoorblok nodig hê, dus word dit outomaties teruggestel tensy jy bevestig."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سيتوقف هذا الجهاز عن تحريك المؤشر. للتراجع عن ذلك ستحتاج إلى لوحة المفاتيح أو فأرة أو لوحة تتبع أخرى، لذا سيتم التراجع عنه تلقائيًا ما لم تؤكد."
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ovaj uređaj će prestati pomjerati pokazivač. Da biste to poništili, trebat će vam tastatura ili drugi miš ili trackpad, pa se postavka automatski vraća ako je ne potvrdite."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aquest dispositiu deixarà de moure el punter. Per desfer-ho necessitaràs el teclat o un altre ratolí o trackpad, de manera que es revertirà automàticament tret que ho confirmis."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toto zařízení přestane pohybovat ukazatelem. K vrácení budete potřebovat klávesnici nebo jinou myš či trackpad, proto se nastavení automaticky vrátí, pokud jej nepotvrdíte."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Denne enhed holder op med at bevæge markøren. For at fortryde det skal du bruge tastaturet eller en anden mus eller et andet pegefelt, så det fortrydes automatisk, medmindre du bekræfter."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Gerät bewegt den Zeiger nicht mehr. Zum Rückgängigmachen benötigen Sie die Tastatur oder eine andere Maus bzw. ein anderes Trackpad. Daher wird die Einstellung automatisch zurückgesetzt, sofern Sie sie nicht bestätigen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Αυτή η συσκευή θα σταματήσει να μετακινεί τον δείκτη. Για να το αναιρέσετε θα χρειαστείτε το πληκτρολόγιο ή άλλο ποντίκι ή trackpad, οπότε η ρύθμιση επαναφέρεται αυτόματα, εκτός αν επιβεβαιώσετε."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este dispositivo dejará de mover el puntero. Para deshacerlo necesitarás el teclado u otro ratón o trackpad, así que se revertirá automáticamente a menos que lo confirmes."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tämä laite lakkaa liikuttamasta osoitinta. Kumoamiseen tarvitset näppäimistön tai toisen hiiren tai ohjauslevyn, joten asetus palautetaan automaattisesti, ellet vahvista sitä."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cet appareil ne déplacera plus le pointeur. Pour annuler, vous aurez besoin du clavier ou d’une autre souris ou d’un autre trackpad ; le réglage est donc rétabli automatiquement, sauf si vous confirmez."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מכשיר זה יפסיק להזיז את המצביע. כדי לבטל זאת תצטרך את המקלדת או עכבר או משטח מגע אחר, ולכן ההגדרה תוחזר אוטומטית אלא אם תאשר."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ez az eszköz nem fogja mozgatni a mutatót. A visszavonáshoz a billentyűzetre vagy egy másik egérre vagy trackpadre lesz szüksége, ezért a beállítás automatikusan visszaáll, hacsak meg nem erősíti."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perangkat ini akan berhenti menggerakkan penunjuk. Untuk membatalkannya Anda memerlukan papan ketik atau mouse atau trackpad lain, jadi pengaturan ini dikembalikan secara otomatis kecuali Anda mengonfirmasi."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questo dispositivo smetterà di muovere il puntatore. Per annullare servirà la tastiera o un altro mouse o trackpad, quindi l’impostazione viene ripristinata automaticamente se non confermi."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このデバイスではポインターが動かなくなります。元に戻すにはキーボード、または別のマウスやトラックパッドが必要になるため、確認しない限り自動的に元に戻ります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 기기는 더 이상 포인터를 움직이지 않습니다. 되돌리려면 키보드나 다른 마우스 또는 트랙패드가 필요하므로, 확인하지 않으면 자동으로 되돌려집니다."
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ဤစက်ပစ္စည်းသည် pointer ကို ရွှေ့တော့မည် မဟုတ်ပါ။ ၎င်းကို ပြန်ပြင်ရန် ကီးဘုတ် သို့မဟုတ် အခြား mouse သို့မဟုတ် trackpad လိုအပ်မည်ဖြစ်သောကြောင့် သင်အတည်မပြုပါက အလိုအလျောက် ပြန်ပြောင်းပါမည်။"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Denne enheten slutter å flytte pekeren. For å angre trenger du tastaturet eller en annen mus eller styreflate, så innstillingen tilbakestilles automatisk med mindre du bekrefter."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dit apparaat verplaatst de aanwijzer niet meer. Om dit ongedaan te maken heb je het toetsenbord of een andere muis of trackpad nodig, dus wordt het automatisch hersteld, tenzij je bevestigt."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To urządzenie przestanie poruszać wskaźnikiem. Aby to cofnąć, potrzebna będzie klawiatura albo inna mysz lub gładzik, dlatego ustawienie zostanie automatycznie przywrócone, jeśli go nie potwierdzisz."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este dispositivo deixará de mover o ponteiro. Para anular, precisará do teclado ou de outro rato ou trackpad, por isso a definição é revertida automaticamente, a menos que confirme."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este dispositivo deixará de mover o ponteiro. Para desfazer, você precisará do teclado ou de outro mouse ou trackpad, por isso a configuração é revertida automaticamente, a menos que você confirme."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acest dispozitiv nu va mai mișca indicatorul. Pentru a anula, veți avea nevoie de tastatură sau de alt mouse sau trackpad, așa că setarea este anulată automat dacă nu confirmați."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это устройство перестанет перемещать указатель. Чтобы отменить это, понадобится клавиатура или другая мышь или трекпад, поэтому настройка автоматически возвращается, если вы её не подтвердите."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toto zariadenie prestane pohybovať ukazovateľom. Na vrátenie budete potrebovať klávesnicu alebo inú myš či trackpad, preto sa nastavenie automaticky vráti, ak ho nepotvrdíte."
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Овај уређај ће престати да помера показивач. Да бисте то поништили, биће вам потребна тастатура или други миш или трекпед, па се подешавање аутоматски враћа ако не потврдите."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Den här enheten slutar flytta pekaren. För att ångra det behöver du tangentbordet eller en annan mus eller styrplatta, så inställningen återställs automatiskt om du inte bekräftar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu aygıt işaretçiyi hareket ettirmeyi bırakacak. Bunu geri almak için klavyeye ya da başka bir fareye veya izleme dörtgenine ihtiyacınız olacağından, onaylamazsanız ayar otomatik olarak geri alınır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цей пристрій перестане рухати вказівник. Щоб скасувати це, знадобиться клавіатура або інша миша чи трекпад, тому налаштування автоматично повертається, якщо ви його не підтвердите."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thiết bị này sẽ không di chuyển con trỏ nữa. Để hoàn tác, bạn sẽ cần bàn phím hoặc một chuột hay bàn di chuột khác, vì vậy cài đặt sẽ tự động được hoàn nguyên trừ khi bạn xác nhận."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此设备将不再移动指针。要撤销此操作，你需要使用键盘或其他鼠标或触控板，因此除非你确认，否则此设置会自动还原。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此裝置將不再移動指標。若要復原，你需要使用鍵盤或其他滑鼠或觸控式軌跡板，因此除非你確認，否則此設定會自動還原。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此裝置將不再移動指標。若要復原，你需要使用鍵盤或其他滑鼠或觸控板，因此除非你確認，否則此設定會自動還原。"
+          }
+        }
+      }
+    },
     "This will delete all settings for \"%@\"." : {
       "localizations" : {
         "af" : {
@@ -70046,6 +72210,215 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "觸發條件"
+          }
+        }
+      }
+    },
+    "Turn On" : {
+      "comment" : "Button that confirms always converting pointer movement to scroll events.",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skakel aan"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تشغيل"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uključi"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activa"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zapnout"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slå til"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einschalten"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ενεργοποίηση"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activar"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ota käyttöön"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activer"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הפעלה"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bekapcsolás"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nyalakan"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attiva"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オンにする"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "켜기"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ဖွင့်ရန်"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slå på"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schakel in"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Włącz"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ativar"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ativar"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activați"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Включить"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zapnúť"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Укључи"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slå på"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aç"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Увімкнути"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bật"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开启"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開啟"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開啟"
           }
         }
       }
@@ -73590,6 +75963,215 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "需要時"
+          }
+        }
+      }
+    },
+    "While holding a trigger" : {
+      "comment" : "Mode that converts pointer movement to scroll events only while a trigger is held.",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terwyl 'n sneller ingehou word"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أثناء الضغط على مشغل"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dok se drži okidač"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mentre es manté premut un desencadenant"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Při držení spouštěče"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mens en udløser holdes nede"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Während ein Auslöser gehalten wird"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Όσο κρατιέται πατημένη μια ενεργοποίηση"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mientras se mantiene pulsado un disparador"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kun laukaisinta pidetään painettuna"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lorsqu’un déclencheur est maintenu"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כל עוד טריגר מוחזק"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kiváltó nyomva tartása közben"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saat menahan pemicu"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mentre si tiene premuto un trigger"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "トリガーを押している間"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "트리거를 누르고 있는 동안"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "လှုံ့ဆော်မှုကို ဖိထားစဉ်"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mens en utløser holdes inne"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terwijl een trigger wordt ingedrukt"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podczas przytrzymywania wyzwalacza"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enquanto um gatilho estiver premido"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enquanto um gatilho estiver pressionado"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cât timp un declanșator este ținut apăsat"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пока удерживается триггер"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Počas držania spúšťača"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Док се држи окидач"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medan en utlösare hålls ned"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir tetikleyici basılı tutulurken"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поки утримується тригер"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khi đang giữ nút kích hoạt"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按住触发器时"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按住觸發條件時"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按住觸發條件時"
           }
         }
       }
