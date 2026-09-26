@@ -128,6 +128,12 @@
           "description": "Ignore rapid clicks with a certain time period.",
           "title": "Debounce button clicks"
         },
+        "clickThrough": {
+          "default": false,
+          "description": "If the value is true, clicking a window of an inactive app will also click the item under the pointer, instead of only activating the app.",
+          "title": "Click through to inactive windows",
+          "type": "boolean"
+        },
         "gesture": {
           "$ref": "#/definitions/Scheme.Buttons.Gesture",
           "description": "Press and hold a button while dragging to trigger gestures like switching desktop spaces or opening Mission Control.",
