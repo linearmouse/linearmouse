@@ -20,7 +20,7 @@ final class AutoScrollTransformerTests: XCTestCase {
             trigger: trigger,
             modes: [.toggle, .hold],
             speed: 1
-        )
+        ) { _ in }
         let event = try XCTUnwrap(CGEvent(
             mouseEventSource: nil,
             mouseType: .otherMouseDown,
@@ -46,7 +46,7 @@ final class AutoScrollTransformerTests: XCTestCase {
             trigger: trigger,
             modes: [.hold],
             speed: 1
-        )
+        ) { _ in }
 
         XCTAssertEqual(
             transformer.handleLogitechControlEvent(.init(
@@ -71,7 +71,7 @@ final class AutoScrollTransformerTests: XCTestCase {
             trigger: trigger,
             modes: [.hold],
             speed: 1
-        )
+        ) { _ in }
         let context = LogitechEventContext(
             device: nil,
             pid: nil,
@@ -108,7 +108,7 @@ final class AutoScrollTransformerTests: XCTestCase {
             trigger: trigger,
             modes: [.hold],
             speed: 1
-        )
+        ) { _ in }
         let press = LogitechEventContext(
             device: nil,
             pid: nil,
@@ -145,7 +145,7 @@ final class AutoScrollTransformerTests: XCTestCase {
             toggleActivation: .longPress,
             speed: 1,
             longPressTimerScheduler: timer.schedule
-        )
+        ) { _ in }
         let press = logitechContext(identity: identity, pressed: true)
         let release = logitechContext(identity: identity, pressed: false)
 
@@ -167,7 +167,7 @@ final class AutoScrollTransformerTests: XCTestCase {
             toggleActivation: .longPress,
             speed: 1,
             longPressTimerScheduler: timer.schedule
-        )
+        ) { _ in }
         let press = logitechContext(identity: identity, pressed: true)
         let release = logitechContext(identity: identity, pressed: false)
 
@@ -322,7 +322,7 @@ final class AutoScrollTransformerTests: XCTestCase {
             toggleActivation: .longPress,
             speed: 1,
             longPressTimerScheduler: timer.schedule
-        )
+        ) { _ in }
 
         XCTAssertNil(try transformer.transform(
             mouseEvent(type: .otherMouseDown, location: CGPoint(x: 100, y: 100)),
@@ -353,7 +353,7 @@ final class AutoScrollTransformerTests: XCTestCase {
             toggleActivation: .longPress,
             speed: 1,
             longPressTimerScheduler: timer.schedule
-        )
+        ) { _ in }
 
         XCTAssertNil(try transformer.transform(
             mouseEvent(type: .otherMouseDown, location: CGPoint(x: 100, y: 100)),
@@ -385,7 +385,7 @@ final class AutoScrollTransformerTests: XCTestCase {
             toggleActivation: .longPress,
             speed: 1,
             longPressTimerScheduler: timer.schedule
-        )
+        ) { _ in }
 
         XCTAssertNil(try transformer.transform(
             mouseEvent(type: .otherMouseDown, location: CGPoint(x: 100, y: 100)),

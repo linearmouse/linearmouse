@@ -465,9 +465,9 @@ struct ReceiverSlotStateStore {
             }
         }
 
-        let inventoryComplete = discovery.inventoryAvailable
-            && discovery.expectedConnectedDeviceCount != nil
-            && connectedSlots.count == discovery.expectedConnectedDeviceCount
+        // Bolt needs presence evidence for each actual paired slot, including
+        // offline devices. Classic/Lightspeed retain their connected-count check.
+        let inventoryComplete = discovery.hasCompletePresence
             && slotKinds.count == connectedSlots.count
             && !hasUnresolvedConnectedSlot
         return .init(inventoryComplete: inventoryComplete)
@@ -564,7 +564,7 @@ private final class ReceiverContext {
     private var stateStore = ReceiverSlotStateStore()
     private var currentChannel: LogitechReceiverChannel?
     private var rediscoveryRequest: ReceiverRediscoveryRequest?
-    private var lastCompleteConnectedDeviceCount: Int?
+    private var lastCompleteDeviceCount: Int?
     private let retrySemaphore = DispatchSemaphore(value: 0)
     /// Receiver notification flags belong to this monitor context rather than
     /// one transient IOHID channel. Reopening the same physical receiver can
@@ -596,7 +596,7 @@ private final class ReceiverContext {
         }
         isRunning = true
         rediscoveryRequest = nil
-        lastCompleteConnectedDeviceCount = nil
+        lastCompleteDeviceCount = nil
         lastPublishedIdentities = []
         stateStore.reset()
 
@@ -784,7 +784,7 @@ private final class ReceiverContext {
                         channelReachable: reachability.value
                     ) {
                         invalidateCurrentChannel(receiverChannel)
-                        lastCompleteConnectedDeviceCount = nil
+                        lastCompleteDeviceCount = nil
                     }
                     os_log(
                         "Receiver inventory is incomplete, retrying: locationID=%{public}d device=%{public}@",
@@ -824,7 +824,7 @@ private final class ReceiverContext {
 
                 discoveryState = .ready
                 discoveryBackoff.reset()
-                lastCompleteConnectedDeviceCount = discovery.expectedConnectedDeviceCount
+                lastCompleteDeviceCount = discovery.expectedDeviceCount?.value
                 let completedRediscovery = rediscoveryInProgress
                 rediscoveryInProgress = nil
                 let identitiesDescription = identities.map { identity in
@@ -896,11 +896,11 @@ private final class ReceiverContext {
                     invalidateCurrentChannel(receiverChannel)
                     discoveryState = .pending
                     discoveryBackoff.reset()
-                    lastCompleteConnectedDeviceCount = nil
+                    lastCompleteDeviceCount = nil
                 } else {
                     guard let count = ReceiverWorkerPostCallAdmission.admit(
                         {
-                            provider.connectedDeviceCount(
+                            provider.receiverDeviceCount(
                                 for: device.pointerDevice,
                                 using: receiverChannel,
                                 until: shouldContinueRunning
@@ -911,13 +911,13 @@ private final class ReceiverContext {
                         break
                     }
                     if case .enterPending = ReceiverReadyCountDisposition.resolve(
-                        previousCount: lastCompleteConnectedDeviceCount,
+                        previousCount: lastCompleteDeviceCount,
                         currentCount: count.value
                     ) {
                         publishUnavailable()
                         discoveryState = .pending
                         discoveryBackoff.reset()
-                        lastCompleteConnectedDeviceCount = nil
+                        lastCompleteDeviceCount = nil
                     }
                 }
                 continue
@@ -1113,7 +1113,7 @@ private final class ReceiverContext {
             matching: channel
         )
         stateStore.invalidateChannel()
-        lastCompleteConnectedDeviceCount = nil
+        lastCompleteDeviceCount = nil
         publish([])
     }
 

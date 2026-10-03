@@ -171,16 +171,47 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         static let empty = Self(snapshots: [:], reconnectedSlots: [])
     }
 
-    /// Accumulates receiver connection notifications. A complete connected
+    /// Receiver families do not necessarily give register 0x02 the same semantics.
+    enum ReceiverDeviceCount: Equatable {
+        case connected(Int)
+        case paired(Int)
+
+        var value: Int {
+            switch self {
+            case let .connected(count), let .paired(count):
+                return count
+            }
+        }
+
+        func hasCompletePresence(
+            snapshots: [UInt8: ReceiverConnectionSnapshot],
+            liveReachableSlots: Set<UInt8>,
+            pairedSlots: Set<UInt8>
+        ) -> Bool {
+            let activeSlots = Set(snapshots.compactMap { $0.value.isConnected ? $0.key : nil })
+                .union(liveReachableSlots)
+            switch self {
+            case let .connected(count):
+                return activeSlots.count == count
+            case let .paired(count):
+                let observedSlots = Set(snapshots.keys).union(liveReachableSlots)
+                return pairedSlots.count == count
+                    && pairedSlots.isSubset(of: observedSlots)
+                    && activeSlots.isSubset(of: pairedSlots)
+            }
+        }
+    }
+
+    /// Accumulates receiver connection notifications. A complete connected-device
     /// count is only actionable after a quiet wait: buffered follow-up events
     /// for the same slot must be allowed to replace an earlier snapshot.
     struct ReceiverConnectionSnapshotCollector {
-        private let expectedConnectedDeviceCount: Int?
+        private let expectedDeviceCount: ReceiverDeviceCount?
         private(set) var snapshots = [UInt8: ReceiverConnectionSnapshot]()
         private(set) var reconnectedSlots = Set<UInt8>()
 
-        init(expectedConnectedDeviceCount: Int?) {
-            self.expectedConnectedDeviceCount = expectedConnectedDeviceCount
+        init(expectedDeviceCount: ReceiverDeviceCount?) {
+            self.expectedDeviceCount = expectedDeviceCount
         }
 
         mutating func record(slot: UInt8, snapshot: ReceiverConnectionSnapshot) {
@@ -195,18 +226,20 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         }
 
         var isCompleteAfterQuietWait: Bool {
-            guard let expectedConnectedDeviceCount else {
+            // Bolt pairing slots have not been read yet. Collect its whole
+            // bounded notification window; stale offline slots cannot justify
+            // finishing early merely by matching the paired-device count.
+            guard case let .connected(count) = expectedDeviceCount else {
                 return false
             }
-
-            return snapshots.values.filter(\.isConnected).count >= expectedConnectedDeviceCount
+            return snapshots.values.filter(\.isConnected).count >= count
         }
     }
 
     struct ReceiverSlotDiscovery {
         let slots: [ReceiverSlotInfo]
         let connectionSnapshots: [UInt8: ReceiverConnectionSnapshot]
-        let expectedConnectedDeviceCount: Int?
+        let expectedDeviceCount: ReceiverDeviceCount?
         let inventoryAvailable: Bool
     }
 
@@ -214,25 +247,33 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         let identities: [ReceiverLogicalDeviceIdentity]
         let connectionSnapshots: [UInt8: ReceiverConnectionSnapshot]
         let liveReachableSlots: Set<UInt8>
-        let expectedConnectedDeviceCount: Int?
+        let expectedDeviceCount: ReceiverDeviceCount?
         let inventoryAvailable: Bool
         /// Slot types successfully read during discovery, including keyboards
         /// and other non-pointing devices that are intentionally absent from
         /// `identities`.
         let observedSlotKinds: [UInt8: UInt8]
 
+        var hasCompletePresence: Bool {
+            inventoryAvailable && expectedDeviceCount?.hasCompletePresence(
+                snapshots: connectionSnapshots,
+                liveReachableSlots: liveReachableSlots,
+                pairedSlots: Set(observedSlotKinds.keys)
+            ) == true
+        }
+
         init(
             identities: [ReceiverLogicalDeviceIdentity],
             connectionSnapshots: [UInt8: ReceiverConnectionSnapshot],
             liveReachableSlots: Set<UInt8>,
-            expectedConnectedDeviceCount: Int? = nil,
+            expectedDeviceCount: ReceiverDeviceCount? = nil,
             inventoryAvailable: Bool = true,
             observedSlotKinds: [UInt8: UInt8] = [:]
         ) {
             self.identities = identities
             self.connectionSnapshots = connectionSnapshots
             self.liveReachableSlots = liveReachableSlots
-            self.expectedConnectedDeviceCount = expectedConnectedDeviceCount
+            self.expectedDeviceCount = expectedDeviceCount
             self.inventoryAvailable = inventoryAvailable
             self.observedSlotKinds = observedSlotKinds
         }
@@ -472,12 +513,12 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         for device: VendorSpecificDeviceContext,
         discovery: ReceiverPointingDeviceDiscovery
     ) -> UInt8? {
-        guard let expectedConnectedDeviceCount = discovery.expectedConnectedDeviceCount else {
+        guard let expectedDeviceCount = discovery.expectedDeviceCount else {
             // Explicit compatibility path for receivers without a usable
-            // connected-count register.
+            // count register.
             return receiverSlot(for: device, identities: discovery.identities)
         }
-        guard expectedConnectedDeviceCount > 0 else {
+        guard expectedDeviceCount.value > 0 else {
             return nil
         }
 
@@ -513,8 +554,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             kind.isPointingDevice ? slot : nil
         })
         let activeIdentitySlots = Set(activeIdentities.map(\.slot))
-        guard discovery.inventoryAvailable,
-              activeSlots.count == expectedConnectedDeviceCount,
+        guard discovery.hasCompletePresence,
               activeKinds.count == activeSlots.count,
               activeIdentitySlots == pointingActiveSlots
         else {
@@ -679,7 +719,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         )
     }
 
-    func connectedDeviceCount(
+    func receiverDeviceCount(
         for device: VendorSpecificDeviceContext,
         using receiverChannel: LogitechReceiverChannel,
         until shouldContinue: @escaping () -> Bool = { true }
@@ -691,7 +731,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             transport: device.transport
         ) {
         case .bolt:
-            return receiverChannel.boltConnectedDeviceCount(
+            return receiverChannel.boltPairedDeviceCount(
                 deadline: deadline,
                 until: shouldContinue
             )
@@ -853,7 +893,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             for: device,
             slots: discovery.slots,
             connectionSnapshots: discovery.connectionSnapshots,
-            expectedConnectedDeviceCount: discovery.expectedConnectedDeviceCount,
+            expectedDeviceCount: discovery.expectedDeviceCount,
             inventoryAvailable: discovery.inventoryAvailable
         )
     }
@@ -872,15 +912,15 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         for device: VendorSpecificDeviceContext,
         slots: [ReceiverSlotMatchCandidate],
         connectionSnapshots: [UInt8: ReceiverConnectionSnapshot],
-        expectedConnectedDeviceCount: Int?,
+        expectedDeviceCount: ReceiverDeviceCount?,
         inventoryAvailable: Bool
     ) -> ReceiverSlotMatchCandidate? {
-        guard let expectedConnectedDeviceCount else {
+        guard let expectedDeviceCount else {
             // Legacy receivers that cannot report a count keep the existing,
             // explicitly compatibility-oriented fallback behavior.
             return resolveReceiverSlotCandidate(for: device, slots: slots)
         }
-        guard expectedConnectedDeviceCount > 0 else {
+        guard expectedDeviceCount.value > 0 else {
             return nil
         }
 
@@ -934,7 +974,11 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         }
 
         guard inventoryAvailable,
-              activeSlots.count == expectedConnectedDeviceCount,
+              expectedDeviceCount.hasCompletePresence(
+                  snapshots: connectionSnapshots,
+                  liveReachableSlots: Set(slots.filter(\.hasLiveMetadata).map(\.slot)),
+                  pairedSlots: Set(slots.map(\.slot))
+              ),
               resolvedKinds.count == activeSlots.count,
               pointingSlotsWithCandidates == Set(resolvedKinds.compactMap { slot, kind in
                   kind.isPointingDevice ? slot : nil
@@ -1215,7 +1259,8 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         }
     }
 
-    static func parseConnectedDeviceCount(_ response: [UInt8]) -> Int? {
+    /// Decode the raw count; discovery assigns its meaning for each receiver family.
+    static func parseReceiverDeviceCount(_ response: [UInt8]) -> Int? {
         guard response.count >= 6 else {
             return nil
         }
@@ -2049,7 +2094,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             ),
             until: shouldContinue
         ).flatMap { response in
-            LogitechHIDPPDeviceMetadataProvider.parseConnectedDeviceCount(response)
+            LogitechHIDPPDeviceMetadataProvider.parseReceiverDeviceCount(response)
         }
         guard shouldContinue() else {
             return nil
@@ -2136,7 +2181,8 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         return .init(
             slots: pairedSlots,
             connectionSnapshots: connectionSnapshots,
-            expectedConnectedDeviceCount: connectedDeviceCount,
+            expectedDeviceCount: connectedDeviceCount
+                .map(LogitechHIDPPDeviceMetadataProvider.ReceiverDeviceCount.connected),
             inventoryAvailable: true
         )
     }
@@ -2146,7 +2192,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         until shouldContinue: @escaping () -> Bool = { true }
     ) -> Int? {
         readConnectionState(deadline: deadline, until: shouldContinue).flatMap {
-            LogitechHIDPPDeviceMetadataProvider.parseConnectedDeviceCount($0)
+            LogitechHIDPPDeviceMetadataProvider.parseReceiverDeviceCount($0)
         }
     }
 
@@ -2264,7 +2310,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         }
 
         var collector = LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotCollector(
-            expectedConnectedDeviceCount: expectedCount
+            expectedDeviceCount: expectedCount.map(LogitechHIDPPDeviceMetadataProvider.ReceiverDeviceCount.connected)
         )
         let deadline = Date().addingTimeInterval(0.5)
         while shouldContinue(), Date() < deadline {
@@ -2296,7 +2342,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         -> (
             slots: [LogitechHIDPPDeviceMetadataProvider.ReceiverSlotMatchCandidate],
             connectionSnapshots: [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot],
-            expectedConnectedDeviceCount: Int?,
+            expectedDeviceCount: LogitechHIDPPDeviceMetadataProvider.ReceiverDeviceCount?,
             inventoryAvailable: Bool
         )? {
         enableWirelessNotifications(until: shouldContinue)
@@ -2329,7 +2375,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         return (
             candidates,
             discovery.connectionSnapshots,
-            discovery.expectedConnectedDeviceCount,
+            discovery.expectedDeviceCount,
             discovery.inventoryAvailable
         )
     }
@@ -2486,7 +2532,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             identities: identities,
             connectionSnapshots: connectionSnapshots,
             liveReachableSlots: liveReachableSlots,
-            expectedConnectedDeviceCount: discovery.expectedConnectedDeviceCount,
+            expectedDeviceCount: discovery.expectedDeviceCount,
             inventoryAvailable: discovery.inventoryAvailable,
             observedSlotKinds: Dictionary(uniqueKeysWithValues: slots.map {
                 ($0.slot, $0.kind)
@@ -2512,7 +2558,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         }
 
         var collector = LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotCollector(
-            expectedConnectedDeviceCount: nil
+            expectedDeviceCount: nil
         )
         collector.record(slot: initialNotification.slot, snapshot: initialNotification.snapshot)
         let deadline = Date().addingTimeInterval(0.1)

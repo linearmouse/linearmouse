@@ -121,7 +121,15 @@ class EventTransformerManager {
         onPointerMotionRequirementsChanged?(requirements)
     }
 
-    init() {
+    private let warpPointer: (CGPoint) -> Void
+    private let postEvent: (CGEvent, CGEventTapLocation) -> Void
+
+    init(
+        warpPointer: @escaping (CGPoint) -> Void = { CGWarpMouseCursorPosition($0) },
+        postEvent: @escaping (CGEvent, CGEventTapLocation) -> Void = { $0.post(tap: $1) }
+    ) {
+        self.warpPointer = warpPointer
+        self.postEvent = postEvent
         ConfigurationState.shared
             .$configuration
             .removeDuplicates()
@@ -877,7 +885,10 @@ class EventTransformerManager {
         // so the same button does not also click or run a mapping.
         if scheme.pointer.redirectsToScroll == true,
            let trigger = scheme.pointer.redirectsToScrollTrigger,
-           let transformer = PointerRedirectsToScrollTriggerTransformer(trigger: trigger) {
+           let transformer = PointerRedirectsToScrollTriggerTransformer(
+               trigger: trigger,
+               redirect: redirectPointerToScroll
+           ) {
             eventTransformer.append(transformer)
         }
 
@@ -891,7 +902,10 @@ class EventTransformerManager {
                 mappings: buttonMappings,
                 universalBackForward: scheme.buttons.universalBackForward,
                 scrollRecognizer: scrollRecognizer,
-                gestureTransformer: gestureTransformer
+                gestureTransformer: gestureTransformer,
+                warpPointer: warpPointer,
+                eventSink: { [postEvent] in postEvent($0, .cgSessionEventTap) },
+                syntheticClickEventSink: { [postEvent] in postEvent($0, .cghidEventTap) }
             ))
         }
 
@@ -927,7 +941,7 @@ class EventTransformerManager {
         if hasSmoothedScrolling {
             eventTransformer.append(SmoothedScrollingTransformer(
                 smoothed: smoothed
-            ))
+            ) { [postEvent] in postEvent($0, .cgSessionEventTap) })
         }
 
         if let distance = scheme.scrolling.distance.horizontal {
@@ -982,7 +996,7 @@ class EventTransformerManager {
                 case .libinput:
                     eventTransformer.append(LibinputClickDebouncingTransformer(
                         for: button
-                    ))
+                    ) { [postEvent] in postEvent($0, .cgSessionEventTap) })
                 }
             }
         }
@@ -1007,7 +1021,7 @@ class EventTransformerManager {
 
         if let redirectsToScroll = scheme.pointer.redirectsToScroll, redirectsToScroll,
            scheme.pointer.redirectsToScrollTrigger == nil {
-            eventTransformer.append(PointerRedirectsToScrollTransformer())
+            eventTransformer.append(PointerRedirectsToScrollTransformer(redirect: redirectPointerToScroll))
         }
 
         let route = TransformerRoute(transformer: eventTransformer)
@@ -1028,6 +1042,15 @@ class EventTransformerManager {
         }
 
         return route
+    }
+
+    private var redirectPointerToScroll: (CGEvent) -> Void {
+        { [warpPointer, postEvent] event in
+            PointerRedirectsToScrollTransformer.redirectToScroll(
+                event,
+                warpPointer: warpPointer
+            ) { postEvent($0, .cghidEventTap) }
+        }
     }
 
     private func highResolutionWheelNormalizerMode(
@@ -1081,7 +1104,7 @@ class EventTransformerManager {
             modes: modes,
             toggleActivation: toggleActivation,
             speed: speed
-        )
+        ) { [postEvent] in postEvent($0, .cgSessionEventTap) }
         transformer.onPointerMotionRequirementChanged = { [weak self] in
             self?.publishPointerMotionRequirements()
         }

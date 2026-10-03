@@ -638,19 +638,19 @@ extension LogitechReceiverMonitoringChannel {
             return nil
         }
 
-        let connectedDeviceCount = readBoltConnectionState(
+        let pairedDeviceCount = readBoltConnectionState(
             deadline: Date().addingTimeInterval(
                 LogitechHIDPPDeviceMetadataProvider.Constants.receiverProbeTimeout
             ),
             until: shouldContinue
         ).flatMap {
-            LogitechHIDPPDeviceMetadataProvider.parseConnectedDeviceCount($0.bytes)
+            LogitechHIDPPDeviceMetadataProvider.parseReceiverDeviceCount($0.bytes)
         }
         guard shouldContinue() else {
             return nil
         }
         let connectionSnapshots = discoverBoltConnectionSnapshots(
-            expectedCount: connectedDeviceCount,
+            expectedCount: pairedDeviceCount,
             until: shouldContinue
         )
         var pairedSlots = [LogitechHIDPPDeviceMetadataProvider.ReceiverSlotInfo]()
@@ -667,11 +667,11 @@ extension LogitechReceiverMonitoringChannel {
             }
         }
 
-        let inventoryAvailable = connectedDeviceCount != nil || !connectionSnapshots.isEmpty || !pairedSlots.isEmpty
+        let inventoryAvailable = pairedDeviceCount != nil || !connectionSnapshots.isEmpty || !pairedSlots.isEmpty
         return .init(
             slots: pairedSlots,
             connectionSnapshots: connectionSnapshots,
-            expectedConnectedDeviceCount: connectedDeviceCount,
+            expectedDeviceCount: pairedDeviceCount.map(LogitechHIDPPDeviceMetadataProvider.ReceiverDeviceCount.paired),
             inventoryAvailable: inventoryAvailable
         )
     }
@@ -795,7 +795,7 @@ extension LogitechReceiverMonitoringChannel {
             identities: identities,
             connectionSnapshots: discovery.connectionSnapshots,
             liveReachableSlots: liveReachableSlots,
-            expectedConnectedDeviceCount: discovery.expectedConnectedDeviceCount,
+            expectedDeviceCount: discovery.expectedDeviceCount,
             inventoryAvailable: discovery.inventoryAvailable,
             observedSlotKinds: Dictionary(uniqueKeysWithValues: discovery.slots.map {
                 ($0.slot, $0.kind)
@@ -828,12 +828,12 @@ extension LogitechReceiverMonitoringChannel {
         )
     }
 
-    func boltConnectedDeviceCount(
+    func boltPairedDeviceCount(
         deadline: Date? = nil,
         until shouldContinue: @escaping () -> Bool = { true }
     ) -> Int? {
         readBoltConnectionState(deadline: deadline, until: shouldContinue).flatMap {
-            LogitechHIDPPDeviceMetadataProvider.parseConnectedDeviceCount($0.bytes)
+            LogitechHIDPPDeviceMetadataProvider.parseReceiverDeviceCount($0.bytes)
         }
     }
 
@@ -886,7 +886,7 @@ extension LogitechReceiverMonitoringChannel {
         }
 
         var collector = LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotCollector(
-            expectedConnectedDeviceCount: nil
+            expectedDeviceCount: nil
         )
         collector.record(slot: initialNotification.slot, snapshot: initialNotification.snapshot)
         let deadline = Date().addingTimeInterval(0.1)
@@ -914,7 +914,7 @@ extension LogitechReceiverMonitoringChannel {
         until shouldContinue: (() -> Bool)? = nil
     ) -> [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot] {
         var collector = LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotCollector(
-            expectedConnectedDeviceCount: expectedCount
+            expectedDeviceCount: expectedCount.map(LogitechHIDPPDeviceMetadataProvider.ReceiverDeviceCount.paired)
         )
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline, shouldContinue?() ?? true {

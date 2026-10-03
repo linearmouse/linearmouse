@@ -624,7 +624,7 @@ extension AutoScrollTransformer: EventTransformer {
         event.setDoubleValueField(.scrollWheelEventPointDeltaAxis2, value: horizontal)
         event.setDoubleValueField(.scrollWheelEventFixedPtDeltaAxis2, value: horizontal)
         event.flags = []
-        event.post(tap: .cgSessionEventTap)
+        fallbackEventSink(event)
     }
 
     private var hasToggleMode: Bool {

@@ -10,7 +10,7 @@ final class ScrollGestureTransformerTests: XCTestCase {
         var scheme = Scheme(if: [.init(display: "scroll-test-A")])
         scheme.buttons.mappings = [.init(trigger: .init(input: .wheel(.up)), action: .arg0(.none))]
         ConfigurationState.shared.configuration = .init(schemes: [scheme])
-        let manager = EventTransformerManager()
+        let manager = EventTransformerManager(warpPointer: { _ in }, postEvent: { _, _ in })
         let event = try scrollEvent()
         ScrollWheelEventView(event).scrollPhase = .began
         let first = manager.get(withDevice: nil, withPid: nil, withDisplay: "scroll-test-A")
@@ -35,7 +35,7 @@ final class ScrollGestureTransformerTests: XCTestCase {
         var scheme = Scheme(if: [.init(display: "scroll-test-A")])
         scheme.buttons.mappings = [.init(trigger: .init(input: .wheel(.up)), action: .arg0(.none))]
         ConfigurationState.shared.configuration = .init(schemes: [scheme])
-        let manager = EventTransformerManager()
+        let manager = EventTransformerManager(warpPointer: { _ in }, postEvent: { _, _ in })
         let first = manager.get(withDevice: nil, withPid: nil, withDisplay: "scroll-test-A")
         let event = try scrollEvent()
         let view = ScrollWheelEventView(event)

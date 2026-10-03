@@ -6,6 +6,17 @@ import Combine
 import XCTest
 
 final class EventTransformerManagerTests: XCTestCase {
+    private var warpedPositions = [CGPoint]()
+    private var postedEvents = [CGEvent]()
+    private lazy var sharedManager = makeManager()
+
+    private func makeManager() -> EventTransformerManager {
+        EventTransformerManager(
+            warpPointer: { [weak self] in self?.warpedPositions.append($0) },
+            postEvent: { [weak self] event, _ in self?.postedEvents.append(event) }
+        )
+    }
+
     override func tearDown() {
         super.tearDown()
         ConfigurationState.shared.configuration = .init()
@@ -22,7 +33,7 @@ final class EventTransformerManagerTests: XCTestCase {
             )
         ]
         ConfigurationState.shared.configuration = .init(schemes: [scheme])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         var changes: [PointerMotionRequirements] = []
         manager.onPointerMotionRequirementsChanged = { changes.append($0) }
         func send(_ type: CGEventType, button: CGMouseButton, deltaX: Double = 0) throws {
@@ -50,6 +61,39 @@ final class EventTransformerManagerTests: XCTestCase {
             XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
         }
         XCTAssertEqual(changes, [.all, [], .all, [], .all, []])
+        XCTAssertFalse(warpedPositions.isEmpty, "The gesture must use the injected cursor output")
+        XCTAssertTrue(postedEvents.isEmpty)
+    }
+
+    func testPointerScrollRoutesUseInjectedCursorAndScrollOutputs() throws {
+        for heldTrigger in [false, true] {
+            var scheme = Scheme()
+            scheme.pointer.redirectsToScroll = true
+            scheme.pointer.redirectsToScrollTrigger = heldTrigger ? .init(input: .button(.mouse(4))) : nil
+            ConfigurationState.shared.configuration = .init(schemes: [scheme])
+            let manager = makeManager()
+            let route = manager.get(withDevice: nil, withPid: nil, withDisplay: nil)
+            let button = try XCTUnwrap(CGMouseButton(rawValue: 4))
+            if heldTrigger {
+                XCTAssertNil(try route.transform(
+                    mouseEvent(type: .otherMouseDown, button: button),
+                    in: .init(device: nil)
+                ))
+            }
+            let movement = try mouseEvent(type: .mouseMoved, button: button)
+            movement.location = CGPoint(x: 123, y: 456)
+            movement.setDoubleValueField(.mouseEventDeltaX, value: 3)
+            movement.setDoubleValueField(.mouseEventDeltaY, value: -5)
+            warpedPositions.removeAll()
+            postedEvents.removeAll()
+            XCTAssertNil(route.transform(movement, in: .init(device: nil)))
+            XCTAssertEqual(warpedPositions, [movement.location])
+            XCTAssertEqual(postedEvents.count, 1)
+            let scroll = try XCTUnwrap(postedEvents.first)
+            XCTAssertEqual(scroll.type, .scrollWheel)
+            XCTAssertEqual(scroll.getIntegerValueField(.scrollWheelEventPointDeltaAxis1), 5)
+            XCTAssertEqual(scroll.getIntegerValueField(.scrollWheelEventPointDeltaAxis2), -3)
+        }
     }
 
     func testMotionTapDemandFollowsHeldTriggerAndDrainsRemovedTrigger() throws {
@@ -57,7 +101,7 @@ final class EventTransformerManagerTests: XCTestCase {
         scheme.pointer.redirectsToScroll = true
         scheme.pointer.redirectsToScrollTrigger = .init(input: .button(.mouse(4)))
         ConfigurationState.shared.configuration = .init(schemes: [scheme])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         var changes: [PointerMotionRequirements] = []
         manager.onPointerMotionRequirementsChanged = { changes.append($0) }
         XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
@@ -96,7 +140,7 @@ final class EventTransformerManagerTests: XCTestCase {
         scheme.pointer.redirectsToScroll = true
         scheme.pointer.redirectsToScrollTrigger = .init(input: .button(.mouse(4)))
         ConfigurationState.shared.configuration = .init(schemes: [scheme])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         var changes: [PointerMotionRequirements] = []
         manager.onPointerMotionRequirementsChanged = { changes.append($0) }
         for _ in 0 ..< 2 {
@@ -122,7 +166,7 @@ final class EventTransformerManagerTests: XCTestCase {
         scheme.buttons.autoScroll.modes = [.hold]
         scheme.buttons.autoScroll.trigger = .init(button: .logitechControl(identity))
         ConfigurationState.shared.configuration = .init(schemes: [scheme])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         var changes: [PointerMotionRequirements] = []
         manager.onPointerMotionRequirementsChanged = { changes.append($0) }
         XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
@@ -146,7 +190,7 @@ final class EventTransformerManagerTests: XCTestCase {
         scheme.buttons.gesture.threshold = 10
         scheme.buttons.gesture.actions = .init(right: .some(.none))
         ConfigurationState.shared.configuration = .init(schemes: [scheme])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
 
         var now: UInt64 = 0
@@ -216,7 +260,7 @@ final class EventTransformerManagerTests: XCTestCase {
             .init(trigger: .init(input: .button(.mouse(4))), outcomes: .init(shortPress: .arg0(.none)))
         ]
         ConfigurationState.shared.configuration = .init(schemes: [scheme])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         func send(_ type: CGEventType, button: CGMouseButton) throws -> EventTransformerResolution {
             let event = try mouseEvent(type: type, button: button)
             let resolution = manager.resolve(
@@ -290,7 +334,7 @@ final class EventTransformerManagerTests: XCTestCase {
         scheme.buttons.clickDebouncing.buttons = [.left]
         ConfigurationState.shared.configuration = .init(schemes: [scheme])
 
-        let transformers = try XCTUnwrap(EventTransformerManager.shared.get(
+        let transformers = try XCTUnwrap(sharedManager.get(
             withDevice: nil,
             withPid: nil,
             withDisplay: nil
@@ -307,7 +351,7 @@ final class EventTransformerManagerTests: XCTestCase {
         scheme.buttons.clickDebouncing.buttons = [.left]
         ConfigurationState.shared.configuration = .init(schemes: [scheme])
 
-        let transformers = try XCTUnwrap(EventTransformerManager.shared.get(
+        let transformers = try XCTUnwrap(sharedManager.get(
             withDevice: nil,
             withPid: nil,
             withDisplay: nil
@@ -341,7 +385,7 @@ final class EventTransformerManagerTests: XCTestCase {
         ]
         ConfigurationState.shared.configuration = .init(schemes: [scheme])
 
-        let transformers = try XCTUnwrap(EventTransformerManager().get(
+        let transformers = try XCTUnwrap(makeManager().get(
             withDevice: nil,
             withPid: nil,
             withDisplay: nil
@@ -366,7 +410,7 @@ final class EventTransformerManagerTests: XCTestCase {
         scheme.buttons.gesture = gesture
         ConfigurationState.shared.configuration = .init(schemes: [scheme])
 
-        let transformers = try XCTUnwrap(EventTransformerManager().get(
+        let transformers = try XCTUnwrap(makeManager().get(
             withDevice: nil,
             withPid: nil,
             withDisplay: nil
@@ -382,7 +426,7 @@ final class EventTransformerManagerTests: XCTestCase {
         scheme.pointer.redirectsToScroll = true
         ConfigurationState.shared.configuration = .init(schemes: [scheme])
 
-        let transformers = try XCTUnwrap(EventTransformerManager().get(
+        let transformers = try XCTUnwrap(makeManager().get(
             withDevice: nil,
             withPid: nil,
             withDisplay: nil
@@ -404,7 +448,7 @@ final class EventTransformerManagerTests: XCTestCase {
         ]
         ConfigurationState.shared.configuration = .init(schemes: [scheme])
 
-        let transformers = try XCTUnwrap(EventTransformerManager().get(
+        let transformers = try XCTUnwrap(makeManager().get(
             withDevice: nil,
             withPid: nil,
             withDisplay: nil
@@ -421,7 +465,7 @@ final class EventTransformerManagerTests: XCTestCase {
         scheme.pointer.redirectsToScrollTrigger = .init(input: .button(.mouse(3)))
         ConfigurationState.shared.configuration = .init(schemes: [scheme])
 
-        let transformer = EventTransformerManager().get(withDevice: nil, withPid: nil, withDisplay: nil)
+        let transformer = makeManager().get(withDevice: nil, withPid: nil, withDisplay: nil)
         let transformers = transformer as? [EventTransformer] ?? [transformer]
 
         XCTAssertFalse(transformers.contains { $0 is PointerRedirectsToScrollTriggerTransformer })
@@ -434,7 +478,7 @@ final class EventTransformerManagerTests: XCTestCase {
         scheme.pointer.redirectsToScrollTrigger = .init(input: .button(.mouse(0)))
         ConfigurationState.shared.configuration = .init(schemes: [scheme])
 
-        let transformer = EventTransformerManager().get(withDevice: nil, withPid: nil, withDisplay: nil)
+        let transformer = makeManager().get(withDevice: nil, withPid: nil, withDisplay: nil)
         let transformers = transformer as? [EventTransformer] ?? [transformer]
 
         XCTAssertFalse(transformers.contains { $0 is PointerRedirectsToScrollTriggerTransformer })
@@ -452,7 +496,7 @@ final class EventTransformerManagerTests: XCTestCase {
         ConfigurationState.shared.configuration = .init(schemes: [scheme])
         SettingsState.shared.beginButtonMappingRecording(sessionID: UUID())
 
-        let transformer = EventTransformerManager().get(
+        let transformer = makeManager().get(
             withDevice: nil,
             withPid: nil,
             withDisplay: nil
@@ -472,17 +516,17 @@ final class EventTransformerManagerTests: XCTestCase {
         ])
         let firstProcess = ProcessIdentity(pid: 42, startTimeSeconds: 100, startTimeMicroseconds: 1)
         let secondProcess = ProcessIdentity(pid: 42, startTimeSeconds: 200, startTimeMicroseconds: 2)
-        let firstTransformer = EventTransformerManager.shared.get(
+        let firstTransformer = sharedManager.get(
             withDevice: nil,
             withProcess: firstProcess,
             withDisplay: nil
         )
-        let cachedFirstTransformer = EventTransformerManager.shared.get(
+        let cachedFirstTransformer = sharedManager.get(
             withDevice: nil,
             withProcess: firstProcess,
             withDisplay: nil
         )
-        let secondTransformer = EventTransformerManager.shared.get(
+        let secondTransformer = sharedManager.get(
             withDevice: nil,
             withProcess: secondProcess,
             withDisplay: nil
@@ -509,7 +553,7 @@ final class EventTransformerManagerTests: XCTestCase {
         ConfigurationState.shared.configuration = .init(schemes: [
             Scheme(buttons: .init(mappings: [orderedMapping]))
         ])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
 
         let initialResolution = try manager.resolve(
             withCGEvent: mouseEvent(type: .leftMouseDown, button: .left),
@@ -601,7 +645,7 @@ final class EventTransformerManagerTests: XCTestCase {
                 scrolling: .init(reverse: .init(vertical: false))
             )
         ])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         let button = try XCTUnwrap(CGMouseButton(rawValue: 4))
 
         let down = try mouseEvent(type: .otherMouseDown, button: button)
@@ -686,7 +730,7 @@ final class EventTransformerManagerTests: XCTestCase {
                 buttons: .init(switchPrimaryButtonAndSecondaryButtons: false)
             )
         ])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
 
         let down = try mouseEvent(type: .leftMouseDown, button: .left)
         let downResolution = manager.resolve(
@@ -732,7 +776,7 @@ final class EventTransformerManagerTests: XCTestCase {
                 buttons: .init(switchPrimaryButtonAndSecondaryButtons: false)
             )
         ])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         let mappedButton = try XCTUnwrap(CGMouseButton(rawValue: 4))
 
         let mappedDown = try mouseEvent(type: .otherMouseDown, button: mappedButton)
@@ -818,7 +862,7 @@ final class EventTransformerManagerTests: XCTestCase {
                 buttons: .init(switchPrimaryButtonAndSecondaryButtons: false)
             )
         ])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         let mappedButton = try XCTUnwrap(CGMouseButton(rawValue: 4))
 
         let mappedDown = try mouseEvent(type: .otherMouseDown, button: mappedButton)
@@ -898,7 +942,7 @@ final class EventTransformerManagerTests: XCTestCase {
         ConfigurationState.shared.configuration = .init(schemes: [
             Scheme(buttons: buttons)
         ])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         let button = try XCTUnwrap(CGMouseButton(rawValue: 4))
         XCTAssertFalse(SettingsState.shared.recording)
 
@@ -948,7 +992,7 @@ final class EventTransformerManagerTests: XCTestCase {
         ConfigurationState.shared.configuration = .init(schemes: [
             Scheme(buttons: .init(mappings: [mapping]))
         ])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
 
         let dragResolution = try manager.resolve(
             withCGEvent: mouseEvent(type: .leftMouseDragged, button: .left),
@@ -979,7 +1023,7 @@ final class EventTransformerManagerTests: XCTestCase {
         ConfigurationState.shared.configuration = .init(schemes: [
             Scheme(buttons: .init(mappings: [mapping]))
         ])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         var deliveredEventTypes = [CGEventType]()
         let context = EventTransformerContext(device: nil) { deliveredEvent in
             deliveredEventTypes.append(deliveredEvent.type)
@@ -1042,7 +1086,7 @@ final class EventTransformerManagerTests: XCTestCase {
         ConfigurationState.shared.configuration = .init(schemes: [
             Scheme(buttons: .init(mappings: [mapping]))
         ])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         let previousBypassSetting = manager.bypassEventsFromOtherApplications
         manager.bypassEventsFromOtherApplications = true
         defer {
@@ -1087,7 +1131,7 @@ final class EventTransformerManagerTests: XCTestCase {
                 switchPrimaryButtonAndSecondaryButtons: true
             ))
         ])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         let previousBypassSetting = manager.bypassEventsFromOtherApplications
         manager.bypassEventsFromOtherApplications = true
         defer {
@@ -1153,7 +1197,7 @@ final class EventTransformerManagerTests: XCTestCase {
         ConfigurationState.shared.configuration = .init(schemes: [
             Scheme(buttons: .init(mappings: [mapping]))
         ])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         let initialTransformer = try buttonMappingTransformer(in: manager.get(
             withDevice: nil,
             withPid: nil,
@@ -1193,7 +1237,7 @@ final class EventTransformerManagerTests: XCTestCase {
         scheme.buttons.autoScroll.modes = [.hold]
         scheme.buttons.autoScroll.trigger = .init(button: .logitechControl(autoScrollIdentity))
         ConfigurationState.shared.configuration = .init(schemes: [scheme])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         let route = try XCTUnwrap(manager.get(
             withDevice: nil,
             withPid: nil,
@@ -1237,7 +1281,7 @@ final class EventTransformerManagerTests: XCTestCase {
         scheme.buttons.autoScroll.modes = [.hold]
         scheme.buttons.autoScroll.trigger = .init(button: .logitechControl(identity))
         ConfigurationState.shared.configuration = .init(schemes: [scheme])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         let route = try XCTUnwrap(manager.get(
             withDevice: nil,
             withPid: nil,
@@ -1277,7 +1321,7 @@ final class EventTransformerManagerTests: XCTestCase {
         ConfigurationState.shared.configuration = .init(schemes: [
             Scheme(buttons: .init(mappings: [mapping]))
         ])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
 
         XCTAssertEqual(
             manager.handleLogitechControlEvent(logitech(identity, pressed: true, display: "Display A")),
@@ -1332,7 +1376,7 @@ final class EventTransformerManagerTests: XCTestCase {
         ConfigurationState.shared.configuration = .init(schemes: [
             Scheme(buttons: .init(mappings: [mapping]))
         ])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         let button = try XCTUnwrap(CGMouseButton(rawValue: 4))
 
         let down = try mouseEvent(type: .otherMouseDown, button: button)
@@ -1378,7 +1422,7 @@ final class EventTransformerManagerTests: XCTestCase {
         ConfigurationState.shared.configuration = .init(schemes: [
             Scheme(buttons: .init(mappings: [originalMapping]))
         ])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         let button = try XCTUnwrap(CGMouseButton(rawValue: 4))
         var replayedEvents = [CGEventType]()
 
@@ -1442,7 +1486,7 @@ final class EventTransformerManagerTests: XCTestCase {
         ConfigurationState.shared.configuration = .init(schemes: [
             Scheme(buttons: .init(mappings: [originalMapping]))
         ])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         let originalTransformer = try buttonMappingTransformer(in: manager.get(
             withDevice: nil,
             withPid: nil,
@@ -1488,7 +1532,7 @@ final class EventTransformerManagerTests: XCTestCase {
         ConfigurationState.shared.configuration = .init(schemes: [
             Scheme(buttons: .init(mappings: [originalMapping]))
         ])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
 
         XCTAssertEqual(
             manager.handleLogitechControlEvent(logitech(identity, pressed: true, display: "Display A")),
@@ -1531,7 +1575,7 @@ final class EventTransformerManagerTests: XCTestCase {
         ConfigurationState.shared.configuration = .init(schemes: [
             Scheme(buttons: .init(mappings: [mapping]))
         ])
-        let manager = EventTransformerManager()
+        let manager = makeManager()
         let button = try XCTUnwrap(CGMouseButton(rawValue: 4))
 
         let down = try mouseEvent(type: .otherMouseDown, button: button)
@@ -1589,7 +1633,7 @@ final class EventTransformerManagerTests: XCTestCase {
         event.flags = [.maskAlternate]
         event.isLinearMouseSyntheticEvent = true
 
-        let transformer = EventTransformerManager.shared.get(
+        let transformer = sharedManager.get(
             withCGEvent: event,
             withSourcePid: nil,
             withTargetPid: nil,
@@ -1624,7 +1668,7 @@ final class EventTransformerManagerTests: XCTestCase {
             wheel3: 0
         ))
 
-        let transformer = EventTransformerManager.shared.get(
+        let transformer = sharedManager.get(
             withCGEvent: event,
             withSourcePid: nil,
             withTargetPid: nil,
@@ -1663,7 +1707,7 @@ final class EventTransformerManagerTests: XCTestCase {
         view.deltaYFixedPt = 12
         view.scrollPhase = .began
 
-        let transformer = EventTransformerManager.shared.get(
+        let transformer = sharedManager.get(
             withCGEvent: event,
             withSourcePid: nil,
             withTargetPid: nil,
@@ -1696,7 +1740,7 @@ final class EventTransformerManagerTests: XCTestCase {
             wheel3: 0
         ))
 
-        let transformer = EventTransformerManager.shared.get(
+        let transformer = sharedManager.get(
             withCGEvent: event,
             withSourcePid: nil,
             withTargetPid: nil,
@@ -1730,7 +1774,7 @@ final class EventTransformerManagerTests: XCTestCase {
         ))
         event.flags = [.maskControl]
 
-        let transformer = EventTransformerManager.shared.get(
+        let transformer = sharedManager.get(
             withCGEvent: event,
             withSourcePid: nil,
             withTargetPid: nil,
@@ -1762,7 +1806,7 @@ final class EventTransformerManagerTests: XCTestCase {
             Scheme(buttons: .init(mappings: [structured, legacyButton, legacyWheel]))
         ])
 
-        let transformers = try XCTUnwrap(EventTransformerManager.shared.get(
+        let transformers = try XCTUnwrap(sharedManager.get(
             withDevice: nil,
             withPid: nil,
             withDisplay: nil
@@ -1787,7 +1831,7 @@ final class EventTransformerManagerTests: XCTestCase {
             )
         ])
 
-        let transformers = try XCTUnwrap(EventTransformerManager.shared.get(
+        let transformers = try XCTUnwrap(sharedManager.get(
             withDevice: nil,
             withPid: nil,
             withDisplay: nil
@@ -1817,7 +1861,7 @@ final class EventTransformerManagerTests: XCTestCase {
         ))
         event.flags = [.maskControl]
 
-        let transformer = EventTransformerManager.shared.get(
+        let transformer = sharedManager.get(
             withCGEvent: event,
             withSourcePid: nil,
             withTargetPid: nil,
@@ -1858,7 +1902,7 @@ final class EventTransformerManagerTests: XCTestCase {
         event.flags = [.maskControl]
         event.isLinearMouseSyntheticEvent = true
 
-        let transformer = EventTransformerManager.shared.get(
+        let transformer = sharedManager.get(
             withCGEvent: event,
             withSourcePid: nil,
             withTargetPid: nil,
@@ -1892,7 +1936,7 @@ final class EventTransformerManagerTests: XCTestCase {
         ))
         event.flags = [.maskCommand]
 
-        let transformer = EventTransformerManager.shared.get(
+        let transformer = sharedManager.get(
             withCGEvent: event,
             withSourcePid: nil,
             withTargetPid: nil,
