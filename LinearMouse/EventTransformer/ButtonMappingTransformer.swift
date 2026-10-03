@@ -87,6 +87,9 @@ final class ButtonMappingTransformer: EventTransformer {
     private let gestureTransformer: GestureButtonTransformer?
     private let policy: ButtonMappingPolicy
 
+    private let warpPointer: (CGPoint) -> Void
+    private var pointerAnchor: CGPoint?
+
     private var timer: TimerToken?
     private var timerGeneration: UInt64 = 0
     private var scheduledDeadline: UInt64?
@@ -108,6 +111,7 @@ final class ButtonMappingTransformer: EventTransformer {
             $0.device?.highResolutionWheelNormalizationMultiplier
         },
         gestureTransformer: GestureButtonTransformer? = nil,
+        warpPointer: @escaping (CGPoint) -> Void = { CGWarpMouseCursorPosition($0) },
         eventSink: @escaping (CGEvent) -> Void = { $0.post(tap: .cgSessionEventTap) },
         syntheticClickScheduler: @escaping AsyncScheduler = ButtonMappingTransformer
             .scheduleSyntheticClickReplay,
@@ -132,6 +136,7 @@ final class ButtonMappingTransformer: EventTransformer {
         self.syntheticClickEventSink = syntheticClickEventSink
         self.swapsPrimaryAndSecondaryButtons = swapsPrimaryAndSecondaryButtons
         self.gestureTransformer = gestureTransformer
+        self.warpPointer = warpPointer
     }
 
     var handlesPointerMotion: Bool {
@@ -146,6 +151,16 @@ final class ButtonMappingTransformer: EventTransformer {
         guard !event.isLinearMouseSyntheticEvent,
               !isRecording || hasActiveInteraction else {
             return event
+        }
+
+        let isPointerMotion = [
+            CGEventType.mouseMoved, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged
+        ].contains(event.type)
+        if let pointerAnchor {
+            event.location = pointerAnchor
+            if isPointerMotion {
+                warpPointer(pointerAnchor)
+            }
         }
 
         if let gestureTransformer,
@@ -319,6 +334,7 @@ final class ButtonMappingTransformer: EventTransformer {
             return event
         }
 
+        updatePointerAnchor(at: event.location)
         var output = recognition.output
 
         if let handling = output.pointerHandling {
@@ -358,6 +374,9 @@ final class ButtonMappingTransformer: EventTransformer {
         scheduleNextDeadline()
 
         if forwardedEvent != nil {
+            return nil
+        }
+        if isPointerMotion, pointerAnchor != nil {
             return nil
         }
         return alwaysForwardsEvent || !output.consumesEvent ? event : nil
@@ -473,9 +492,22 @@ final class ButtonMappingTransformer: EventTransformer {
         pruneRecognitionLanes()
     }
 
+    private func updatePointerAnchor(at location: CGPoint) {
+        if recognitionLanes.contains(where: \.engine.locksPointer) {
+            if pointerAnchor == nil {
+                pointerAnchor = location
+            }
+        } else {
+            pointerAnchor = nil
+        }
+    }
+
     private func pruneRecognitionLanes() {
         recognitionLanes.removeAll { lane in
             !lane.engine.hasActiveInteraction && lane.bufferedEvents.isEmpty
+        }
+        if !recognitionLanes.contains(where: \.engine.locksPointer) {
+            pointerAnchor = nil
         }
     }
 
@@ -808,6 +840,7 @@ extension ButtonMappingTransformer: LogitechControlEventHandling, LogitechContro
                 .output
             }
         }
+        updatePointerAnchor(at: context.mouseLocation)
         process(recognition.output, in: recognition.lane)
         pruneRecognitionLanes()
         scheduleNextDeadline()
@@ -900,6 +933,7 @@ extension ButtonMappingTransformer: Deactivatable {
             lane.bufferedEvents.removeAll()
         }
         recognitionLanes.removeAll()
+        pointerAnchor = nil
         actionExecutor.deactivate()
         gestureTransformer?.deactivate()
     }
