@@ -166,6 +166,7 @@ struct ButtonMappingEngine {
         var heldButtons: Set<Button>
         var pressAction: PressAction?
         var blocksImpulses: Bool
+        var locksPointer: Bool
     }
 
     private let mappings: [Mapping]
@@ -248,6 +249,26 @@ struct ButtonMappingEngine {
             activeCaptures.contains { containsOverlappingButton($0.remainingButtons) } ||
             containsOverlappingButton(retainedHeldButtons) ||
             containsOverlappingButton(passthroughButtons)
+    }
+
+    /// Motion is still fed to the recognizer while the visible pointer is anchored.
+    var locksPointer: Bool {
+        activeCaptures.contains(where: \.locksPointer) || session.map(locksPointer(in:)) == true
+    }
+
+    private func locksPointer(in session: Session) -> Bool {
+        if let resolution = session.resolution {
+            return hasSwipeAction(resolution.candidate.mapping)
+        }
+        return session.candidates.contains { hasSwipeAction($0.mapping) }
+    }
+
+    private func hasSwipeAction(_ mapping: Mapping) -> Bool {
+        guard configuredPressAction(mapping.outcomes?.press) == nil,
+              let swipe = mapping.outcomes?.swipe else {
+            return false
+        }
+        return [swipe.up, swipe.down, swipe.left, swipe.right].contains { Self.isConfigured($0) }
     }
 
     var nextDeadline: UInt64? {
@@ -648,7 +669,12 @@ struct ButtonMappingEngine {
         let heldButtons = Set(candidate.trigger.whileHeld ?? [])
         if var session, !heldButtons.isDisjoint(with: session.involvedButtons) {
             session.commitment = .impulse
-            commit(session, blocksImpulses: false, additionalHeldButtons: heldButtons)
+            commit(
+                session,
+                blocksImpulses: false,
+                additionalHeldButtons: heldButtons,
+                locksPointer: false
+            )
             output.discardsBufferedEvents = true
         }
 
@@ -678,7 +704,7 @@ struct ButtonMappingEngine {
         output.actions.append(action)
         output.discardsBufferedEvents = true
         updatedSession.commitment = .statefulAction
-        commit(updatedSession)
+        commit(updatedSession, locksPointer: false)
         return output
     }
 
@@ -725,6 +751,7 @@ struct ButtonMappingEngine {
             where activeCaptures[index].buttons.contains(button) ||
             activeCaptures[index].remainingButtons.contains(button) {
             var active = activeCaptures[index]
+            active.locksPointer = false
             if active.buttons.contains(button), let pressAction = active.pressAction {
                 lifecycleEvents.append(.ended(pressAction, buttons: active.buttons))
                 active.pressAction = nil
@@ -1062,7 +1089,8 @@ struct ButtonMappingEngine {
         _ session: Session,
         pressAction: PressAction? = nil,
         blocksImpulses: Bool = true,
-        additionalHeldButtons: Set<Button> = []
+        additionalHeldButtons: Set<Button> = [],
+        locksPointer: Bool? = nil
     ) {
         let trigger = session.resolution?.candidate.trigger
         let buttons = (trigger?.statefulButtons ?? session.capturedButtons).union(additionalHeldButtons)
@@ -1075,7 +1103,8 @@ struct ButtonMappingEngine {
             remainingButtons: buttons.union(session.capturedButtons).intersection(pressedButtons),
             heldButtons: heldButtons,
             pressAction: pressAction,
-            blocksImpulses: blocksImpulses
+            blocksImpulses: blocksImpulses,
+            locksPointer: locksPointer ?? self.locksPointer(in: session)
         )
         retainedHeldButtons.subtract(active.remainingButtons)
         if !retainHeldButtons(from: active) {

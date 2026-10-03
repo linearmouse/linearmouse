@@ -15,6 +15,82 @@ final class ButtonMappingEngineTests: XCTestCase {
     private let chordAction: Action = .arg0(.showDesktop)
     private let wheelAction: Action = .arg0(.appExpose)
 
+    func testLongPressCommitReleasesPendingSwipePointerLock() {
+        var engine = engine([buttonMapping(1, long: longAction, swipe: .init(right: chordAction))])
+        _ = engine.buttonDown(.mouse(1), modifierFlags: [], at: 0)
+        XCTAssertTrue(engine.locksPointer)
+        XCTAssertEqual(engine.advance(to: ms(500)).actions, [longAction])
+        XCTAssertFalse(engine.locksPointer)
+        XCTAssertTrue(engine.pointerMoved(deltaX: 60, deltaY: 0, at: ms(510)).actions.isEmpty)
+    }
+
+    func testWheelCommitReleasesPendingSwipeChordPointerLock() {
+        var engine = engine([
+            buttonMapping(1, simultaneous: [4], swipe: .init(right: chordAction)),
+            wheelMapping(.up, whileHeld: [1], action: wheelAction)
+        ])
+        _ = engine.buttonDown(.mouse(1), modifierFlags: [], at: 0)
+        _ = engine.buttonDown(.mouse(4), modifierFlags: [], at: ms(10))
+        XCTAssertTrue(engine.locksPointer)
+        XCTAssertEqual(engine.wheel(.up, modifierFlags: [], at: ms(20)).actions, [wheelAction])
+        XCTAssertFalse(engine.locksPointer)
+        XCTAssertTrue(engine.pointerMoved(deltaX: 60, deltaY: 0, at: ms(30)).actions.isEmpty)
+    }
+
+    func testSwipePointerLockSurvivesRecognitionUntilRelease() {
+        var engine = engine([buttonMapping(1, swipe: .init(right: chordAction))])
+        _ = engine.buttonDown(.mouse(1), modifierFlags: [], at: ms(0))
+        XCTAssertTrue(engine.locksPointer)
+        XCTAssertEqual(engine.pointerMoved(deltaX: 30, deltaY: 0, at: ms(10)).actions, [])
+        XCTAssertEqual(engine.pointerMoved(deltaX: 30, deltaY: 0, at: ms(20)).actions, [chordAction])
+        XCTAssertTrue(engine.locksPointer)
+        _ = engine.buttonUp(.mouse(1), modifierFlags: [], at: ms(30))
+        XCTAssertFalse(engine.locksPointer)
+    }
+
+    func testSwipeChordLocksFromFirstButtonAndUnlocksOnTimeout() {
+        var engine = engine([buttonMapping(1, simultaneous: [4], swipe: .init(right: chordAction))])
+        _ = engine.buttonDown(.mouse(1), modifierFlags: [], at: ms(0))
+        XCTAssertTrue(engine.locksPointer)
+        XCTAssertTrue(engine.advance(to: ms(80)).replaysBufferedEvents)
+        XCTAssertFalse(engine.locksPointer)
+    }
+
+    func testSwipeChordCancellationUnlocksRemainingButtons() {
+        var engine = engine([buttonMapping(1, simultaneous: [4], swipe: .init(right: chordAction))])
+        _ = engine.buttonDown(.mouse(1), modifierFlags: [], at: ms(0))
+        _ = engine.buttonDown(.mouse(4), modifierFlags: [], at: ms(10))
+        XCTAssertTrue(engine.locksPointer)
+        _ = engine.cancelInteractions(containing: .mouse(1))
+        XCTAssertFalse(engine.locksPointer)
+    }
+
+    func testOrderedSwipeLocksOnlyWhenSwipeInputIsPressed() {
+        var engine = engine([
+            Mapping(
+                trigger: .init(input: .button(.mouse(4)), whileHeld: [.mouse(1)]),
+                outcomes: .init(swipe: .init(right: chordAction))
+            )
+        ])
+        _ = engine.buttonDown(.mouse(1), modifierFlags: [], at: ms(0))
+        XCTAssertFalse(engine.locksPointer)
+        _ = engine.buttonDown(.mouse(4), modifierFlags: [], at: ms(100))
+        XCTAssertTrue(engine.locksPointer)
+        _ = engine.pointerMoved(deltaX: 60, deltaY: 0, at: ms(110))
+        _ = engine.buttonUp(.mouse(4), modifierFlags: [], at: ms(120))
+        XCTAssertFalse(engine.locksPointer)
+        _ = engine.buttonDown(.mouse(4), modifierFlags: [], at: ms(200))
+        XCTAssertTrue(engine.locksPointer)
+        _ = engine.reset()
+        XCTAssertFalse(engine.locksPointer)
+    }
+
+    func testAutomaticSwipeDoesNotLockPointer() {
+        var engine = engine([buttonMapping(1, short: shortAction, swipe: .init(right: .arg0(.auto)))])
+        _ = engine.buttonDown(.mouse(1), modifierFlags: [], at: ms(0))
+        XCTAssertFalse(engine.locksPointer)
+    }
+
     func testShortPressExecutesOnlyOnRelease() {
         var engine = engine([buttonMapping(4, short: shortAction)])
 
