@@ -68,13 +68,32 @@ final class AutoScrollTransformer {
         case active(anchor: CGPoint, current: CGPoint, session: Session)
     }
 
-    private var state: State = .idle
+    var onPointerMotionRequirementChanged: (() -> Void)?
+    var needsPointerMotion: Bool {
+        hasPendingActivation || isAutoscrollActive
+    }
+
+    private var state: State = .idle {
+        didSet {
+            // Pending activation needs the very first delta to distinguish a
+            // click from a drag. Timers can also end an interaction.
+            if case .idle = oldValue {
+                if needsPointerMotion {
+                    onPointerMotionRequirementChanged?()
+                }
+            } else if !needsPointerMotion {
+                onPointerMotionRequirementChanged?()
+            }
+        }
+    }
+
     private var suppressTriggerUp = false
     private var suppressedExitMouseButton: CGMouseButton?
     private var longPressTimerCancellation: (() -> Void)?
     private var longPressTimerGeneration: UInt64 = 0
     private var timer: EventThreadTimer?
     private let indicatorController = AutoScrollIndicatorWindowController()
+    private var lastIndicatorLocation: CGPoint?
     private let accessibilityActivationClassifier = AutoScrollAccessibilityActivationClassifier()
 
     static func shouldStartAutoScroll(for hit: AutoScrollActivationHit?) -> Bool {
@@ -108,7 +127,16 @@ final class AutoScrollTransformer {
     }
 }
 
-extension AutoScrollTransformer: EventTransformer, DeferredEventTransformer {
+extension AutoScrollTransformer: EventTransformer {
+    var handlesPointerMotion: Bool {
+        needsPointerMotion
+    }
+
+    func needsDeferredEventContinuation(for event: CGEvent) -> Bool {
+        // Only pending activation buffers movement for possible click replay.
+        !event.type.isPointerMotion || hasPendingActivation
+    }
+
     func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent? {
         guard !SettingsState.shared.recording else {
             if case .pending = state {
@@ -314,10 +342,6 @@ extension AutoScrollTransformer: EventTransformer, DeferredEventTransformer {
             }
 
             state = .active(anchor: anchor, current: point, session: resolvedSession)
-            let delta = CGVector(dx: point.x - anchor.x, dy: point.y - anchor.y)
-            DispatchQueue.main.async { [indicatorController] in
-                indicatorController.update(delta: delta)
-            }
 
             if isTriggerDrag, suppressTriggerUp {
                 return nil
@@ -523,6 +547,7 @@ extension AutoScrollTransformer: EventTransformer, DeferredEventTransformer {
         suppressedExitMouseButton = nil
         let current = current ?? point
         state = .active(anchor: point, current: current, session: session)
+        lastIndicatorLocation = current
         let delta = CGVector(dx: current.x - point.x, dy: current.y - point.y)
         DispatchQueue.main.async { [indicatorController] in
             indicatorController.show(at: point)
@@ -547,6 +572,16 @@ extension AutoScrollTransformer: EventTransformer, DeferredEventTransformer {
     private func tick() {
         guard case let .active(anchor, current, _) = state else {
             return
+        }
+
+        // Input stays at full precision; the HUD only needs the latest position
+        // at the existing scroll timer's 60 Hz, not a main-queue task per report.
+        if lastIndicatorLocation != current {
+            lastIndicatorLocation = current
+            let delta = CGVector(dx: current.x - anchor.x, dy: current.y - anchor.y)
+            DispatchQueue.main.async { [indicatorController] in
+                indicatorController.update(delta: delta)
+            }
         }
 
         let horizontal = scrollAmount(for: anchor.x - current.x)

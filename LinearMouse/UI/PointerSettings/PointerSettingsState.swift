@@ -315,15 +315,12 @@ extension PointerSettingsState {
     }
 
     /// Writes both fields in one update so the scheme never passes through a
-    /// state the mode cannot describe, then restarts the tap to pick it up.
+    /// state the mode cannot describe. The event manager updates tap demand.
     private func applyRedirectsToScroll(_ enabled: Bool, trigger: Scheme.Trigger?) {
         var updated = scheme
         updated.pointer.redirectsToScroll = enabled
         updated.pointer.redirectsToScrollTrigger = trigger
         scheme = updated
-
-        GlobalEventTap.shared.stop()
-        GlobalEventTap.shared.start()
     }
 
     var pointerRedirectsToScrollTrigger: Scheme.Trigger? {

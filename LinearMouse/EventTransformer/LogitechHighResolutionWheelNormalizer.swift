@@ -4,6 +4,10 @@
 import Foundation
 
 final class LogitechHighResolutionWheelNormalizer: EventTransformer {
+    var handlesPointerMotion: Bool {
+        false
+    }
+
     enum AxisMode {
         case passthrough
         case lowResolution

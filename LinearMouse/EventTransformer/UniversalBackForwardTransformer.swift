@@ -6,6 +6,10 @@ import GestureKit
 import os.log
 
 class UniversalBackForwardTransformer: EventTransformer {
+    var handlesPointerMotion: Bool {
+        false
+    }
+
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "UniversalBackForward")
 
     private static let includes = [

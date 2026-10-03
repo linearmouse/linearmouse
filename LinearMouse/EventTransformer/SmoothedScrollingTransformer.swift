@@ -6,6 +6,10 @@ import GestureKit
 import os.log
 
 final class SmoothedScrollingTransformer: EventTransformer, Deactivatable {
+    var handlesPointerMotion: Bool {
+        false
+    }
+
     private static let log = OSLog(
         subsystem: Bundle.main.bundleIdentifier!, category: "SmoothedScrolling"
     )

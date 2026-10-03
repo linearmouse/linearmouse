@@ -164,9 +164,6 @@ extension ButtonsSettingsState {
             } else {
                 scheme.buttons.autoScroll.enabled = false
             }
-
-            GlobalEventTap.shared.stop()
-            GlobalEventTap.shared.start()
         }
     }
 
@@ -308,9 +305,6 @@ extension ButtonsSettingsState {
             } else {
                 scheme.buttons.gesture.enabled = false
             }
-
-            GlobalEventTap.shared.stop()
-            GlobalEventTap.shared.start()
         }
     }
 

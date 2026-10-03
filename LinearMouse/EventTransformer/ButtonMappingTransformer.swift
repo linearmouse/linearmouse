@@ -5,7 +5,11 @@ import Foundation
 import KeyKit
 import os.log
 
-final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer {
+final class ButtonMappingTransformer: EventTransformer {
+    func needsDeferredEventContinuation(for _: CGEvent) -> Bool {
+        true
+    }
+
     typealias Mapping = Scheme.Buttons.Mapping
     typealias TimerScheduler = (TimeInterval, @escaping () -> Void) -> TimerToken?
     typealias MonotonicClock = () -> UInt64
@@ -68,6 +72,8 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
     )
     private static let syntheticClickReleaseDelay: TimeInterval = 0.015
 
+    var onInteractionStateChanged: (() -> Void)?
+
     let mappings: [Mapping]
     let universalBackForward: Scheme.Buttons.UniversalBackForward?
     private let actionExecutor: ButtonActionExecutor
@@ -118,6 +124,10 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
         self.syntheticClickEventSink = syntheticClickEventSink
         self.swapsPrimaryAndSecondaryButtons = swapsPrimaryAndSecondaryButtons
         self.gestureTransformer = gestureTransformer
+    }
+
+    var handlesPointerMotion: Bool {
+        hasActiveInteraction
     }
 
     func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent? {
@@ -681,6 +691,7 @@ final class ButtonMappingTransformer: EventTransformer, DeferredEventTransformer
         scheduledDeadline = nil
         advanceRecognitionLanes(to: now)
         scheduleNextDeadline()
+        onInteractionStateChanged?()
     }
 }
 

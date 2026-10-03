@@ -5,6 +5,10 @@ import Foundation
 import os.log
 
 class ScrollingAccelerationSpeedAdjustmentTransformer: EventTransformer {
+    var handlesPointerMotion: Bool {
+        false
+    }
+
     private static let log = OSLog(
         subsystem: Bundle.main.bundleIdentifier!,
         category: "ScrollingAccelerationSpeedAdjustment"

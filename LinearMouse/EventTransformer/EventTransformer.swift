@@ -8,6 +8,8 @@ import os.log
 struct EventTransformerContext {
     var device: Device?
     var deferredEventSink: ((CGEvent) -> Void)?
+    /// Reconcile route ownership after a timer resumes a suspended pipeline.
+    var didTransformDeferredEvent: (() -> Void)?
 
     init(device: Device?, deferredEventSink: ((CGEvent) -> Void)? = nil) {
         self.device = device
@@ -41,12 +43,28 @@ struct EventTransformerResolution {
 
         var context = context
         context.deferredEventSink = deferredEventSink
+        context.didTransformDeferredEvent = didTransform
         return transformer.transform(event, in: context)
     }
 }
 
 protocol EventTransformer {
+    /// Whether this stage currently needs movement/drag input.
+    var handlesPointerMotion: Bool { get }
+    /// Whether this event may be retained and resumed through the remaining stages.
+    func needsDeferredEventContinuation(for event: CGEvent) -> Bool
     func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent?
+}
+
+extension EventTransformer {
+    /// New transformers receive all input unless they explicitly opt out.
+    var handlesPointerMotion: Bool {
+        true
+    }
+
+    func needsDeferredEventContinuation(for _: CGEvent) -> Bool {
+        false
+    }
 }
 
 /// Adopted by stateful transformers that must continue receiving events until
@@ -54,12 +72,6 @@ protocol EventTransformer {
 protocol EventTransformerInteractionTracking: AnyObject {
     var hasActiveInteraction: Bool { get }
 }
-
-/// Adopted by transformers that can emit an event after `transform` returns.
-///
-/// The array transformer provides those events with a continuation through the
-/// remaining transformers before they are posted back to the session.
-protocol DeferredEventTransformer {}
 
 enum LogitechControlEventHandlingResult {
     case notHandled
@@ -85,27 +97,30 @@ protocol LogitechControlInteractionCanceling {
 
 extension [EventTransformer]: EventTransformer {
     func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent? {
-        var event: CGEvent? = event
+        var event = event
 
-        for (index, eventTransformer) in enumerated() {
-            event = event.flatMap {
-                var transformerContext = context
-
-                if eventTransformer is DeferredEventTransformer,
-                   let finalSink = context.deferredEventSink {
-                    // Capture only the tail. A deferred transformer may retain this
-                    // continuation while a timer is active, so capturing the full
-                    // array here would create a temporary retain cycle.
-                    let remainingTransformers = Array(dropFirst(index + 1))
-                    transformerContext.deferredEventSink = { deferredEvent in
-                        if let transformedEvent = remainingTransformers.transform(deferredEvent, in: context) {
-                            finalSink(transformedEvent)
-                        }
+        for (index, transformer) in enumerated() {
+            // Earlier stages can rewrite the event type, so decide at each stage.
+            guard !event.type.isPointerMotion || transformer.handlesPointerMotion else {
+                continue
+            }
+            var transformerContext = context
+            if transformer.needsDeferredEventContinuation(for: event),
+               let finalSink = context.deferredEventSink {
+                // Retain only the tail: retaining the buffering stage would form
+                // a cycle. Keep every later stage since replay can change type.
+                let remainingTransformers = Array(dropFirst(index + 1))
+                transformerContext.deferredEventSink = { deferredEvent in
+                    defer { context.didTransformDeferredEvent?() }
+                    if let transformedEvent = remainingTransformers.transform(deferredEvent, in: context) {
+                        finalSink(transformedEvent)
                     }
                 }
-
-                return eventTransformer.transform($0, in: transformerContext)
             }
+            guard let transformedEvent = transformer.transform(event, in: transformerContext) else {
+                return nil
+            }
+            event = transformedEvent
         }
 
         return event
