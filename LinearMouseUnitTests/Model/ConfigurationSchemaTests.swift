@@ -5,6 +5,24 @@ import Foundation
 import XCTest
 
 final class ConfigurationSchemaTests: XCTestCase {
+    func testLegacyGestureConfigurationIsDeprecated() throws {
+        let buttons = try definition(named: "Scheme.Buttons")
+        let properties = try XCTUnwrap(buttons["properties"] as? [String: [String: Any]])
+        XCTAssertEqual(properties["gesture"]?["deprecated"] as? Bool, true)
+        XCTAssertNil(properties["mappings"]?["deprecated"])
+
+        for name in [
+            "Scheme.Buttons.Gesture", "Scheme.Buttons.Gesture.Trigger",
+            "Scheme.Buttons.Gesture.Actions", "Scheme.Buttons.Gesture.GestureAction"
+        ] {
+            let legacy = try definition(named: name)
+            XCTAssertEqual(legacy["deprecated"] as? Bool, true, name)
+            for (field, property) in legacy["properties"] as? [String: [String: Any]] ?? [:] {
+                XCTAssertEqual(property["deprecated"] as? Bool, true, "\(name).\(field)")
+            }
+        }
+    }
+
     /// The committed JSON schema is generated from `Documentation/Configuration.d.ts`
     /// and lives outside the test bundle. Resolve it by walking up from this source
     /// file to the repository root, which stays valid regardless of the checkout path.

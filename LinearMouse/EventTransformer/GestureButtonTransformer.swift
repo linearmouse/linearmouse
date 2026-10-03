@@ -7,6 +7,8 @@ import Foundation
 import KeyKit
 import os.log
 
+/// Deprecated compatibility recognizer for legacy configurations not migrated at startup.
+@available(*, deprecated, message: "Use ButtonMappingTransformer with swipe outcomes instead.")
 class GestureButtonTransformer {
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "GestureButton")
 

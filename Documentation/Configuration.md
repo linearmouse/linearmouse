@@ -1028,3 +1028,26 @@ To convert movement only while a button is held, add `redirectsToScrollTrigger`.
   ]
 }
 ```
+
+### Deprecated gesture button configuration and migration
+
+`buttons.gesture` and all of its fields are **deprecated**. Use
+`buttons.mappings` with directional `outcomes.swipe` actions instead. Legacy fields
+remain readable for migration and compatibility; do not add them to new configurations.
+
+On startup, LinearMouse converts `buttons.gesture` into `buttons.mappings` with
+four directional `swipe` outcomes. The original file is retained next to the
+configuration as `linearmouse.json.before-gesture-migration`. Successfully migrated
+legacy fields are removed, so subsequent launches do not add duplicate mappings.
+Migration is detected by the presence of the old field, not the `$schema` version.
+Hot reload does not perform this migration.
+
+The migration preserves trigger buttons, modifiers, and directional actions.
+Legacy custom distances are not migrated: button mappings continue to use their
+fixed 50-pixel threshold and 40-pixel perpendicular dead zone (strictly less than
+40). The original custom values remain in the backup.
+Explicit existing outcomes for the same trigger take priority. Disabled gesture
+rules remove inherited gestures while restoring ordinary mappings under their
+original conditions, using additional rules in the existing scheme format. Unsupported legacy triggers remain unchanged.
+Migrated gestures use the button mapping lifecycle: one action per press, with no
+separate gesture cooldown. Edit them under **Buttons → Button Mappings**.

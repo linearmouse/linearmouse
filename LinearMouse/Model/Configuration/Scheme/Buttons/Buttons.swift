@@ -22,6 +22,8 @@ extension Scheme {
 
         @ImplicitOptional var autoScroll: AutoScroll
 
+        /// Deprecated legacy configuration, retained for startup migration and fallback decoding.
+        @available(*, deprecated, message: "Use mappings with swipe outcomes instead.")
         @ImplicitOptional var gesture: Gesture
     }
 }
