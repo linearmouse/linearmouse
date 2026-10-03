@@ -67,15 +67,12 @@ class SettingsState: ObservableObject {
 
     enum ButtonsDestination: Equatable {
         case autoScroll
-        case gestureButton
         case buttonMappings
 
         var title: LocalizedStringKey {
             switch self {
             case .autoScroll:
                 return "Autoscroll"
-            case .gestureButton:
-                return "Gesture Button"
             case .buttonMappings:
                 return "Button Mappings"
             }
@@ -85,8 +82,6 @@ class SettingsState: ObservableObject {
             switch self {
             case .autoScroll:
                 return NSLocalizedString("Autoscroll", comment: "Buttons settings destination")
-            case .gestureButton:
-                return NSLocalizedString("Gesture Button", comment: "Buttons settings destination")
             case .buttonMappings:
                 return NSLocalizedString("Button Mappings", comment: "Buttons settings destination")
             }

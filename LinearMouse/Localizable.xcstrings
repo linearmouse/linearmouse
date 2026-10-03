@@ -2965,6 +2965,7 @@
       }
     },
     "%lld pixels" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -7344,6 +7345,7 @@
     },
     "App Expose" : {
       "comment" : "macOS feature name. Use the official localized system term if the target language has one.",
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -25457,6 +25459,7 @@
       }
     },
     "Enable gesture button" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -29618,6 +29621,7 @@
       }
     },
     "Gesture Actions" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -29827,6 +29831,7 @@
     },
     "Gesture Button" : {
       "comment" : "Buttons settings destination",
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -31494,6 +31499,7 @@
       }
     },
     "Hold the button and drag to trigger gestures. Drag at least %lld pixels in one direction." : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -43794,6 +43800,7 @@
     },
     "Next Space" : {
       "comment" : "Gesture action name for switching to the next macOS desktop Space.",
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -44626,6 +44633,7 @@
       }
     },
     "None" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -48802,6 +48810,7 @@
       }
     },
     "Press and hold a button while dragging to trigger gestures like switching desktop spaces or opening Mission Control." : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -49427,6 +49436,7 @@
     },
     "Previous Space" : {
       "comment" : "Gesture action name for switching to the previous macOS desktop Space.",
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -64305,6 +64315,7 @@
     },
     "Show Desktop" : {
       "comment" : "Gesture action name for the macOS command that reveals the desktop.",
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -71175,6 +71186,7 @@
       }
     },
     "Threshold" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {

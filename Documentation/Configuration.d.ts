@@ -502,8 +502,9 @@ declare namespace Scheme {
     clickDebouncing?: Buttons.ClickDebouncing;
 
     /**
-     * @title Gesture button
-     * @description Press and hold a button while dragging to trigger gestures like switching desktop spaces or opening Mission Control.
+     * @title Gesture button (deprecated)
+     * @deprecated
+     * @description Legacy gesture configuration, migrated to button mappings on startup. Use mappings with swipe outcomes for new configurations.
      */
     gesture?: Buttons.Gesture;
 
@@ -1207,8 +1208,13 @@ declare namespace Scheme {
       type Mode = Legacy | Libinput;
     }
 
+    /**
+     * @deprecated
+     * @description Deprecated. Use buttons.mappings with swipe outcomes instead.
+     */
     type Gesture = {
       /**
+       * @deprecated
        * @title Enable gesture button
        * @description If the value is true, the gesture button feature is enabled.
        * @default false
@@ -1216,6 +1222,7 @@ declare namespace Scheme {
       enabled?: boolean;
 
       /**
+       * @deprecated
        * @title Trigger
        * @description Choose the mouse button and modifier keys used to activate gestures.
        */
@@ -1223,12 +1230,13 @@ declare namespace Scheme {
 
       /**
        * @title Button
-       * @description Deprecated. Use trigger instead.
+       * @description Deprecated. Use buttons.mappings with swipe outcomes instead.
        * @deprecated
        */
       button?: PhysicalButton;
 
       /**
+       * @deprecated
        * @title Threshold
        * @description The distance in pixels that must be dragged before triggering a gesture.
        * @default 50
@@ -1238,6 +1246,7 @@ declare namespace Scheme {
       threshold?: Int;
 
       /**
+       * @deprecated
        * @title Dead zone
        * @description The tolerance in pixels for the non-dominant axis to prevent accidental gestures.
        * @default 40
@@ -1247,6 +1256,7 @@ declare namespace Scheme {
       deadZone?: Int;
 
       /**
+       * @deprecated
        * @title Cooldown
        * @description The cooldown period in milliseconds between gestures to prevent double-triggering.
        * @default 500
@@ -1256,6 +1266,7 @@ declare namespace Scheme {
       cooldownMs?: Int;
 
       /**
+       * @deprecated
        * @title Gesture actions
        * @description Actions to trigger for each gesture direction.
        */
@@ -1263,36 +1274,51 @@ declare namespace Scheme {
     };
 
     namespace Gesture {
+      /**
+       * @deprecated
+       * @description Deprecated. Use buttons.mappings with swipe outcomes instead.
+       */
       type Trigger = {
         /**
+         * @deprecated
          * @title Button number
          * @description The button number. See https://developer.apple.com/documentation/coregraphics/cgmousebutton
          */
         button: Mapping.Button;
 
         /**
+         * @deprecated
          * @description Indicates if the command modifier key should be pressed.
          */
         command?: boolean;
 
         /**
+         * @deprecated
          * @description Indicates if the shift modifier key should be pressed.
          */
         shift?: boolean;
 
         /**
+         * @deprecated
          * @description Indicates if the option modifier key should be pressed.
          */
         option?: boolean;
 
         /**
+         * @deprecated
          * @description Indicates if the control modifier key should be pressed.
          */
         control?: boolean;
       };
 
+      /**
+       * @deprecated
+       * @description Deprecated. Use buttons.mappings with swipe outcomes instead.
+       */
+
       type Actions = {
         /**
+         * @deprecated
          * @title Swipe left action
          * @description Action to trigger when dragging left.
          * @default "missionControl.spaceLeft"
@@ -1300,6 +1326,7 @@ declare namespace Scheme {
         left?: GestureAction;
 
         /**
+         * @deprecated
          * @title Swipe right action
          * @description Action to trigger when dragging right.
          * @default "missionControl.spaceRight"
@@ -1307,6 +1334,7 @@ declare namespace Scheme {
         right?: GestureAction;
 
         /**
+         * @deprecated
          * @title Swipe up action
          * @description Action to trigger when dragging up.
          * @default "missionControl"
@@ -1314,12 +1342,18 @@ declare namespace Scheme {
         up?: GestureAction;
 
         /**
+         * @deprecated
          * @title Swipe down action
          * @description Action to trigger when dragging down.
          * @default "appExpose"
          */
         down?: GestureAction;
       };
+
+      /**
+       * @deprecated
+       * @description Deprecated. Use buttons.mappings with swipe outcomes instead.
+       */
 
       type GestureAction =
         | "none"

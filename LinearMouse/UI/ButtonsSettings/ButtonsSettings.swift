@@ -6,7 +6,6 @@ import SwiftUI
 
 struct ButtonsSettings: View {
     @Environment(\.layoutDirection) private var layoutDirection
-    @ObservedObject private var deviceState: DeviceState = .shared
     @ObservedObject private var settingsState: SettingsState = .shared
 
     var body: some View {
@@ -17,12 +16,6 @@ struct ButtonsSettings: View {
                 } else {
                     overview
                 }
-            }
-        }
-        .onReceive(deviceState.$currentDeviceRef) { deviceRef in
-            if settingsState.buttonsNavigationPath.last == .gestureButton,
-               deviceRef?.value?.category != .mouse {
-                settingsState.buttonsNavigationPath.removeAll()
             }
         }
         .onDisappear {
@@ -44,13 +37,6 @@ struct ButtonsSettings: View {
                     description: "Scroll by moving away from an anchor point, similar to Windows middle-click autoscroll."
                 )
 
-                if isMouseDevice {
-                    destinationButton(
-                        .gestureButton,
-                        description: "Press and hold a button while dragging to trigger gestures like switching desktop spaces or opening Mission Control."
-                    )
-                }
-
                 destinationButton(
                     .buttonMappings,
                     description: "Assign actions to buttons and gestures"
@@ -59,10 +45,6 @@ struct ButtonsSettings: View {
             .modifier(SectionViewModifier())
         }
         .modifier(FormViewModifier())
-    }
-
-    private var isMouseDevice: Bool {
-        deviceState.currentDeviceRef?.value?.category == .mouse
     }
 
     private func destinationButton(
@@ -103,8 +85,6 @@ struct ButtonsSettings: View {
             switch destination {
             case .autoScroll:
                 AutoScrollSection()
-            case .gestureButton:
-                GestureButtonSection()
             case .buttonMappings:
                 ButtonMappingsSection()
             }
