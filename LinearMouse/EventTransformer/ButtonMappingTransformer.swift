@@ -156,6 +156,10 @@ final class ButtonMappingTransformer: EventTransformer {
         let isPointerMotion = [
             CGEventType.mouseMoved, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged
         ].contains(event.type)
+        // Timers may be delayed behind input events. Resolve deadlines before
+        // applying a lock that an expired interaction no longer owns.
+        let now = monotonicClock()
+        advanceRecognitionLanes(to: now)
         if let pointerAnchor {
             event.location = pointerAnchor
             if isPointerMotion {
@@ -176,7 +180,6 @@ final class ButtonMappingTransformer: EventTransformer {
             return event
         }
 
-        let now = monotonicClock()
         let modifierFlags = event.flags.intersection([.maskCommand, .maskShift, .maskControl, .maskAlternate])
         scrollRecognizer.updateModifiers(modifierFlags.rawValue)
         if [
@@ -185,8 +188,6 @@ final class ButtonMappingTransformer: EventTransformer {
         ].contains(event.type) {
             scrollRecognizer.discardMovement()
         }
-        advanceRecognitionLanes(to: now)
-
         if event.isGestureCleanupRelease,
            let button = mappingButton(of: event) {
             var canceledRemapTarget: CGMouseButton?

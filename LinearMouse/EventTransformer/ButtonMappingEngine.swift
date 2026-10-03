@@ -669,7 +669,12 @@ struct ButtonMappingEngine {
         let heldButtons = Set(candidate.trigger.whileHeld ?? [])
         if var session, !heldButtons.isDisjoint(with: session.involvedButtons) {
             session.commitment = .impulse
-            commit(session, blocksImpulses: false, additionalHeldButtons: heldButtons)
+            commit(
+                session,
+                blocksImpulses: false,
+                additionalHeldButtons: heldButtons,
+                locksPointer: false
+            )
             output.discardsBufferedEvents = true
         }
 
@@ -699,7 +704,7 @@ struct ButtonMappingEngine {
         output.actions.append(action)
         output.discardsBufferedEvents = true
         updatedSession.commitment = .statefulAction
-        commit(updatedSession)
+        commit(updatedSession, locksPointer: false)
         return output
     }
 
@@ -1084,7 +1089,8 @@ struct ButtonMappingEngine {
         _ session: Session,
         pressAction: PressAction? = nil,
         blocksImpulses: Bool = true,
-        additionalHeldButtons: Set<Button> = []
+        additionalHeldButtons: Set<Button> = [],
+        locksPointer: Bool? = nil
     ) {
         let trigger = session.resolution?.candidate.trigger
         let buttons = (trigger?.statefulButtons ?? session.capturedButtons).union(additionalHeldButtons)
@@ -1098,7 +1104,7 @@ struct ButtonMappingEngine {
             heldButtons: heldButtons,
             pressAction: pressAction,
             blocksImpulses: blocksImpulses,
-            locksPointer: locksPointer(in: session)
+            locksPointer: locksPointer ?? self.locksPointer(in: session)
         )
         retainedHeldButtons.subtract(active.remainingButtons)
         if !retainHeldButtons(from: active) {
