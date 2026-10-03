@@ -62,6 +62,8 @@ struct ButtonMappingEngine {
         /// must be retained until that interaction commits or falls back.
         var buffersEvent = false
         var actions = [Action]()
+        /// The final action in this output is the impulse from this wheel mapping.
+        var wheelMappingIndex: Int?
         var lifecycleEvents = [LifecycleEvent]()
         var replaysBufferedEvents = false
         /// A pending interaction committed, so its retained physical events
@@ -640,6 +642,7 @@ struct ButtonMappingEngine {
 
         output.consumesEvent = true
         output.actions.append(action)
+        output.wheelMappingIndex = candidate.index
         output.recognitionPriority = recognitionPriority(of: candidate)
 
         let heldButtons = Set(candidate.trigger.whileHeld ?? [])

@@ -24,6 +24,9 @@ class ModifierActionsTransformer {
 
     private let modifiers: Modifiers
     private let keySimulator: KeySimulating
+    private let scrollGesture: ScrollGestureOwnership
+    private let scrollThrottle: ScrollActionThrottle
+    private let monotonicClock: () -> UInt64
     private let zoomShortcut: (Bool) -> KeyEquivalentResolver.Shortcut?
 
     private var pinchZoomBegan = false
@@ -32,10 +35,16 @@ class ModifierActionsTransformer {
     init(
         modifiers: Modifiers,
         keySimulator: KeySimulating? = nil,
+        scrollThrottle: ScrollActionThrottle = .init(),
+        scrollGesture: ScrollGestureOwnership = .init(),
+        monotonicClock: @escaping () -> UInt64 = { DispatchTime.now().uptimeNanoseconds },
         zoomShortcut: @escaping (Bool) -> KeyEquivalentResolver.Shortcut? = defaultZoomShortcut
     ) {
         self.modifiers = modifiers
         self.keySimulator = keySimulator ?? Self.defaultKeySimulator
+        self.scrollThrottle = scrollThrottle
+        self.scrollGesture = scrollGesture
+        self.monotonicClock = monotonicClock
         self.zoomShortcut = zoomShortcut
     }
 
@@ -113,8 +122,16 @@ extension ModifierActionsTransformer: EventTransformer {
             if deltaSignum == 0 {
                 return event
             }
+            guard scrollWheelEventView.momentumPhase == .none else {
+                return nil
+            }
+            let axis: ScrollInput.Axis = scrollWheelEventView.deltaYSignum != 0 ? .vertical : .horizontal
+            scrollGesture.claim()
             let restoringModifierFlags = ModifierState.normalize(event.flags)
             if let shortcut = zoomShortcut(deltaSignum > 0) {
+                guard scrollThrottle.allowsAction(on: axis, at: monotonicClock()) else {
+                    return nil
+                }
                 try? keySimulator.press(
                     keyCode: shortcut.keyCode,
                     modifierFlags: shortcut.modifierFlags,
