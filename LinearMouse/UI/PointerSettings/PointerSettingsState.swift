@@ -147,6 +147,11 @@ class PointerSettingsState: ObservableObject {
         schemeState.mergedScheme
     }
 
+    var focusFollowsMouse: Bool {
+        get { mergedScheme.pointer.focusFollowsMouse ?? false }
+        set { scheme.pointer.focusFollowsMouse = newValue }
+    }
+
     var pointerHardwareDPIBusy: Bool {
         pointerHardwareDPIInfoRefreshing || pointerHardwareDPIApplying
     }

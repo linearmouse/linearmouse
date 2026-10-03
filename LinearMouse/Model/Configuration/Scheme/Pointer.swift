@@ -49,6 +49,9 @@ extension Scheme {
 
         var hardwareDPI: Int?
 
+        /// Match application conditions against the window under the pointer.
+        var focusFollowsMouse: Bool?
+
         var disableAcceleration: Bool?
         var redirectsToScroll: Bool?
         /// When set, pointer movement is redirected to scrolling only while
@@ -69,6 +72,10 @@ extension Scheme.Pointer {
 
         if let hardwareDPI {
             pointer.hardwareDPI = hardwareDPI
+        }
+
+        if let focusFollowsMouse {
+            pointer.focusFollowsMouse = focusFollowsMouse
         }
 
         if let disableAcceleration {

@@ -1,6 +1,436 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Focus the window under the pointer without bringing it to the front. App-specific settings apply to the window you hover over. Hold Control to pause." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokus die venster onder die wyser sonder om dit na vore te bring. Programspesifieke instellings geld vir die venster waaroor die wyser beweeg. Hou Control in om te onderbreek."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ركّز النافذة تحت المؤشر دون إحضارها إلى المقدمة. تنطبق الإعدادات الخاصة بالتطبيق على النافذة التي يمر المؤشر فوقها. اضغط مطولًا على Control للإيقاف المؤقت."
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokusiraj prozor ispod pokazivača bez premještanja u prvi plan. Postavke za pojedinačne aplikacije primjenjuju se na prozor iznad kojeg je pokazivač. Držite Control za pauziranje."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dona el focus a la finestra sota el punter sense portar-la al davant. Els ajustos específics de cada aplicació s'apliquen a la finestra sobre la qual es troba el punter. Mantén premuda la tecla Control per posar-ho en pausa."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zaměří okno pod kurzorem, aniž by ho přesunulo do popředí. Nastavení pro jednotlivé aplikace se vztahují na okno pod kurzorem. Podržením klávesy Control funkci pozastavíte."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giv vinduet under markøren fokus uden at flytte det forrest. Appspecifikke indstillinger gælder for vinduet under markøren. Hold Control nede for at sætte funktionen på pause."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokussiert das Fenster unter dem Zeiger, ohne es in den Vordergrund zu bringen. App-spezifische Einstellungen gelten für das Fenster unter dem Zeiger. Zum Pausieren die Control-Taste gedrückt halten."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εστιάζει στο παράθυρο κάτω από τον δείκτη χωρίς να το φέρνει στο προσκήνιο. Οι ρυθμίσεις ανά εφαρμογή ισχύουν για το παράθυρο κάτω από τον δείκτη. Κρατήστε πατημένο το Control για παύση."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Focus the window under the pointer without bringing it to the front. App-specific settings apply to the window you hover over. Hold Control to pause."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enfoca la ventana situada bajo el puntero sin traerla al frente. Los ajustes específicos de cada aplicación se aplican a la ventana sobre la que está el puntero. Mantén pulsada la tecla Control para pausar la función."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kohdistaa osoittimen alla olevaan ikkunaan nostamatta sitä etualalle. Sovelluskohtaiset asetukset koskevat osoittimen alla olevaa ikkunaa. Keskeytä toiminto pitämällä Control-näppäintä painettuna."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Donne le focus à la fenêtre sous le pointeur sans la faire passer au premier plan. Les réglages propres à chaque app s’appliquent à la fenêtre survolée. Maintenez la touche Control enfoncée pour suspendre la fonction."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מיקוד החלון שמתחת למצביע בלי להעביר אותו לחזית. ההגדרות הייחודיות לכל יישום חלות על החלון שמתחת למצביע. להשהיה, יש להחזיק את מקש Control לחוץ."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fókuszálja a mutató alatti ablakot anélkül, hogy előtérbe hozná. Az alkalmazásonkénti beállítások a mutató alatti ablakra vonatkoznak. A szüneteltetéshez tartsa lenyomva a Control billentyűt."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokuskan jendela di bawah penunjuk tanpa membawanya ke depan. Pengaturan khusus aplikasi berlaku untuk jendela di bawah penunjuk. Tahan Control untuk menjeda."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dà il focus alla finestra sotto il puntatore senza portarla in primo piano. Le impostazioni specifiche delle app si applicano alla finestra sotto il puntatore. Tieni premuto Control per sospendere la funzione."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ポインターの下にあるウインドウを最前面に移動せずにフォーカスします。アプリ別の設定は、ポインターを重ねたウインドウに適用されます。Control キーを押している間は一時停止します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "포인터 아래의 윈도우를 맨 앞으로 가져오지 않고 초점을 맞춥니다. 앱별 설정은 포인터를 올린 윈도우에 적용됩니다. Control 키를 누르고 있으면 일시 정지합니다."
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ညွှန်တံအောက်ရှိ ဝင်းဒိုးကို ရှေ့ဆုံးသို့ မရွှေ့ဘဲ အာရုံစိုက်ပါ။ အက်ပ်တစ်ခုချင်းစီအတွက် သတ်မှတ်ချက်များသည် ညွှန်တံတင်ထားသော ဝင်းဒိုးအပေါ် သက်ရောက်ပါသည်။ ခေတ္တရပ်ရန် Control ကို ဖိထားပါ။"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gi vinduet under pekeren fokus uten å flytte det fremst. Appspesifikke innstillinger gjelder for vinduet under pekeren. Hold Control inne for å sette funksjonen på pause."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geef het venster onder de aanwijzer focus zonder het naar de voorgrond te brengen. Appspecifieke instellingen gelden voor het venster onder de aanwijzer. Houd Control ingedrukt om te pauzeren."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ustawia fokus na oknie pod wskaźnikiem bez przenoszenia go na pierwszy plan. Ustawienia poszczególnych aplikacji dotyczą okna pod wskaźnikiem. Przytrzymaj Control, aby wstrzymać działanie."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dá foco à janela sob o cursor sem a trazer para a frente. As definições específicas de cada aplicação aplicam-se à janela sob o cursor. Mantenha a tecla Control premida para pausar a função."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foca a janela sob o ponteiro sem trazê-la para a frente. Os ajustes específicos de cada app se aplicam à janela sob o ponteiro. Mantenha a tecla Control pressionada para pausar a função."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Focalizează fereastra de sub cursor fără a o aduce în prim-plan. Configurările specifice aplicației se aplică ferestrei de sub cursor. Țineți apăsată tasta Control pentru a întrerupe temporar funcția."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переводит фокус на окно под указателем, не выводя его на передний план. Настройки для отдельных приложений применяются к окну под указателем. Удерживайте Control, чтобы приостановить действие функции."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zameria okno pod ukazovateľom bez jeho presunutia do popredia. Nastavenia jednotlivých aplikácií sa vzťahujú na okno pod ukazovateľom. Podržaním klávesu Control funkciu pozastavíte."
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фокусира прозор испод показивача без пребацивања у први план. Подешавања за појединачне апликације примењују се на прозор испод показивача. Држите Control да бисте паузирали функцију."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ge fönstret under pekaren fokus utan att flytta det längst fram. Appspecifika inställningar gäller för fönstret under pekaren. Håll Control nedtryckt för att pausa funktionen."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İmlecin altındaki pencereyi öne getirmeden odaklar. Uygulamaya özel ayarlar, imlecin üzerinde bulunduğu pencereye uygulanır. Duraklatmak için Control tuşunu basılı tutun."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переводить фокус на вікно під вказівником, не виводячи його на передній план. Налаштування окремих програм застосовуються до вікна під вказівником. Утримуйте Control, щоб призупинити дію функції."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đặt tiêu điểm vào cửa sổ dưới con trỏ mà không đưa cửa sổ lên trước. Cài đặt riêng cho ứng dụng áp dụng cho cửa sổ dưới con trỏ. Giữ Control để tạm dừng."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "聚焦指针下的窗口，但不将它置于最前方。应用专属设置针对悬停目标窗口生效。按住 Control 可暂停。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "聚焦指標下的視窗，但不將它移至最前方。App 專屬設定針對懸停目標視窗生效。按住 Control 可暫停。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "聚焦指標下的視窗，但不將它移至最前方。App 專屬設定適用於懸停目標視窗。按住 Control 可暫停。"
+          }
+        }
+      }
+    },
+    "Focus windows on hover" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokus vensters wanneer die wyser daaroor beweeg"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تركيز النوافذ عند مرور المؤشر فوقها"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokusiraj prozore prelaskom pokazivača"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dona el focus a les finestres en passar-hi el punter"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zaměřit okna při najetí kurzorem"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giv vinduer fokus, når markøren er over dem"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fenster beim Darüberbewegen des Zeigers fokussieren"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εστίαση παραθύρων όταν ο δείκτης βρίσκεται πάνω τους"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Focus windows on hover"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enfocar ventanas al pasar el puntero"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kohdista ikkunaan viemällä osoitin sen päälle"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Donner le focus aux fenêtres au survol"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מיקוד חלונות במעבר המצביע מעליהם"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ablakok fókuszálása a mutató rájuk mozgatásakor"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokuskan jendela saat penunjuk berada di atasnya"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dai il focus alle finestre al passaggio del puntatore"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ポインターを重ねたウインドウにフォーカス"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "포인터를 올린 윈도우에 초점 맞추기"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ညွှန်တံတင်ထားသော ဝင်းဒိုးကို အာရုံစိုက်ရန်"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gi vinduer fokus når pekeren er over dem"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vensters focussen bij aanwijzen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ustawiaj fokus na oknach pod wskaźnikiem"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dar foco às janelas ao passar o cursor"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Focar janelas ao passar o ponteiro"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Focalizează ferestrele la trecerea cursorului"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фокусировать окна при наведении указателя"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zamerať okná pri prejdení ukazovateľom"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фокусирај прозоре преласком показивача"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ge fönster fokus när pekaren är över dem"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İmleç üzerindeyken pencerelere odaklan"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фокусувати вікна під час наведення вказівника"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đặt tiêu điểm vào cửa sổ khi di con trỏ lên"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "悬停聚焦窗口"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "懸停聚焦視窗"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "懸停聚焦視窗"
+          }
+        }
+      }
+    },
     "- %@" : {
       "localizations" : {
         "af" : {

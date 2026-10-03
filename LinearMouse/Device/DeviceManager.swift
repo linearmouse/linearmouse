@@ -917,6 +917,10 @@ class DeviceManager: ObservableObject {
         markDeviceActive(physicalDevice, reason: "Received event from DeviceManager")
     }
 
+    func identifiedDevice(for senderID: UInt64) -> Device? {
+        eventDeviceSnapshot.identifiedDevice(for: senderID)
+    }
+
     func deviceFromCGEvent(_ cgEvent: CGEvent) -> Device? {
         // Issue: https://github.com/linearmouse/linearmouse/issues/677#issuecomment-1938208542
         guard ![.flagsChanged, .keyDown, .keyUp].contains(cgEvent.type) else {

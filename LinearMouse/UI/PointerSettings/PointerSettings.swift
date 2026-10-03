@@ -22,6 +22,15 @@ struct PointerSettings: View {
                         }
                     }
 
+                    Toggle(isOn: $state.focusFollowsMouse) {
+                        withDescription {
+                            Text("Focus windows on hover")
+                            Text(
+                                "Focus the window under the pointer without bringing it to the front. App-specific settings apply to the window you hover over. Hold Control to pause."
+                            )
+                        }
+                    }
+
                     pointerRedirectsToScrollControl
 
                     if !state.pointerDisableAcceleration {

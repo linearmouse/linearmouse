@@ -22,6 +22,14 @@ class ScreenManager: ObservableObject {
 
     /// Thread-safe access to `currentScreenName`, for use from the background event tap thread.
     private let screenNameLock = NSLock()
+    private var focusDisplays: [(bounds: CGRect, name: String)] = []
+
+    /// Resolve directly from the event point; the ordinary current-screen
+    /// snapshot can lag behind a fast crossing by half a second.
+    func displayName(at point: CGPoint) -> String? {
+        screenNameLock.withLock { focusDisplays.first { $0.bounds.contains(point) }?.name }
+    }
+
     private var _currentScreenNameSnapshot: String?
     var currentScreenNameSnapshot: String? {
         screenNameLock.withLock { _currentScreenNameSnapshot }
@@ -70,6 +78,19 @@ class ScreenManager: ObservableObject {
 
     private func updateScreens() {
         screens = NSScreen.screens
+        let mainTop = screens.first?.frame.maxY ?? 0
+        let displays = screens.map { screen in
+            (
+                bounds: CGRect(
+                    x: screen.frame.minX,
+                    y: mainTop - screen.frame.maxY,
+                    width: screen.frame.width,
+                    height: screen.frame.height
+                ),
+                name: screen.nameOrLocalizedName
+            )
+        }
+        screenNameLock.withLock { focusDisplays = displays }
         os_log("Displays changed: %{public}@", String(describing: screens))
     }
 

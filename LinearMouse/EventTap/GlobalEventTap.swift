@@ -17,6 +17,8 @@ class GlobalEventTap {
     private lazy var watchdog = GlobalEventTapWatchdog()
     private let eventThread = EventThread.shared
     private var shouldRun = false
+    /// Read and updated only on EventThread; disabled events never enter the focus controller.
+    private var hoverFocusEnabled = false
 
     init() {}
 
@@ -24,9 +26,15 @@ class GlobalEventTap {
         let manager = EventTransformerManager.shared
         if event.type.isPointerMotion {
             guard manager.pointerMotionRequirements.contains(eventType: event.type) else {
+                if hoverFocusEnabled {
+                    FocusFollowsMouseController.shared.observe(event)
+                }
                 return event
             }
         } else {
+            if hoverFocusEnabled {
+                FocusFollowsMouseController.shared.observe(event)
+            }
             PointerLocationTriggerController.shared.handle(event)
             ModifierState.shared.update(with: event)
         }
@@ -40,7 +48,15 @@ class GlobalEventTap {
             withMouseLocationPid: usesProcessConditions ? mouseEventView.mouseLocationOwnerPid : nil,
             withDisplay: ScreenManager.shared.currentScreenNameSnapshot
         )
+        let wasMotion = event.type.isPointerMotion
         let transformedEvent = eventTransformerResolution.transform(event)
+        if wasMotion, hoverFocusEnabled {
+            if let transformedEvent, transformedEvent.type == .mouseMoved {
+                FocusFollowsMouseController.shared.observe(transformedEvent)
+            } else {
+                FocusFollowsMouseController.shared.cancel()
+            }
+        }
         invalidateWindowInfoCacheIfNeeded(for: event)
         return transformedEvent
     }
@@ -81,6 +97,8 @@ class GlobalEventTap {
         eventThread.onWillStop = {
             EventTransformerManager.shared.onPointerMotionRequirementsChanged = nil
             EventTransformerManager.shared.resetForRestart()
+            FocusFollowsMouseController.shared.onEnabledChanged = nil
+            FocusFollowsMouseController.shared.stop()
             WindowInfoCache.shared.invalidate()
         }
         eventThread.start()
@@ -93,10 +111,18 @@ class GlobalEventTap {
                     }
                 }
                 let manager = EventTransformerManager.shared
-                motionControl.isEnabled = !manager.pointerMotionRequirements.isEmpty
-                manager.onPointerMotionRequirementsChanged = { [weak self] requirements in
-                    self?.motionControl.isEnabled = !requirements.isEmpty
+                let focusController = FocusFollowsMouseController.shared
+                let updateMotionSubscription: () -> Void = { [weak self] in
+                    guard let self else {
+                        return
+                    }
+                    hoverFocusEnabled = focusController.isEnabled
+                    motionControl.isEnabled = !manager.pointerMotionRequirements.isEmpty || hoverFocusEnabled
                 }
+                manager.onPointerMotionRequirementsChanged = { _ in updateMotionSubscription() }
+                focusController.onEnabledChanged = updateMotionSubscription
+                focusController.start()
+                updateMotionSubscription()
                 let motionToken = try EventTap.observe(
                     [.mouseMoved, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged],
                     onInvalidated: onInvalidated,
