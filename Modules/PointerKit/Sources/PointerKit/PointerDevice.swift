@@ -255,21 +255,23 @@ public class PointerDevice {
         return client.getProperty(key)
     }
 
-    private func setDynamicProperty<T>(_ value: T, forKey key: String) {
+    @discardableResult
+    private func setDynamicProperty<T>(_ value: T, forKey key: String) -> Bool {
         stateLock.lock()
         defer { stateLock.unlock() }
         guard isValid else {
-            return
+            return false
         }
 
-        client.setProperty(value, forKey: key)
+        return client.setProperty(value, forKey: key)
     }
 
     private func getDynamicPropertyIOFixed(_ key: String) -> Double? {
         (getDynamicProperty(key) as IOFixed?).map { Double($0) / 65_536 }
     }
 
-    private func setDynamicPropertyIOFixed(_ value: Double?, forKey key: String) {
+    @discardableResult
+    private func setDynamicPropertyIOFixed(_ value: Double?, forKey key: String) -> Bool {
         setDynamicProperty(value.map { IOFixed($0 * 65_536) }, forKey: key)
     }
 
@@ -406,14 +408,20 @@ public extension PointerDevice {
     var pointerResolution: Double? {
         get { getDynamicPropertyIOFixed(kIOHIDPointerResolutionKey) }
 
-        set {
-            setDynamicPropertyIOFixed(newValue.map { $0.clamp(10, 1995) }, forKey: kIOHIDPointerResolutionKey)
+        set { setPointerResolution(newValue) }
+    }
 
-            // HACK: Reapply an available acceleration value to make `pointerResolution` take effect.
-            if let acceleration = pointerAcceleration {
-                pointerAcceleration = acceleration
-            }
+    @discardableResult
+    func setPointerResolution(_ value: Double?) -> Bool {
+        guard setDynamicPropertyIOFixed(value.map { $0.clamp(10, 1995) }, forKey: kIOHIDPointerResolutionKey) else {
+            return false
         }
+        // Reapply an available acceleration to make resolution take effect;
+        // propagate failure of either write so callers can retry the operation.
+        if let acceleration = pointerAcceleration {
+            return setPointerAcceleration(acceleration)
+        }
+        return true
     }
 
     var pointerAccelerationType: String? {
@@ -443,8 +451,13 @@ public extension PointerDevice {
         }
         set {
             // TODO: Use `kIOHIDUseLinearScalingMouseAccelerationKey`.
-            setDynamicProperty(newValue, forKey: "HIDUseLinearScalingMouseAcceleration")
+            setUseLinearScalingMouseAcceleration(newValue)
         }
+    }
+
+    @discardableResult
+    func setUseLinearScalingMouseAcceleration(_ value: Int?) -> Bool {
+        setDynamicProperty(value, forKey: "HIDUseLinearScalingMouseAcceleration")
     }
 
     /**
@@ -460,12 +473,15 @@ public extension PointerDevice {
             return getDynamicPropertyIOFixed(pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey)
         }
 
-        set {
-            setDynamicPropertyIOFixed(
-                newValue.map { $0 == -1 ? $0 : $0.clamp(0, 40) },
-                forKey: pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey
-            )
-        }
+        set { setPointerAcceleration(newValue) }
+    }
+
+    @discardableResult
+    func setPointerAcceleration(_ value: Double?) -> Bool {
+        setDynamicPropertyIOFixed(
+            value.map { $0 == -1 ? $0 : $0.clamp(0, 40) },
+            forKey: pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey
+        )
     }
 }
 

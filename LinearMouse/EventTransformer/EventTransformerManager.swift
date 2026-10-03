@@ -100,6 +100,7 @@ class EventTransformerManager {
 
     private var subscriptions = Set<AnyCancellable>()
     private var configuration = Configuration()
+    private var hasConfigurationSnapshot = false
     private var configuredMotionRequirements: PointerMotionRequirements = []
     private(set) var usesProcessConditions = false
     var onPointerMotionRequirementsChanged: ((PointerMotionRequirements) -> Void)?
@@ -139,11 +140,20 @@ class EventTransformerManager {
                 }
 
                 let update = {
-                    FocusFollowsMouseController.shared.configure(configuration)
+                    let diff = ConfigurationDiff(
+                        previous: self.hasConfigurationSnapshot ? self.configuration : nil,
+                        current: configuration
+                    )
+                    if diff.affectsFocusFollowsMouse {
+                        FocusFollowsMouseController.shared.configure(configuration)
+                    }
                     self.configuration = configuration
+                    self.hasConfigurationSnapshot = true
                     self.usesProcessConditions = configuration.usesProcessConditions
                     self.configuredMotionRequirements = .init(configuration: configuration)
-                    self.invalidateConfigurationState()
+                    if diff.affectsEventTransformers {
+                        self.invalidateConfigurationState()
+                    }
                     self.publishPointerMotionRequirements()
                 }
                 if EventThread.shared.performAndWait(update) == nil {

@@ -3,14 +3,11 @@
 
 import Foundation
 
-struct LogitechDeviceSettings: Equatable {
-    var dpi: Int?
-    var highResolutionWheel: Bool?
-}
-
 protocol LogitechDeviceSettingsTarget: AnyObject {
     var isRemoved: Bool { get }
-    var confirmedLogitechSensorDPI: Int? { get }
+    var isLogitechSensorDPIApplyRunning: Bool { get }
+    var isLogitechHighResolutionWheelApplyRunning: Bool { get }
+    func hasConfirmedLogitechSensorDPI(_ dpi: Int) -> Bool
     var confirmedLogitechHighResolutionWheel: Bool? { get }
     var needsLogitechSensorDPIRestoreRetry: Bool { get }
     var needsLogitechHighResolutionWheelRestoreRetry: Bool { get }
@@ -31,69 +28,74 @@ extension Device: LogitechDeviceSettingsTarget {}
 final class LogitechDeviceSettingsReconciler {
     private weak var device: LogitechDeviceSettingsTarget?
     private let lock = NSLock()
-    private var desiredSettings = LogitechDeviceSettings()
+    private var desiredScheme = Scheme()
 
     init(device: LogitechDeviceSettingsTarget) {
         self.device = device
     }
 
-    func apply(_ settings: LogitechDeviceSettings) {
-        apply(settings, force: false)
+    func apply(_ scheme: Scheme) {
+        apply(scheme, force: false)
     }
 
-    func reapply(_ settings: LogitechDeviceSettings) {
+    func reapply(_ scheme: Scheme) {
         guard let device, !device.isRemoved else {
             return
         }
 
         device.prepareSensorDPIForReconnect()
-        if settings.highResolutionWheel != nil {
+        if scheme.logitech.highResolutionWheel != nil {
             device.prepareHighResolutionWheelForReconnect()
         }
-        apply(settings, force: true)
+        apply(scheme, force: true)
         device.requestLogitechControlsForcedReconfiguration()
     }
 
     /// Verifies volatile settings after a system wake without discarding the
     /// suspension's provisional Hi-Res multiplier. The session already
     /// invalidated feature transports and confirmed values before sleep.
-    func reapplyAfterWake(_ settings: LogitechDeviceSettings) {
+    func reapplyAfterWake(_ scheme: Scheme) {
         guard let device, !device.isRemoved else {
             return
         }
 
-        apply(settings, force: true)
+        apply(scheme, force: true)
         device.requestLogitechControlsForcedReconfiguration()
     }
 
-    private func apply(_ settings: LogitechDeviceSettings, force: Bool) {
+    private func apply(_ scheme: Scheme, force: Bool) {
         guard let device, !device.isRemoved else {
             return
         }
 
-        let previousSettings = lock.withLock { () -> LogitechDeviceSettings in
-            let previous = desiredSettings
-            desiredSettings = settings
-            return previous
+        let diff = lock.withLock { () -> SchemeDiff in
+            let diff = SchemeDiff(previous: desiredScheme, current: scheme)
+            desiredScheme = diff.current
+            return diff
         }
 
-        // desiredSettings records only the request. The feature caches are
+        let dpiChanged = diff.changed(\.pointer.hardwareDPI)
+        let wheelChanged = diff.changed(\.logitech.highResolutionWheel)
+
+        // The scheme snapshot records only the request. The feature caches are
         // updated from HID++ reads/writes, and become nil after an exhausted
         // retry budget, so an unchanged configuration can converge again.
-        if let dpi = settings.dpi,
-           force || dpi != previousSettings.dpi || device.confirmedLogitechSensorDPI != dpi {
+        if let dpi = scheme.pointer.hardwareDPI,
+           force || dpiChanged ||
+           (!device.isLogitechSensorDPIApplyRunning && !device.hasConfirmedLogitechSensorDPI(dpi)) {
             device.applyConfiguredSensorDPI(dpi)
-        } else if settings.dpi == nil,
-                  force || previousSettings.dpi != nil
+        } else if scheme.pointer.hardwareDPI == nil,
+                  force || dpiChanged
                   || device.needsLogitechSensorDPIRestoreRetry {
             device.stopManagingSensorDPI()
         }
-        if let highResolutionWheel = settings.highResolutionWheel,
-           force || highResolutionWheel != previousSettings.highResolutionWheel
-           || device.confirmedLogitechHighResolutionWheel != highResolutionWheel {
+        if let highResolutionWheel = scheme.logitech.highResolutionWheel,
+           force || wheelChanged
+           || (!device.isLogitechHighResolutionWheelApplyRunning
+               && device.confirmedLogitechHighResolutionWheel != highResolutionWheel) {
             device.applyConfiguredHighResolutionWheel(highResolutionWheel)
-        } else if settings.highResolutionWheel == nil,
-                  force || previousSettings.highResolutionWheel != nil
+        } else if scheme.logitech.highResolutionWheel == nil,
+                  force || wheelChanged
                   || device.needsLogitechHighResolutionWheelRestoreRetry {
             device.stopManagingHighResolutionWheel()
         }

@@ -14,6 +14,20 @@ import PointerKit
 /// yield before lifecycle teardown performs its main-run-loop restore.
 extension PointerKit.PointerDevice: HIDPP.HIDPPCancellableDeviceIO {}
 
+enum PointerAccelerationRestoreOperation {
+    static func perform(
+        fallback: Double,
+        readSystemValue: () -> Double?,
+        write: (Double) -> Bool
+    ) -> Bool {
+        let systemValue = readSystemValue()
+        // A fallback keeps the device usable, but does not confirm restoration.
+        // Always attempt the write, even when the system read failed.
+        let written = write(systemValue ?? fallback)
+        return systemValue != nil && written
+    }
+}
+
 enum PointerLinearScalingRestoreOperation {
     static func perform(
         baseline: Int?,
@@ -186,6 +200,12 @@ class Device {
     private let removalLock = NSLock()
 
     private var verbosedLoggingOn = Defaults[.verbosedLoggingOn]
+
+    let pointerSchemeState = PointerSchemeApplicationState()
+
+    var supportsLinearPointerScaling: Bool {
+        initialUseLinearScalingMouseAcceleration != nil
+    }
 
     private let initialPointerResolution: Double
     private let initialUseLinearScalingMouseAcceleration: Int?
@@ -651,31 +671,40 @@ extension Device {
      macOS, this value would be nil.
      */
     var disablePointerAcceleration: Bool? {
-        get {
-            device.useLinearScalingMouseAcceleration.map { $0 != 0 }
-        }
-        set {
-            guard device.useLinearScalingMouseAcceleration != nil, let newValue else {
-                return
-            }
-            device.useLinearScalingMouseAcceleration = newValue ? 1 : 0
-        }
+        device.useLinearScalingMouseAcceleration.map { $0 != 0 }
     }
 
     var pointerAcceleration: Double {
-        get {
-            device.pointerAcceleration ?? Self.fallbackPointerAcceleration
+        device.pointerAcceleration ?? Self.fallbackPointerAcceleration
+    }
+
+    func setPointerAcceleration(_ value: Double) -> Bool {
+        os_log(
+            "Update pointer acceleration for device: %{public}@: %{public}f",
+            log: Self.log,
+            type: .info,
+            String(describing: self),
+            value
+        )
+        return device.setPointerAcceleration(value)
+    }
+
+    func setPointerSpeed(_ value: Double) -> Bool {
+        os_log(
+            "Update pointer speed for device: %{public}@: %{public}f",
+            log: Self.log,
+            type: .info,
+            String(describing: self),
+            value
+        )
+        return device.setPointerResolution(Self.pointerResolution(fromPointerSpeed: value))
+    }
+
+    func setDisablePointerAcceleration(_ value: Bool) -> Bool {
+        guard supportsLinearPointerScaling else {
+            return false
         }
-        set {
-            os_log(
-                "Update pointer acceleration for device: %{public}@: %{public}f",
-                log: Self.log,
-                type: .info,
-                String(describing: self),
-                newValue
-            )
-            device.pointerAcceleration = newValue
-        }
+        return device.setUseLinearScalingMouseAcceleration(value ? 1 : 0)
     }
 
     private static let pointerSpeedRange = 1.0 / 1200 ... 1.0 / 40
@@ -691,43 +720,35 @@ extension Device {
     }
 
     var pointerSpeed: Double {
-        get {
-            device.pointerResolution.map {
-                Self.pointerSpeed(fromPointerResolution: $0)
+        device.pointerResolution.map {
+            Self.pointerSpeed(fromPointerResolution: $0)
+        } ?? Self.fallbackPointerSpeed
+    }
+
+    @discardableResult
+    func restorePointerAcceleration() -> Bool {
+        PointerAccelerationRestoreOperation.perform(
+            fallback: Self.fallbackPointerAcceleration,
+            readSystemValue: {
+                (DeviceManager.shared.getSystemProperty(
+                    forKey: device.pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey
+                ) as IOFixed?).map { Double($0) / 65_536 }
+            },
+            write: { value in
+                os_log(
+                    "Restore pointer acceleration for device: %{public}@: %{public}f",
+                    log: Self.log,
+                    type: .info,
+                    String(describing: device),
+                    value
+                )
+                return setPointerAcceleration(value)
             }
-                ?? Self
-                .fallbackPointerSpeed
-        }
-        set {
-            os_log(
-                "Update pointer speed for device: %{public}@: %{public}f",
-                log: Self.log,
-                type: .info,
-                String(describing: self),
-                newValue
-            )
-            device.pointerResolution = Self.pointerResolution(fromPointerSpeed: newValue)
-        }
+        )
     }
 
-    func restorePointerAcceleration() {
-        let systemPointerAcceleration = (DeviceManager.shared
-            .getSystemProperty(forKey: device.pointerAccelerationType ?? kIOHIDMouseAccelerationTypeKey) as IOFixed?
-        )
-        .map { Double($0) / 65_536 } ?? Self.fallbackPointerAcceleration
-
-        os_log(
-            "Restore pointer acceleration for device: %{public}@: %{public}f",
-            log: Self.log,
-            type: .info,
-            String(describing: device),
-            systemPointerAcceleration
-        )
-
-        pointerAcceleration = systemPointerAcceleration
-    }
-
-    func restorePointerSpeed() {
+    @discardableResult
+    func restorePointerSpeed() -> Bool {
         os_log(
             "Restore pointer speed for device: %{public}@: %{public}f",
             log: Self.log,
@@ -736,7 +757,7 @@ extension Device {
             Self.pointerSpeed(fromPointerResolution: initialPointerResolution)
         )
 
-        device.pointerResolution = initialPointerResolution
+        return device.setPointerResolution(initialPointerResolution)
     }
 
     /// Restore only software pointer properties. UI-level pointer-speed reset
@@ -744,6 +765,7 @@ extension Device {
     func restorePointerAccelerationAndPointerSpeed() {
         restorePointerSpeed()
         restorePointerAcceleration()
+        pointerSchemeState.invalidate()
     }
 
     private func restoreUseLinearScalingMouseAcceleration() {

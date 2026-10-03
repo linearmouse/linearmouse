@@ -8,6 +8,13 @@ import XCTest
 final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
     private final class Device: LogitechDeviceSettingsTarget {
         var isRemoved = false
+        var isLogitechSensorDPIApplyRunning = false
+        var isLogitechHighResolutionWheelApplyRunning = false
+
+        func hasConfirmedLogitechSensorDPI(_ dpi: Int) -> Bool {
+            confirmedLogitechSensorDPI == dpi
+        }
+
         var confirmedLogitechSensorDPI: Int?
         var confirmedLogitechHighResolutionWheel: Bool?
         var needsLogitechSensorDPIRestoreRetry = false
@@ -47,27 +54,34 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
         }
     }
 
+    private func scheme(dpi: Int? = nil, highResolutionWheel: Bool? = nil) -> Scheme {
+        var scheme = Scheme()
+        scheme.pointer.hardwareDPI = dpi
+        scheme.logitech.highResolutionWheel = highResolutionWheel
+        return scheme
+    }
+
     func testApplyOnlyUpdatesChangedSettings() {
         let device = Device()
         let reconciler = LogitechDeviceSettingsReconciler(device: device)
 
-        reconciler.apply(.init(dpi: 1000, highResolutionWheel: true))
+        reconciler.apply(scheme(dpi: 1000, highResolutionWheel: true))
         XCTAssertEqual(device.actions, ["dpi:1000", "hiResWheel:true"])
 
         device.resetActions()
         device.confirmedLogitechSensorDPI = 1000
         device.confirmedLogitechHighResolutionWheel = true
-        reconciler.apply(.init(dpi: 1000, highResolutionWheel: true))
+        reconciler.apply(scheme(dpi: 1000, highResolutionWheel: true))
         XCTAssertTrue(device.actions.isEmpty)
 
-        reconciler.apply(.init(dpi: 1000, highResolutionWheel: false))
+        reconciler.apply(scheme(dpi: 1000, highResolutionWheel: false))
         XCTAssertEqual(device.actions, ["hiResWheel:false"])
     }
 
     func testUnconfirmedUnchangedSettingsAreAppliedAgain() {
         let device = Device()
         let reconciler = LogitechDeviceSettingsReconciler(device: device)
-        let settings = LogitechDeviceSettings(dpi: 1000, highResolutionWheel: true)
+        let settings = scheme(dpi: 1000, highResolutionWheel: true)
 
         reconciler.apply(settings)
         device.resetActions()
@@ -79,13 +93,34 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
         XCTAssertEqual(device.actions, ["dpi:1000", "hiResWheel:true"])
     }
 
+    func testUnchangedSchemeDoesNotRestartPendingHardwareWork() {
+        let device = Device()
+        let reconciler = LogitechDeviceSettingsReconciler(device: device)
+        let settings = scheme(dpi: 1000, highResolutionWheel: true)
+        reconciler.apply(settings)
+        device.isLogitechSensorDPIApplyRunning = true
+        device.isLogitechHighResolutionWheelApplyRunning = true
+        device.resetActions()
+        reconciler.apply(settings)
+        XCTAssertTrue(device.actions.isEmpty)
+
+        reconciler.apply(scheme(dpi: 1200, highResolutionWheel: false))
+        XCTAssertEqual(device.actions, ["dpi:1200", "hiResWheel:false"])
+        device.resetActions()
+        reconciler.apply(.init())
+        XCTAssertEqual(device.actions, ["restoreDPI", "restoreHiResWheel"])
+        device.resetActions()
+        reconciler.apply(.init())
+        XCTAssertTrue(device.actions.isEmpty)
+    }
+
     func testNilTransitionRestoresOriginalHardwareSettings() {
         let device = Device()
         let reconciler = LogitechDeviceSettingsReconciler(device: device)
 
-        reconciler.apply(.init(dpi: 1000, highResolutionWheel: true))
+        reconciler.apply(scheme(dpi: 1000, highResolutionWheel: true))
         device.resetActions()
-        reconciler.apply(.init(dpi: nil, highResolutionWheel: nil))
+        reconciler.apply(scheme(dpi: nil, highResolutionWheel: nil))
 
         XCTAssertEqual(device.actions, ["restoreDPI", "restoreHiResWheel"])
     }
@@ -93,7 +128,7 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
     func testReapplyForcesEveryVolatileSettingAndControlReconfiguration() {
         let device = Device()
         let reconciler = LogitechDeviceSettingsReconciler(device: device)
-        let settings = LogitechDeviceSettings(dpi: 1200, highResolutionWheel: true)
+        let settings = scheme(dpi: 1200, highResolutionWheel: true)
 
         reconciler.apply(settings)
         device.resetActions()
@@ -111,7 +146,7 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
     func testWakeReapplyKeepsSuspendedRuntimeStateUntilVerification() {
         let device = Device()
         let reconciler = LogitechDeviceSettingsReconciler(device: device)
-        let settings = LogitechDeviceSettings(dpi: 1200, highResolutionWheel: true)
+        let settings = scheme(dpi: 1200, highResolutionWheel: true)
 
         reconciler.apply(settings)
         device.resetActions()
@@ -127,7 +162,7 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
     func testReapplyRetriesStoppingUnconfiguredWheelManagement() {
         let device = Device()
         let reconciler = LogitechDeviceSettingsReconciler(device: device)
-        let settings = LogitechDeviceSettings(dpi: nil, highResolutionWheel: nil)
+        let settings = scheme(dpi: nil, highResolutionWheel: nil)
 
         reconciler.reapply(settings)
 
@@ -144,7 +179,7 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
         device.needsLogitechSensorDPIRestoreRetry = true
         let reconciler = LogitechDeviceSettingsReconciler(device: device)
 
-        reconciler.apply(.init(dpi: nil, highResolutionWheel: nil))
+        reconciler.apply(scheme(dpi: nil, highResolutionWheel: nil))
 
         XCTAssertEqual(device.actions, ["restoreDPI"])
     }
@@ -154,7 +189,7 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
         device.needsLogitechHighResolutionWheelRestoreRetry = true
         let reconciler = LogitechDeviceSettingsReconciler(device: device)
 
-        reconciler.apply(.init(dpi: nil, highResolutionWheel: nil))
+        reconciler.apply(scheme(dpi: nil, highResolutionWheel: nil))
 
         XCTAssertEqual(device.actions, ["restoreHiResWheel"])
     }
@@ -164,8 +199,8 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
         device.isRemoved = true
         let reconciler = LogitechDeviceSettingsReconciler(device: device)
 
-        reconciler.apply(.init(dpi: 1000, highResolutionWheel: true))
-        reconciler.reapply(.init(dpi: 1000, highResolutionWheel: true))
+        reconciler.apply(scheme(dpi: 1000, highResolutionWheel: true))
+        reconciler.reapply(scheme(dpi: 1000, highResolutionWheel: true))
 
         XCTAssertTrue(device.actions.isEmpty)
     }

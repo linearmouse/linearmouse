@@ -25,11 +25,12 @@ extension IOHIDServiceClient {
         return value
     }
 
-    func setProperty<T>(_ value: T, forKey: String) {
+    @discardableResult
+    func setProperty<T>(_ value: T, forKey: String) -> Bool {
         guard let propertyValue = hidPropertyValue(value) else {
-            return
+            return false
         }
-        IOHIDServiceClientSetProperty(self, forKey as CFString, propertyValue)
+        return IOHIDServiceClientSetProperty(self, forKey as CFString, propertyValue)
     }
 
     func getPropertyIOFixed(_ key: String) -> Double? {

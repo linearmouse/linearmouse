@@ -109,6 +109,10 @@ extension Device {
         let multiplier: Int?
     }
 
+    var isLogitechHighResolutionWheelApplyRunning: Bool {
+        logitechSession.isHiResWheelApplyRunning
+    }
+
     var confirmedLogitechHighResolutionWheel: Bool? {
         logitechSession.hiResWheelEnabled
     }
