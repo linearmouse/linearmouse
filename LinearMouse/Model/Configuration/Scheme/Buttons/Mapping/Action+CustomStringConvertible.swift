@@ -22,17 +22,32 @@ extension Scheme.Buttons.Mapping.Action.Arg0: CustomStringConvertible {
         case .none:
             return NSLocalizedString("No action", comment: "")
         case .missionControl:
-            return NSLocalizedString("Mission Control", comment: "")
+            return NSLocalizedString(
+                "Mission Control",
+                comment: "macOS feature showing all windows and desktop spaces. Use Apple's localized system name; this is not App Exposé."
+            )
         case .missionControlSpaceLeft:
-            return NSLocalizedString("Move left a space", comment: "")
+            return NSLocalizedString(
+                "Move left a space",
+                comment: "Switch to the desktop Space on the left, as in macOS Mission Control keyboard shortcuts. Space means a virtual desktop, not a text character."
+            )
         case .missionControlSpaceRight:
-            return NSLocalizedString("Move right a space", comment: "")
+            return NSLocalizedString(
+                "Move right a space",
+                comment: "Switch to the desktop Space on the right, as in macOS Mission Control keyboard shortcuts. Space means a virtual desktop, not a text character."
+            )
         case .appExpose:
-            return NSLocalizedString("Application windows", comment: "")
+            return NSLocalizedString(
+                "Application windows",
+                comment: "Show all windows of the current application (App Exposé). Use the macOS keyboard shortcut label; this is not Mission Control, which shows all applications."
+            )
         case .launchpad:
             return NSLocalizedString("Launchpad", comment: "")
         case .showDesktop:
-            return NSLocalizedString("Show desktop", comment: "")
+            return NSLocalizedString(
+                "Show desktop",
+                comment: "Reveal the desktop, as in macOS Mission Control keyboard shortcuts. Use Apple's localized system label."
+            )
         case .lookUpAndDataDetectors:
             return NSLocalizedString("Look up & data detectors", comment: "")
         case .smartZoom:

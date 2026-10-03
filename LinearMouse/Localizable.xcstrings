@@ -1,436 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "Focus the window under the pointer without bringing it to the front. App-specific settings apply to the window you hover over. Hold Control to pause." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "af" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fokus die venster onder die wyser sonder om dit na vore te bring. Programspesifieke instellings geld vir die venster waaroor die wyser beweeg. Hou Control in om te onderbreek."
-          }
-        },
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ركّز النافذة تحت المؤشر دون إحضارها إلى المقدمة. تنطبق الإعدادات الخاصة بالتطبيق على النافذة التي يمر المؤشر فوقها. اضغط مطولًا على Control للإيقاف المؤقت."
-          }
-        },
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fokusiraj prozor ispod pokazivača bez premještanja u prvi plan. Postavke za pojedinačne aplikacije primjenjuju se na prozor iznad kojeg je pokazivač. Držite Control za pauziranje."
-          }
-        },
-        "ca" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dona el focus a la finestra sota el punter sense portar-la al davant. Els ajustos específics de cada aplicació s'apliquen a la finestra sobre la qual es troba el punter. Mantén premuda la tecla Control per posar-ho en pausa."
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zaměří okno pod kurzorem, aniž by ho přesunulo do popředí. Nastavení pro jednotlivé aplikace se vztahují na okno pod kurzorem. Podržením klávesy Control funkci pozastavíte."
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Giv vinduet under markøren fokus uden at flytte det forrest. Appspecifikke indstillinger gælder for vinduet under markøren. Hold Control nede for at sætte funktionen på pause."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fokussiert das Fenster unter dem Zeiger, ohne es in den Vordergrund zu bringen. App-spezifische Einstellungen gelten für das Fenster unter dem Zeiger. Zum Pausieren die Control-Taste gedrückt halten."
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Εστιάζει στο παράθυρο κάτω από τον δείκτη χωρίς να το φέρνει στο προσκήνιο. Οι ρυθμίσεις ανά εφαρμογή ισχύουν για το παράθυρο κάτω από τον δείκτη. Κρατήστε πατημένο το Control για παύση."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Focus the window under the pointer without bringing it to the front. App-specific settings apply to the window you hover over. Hold Control to pause."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enfoca la ventana situada bajo el puntero sin traerla al frente. Los ajustes específicos de cada aplicación se aplican a la ventana sobre la que está el puntero. Mantén pulsada la tecla Control para pausar la función."
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kohdistaa osoittimen alla olevaan ikkunaan nostamatta sitä etualalle. Sovelluskohtaiset asetukset koskevat osoittimen alla olevaa ikkunaa. Keskeytä toiminto pitämällä Control-näppäintä painettuna."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Donne le focus à la fenêtre sous le pointeur sans la faire passer au premier plan. Les réglages propres à chaque app s’appliquent à la fenêtre survolée. Maintenez la touche Control enfoncée pour suspendre la fonction."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "מיקוד החלון שמתחת למצביע בלי להעביר אותו לחזית. ההגדרות הייחודיות לכל יישום חלות על החלון שמתחת למצביע. להשהיה, יש להחזיק את מקש Control לחוץ."
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fókuszálja a mutató alatti ablakot anélkül, hogy előtérbe hozná. Az alkalmazásonkénti beállítások a mutató alatti ablakra vonatkoznak. A szüneteltetéshez tartsa lenyomva a Control billentyűt."
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fokuskan jendela di bawah penunjuk tanpa membawanya ke depan. Pengaturan khusus aplikasi berlaku untuk jendela di bawah penunjuk. Tahan Control untuk menjeda."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dà il focus alla finestra sotto il puntatore senza portarla in primo piano. Le impostazioni specifiche delle app si applicano alla finestra sotto il puntatore. Tieni premuto Control per sospendere la funzione."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ポインターの下にあるウインドウを最前面に移動せずにフォーカスします。アプリ別の設定は、ポインターを重ねたウインドウに適用されます。Control キーを押している間は一時停止します。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "포인터 아래의 윈도우를 맨 앞으로 가져오지 않고 초점을 맞춥니다. 앱별 설정은 포인터를 올린 윈도우에 적용됩니다. Control 키를 누르고 있으면 일시 정지합니다."
-          }
-        },
-        "my" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ညွှန်တံအောက်ရှိ ဝင်းဒိုးကို ရှေ့ဆုံးသို့ မရွှေ့ဘဲ အာရုံစိုက်ပါ။ အက်ပ်တစ်ခုချင်းစီအတွက် သတ်မှတ်ချက်များသည် ညွှန်တံတင်ထားသော ဝင်းဒိုးအပေါ် သက်ရောက်ပါသည်။ ခေတ္တရပ်ရန် Control ကို ဖိထားပါ။"
-          }
-        },
-        "nb-NO" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gi vinduet under pekeren fokus uten å flytte det fremst. Appspesifikke innstillinger gjelder for vinduet under pekeren. Hold Control inne for å sette funksjonen på pause."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geef het venster onder de aanwijzer focus zonder het naar de voorgrond te brengen. Appspecifieke instellingen gelden voor het venster onder de aanwijzer. Houd Control ingedrukt om te pauzeren."
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ustawia fokus na oknie pod wskaźnikiem bez przenoszenia go na pierwszy plan. Ustawienia poszczególnych aplikacji dotyczą okna pod wskaźnikiem. Przytrzymaj Control, aby wstrzymać działanie."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dá foco à janela sob o cursor sem a trazer para a frente. As definições específicas de cada aplicação aplicam-se à janela sob o cursor. Mantenha a tecla Control premida para pausar a função."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Foca a janela sob o ponteiro sem trazê-la para a frente. Os ajustes específicos de cada app se aplicam à janela sob o ponteiro. Mantenha a tecla Control pressionada para pausar a função."
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Focalizează fereastra de sub cursor fără a o aduce în prim-plan. Configurările specifice aplicației se aplică ferestrei de sub cursor. Țineți apăsată tasta Control pentru a întrerupe temporar funcția."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Переводит фокус на окно под указателем, не выводя его на передний план. Настройки для отдельных приложений применяются к окну под указателем. Удерживайте Control, чтобы приостановить действие функции."
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zameria okno pod ukazovateľom bez jeho presunutia do popredia. Nastavenia jednotlivých aplikácií sa vzťahujú na okno pod ukazovateľom. Podržaním klávesu Control funkciu pozastavíte."
-          }
-        },
-        "sr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Фокусира прозор испод показивача без пребацивања у први план. Подешавања за појединачне апликације примењују се на прозор испод показивача. Држите Control да бисте паузирали функцију."
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ge fönstret under pekaren fokus utan att flytta det längst fram. Appspecifika inställningar gäller för fönstret under pekaren. Håll Control nedtryckt för att pausa funktionen."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "İmlecin altındaki pencereyi öne getirmeden odaklar. Uygulamaya özel ayarlar, imlecin üzerinde bulunduğu pencereye uygulanır. Duraklatmak için Control tuşunu basılı tutun."
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Переводить фокус на вікно під вказівником, не виводячи його на передній план. Налаштування окремих програм застосовуються до вікна під вказівником. Утримуйте Control, щоб призупинити дію функції."
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Đặt tiêu điểm vào cửa sổ dưới con trỏ mà không đưa cửa sổ lên trước. Cài đặt riêng cho ứng dụng áp dụng cho cửa sổ dưới con trỏ. Giữ Control để tạm dừng."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "聚焦指针下的窗口，但不将它置于最前方。应用专属设置针对悬停目标窗口生效。按住 Control 可暂停。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "聚焦指標下的視窗，但不將它移至最前方。App 專屬設定針對懸停目標視窗生效。按住 Control 可暫停。"
-          }
-        },
-        "zh-Hant-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "聚焦指標下的視窗，但不將它移至最前方。App 專屬設定適用於懸停目標視窗。按住 Control 可暫停。"
-          }
-        }
-      }
-    },
-    "Focus windows on hover" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "af" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fokus vensters wanneer die wyser daaroor beweeg"
-          }
-        },
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تركيز النوافذ عند مرور المؤشر فوقها"
-          }
-        },
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fokusiraj prozore prelaskom pokazivača"
-          }
-        },
-        "ca" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dona el focus a les finestres en passar-hi el punter"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zaměřit okna při najetí kurzorem"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Giv vinduer fokus, når markøren er over dem"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fenster beim Darüberbewegen des Zeigers fokussieren"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Εστίαση παραθύρων όταν ο δείκτης βρίσκεται πάνω τους"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Focus windows on hover"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enfocar ventanas al pasar el puntero"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kohdista ikkunaan viemällä osoitin sen päälle"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Donner le focus aux fenêtres au survol"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "מיקוד חלונות במעבר המצביע מעליהם"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ablakok fókuszálása a mutató rájuk mozgatásakor"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fokuskan jendela saat penunjuk berada di atasnya"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dai il focus alle finestre al passaggio del puntatore"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ポインターを重ねたウインドウにフォーカス"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "포인터를 올린 윈도우에 초점 맞추기"
-          }
-        },
-        "my" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ညွှန်တံတင်ထားသော ဝင်းဒိုးကို အာရုံစိုက်ရန်"
-          }
-        },
-        "nb-NO" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gi vinduer fokus når pekeren er over dem"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vensters focussen bij aanwijzen"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ustawiaj fokus na oknach pod wskaźnikiem"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dar foco às janelas ao passar o cursor"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Focar janelas ao passar o ponteiro"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Focalizează ferestrele la trecerea cursorului"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Фокусировать окна при наведении указателя"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zamerať okná pri prejdení ukazovateľom"
-          }
-        },
-        "sr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Фокусирај прозоре преласком показивача"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ge fönster fokus när pekaren är över dem"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "İmleç üzerindeyken pencerelere odaklan"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Фокусувати вікна під час наведення вказівника"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Đặt tiêu điểm vào cửa sổ khi di con trỏ lên"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "悬停聚焦窗口"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "懸停聚焦視窗"
-          }
-        },
-        "zh-Hant-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "懸停聚焦視窗"
-          }
-        }
-      }
-    },
     "- %@" : {
       "localizations" : {
         "af" : {
@@ -3378,215 +2948,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "%lld pixels" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "af" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld pikselsnelhede"
-          }
-        },
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld بكسل"
-          }
-        },
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld piksel"
-          }
-        },
-        "ca" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld píxels"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld pixelů"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld pixels"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld Pixel"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld pixel"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld píxeles"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld pikseliä"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld pixels"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld פיקסלים"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld képpont"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld piksel"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld pixel"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld ピクセル"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld픽셀"
-          }
-        },
-        "my" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld pixels"
-          }
-        },
-        "nb-NO" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld piksler"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld pixels"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld pikseli"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld píxeis"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld pixels"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld pixeli"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld пикселей"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld pixelov"
-          }
-        },
-        "sr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld piksela"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld pixlar"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld piksel"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld пікселів"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld pixel"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld 像素"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld 像素"
-          }
-        },
-        "zh-Hant-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld 像素"
           }
         }
       }
@@ -7761,217 +7122,8 @@
         }
       }
     },
-    "App Expose" : {
-      "comment" : "macOS feature name. Use the official localized system term if the target language has one.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "af" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Expose"
-          }
-        },
-        "ca" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Expose"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mission Control"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Expose"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mission Control"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mission Control"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "my" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "nb-NO" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App-Exposé"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Exposição de Apps"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mission Control"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "sr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uygulama Gösterimi"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mission Control"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "应用程序总览"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        },
-        "zh-Hant-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Exposé"
-          }
-        }
-      }
-    },
     "Application windows" : {
+      "comment" : "Show all windows of the current application (App Exposé). Use the macOS keyboard shortcut label; this is not Mission Control, which shows all applications.",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -7994,7 +7146,7 @@
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Finestres de l'aplicació"
+            "value" : "Finestres de l’app"
           }
         },
         "cs" : {
@@ -8006,19 +7158,19 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Programvinduer"
+            "value" : "Appvinduer"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anwendungsfenster"
+            "value" : "Programmfenster"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Παράθυρα εφαρμογής"
+            "value" : "Παράθυρα εφαρμογών"
           }
         },
         "es" : {
@@ -8030,19 +7182,19 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sovellusikkunat"
+            "value" : "Appi-ikkunat"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fenêtre d'application"
+            "value" : "Fenêtres de l’application"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "חלון האפליקציה"
+            "value" : "חלונות של יישום"
           }
         },
         "hu" : {
@@ -8060,13 +7212,13 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Finestre dell'applicazione"
+            "value" : "Finestre applicazione"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "アプリケーションウィンドウ"
+            "value" : "アプリケーションウインドウ"
           }
         },
         "ko" : {
@@ -8084,13 +7236,13 @@
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Programvinduer"
+            "value" : "Appvinduer"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toepassingsvenster"
+            "value" : "Appvensters"
           }
         },
         "pl" : {
@@ -8108,25 +7260,25 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Janelas de aplicação"
+            "value" : "Janelas do aplicativo"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ferestrele aplicațiilor"
+            "value" : "Ferestrele aplicației"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Окна программы"
+            "value" : "Окна приложения"
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Okno aplikácie"
+            "value" : "Okná aplikácií"
           }
         },
         "sr" : {
@@ -8138,7 +7290,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Programfönster"
+            "value" : "Appfönster"
           }
         },
         "tr" : {
@@ -8150,7 +7302,7 @@
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Вікна застосунків"
+            "value" : "Вікна програми"
           }
         },
         "vi" : {
@@ -14845,216 +13997,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "按一下並放開以保持自動捲動作用中，或按住並拖曳以僅在放開前捲動。"
-          }
-        }
-      }
-    },
-    "Click once to toggle" : {
-      "comment" : "Autoscroll mode label. One click turns the mode on or off.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "af" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klik een keer om te wissel"
-          }
-        },
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "انقر مرة واحدة للتبديل"
-          }
-        },
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kliknite jednom za prebacivanje"
-          }
-        },
-        "ca" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fes clic una vegada per alternar"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jedním kliknutím přepnete"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klik én gang for at skifte"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Einmal klicken zum Umschalten"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Κάντε κλικ μία φορά για εναλλαγή"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Haz clic una vez para alternar"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Napsauta kerran vaihtaaksesi"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clic unique pour activer/désactiver"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "לחץ פעם אחת כדי להפעיל/לכבות"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kattintson egyszer a váltáshoz"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klik sekali untuk mengalihkan"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fai clic una volta per attivare/disattivare"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "一度クリックして切り替え"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "한 번 클릭하여 전환"
-          }
-        },
-        "my" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "တစ်ကြိမ်ကလစ်နှိပ်၍ ဖွင့်/ပိတ်လုပ်ပါ"
-          }
-        },
-        "nb-NO" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klikk én gang for å veksle"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eén keer klikken om te wisselen"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kliknij raz, aby przełączyć"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clique uma vez para alternar"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clique uma vez para alternar"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Faceți clic o dată pentru a comuta"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Однократный клик для переключения"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kliknutím prepnete"
-          }
-        },
-        "sr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kliknite jednom za prebacivanje"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klicka en gång för att växla"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Açıp kapatmak için bir kez tıklayın"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Клацніть один раз, щоб перемкнути"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nhấp một lần để chuyển đổi"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "单击一次以切换"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "點按一次以切換"
-          }
-        },
-        "zh-Hant-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "按一下以切換"
           }
         }
       }
@@ -25876,215 +24818,6 @@
         }
       }
     },
-    "Enable gesture button" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "af" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktiveer gebaar knoppie"
-          }
-        },
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تمكين زر الإيماءات"
-          }
-        },
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Omogući dugme za gestu"
-          }
-        },
-        "ca" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Habilita el botó de gestos"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Povolit tlačítko gesta"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktivér gestusknap"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gesten-Schaltfläche aktivieren"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ενεργοποίηση κουμπιού χειρονομίας"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Activar botón de gesto"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ota elepainike käyttöön"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Activer le bouton de geste"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "אפשר לחצן מחוות"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Érintés gomb engedélyezése"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktifkan tombol gestur"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abilita pulsante gesto"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ジェスチャーボタンを有効にする"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "제스처 버튼 활성화"
-          }
-        },
-        "my" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "အမူအယာ ခလုတ်ကို ဖွင့်ပါ။"
-          }
-        },
-        "nb-NO" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktiver bevegelsesknapp"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gebarenknop inschakelen"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Włącz przycisk gestów"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ativar botão de gesto"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ativar botão de gesto"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Activare buton gest"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Включить кнопку жестов"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Povoliť tlačidlo gesta"
-          }
-        },
-        "sr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Omogući dugme za gestove"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktivera gestknapp"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hareket düğmesini etkinleştir"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Увімкнути кнопку жестів"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bật nút cử chỉ"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "启用手势按钮"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "啟用手勢按鈕"
-          }
-        },
-        "zh-Hant-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "啟用手勢按鈕"
-          }
-        }
-      }
-    },
     "Enable universal back and forward" : {
       "localizations" : {
         "af" : {
@@ -29414,6 +28147,436 @@
         }
       }
     },
+    "Focus the window under the pointer without bringing it to the front. App-specific settings apply to the window you hover over. Hold Control to pause." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokus die venster onder die wyser sonder om dit na vore te bring. Programspesifieke instellings geld vir die venster waaroor die wyser beweeg. Hou Control in om te onderbreek."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ركّز النافذة تحت المؤشر دون إحضارها إلى المقدمة. تنطبق الإعدادات الخاصة بالتطبيق على النافذة التي يمر المؤشر فوقها. اضغط مطولًا على Control للإيقاف المؤقت."
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokusiraj prozor ispod pokazivača bez premještanja u prvi plan. Postavke za pojedinačne aplikacije primjenjuju se na prozor iznad kojeg je pokazivač. Držite Control za pauziranje."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dona el focus a la finestra sota el punter sense portar-la al davant. Els ajustos específics de cada aplicació s'apliquen a la finestra sobre la qual es troba el punter. Mantén premuda la tecla Control per posar-ho en pausa."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zaměří okno pod kurzorem, aniž by ho přesunulo do popředí. Nastavení pro jednotlivé aplikace se vztahují na okno pod kurzorem. Podržením klávesy Control funkci pozastavíte."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giv vinduet under markøren fokus uden at flytte det forrest. Appspecifikke indstillinger gælder for vinduet under markøren. Hold Control nede for at sætte funktionen på pause."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokussiert das Fenster unter dem Zeiger, ohne es in den Vordergrund zu bringen. App-spezifische Einstellungen gelten für das Fenster unter dem Zeiger. Zum Pausieren die Control-Taste gedrückt halten."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εστιάζει στο παράθυρο κάτω από τον δείκτη χωρίς να το φέρνει στο προσκήνιο. Οι ρυθμίσεις ανά εφαρμογή ισχύουν για το παράθυρο κάτω από τον δείκτη. Κρατήστε πατημένο το Control για παύση."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Focus the window under the pointer without bringing it to the front. App-specific settings apply to the window you hover over. Hold Control to pause."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enfoca la ventana situada bajo el puntero sin traerla al frente. Los ajustes específicos de cada aplicación se aplican a la ventana sobre la que está el puntero. Mantén pulsada la tecla Control para pausar la función."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kohdistaa osoittimen alla olevaan ikkunaan nostamatta sitä etualalle. Sovelluskohtaiset asetukset koskevat osoittimen alla olevaa ikkunaa. Keskeytä toiminto pitämällä Control-näppäintä painettuna."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Donne le focus à la fenêtre sous le pointeur sans la faire passer au premier plan. Les réglages propres à chaque app s’appliquent à la fenêtre survolée. Maintenez la touche Control enfoncée pour suspendre la fonction."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מיקוד החלון שמתחת למצביע בלי להעביר אותו לחזית. ההגדרות הייחודיות לכל יישום חלות על החלון שמתחת למצביע. להשהיה, יש להחזיק את מקש Control לחוץ."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fókuszálja a mutató alatti ablakot anélkül, hogy előtérbe hozná. Az alkalmazásonkénti beállítások a mutató alatti ablakra vonatkoznak. A szüneteltetéshez tartsa lenyomva a Control billentyűt."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokuskan jendela di bawah penunjuk tanpa membawanya ke depan. Pengaturan khusus aplikasi berlaku untuk jendela di bawah penunjuk. Tahan Control untuk menjeda."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dà il focus alla finestra sotto il puntatore senza portarla in primo piano. Le impostazioni specifiche delle app si applicano alla finestra sotto il puntatore. Tieni premuto Control per sospendere la funzione."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ポインターの下にあるウインドウを最前面に移動せずにフォーカスします。アプリ別の設定は、ポインターを重ねたウインドウに適用されます。Control キーを押している間は一時停止します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "포인터 아래의 윈도우를 맨 앞으로 가져오지 않고 초점을 맞춥니다. 앱별 설정은 포인터를 올린 윈도우에 적용됩니다. Control 키를 누르고 있으면 일시 정지합니다."
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ညွှန်တံအောက်ရှိ ဝင်းဒိုးကို ရှေ့ဆုံးသို့ မရွှေ့ဘဲ အာရုံစိုက်ပါ။ အက်ပ်တစ်ခုချင်းစီအတွက် သတ်မှတ်ချက်များသည် ညွှန်တံတင်ထားသော ဝင်းဒိုးအပေါ် သက်ရောက်ပါသည်။ ခေတ္တရပ်ရန် Control ကို ဖိထားပါ။"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gi vinduet under pekeren fokus uten å flytte det fremst. Appspesifikke innstillinger gjelder for vinduet under pekeren. Hold Control inne for å sette funksjonen på pause."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geef het venster onder de aanwijzer focus zonder het naar de voorgrond te brengen. Appspecifieke instellingen gelden voor het venster onder de aanwijzer. Houd Control ingedrukt om te pauzeren."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ustawia fokus na oknie pod wskaźnikiem bez przenoszenia go na pierwszy plan. Ustawienia poszczególnych aplikacji dotyczą okna pod wskaźnikiem. Przytrzymaj Control, aby wstrzymać działanie."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dá foco à janela sob o cursor sem a trazer para a frente. As definições específicas de cada aplicação aplicam-se à janela sob o cursor. Mantenha a tecla Control premida para pausar a função."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foca a janela sob o ponteiro sem trazê-la para a frente. Os ajustes específicos de cada app se aplicam à janela sob o ponteiro. Mantenha a tecla Control pressionada para pausar a função."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Focalizează fereastra de sub cursor fără a o aduce în prim-plan. Configurările specifice aplicației se aplică ferestrei de sub cursor. Țineți apăsată tasta Control pentru a întrerupe temporar funcția."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переводит фокус на окно под указателем, не выводя его на передний план. Настройки для отдельных приложений применяются к окну под указателем. Удерживайте Control, чтобы приостановить действие функции."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zameria okno pod ukazovateľom bez jeho presunutia do popredia. Nastavenia jednotlivých aplikácií sa vzťahujú na okno pod ukazovateľom. Podržaním klávesu Control funkciu pozastavíte."
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фокусира прозор испод показивача без пребацивања у први план. Подешавања за појединачне апликације примењују се на прозор испод показивача. Држите Control да бисте паузирали функцију."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ge fönstret under pekaren fokus utan att flytta det längst fram. Appspecifika inställningar gäller för fönstret under pekaren. Håll Control nedtryckt för att pausa funktionen."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İmlecin altındaki pencereyi öne getirmeden odaklar. Uygulamaya özel ayarlar, imlecin üzerinde bulunduğu pencereye uygulanır. Duraklatmak için Control tuşunu basılı tutun."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переводить фокус на вікно під вказівником, не виводячи його на передній план. Налаштування окремих програм застосовуються до вікна під вказівником. Утримуйте Control, щоб призупинити дію функції."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đặt tiêu điểm vào cửa sổ dưới con trỏ mà không đưa cửa sổ lên trước. Cài đặt riêng cho ứng dụng áp dụng cho cửa sổ dưới con trỏ. Giữ Control để tạm dừng."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "聚焦指针下的窗口，但不将它置于最前方。应用专属设置针对悬停目标窗口生效。按住 Control 可暂停。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "聚焦指標下的視窗，但不將它移至最前方。App 專屬設定針對懸停目標視窗生效。按住 Control 可暫停。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "聚焦指標下的視窗，但不將它移至最前方。App 專屬設定適用於懸停目標視窗。按住 Control 可暫停。"
+          }
+        }
+      }
+    },
+    "Focus windows on hover" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokus vensters wanneer die wyser daaroor beweeg"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تركيز النوافذ عند مرور المؤشر فوقها"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokusiraj prozore prelaskom pokazivača"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dona el focus a les finestres en passar-hi el punter"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zaměřit okna při najetí kurzorem"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giv vinduer fokus, når markøren er over dem"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fenster beim Darüberbewegen des Zeigers fokussieren"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Εστίαση παραθύρων όταν ο δείκτης βρίσκεται πάνω τους"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Focus windows on hover"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enfocar ventanas al pasar el puntero"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kohdista ikkunaan viemällä osoitin sen päälle"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Donner le focus aux fenêtres au survol"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מיקוד חלונות במעבר המצביע מעליהם"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ablakok fókuszálása a mutató rájuk mozgatásakor"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fokuskan jendela saat penunjuk berada di atasnya"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dai il focus alle finestre al passaggio del puntatore"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ポインターを重ねたウインドウにフォーカス"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "포인터를 올린 윈도우에 초점 맞추기"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ညွှန်တံတင်ထားသော ဝင်းဒိုးကို အာရုံစိုက်ရန်"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gi vinduer fokus når pekeren er over dem"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vensters focussen bij aanwijzen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ustawiaj fokus na oknach pod wskaźnikiem"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dar foco às janelas ao passar o cursor"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Focar janelas ao passar o ponteiro"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Focalizează ferestrele la trecerea cursorului"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фокусировать окна при наведении указателя"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zamerať okná pri prejdení ukazovateľom"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фокусирај прозоре преласком показивача"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ge fönster fokus när pekaren är över dem"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İmleç üzerindeyken pencerelere odaklan"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фокусувати вікна під час наведення вказівника"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đặt tiêu điểm vào cửa sổ khi di con trỏ lên"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "悬停聚焦窗口"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "懸停聚焦視窗"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "懸停聚焦視窗"
+          }
+        }
+      }
+    },
     "Forward" : {
       "localizations" : {
         "af" : {
@@ -30034,425 +29197,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "通用"
-          }
-        }
-      }
-    },
-    "Gesture Actions" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "af" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gebare-aksies"
-          }
-        },
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "إجراءات الإيماءات"
-          }
-        },
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Radnje gestama"
-          }
-        },
-        "ca" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Accions de gestos"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Akce gesta"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gestushandlinger"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gestenaktionen"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ενέργειες χειρονομιών"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Acciones de gestos"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eletoiminnot"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Actions de geste"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "פעולות מחוות"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Érintés műveletek"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tindakan Gestur"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Azioni gesto"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ジェスチャーアクション"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "제스처 동작"
-          }
-        },
-        "my" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "အမူအယာ လုပ်ဆောင်ချက်များ"
-          }
-        },
-        "nb-NO" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bevegelseshandlinger"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gebarenacties"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Akcje gestów"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ações de Gesto"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ações de Gesto"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Acțiuni gestuale"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Действия жестов"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Akcie gest"
-          }
-        },
-        "sr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Акције покрета"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geståtgärder"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hareket Eylemleri"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Дії жестів"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hành động Cử chỉ"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "手势操作"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "手勢動作"
-          }
-        },
-        "zh-Hant-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "手勢操作"
-          }
-        }
-      }
-    },
-    "Gesture Button" : {
-      "comment" : "Buttons settings destination",
-      "extractionState" : "stale",
-      "localizations" : {
-        "af" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gebaarknoppie"
-          }
-        },
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "زر الإيماءات"
-          }
-        },
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dugme za gestu"
-          }
-        },
-        "ca" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Botó de gestos"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tlačítko gesta"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gestusknap"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gesten-Schaltfläche"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Κουμπί χειρονομίας"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Botón de gesto"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elepainike"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bouton de geste"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "לחצן מחוות"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gesztusgomb"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tombol gestur"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pulsante gesto"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ジェスチャーボタン"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "제스처 버튼"
-          }
-        },
-        "my" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "အမူအယာ ခလုတ်"
-          }
-        },
-        "nb-NO" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bevegelsesknapp"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gebarenknop"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Przycisk gestów"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Botão de gesto"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Botão de gesto"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Buton gest"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Кнопка жестов"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tlačidlo gesta"
-          }
-        },
-        "sr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Дугме за гестове"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gestknapp"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hareket düğmesi"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Кнопка жестів"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nút cử chỉ"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "手势按钮"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "手勢按鈕"
-          }
-        },
-        "zh-Hant-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "手勢按鈕"
           }
         }
       }
@@ -31912,215 +30656,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "按住時維持按下"
-          }
-        }
-      }
-    },
-    "Hold the button and drag to trigger gestures. Drag at least %lld pixels in one direction." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "af" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hou die knoppie vas en sleep om gebare te aktiveer. Sleep ten minste %lld pixels in een rigting."
-          }
-        },
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "اضغط مع الاستمرار على الزر واسحب لتشغيل الإيماءات. اسحب %lld بكسل على الأقل في اتجاه واحد."
-          }
-        },
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Držite dugme i prevucite da biste pokrenuli geste. Prevucite najmanje %lld piksela u jednom smjeru."
-          }
-        },
-        "ca" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mantén premut el botó i arrossega per activar gestos. Arrossega almenys %lld píxels en una direcció."
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Podržte tlačítko a přetáhněte pro spuštění gest. Přetáhněte alespoň %lld pixelů jedním směrem."
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hold knappen nede og træk for at udløse gestus. Træk mindst %lld pixels i én retning."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Halten Sie die Schaltfläche gedrückt und ziehen Sie, um Gesten auszulösen. Ziehen Sie mindestens %lld Pixel in eine Richtung."
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Κρατήστε πατημένο το κουμπί και σύρετε για να ενεργοποιήσετε χειρονομίες. Σύρετε τουλάχιστον %lld pixel προς μία κατεύθυνση."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mantén pulsado el botón y arrastra para producir gestos. Arrastra al menos %lld píxeles en una dirección."
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pidä painiketta painettuna ja vedä eleiden käynnistämiseksi. Vedä vähintään %lld pikseliä yhteen suuntaan."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maintenez le bouton enfoncé et faites glisser pour déclencher des gestes. Faites glisser sur au moins %lld pixels dans une direction."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "החזק את הלחצן וגרור כדי להפעיל מחוות. גרור לפחות %lld פיקסלים בכיוון אחד."
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tartsa lenyomva a gombot, és húzza az érintés aktiválásához. Húzza legalább %lld képpont távolságra egy irányban."
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tahan tombol dan seret untuk memicu gestur. Seret setidaknya %lld piksel ke satu arah."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tieni premuto il pulsante e trascina per attivare i gesti. Trascina almeno %lld pixel in una direzione."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ボタンを押したままドラッグしてジェスチャーをトリガーします。いずれかの方向に少なくとも%lldピクセルドラッグしてください。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "버튼을 누른 상태에서 드래그하여 제스처를 트리거합니다. 한 방향으로 최소 %lld 픽셀을 드래그하세요."
-          }
-        },
-        "my" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "အမူအယာများကို trigger လုပ်ရန် ခလုတ်ကို ကိုင်ပြီး ဆွဲပါ။ တစ်ဖက်သို့ အနည်းဆုံး %lld pixels ဆွဲပါ။"
-          }
-        },
-        "nb-NO" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hold knappen inne og dra for å utløse bevegelser. Dra minst %lld piksler i én retning."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Houd de knop ingedrukt en sleep om gebaren te activeren. Sleep minstens %lld pixels in één richting."
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Przytrzymaj przycisk i przeciągnij, aby wywołać gesty. Przeciągnij co najmniej %lld pikseli w jednym kierunku."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mantenha o botão pressionado e arraste para acionar gestos. Arraste pelo menos %lld pixels em uma direção."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mantenha o botão pressionado e arraste para acionar gestos. Arraste pelo menos %lld pixels em uma direção."
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ține apăsat butonul și trage pentru a declanșa gesturi. Trage cel puțin %lld pixeli într-o direcție."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Удерживайте кнопку и перетаскивайте, чтобы активировать жесты. Перетащите не менее %lld пикселей в одном направлении."
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Podržte tlačidlo a potiahnite, aby ste spustili gestá. Potiahnite aspoň %lld pixelov jedným smerom."
-          }
-        },
-        "sr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Држите дугме и превуците да бисте покренули покрете. Превуците најмање %lld пиксела у једном смеру."
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Håll ned knappen och dra för att aktivera gester. Dra minst %lld pixlar i en riktning."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hareketleri tetiklemek için düğmeyi basılı tutun ve sürükleyin. Tek bir yönde en az %lld piksel sürükleyin."
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Утримуйте кнопку та перетягніть, щоб викликати жести. Перетягніть щонайменше на %lld пікселів в одному напрямку."
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Giữ nút và kéo để kích hoạt cử chỉ. Kéo ít nhất %lld pixel theo một hướng."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "按住按钮并拖动以触发手势。沿一个方向拖动至少 %lld 像素。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "按住按鈕並拖曳以觸發手勢。朝任一方向拖曳至少 %lld 個像素。"
-          }
-        },
-        "zh-Hant-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "按住按鈕並拖曳以觸發手勢。朝一個方向拖曳至少 %lld 個像素。"
           }
         }
       }
@@ -41304,6 +39839,7 @@
       }
     },
     "Mission Control" : {
+      "comment" : "macOS feature showing all windows and desktop spaces. Use Apple's localized system name; this is not App Exposé.",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -41314,7 +39850,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mission Control"
+            "value" : "إدارة المهام"
           }
         },
         "bs" : {
@@ -41350,7 +39886,7 @@
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Έλεγχος Αποστολής"
+            "value" : "Mission Control"
           }
         },
         "es" : {
@@ -41398,7 +39934,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ミッションコントロール"
+            "value" : "Mission Control"
           }
         },
         "ko" : {
@@ -41440,7 +39976,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Controle de missão"
+            "value" : "Mission Control"
           }
         },
         "ro" : {
@@ -41476,7 +40012,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Görev Kontrol"
+            "value" : "Mission Control"
           }
         },
         "uk" : {
@@ -42761,6 +41297,7 @@
       }
     },
     "Move left a space" : {
+      "comment" : "Switch to the desktop Space on the left, as in macOS Mission Control keyboard shortcuts. Space means a virtual desktop, not a text character.",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -42771,7 +41308,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الانتقال إلى اليسار مسافة واحدة"
+            "value" : "نقل لليسار مسافة واحدة"
           }
         },
         "bs" : {
@@ -42783,13 +41320,13 @@
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mou a l'esquerra un espai"
+            "value" : "Ves un Space cap a l’esquerra"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Posun o pole vlevo"
+            "value" : "Posunout o plochu doleva"
           }
         },
         "da" : {
@@ -42801,61 +41338,61 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ein Leerzeichen nach links bewegen"
+            "value" : "Einen Space nach links bewegen"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Μετακίνηση αριστερά ένα διάστημα"
+            "value" : "Μετακίνηση αριστερά κατά έναν χώρο"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mover a la izquierda un espacio"
+            "value" : "Ir al Space de la izquierda"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Siirry yhden tilan vasemmalle"
+            "value" : "Siirry edelliseen tilaan"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Déplacer vers la gauche d'un espace"
+            "value" : "Déplacer d’un Space vers la gauche"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "הזז שמאלה חלון"
+            "value" : "מעבר ל-Space משמאל"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ugrás balra egy helyet"
+            "value" : "Mozgás balra egy Spaces-íróasztallal"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pindah ke ruang di kiri"
+            "value" : "Pindah Ruang ke kiri"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sposta a sinistra di uno spazio"
+            "value" : "Vai a sinistra di uno spazio"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "左にスペースを移動する"
+            "value" : "左の操作スペースに移動"
           }
         },
         "ko" : {
@@ -42873,13 +41410,13 @@
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Flytt et mellomrom til venstre"
+            "value" : "Flytt ett arbeidsområde til venstre"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Beweeg een ruimte naar links"
+            "value" : "Ga een spatie naar links"
           }
         },
         "pl" : {
@@ -42891,31 +41428,31 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mover um espaço para a esquerda"
+            "value" : "Um espaço para a esquerda"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mover um espaço para a esquerda"
+            "value" : "Mover para a esquerda um Space"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mutare la stânga un spațiu"
+            "value" : "Treceți cu un spațiu spre stânga"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "На одно пространство влево"
+            "value" : "На одну область влево"
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Posun o jedno políčko doľava"
+            "value" : "Posunúť o plochu doľava"
           }
         },
         "sr" : {
@@ -42927,25 +41464,25 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Flytta ett steg åt vänster"
+            "value" : "Flytta ett Spaces-skrivbord åt vänster"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sola bir boşluk kaydır"
+            "value" : "Bir boşluk sola git"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Перемістити ліворуч"
+            "value" : "Пересунути на простір ліворуч"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Di chuyển sang trái một khoảng"
+            "value" : "Di chuyển sang trái một dấu cách"
           }
         },
         "zh-Hans" : {
@@ -42969,6 +41506,7 @@
       }
     },
     "Move right a space" : {
+      "comment" : "Switch to the desktop Space on the right, as in macOS Mission Control keyboard shortcuts. Space means a virtual desktop, not a text character.",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -42979,7 +41517,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الانتقال إلى اليمين مسافة واحدة"
+            "value" : "نقل لليمين مسافة واحدة"
           }
         },
         "bs" : {
@@ -42991,13 +41529,13 @@
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mou a la dreta un espai"
+            "value" : "Ves un Space cap a la dreta"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Posun o pole vpravo"
+            "value" : "Posunout o plochu doprava"
           }
         },
         "da" : {
@@ -43009,61 +41547,61 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ein Leerzeichen nach rechts bewegen"
+            "value" : "Einen Space nach rechts bewegen"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Μετακίνηση δεξιά ένα διάστημα"
+            "value" : "Μετακίνηση δεξιά κατά έναν χώρο"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mover un espacio a la derecha"
+            "value" : "Ir al Space de la derecha"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Siirry yhden tilan oikealle"
+            "value" : "Siirry seuraavaan tilaan"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Déplacer vers la droite d'un espace"
+            "value" : "Déplacer d’un Space vers la droite"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "הזז ימינה חלון"
+            "value" : "מעבר ל-Space מימין"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ugrás jobbra egy helyet"
+            "value" : "Mozgás jobbra egy Spaces-íróasztallal"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pindah ke ruang di kanan"
+            "value" : "Pindah Ruang ke kanan"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sposta a destra di uno spazio"
+            "value" : "Vai a destra di uno spazio"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スペースを右に移動する"
+            "value" : "右の操作スペースに移動"
           }
         },
         "ko" : {
@@ -43081,13 +41619,13 @@
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Flytt et mellomrom til høyre"
+            "value" : "Flytt ett arbeidsområde til høyre"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Beweeg een ruimte naar rechts"
+            "value" : "Ga een spatie naar rechts"
           }
         },
         "pl" : {
@@ -43099,31 +41637,31 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mover um espaço para a direita"
+            "value" : "Um espaço para a direita"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mover um espaço para a direita"
+            "value" : "Mover para a direita um Space"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mutare la dreapta un spațiu"
+            "value" : "Treceți cu un spațiu spre dreapta"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "На одно пространство вправо"
+            "value" : "На одну область вправо"
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Posun o jedno políčko doprava"
+            "value" : "Posunúť o plochu doprava"
           }
         },
         "sr" : {
@@ -43135,25 +41673,25 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Flytta ett steg åt höger"
+            "value" : "Flytta ett Spaces-skrivbord åt höger"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sağa bir boşluk kaydır"
+            "value" : "Bir boşluk sağa git"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Перемістити праворуч"
+            "value" : "Пересунути на простір праворуч"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Di chuyển sang phải một khoảng"
+            "value" : "Di chuyển sang phải một dấu cách"
           }
         },
         "zh-Hans" : {
@@ -44216,216 +42754,6 @@
         }
       }
     },
-    "Next Space" : {
-      "comment" : "Gesture action name for switching to the next macOS desktop Space.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "af" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Volgende spasie"
-          }
-        },
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "المساحة التالية"
-          }
-        },
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sljedeći Razmak"
-          }
-        },
-        "ca" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Espai següent"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Další plocha"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Næste rum"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nächster Space"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Επόμενος Χώρος"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Espacio siguiente"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Seuraava tila"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Espace suivant"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "רווח הבא"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Következő hely"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ruang Berikutnya"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spazio successivo"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "次のスペース"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "다음 스페이스"
-          }
-        },
-        "my" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "နောက် Space"
-          }
-        },
-        "nb-NO" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Neste mellomrom"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Volgende ruimte"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Następny pulpit"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Espaço seguinte"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Próximo Espaço"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spațiul următor"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Следующее пространство"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ďalší priestor"
-          }
-        },
-        "sr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Следећи простор"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nästa skrivbord"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sonraki Alan"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Наступний простір"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Không gian tiếp theo"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下一个空间"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下一個空間"
-          }
-        },
-        "zh-Hant-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下一個空間"
-          }
-        }
-      }
-    },
     "No action" : {
       "localizations" : {
         "af" : {
@@ -45046,215 +43374,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "未選取裝置。"
-          }
-        }
-      }
-    },
-    "None" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "af" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geen"
-          }
-        },
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لا شيء"
-          }
-        },
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ništa"
-          }
-        },
-        "ca" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cap"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Žádný"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingen"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keine"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Κανένα"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ninguno"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ei mitään"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucun"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ללא"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Egyik sem"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tidak ada"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nessuno"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "なし"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "없음"
-          }
-        },
-        "my" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "မရှိ"
-          }
-        },
-        "nb-NO" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingen"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geen"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Brak"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nenhum"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nenhum"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Niciunul"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Нет"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Žiadne"
-          }
-        },
-        "sr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ниједан"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingen"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hiçbiri"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Немає"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Không có"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "無"
-          }
-        },
-        "zh-Hant-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "無"
           }
         }
       }
@@ -49227,215 +47346,6 @@
         }
       }
     },
-    "Press and hold a button while dragging to trigger gestures like switching desktop spaces or opening Mission Control." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "af" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hou 'n knoppie vas terwyl jy sleep om gebare soos om desktop-spasies te verander of Mission Control oop te maak, te aktiveer."
-          }
-        },
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "اضغط مع الاستمرار على زر أثناء السحب لتشغيل إيماءات مثل التبديل بين مساحات سطح المكتب أو فتح Mission Control."
-          }
-        },
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pritisnite i držite dugme dok prevlačite da biste pokrenuli geste poput prebacivanja na drugi prostor na radnoj površini ili otvaranja Mission Controla."
-          }
-        },
-        "ca" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mantén premut un botó mentre arrossegares per activar gestos com canviar d'espais d'escriptori o obrir el Control de missió."
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Podržte tlačítko a přetáhněte jej, abyste aktivovali gesta, jako je přepínání ploch nebo otevření Mission Control."
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tryk og hold en knap nede, mens du trækker, for at udløse bevægelser som f.eks. at skifte skrivebordsrum eller åbne Mission Control."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Halten Sie eine Schaltfläche gedrückt, während Sie ziehen, um Gesten wie das Wechseln von Desktop-Spaces oder das Öffnen von Mission Control auszulösen."
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Πατήστε και κρατήστε πατημένο ένα κουμπί ενώ σύρετε για να ενεργοποιήσετε χειρονομίες όπως η εναλλαγή χώρων επιφάνειας εργασίας ή το άνοιγμα του Mission Control."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mantén pulsado el botón y arrastra para producir gestos como cambiar espacios o abrir Mission Control."
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Paina ja pidä painiketta painettuna vetäessäsi aktivoidaksesi eleitä, kuten työpöytätilojen vaihtamista tai Mission Controlin avaamista."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maintenez un bouton enfoncé tout en faisant glisser pour déclencher des gestes tels que le changement d’espace de bureau ou l’ouverture de Mission Control."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "לחץ והחזק לחצן תוך כדי גרירה כדי להפעיל מחוות כמו מעבר בין סביבות שולחן עבודה או פתיחת Mission Control."
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tartsa lenyomva egy gombot, miközben húzza, hogy olyan gesztusokat aktiváljon, mint az asztali területek közötti váltás vagy a Mission Control megnyitása."
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tekan dan tahan tombol sambil menyeret untuk memicu gestur seperti berpindah ruang desktop atau membuka Mission Control."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tieni premuto un pulsante mentre trascini per attivare gesti come il passaggio tra spazi desktop o l'apertura di Mission Control."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ボタンを押したままドラッグして、デスクトップスペースの切り替えやMission Controlの起動などのジェスチャーをトリガーします。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "버튼을 누른 상태에서 드래그하여 데스크탑 스페이스 전환 또는 Mission Control 열기와 같은 제스처를 트리거합니다."
-          }
-        },
-        "my" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Desktop spaces ပြောင်းခြင်း သို့မဟုတ် Mission Control ဖွင့်ခြင်းကဲ့သို့ gesture များကို trigger လုပ်ရန် ဆွဲနေစဉ် ခလုတ်တစ်ခုကို ဖိကိုင်ထားပါ။"
-          }
-        },
-        "nb-NO" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trykk og hold en knapp mens du drar for å utløse gester som å bytte skrivebordsområder eller åpne Mission Control."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Houd een knop ingedrukt terwijl u sleept om gebaren te activeren, zoals het wisselen van bureaubladruimtes of het openen van Mission Control."
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Naciśnij i przytrzymaj przycisk podczas przeciągania, aby aktywować gesty, takie jak przełączanie przestrzeni pulpitu lub otwieranie Mission Control."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mantenha um botão pressionado enquanto arrasta para acionar gestos como alternar entre espaços de desktop ou abrir o Mission Control."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pressione e segure um botão enquanto arrasta para acionar gestos como alternar espaços da área de trabalho ou abrir o Mission Control."
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ține apăsat un buton în timp ce tragi pentru a declanșa gesturi precum comutarea spațiilor de lucru sau deschiderea Mission Control."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Нажмите и удерживайте кнопку во время перетаскивания, чтобы активировать жесты, такие как переключение рабочих столов или открытие Mission Control."
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Podržte tlačidlo a zároveň potiahnite, čím spustíte gestá, ako je prepínanie plôch alebo otvorenie Mission Control."
-          }
-        },
-        "sr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Притисните и задржите дугме док вучете да бисте активирали покрете попут пребацивања радних простора или отварања Mission Control."
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Håll ner en knapp medan du drar för att aktivera gester som att byta skrivbordsutrymmen eller öppna Mission Control."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Masaüstü alanları arasında geçiş yapma veya Mission Control'ü açma gibi hareketleri tetiklemek için sürüklerken bir düğmeyi basılı tutun."
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Натисніть і утримуйте кнопку під час перетягування, щоб активувати жести, як-от перемикання між просторами робочого столу або відкриття Mission Control."
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nhấn và giữ một nút trong khi kéo để kích hoạt các cử chỉ như chuyển đổi không gian máy tính hoặc mở Mission Control."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "按住按钮并拖动以触发切换桌面空间或打开调度中心等手势。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "按住按鈕並拖移，以觸發切換桌面空間或開啟「預覽」等手勢。"
-          }
-        },
-        "zh-Hant-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "按住按鈕並拖曳，以觸發切換桌面空間或開啟「動態桌面」等手勢。"
-          }
-        }
-      }
-    },
     "Press, hold, combine buttons, drag, or scroll; the recognized trigger updates live." : {
       "localizations" : {
         "af" : {
@@ -49848,216 +47758,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "上一個"
-          }
-        }
-      }
-    },
-    "Previous Space" : {
-      "comment" : "Gesture action name for switching to the previous macOS desktop Space.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "af" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vorige spasie"
-          }
-        },
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "المساحة السابقة"
-          }
-        },
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prethodni Razmak"
-          }
-        },
-        "ca" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Espai anterior"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Předchozí plocha"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forrige rum"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vorheriger Space"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Προηγούμενος Χώρος"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Espacio anterior"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Edellinen tila"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Espace précédent"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "רווח קודם"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Előző terület"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ruang Sebelumnya"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spazio precedente"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "前のスペース"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "이전 스페이스"
-          }
-        },
-        "my" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ယခင် Space"
-          }
-        },
-        "nb-NO" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forrige mellomrom"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vorige ruimte"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Poprzednia przestrzeń"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Espaço Anterior"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Espaço Anterior"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spațiul anterior"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Предыдущее рабочее пространство"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Predchádzajúci priestor"
-          }
-        },
-        "sr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Претходни простор"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Föregående utrymme"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Önceki Alan"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Попередній простір"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Không gian trước đó"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "上一个空间"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "上一個空間"
-          }
-        },
-        "zh-Hant-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "上一個空間"
           }
         }
       }
@@ -64518,6 +62218,7 @@
       }
     },
     "Show desktop" : {
+      "comment" : "Reveal the desktop, as in macOS Mission Control keyboard shortcuts. Use Apple's localized system label.",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -64540,31 +62241,31 @@
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mostra l'escriptori"
+            "value" : "Mostra l’escriptori"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ukázat plochu"
+            "value" : "Zobrazit plochu"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vis skrivebordet"
+            "value" : "Vis skrivebord"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Desktop anzeigen"
+            "value" : "Schreibtisch anzeigen"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Εμφάνιση επιφάνειας εργασίας"
+            "value" : "Εμφάνιση γραφείου εργασίας"
           }
         },
         "es" : {
@@ -64582,31 +62283,31 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Montrer le bureau"
+            "value" : "Afficher le bureau"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "הצג שולחן עבודה"
+            "value" : "הצגת המכתבה"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Asztal megjelenítése"
+            "value" : "Íróasztal megjelenítése"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tampilkan desktop"
+            "value" : "Tampilkan Desktop"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mostra desktop"
+            "value" : "Mostra scrivania"
           }
         },
         "ja" : {
@@ -64636,25 +62337,25 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bureaublad weergeven"
+            "value" : "Toon bureaublad"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pokaż pulpit"
+            "value" : "Pokaż Biurko"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mostrar secretária"
+            "value" : "Mostrar Secretária"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mostrar área de trabalho"
+            "value" : "Mostrar Mesa"
           }
         },
         "ro" : {
@@ -64666,7 +62367,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Показать рабочий стол"
+            "value" : "Показать Рабочий стол"
           }
         },
         "sk" : {
@@ -64690,229 +62391,19 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Masaüstünü göster"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Показати робочий стіл"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hiển thị màn hình nền"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示桌面"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "顯示桌面"
-          }
-        },
-        "zh-Hant-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "顯示桌面"
-          }
-        }
-      }
-    },
-    "Show Desktop" : {
-      "comment" : "Gesture action name for the macOS command that reveals the desktop.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "af" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wys Werkblad"
-          }
-        },
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "إظهار سطح المكتب"
-          }
-        },
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prikaži Desktop"
-          }
-        },
-        "ca" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostra l'escriptori"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zobrazit plochu"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis skrivebord"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schreibtisch anzeigen"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Εμφάνιση επιφάνειας εργασίας"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar escritorio"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Näytä työpöytä"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Afficher le bureau"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הצג שולחן עבודה"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Asztal megjelenítése"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tampilkan Desktop"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostra Scrivania"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "デスクトップを表示"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "데스크탑 보기"
-          }
-        },
-        "my" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Desktop ပြပါ"
-          }
-        },
-        "nb-NO" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis skrivebord"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bureaublad tonen"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pokaż pulpit"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar Mesa"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar Mesa"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Afișați Desktopul"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Показать рабочий стол"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zobraziť plochu"
-          }
-        },
-        "sr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prikaži radnu površinu"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Visa skrivbordet"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
             "value" : "Masaüstünü Göster"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Показати робочий стіл"
+            "value" : "Показати Робочий стіл"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hiển thị màn hình nền"
+            "value" : "Hiển thị Màn hình nền"
           }
         },
         "zh-Hans" : {
@@ -71593,215 +69084,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "這將刪除所選裝置的所有設定。"
-          }
-        }
-      }
-    },
-    "Threshold" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "af" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Drempel"
-          }
-        },
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "عتبة"
-          }
-        },
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prag"
-          }
-        },
-        "ca" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Límit"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prahová hodnota"
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tærskel"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schwelle"
-          }
-        },
-        "el" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Όριο"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Umbral"
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kynnysarvo"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Seuil"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "סף"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Küszöbérték"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ambang batas"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Soglia"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "しきい値"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "임계값"
-          }
-        },
-        "my" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "အကန့်"
-          }
-        },
-        "nb-NO" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Terskel"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Drempelwaarde"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Próg"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Limiar"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Limiar"
-          }
-        },
-        "ro" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prag"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Порог"
-          }
-        },
-        "sk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prah"
-          }
-        },
-        "sr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Праг"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tröskelvärde"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eşik"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Поріг"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ngưỡng"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "阈值"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "臨界值"
-          }
-        },
-        "zh-Hant-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "臨界值"
           }
         }
       }
