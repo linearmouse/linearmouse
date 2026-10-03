@@ -138,9 +138,13 @@ struct ButtonMappingRecordingEngine {
 
     mutating func pointerMoved(deltaX: Double, deltaY: Double, at timestamp: UInt64) {
         advance(to: timestamp)
+        // Long press is only a preview while every participating button is
+        // held. After any release, movement must not change the outcome.
         guard !pressedButtons.isEmpty,
+              triggerButtons.allSatisfy(pressedButtons.contains),
+              heldPrefixButtons.allSatisfy(pressedButtons.contains),
               wheelMapping == nil,
-              recognition == nil else {
+              recognition == nil || recognition == .longPress else {
             return
         }
 

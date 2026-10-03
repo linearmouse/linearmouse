@@ -83,6 +83,23 @@ final class ButtonMappingEngineTests: XCTestCase {
         XCTAssertEqual(engine.pointerMoved(deltaX: 60, deltaY: 0, at: ms(510)).actions, [])
     }
 
+    func testDelayedSwipeExecutesWhenLongPressIsNotConfigured() {
+        for longAction: Action? in [nil, .arg0(.auto)] {
+            var engine = engine([
+                buttonMapping(4, short: shortAction, long: longAction, swipe: .init(right: chordAction))
+            ])
+
+            _ = engine.buttonDown(.mouse(4), modifierFlags: [], at: ms(0))
+            XCTAssertEqual(engine.advance(to: ms(500)).actions, [])
+            XCTAssertEqual(engine.state, .tracking)
+            XCTAssertNil(engine.nextDeadline)
+            XCTAssertEqual(engine.pointerMoved(deltaX: 30, deltaY: 0, at: ms(700)).actions, [])
+            XCTAssertEqual(engine.pointerMoved(deltaX: 30, deltaY: 0, at: ms(800)).actions, [chordAction])
+            XCTAssertEqual(engine.buttonUp(.mouse(4), modifierFlags: [], at: ms(900)).actions, [])
+            XCTAssertEqual(engine.state, .idle)
+        }
+    }
+
     func testChordBeatsItsSingleButtonPrefix() {
         let single = buttonMapping(4, short: shortAction)
         let chord = buttonMapping(4, simultaneous: [5], short: chordAction)

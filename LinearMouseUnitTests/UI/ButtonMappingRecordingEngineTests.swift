@@ -188,14 +188,108 @@ final class ButtonMappingRecordingEngineTests: XCTestCase {
         XCTAssertNil(recorder.snapshot.recognition)
     }
 
-    func testLongPressPreventsLaterSwipeReclassification() {
+    func testSwipeCanReplaceProvisionalLongPressWhileButtonRemainsHeld() {
+        var recorder = ButtonMappingRecordingEngine()
+        let button: Mapping.Button = .logitechControl(.init(controlID: 0xC3))
+
+        recorder.buttonDown(button, modifierFlags: [], at: ms(0))
+        recorder.advance(to: ms(500))
+        XCTAssertEqual(recorder.snapshot.recognition, .longPress)
+
+        recorder.pointerMoved(deltaX: 0, deltaY: -30, at: ms(700))
+        XCTAssertEqual(recorder.snapshot.recognition, .longPress)
+        XCTAssertEqual(recorder.snapshot.movementDirection, .up)
+        recorder.pointerMoved(deltaX: 0, deltaY: -30, at: ms(800))
+
+        XCTAssertEqual(recorder.snapshot.recognition, .swipe(.up))
+        XCTAssertEqual(recorder.snapshot.mapping?.trigger?.input, .button(button))
+        XCTAssertEqual(recorder.snapshot.mapping?.outcomes?.swipe?.up, .arg0(.auto))
+        XCTAssertNil(recorder.snapshot.mapping?.outcomes?.longPress)
+        XCTAssertFalse(recorder.snapshot.isComplete)
+
+        recorder.buttonUp(button, at: ms(900))
+        XCTAssertEqual(recorder.snapshot.recognition, .swipe(.up))
+        XCTAssertTrue(recorder.snapshot.isComplete)
+    }
+
+    func testMovementBelowSwipeThresholdPreservesLongPressOnRelease() {
         var recorder = ButtonMappingRecordingEngine()
 
         recorder.buttonDown(.mouse(4), modifierFlags: [], at: ms(0))
-        recorder.advance(to: ms(500))
-        recorder.pointerMoved(deltaX: 100, deltaY: 0, at: ms(510))
+        recorder.pointerMoved(deltaX: 30, deltaY: 0, at: ms(700))
+        recorder.buttonUp(.mouse(4), at: ms(900))
 
         XCTAssertEqual(recorder.snapshot.recognition, .longPress)
+        XCTAssertEqual(recorder.snapshot.mapping?.outcomes?.longPress, .arg0(.auto))
+        XCTAssertTrue(recorder.snapshot.isComplete)
+    }
+
+    func testCompletedLongPressCannotBecomeSwipe() {
+        var recorder = ButtonMappingRecordingEngine()
+
+        recorder.buttonDown(.mouse(4), modifierFlags: [], at: ms(0))
+        recorder.buttonUp(.mouse(4), at: ms(600))
+        let completed = recorder.snapshot
+        recorder.pointerMoved(deltaX: 100, deltaY: 0, at: ms(700))
+
+        XCTAssertEqual(recorder.snapshot, completed)
+        XCTAssertEqual(recorder.snapshot.recognition, .longPress)
+        XCTAssertTrue(recorder.snapshot.isComplete)
+    }
+
+    func testCombinedLongPressCanBecomeSwipeWhileAllButtonsRemainHeld() {
+        for secondPressTime: UInt64 in [40, 100] {
+            var recorder = ButtonMappingRecordingEngine()
+            recorder.buttonDown(.mouse(4), modifierFlags: [], at: ms(0))
+            recorder.buttonDown(.mouse(5), modifierFlags: [], at: ms(secondPressTime))
+            recorder.advance(to: ms(600))
+            XCTAssertEqual(recorder.snapshot.recognition, .longPress)
+
+            recorder.pointerMoved(deltaX: 60, deltaY: 0, at: ms(700))
+
+            XCTAssertEqual(recorder.snapshot.recognition, .swipe(.right))
+            XCTAssertEqual(recorder.snapshot.isChord, secondPressTime == 40)
+            XCTAssertEqual(recorder.snapshot.isOrdered, secondPressTime == 100)
+            XCTAssertEqual(recorder.snapshot.mapping?.outcomes?.swipe?.right, .arg0(.auto))
+        }
+    }
+
+    func testCombinedLongPressCannotBecomeSwipeAfterEitherButtonIsReleased() {
+        for secondPressTime: UInt64 in [40, 100] {
+            for releasedButton: Mapping.Button in [.mouse(4), .mouse(5)] {
+                var recorder = ButtonMappingRecordingEngine()
+                recorder.buttonDown(.mouse(4), modifierFlags: [], at: ms(0))
+                recorder.buttonDown(.mouse(5), modifierFlags: [], at: ms(secondPressTime))
+                recorder.advance(to: ms(600))
+                recorder.pointerMoved(deltaX: 30, deltaY: 0, at: ms(650))
+                recorder.buttonUp(releasedButton, at: ms(700))
+                let released = recorder.snapshot
+                XCTAssertEqual(released.recognition, .longPress)
+                XCTAssertFalse(released.isComplete)
+
+                recorder.pointerMoved(deltaX: 30, deltaY: 0, at: ms(800))
+
+                XCTAssertEqual(recorder.snapshot, released)
+                let remainingButton: Mapping.Button = releasedButton == .mouse(4) ? .mouse(5) : .mouse(4)
+                recorder.buttonUp(remainingButton, at: ms(900))
+                XCTAssertEqual(recorder.snapshot.recognition, .longPress)
+                XCTAssertEqual(recorder.snapshot.mapping?.outcomes?.longPress, .arg0(.auto))
+                XCTAssertNil(recorder.snapshot.mapping?.outcomes?.swipe)
+                XCTAssertTrue(recorder.snapshot.isComplete)
+            }
+        }
+    }
+
+    func testRecognizedSwipeCannotBeReplacedByLaterMovement() {
+        var recorder = ButtonMappingRecordingEngine()
+
+        recorder.buttonDown(.mouse(4), modifierFlags: [], at: ms(0))
+        recorder.pointerMoved(deltaX: 60, deltaY: 0, at: ms(100))
+        recorder.pointerMoved(deltaX: -120, deltaY: 0, at: ms(700))
+        recorder.buttonUp(.mouse(4), at: ms(900))
+
+        XCTAssertEqual(recorder.snapshot.recognition, .swipe(.right))
+        XCTAssertTrue(recorder.snapshot.isComplete)
     }
 
     func testRecordsPlainWheelImmediately() {
