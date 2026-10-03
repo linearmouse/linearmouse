@@ -4,7 +4,15 @@
 import Foundation
 import os.log
 
-final class LibinputClickDebouncingTransformer: EventTransformer, DeferredEventTransformer, Deactivatable {
+final class LibinputClickDebouncingTransformer: EventTransformer, Deactivatable {
+    func needsDeferredEventContinuation(for _: CGEvent) -> Bool {
+        true
+    }
+
+    var handlesPointerMotion: Bool {
+        false
+    }
+
     static let bounceTimeout: TimeInterval = 0.025
     static let spuriousTimeout: TimeInterval = 0.012
     private static let bounceTimeoutNanoseconds: UInt64 = 25_000_000

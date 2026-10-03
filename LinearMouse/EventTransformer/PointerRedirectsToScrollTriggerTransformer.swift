@@ -34,6 +34,10 @@ final class PointerRedirectsToScrollTriggerTransformer {
 }
 
 extension PointerRedirectsToScrollTriggerTransformer: EventTransformer {
+    var handlesPointerMotion: Bool {
+        hasActiveInteraction
+    }
+
     func transform(_ event: CGEvent, in _: EventTransformerContext) -> CGEvent? {
         guard !SettingsState.shared.recording || hasActiveInteraction else {
             return event

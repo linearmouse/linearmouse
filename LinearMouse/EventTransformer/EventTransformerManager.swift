@@ -95,18 +95,46 @@ class EventTransformerManager {
     }
 
     private var subscriptions = Set<AnyCancellable>()
+    private var configuration = Configuration()
+    private var configuredMotionRequirements: PointerMotionRequirements = []
+    private(set) var usesProcessConditions = false
+    var onPointerMotionRequirementsChanged: ((PointerMotionRequirements) -> Void)?
+    private var publishedMotionRequirements: PointerMotionRequirements = []
+
+    var pointerMotionRequirements: PointerMotionRequirements {
+        if !activeInteractions.isEmpty || sharedAutoScrollTransformer?.needsPointerMotion == true {
+            return .all
+        }
+        return configuredMotionRequirements
+    }
+
+    private func publishPointerMotionRequirements() {
+        let requirements = pointerMotionRequirements
+        guard requirements != publishedMotionRequirements else {
+            return
+        }
+        publishedMotionRequirements = requirements
+        onPointerMotionRequirementsChanged?(requirements)
+    }
 
     init() {
         ConfigurationState.shared
             .$configuration
             .removeDuplicates()
-            .sink { [weak self] _ in
+            .sink { [weak self] configuration in
                 guard let self else {
                     return
                 }
 
-                if EventThread.shared.performAndWait({ self.invalidateConfigurationState() }) == nil {
+                let update = {
+                    self.configuration = configuration
+                    self.usesProcessConditions = configuration.usesProcessConditions
+                    self.configuredMotionRequirements = .init(configuration: configuration)
                     self.invalidateConfigurationState()
+                    self.publishPointerMotionRequirements()
+                }
+                if EventThread.shared.performAndWait(update) == nil {
+                    update()
                 }
             }
             .store(in: &subscriptions)
@@ -204,7 +232,7 @@ class EventTransformerManager {
         let mouseButtonTransition = mouseButtonTransition(for: cgEvent)
 
         if sourcePid != nil, bypassEventsFromOtherApplications, !cgEvent.isLinearMouseSyntheticEvent {
-            if let (interactionKey, interaction) = activeInteraction,
+            if let (_, interaction) = activeInteraction,
                interactionOwnsContinuation(cgEvent, interaction: interaction) {
                 // The owner must still receive its release even when the event
                 // source would normally bypass LinearMouse. Use its original
@@ -214,7 +242,6 @@ class EventTransformerManager {
                     transformer: interaction.route.transformer,
                     interaction: interaction,
                     selection: effectiveSelection,
-                    interactionKey: interactionKey,
                     mouseButtonTransition: mouseButtonTransition
                 )
             }
@@ -228,13 +255,12 @@ class EventTransformerManager {
         }
         if let sourceBundleIdentifier = sourcePid?.bundleIdentifier,
            Self.shouldBypassSourceApplication(sourceBundleIdentifier) {
-            if let (interactionKey, interaction) = activeInteraction,
+            if let (_, interaction) = activeInteraction,
                interactionOwnsContinuation(cgEvent, interaction: interaction) {
                 return drainingResolution(
                     transformer: interaction.route.transformer,
                     interaction: interaction,
                     selection: effectiveSelection,
-                    interactionKey: interactionKey,
                     mouseButtonTransition: mouseButtonTransition
                 )
             }
@@ -253,7 +279,7 @@ class EventTransformerManager {
             withDisplay: effectiveSelection.display,
             updateActiveRoute: true
         )
-        if let (interactionKey, interaction) = activeInteraction {
+        if let (_, interaction) = activeInteraction {
             if isMouseButtonInteractionEvent(cgEvent) {
                 // Keep one physical button stream on one preprocessing route.
                 // The latest route is already active for unrelated input, but
@@ -265,7 +291,6 @@ class EventTransformerManager {
                     transformer: interaction.route.transformer,
                     interaction: interaction,
                     selection: effectiveSelection,
-                    interactionKey: interactionKey,
                     mouseButtonTransition: mouseButtonTransition
                 )
             }
@@ -276,8 +301,7 @@ class EventTransformerManager {
                 return drainingResolution(
                     transformer: transformerWithoutInteractionTrackers(in: route),
                     interaction: interaction,
-                    selection: effectiveSelection,
-                    interactionKey: interactionKey
+                    selection: effectiveSelection
                 )
             }
             return drainingResolution(
@@ -286,8 +310,7 @@ class EventTransformerManager {
                     replacingInteractionTrackersWith: interaction.transformer
                 ),
                 interaction: interaction,
-                selection: effectiveSelection,
-                interactionKey: interactionKey
+                selection: effectiveSelection
             )
         }
         return resolution(
@@ -305,7 +328,10 @@ class EventTransformerManager {
         EventTransformerResolution(
             transformer: route.transformer,
             context: .init(device: selection.device)
-        ) { [weak self] in
+        ) { [weak self, weak route] in
+            guard let route else {
+                return
+            }
             self?.didProcessRoute(
                 on: route,
                 selection: selection,
@@ -319,17 +345,28 @@ class EventTransformerManager {
         transformer: EventTransformer,
         interaction: ActiveInteraction,
         selection: RouteSelection,
-        interactionKey: InteractionKey,
         mouseButtonTransition: MouseButtonTransition? = nil
     ) -> EventTransformerResolution {
-        EventTransformerResolution(
+        // The continuation may be retained by a transformer until a timer fires.
+        // It must not retain that transformer or its route, or a pending event
+        // would form a cycle. Look up its current lease, including device adoption.
+        let routeID = interaction.route.id
+        return EventTransformerResolution(
             transformer: transformer,
             context: .init(device: selection.device)
         ) { [weak self] in
-            self?.didProcessOwnedInteraction(
-                interaction,
+            guard let self,
+                  let (key, current) = activeInteraction(
+                      for: selection,
+                      allowsUnidentifiedOwnerForIdentifiedSelection: true
+                  ),
+                  current.route.id == routeID else {
+                return
+            }
+            didProcessOwnedInteraction(
+                current,
                 selection: selection,
-                interactionKey: interactionKey,
+                interactionKey: key,
                 mouseButtonTransition: mouseButtonTransition
             )
         }
@@ -341,7 +378,20 @@ class EventTransformerManager {
         interactionKey: InteractionKey,
         mouseButtonTransition: MouseButtonTransition? = nil
     ) {
-        guard let transformer = activeInteractionTransformers(in: route.transformer).first else {
+        defer { publishPointerMotionRequirements() }
+        // A delayed down/up can return here after the initial resolution has
+        // already established an owner. Update its lease instead of replacing
+        // it and losing the other physical buttons pinned to that route.
+        if let (key, interaction) = activeInteraction(for: selection), interaction.route === route {
+            didProcessOwnedInteraction(
+                interaction,
+                selection: selection,
+                interactionKey: key,
+                mouseButtonTransition: mouseButtonTransition
+            )
+            return
+        }
+        guard let transformer = firstActiveInteractionTransformer(in: route.transformer) else {
             return
         }
         var pinnedMouseButtons = Set<CGMouseButton>()
@@ -362,6 +412,7 @@ class EventTransformerManager {
         interactionKey: InteractionKey,
         mouseButtonTransition: MouseButtonTransition? = nil
     ) {
+        defer { publishPointerMotionRequirements() }
         guard let current = activeInteractions[interactionKey],
               sameTransformer(current.transformer, interaction.transformer) else {
             return
@@ -467,6 +518,20 @@ class EventTransformerManager {
         default:
             return nil
         }
+    }
+
+    private func firstActiveInteractionTransformer(in transformer: EventTransformer) -> EventTransformer? {
+        if let tracker = transformer as? EventTransformerInteractionTracking, tracker.hasActiveInteraction {
+            return transformer
+        }
+        if let transformers = transformer as? [EventTransformer] {
+            for transformer in transformers {
+                if let active = firstActiveInteractionTransformer(in: transformer) {
+                    return active
+                }
+            }
+        }
+        return nil
     }
 
     private func activeInteractionTransformers(in transformer: EventTransformer) -> [EventTransformer] {
@@ -596,7 +661,7 @@ class EventTransformerManager {
     }
 
     private func cancelLogitechControlInteractionOnCurrentThread(_ context: LogitechEventContext) -> Bool {
-        let pid = ConfigurationState.shared.configuration.usesProcessConditions ? context.pid : nil
+        let pid = usesProcessConditions ? context.pid : nil
         let selection = RouteSelection(
             device: context.device,
             process: pid?.processIdentity,
@@ -626,7 +691,7 @@ class EventTransformerManager {
     private func handleLogitechControlEventOnCurrentThread(
         _ context: LogitechEventContext
     ) -> LogitechControlEventHandlingResult {
-        let pid = ConfigurationState.shared.configuration.usesProcessConditions ? context.pid : nil
+        let pid = usesProcessConditions ? context.pid : nil
         let selection = RouteSelection(
             device: context.device,
             process: pid?.processIdentity,
@@ -734,7 +799,7 @@ class EventTransformerManager {
             return route
         }
 
-        let scheme = ConfigurationState.shared.configuration.matchScheme(
+        let scheme = configuration.matchScheme(
             withDevice: device,
             withProcess: process,
             withDisplay: display
@@ -923,6 +988,17 @@ class EventTransformerManager {
         }
 
         let route = TransformerRoute(transformer: eventTransformer)
+        // Recognition can finish on a timer without another physical event.
+        // Release its motion demand then as well, without retaining the route.
+        for case let mapping as ButtonMappingTransformer in eventTransformer {
+            mapping.onInteractionStateChanged = { [weak self, weak route] in
+                guard let self, let route else {
+                    return
+                }
+                let selection = RouteSelection(device: device, process: process, display: display)
+                didProcessRoute(on: route, selection: selection, interactionKey: selection.interactionKey)
+            }
+        }
         eventTransformerCache.setValue(route, forKey: cacheKey)
         if updateActiveRoute {
             activeRoute = route
@@ -983,6 +1059,9 @@ class EventTransformerManager {
             toggleActivation: toggleActivation,
             speed: speed
         )
+        transformer.onPointerMotionRequirementChanged = { [weak self] in
+            self?.publishPointerMotionRequirements()
+        }
         sharedAutoScrollTransformer = transformer
         return transformer
     }
@@ -1094,6 +1173,7 @@ class EventTransformerManager {
         eventTransformerCache.removeAllValues()
         retiredRoutes.removeAll()
         oldAutoScroll?.deactivate()
+        publishPointerMotionRequirements()
     }
 
     private func deactivate(
@@ -1165,6 +1245,10 @@ class EventTransformerManager {
 }
 
 final class ButtonMappingScrollRecordingTransformer: EventTransformer {
+    var handlesPointerMotion: Bool {
+        false
+    }
+
     func transform(_ event: CGEvent, in _: EventTransformerContext) -> CGEvent? {
         guard SettingsState.shared.recording,
               let recordingSessionID = SettingsState.shared.buttonMappingRecordingSessionID,

@@ -13,7 +13,20 @@ class ConfigurationState: ObservableObject {
 
     static let shared = ConfigurationState()
 
+    #if DEBUG
+        private static let testConfigurationURL = FileManager.default
+            .temporaryDirectory
+            .appendingPathComponent("linearmouse-tests-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("linearmouse.json")
+    #endif
+
     var configurationPaths: [URL] {
+        #if DEBUG
+            if ProcessEnvironment.isRunningTest {
+                return [Self.testConfigurationURL]
+            }
+        #endif
+
         var urls: [URL] = []
 
         if let applicationSupportURL = FileManager.default
@@ -142,7 +155,7 @@ extension ConfigurationState {
     }
 
     func revealInFinder() {
-        NSWorkspace.shared.activateFileViewerSelecting([ConfigurationState.shared.configurationPath.absoluteURL])
+        NSWorkspace.shared.activateFileViewerSelecting([Self.shared.configurationPath.absoluteURL])
     }
 
     func load() {

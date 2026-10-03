@@ -5,6 +5,10 @@ import Foundation
 import os.log
 
 class LinearScrollingHorizontalTransformer: EventTransformer {
+    var handlesPointerMotion: Bool {
+        false
+    }
+
     private static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "LinearScrollingHorizontal")
 
     private let distance: Scheme.Scrolling.Distance

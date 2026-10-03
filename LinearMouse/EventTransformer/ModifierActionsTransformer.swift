@@ -52,6 +52,10 @@ class ModifierActionsTransformer {
 }
 
 extension ModifierActionsTransformer: EventTransformer {
+    var handlesPointerMotion: Bool {
+        false
+    }
+
     func transform(_ event: CGEvent, in _: EventTransformerContext) -> CGEvent? {
         if pinchZoomBegan {
             return handlePinchZoom(event, reverse: pinchZoomReversed)

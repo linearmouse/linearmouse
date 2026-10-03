@@ -12,6 +12,8 @@ class GlobalEventTap {
     static let shared = GlobalEventTap()
 
     private var observationToken: ObservationToken?
+    private var motionObservationToken: ObservationToken?
+    private let motionControl = EventTap.Control(isEnabled: false)
     private lazy var watchdog = GlobalEventTapWatchdog()
     private let eventThread = EventThread.shared
     private var shouldRun = false
@@ -19,12 +21,19 @@ class GlobalEventTap {
     init() {}
 
     private func callback(_ event: CGEvent) -> CGEvent? {
-        PointerLocationTriggerController.shared.handle(event)
-        ModifierState.shared.update(with: event)
+        let manager = EventTransformerManager.shared
+        if event.type.isPointerMotion {
+            guard manager.pointerMotionRequirements.contains(eventType: event.type) else {
+                return event
+            }
+        } else {
+            PointerLocationTriggerController.shared.handle(event)
+            ModifierState.shared.update(with: event)
+        }
 
         let mouseEventView = MouseEventView(event)
-        let usesProcessConditions = ConfigurationState.shared.configuration.usesProcessConditions
-        let eventTransformerResolution = EventTransformerManager.shared.resolve(
+        let usesProcessConditions = manager.usesProcessConditions
+        let eventTransformerResolution = manager.resolve(
             withCGEvent: event,
             withSourcePid: mouseEventView.sourcePid,
             withTargetPid: usesProcessConditions ? mouseEventView.targetPid : nil,
@@ -67,14 +76,10 @@ class GlobalEventTap {
             return
         }
 
-        var eventTypes: [CGEventType] = EventType.all
-        if SchemeState.shared.schemes.contains(where: { $0.pointer.redirectsToScroll ?? false }) ||
-            SchemeState.shared.schemes.contains(where: { $0.buttons.$autoScroll?.enabled ?? false }) ||
-            SchemeState.shared.schemes.contains(where: { $0.buttons.$gesture?.enabled ?? false }) {
-            eventTypes.append(EventType.mouseMoved)
-        }
+        let eventTypes = EventType.all.filter { !$0.isPointerMotion }
 
         eventThread.onWillStop = {
+            EventTransformerManager.shared.onPointerMotionRequirementsChanged = nil
             EventTransformerManager.shared.resetForRestart()
             WindowInfoCache.shared.invalidate()
         }
@@ -82,11 +87,25 @@ class GlobalEventTap {
 
         guard let observationResult = eventThread.performAndWait({ [self] in
             Result {
-                try EventTap.observe(eventTypes, onInvalidated: { [weak self] in
+                let onInvalidated: () -> Void = { [weak self] in
                     DispatchQueue.main.async {
                         self?.restartIfNeeded(reason: "event tap invalidated")
                     }
-                }) { [weak self] in self?.callback($1) }
+                }
+                let manager = EventTransformerManager.shared
+                motionControl.isEnabled = !manager.pointerMotionRequirements.isEmpty
+                manager.onPointerMotionRequirementsChanged = { [weak self] requirements in
+                    self?.motionControl.isEnabled = !requirements.isEmpty
+                }
+                let motionToken = try EventTap.observe(
+                    [.mouseMoved, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged],
+                    onInvalidated: onInvalidated,
+                    control: motionControl
+                ) { [weak self] in self?.callback($1) }
+                let token = try EventTap.observe(eventTypes, onInvalidated: onInvalidated) { [weak self] in
+                    self?.callback($1)
+                }
+                return (token, motionToken)
             }
         }) else {
             eventThread.stop()
@@ -94,8 +113,9 @@ class GlobalEventTap {
         }
 
         switch observationResult {
-        case let .success(token):
+        case let .success((token, motionToken)):
             observationToken = token
+            motionObservationToken = motionToken
         case let .failure(error):
             eventThread.stop()
             NSAlert(error: error).runModal()
@@ -114,6 +134,7 @@ class GlobalEventTap {
         // Release the observation token, which dispatches timer invalidation
         // to the event RunLoop (see EventTap.observe).
         observationToken = nil
+        motionObservationToken = nil
 
         // EventThread.stop() fires onWillStop (which calls resetForRestart)
         // then stops the RunLoop, all in FIFO order.

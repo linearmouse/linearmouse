@@ -4,6 +4,10 @@
 import Foundation
 
 class ReverseScrollingTransformer: EventTransformer {
+    var handlesPointerMotion: Bool {
+        false
+    }
+
     private let vertically: Bool
     private let horizontally: Bool
 

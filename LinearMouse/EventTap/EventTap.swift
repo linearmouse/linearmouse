@@ -12,12 +12,31 @@ extension EventTap {
 
     typealias Callback = (_ proxy: CGEventTapProxy, _ event: CGEvent) -> CGEvent?
 
+    /// Access only on the tap's run loop. Deliberately disabled taps must stay
+    /// disabled when the watchdog or a timeout notification runs.
+    final class Control {
+        fileprivate var tap: CFMachPort?
+        var isEnabled: Bool {
+            didSet {
+                guard oldValue != isEnabled, let tap else {
+                    return
+                }
+                CGEvent.tapEnable(tap: tap, enable: isEnabled)
+            }
+        }
+
+        init(isEnabled: Bool = true) {
+            self.isEnabled = isEnabled
+        }
+    }
+
     private class ContextHolder {
-        var tap: CFMachPort?
+        let control: Control
         let callback: Callback
 
-        init(_ callback: @escaping Callback) {
+        init(_ callback: @escaping Callback, control: Control) {
             self.callback = callback
+            self.control = control
         }
     }
 
@@ -29,7 +48,7 @@ extension EventTap {
 
         // Get the tap and the callback from contextHolder.
         let contextHolder = Unmanaged<ContextHolder>.fromOpaque(refcon).takeUnretainedValue()
-        let tap = contextHolder.tap
+        let tap = contextHolder.control.tap
         let callback = contextHolder.callback
 
         switch type {
@@ -42,7 +61,7 @@ extension EventTap {
                 os_log("Cannot find the tap", log: log, type: .error, String(describing: type))
                 return Unmanaged.passUnretained(event)
             }
-            CGEvent.tapEnable(tap: tap, enable: true)
+            CGEvent.tapEnable(tap: tap, enable: contextHolder.control.isEnabled)
             return Unmanaged.passUnretained(event)
 
         default:
@@ -75,10 +94,11 @@ extension EventTap {
         place: CGEventTapPlacement = .headInsertEventTap,
         at runLoop: RunLoop = .current,
         onInvalidated: (() -> Void)? = nil,
+        control: Control = Control(),
         callback: @escaping Callback
     ) throws -> ObservationToken {
         // Create a context holder. The lifetime of contextHolder should be the same as ObservationToken's.
-        let contextHolder = ContextHolder(callback)
+        let contextHolder = ContextHolder(callback, control: control)
 
         // Create event tap.
         let eventsOfInterest = events.reduce(CGEventMask(0)) { $0 | (1 << $1.rawValue) }
@@ -94,7 +114,8 @@ extension EventTap {
         }
 
         // Attach tap to contextHolder.
-        contextHolder.tap = tap
+        control.tap = tap
+        CGEvent.tapEnable(tap: tap, enable: control.isEnabled)
 
         // Create and add run loop source to the run loop.
         let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
@@ -115,7 +136,7 @@ extension EventTap {
                 onInvalidated?()
                 return
             }
-            if !CGEvent.tapIsEnabled(tap: tap) {
+            if control.isEnabled, !CGEvent.tapIsEnabled(tap: tap) {
                 os_log("EventTap found disabled, re-enabling", log: log, type: .error)
                 CGEvent.tapEnable(tap: tap, enable: true)
             }
@@ -129,6 +150,7 @@ extension EventTap {
                 CGEvent.tapEnable(tap: tap, enable: false)
                 CFRunLoopRemoveSource(cfRunLoop, runLoopSource, .commonModes)
                 CFMachPortInvalidate(tap)
+                control.tap = nil
                 withExtendedLifetime(contextHolder) {}
             }
             CFRunLoopWakeUp(cfRunLoop)

@@ -13,6 +13,243 @@ final class EventTransformerManagerTests: XCTestCase {
         SettingsState.shared.recordedButtonMappingEvent = nil
     }
 
+    func testRightSwipeEnablesMotionOnlyForItsTriggerAndDisablesOnRelease() throws {
+        var scheme = Scheme()
+        scheme.buttons.mappings = [
+            .init(
+                trigger: .init(input: .button(.mouse(1))),
+                outcomes: .init(swipe: .init(left: .arg0(.none)))
+            )
+        ]
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+        let manager = EventTransformerManager()
+        var changes: [PointerMotionRequirements] = []
+        manager.onPointerMotionRequirementsChanged = { changes.append($0) }
+        func send(_ type: CGEventType, button: CGMouseButton, deltaX: Double = 0) throws {
+            let event = try mouseEvent(type: type, button: button)
+            event.setDoubleValueField(.mouseEventDeltaX, value: deltaX)
+            _ = manager.resolve(
+                withCGEvent: event,
+                withSourcePid: nil,
+                withTargetPid: nil,
+                withMouseLocationPid: nil,
+                withDisplay: nil
+            )
+            .transform(event) { _ in }
+        }
+        XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
+        try send(.leftMouseDown, button: .left)
+        XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
+        try send(.leftMouseUp, button: .left)
+        XCTAssertTrue(changes.isEmpty)
+        for _ in 0 ..< 3 {
+            try send(.rightMouseDown, button: .right)
+            XCTAssertEqual(manager.pointerMotionRequirements, .all)
+            try send(.rightMouseDragged, button: .right, deltaX: -60)
+            try send(.rightMouseUp, button: .right)
+            XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
+        }
+        XCTAssertEqual(changes, [.all, [], .all, [], .all, []])
+    }
+
+    func testMotionTapDemandFollowsHeldTriggerAndDrainsRemovedTrigger() throws {
+        var scheme = Scheme()
+        scheme.pointer.redirectsToScroll = true
+        scheme.pointer.redirectsToScrollTrigger = .init(input: .button(.mouse(4)))
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+        let manager = EventTransformerManager()
+        var changes: [PointerMotionRequirements] = []
+        manager.onPointerMotionRequirementsChanged = { changes.append($0) }
+        XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
+
+        let button = try XCTUnwrap(CGMouseButton(rawValue: 4))
+        func send(_ type: CGEventType) throws -> CGEvent? {
+            let event = try mouseEvent(type: type, button: button)
+            return manager.resolve(
+                withCGEvent: event,
+                withSourcePid: nil,
+                withTargetPid: nil,
+                withMouseLocationPid: nil,
+                withDisplay: nil
+            )
+            .transform(event) { _ in }
+        }
+        XCTAssertNil(try send(.otherMouseDown))
+        XCTAssertEqual(manager.pointerMotionRequirements, .all)
+        ConfigurationState.shared.configuration = .init()
+        XCTAssertEqual(manager.pointerMotionRequirements, .all)
+        XCTAssertNil(try send(.otherMouseUp))
+        XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
+        XCTAssertEqual(changes, [.all, []])
+
+        scheme.pointer.redirectsToScrollTrigger = nil
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+        XCTAssertEqual(manager.pointerMotionRequirements, .all)
+        scheme.pointer.redirectsToScroll = false
+        scheme.buttons.switchPrimaryButtonAndSecondaryButtons = true
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+        XCTAssertEqual(manager.pointerMotionRequirements, .dragged)
+    }
+
+    func testHeldMotionDemandResetsOnRestart() throws {
+        var scheme = Scheme()
+        scheme.pointer.redirectsToScroll = true
+        scheme.pointer.redirectsToScrollTrigger = .init(input: .button(.mouse(4)))
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+        let manager = EventTransformerManager()
+        var changes: [PointerMotionRequirements] = []
+        manager.onPointerMotionRequirementsChanged = { changes.append($0) }
+        for _ in 0 ..< 2 {
+            let event = try mouseEvent(type: .otherMouseDown, button: XCTUnwrap(CGMouseButton(rawValue: 4)))
+            _ = manager.resolve(
+                withCGEvent: event,
+                withSourcePid: nil,
+                withTargetPid: nil,
+                withMouseLocationPid: nil,
+                withDisplay: nil
+            )
+            .transform(event) { _ in }
+            manager.resetForRestart()
+        }
+        XCTAssertEqual(changes, [.all, [], .all, []])
+        XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
+    }
+
+    func testLogitechMotionDemandStartsOnPressAndEndsOnCancellation() {
+        let identity = LogitechControlIdentity(controlID: 0x00C4)
+        var scheme = Scheme()
+        scheme.buttons.autoScroll.enabled = true
+        scheme.buttons.autoScroll.modes = [.hold]
+        scheme.buttons.autoScroll.trigger = .init(button: .logitechControl(identity))
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+        let manager = EventTransformerManager()
+        var changes: [PointerMotionRequirements] = []
+        manager.onPointerMotionRequirementsChanged = { changes.append($0) }
+        XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
+        _ = manager.handleLogitechControlEvent(logitech(identity, pressed: true, display: "Display A"))
+        XCTAssertEqual(manager.pointerMotionRequirements, .all)
+        XCTAssertTrue(manager.cancelLogitechControlInteraction(logitech(
+            identity,
+            pressed: false,
+            display: "Display A"
+        )))
+        XCTAssertEqual(changes, [.all, []])
+        XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
+    }
+
+    func testDeferredDebouncedGestureReceivesTheFirstDragDelta() throws {
+        var scheme = Scheme()
+        scheme.buttons.clickDebouncing.mode = .libinput
+        scheme.buttons.clickDebouncing.timeout = 25
+        scheme.buttons.gesture.enabled = true
+        scheme.buttons.gesture.trigger = .init(button: .mouse(0))
+        scheme.buttons.gesture.threshold = 10
+        scheme.buttons.gesture.actions = .init(right: .some(.none))
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+        let manager = EventTransformerManager()
+        XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
+
+        var now: UInt64 = 0
+        var timerCallbacks: [() -> Void] = []
+        let debouncer = LibinputClickDebouncingTransformer(
+            for: .left,
+            scheduleTimer: { _, callback in
+                timerCallbacks.append(callback)
+                return .init {}
+            },
+            monotonicClock: { now }
+        ) { _ in
+            XCTFail("Deferred events must continue through the gesture transformer")
+        }
+        let route = try XCTUnwrap(manager.get(withDevice: nil, withPid: nil, withDisplay: nil) as? [EventTransformer])
+        let gesture = try XCTUnwrap(route.compactMap { $0 as? GestureButtonTransformer }.first)
+        // Replace only the timer/clock dependency; retain the actual gesture
+        // instance and manager post-processing used by the production route.
+        let pipeline: [EventTransformer] = [debouncer, gesture]
+        var deliveredEvents: [CGEvent] = []
+        func send(_ type: CGEventType, deltaX: Double = 0) throws -> CGEvent {
+            let event = try mouseEvent(type: type, button: .left)
+            event.setDoubleValueField(.mouseEventDeltaX, value: deltaX)
+            var resolution = manager.resolve(
+                withCGEvent: event,
+                withSourcePid: nil,
+                withTargetPid: nil,
+                withMouseLocationPid: nil,
+                withDisplay: nil
+            )
+            resolution.transformer = pipeline
+            _ = resolution.transform(event) { deliveredEvents.append($0) }
+            return event
+        }
+
+        _ = try send(.leftMouseDown)
+        now = 30_000_000
+        _ = try send(.leftMouseUp)
+        XCTAssertFalse(gesture.hasActiveInteraction)
+        now = 31_000_000
+        _ = try send(.leftMouseDown)
+        XCTAssertFalse(gesture.hasActiveInteraction) // Waiting in the debouncer.
+        XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
+        now = 44_000_000
+        try XCTUnwrap(timerCallbacks.last)()
+        XCTAssertTrue(gesture.hasActiveInteraction)
+        // The deferred down must establish ownership before the next movement,
+        // even if a configuration reload removes the feature in between.
+        ConfigurationState.shared.configuration = .init()
+        XCTAssertEqual(manager.pointerMotionRequirements, .all)
+        _ = try send(.leftMouseDragged, deltaX: 4)
+        _ = try send(.leftMouseDragged, deltaX: 6)
+        now = 75_000_000
+        _ = try send(.leftMouseUp)
+        now = 90_000_000
+        try XCTUnwrap(timerCallbacks.last)()
+        XCTAssertTrue(
+            try XCTUnwrap(deliveredEvents.last).isGestureCleanupRelease,
+            "Both drag deltas must contribute to the gesture threshold"
+        )
+        XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
+    }
+
+    func testDeferredCompletionDoesNotLoseOtherPinnedButtons() throws {
+        var scheme = Scheme()
+        scheme.buttons.mappings = [
+            .init(trigger: .init(input: .button(.mouse(4))), outcomes: .init(shortPress: .arg0(.none)))
+        ]
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+        let manager = EventTransformerManager()
+        func send(_ type: CGEventType, button: CGMouseButton) throws -> EventTransformerResolution {
+            let event = try mouseEvent(type: type, button: button)
+            let resolution = manager.resolve(
+                withCGEvent: event,
+                withSourcePid: nil,
+                withTargetPid: nil,
+                withMouseLocationPid: nil,
+                withDisplay: nil
+            )
+            _ = resolution.transform(event) { _ in }
+            return resolution
+        }
+        let button = try XCTUnwrap(CGMouseButton(rawValue: 4))
+        let first = try send(.otherMouseDown, button: button)
+        _ = try send(.leftMouseDown, button: .left)
+        // A buffered event resumes after another physical button has joined.
+        first.didTransform?()
+        _ = try send(.otherMouseUp, button: button)
+        scheme.buttons.mappings = []
+        scheme.buttons.switchPrimaryButtonAndSecondaryButtons = true
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+        let up = try mouseEvent(type: .leftMouseUp, button: .left)
+        let resolution = manager.resolve(
+            withCGEvent: up,
+            withSourcePid: nil,
+            withTargetPid: nil,
+            withMouseLocationPid: nil,
+            withDisplay: nil
+        )
+        let result = try XCTUnwrap(resolution.transform(up) { _ in })
+        XCTAssertEqual(result.type, .leftMouseUp, "The release must match its original unswapped press")
+    }
+
     func testCacheKeyIsConfigurationScoped() {
         let matcher = DeviceMatcher(category: .mouse)
         let firstKey = EventTransformerManager.CacheKey(
