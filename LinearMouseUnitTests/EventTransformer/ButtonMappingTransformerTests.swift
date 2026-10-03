@@ -1125,20 +1125,29 @@ final class ButtonMappingTransformerTests: XCTestCase {
         XCTAssertEqual(replayed, [])
     }
 
-    func testWheelMappingConsumesPhysicalEventButIgnoresSyntheticAndMomentum() throws {
+    func testWheelMappingConsumesOwnedMomentumButPassesSyntheticAndUnownedMomentum() throws {
+        let ownership = ScrollGestureOwnership()
         let scheduler = ButtonMappingTestTimerScheduler()
         let mapping = Mapping(trigger: .init(input: .wheel(.up)), action: .arg0(.none))
-        let transformer = makeTransformer(mappings: [mapping], scheduler: scheduler)
-
-        XCTAssertNil(try transformer.transform(scrollEvent(vertical: 1), in: .init(device: nil)))
-
-        let synthetic = try scrollEvent(vertical: 1)
-        synthetic.isLinearMouseSyntheticEvent = true
-        XCTAssertNotNil(transformer.transform(synthetic, in: .init(device: nil)))
+        let transformer = makeTransformer(
+            mappings: [mapping], scheduler: scheduler, scrollRecognizer: .init(gesture: ownership)
+        )
+        let pipeline: [EventTransformer] = [ScrollGestureTransformer(ownership: ownership), transformer]
 
         let momentum = try scrollEvent(vertical: 1)
         ScrollWheelEventView(momentum).momentumPhase = .begin
-        XCTAssertNotNil(transformer.transform(momentum, in: .init(device: nil)))
+        XCTAssertNotNil(pipeline.transform(momentum, in: .init(device: nil)))
+
+        let synthetic = try scrollEvent(vertical: 1)
+        synthetic.isLinearMouseSyntheticEvent = true
+        XCTAssertNotNil(pipeline.transform(synthetic, in: .init(device: nil)))
+        XCTAssertNotNil(pipeline.transform(momentum, in: .init(device: nil)))
+
+        XCTAssertNil(try pipeline.transform(scrollEvent(vertical: 1), in: .init(device: nil)))
+        XCTAssertNil(pipeline.transform(momentum, in: .init(device: nil)))
+        ScrollWheelEventView(momentum).momentumPhase = .end
+        XCTAssertNil(pipeline.transform(momentum, in: .init(device: nil)))
+        XCTAssertNotNil(pipeline.transform(momentum, in: .init(device: nil)))
     }
 
     func testOrderedShortPressRepeatsWithoutReplayingHeldPrefixes() throws {
@@ -1315,6 +1324,9 @@ final class ButtonMappingTransformerTests: XCTestCase {
             XCTAssertNil(try transformer.transform(buttonEvent(button: button, pressed: true), in: context))
             XCTAssertNil(try transformer.transform(buttonEvent(button: button, pressed: false), in: context))
         }
+        // Interleaved clicks do not bypass the wheel cooldown.
+        XCTAssertNil(try transformer.transform(scrollEvent(vertical: 1), in: context))
+        scheduler.advance(to: ms(300))
         XCTAssertNil(try transformer.transform(scrollEvent(vertical: 1), in: context))
         XCTAssertNil(try transformer.transform(buttonEvent(button: 6, pressed: false), in: context))
         XCTAssertNil(try transformer.transform(buttonEvent(button: 4, pressed: false), in: context))
@@ -2095,11 +2107,250 @@ final class ButtonMappingTransformerTests: XCTestCase {
         XCTAssertEqual(deferredEvents, [])
     }
 
+    func testHorizontalShortcutRepeatsWithoutIdleAcrossFreshRecognitionLanes() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let simulator = ButtonMappingTestKeySimulator()
+        let transformer = makeTransformer(
+            mappings: [Mapping(trigger: .init(input: .wheel(.left)), action: .arg1(.keyPress([.a])))],
+            scheduler: scheduler,
+            keySimulator: simulator
+        )
+        for index in 0 ..< 20 {
+            scheduler.advance(to: ms(UInt64(index) * 36))
+            XCTAssertNil(try transformer.transform(scrollEvent(horizontal: 1), in: .init(device: nil)))
+        }
+        scheduler.advance(to: ms(1440))
+        XCTAssertNil(try transformer.transform(scrollEvent(horizontal: 1), in: .init(device: nil)))
+        assertScrollKeyEvents(simulator, equal: Array(repeating: .press([.a]), count: 4))
+    }
+
+    func testContinuousShortcutUsesSameThrottleAndConsumesMomentum() throws {
+        let ownership = ScrollGestureOwnership()
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let simulator = ButtonMappingTestKeySimulator()
+        let transformer = makeTransformer(
+            mappings: [Mapping(trigger: .init(input: .wheel(.left)), action: .arg1(.keyPress([.a])))],
+            scheduler: scheduler,
+            keySimulator: simulator,
+            scrollRecognizer: .init(gesture: ownership)
+        )
+        let pipeline: [EventTransformer] = [ScrollGestureTransformer(ownership: ownership), transformer]
+        for index in 0 ..< 10 {
+            let event = try scrollEvent(horizontal: 1)
+            let view = ScrollWheelEventView(event)
+            view.continuous = true
+            view.deltaXPt = 2
+            view.scrollPhase = index == 0 ? .began : .changed
+            scheduler
+                .advance(to: ms(UInt64(index) * 360)) // Continued scrolling can repeat without ending the gesture.
+            XCTAssertNil(pipeline.transform(event, in: .init(device: nil)))
+        }
+        let end = try scrollEvent()
+        ScrollWheelEventView(end).scrollPhase = .ended
+        XCTAssertNil(pipeline.transform(end, in: .init(device: nil)))
+        let momentum = try scrollEvent(horizontal: 10)
+        ScrollWheelEventView(momentum).momentumPhase = .begin
+        XCTAssertNil(pipeline.transform(momentum, in: .init(device: nil)))
+        let next = try scrollEvent(horizontal: 1)
+        let view = ScrollWheelEventView(next)
+        view.continuous = true
+        view.deltaXPt = 8
+        view.scrollPhase = .began
+        XCTAssertNil(pipeline.transform(next, in: .init(device: nil)))
+        assertScrollKeyEvents(simulator, equal: Array(repeating: .press([.a]), count: 10))
+    }
+
+    func testControlVerticalWheelShortcutUsesFixedThrottle() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let simulator = ButtonMappingTestKeySimulator()
+        let transformer = makeTransformer(
+            mappings: [
+                Mapping(
+                    trigger: .init(input: .wheel(.up), modifiers: [.control]),
+                    action: .arg1(.keyPress([.a]))
+                )
+            ],
+            scheduler: scheduler,
+            keySimulator: simulator
+        )
+        let context = EventTransformerContext(device: nil)
+        for time: UInt64 in [0, 10, 50, 249] {
+            scheduler.advance(to: ms(6 * time / 5))
+            let event = try scrollEvent(vertical: 1)
+            event.flags = .maskControl
+            XCTAssertNil(transformer.transform(event, in: context))
+        }
+        assertScrollKeyEvents(simulator, equal: [.press([.a])])
+        scheduler.advance(to: ms(300))
+        let event = try scrollEvent(vertical: 1)
+        event.flags = .maskControl
+        XCTAssertNil(transformer.transform(event, in: context))
+        assertScrollKeyEvents(simulator, equal: [.press([.a]), .press([.a])])
+    }
+
+    func testHighResolutionShortcutIsThrottledAcrossPartialDetents() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let simulator = ButtonMappingTestKeySimulator()
+        let transformer = ButtonMappingTransformer(
+            mappings: [Mapping(trigger: .init(input: .wheel(.up)), action: .arg1(.keyPress([.a])))],
+            scheduleTimer: scheduler.schedule,
+            monotonicClock: { scheduler.now },
+            keySimulator: simulator,
+            highResolutionWheelMultiplier: { _ in 8 },
+            eventSink: { _ in }
+        )
+        for index in 0 ..< 16 {
+            scheduler.advance(to: ms(UInt64(index) * 12))
+            let event = try scrollEvent(vertical: 1)
+            let view = ScrollWheelEventView(event)
+            view.deltaYFixedPt = 0.125
+            view.deltaYPt = 20 // An accelerated pixel representation must not add steps.
+            XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+        }
+        assertScrollKeyEvents(simulator, equal: [.press([.a])])
+        scheduler.advance(to: ms(300))
+        XCTAssertNil(try transformer.transform(scrollEvent(vertical: 1), in: .init(device: nil)))
+        assertScrollKeyEvents(simulator, equal: [.press([.a]), .press([.a])])
+    }
+
+    func testHighResolutionPointOnlyShortcutEventsAreConsumedAndThrottled() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let simulator = ButtonMappingTestKeySimulator()
+        let transformer = ButtonMappingTransformer(
+            mappings: [Mapping(trigger: .init(input: .wheel(.up)), action: .arg1(.keyPress([.a])))],
+            scheduleTimer: scheduler.schedule,
+            monotonicClock: { scheduler.now },
+            keySimulator: simulator,
+            highResolutionWheelMultiplier: { _ in 8 },
+            eventSink: { _ in }
+        )
+        for _ in 0 ..< 10 {
+            let event = try scrollEvent()
+            ScrollWheelEventView(event).deltaYPt = 1
+            XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+        }
+        assertScrollKeyEvents(simulator, equal: [.press([.a])])
+    }
+
+    func testScrollStateSurvivesTargetChangeAndRouteDeactivation() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let simulator = ButtonMappingTestKeySimulator()
+        let transformer = makeTransformer(
+            mappings: [Mapping(trigger: .init(input: .wheel(.left)), action: .arg1(.keyPress([.a])))],
+            scheduler: scheduler,
+            keySimulator: simulator
+        )
+        for pid in [Int64(1), 1, 2, 2] {
+            let event = try scrollEvent(horizontal: 1)
+            event.setIntegerValueField(.eventTargetUnixProcessID, value: pid)
+            XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+        }
+        assertScrollKeyEvents(simulator, equal: [.press([.a])])
+        transformer.deactivate()
+        XCTAssertNil(try transformer.transform(scrollEvent(horizontal: 1), in: .init(device: nil)))
+        assertScrollKeyEvents(simulator, equal: [.press([.a])])
+    }
+
+    func testNavigationStrokeSurvivesReplacementOfApplicationRoute() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let simulator = ButtonMappingTestKeySimulator()
+        let sharedThrottle = ScrollActionThrottle()
+        let sharedGesture = ScrollGestureOwnership()
+        func route(recognizer: ScrollActionRecognizer, padding: Bool = false) -> ButtonMappingTransformer {
+            let mapping = Mapping(trigger: .init(input: .wheel(.left)), action: .arg1(.keyPress([.a])))
+            return ButtonMappingTransformer(
+                mappings: padding ? [buttonMapping(short: .arg0(.none)), mapping] : [mapping],
+                scheduleTimer: scheduler.schedule,
+                monotonicClock: { scheduler.now },
+                keySimulator: simulator,
+                scrollRecognizer: recognizer,
+                eventSink: { _ in }
+            ) { _ in }
+        }
+        let original = route(recognizer: .init(throttle: sharedThrottle, gesture: sharedGesture))
+        let nextApp = route(recognizer: .init(throttle: sharedThrottle, gesture: sharedGesture), padding: true)
+        let otherDevice = route(recognizer: ScrollActionRecognizer())
+        let tiny = try scrollEvent(horizontal: 1)
+        ScrollWheelEventView(tiny).deltaXFixedPt = 0.001
+        XCTAssertNil(original.transform(tiny, in: .init(device: nil)))
+        original.deactivate()
+        scheduler.advance(to: ms(120))
+        XCTAssertNil(try nextApp.transform(scrollEvent(horizontal: 10), in: .init(device: nil)))
+        scheduler.advance(to: ms(240))
+        XCTAssertNil(try original.transform(scrollEvent(horizontal: 10), in: .init(device: nil)))
+        assertScrollKeyEvents(simulator, equal: [.press([.a])])
+        XCTAssertNil(try otherDevice.transform(scrollEvent(horizontal: 1), in: .init(device: nil)))
+        assertScrollKeyEvents(simulator, equal: [.press([.a]), .press([.a])])
+        scheduler.advance(to: ms(300))
+        XCTAssertNil(try nextApp.transform(scrollEvent(horizontal: 1), in: .init(device: nil)))
+        assertScrollKeyEvents(simulator, equal: [.press([.a]), .press([.a]), .press([.a])])
+    }
+
+    func testUnmappedReversalCannotRetriggerShortcutDuringCooldown() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let simulator = ButtonMappingTestKeySimulator()
+        let transformer = makeTransformer(
+            mappings: [Mapping(trigger: .init(input: .wheel(.left)), action: .arg1(.keyPress([.a])))],
+            scheduler: scheduler,
+            keySimulator: simulator
+        )
+        XCTAssertNil(try transformer.transform(scrollEvent(horizontal: 1), in: .init(device: nil)))
+        scheduler.advance(to: ms(6))
+        XCTAssertNotNil(try transformer.transform(scrollEvent(horizontal: -1), in: .init(device: nil)))
+        scheduler.advance(to: ms(12))
+        XCTAssertNil(try transformer.transform(scrollEvent(horizontal: 1), in: .init(device: nil)))
+        assertScrollKeyEvents(simulator, equal: [.press([.a])])
+    }
+
+    func testModifierReleaseKeepsMappedMomentumConsumed() throws {
+        let ownership = ScrollGestureOwnership()
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let simulator = ButtonMappingTestKeySimulator()
+        let transformer = makeTransformer(
+            mappings: [
+                Mapping(
+                    trigger: .init(input: .wheel(.up), modifiers: [.control]),
+                    action: .arg1(.keyPress([.a]))
+                )
+            ],
+            scheduler: scheduler,
+            keySimulator: simulator,
+            scrollRecognizer: .init(gesture: ownership)
+        )
+        let pipeline: [EventTransformer] = [ScrollGestureTransformer(ownership: ownership), transformer]
+        let event = try scrollEvent(vertical: 1)
+        event.flags = .maskControl
+        let view = ScrollWheelEventView(event)
+        view.continuous = true
+        view.deltaYPt = 8
+        view.scrollPhase = .began
+        XCTAssertNil(pipeline.transform(event, in: .init(device: nil)))
+        event.flags = []
+        view.momentumPhase = .begin
+        XCTAssertNil(pipeline.transform(event, in: .init(device: nil)))
+        assertScrollKeyEvents(simulator, equal: [.press([.a])])
+    }
+
+    private func assertScrollKeyEvents(
+        _ simulator: ButtonMappingTestKeySimulator,
+        equal events: [ButtonMappingTestKeySimulator.Event],
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        let performed = expectation(description: "scroll actions performed")
+        DispatchQueue.main.async {
+            XCTAssertEqual(simulator.events.filter { $0 != .reset }, events, file: file, line: line)
+            performed.fulfill()
+        }
+        wait(for: [performed], timeout: 1)
+    }
+
     private func makeTransformer(
         mappings: [Mapping],
         scheduler: ButtonMappingTestTimerScheduler,
         swapsPrimaryAndSecondaryButtons: Bool = false,
         keySimulator: KeySimulating? = nil,
+        scrollRecognizer: ScrollActionRecognizer = .init(),
         gestureTransformer: GestureButtonTransformer? = nil,
         eventSink: @escaping (CGEvent) -> Void = { _ in }
     ) -> ButtonMappingTransformer {
@@ -2109,6 +2360,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
             scheduleTimer: scheduler.schedule,
             monotonicClock: { scheduler.now },
             keySimulator: keySimulator,
+            scrollRecognizer: scrollRecognizer,
             gestureTransformer: gestureTransformer,
             eventSink: eventSink,
             syntheticClickScheduler: { $0() },
@@ -2147,6 +2399,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
             mouseButton: mouseButton
         ))
         event.setIntegerValueField(.mouseEventButtonNumber, value: Int64(button))
+        event.flags = []
         return event
     }
 
@@ -2161,6 +2414,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
         event.setIntegerValueField(.mouseEventButtonNumber, value: Int64(button))
         event.setDoubleValueField(.mouseEventDeltaX, value: deltaX)
         event.setDoubleValueField(.mouseEventDeltaY, value: deltaY)
+        event.flags = []
         return event
     }
 
@@ -2173,11 +2427,12 @@ final class ButtonMappingTransformerTests: XCTestCase {
         ))
         event.setDoubleValueField(.mouseEventDeltaX, value: deltaX)
         event.setDoubleValueField(.mouseEventDeltaY, value: deltaY)
+        event.flags = []
         return event
     }
 
     private func scrollEvent(horizontal: Int32 = 0, vertical: Int32 = 0) throws -> CGEvent {
-        try XCTUnwrap(CGEvent(
+        let event = try XCTUnwrap(CGEvent(
             scrollWheelEvent2Source: nil,
             units: .line,
             wheelCount: 2,
@@ -2185,6 +2440,8 @@ final class ButtonMappingTransformerTests: XCTestCase {
             wheel2: horizontal,
             wheel3: 0
         ))
+        event.flags = []
+        return event
     }
 
     private func logitech(

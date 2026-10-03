@@ -52,6 +52,10 @@ class EventTransformerManager {
     }
 
     private var activeInteractions = [InteractionKey: ActiveInteraction]()
+    /// Switching Spaces can select a different app route during one wheel stroke.
+    /// Share its cooldown by physical device rather than by app/display configuration.
+    private var scrollThrottles = [InteractionKey: ScrollActionThrottle]()
+    private var scrollGestures = [InteractionKey: ScrollGestureOwnership]()
 
     private struct RouteSelection {
         var device: Device?
@@ -817,7 +821,10 @@ class EventTransformerManager {
             String(describing: display)
         )
 
-        var eventTransformer: [EventTransformer] = []
+        let scrollKey = device.map { InteractionKey.device($0.id) } ?? .unidentified
+        let scrollGesture = scrollGestures[scrollKey] ?? ScrollGestureOwnership()
+        scrollGestures[scrollKey] = scrollGesture
+        var eventTransformer: [EventTransformer] = [ScrollGestureTransformer(ownership: scrollGesture)]
 
         if let reverse = scheme.scrolling.$reverse {
             let vertical = reverse.vertical ?? false
@@ -854,21 +861,6 @@ class EventTransformerManager {
             nil
         }
         let autoScrollTransformer = autoScrollTransformer(for: scheme.buttons.$autoScroll)
-        if device != nil {
-            let highResolutionWheelNormalizer = LogitechHighResolutionWheelNormalizer(
-                verticalMode: highResolutionWheelNormalizerMode(
-                    distance: scheme.scrolling.distance.vertical,
-                    smoothed: smoothed.vertical
-                ),
-                horizontalMode: highResolutionWheelNormalizerMode(
-                    distance: scheme.scrolling.distance.horizontal,
-                    smoothed: smoothed.horizontal
-                )
-            )
-            if highResolutionWheelNormalizer.normalizesAnyAxis {
-                eventTransformer.append(highResolutionWheelNormalizer)
-            }
-        }
 
         if scheme.buttons.switchPrimaryButtonAndSecondaryButtons == true {
             eventTransformer.append(SwitchPrimaryAndSecondaryButtonsTransformer())
@@ -888,12 +880,34 @@ class EventTransformerManager {
             eventTransformer.append(transformer)
         }
 
+        // Action mapping reads physical movement before page-scroll normalization.
+        // Otherwise smoothing/distance settings change shortcut trigger frequency.
         if !buttonMappings.isEmpty {
+            let scrollRecognizer = ScrollActionRecognizer(
+                throttle: scrollThrottle(for: device), gesture: scrollGesture
+            )
             eventTransformer.append(ButtonMappingTransformer(
                 mappings: buttonMappings,
                 universalBackForward: scheme.buttons.universalBackForward,
+                scrollRecognizer: scrollRecognizer,
                 gestureTransformer: gestureTransformer
             ))
+        }
+
+        if device != nil {
+            let highResolutionWheelNormalizer = LogitechHighResolutionWheelNormalizer(
+                verticalMode: highResolutionWheelNormalizerMode(
+                    distance: scheme.scrolling.distance.vertical,
+                    smoothed: smoothed.vertical
+                ),
+                horizontalMode: highResolutionWheelNormalizerMode(
+                    distance: scheme.scrolling.distance.horizontal,
+                    smoothed: smoothed.horizontal
+                )
+            )
+            if highResolutionWheelNormalizer.normalizesAnyAxis {
+                eventTransformer.append(highResolutionWheelNormalizer)
+            }
         }
 
         // Record the normalized/reversed physical wheel before configured
@@ -902,7 +916,11 @@ class EventTransformerManager {
 
         if let modifiers = scheme.scrolling.$modifiers,
            hasSmoothedScrolling {
-            eventTransformer.append(ModifierActionsTransformer(modifiers: modifiers))
+            eventTransformer.append(ModifierActionsTransformer(
+                modifiers: modifiers,
+                scrollThrottle: scrollThrottle(for: device),
+                scrollGesture: scrollGesture
+            ))
         }
 
         if hasSmoothedScrolling {
@@ -970,7 +988,11 @@ class EventTransformerManager {
 
         if let modifiers = scheme.scrolling.$modifiers,
            !hasSmoothedScrolling {
-            eventTransformer.append(ModifierActionsTransformer(modifiers: modifiers))
+            eventTransformer.append(ModifierActionsTransformer(
+                modifiers: modifiers,
+                scrollThrottle: scrollThrottle(for: device),
+                scrollGesture: scrollGesture
+            ))
         }
 
         if buttonMappings.isEmpty, let gestureTransformer {
@@ -1116,6 +1138,7 @@ class EventTransformerManager {
     }
 
     private func invalidateConfigurationState() {
+        resetScrollState()
         let oldAutoScroll = sharedAutoScrollTransformer
         let preservedAutoScrollTransformer = oldAutoScroll?.isAutoscrollActive == true
             ? oldAutoScroll
@@ -1151,7 +1174,29 @@ class EventTransformerManager {
         }
     }
 
+    private func scrollThrottle(for device: Device?) -> ScrollActionThrottle {
+        let key = device.map { InteractionKey.device($0.id) } ?? .unidentified
+        if let throttle = scrollThrottles[key] {
+            return throttle
+        }
+        let throttle = ScrollActionThrottle()
+        scrollThrottles[key] = throttle
+        return throttle
+    }
+
+    private func resetScrollState() {
+        for throttle in scrollThrottles.values {
+            throttle.reset()
+        }
+        scrollThrottles.removeAll()
+        for gesture in scrollGestures.values {
+            gesture.release()
+        }
+        scrollGestures.removeAll()
+    }
+
     private func forceResetState() {
+        resetScrollState()
         let oldAutoScroll = sharedAutoScrollTransformer
         var routesByID = [UUID: TransformerRoute]()
         if let activeRoute {

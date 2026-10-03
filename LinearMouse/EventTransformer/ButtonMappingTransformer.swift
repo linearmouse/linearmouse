@@ -92,6 +92,8 @@ final class ButtonMappingTransformer: EventTransformer {
     private var scheduledDeadline: UInt64?
     private var recognitionLanes = [RecognitionLane]()
     private var targetBundleIdentifier: String?
+    private let scrollRecognizer: ScrollActionRecognizer
+    private let highResolutionWheelMultiplier: (EventTransformerContext) -> Int?
 
     init(
         mappings: [Mapping],
@@ -101,6 +103,10 @@ final class ButtonMappingTransformer: EventTransformer {
         scheduleTimer: @escaping TimerScheduler = ButtonMappingTransformer.scheduleEventThreadTimer,
         monotonicClock: @escaping MonotonicClock = { DispatchTime.now().uptimeNanoseconds },
         keySimulator: KeySimulating? = nil,
+        scrollRecognizer: ScrollActionRecognizer = .init(),
+        highResolutionWheelMultiplier: @escaping (EventTransformerContext) -> Int? = {
+            $0.device?.highResolutionWheelNormalizationMultiplier
+        },
         gestureTransformer: GestureButtonTransformer? = nil,
         eventSink: @escaping (CGEvent) -> Void = { $0.post(tap: .cgSessionEventTap) },
         syntheticClickScheduler: @escaping AsyncScheduler = ButtonMappingTransformer
@@ -112,6 +118,8 @@ final class ButtonMappingTransformer: EventTransformer {
         self.mappings = mappings
         self.universalBackForward = universalBackForward
         self.policy = policy
+        self.scrollRecognizer = scrollRecognizer
+        self.highResolutionWheelMultiplier = highResolutionWheelMultiplier
         actionExecutor = .init(
             universalBackForward: universalBackForward,
             keySimulator: keySimulator
@@ -132,6 +140,9 @@ final class ButtonMappingTransformer: EventTransformer {
 
     func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent? {
         let isRecording = SettingsState.shared.recording
+        if isRecording {
+            scrollRecognizer.reset()
+        }
         guard !event.isLinearMouseSyntheticEvent,
               !isRecording || hasActiveInteraction else {
             return event
@@ -151,6 +162,14 @@ final class ButtonMappingTransformer: EventTransformer {
         }
 
         let now = monotonicClock()
+        let modifierFlags = event.flags.intersection([.maskCommand, .maskShift, .maskControl, .maskAlternate])
+        scrollRecognizer.updateModifiers(modifierFlags.rawValue)
+        if [
+            CGEventType.leftMouseDown, .leftMouseUp, .rightMouseDown, .rightMouseUp,
+            .otherMouseDown, .otherMouseUp
+        ].contains(event.type) {
+            scrollRecognizer.discardMovement()
+        }
         advanceRecognitionLanes(to: now)
 
         if event.isGestureCleanupRelease,
@@ -238,12 +257,61 @@ final class ButtonMappingTransformer: EventTransformer {
             guard !isRecording else {
                 return event
             }
-            guard let direction = wheelDirection(of: event) else {
+            let view = ScrollWheelEventView(event)
+            // The route's ScrollGestureTransformer handles owned momentum.
+            // Unowned momentum must not start a new action mapping.
+            guard view.momentumPhase == .none else {
                 return event
             }
-            recognition = recognize(includingFreshLane: true) { engine in
+            if view.scrollPhase == .began {
+                scrollRecognizer.beginGesture()
+            }
+            let endsGesture = view.scrollPhase == .ended ||
+                view.scrollPhase == .cancelled
+            defer {
+                if endsGesture {
+                    scrollRecognizer.endGesture()
+                }
+            }
+            guard let input = scrollInput(from: view, in: context) else {
+                return endsGesture && scrollRecognizer.ownsGesture ? nil : event
+            }
+            let direction: Mapping.ScrollDirection = switch input.axis {
+            case .horizontal:
+                input.delta > 0 ? .left : .right
+            case .vertical:
+                input.delta > 0 ? .up : .down
+            }
+            var result = recognize(includingFreshLane: true) { engine in
                 engine.wheel(direction, modifierFlags: event.flags, at: now)
             }
+            if let index = result.output.wheelMappingIndex, let action = result.output.actions.popLast() {
+                let count = view.scrollPhase == .cancelled ? 0 : scrollRecognizer.consume(
+                    input,
+                    mapping: index,
+                    repeats: action.repeatsWithScrollMovement,
+                    at: now
+                )
+                if action.repeatsWithScrollMovement, view.scrollPhase != .cancelled {
+                    let executor = actionExecutor
+                    let target = targetBundleIdentifier
+                    scrollRecognizer.retainScrollMomentum(
+                        input: input,
+                        mapping: index,
+                        action: action,
+                        highResolutionMultiplier: highResolutionWheelMultiplier(context),
+                        clock: monotonicClock
+                    ) { action in
+                        executor.perform(action, targetBundleIdentifier: target)
+                    }
+                }
+                if count > 0 {
+                    result.output.actions.append(action.coalescingScrollSteps(count))
+                }
+            } else {
+                scrollRecognizer.discardMovement(on: input.axis)
+            }
+            recognition = result
             canBuffer = false
             alwaysForwardsEvent = false
 
@@ -446,22 +514,11 @@ final class ButtonMappingTransformer: EventTransformer {
         return .mouse(number)
     }
 
-    private func wheelDirection(of event: CGEvent) -> Mapping.ScrollDirection? {
-        let view = ScrollWheelEventView(event)
-        guard view.momentumPhase == .none else {
-            return nil
-        }
-
-        let deltaX = view.continuous ? view.deltaXPt : Double(view.deltaX)
-        let deltaY = view.continuous ? view.deltaYPt : Double(view.deltaY)
-        guard deltaX != 0 || deltaY != 0 else {
-            return nil
-        }
-
-        if abs(deltaY) >= abs(deltaX) {
-            return deltaY > 0 ? .up : .down
-        }
-        return deltaX > 0 ? .left : .right
+    private func scrollInput(
+        from view: ScrollWheelEventView,
+        in context: EventTransformerContext
+    ) -> ScrollInput? {
+        ScrollInput.read(from: view, highResolutionMultiplier: highResolutionWheelMultiplier(context))
     }
 
     private func process(_ output: ButtonMappingEngine.Output, in lane: RecognitionLane?) {
@@ -698,6 +755,9 @@ final class ButtonMappingTransformer: EventTransformer {
 extension ButtonMappingTransformer: LogitechControlEventHandling, LogitechControlInteractionCanceling {
     func handleLogitechControlEvent(_ context: LogitechEventContext) -> LogitechControlEventHandlingResult {
         let isRecording = SettingsState.shared.recording
+        if isRecording {
+            scrollRecognizer.reset()
+        }
         guard !isRecording || hasActiveInteraction else {
             return .notHandled
         }
@@ -828,6 +888,9 @@ extension ButtonMappingTransformer: LogitechControlEventHandling, LogitechContro
 
 extension ButtonMappingTransformer: Deactivatable {
     func deactivate() {
+        scrollRecognizer.discardMovement()
+        // The device's scroll burst outlives an application/Space route change.
+        // EventTransformerManager resets it when configuration or input restarts.
         timerGeneration &+= 1
         timer?.invalidate()
         timer = nil
