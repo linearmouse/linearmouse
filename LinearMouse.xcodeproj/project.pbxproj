@@ -17,10 +17,10 @@
 		97C97728288FC49F009094BA /* DockKit in Frameworks */ = {isa = PBXBuildFile; productRef = 97C97727288FC49F009094BA /* DockKit */; };
 		97FC692F29F44D0100859859 /* AppMover in Frameworks */ = {isa = PBXBuildFile; productRef = 97FC692E29F44D0100859859 /* AppMover */; };
 		97FD5B552CCDF2A600125BFE /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 97FD5B542CCDF2A600125BFE /* Sparkle */; };
-		D2D2D2D2D2D2D2D2D2D2D2D2 /* HIDPP in Frameworks */ = {isa = PBXBuildFile; productRef = D1D1D1D1D1D1D1D1D1D1D1D1 /* HIDPP */; };
 		B70A58F6284F987900E5C86E /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = B70A58F5284F987900E5C86E /* LaunchAtLogin */; };
 		B73AC55127C29C7C00F7D3E8 /* Version in Frameworks */ = {isa = PBXBuildFile; productRef = B73AC55027C29C7C00F7D3E8 /* Version */; };
 		B7F6C5F827A4F6A800E5400B /* LRUCache in Frameworks */ = {isa = PBXBuildFile; productRef = B7F6C5F727A4F6A800E5400B /* LRUCache */; };
+		D2D2D2D2D2D2D2D2D2D2D2D2 /* HIDPP in Frameworks */ = {isa = PBXBuildFile; productRef = D1D1D1D1D1D1D1D1D1D1D1D1 /* HIDPP */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -668,10 +668,6 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = PointerKit;
 		};
-		D1D1D1D1D1D1D1D1D1D1D1D1 /* HIDPP */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = HIDPP;
-		};
 		97C5D8FE2856E3CB00CBED2D /* GestureKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = GestureKit;
@@ -704,6 +700,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B7F6C5F627A4F6A800E5400B /* XCRemoteSwiftPackageReference "LRUCache" */;
 			productName = LRUCache;
+		};
+		D1D1D1D1D1D1D1D1D1D1D1D1 /* HIDPP */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = HIDPP;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
