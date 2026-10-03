@@ -167,7 +167,12 @@ extension ConfigurationState {
         do {
             configuration = try Configuration.load(from: configurationPath)
             // Publish migration only after its backup and atomic write succeed.
-            try configuration.migrateLegacyGestureButtons(persistingTo: configurationPath)
+            do {
+                try configuration.migrateLegacyGestureButtons(persistingTo: configurationPath)
+            } catch {
+                os_log("Gesture migration failed: %{public}@", log: Self.log, type: .error,
+                       error.localizedDescription)
+            }
         } catch CocoaError.fileReadNoSuchFile {
             os_log(
                 "No configuration file found, try creating a default one",
