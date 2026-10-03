@@ -1225,12 +1225,6 @@
               "formatSpecifier" : "f",
               "variations" : {
                 "plural" : {
-                  "many" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%.1f פיקסלים"
-                    }
-                  },
                   "one" : {
                     "stringUnit" : {
                       "state" : "translated",
@@ -2957,12 +2951,6 @@
         "he" : {
           "variations" : {
             "plural" : {
-              "many" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%d שורות"
-                }
-              },
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
@@ -7798,7 +7786,7 @@
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App Exposar"
+            "value" : "App Expose"
           }
         },
         "cs" : {
@@ -37377,7 +37365,7 @@
         },
         "ca" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
@@ -37407,7 +37395,7 @@
         },
         "es" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
@@ -55334,12 +55322,6 @@
         "he" : {
           "variations" : {
             "plural" : {
-              "many" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "ההגדרה תוחזר בעוד %lld שניות אלא אם תשמור אותה."
-                }
-              },
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
