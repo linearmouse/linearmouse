@@ -170,8 +170,12 @@ extension ConfigurationState {
             do {
                 try configuration.migrateLegacyGestureButtons(persistingTo: configurationPath)
             } catch {
-                os_log("Gesture migration failed: %{public}@", log: Self.log, type: .error,
-                       error.localizedDescription)
+                os_log(
+                    "Gesture migration failed: %{public}@",
+                    log: Self.log,
+                    type: .error,
+                    error.localizedDescription
+                )
             }
         } catch CocoaError.fileReadNoSuchFile {
             os_log(
