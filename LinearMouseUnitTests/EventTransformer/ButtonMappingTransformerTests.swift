@@ -134,7 +134,8 @@ final class ButtonMappingTransformerTests: XCTestCase {
                 scheduleTimer: { _, _ in .init {} },
                 monotonicClock: { now },
                 warpPointer: { warped.append($0) },
-                eventSink: { _ in }
+                eventSink: { _ in },
+                syntheticClickEventSink: { _ in }
             )
             let down = try buttonEvent(button: 1, pressed: true)
             down.location = CGPoint(x: 100, y: 100)
@@ -167,7 +168,8 @@ final class ButtonMappingTransformerTests: XCTestCase {
             scheduleTimer: { _, _ in .init {} },
             monotonicClock: { now },
             warpPointer: { warped.append($0) },
-            eventSink: { _ in }
+            eventSink: { _ in },
+            syntheticClickEventSink: { _ in }
         )
         let first = try buttonEvent(button: 1, pressed: true)
         first.location = CGPoint(x: 100, y: 100)
@@ -572,6 +574,8 @@ final class ButtonMappingTransformerTests: XCTestCase {
             mappings: [mapping],
             scheduleTimer: scheduler.schedule,
             monotonicClock: { scheduler.now },
+            warpPointer: { _ in },
+            eventSink: { _ in },
             syntheticClickScheduler: { scheduledReplay = $0 },
             syntheticClickReleaseScheduler: { delay, handler in
                 scheduledReleaseDelay = delay
@@ -1170,6 +1174,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
                 return .init {}
             },
             monotonicClock: { now },
+            warpPointer: { _ in },
             eventSink: { replayed.append($0.type) },
             syntheticClickScheduler: { $0() },
             syntheticClickReleaseScheduler: { _, handler in handler() },
@@ -2373,7 +2378,9 @@ final class ButtonMappingTransformerTests: XCTestCase {
             monotonicClock: { scheduler.now },
             keySimulator: simulator,
             highResolutionWheelMultiplier: { _ in 8 },
-            eventSink: { _ in }
+            warpPointer: { _ in },
+            eventSink: { _ in },
+            syntheticClickEventSink: { _ in }
         )
         for index in 0 ..< 16 {
             scheduler.advance(to: ms(UInt64(index) * 12))
@@ -2398,7 +2405,9 @@ final class ButtonMappingTransformerTests: XCTestCase {
             monotonicClock: { scheduler.now },
             keySimulator: simulator,
             highResolutionWheelMultiplier: { _ in 8 },
-            eventSink: { _ in }
+            warpPointer: { _ in },
+            eventSink: { _ in },
+            syntheticClickEventSink: { _ in }
         )
         for _ in 0 ..< 10 {
             let event = try scrollEvent()
@@ -2440,6 +2449,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
                 monotonicClock: { scheduler.now },
                 keySimulator: simulator,
                 scrollRecognizer: recognizer,
+                warpPointer: { _ in },
                 eventSink: { _ in }
             ) { _ in }
         }

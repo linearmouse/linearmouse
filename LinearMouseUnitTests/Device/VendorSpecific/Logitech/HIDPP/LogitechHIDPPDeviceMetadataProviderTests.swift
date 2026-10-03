@@ -53,7 +53,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
             for: device,
             slots: [slot(slot: 1, name: "Mouse")],
             connectionSnapshots: [1: .init(isConnected: true, kind: 0x02)],
-            expectedConnectedDeviceCount: 2,
+            expectedPairedDeviceCount: 2,
             inventoryAvailable: true
         )
 
@@ -68,7 +68,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
             for: device,
             slots: [slot(slot: 1, name: "Mouse")],
             connectionSnapshots: [1: .init(isConnected: true, kind: 0x02)],
-            expectedConnectedDeviceCount: 1,
+            expectedPairedDeviceCount: 1,
             inventoryAvailable: true
         ))
 
@@ -82,7 +82,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
             for: mouseDevice(),
             slots: [slot(slot: 1, name: "Mouse")],
             connectionSnapshots: [:],
-            expectedConnectedDeviceCount: 0,
+            expectedPairedDeviceCount: 0,
             inventoryAvailable: true
         ))
     }
@@ -103,11 +103,46 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
             for: device,
             slots: [slot(slot: 1, name: "Mouse", serialNumber: "ABC123")],
             connectionSnapshots: [1: .init(isConnected: true, kind: 0x02)],
-            expectedConnectedDeviceCount: 2,
+            expectedPairedDeviceCount: 2,
             inventoryAvailable: true
         ))
 
         XCTAssertEqual(candidate.slot, 1)
+    }
+
+    func testOfflinePairedSlotDoesNotBlockOnlineMouseRoute() throws {
+        let provider = LogitechHIDPPDeviceMetadataProvider()
+        let snapshots: [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot] = [
+            1: .init(isConnected: true, kind: 0x02),
+            2: .init(isConnected: false, kind: 0x02)
+        ]
+        let candidate = try XCTUnwrap(provider.receiverSlotCandidate(
+            for: mouseDevice(),
+            slots: [slot(slot: 1, name: "Online Mouse"), slot(slot: 2)],
+            connectionSnapshots: snapshots,
+            expectedPairedDeviceCount: 2,
+            inventoryAvailable: true
+        ))
+        XCTAssertEqual(candidate.slot, 1)
+
+        let discovery = LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery(
+            identities: [1, 2].map { slot in
+                ReceiverLogicalDeviceIdentity(
+                    receiverLocationID: 1,
+                    slot: UInt8(slot),
+                    kind: .mouse,
+                    name: "Mouse",
+                    serialNumber: nil,
+                    productID: nil,
+                    batteryLevel: nil
+                )
+            },
+            connectionSnapshots: snapshots,
+            liveReachableSlots: [],
+            expectedPairedDeviceCount: 2,
+            observedSlotKinds: [1: 0x02, 2: 0x02]
+        )
+        XCTAssertEqual(provider.receiverSlot(for: mouseDevice(), discovery: discovery), 1)
     }
 
     func testUnknownCountKeepsLegacyCompatibilityFallback() throws {
@@ -117,7 +152,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
             for: mouseDevice(),
             slots: [slot(slot: 1, name: "Mouse")],
             connectionSnapshots: [:],
-            expectedConnectedDeviceCount: nil,
+            expectedPairedDeviceCount: nil,
             inventoryAvailable: false
         ))
 
@@ -131,7 +166,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
             for: mouseDevice(),
             slots: [slot(slot: 1, kind: ReceiverLogicalDeviceKind.keyboard.rawValue)],
             connectionSnapshots: [1: .init(isConnected: true, kind: 0x01)],
-            expectedConnectedDeviceCount: 1,
+            expectedPairedDeviceCount: 1,
             inventoryAvailable: true
         ))
     }
@@ -143,7 +178,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
             for: mouseDevice(),
             slots: [slot(slot: 1, kind: ReceiverLogicalDeviceKind.mouse.rawValue, name: "Mouse")],
             connectionSnapshots: [1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.keyboard.rawValue)],
-            expectedConnectedDeviceCount: 1,
+            expectedPairedDeviceCount: 1,
             inventoryAvailable: true
         ))
     }
@@ -155,7 +190,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
             for: mouseDevice(),
             slots: [slot(slot: 1, kind: ReceiverLogicalDeviceKind.keyboard.rawValue, name: "Keyboard")],
             connectionSnapshots: [1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)],
-            expectedConnectedDeviceCount: 1,
+            expectedPairedDeviceCount: 1,
             inventoryAvailable: true
         ))
     }
@@ -173,7 +208,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
                 1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue),
                 2: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.keyboard.rawValue)
             ],
-            expectedConnectedDeviceCount: 2,
+            expectedPairedDeviceCount: 2,
             inventoryAvailable: true
         ))
 
@@ -188,7 +223,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
             for: mouseDevice(),
             slots: slots,
             connectionSnapshots: [1: .init(isConnected: true, kind: 0)],
-            expectedConnectedDeviceCount: 1,
+            expectedPairedDeviceCount: 1,
             inventoryAvailable: true
         ))
         XCTAssertEqual(zeroMarker.slot, 1)
@@ -197,7 +232,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
             for: mouseDevice(),
             slots: slots,
             connectionSnapshots: [1: .init(isConnected: true, kind: 0x06)],
-            expectedConnectedDeviceCount: 1,
+            expectedPairedDeviceCount: 1,
             inventoryAvailable: true
         ))
     }
@@ -209,7 +244,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
             for: mouseDevice(),
             slots: [slot(slot: 1, kind: ReceiverLogicalDeviceKind.mouse.rawValue, name: "Mouse")],
             connectionSnapshots: [1: .init(isConnected: true, kind: nil)],
-            expectedConnectedDeviceCount: 1,
+            expectedPairedDeviceCount: 1,
             inventoryAvailable: true
         ))
 
@@ -229,7 +264,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
                 1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue),
                 2: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.keyboard.rawValue)
             ],
-            expectedConnectedDeviceCount: 2,
+            expectedPairedDeviceCount: 2,
             inventoryAvailable: true
         ))
 
@@ -256,7 +291,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
                 serialNumber: "ABC123"
             )],
             connectionSnapshots: [1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.keyboard.rawValue)],
-            expectedConnectedDeviceCount: 1,
+            expectedPairedDeviceCount: 1,
             inventoryAvailable: true
         ))
     }
@@ -286,7 +321,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
 
     func testConnectionSnapshotCollectorRetainsReconnectTransition() {
         var collector = LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotCollector(
-            expectedConnectedDeviceCount: nil
+            expectedPairedDeviceCount: nil
         )
         collector.record(slot: 1, snapshot: .init(isConnected: false, kind: 0x02))
         collector.record(slot: 1, snapshot: .init(isConnected: true, kind: 0x02))
@@ -311,7 +346,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
             identities: [identity],
             connectionSnapshots: [1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)],
             liveReachableSlots: [1],
-            expectedConnectedDeviceCount: 2,
+            expectedPairedDeviceCount: 2,
             inventoryAvailable: true,
             observedSlotKinds: [1: ReceiverLogicalDeviceKind.mouse.rawValue]
         )
@@ -322,7 +357,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
             identities: [identity],
             connectionSnapshots: [1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)],
             liveReachableSlots: [1],
-            expectedConnectedDeviceCount: 1,
+            expectedPairedDeviceCount: 1,
             inventoryAvailable: true,
             observedSlotKinds: [1: ReceiverLogicalDeviceKind.mouse.rawValue]
         )
@@ -470,7 +505,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
 
     func testConnectionSnapshotCollectorRetainsFollowupUntilQuietWait() {
         var collector = LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotCollector(
-            expectedConnectedDeviceCount: 1
+            expectedPairedDeviceCount: 1
         )
         collector.record(slot: 1, snapshot: .init(isConnected: true, kind: 0x02))
 
@@ -479,13 +514,27 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         XCTAssertTrue(collector.isCompleteAfterQuietWait)
         collector.record(slot: 1, snapshot: .init(isConnected: false, kind: 0x02))
 
-        XCTAssertFalse(collector.isCompleteAfterQuietWait)
+        XCTAssertTrue(collector.isCompleteAfterQuietWait)
         XCTAssertEqual(collector.snapshots[1], .init(isConnected: false, kind: 0x02))
+    }
+
+    func testConnectionSnapshotCollectorCountsOfflineSlotsButNotDuplicateEvents() {
+        var collector = LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotCollector(
+            expectedPairedDeviceCount: 2
+        )
+        collector.record(slot: 1, snapshot: .init(isConnected: false, kind: 0x02))
+        collector.record(slot: 1, snapshot: .init(isConnected: false, kind: 0x02))
+        XCTAssertFalse(collector.isCompleteAfterQuietWait)
+        collector.record(slot: 2, snapshot: .init(isConnected: false, kind: 0x02))
+        XCTAssertTrue(collector.isCompleteAfterQuietWait)
+        collector.record(slot: 2, snapshot: .init(isConnected: true, kind: 0x02))
+        XCTAssertTrue(collector.isCompleteAfterQuietWait)
+        XCTAssertEqual(collector.batch.reconnectedSlots, [2])
     }
 
     func testConnectionSnapshotCollectorCompletesAfterQuietWaitForConnectOnly() {
         var collector = LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotCollector(
-            expectedConnectedDeviceCount: 1
+            expectedPairedDeviceCount: 1
         )
         collector.record(slot: 1, snapshot: .init(isConnected: true, kind: 0x02))
 

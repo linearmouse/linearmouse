@@ -20,7 +20,7 @@ final class PointerRedirectsToScrollTriggerTransformer {
     /// Returns nil unless `trigger` is a valid redirects-to-scroll trigger.
     init?(
         trigger: Scheme.Trigger,
-        redirect: @escaping Redirect = PointerRedirectsToScrollTransformer.redirectToScroll
+        redirect: @escaping Redirect = { PointerRedirectsToScrollTransformer.redirectToScroll($0) }
     ) {
         guard trigger.isValidRedirectsToScrollTrigger,
               case let .button(.mouse(buttonNumber)) = trigger.input else {
