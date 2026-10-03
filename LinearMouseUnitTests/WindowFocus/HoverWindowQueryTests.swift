@@ -6,6 +6,82 @@ import AppKit
 import XCTest
 
 final class HoverWindowQueryTests: XCTestCase {
+    /// Run with a fresh test host to exercise the first AXChildren query while
+    /// the settings window is still initializing. Do not warm up AX on main.
+    func testOwnSettingsWindowCanBeQueriedDuringOpening() {
+        let completed = expectation(description: "Query settings window during startup")
+        DispatchQueue.main.async {
+            SettingsWindowController.shared.bringToFront()
+            guard let window = SettingsWindowController.shared.window,
+                  let screen = NSScreen.screens.first else {
+                XCTFail("Missing settings window or screen")
+                completed.fulfill()
+                return
+            }
+            let target = HoverWindowQuery.Focus(pid: getpid(), windowID: CGWindowID(window.windowNumber))
+            let point = CGPoint(x: window.frame.midX, y: screen.frame.maxY - window.frame.midY)
+            DispatchQueue(label: "test.hover-focus.opening").async {
+                let query = HoverWindowQuery()
+                var eligibleQueries = 0
+                for _ in 0 ..< 200 {
+                    if query.canFocus(target, at: point) {
+                        eligibleQueries += 1
+                    }
+                    Thread.sleep(forTimeInterval: 0.01)
+                }
+                // The initial accessory-to-regular activation transition may
+                // temporarily make the window ineligible.
+                XCTAssertGreaterThan(eligibleQueries, 0)
+                DispatchQueue.main.async {
+                    window.close()
+                    completed.fulfill()
+                }
+            }
+        }
+        wait(for: [completed], timeout: 15)
+    }
+
+    func testOwnApplicationQueryRunsOnMainFromWorker() {
+        let completed = expectation(description: "Local AX query completes")
+        DispatchQueue(label: "test.hover-focus").async {
+            let application = AXUIElementCreateApplication(ProcessInfo.processInfo.processIdentifier)
+            let result = HoverWindowQuery.performAXQuery(on: application) {
+                XCTAssertTrue(Thread.isMainThread)
+                return 42
+            }
+            XCTAssertEqual(result, 42)
+            XCTAssertFalse(Thread.isMainThread)
+            completed.fulfill()
+        }
+        wait(for: [completed], timeout: 5)
+    }
+
+    func testOwnApplicationQueryOnMainDoesNotRedispatch() {
+        let completed = expectation(description: "Main-thread AX query completes without deadlocking")
+        DispatchQueue.main.async {
+            let application = AXUIElementCreateApplication(ProcessInfo.processInfo.processIdentifier)
+            HoverWindowQuery.performAXQuery(on: application) {
+                XCTAssertTrue(Thread.isMainThread)
+            }
+            completed.fulfill()
+        }
+        wait(for: [completed], timeout: 5)
+    }
+
+    func testRemoteApplicationQueryStaysOnWorker() {
+        let completed = expectation(description: "Remote AX query stays off main")
+        let queue = DispatchQueue(label: "test.hover-focus.remote")
+        queue.async {
+            let application = AXUIElementCreateApplication(getppid())
+            HoverWindowQuery.performAXQuery(on: application) {
+                dispatchPrecondition(condition: .onQueue(queue))
+                XCTAssertFalse(Thread.isMainThread)
+            }
+            completed.fulfill()
+        }
+        wait(for: [completed], timeout: 5)
+    }
+
     private func window(_ id: UInt32, layer: Int = 0, alpha: Double = 1) -> [String: Any] {
         [
             kCGWindowNumber as String: id,

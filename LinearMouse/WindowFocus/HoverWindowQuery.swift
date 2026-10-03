@@ -29,7 +29,7 @@ struct HoverWindowQuery {
         let application = AXUIElementCreateApplication(target.pid)
         guard let axWindows = value(kAXWindowsAttribute, on: application) as? [AXUIElement],
               let window = Self.matchingWindow(in: axWindows, targetID: target.windowID, windowID: { element in
-                  WindowFocus.shared.windowID(of: element)
+                  windowID(of: element)
               }),
               string(kAXRoleAttribute, on: window) == kAXWindowRole,
               string(kAXSubroleAttribute, on: window) == kAXStandardWindowSubrole,
@@ -82,7 +82,7 @@ struct HoverWindowQuery {
             !hasSheet(on: window) else {
             return nil
         }
-        guard let id = WindowFocus.shared.windowID(of: window) else {
+        guard let id = windowID(of: window) else {
             return nil
         }
         return Focus(pid: pid, windowID: id)
@@ -118,13 +118,34 @@ struct HoverWindowQuery {
         return children.contains { string(kAXRoleAttribute, on: $0) == kAXSheetRole }
     }
 
-    private func value(_ attribute: String, on element: AXUIElement) -> CFTypeRef? {
-        AXUIElementSetMessagingTimeout(element, 0.05)
-        var result: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(element, attribute as CFString, &result) == .success else {
-            return nil
+    /// AX queries for our own elements call AppKit directly on the caller's thread.
+    /// Keep those calls on main, including window-ID lookup, while remote IPC stays
+    /// on the hover worker. The main thread must not wait synchronously for that worker.
+    static func performAXQuery<Result>(on element: AXUIElement, _ query: () -> Result) -> Result {
+        var pid: pid_t = 0
+        if AXUIElementGetPid(element, &pid) == .success,
+           pid == ProcessInfo.processInfo.processIdentifier,
+           !Thread.isMainThread {
+            return DispatchQueue.main.sync(execute: query)
         }
-        return result
+        return query()
+    }
+
+    private func windowID(of window: AXUIElement) -> CGWindowID? {
+        Self.performAXQuery(on: window) {
+            WindowFocus.shared.windowID(of: window)
+        }
+    }
+
+    private func value(_ attribute: String, on element: AXUIElement) -> CFTypeRef? {
+        Self.performAXQuery(on: element) {
+            AXUIElementSetMessagingTimeout(element, 0.05)
+            var result: CFTypeRef?
+            guard AXUIElementCopyAttributeValue(element, attribute as CFString, &result) == .success else {
+                return nil
+            }
+            return result
+        }
     }
 
     private func element(_ attribute: String, on element: AXUIElement) -> AXUIElement? {
