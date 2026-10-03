@@ -39886,7 +39886,7 @@
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mission Control"
+            "value" : "Έλεγχος Αποστολής"
           }
         },
         "es" : {
@@ -39934,7 +39934,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mission Control"
+            "value" : "ミッションコントロール"
           }
         },
         "ko" : {
@@ -39976,7 +39976,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mission Control"
+            "value" : "Controle de missão"
           }
         },
         "ro" : {
@@ -40012,7 +40012,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mission Control"
+            "value" : "Görev Kontrol"
           }
         },
         "uk" : {
