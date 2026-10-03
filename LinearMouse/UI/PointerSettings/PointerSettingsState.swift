@@ -617,21 +617,17 @@ extension PointerSettingsState {
         mergedScheme.firstMatchedDevice?.showsPointerSpeedLimitationNotice ?? false
     }
 
+    /// Restore software tracking settings without changing other pointer features or hardware DPI.
     func revertPointerSpeed() {
         let device = scheme.firstMatchedDevice
 
         device?.restorePointerAccelerationAndPointerSpeed()
 
-        // This turns redirecting off, so a pending selection or countdown no
-        // longer has anything to apply or put back.
-        resetRedirectsToScrollModeState()
-
         Scheme(
             pointer: Scheme.Pointer(
                 acceleration: .unset,
                 speed: .unset,
-                disableAcceleration: false,
-                redirectsToScroll: false
+                disableAcceleration: false
             )
         )
         .merge(into: &scheme)
