@@ -1051,3 +1051,46 @@ rules remove inherited gestures while restoring ordinary mappings under their
 original conditions, using additional rules in the existing scheme format. Unsupported legacy triggers remain unchanged.
 Migrated gestures use the button mapping lifecycle: one action per press, with no
 separate gesture cooldown. Edit them under **Buttons → Button Mappings**.
+
+## Focus windows on hover
+
+Enable **Focus windows on hover** in Pointer settings for **All mice**, **All
+trackpads**, or an individual device. It is off by default. The pointer must stay
+inside an eligible window for about 100 ms before it receives keyboard focus.
+LinearMouse does not raise the window or replay a click. Some applications raise
+their own windows when focused. Clicking before focus has changed still follows
+the application's normal first-click behavior.
+
+The setting belongs to the selected scheme. Application conditions refer to the
+**window under the pointer**, not the currently focused application. To exclude
+an application, select it in the settings header and turn the option off. This
+prevents automatically entering that application's windows; it does not prevent
+leaving them. For example, enable only for mice, except over a particular app:
+
+```json
+{
+  "schemes": [
+    {
+      "if": { "device": { "category": "mouse" } },
+      "pointer": { "focusFollowsMouse": true }
+    },
+    {
+      "if": {
+        "device": { "category": "mouse" },
+        "app": "com.example.app"
+      },
+      "pointer": { "focusFollowsMouse": false }
+    }
+  ]
+}
+```
+
+Hold Control to temporarily pause, for example when moving toward the menu bar.
+Dragging, keyboard input, other held modifiers, menus, modal dialogs and Mission
+Control suspend automatic focus. After typing or switching windows with the
+keyboard, leave and re-enter the hovered window to focus it again. Unidentified
+or synthetic pointer input cannot borrow another device's setting.
+
+The implementation uses dynamically resolved macOS private focus APIs. It
+requires the usual Accessibility permission, not a Dock injection or disabled
+SIP. Unsupported windows or unavailable APIs are skipped without a raise fallback.

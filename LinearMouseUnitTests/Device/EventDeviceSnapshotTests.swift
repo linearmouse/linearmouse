@@ -33,6 +33,17 @@ final class EventDeviceSnapshotTests: XCTestCase {
         XCTAssertIdentical(snapshot.device(for: nil), fallback)
     }
 
+    func testStrictLookupNeverBorrowsAnotherDevicesSettings() {
+        let snapshot = EventDeviceSnapshot<TestDevice>()
+        let mouse = TestDevice(senderID: 7)
+        snapshot.replaceDevices([7: mouse])
+        snapshot.setLastActiveDevice(mouse)
+        XCTAssertIdentical(snapshot.identifiedDevice(for: 7), mouse)
+        XCTAssertNil(snapshot.identifiedDevice(for: 8))
+        snapshot.replaceDevices([:])
+        XCTAssertNil(snapshot.identifiedDevice(for: 7))
+    }
+
     func testUnknownSenderWithoutActiveDeviceReturnsNil() {
         let snapshot = EventDeviceSnapshot<TestDevice>()
         snapshot.replaceDevices([7: TestDevice(senderID: 7)])

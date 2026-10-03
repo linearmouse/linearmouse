@@ -1,6 +1,40 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Focus the window under the pointer without bringing it to the front. App-specific settings apply to the window you hover over. Hold Control to pause." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "聚焦指针下的窗口，但不将它置于最前方。应用专属设置针对悬停目标窗口生效。按住 Control 可暂停。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "聚焦指標下的視窗，但不將它移至最前方。App 專屬設定針對懸停目標視窗生效。按住 Control 可暫停。"
+          }
+        }
+      }
+    },
+    "Focus windows on hover" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "悬停聚焦窗口"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "懸停聚焦視窗"
+          }
+        }
+      }
+    },
     "- %@" : {
       "localizations" : {
         "af" : {

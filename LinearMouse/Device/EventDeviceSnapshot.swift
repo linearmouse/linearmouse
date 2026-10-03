@@ -28,6 +28,11 @@ final class EventDeviceSnapshot<Device: AnyObject> {
         }
     }
 
+    /// Focus changes must never borrow the last active device for unidentified input.
+    func identifiedDevice(for senderID: UInt64) -> Device? {
+        lock.withLock { devices[senderID] }
+    }
+
     func device(for senderID: UInt64?) -> Device? {
         lock.withLock {
             if let senderID, let device = devices[senderID] {

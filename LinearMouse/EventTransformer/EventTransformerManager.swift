@@ -131,6 +131,7 @@ class EventTransformerManager {
                 }
 
                 let update = {
+                    FocusFollowsMouseController.shared.configure(configuration)
                     self.configuration = configuration
                     self.usesProcessConditions = configuration.usesProcessConditions
                     self.configuredMotionRequirements = .init(configuration: configuration)

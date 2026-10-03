@@ -1448,6 +1448,12 @@
           "title": "Disable pointer acceleration",
           "type": "boolean"
         },
+        "focusFollowsMouse": {
+          "default": false,
+          "description": "Focus the hovered window after 100 ms without raising it. App conditions match the hovered window, not the frontmost app. Hold Control to pause. Some apps may raise themselves when focused.",
+          "title": "Focus windows on hover",
+          "type": "boolean"
+        },
         "hardwareDPI": {
           "description": "A device-specific hardware DPI value for supported devices. If omitted, no hardware DPI will be applied.",
           "minimum": 100,

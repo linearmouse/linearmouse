@@ -9,6 +9,7 @@
 #include <IOKit/hidsystem/IOHIDEventSystemClient.h>
 
 #include "Utilities/Process.h"
+#include "WindowFocus/WindowFocus.h"
 
 CF_IMPLICIT_BRIDGING_ENABLED
 
