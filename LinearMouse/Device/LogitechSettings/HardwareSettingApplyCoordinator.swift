@@ -61,6 +61,10 @@ final class HardwareSettingApplyCoordinator {
         self.scheduler = scheduler
     }
 
+    var isRunning: Bool {
+        lock.withLock { currentCancellationSource != nil }
+    }
+
     func start(_ operation: @escaping Operation, completion: Completion? = nil) {
         let cancellationSource = CancellationSource()
         let previousSource = lock.withLock { () -> CancellationSource? in

@@ -85,8 +85,12 @@ extension Device {
         }
     }
 
-    var confirmedLogitechSensorDPI: Int? {
-        logitechSession.sensorDPI
+    var isLogitechSensorDPIApplyRunning: Bool {
+        logitechSession.isDPIApplyRunning
+    }
+
+    func hasConfirmedLogitechSensorDPI(_ dpi: Int) -> Bool {
+        logitechSession.hasConfirmedSensorDPI(dpi)
     }
 
     var needsLogitechSensorDPIRestoreRetry: Bool {

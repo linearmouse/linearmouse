@@ -1279,6 +1279,18 @@ final class LogitechDeviceSessionTests: XCTestCase {
         })
     }
 
+    func testConfirmedDPIMatchesNearestSupportedValueWithoutDeviceIO() throws {
+        let session = LogitechDeviceSession(deviceID: 1)
+        let access = try adjustableDPIAccess(for: session)
+        XCTAssertFalse(session.hasConfirmedSensorDPI(810))
+        session.updateSensorDPI(800, for: access)
+        XCTAssertTrue(session.hasConfirmedSensorDPI(810))
+        XCTAssertTrue(session.hasConfirmedSensorDPI(800))
+        XCTAssertFalse(session.hasConfirmedSensorDPI(1200))
+        session.clearSensorDPI()
+        XCTAssertFalse(session.hasConfirmedSensorDPI(810))
+    }
+
     private func adjustableDPIAccess(
         for session: LogitechDeviceSession,
         expectedToken: CancellationToken? = nil,

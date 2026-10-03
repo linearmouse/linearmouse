@@ -174,6 +174,7 @@ class DeviceManager: ObservableObject {
             manager
                 .observePropertyChanged(property: property) { [self] _ in
                     os_log("Property %{public}@ changed", log: Self.log, type: .info, property)
+                    invalidatePointerSchemes()
                     updatePointerSpeed()
                 }
                 .tieToLifetime(of: self)
@@ -285,6 +286,7 @@ class DeviceManager: ObservableObject {
         lastActiveDeviceRef = nil
         state = .running
 
+        invalidatePointerSchemes()
         updatePointerSpeed()
         for device in devices {
             if shouldMonitorReceiver(device) {
@@ -294,7 +296,7 @@ class DeviceManager: ObservableObject {
                     receiverMonitor.requestRediscovery(device: device, request: rediscovery)
                 }
             } else if device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID {
-                device.logitechSettingsReconciler.reapplyAfterWake(configuredLogitechDeviceSettings(for: device))
+                device.logitechSettingsReconciler.reapplyAfterWake(configuredLogitechScheme(for: device))
                 device.resumeLogitechControlsAfterSleep()
             }
         }
@@ -936,6 +938,12 @@ class DeviceManager: ObservableObject {
         return eventDeviceSnapshot.device(for: IOHIDEventGetSenderID(ioHIDEvent))
     }
 
+    private func invalidatePointerSchemes() {
+        for device in devices {
+            device.pointerSchemeState.invalidate()
+        }
+    }
+
     func updatePointerSpeed() {
         guard state == .running else {
             return
@@ -958,58 +966,7 @@ class DeviceManager: ObservableObject {
                 .currentScreenName
         )
 
-        if let pointerDisableAcceleration = scheme.pointer.disableAcceleration, pointerDisableAcceleration {
-            // If the pointer acceleration is turned off, it is preferable to utilize
-            // the new API introduced by macOS Sonoma.
-            // Otherwise, set pointer acceleration to -1.
-            if device.disablePointerAcceleration != nil {
-                device.disablePointerAcceleration = true
-
-                // This might be a bit confusing because of the historical naming
-                // convention, but here, the pointerAcceleration actually refers to
-                // the tracking speed.
-                if let pointerAcceleration = scheme.pointer.acceleration {
-                    switch pointerAcceleration {
-                    case let .value(v):
-                        device.pointerAcceleration = v.asTruncatedDouble
-                    case .unset:
-                        device.restorePointerAcceleration()
-                    }
-                } else {
-                    device.restorePointerAcceleration()
-                }
-            } else {
-                device.pointerAcceleration = -1
-            }
-
-            return
-        }
-
-        if device.disablePointerAcceleration != nil {
-            device.disablePointerAcceleration = false
-        }
-
-        if let pointerSpeed = scheme.pointer.speed {
-            switch pointerSpeed {
-            case let .value(v):
-                device.pointerSpeed = v.asTruncatedDouble
-            case .unset:
-                device.restorePointerSpeed()
-            }
-        } else {
-            device.restorePointerSpeed()
-        }
-
-        if let pointerAcceleration = scheme.pointer.acceleration {
-            switch pointerAcceleration {
-            case let .value(v):
-                device.pointerAcceleration = v.asTruncatedDouble
-            case .unset:
-                device.restorePointerAcceleration()
-            }
-        } else {
-            device.restorePointerAcceleration()
-        }
+        device.pointerSchemeState.apply(scheme, to: device)
     }
 
     func updateLogitechDeviceSettings() {
@@ -1033,10 +990,10 @@ class DeviceManager: ObservableObject {
             return
         }
 
-        device.logitechSettingsReconciler.apply(configuredLogitechDeviceSettings(for: device))
+        device.logitechSettingsReconciler.apply(configuredLogitechScheme(for: device))
     }
 
-    private func configuredLogitechDeviceSettings(for device: Device) -> LogitechDeviceSettings {
+    private func configuredLogitechScheme(for device: Device) -> Scheme {
         let schemes = ConfigurationState.shared.configuration.schemes
         guard case let .at(index) = schemes.schemeIndex(
             ofDevice: device,
@@ -1045,14 +1002,10 @@ class DeviceManager: ObservableObject {
             ofProcessName: nil,
             ofDisplay: nil
         ) else {
-            return LogitechDeviceSettings(dpi: nil, highResolutionWheel: nil)
+            return Scheme()
         }
 
-        let scheme = schemes[index]
-        return LogitechDeviceSettings(
-            dpi: scheme.pointer.hardwareDPI,
-            highResolutionWheel: scheme.logitech.highResolutionWheel
-        )
+        return schemes[index]
     }
 
     private func finishDeviceLifecycleTeardown() {
@@ -1127,7 +1080,7 @@ class DeviceManager: ObservableObject {
             return
         }
 
-        device.logitechSettingsReconciler.reapply(configuredLogitechDeviceSettings(for: device))
+        device.logitechSettingsReconciler.reapply(configuredLogitechScheme(for: device))
     }
 
     /// `isReady` remains false for a monitored receiver until discovery has
@@ -1277,10 +1230,10 @@ class DeviceManager: ObservableObject {
 
             let identityChanged = previousRoute != route
             if resumedAfterWake {
-                device.logitechSettingsReconciler.reapplyAfterWake(configuredLogitechDeviceSettings(for: device))
+                device.logitechSettingsReconciler.reapplyAfterWake(configuredLogitechScheme(for: device))
                 device.resumeLogitechControlsAfterSleep()
             } else if discovery.update?.hardwareTargetChanged == true {
-                device.logitechSettingsReconciler.reapply(configuredLogitechDeviceSettings(for: device))
+                device.logitechSettingsReconciler.reapply(configuredLogitechScheme(for: device))
             } else if identityChanged {
                 device.requestLogitechControlsForcedReconfiguration()
             }

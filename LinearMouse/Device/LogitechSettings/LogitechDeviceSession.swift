@@ -474,6 +474,22 @@ final class LogitechDeviceSession {
         return update.0
     }
 
+    var isDPIApplyRunning: Bool {
+        dpiApplyCoordinator.isRunning
+    }
+
+    var isHiResWheelApplyRunning: Bool {
+        hiResWheelApplyCoordinator.isRunning
+    }
+
+    /// Uses cached capabilities only; diffing a configuration must not query HID++.
+    func hasConfirmedSensorDPI(_ dpi: Int) -> Bool {
+        withState { state in
+            let target = state.adjustableDPI?.feature.supportedDPI(nearestTo: dpi) ?? dpi
+            return state.sensorDPI == target
+        }
+    }
+
     func startDPIApply(
         _ operation: @escaping (HardwareSettingApplyCoordinator.Attempt, CancellationToken) -> Bool
     ) {

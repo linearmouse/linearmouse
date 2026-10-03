@@ -328,6 +328,45 @@ final class EventTransformerManagerTests: XCTestCase {
         XCTAssertNotEqual(firstKey, secondKey)
     }
 
+    func testPointerAndHardwareEditsPreserveExistingEventTransformers() throws {
+        var scheme = Scheme()
+        scheme.buttons.clickDebouncing.timeout = 50
+        scheme.buttons.clickDebouncing.buttons = [.left]
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+        let manager = makeManager()
+        func debouncer() throws -> ClickDebouncingTransformer {
+            let transformers = try XCTUnwrap(manager.get(
+                withDevice: nil, withPid: nil, withDisplay: nil
+            ) as? [EventTransformer])
+            return try XCTUnwrap(transformers.compactMap { $0 as? ClickDebouncingTransformer }.first)
+        }
+        let original = try debouncer()
+        scheme.pointer.speed = .value(0.5)
+        scheme.pointer.acceleration = .value(2)
+        scheme.pointer.hardwareDPI = 1200
+        scheme.logitech.highResolutionWheel = true
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+        XCTAssertTrue(try debouncer() === original)
+
+        scheme.pointer.focusFollowsMouse = true
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+        XCTAssertTrue(try debouncer() === original)
+
+        var hardwareOnly = Scheme()
+        hardwareOnly.if = [.init(display: "External")]
+        hardwareOnly.pointer.hardwareDPI = 800
+        ConfigurationState.shared.configuration = .init(schemes: [hardwareOnly, scheme])
+        XCTAssertTrue(try debouncer() === original)
+        ConfigurationState.shared.configuration = .init(schemes: [scheme, hardwareOnly])
+        XCTAssertTrue(try debouncer() === original)
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+        XCTAssertTrue(try debouncer() === original)
+
+        scheme.buttons.clickDebouncing.timeout = 100
+        ConfigurationState.shared.configuration = .init(schemes: [scheme])
+        XCTAssertFalse(try debouncer() === original)
+    }
+
     func testClickDebouncingWithoutModeUsesLegacyTransformer() throws {
         var scheme = Scheme()
         scheme.buttons.clickDebouncing.timeout = 50
