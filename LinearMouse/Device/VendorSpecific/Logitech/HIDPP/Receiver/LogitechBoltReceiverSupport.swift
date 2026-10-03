@@ -644,7 +644,7 @@ extension LogitechReceiverMonitoringChannel {
             ),
             until: shouldContinue
         ).flatMap {
-            LogitechHIDPPDeviceMetadataProvider.parsePairedDeviceCount($0.bytes)
+            LogitechHIDPPDeviceMetadataProvider.parseReceiverDeviceCount($0.bytes)
         }
         guard shouldContinue() else {
             return nil
@@ -671,7 +671,7 @@ extension LogitechReceiverMonitoringChannel {
         return .init(
             slots: pairedSlots,
             connectionSnapshots: connectionSnapshots,
-            expectedPairedDeviceCount: pairedDeviceCount,
+            expectedDeviceCount: pairedDeviceCount.map(LogitechHIDPPDeviceMetadataProvider.ReceiverDeviceCount.paired),
             inventoryAvailable: inventoryAvailable
         )
     }
@@ -795,7 +795,7 @@ extension LogitechReceiverMonitoringChannel {
             identities: identities,
             connectionSnapshots: discovery.connectionSnapshots,
             liveReachableSlots: liveReachableSlots,
-            expectedPairedDeviceCount: discovery.expectedPairedDeviceCount,
+            expectedDeviceCount: discovery.expectedDeviceCount,
             inventoryAvailable: discovery.inventoryAvailable,
             observedSlotKinds: Dictionary(uniqueKeysWithValues: discovery.slots.map {
                 ($0.slot, $0.kind)
@@ -833,7 +833,7 @@ extension LogitechReceiverMonitoringChannel {
         until shouldContinue: @escaping () -> Bool = { true }
     ) -> Int? {
         readBoltConnectionState(deadline: deadline, until: shouldContinue).flatMap {
-            LogitechHIDPPDeviceMetadataProvider.parsePairedDeviceCount($0.bytes)
+            LogitechHIDPPDeviceMetadataProvider.parseReceiverDeviceCount($0.bytes)
         }
     }
 
@@ -886,7 +886,7 @@ extension LogitechReceiverMonitoringChannel {
         }
 
         var collector = LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotCollector(
-            expectedPairedDeviceCount: nil
+            expectedDeviceCount: nil
         )
         collector.record(slot: initialNotification.slot, snapshot: initialNotification.snapshot)
         let deadline = Date().addingTimeInterval(0.1)
@@ -914,7 +914,7 @@ extension LogitechReceiverMonitoringChannel {
         until shouldContinue: (() -> Bool)? = nil
     ) -> [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot] {
         var collector = LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotCollector(
-            expectedPairedDeviceCount: expectedCount
+            expectedDeviceCount: expectedCount.map(LogitechHIDPPDeviceMetadataProvider.ReceiverDeviceCount.paired)
         )
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline, shouldContinue?() ?? true {

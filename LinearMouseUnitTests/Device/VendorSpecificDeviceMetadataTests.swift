@@ -403,7 +403,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         }
 
         let discovery = device.discoverBoltPointingDeviceDiscovery(baseName: "USB Receiver")
-        XCTAssertEqual(discovery.expectedPairedDeviceCount, 1)
+        XCTAssertEqual(discovery.expectedDeviceCount, .paired(1))
         XCTAssertEqual(discovery.connectionSnapshots[2], .init(isConnected: false, kind: 0x02))
         XCTAssertEqual(discovery.identities.map(\.slot), [2])
         XCTAssertTrue(discovery.liveReachableSlots.isEmpty)
@@ -424,6 +424,58 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertTrue(store.currentPublishedIdentities().isEmpty)
     }
 
+    func testBoltInventoryRequiresTheCurrentPairedSlotsRatherThanStaleNotifications() {
+        let mouse = receiverIdentity(slot: 3, name: "Online Mouse")
+        var snapshots: [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot] = [
+            1: .init(isConnected: false, kind: 0x02), // Former pairing.
+            3: .init(isConnected: true, kind: 0x02)
+        ]
+        var store = ReceiverSlotStateStore()
+        func discovery() -> LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery {
+            .init(
+                identities: [mouse],
+                connectionSnapshots: snapshots,
+                liveReachableSlots: [],
+                expectedDeviceCount: .paired(2),
+                observedSlotKinds: [2: 0x02, 3: 0x02]
+            )
+        }
+        // The counts match, but current paired slot 2 has no presence evidence.
+        XCTAssertFalse(store.mergeDiscovery(discovery()).inventoryComplete)
+        snapshots[2] = .init(isConnected: false, kind: 0x02)
+        // The extra historical disconnect must neither fill nor block a current slot.
+        XCTAssertTrue(store.mergeDiscovery(discovery()).inventoryComplete)
+        XCTAssertEqual(store.currentPublishedIdentities(), [mouse])
+        snapshots[1] = .init(isConnected: true, kind: 0x02)
+        XCTAssertFalse(store.mergeDiscovery(discovery()).inventoryComplete)
+    }
+
+    func testConnectedCountInventoryIgnoresOfflinePairedSlots() {
+        var store = ReceiverSlotStateStore()
+        let mouse = receiverIdentity(slot: 1, name: "Online Mouse")
+        let snapshots: [UInt8: LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshot] = [
+            1: .init(isConnected: true, kind: 0x02),
+            2: .init(isConnected: false, kind: 0x02)
+        ]
+        let discovery = LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery(
+            identities: [mouse],
+            connectionSnapshots: snapshots,
+            liveReachableSlots: [],
+            expectedDeviceCount: .connected(1),
+            observedSlotKinds: [1: 0x02, 2: 0x02]
+        )
+        XCTAssertTrue(store.mergeDiscovery(discovery).inventoryComplete)
+        XCTAssertEqual(store.currentPublishedIdentities(), [mouse])
+        XCTAssertTrue(store.mergeDiscovery(.init(
+            identities: [],
+            connectionSnapshots: [2: .init(isConnected: false, kind: 0x02)],
+            liveReachableSlots: [],
+            expectedDeviceCount: .connected(0),
+            observedSlotKinds: [2: 0x02]
+        ))
+        .inventoryComplete)
+    }
+
     func testReceiverInventorySeparatesOfflineSlotsFromUnknownPresence() {
         let online = receiverIdentity(slot: 1, name: "Online Mouse")
         let offline = receiverIdentity(slot: 2, name: "Offline Mouse")
@@ -432,7 +484,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             identities: [online, offline],
             connectionSnapshots: [1: .init(isConnected: true, kind: 0x02)],
             liveReachableSlots: [1],
-            expectedPairedDeviceCount: 2,
+            expectedDeviceCount: .paired(2),
             observedSlotKinds: [1: 0x02, 2: 0x02]
         ))
         // Pairing metadata alone cannot establish whether the other mouse is online.
@@ -445,7 +497,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
                 2: .init(isConnected: false, kind: 0x02)
             ],
             liveReachableSlots: [1],
-            expectedPairedDeviceCount: 2,
+            expectedDeviceCount: .paired(2),
             observedSlotKinds: [1: 0x02, 2: 0x02]
         ))
         XCTAssertTrue(complete.inventoryComplete)
@@ -482,7 +534,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
 
         let discovery = try XCTUnwrap(device.discoverBoltSlots())
         XCTAssertTrue(discovery.slots.isEmpty)
-        XCTAssertEqual(discovery.expectedPairedDeviceCount, 1)
+        XCTAssertEqual(discovery.expectedDeviceCount, .paired(1))
         XCTAssertTrue(discovery.inventoryAvailable)
         XCTAssertEqual(
             discovery.connectionSnapshots[1],
@@ -931,7 +983,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
 
     func testParsePairedDeviceCountReadsReceiverConnectionRegister() {
         XCTAssertEqual(
-            LogitechHIDPPDeviceMetadataProvider.parsePairedDeviceCount([0x10, 0xFF, 0x81, 0x02, 0x00, 0x01, 0x00]),
+            LogitechHIDPPDeviceMetadataProvider.parseReceiverDeviceCount([0x10, 0xFF, 0x81, 0x02, 0x00, 0x01, 0x00]),
             1
         )
     }
@@ -1363,7 +1415,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         _ = store.mergeDiscovery(.init(identities: [mouseA, mouseB], connectionSnapshots: [
             1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue),
             2: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
-        ], liveReachableSlots: [1, 2], expectedPairedDeviceCount: 2, observedSlotKinds: [
+        ], liveReachableSlots: [1, 2], expectedDeviceCount: .connected(2), observedSlotKinds: [
             1: ReceiverLogicalDeviceKind.mouse.rawValue,
             2: ReceiverLogicalDeviceKind.mouse.rawValue
         ]))
@@ -1372,7 +1424,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         let partial = store.mergeDiscovery(.init(identities: [mouseB], connectionSnapshots: [
             1: .init(isConnected: true, kind: nil),
             2: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
-        ], liveReachableSlots: [2], expectedPairedDeviceCount: 2, observedSlotKinds: [
+        ], liveReachableSlots: [2], expectedDeviceCount: .connected(2), observedSlotKinds: [
             2: ReceiverLogicalDeviceKind.mouse.rawValue
         ]))
 
@@ -1383,7 +1435,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         let recovered = store.mergeDiscovery(.init(identities: [mouseA, mouseB], connectionSnapshots: [
             1: .init(isConnected: true, kind: nil),
             2: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
-        ], liveReachableSlots: [1, 2], expectedPairedDeviceCount: 2, observedSlotKinds: [
+        ], liveReachableSlots: [1, 2], expectedDeviceCount: .connected(2), observedSlotKinds: [
             1: ReceiverLogicalDeviceKind.mouse.rawValue,
             2: ReceiverLogicalDeviceKind.mouse.rawValue
         ]))
@@ -1422,7 +1474,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             identities: [],
             connectionSnapshots: [:],
             liveReachableSlots: [],
-            expectedPairedDeviceCount: nil
+            expectedDeviceCount: nil
         ))
 
         XCTAssertFalse(result.inventoryComplete)
@@ -1473,7 +1525,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             identities: [reconnectedIdentity],
             connectionSnapshots: [:],
             liveReachableSlots: [1],
-            expectedPairedDeviceCount: 1,
+            expectedDeviceCount: .connected(1),
             observedSlotKinds: [1: ReceiverLogicalDeviceKind.mouse.rawValue]
         ))
 
@@ -1489,7 +1541,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             identities: [mouseB],
             connectionSnapshots: [2: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)],
             liveReachableSlots: [2],
-            expectedPairedDeviceCount: 2,
+            expectedDeviceCount: .connected(2),
             observedSlotKinds: [2: ReceiverLogicalDeviceKind.mouse.rawValue]
         ))
 
@@ -1503,7 +1555,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
                 2: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)
             ],
             liveReachableSlots: [1, 2],
-            expectedPairedDeviceCount: 2,
+            expectedDeviceCount: .connected(2),
             observedSlotKinds: [
                 1: ReceiverLogicalDeviceKind.mouse.rawValue,
                 2: ReceiverLogicalDeviceKind.mouse.rawValue
@@ -1525,7 +1577,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
                 2: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.keyboard.rawValue)
             ],
             liveReachableSlots: [1, 2],
-            expectedPairedDeviceCount: 2,
+            expectedDeviceCount: .connected(2),
             observedSlotKinds: [
                 1: ReceiverLogicalDeviceKind.mouse.rawValue,
                 2: ReceiverLogicalDeviceKind.keyboard.rawValue
@@ -1537,7 +1589,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             identities: [],
             connectionSnapshots: [:],
             liveReachableSlots: [],
-            expectedPairedDeviceCount: 0
+            expectedDeviceCount: .connected(0)
         ))
         XCTAssertTrue(empty.inventoryComplete)
         XCTAssertTrue(store.currentPublishedIdentities().isEmpty)
@@ -1555,7 +1607,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
                 3: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.headset.rawValue)
             ],
             liveReachableSlots: [1, 2, 3],
-            expectedPairedDeviceCount: 3,
+            expectedDeviceCount: .connected(3),
             observedSlotKinds: [
                 1: ReceiverLogicalDeviceKind.mouse.rawValue,
                 2: ReceiverLogicalDeviceKind.presenter.rawValue,
@@ -1574,7 +1626,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             identities: [],
             connectionSnapshots: [1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)],
             liveReachableSlots: [1],
-            expectedPairedDeviceCount: nil,
+            expectedDeviceCount: nil,
             observedSlotKinds: [1: ReceiverLogicalDeviceKind.mouse.rawValue]
         ))
         XCTAssertFalse(unknownCount.inventoryComplete)
@@ -1583,7 +1635,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             identities: [],
             connectionSnapshots: [1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.mouse.rawValue)],
             liveReachableSlots: [1],
-            expectedPairedDeviceCount: 1,
+            expectedDeviceCount: .connected(1),
             observedSlotKinds: [1: ReceiverLogicalDeviceKind.mouse.rawValue]
         ))
         XCTAssertFalse(missingIdentity.inventoryComplete)
@@ -1598,7 +1650,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             identities: [identity],
             connectionSnapshots: [1: .init(isConnected: true, kind: 0)],
             liveReachableSlots: [1],
-            expectedPairedDeviceCount: 1,
+            expectedDeviceCount: .connected(1),
             observedSlotKinds: [1: ReceiverLogicalDeviceKind.mouse.rawValue]
         ))
 
@@ -1612,7 +1664,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             identities: [],
             connectionSnapshots: [1: .init(isConnected: true, kind: 0x06)],
             liveReachableSlots: [1],
-            expectedPairedDeviceCount: 1,
+            expectedDeviceCount: .connected(1),
             observedSlotKinds: [1: 0x06]
         ))
 
@@ -1668,7 +1720,7 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             identities: [staleMouse],
             connectionSnapshots: [1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.keyboard.rawValue)],
             liveReachableSlots: [1],
-            expectedPairedDeviceCount: 1,
+            expectedDeviceCount: .connected(1),
             observedSlotKinds: [1: ReceiverLogicalDeviceKind.keyboard.rawValue]
         ))
 
