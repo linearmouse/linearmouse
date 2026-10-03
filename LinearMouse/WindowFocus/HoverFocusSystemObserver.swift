@@ -11,7 +11,7 @@ final class HoverFocusSystemObserver {
     private var dockObserver: AXObserver?
     private var dock: AXUIElement?
     private var missionControl = false
-    private var sessionInactive = false
+    private var suspension = HoverFocusSuspension()
     private let notifications = [
         "AXExposeShowAllWindows", "AXExposeShowFrontWindows", "AXExposeShowDesktop", "AXExposeExit"
     ]
@@ -24,14 +24,21 @@ final class HoverFocusSystemObserver {
                 self?.changed(nil)
             })
         }
-        for name in [NSWorkspace.sessionDidResignActiveNotification, NSWorkspace.willSleepNotification] {
+        let suspensionNotifications: [(Notification.Name, WritableKeyPath<HoverFocusSuspension, Bool>, Bool)] = [
+            (NSWorkspace.sessionDidResignActiveNotification, \.sessionInactive, true),
+            (NSWorkspace.sessionDidBecomeActiveNotification, \.sessionInactive, false),
+            (NSWorkspace.willSleepNotification, \.sleeping, true),
+            (NSWorkspace.didWakeNotification, \.sleeping, false),
+            (NSWorkspace.screensDidSleepNotification, \.screensSleeping, true),
+            (NSWorkspace.screensDidWakeNotification, \.screensSleeping, false)
+        ]
+        for (name, reason, suspended) in suspensionNotifications {
             tokens.append(center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                self?.setSessionInactive(true)
-            })
-        }
-        for name in [NSWorkspace.sessionDidBecomeActiveNotification, NSWorkspace.didWakeNotification] {
-            tokens.append(center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                self?.setSessionInactive(false)
+                guard let self else {
+                    return
+                }
+                suspension[keyPath: reason] = suspended
+                changed(suspension.isSuspended || missionControl)
             })
         }
         tokens.append(center.addObserver(
@@ -55,11 +62,6 @@ final class HoverFocusSystemObserver {
         }
     }
 
-    private func setSessionInactive(_ inactive: Bool) {
-        sessionInactive = inactive
-        changed(sessionInactive || missionControl)
-    }
-
     private func observeDock() {
         if let dockObserver {
             CFRunLoopRemoveSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(dockObserver), .commonModes)
@@ -67,7 +69,7 @@ final class HoverFocusSystemObserver {
         dockObserver = nil
         dock = nil
         missionControl = false
-        changed(sessionInactive)
+        changed(suspension.isSuspended)
         guard let pid = NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.dock")
             .first?
             .processIdentifier else {
@@ -81,7 +83,7 @@ final class HoverFocusSystemObserver {
             }
             let owner = Unmanaged<HoverFocusSystemObserver>.fromOpaque(context).takeUnretainedValue()
             owner.missionControl = (notification as String) != "AXExposeExit"
-            owner.changed(owner.sessionInactive || owner.missionControl)
+            owner.changed(owner.suspension.isSuspended || owner.missionControl)
         }
         guard AXObserverCreate(pid, callback, &observer) == .success, let observer else {
             return
@@ -94,5 +96,17 @@ final class HoverFocusSystemObserver {
         dock = element
         dockObserver = observer
         CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(observer), .commonModes)
+    }
+}
+
+/// Wake and session notifications can overlap; clearing one reason must not
+/// resume focus while another reason still applies.
+struct HoverFocusSuspension {
+    var sleeping = false
+    var screensSleeping = false
+    var sessionInactive = false
+
+    var isSuspended: Bool {
+        sleeping || screensSleeping || sessionInactive
     }
 }

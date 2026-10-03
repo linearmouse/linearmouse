@@ -1055,8 +1055,9 @@ separate gesture cooldown. Edit them under **Buttons → Button Mappings**.
 ## Focus windows on hover
 
 Enable **Focus windows on hover** in Pointer settings for **All mice**, **All
-trackpads**, or an individual device. It is off by default. The pointer must stay
-inside an eligible window for about 100 ms before it receives keyboard focus.
+trackpads**, or an individual device. It is off by default. Moving into an eligible
+window focuses it without an intentional hover delay. Window queries are coalesced
+at 25 ms intervals; macOS focus processing can add further latency.
 LinearMouse does not raise the window or replay a click. Some applications raise
 their own windows when focused. Clicking before focus has changed still follows
 the application's normal first-click behavior.

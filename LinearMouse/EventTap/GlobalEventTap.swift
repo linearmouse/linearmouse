@@ -17,6 +17,8 @@ class GlobalEventTap {
     private lazy var watchdog = GlobalEventTapWatchdog()
     private let eventThread = EventThread.shared
     private var shouldRun = false
+    /// Read and updated only on EventThread; disabled events never enter the focus controller.
+    private var hoverFocusEnabled = false
 
     init() {}
 
@@ -24,11 +26,15 @@ class GlobalEventTap {
         let manager = EventTransformerManager.shared
         if event.type.isPointerMotion {
             guard manager.pointerMotionRequirements.contains(eventType: event.type) else {
-                FocusFollowsMouseController.shared.observe(event)
+                if hoverFocusEnabled {
+                    FocusFollowsMouseController.shared.observe(event)
+                }
                 return event
             }
         } else {
-            FocusFollowsMouseController.shared.observe(event)
+            if hoverFocusEnabled {
+                FocusFollowsMouseController.shared.observe(event)
+            }
             PointerLocationTriggerController.shared.handle(event)
             ModifierState.shared.update(with: event)
         }
@@ -44,7 +50,7 @@ class GlobalEventTap {
         )
         let wasMotion = event.type.isPointerMotion
         let transformedEvent = eventTransformerResolution.transform(event)
-        if wasMotion {
+        if wasMotion, hoverFocusEnabled {
             if let transformedEvent, transformedEvent.type == .mouseMoved {
                 FocusFollowsMouseController.shared.observe(transformedEvent)
             } else {
@@ -107,8 +113,11 @@ class GlobalEventTap {
                 let manager = EventTransformerManager.shared
                 let focusController = FocusFollowsMouseController.shared
                 let updateMotionSubscription: () -> Void = { [weak self] in
-                    self?.motionControl.isEnabled = !manager.pointerMotionRequirements.isEmpty || focusController
-                        .isEnabled
+                    guard let self else {
+                        return
+                    }
+                    hoverFocusEnabled = focusController.isEnabled
+                    motionControl.isEnabled = !manager.pointerMotionRequirements.isEmpty || hoverFocusEnabled
                 }
                 manager.onPointerMotionRequirementsChanged = { _ in updateMotionSubscription() }
                 focusController.onEnabledChanged = updateMotionSubscription

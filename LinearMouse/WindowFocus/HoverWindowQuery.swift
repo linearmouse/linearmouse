@@ -3,19 +3,9 @@
 
 import AppKit
 
-/// Unlike per-app mouse settings, focusing must not look through menus, Dock
-/// windows or overlays to an ordinary window underneath them.
+/// WindowServer identifies the input window; AX checks eligibility only before focusing.
 struct HoverWindowQuery {
-    struct Window {
-        let id: CGWindowID
-        let pid: pid_t
-        let element: AXUIElement
-    }
-
-    struct Focus: Equatable {
-        let pid: pid_t
-        let windowID: CGWindowID
-    }
+    typealias Focus = WindowFocus.Target
 
     private let system = AXUIElementCreateSystemWide()
 
@@ -23,39 +13,42 @@ struct HoverWindowQuery {
         AXUIElementSetMessagingTimeout(system, 0.05)
     }
 
-    func window(at point: CGPoint) -> Window? {
-        guard LMWindowFocusAvailable(),
+    func window(at point: CGPoint) -> Focus? {
+        WindowFocus.shared.window(at: point)
+    }
+
+    func canFocus(_ target: Focus, at point: CGPoint) -> Bool {
+        guard let app = NSRunningApplication(processIdentifier: target.pid),
+              app.activationPolicy == .regular,
+              !app.isTerminated, !app.isHidden,
               let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], 0)
               as? [[String: Any]],
-              let target = Self.hitTest(windows, at: point),
-              let app = NSRunningApplication(processIdentifier: target.pid),
-              app.activationPolicy == .regular,
-              !app.isTerminated, !app.isHidden else {
-            return nil
+              Self.validateWindow(target, in: windows, at: point) != nil else {
+            return false
         }
-
-        var hit: AXUIElement?
-        guard AXUIElementCopyElementAtPosition(system, Float(point.x), Float(point.y), &hit) == .success,
-              let hit else {
-            return nil
-        }
-        AXUIElementSetMessagingTimeout(hit, 0.05)
-        let window = string(kAXRoleAttribute, on: hit) == kAXWindowRole
-            ? hit : element(kAXWindowAttribute, on: hit)
-        guard let window,
+        let application = AXUIElementCreateApplication(target.pid)
+        guard let axWindows = value(kAXWindowsAttribute, on: application) as? [AXUIElement],
+              let window = Self.matchingWindow(in: axWindows, targetID: target.windowID, windowID: { element in
+                  WindowFocus.shared.windowID(of: element)
+              }),
+              string(kAXRoleAttribute, on: window) == kAXWindowRole,
               string(kAXSubroleAttribute, on: window) == kAXStandardWindowSubrole,
-              (value(kAXMinimizedAttribute, on: window) as? Bool) != true,
+              (value(kAXMinimizedAttribute, on: window) as? Bool) == false,
               (value(kAXModalAttribute, on: window) as? Bool) != true,
               !hasSheet(on: window) else {
-            return nil
+            return false
         }
-        var axID: CGWindowID = 0
-        var axPID: pid_t = 0
-        guard LMGetWindowID(window, &axID), axID == target.windowID,
-              AXUIElementGetPid(window, &axPID) == .success, axPID == target.pid else {
-            return nil
-        }
-        return Window(id: target.windowID, pid: target.pid, element: window)
+        return true
+    }
+
+    /// Never substitute another window from the same application when the hit
+    /// is a menu, transient surface, or a window that disappeared during lookup.
+    static func matchingWindow<Element>(
+        in windows: [Element],
+        targetID: CGWindowID,
+        windowID: (Element) -> CGWindowID?
+    ) -> Element? {
+        windows.first { windowID($0) == targetID }
     }
 
     func currentFocus() -> Focus? {
@@ -89,21 +82,26 @@ struct HoverWindowQuery {
             !hasSheet(on: window) else {
             return nil
         }
-        var id: CGWindowID = 0
-        guard LMGetWindowID(window, &id) else {
+        guard let id = WindowFocus.shared.windowID(of: window) else {
             return nil
         }
         return Focus(pid: pid, windowID: id)
     }
 
-    static func hitTest(_ windows: [[String: Any]], at point: CGPoint) -> Focus? {
-        guard let top = windows.first(where: { contains($0, point: point) }),
-              top[kCGWindowLayer as String] as? Int == 0,
-              let id = top[kCGWindowNumber as String] as? CGWindowID,
-              let pid = top[kCGWindowOwnerPID as String] as? pid_t else {
+    /// Validate the exact WindowServer hit, without falling through to another
+    /// window based on overlapping rectangles or special application names.
+    static func validateWindow(
+        _ target: Focus,
+        in windows: [[String: Any]],
+        at point: CGPoint
+    ) -> Focus? {
+        guard let window = windows.first(where: { $0[kCGWindowNumber as String] as? CGWindowID == target.windowID }),
+              window[kCGWindowOwnerPID as String] as? pid_t == target.pid,
+              window[kCGWindowLayer as String] as? Int == 0,
+              contains(window, point: point) else {
             return nil
         }
-        return Focus(pid: pid, windowID: id)
+        return target
     }
 
     private static func contains(_ window: [String: Any], point: CGPoint) -> Bool {

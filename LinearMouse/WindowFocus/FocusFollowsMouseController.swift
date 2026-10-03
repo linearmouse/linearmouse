@@ -115,11 +115,13 @@ final class FocusFollowsMouseController {
     private func updateTimer() {
         timer?.cancel()
         timer = nil
-        guard lock.withLock({ running && enabled }) else {
+        guard lock.withLock({ running && enabled && !systemSuspended }) else {
             return
         }
         let timer = DispatchSource.makeTimerSource(queue: queue)
         timer.schedule(deadline: .now(), repeating: .milliseconds(25), leeway: .milliseconds(5))
+        // Dispatch sources coalesce missed ticks and never invoke this handler
+        // concurrently. Process only the latest input, never the missed-tick count.
         timer.setEventHandler { [weak self] in self?.poll() }
         self.timer = timer
         timer.resume()
@@ -136,12 +138,10 @@ final class FocusFollowsMouseController {
             return
         }
         lastSequence = input.sequence
-        let now = ProcessInfo.processInfo.systemUptime
         guard inputIsCurrent(input, revision: revision),
               let device = DeviceManager.shared.identifiedDevice(for: input.senderID),
-              let window = query.window(at: input.point),
-              let focus = query.currentFocus() else {
-            _ = state.update(nil, now: now)
+              let window = query.window(at: input.point) else {
+            _ = state.update(nil)
             return
         }
         let process = window.pid.processIdentity
@@ -152,20 +152,27 @@ final class FocusFollowsMouseController {
         )
         guard scheme.pointer.focusFollowsMouse == true,
               scheme.pointer.redirectsToScroll != true || scheme.pointer.redirectsToScrollTrigger != nil else {
-            _ = state.update(nil, now: now)
+            _ = state.update(nil)
             return
         }
 
-        let target = HoverFocusState.Target(windowID: window.id, pid: window.pid, senderID: input.senderID)
-        let ready = state.update(target, now: now)
+        let target = HoverFocusState.Target(windowID: window.windowID, pid: window.pid, senderID: input.senderID)
+        let ready = state.update(target)
+        guard ready else {
+            return
+        }
+        guard query.canFocus(window, at: input.point), let focus = query.currentFocus() else {
+            state.suspend()
+            return
+        }
         if let previousFocus, previousFocus != focus {
             // Includes switching windows within the same app. Remember the
             // hovered window but require re-entry before taking focus back.
             state.suspend()
         }
         previousFocus = focus
-        guard ready, state.isWaiting, focus != .init(pid: window.pid, windowID: window.id) else {
-            if focus == .init(pid: window.pid, windowID: window.id) {
+        guard ready, state.isWaiting, focus != .init(pid: window.pid, windowID: window.windowID) else {
+            if focus == .init(pid: window.pid, windowID: window.windowID) {
                 state.suspend()
             }
             return
@@ -174,12 +181,26 @@ final class FocusFollowsMouseController {
         // AX calls can take time. Recheck the input and focused window after
         // hit testing, and only then perform this entry's one focus attempt.
         guard inputIsCurrent(input, revision: revision), query.currentFocus() == focus,
+              query.window(at: input.point) == window,
               inputIsCurrent(input, revision: revision) else {
             return
         }
         state.suspend()
-        if LMFocusWindowWithoutRaising(window.pid, window.id, focus.pid, focus.windowID) {
-            previousFocus = .init(pid: window.pid, windowID: window.id)
+        if WindowFocus.shared.focus(window, from: focus, isCurrent: {
+            // Movement inside the same window is still valid; crossing to C,
+            // clicking, disabling or suspending invalidates the old request.
+            guard let latest = self.lock.withLock({ self.input }), latest.senderID == input.senderID,
+                  self.inputIsCurrent(latest, revision: revision),
+                  self.query.window(at: latest.point) == window else {
+                return false
+            }
+            return self.inputIsCurrent(latest, revision: revision)
+        }) {
+            previousFocus = .init(pid: window.pid, windowID: window.windowID)
+        } else {
+            // The old window may already have received deactivation. Let the
+            // next window entry establish the current focus afresh.
+            previousFocus = nil
         }
     }
 
@@ -210,6 +231,9 @@ final class FocusFollowsMouseController {
                             }
                             self.revision &+= 1
                             self.input = nil
+                        }
+                        if suspended != nil {
+                            self.queue.async { self.updateTimer() }
                         }
                     }
                 }

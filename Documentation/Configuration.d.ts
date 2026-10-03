@@ -410,7 +410,7 @@ declare namespace Scheme {
   type Pointer = {
     /**
      * @title Focus windows on hover
-     * @description Focus the hovered window after 100 ms without raising it. App conditions match the hovered window, not the frontmost app. Hold Control to pause. Some apps may raise themselves when focused.
+     * @description Focus the hovered window without an intentional hover delay or raising it. App conditions match the hovered window, not the frontmost app. Hold Control to pause. Some apps may raise themselves when focused.
      * @default false
      */
     focusFollowsMouse?: boolean;

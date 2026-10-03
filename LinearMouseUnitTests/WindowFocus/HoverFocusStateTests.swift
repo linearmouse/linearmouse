@@ -8,51 +8,44 @@ final class HoverFocusStateTests: XCTestCase {
     private let first = HoverFocusState.Target(windowID: 10, pid: 1, senderID: 7)
     private let second = HoverFocusState.Target(windowID: 11, pid: 1, senderID: 7)
 
-    func testCrossingWindowDoesNotFocusAndDwellIsPerWindow() {
+    func testWindowEntryIsReadyWithoutWaitingForAnotherSample() {
         var state = HoverFocusState()
-        XCTAssertFalse(state.update(first, now: 0))
-        XCTAssertFalse(state.update(first, now: 0.09))
-        XCTAssertFalse(state.update(second, now: 0.095))
-        XCTAssertFalse(state.update(second, now: 0.15))
-        XCTAssertTrue(state.update(second, now: 0.20))
+        XCTAssertTrue(state.update(first))
+        state.suspend()
+        XCTAssertTrue(state.update(second))
     }
 
     func testCompletedEntryDoesNotRepeatedlyFocus() {
         var state = HoverFocusState()
-        XCTAssertFalse(state.update(first, now: 0))
-        XCTAssertTrue(state.update(first, now: 0.11))
+        XCTAssertTrue(state.update(first))
         state.suspend()
-        XCTAssertFalse(state.update(first, now: 10))
+        XCTAssertFalse(state.update(first))
         XCTAssertFalse(state.isWaiting)
     }
 
     func testKeyboardClickOrSpaceChangeRequiresReentry() {
         var state = HoverFocusState()
-        _ = state.update(first, now: 0)
+        _ = state.update(first)
         state.suspend()
-        XCTAssertFalse(state.update(first, now: 0.2))
-        XCTAssertFalse(state.update(first, now: 20))
-        XCTAssertFalse(state.update(second, now: 21))
-        XCTAssertTrue(state.update(second, now: 21.2))
-        XCTAssertFalse(state.update(first, now: 22))
-        XCTAssertTrue(state.update(first, now: 22.2))
+        XCTAssertFalse(state.update(first))
+        XCTAssertTrue(state.update(second))
+        state.suspend()
+        XCTAssertTrue(state.update(first))
     }
 
-    func testOverlayOrExcludedApplicationCancelsDwell() {
+    func testOverlayOrExcludedApplicationClearsPendingFocus() {
         var state = HoverFocusState()
-        _ = state.update(first, now: 0)
-        XCTAssertFalse(state.update(nil, now: 0.09))
-        XCTAssertFalse(state.update(first, now: 1))
-        XCTAssertFalse(state.update(first, now: 1.05))
-        XCTAssertTrue(state.update(first, now: 1.2))
+        _ = state.update(first)
+        XCTAssertFalse(state.update(nil))
+        XCTAssertFalse(state.isWaiting)
+        XCTAssertTrue(state.update(first))
     }
 
-    func testSwitchingPhysicalDevicesStartsNewDwell() {
+    func testSwitchingPhysicalDevicesStartsNewEntry() {
         var state = HoverFocusState()
-        _ = state.update(first, now: 0)
+        _ = state.update(first)
+        state.suspend()
         let anotherDevice = HoverFocusState.Target(windowID: 10, pid: 1, senderID: 8)
-        XCTAssertFalse(state.update(anotherDevice, now: 0.09))
-        XCTAssertFalse(state.update(anotherDevice, now: 0.15))
-        XCTAssertTrue(state.update(anotherDevice, now: 0.2))
+        XCTAssertTrue(state.update(anotherDevice))
     }
 }

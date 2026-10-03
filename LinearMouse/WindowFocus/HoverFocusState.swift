@@ -3,7 +3,7 @@
 
 import Foundation
 
-/// A dwell belongs to a particular physical device and window. Cancellation
+/// Each entry belongs to a particular physical device and window. Cancellation
 /// consumes the current entry: typing or Cmd-Tab must not be undone by a timer,
 /// or by a small movement within the window the pointer was already over.
 struct HoverFocusState {
@@ -13,22 +13,19 @@ struct HoverFocusState {
         let senderID: UInt64
     }
 
-    static let delay: TimeInterval = 0.1
     private(set) var target: Target?
-    private var enteredAt: TimeInterval = 0
     private var consumed = false
 
-    mutating func update(_ target: Target?, now: TimeInterval) -> Bool {
+    mutating func update(_ target: Target?) -> Bool {
         guard let target else {
             self = Self()
             return false
         }
         if self.target != target {
             self.target = target
-            enteredAt = now
             consumed = false
         }
-        return !consumed && now - enteredAt >= Self.delay
+        return !consumed
     }
 
     var isWaiting: Bool {
