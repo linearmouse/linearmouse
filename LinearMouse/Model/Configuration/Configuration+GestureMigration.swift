@@ -24,7 +24,7 @@ extension Configuration {
     @discardableResult
     mutating func migrateLegacyGestureButtons() -> Bool {
         typealias Mapping = Scheme.Buttons.Mapping
-        var inheritedTriggers = [Mapping.Trigger]()
+        var inheritedGestures = [(trigger: Mapping.Trigger, conditions: [Scheme.If]?)]()
         var changed = false
         let originalSchemes = schemes
         var migratedSchemes = [Scheme]()
@@ -57,28 +57,34 @@ extension Configuration {
                 migrated.append(mapping)
             }
 
-            if !inheritedTriggers.isEmpty {
-                // Replacing a legacy gesture must restore the ordinary mappings
-                // underneath it, not disable those mappings along with the gesture.
-                let resets = inheritedTriggers.map { trigger in
-                    Mapping(trigger: trigger, outcomes: .init(swipe: .init(
-                        up: .arg0(.auto), down: .arg0(.auto), left: .arg0(.auto), right: .arg0(.auto)
-                    )))
+            for inherited in inheritedGestures {
+                // A new gesture on the same trigger replaces all four outcomes.
+                // No separate reset is needed (or useful in the settings UI).
+                if migrated.first?.trigger?.isEquivalent(to: inherited.trigger) == true {
+                    continue
                 }
-                migratedSchemes.append(Scheme(if: scheme.if, buttons: .init(mappings: resets)))
+                let resetConditions = Self.gestureMigrationIntersection(inherited.conditions, scheme.if)
+                guard resetConditions?.isEmpty != true else {
+                    continue
+                }
+                // Only cancel a gesture where both its original rule and this
+                // replacement rule can apply. Unrelated devices/apps need no reset.
+                let reset = Mapping(trigger: inherited.trigger, outcomes: .init(swipe: .init(
+                    up: .arg0(.auto), down: .arg0(.auto), left: .arg0(.auto), right: .arg0(.auto)
+                )))
+                migratedSchemes.append(Scheme(if: resetConditions, buttons: .init(mappings: [reset])))
                 for previous in originalSchemes[..<index] {
                     let mappings = (previous.buttons.mappings ?? []).filter { mapping in
                         guard let trigger = mapping.effectiveTrigger else {
                             return false
                         }
-                        return inheritedTriggers.contains { $0.isEquivalent(to: trigger) }
+                        return inherited.trigger.isEquivalent(to: trigger)
                     }
                     guard !mappings.isEmpty else {
                         continue
                     }
-                    // Restore only where both original rules apply. This uses
-                    // the existing scheme format, without adding mapping options.
-                    let conditions = Self.gestureMigrationIntersection(previous.if, scheme.if)
+                    // Ordinary mappings are restored only in the reset's scope.
+                    let conditions = Self.gestureMigrationIntersection(previous.if, resetConditions)
                     guard conditions?.isEmpty != true else {
                         continue
                     }
@@ -91,8 +97,10 @@ extension Configuration {
                 }
             }
             if let trigger = migrated.first?.trigger,
-               !inheritedTriggers.contains(where: { $0.isEquivalent(to: trigger) }) {
-                inheritedTriggers.append(trigger)
+               !inheritedGestures.contains(where: {
+                   $0.trigger.isEquivalent(to: trigger) && $0.conditions == scheme.if
+               }) {
+                inheritedGestures.append((trigger, scheme.if))
             }
 
             // Preserve explicitly configured outcomes when the same trigger

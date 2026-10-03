@@ -259,6 +259,78 @@ final class GestureMigrationTests: XCTestCase {
         XCTAssertFalse(current.migrateLegacyGestureButtons())
     }
 
+    func testIndependentDevicesDoNotGetEachOthersGestureResets() throws {
+        var configuration = try Configuration.load(from: #"""
+        {"schemes":[
+          {"if":{"device":{"productID":1}},"buttons":{"gesture":{"enabled":true,
+            "trigger":{"button":{"kind":"logitechControl","controlID":208,"productID":1}}}}},
+          {"if":{"device":{"productID":2}},"buttons":{"gesture":{"enabled":true,
+            "trigger":{"button":{"kind":"logitechControl","controlID":208,"productID":2}}}}},
+          {"if":{"device":{"productID":2},"app":"design.app"},
+            "buttons":{"gesture":{"enabled":true,"button":2}}},
+          {"if":{"device":{"productID":3}},"buttons":{"gesture":{"enabled":true,"button":4}}}
+        ]}
+        """#)
+        configuration.migrateLegacyGestureButtons()
+        // The device-specific app override needs a reset; independent devices don't.
+        XCTAssertEqual(configuration.schemes.count, 4)
+        XCTAssertEqual(configuration.schemes.map { $0.buttons.mappings?.count ?? 0 }, [1, 1, 2, 1])
+        XCTAssertEqual(configuration.schemes[3].buttons.mappings?.first?.trigger?.input, .button(.mouse(4)))
+    }
+
+    func testDisjointApplicationsDoNotGetGestureResets() throws {
+        var configuration = try Configuration.load(from: #"""
+        {"schemes":[
+          {"if":{"app":"app.a"},"buttons":{"gesture":{"enabled":true,"button":2}}},
+          {"if":{"app":"app.b"},"buttons":{"gesture":{"enabled":false}}}
+        ]}
+        """#)
+        configuration.migrateLegacyGestureButtons()
+        XCTAssertEqual(configuration.schemes.count, 2)
+        XCTAssertNil(configuration.schemes[1].buttons.mappings)
+    }
+
+    func testResetOnlyAppliesToIntersectionOfOriginalAndReplacementRules() throws {
+        var configuration = try Configuration.load(from: #"""
+        {"schemes":[
+          {"if":{"device":{"productID":1}},"buttons":{"gesture":{"enabled":true,"button":2}}},
+          {"if":{"app":"app.b"},"buttons":{"gesture":{"enabled":false}}}
+        ]}
+        """#)
+        configuration.migrateLegacyGestureButtons()
+        let device = DeviceMatcher(productID: 1)
+        let otherDevice = DeviceMatcher(productID: 2)
+        let affected = configuration.matchScheme(withDeviceMatcher: device, withApp: "app.b").buttons.mappings ?? []
+        var engine = ButtonMappingEngine(mappings: affected)
+        XCTAssertFalse(engine.buttonDown(.mouse(2), modifierFlags: [], at: 0).consumesEvent)
+        XCTAssertNil(configuration.matchScheme(withDeviceMatcher: otherDevice, withApp: "app.b").buttons.mappings)
+        XCTAssertEqual(
+            configuration.matchScheme(withDeviceMatcher: device, withApp: "app.a")
+                .buttons
+                .mappings?
+                .count,
+            1
+        )
+    }
+
+    func testReplacingSameGestureTriggerDoesNotAddResetRow() throws {
+        var configuration = try Configuration.load(from: #"""
+        {"schemes":[
+          {"buttons":{"gesture":{"enabled":true,"button":2}}},
+          {"if":{"app":"app.b"},"buttons":{"gesture":{"enabled":true,"button":2,
+            "actions":{"right":"none"}}}}
+        ]}
+        """#)
+        configuration.migrateLegacyGestureButtons()
+        XCTAssertEqual(configuration.schemes.count, 2)
+        XCTAssertEqual(configuration.schemes[1].buttons.mappings?.count, 1)
+        var engine = ButtonMappingEngine(mappings: configuration.matchScheme(withDeviceMatcher: nil, withApp: "app.b")
+            .buttons
+            .mappings ?? [])
+        _ = engine.buttonDown(.mouse(2), modifierFlags: [], at: 0)
+        XCTAssertEqual(engine.pointerMoved(deltaX: 60, deltaY: 0, at: 1).actions, [.arg0(.none)])
+    }
+
     private func load(_ buttons: String) throws -> Configuration {
         try Configuration.load(from: "{\"schemes\":[{\"buttons\":\(buttons)}]}")
     }
