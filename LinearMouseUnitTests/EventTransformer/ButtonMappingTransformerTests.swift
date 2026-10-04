@@ -2396,6 +2396,58 @@ final class ButtonMappingTransformerTests: XCTestCase {
         assertScrollKeyEvents(simulator, equal: [.press([.a]), .press([.a])])
     }
 
+    func testHighResolutionControlWheelShortcutsPreserveDirection() throws {
+        try assertHighResolutionControlWheelDirections(horizontal: false)
+    }
+
+    func testHighResolutionControlHorizontalWheelShortcutsPreserveDirection() throws {
+        try assertHighResolutionControlWheelDirections(horizontal: true)
+    }
+
+    private func assertHighResolutionControlWheelDirections(horizontal: Bool) throws {
+        // Cover fractional line deltas, point-only events, and integer fallback.
+        for representation in 0 ..< 3 {
+            let scheduler = ButtonMappingTestTimerScheduler()
+            let simulator = ButtonMappingTestKeySimulator()
+            let transformer = ButtonMappingTransformer(
+                mappings: [
+                    Mapping(
+                        trigger: .init(input: .wheel(horizontal ? .left : .up), modifiers: [.control]),
+                        action: .arg1(.keyPress([.a]))
+                    ),
+                    Mapping(
+                        trigger: .init(input: .wheel(horizontal ? .right : .down), modifiers: [.control]),
+                        action: .arg1(.keyPress([.b]))
+                    )
+                ],
+                scheduleTimer: scheduler.schedule,
+                monotonicClock: { scheduler.now },
+                keySimulator: simulator,
+                highResolutionWheelMultiplier: { _ in 8 },
+                warpPointer: { _ in },
+                eventSink: { _ in },
+                syntheticClickEventSink: { _ in }
+            )
+            for (index, direction) in [1, -1, 1, -1].enumerated() {
+                // Allow each direction through the shared axis throttle.
+                scheduler.advance(to: ms(UInt64(index) * 300))
+                let event = try scrollEvent()
+                event.flags = .maskControl
+                let view = ScrollWheelEventView(event)
+                view.deltaY = representation == 1 ? 0 : Int64(direction)
+                view.deltaYFixedPt = representation == 0 ? Double(direction) / 8 : 0
+                view.deltaYPt = representation == 2 ? 0 : Double(direction) * 1.25
+                view.ioHidScrollY = 0
+                view.ioHidScrollX = 0
+                if horizontal {
+                    view.swapXY()
+                }
+                XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+            }
+            assertScrollKeyEvents(simulator, equal: [.press([.a]), .press([.b]), .press([.a]), .press([.b])])
+        }
+    }
+
     func testHighResolutionPointOnlyShortcutEventsAreConsumedAndThrottled() throws {
         let scheduler = ButtonMappingTestTimerScheduler()
         let simulator = ButtonMappingTestKeySimulator()
