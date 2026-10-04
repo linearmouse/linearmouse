@@ -7,6 +7,42 @@ import XCTest
 final class ScrollActionRecognizerTests: XCTestCase {
     private typealias Input = ScrollActionRecognizer.Input
 
+    func testHighResolutionInputPreservesBothAxisDirectionsAfterReversal() throws {
+        for axis: Input.Axis in [.horizontal, .vertical] {
+            for direction in [-1.0, 1.0] {
+                for reversed in [false, true] {
+                    let event = try XCTUnwrap(CGEvent(
+                        scrollWheelEvent2Source: nil,
+                        units: .line,
+                        wheelCount: 2,
+                        wheel1: 0,
+                        wheel2: 0,
+                        wheel3: 0
+                    ))
+                    let view = ScrollWheelEventView(event)
+                    if axis == .horizontal {
+                        view.deltaX = Int64(direction)
+                        view.deltaXFixedPt = direction / 8
+                        view.deltaXPt = direction * 1.25
+                    } else {
+                        view.deltaY = Int64(direction)
+                        view.deltaYFixedPt = direction / 8
+                        view.deltaYPt = direction * 1.25
+                    }
+                    view.ioHidScrollX = 0
+                    view.ioHidScrollY = 0
+                    if reversed {
+                        _ = ReverseScrollingTransformer(vertically: true, horizontally: true)
+                            .transform(event, in: .init(device: nil))
+                    }
+                    let input = try XCTUnwrap(Input.read(from: view, highResolutionMultiplier: 8))
+                    XCTAssertEqual(input.axis, axis)
+                    XCTAssertEqual(input.delta, direction * (reversed ? -1 : 1) / 8, accuracy: 0.0001)
+                }
+            }
+        }
+    }
+
     func testUnmatchedMovementAndModifiersCannotBypassCooldownOrReleaseMomentum() {
         let recognizer = ScrollActionRecognizer()
         let input = Input(axis: .vertical, delta: 1, units: .points, hasPhase: true)

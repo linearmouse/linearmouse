@@ -74,7 +74,8 @@ extension ScrollInput {
                 multiplier: multiplier
             )
             // Page-scroll acceleration must not multiply action impulses.
-            let units = (value > 0 ? 1.0 : -1.0) * resolution.rawUnits / Double(multiplier)
+            // rawUnits already carries a sign; use only its magnitude with the selected delta's direction.
+            let units = (value > 0 ? 1.0 : -1.0) * abs(resolution.rawUnits) / Double(multiplier)
             return .init(axis: axis, delta: units, units: .detents)
         }
         // Preserve the legacy vertical wheel's one-impulse-per-event behavior.
