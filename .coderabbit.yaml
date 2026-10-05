@@ -1,0 +1,5 @@
+reviews:
+  high_level_summary: false
+  pre_merge_checks:
+    docstrings:
+      mode: "off"
