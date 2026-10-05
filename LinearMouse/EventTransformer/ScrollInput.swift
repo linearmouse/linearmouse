@@ -4,7 +4,8 @@
 import Foundation
 
 /// One normalized representation of movement; phase availability is independent
-/// of its resolution. Units affect scroll output, never command throttling.
+/// of its resolution. Detent commands use a distance threshold in addition
+/// to the shared time throttle; scroll output always follows movement.
 struct ScrollInput {
     enum Axis: Hashable {
         case horizontal, vertical

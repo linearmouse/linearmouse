@@ -2391,7 +2391,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
             XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
         }
         assertScrollKeyEvents(simulator, equal: [.press([.a])])
-        scheduler.advance(to: ms(300))
+        scheduler.advance(to: ms(336))
         XCTAssertNil(try transformer.transform(scrollEvent(vertical: 1), in: .init(device: nil)))
         assertScrollKeyEvents(simulator, equal: [.press([.a]), .press([.a])])
     }
@@ -2442,7 +2442,10 @@ final class ButtonMappingTransformerTests: XCTestCase {
                 if horizontal {
                     view.swapXY()
                 }
-                XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+                // Point-only events represent 0.1 detents; the other cases represent 0.125.
+                for _ in 0 ..< (horizontal ? 1 : (representation == 1 ? 10 : 8)) {
+                    XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+                }
             }
             assertScrollKeyEvents(simulator, equal: [.press([.a]), .press([.b]), .press([.a]), .press([.b])])
         }

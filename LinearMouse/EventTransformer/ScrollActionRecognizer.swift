@@ -88,7 +88,15 @@ final class ScrollActionRecognizer {
         if repeats {
             return movement.consume(input, mapping: mapping, at: now)
         }
-        movement.discard(on: input.axis)
+        if input.units == .detents {
+            // Match line scrolling: trigger at half a detent, then every full
+            // detent. Consume crossings during cooldown without queuing commands.
+            guard movement.consume(input, mapping: mapping, roundToNearestStep: true, at: now) > 0 else {
+                return 0
+            }
+        } else {
+            movement.discard(on: input.axis)
+        }
         return throttle.allowsAction(on: input.axis, at: now) ? 1 : 0
     }
 }
