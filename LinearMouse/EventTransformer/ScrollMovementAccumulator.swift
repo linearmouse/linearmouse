@@ -14,6 +14,7 @@ final class ScrollMovementAccumulator {
         var remainder = 0.0
         var lastTime: UInt64
         var hasPhase: Bool
+        var roundToNearestStep: Bool
     }
 
     private var states: [Axis: State] = [:]
@@ -33,7 +34,7 @@ final class ScrollMovementAccumulator {
         }
     }
 
-    func consume(_ input: ScrollInput, mapping: Int, at now: UInt64) -> Int {
+    func consume(_ input: ScrollInput, mapping: Int, roundToNearestStep: Bool = false, at now: UInt64) -> Int {
         guard input.delta.isFinite, input.delta != 0 else {
             return 0
         }
@@ -42,6 +43,7 @@ final class ScrollMovementAccumulator {
         var state = states[input.axis]
         if let previous = state,
            previous.units != input.units || previous.hasPhase != input.hasPhase ||
+           previous.roundToNearestStep != roundToNearestStep ||
            previous.mapping != mapping || previous.direction != direction || now < previous.lastTime ||
            (!input.hasPhase && now - previous.lastTime >
                (input.units == .detents ? 1_000_000_000 : 500_000_000)) {
@@ -52,18 +54,27 @@ final class ScrollMovementAccumulator {
             mapping: mapping,
             direction: direction,
             lastTime: now,
-            hasPhase: input.hasPhase
+            hasPhase: input.hasPhase,
+            roundToNearestStep: roundToNearestStep
         )
         current.lastTime = now
         current.remainder += delta
-        let steps = floor((abs(current.remainder) + 1e-9) / input.units.threshold)
+        let threshold = input.units.threshold
+        let offset = roundToNearestStep ? threshold / 2 : 0
+        // Measure in the input direction: a negative remainder after rounding
+        // is distance owed, not fresh movement in the opposite direction.
+        let progress = direction * current.remainder
+        let steps = max(0, floor((progress + offset + 1e-9) / threshold))
         // Reject unrepresentable input rather than allocating work proportional to it.
         guard steps < Double(Int.max) else {
             states.removeValue(forKey: input.axis)
             return 0
         }
         let count = Int(steps)
-        current.remainder = direction * max(0, abs(current.remainder) - steps * input.units.threshold)
+        let remainder = progress - steps * threshold
+        // Like the high-resolution line-scroll counter, retain the negative
+        // remainder after the first half step so subsequent steps are a full step apart.
+        current.remainder = direction * (roundToNearestStep ? remainder : max(0, remainder))
         states[input.axis] = current
         return count
     }

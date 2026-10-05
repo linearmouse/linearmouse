@@ -43,6 +43,71 @@ final class ScrollActionRecognizerTests: XCTestCase {
         }
     }
 
+    func testDetentCommandsMatchTheLineScrollCounterInBothDirections() {
+        let recognizer = ScrollActionRecognizer()
+        var counter = LogitechHighResolutionWheelScrollCounter()
+        let rawUnits = [1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 2, -1, -1, -1, -1, -4, -4, 1, 1, 1, 1]
+        for (index, units) in rawUnits.enumerated() {
+            let expected = abs(counter.consume(units: Double(units), multiplier: 8, now: Double(index) * 0.4) ?? 0)
+            XCTAssertEqual(recognizer.consume(
+                Input(axis: .vertical, delta: Double(units) / 8, units: .detents),
+                mapping: 0,
+                repeats: false,
+                at: UInt64(index) * 400_000_000
+            ), expected)
+        }
+    }
+
+    func testHalfDetentStartsThenFullDetentsRepeatWithoutDiscardingNegativeRemainder() {
+        for direction in [-1.0, 1.0] {
+            let recognizer = ScrollActionRecognizer()
+            let counts = (0 ..< 24).map { index in
+                recognizer.consume(
+                    Input(axis: .vertical, delta: direction / 8, units: .detents),
+                    mapping: 0,
+                    repeats: false,
+                    at: UInt64(index) * 50_000_000
+                )
+            }
+            XCTAssertEqual(counts.enumerated().filter { $0.element == 1 }.map(\.offset), [3, 11, 19])
+        }
+    }
+
+    func testOneDetentDoesNotRepeatWhenItsTailCrossesTheTimeCooldown() {
+        for pieces in [1, 2, 8, 120] {
+            for duration: UInt64 in [70_000_000, 350_000_000, 900_000_000] {
+                let recognizer = ScrollActionRecognizer()
+                let count = (0 ..< pieces).reduce(0) { count, index in
+                    count + recognizer.consume(
+                        Input(axis: .vertical, delta: 1 / Double(pieces), units: .detents),
+                        mapping: 0,
+                        repeats: false,
+                        at: UInt64(index) * duration / UInt64(max(1, pieces - 1))
+                    )
+                }
+                XCTAssertEqual(count, 1)
+            }
+        }
+    }
+
+    func testSuppressedDetentCrossingsAreConsumedWithoutQueuingActions() {
+        let recognizer = ScrollActionRecognizer()
+        func consume(_ delta: Double, at milliseconds: UInt64) -> Int {
+            recognizer.consume(
+                Input(axis: .vertical, delta: delta, units: .detents),
+                mapping: 0,
+                repeats: false,
+                at: milliseconds * 1_000_000
+            )
+        }
+        XCTAssertEqual(consume(0.5, at: 0), 1)
+        XCTAssertEqual(consume(10, at: 100), 0)
+        XCTAssertEqual(consume(0.125, at: 300), 0)
+        XCTAssertEqual(consume(0.875, at: 350), 1)
+        XCTAssertEqual(consume(10, at: 650), 1)
+        XCTAssertEqual(consume(0.125, at: 950), 0)
+    }
+
     func testUnmatchedMovementAndModifiersCannotBypassCooldownOrReleaseMomentum() {
         let recognizer = ScrollActionRecognizer()
         let input = Input(axis: .vertical, delta: 1, units: .points, hasPhase: true)
@@ -336,7 +401,7 @@ final class ScrollActionRecognizerTests: XCTestCase {
                         var counts = [Int]()
                         for time: UInt64 in [0, 10, 100, 249, 250, 260, 500] {
                             counts.append(recognizer.consume(
-                                Input(axis: axis, delta: 0.125, units: units, hasPhase: hasPhase),
+                                Input(axis: axis, delta: 1, units: units, hasPhase: hasPhase),
                                 mapping: 0,
                                 repeats: action.repeatsWithScrollMovement,
                                 at: time * 1_200_000

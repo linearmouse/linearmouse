@@ -60,7 +60,7 @@ final class ScrollActionStateTests: XCTestCase {
         for units: ScrollInput.Units in [.detents, .points, .lines] {
             let recognizer = ScrollActionRecognizer()
             let input = ScrollInput(axis: .vertical, delta: 0.125, units: units, hasPhase: true)
-            XCTAssertEqual(recognizer.consume(input, mapping: 0, repeats: false, at: 0), 1)
+            XCTAssertEqual(recognizer.consume(input, mapping: 0, repeats: false, at: 0), units == .detents ? 0 : 1)
             recognizer.endGesture()
             XCTAssertTrue(recognizer.ownsGesture)
             recognizer.beginGesture()
