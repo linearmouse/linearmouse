@@ -11,6 +11,7 @@ extension Scheme {
         @ImplicitOptional var speed: Bidirectional<Decimal>
         @ImplicitOptional var smoothed: Bidirectional<Smoothed>
         @ImplicitOptional var modifiers: Bidirectional<Modifiers>
+        var requireTwoFingerScroll: Bool?
 
         init() {}
 
@@ -20,7 +21,8 @@ extension Scheme {
             acceleration: Bidirectional<Decimal>? = nil,
             speed: Bidirectional<Decimal>? = nil,
             smoothed: Bidirectional<Smoothed>? = nil,
-            modifiers: Bidirectional<Modifiers>? = nil
+            modifiers: Bidirectional<Modifiers>? = nil,
+            requireTwoFingerScroll: Bool? = nil
         ) {
             $reverse = reverse
             $distance = distance
@@ -28,6 +30,7 @@ extension Scheme {
             $speed = speed
             $smoothed = smoothed
             $modifiers = modifiers
+            self.requireTwoFingerScroll = requireTwoFingerScroll
         }
     }
 }
@@ -40,6 +43,9 @@ extension Scheme.Scrolling {
         $speed?.merge(into: &scrolling.speed)
         merge(smoothed: $smoothed, into: &scrolling.smoothed)
         $modifiers?.merge(into: &scrolling.modifiers)
+        if let requireTwoFingerScroll {
+            scrolling.requireTwoFingerScroll = requireTwoFingerScroll
+        }
     }
 
     func merge(into scrolling: inout Self?) {
