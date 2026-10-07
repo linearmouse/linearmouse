@@ -173,10 +173,20 @@ final class ButtonMappingTransformer: EventTransformer {
             return nil
         }
 
-        if [.keyDown, .keyUp].contains(event.type) {
+        switch event.type {
+        case .keyDown, .keyUp, .flagsChanged,
+             .mouseMoved, .leftMouseDown, .leftMouseUp, .leftMouseDragged,
+             .rightMouseDown, .rightMouseUp, .rightMouseDragged,
+             .otherMouseDown, .otherMouseUp, .otherMouseDragged,
+             .scrollWheel:
             if let flags = actionExecutor.keySimulator.modifiedCGEventFlags(of: event) {
                 event.flags = flags
             }
+        default:
+            break
+        }
+
+        if [.keyDown, .keyUp, .flagsChanged].contains(event.type) {
             return event
         }
 

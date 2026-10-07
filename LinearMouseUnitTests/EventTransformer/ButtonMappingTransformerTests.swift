@@ -57,6 +57,7 @@ private final class ButtonMappingTestKeySimulator: KeySimulating {
     }
 
     private(set) var events = [Event]()
+    var heldModifierFlags = CGEventFlags()
 
     func down(keys: [Key], tap _: CGEventTapLocation?) throws {
         events.append(.down(keys))
@@ -96,8 +97,8 @@ private final class ButtonMappingTestKeySimulator: KeySimulating {
         XCTFail("Button mappings should send configured keys, not resolved zoom shortcuts")
     }
 
-    func modifiedCGEventFlags(of _: CGEvent) -> CGEventFlags? {
-        nil
+    func modifiedCGEventFlags(of event: CGEvent) -> CGEventFlags? {
+        heldModifierFlags.isEmpty ? nil : event.flags.union(heldModifierFlags)
     }
 }
 
@@ -112,6 +113,31 @@ final class ButtonMappingTransformerTests: XCTestCase {
     override func tearDown() {
         SettingsState.shared.endButtonMappingRecording()
         super.tearDown()
+    }
+
+    func testHeldModifierFlagsReachMouseEventsAndScrollMappings() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let simulator = ButtonMappingTestKeySimulator()
+        simulator.heldModifierFlags = .maskShift
+        let transformer = makeTransformer(
+            mappings: [
+                Mapping(
+                    trigger: .init(input: .wheel(.up), modifiers: [.shift]),
+                    action: .arg1(.keyPress([.a]))
+                )
+            ],
+            scheduler: scheduler,
+            keySimulator: simulator
+        )
+
+        let click = try buttonEvent(button: 4, pressed: true)
+        click.flags = .maskCommand
+        XCTAssertNotNil(try transformer.transform(click, in: .init(device: nil)))
+        XCTAssertTrue(click.flags.contains([.maskCommand, .maskShift]))
+
+        let scroll = try scrollEvent(vertical: 1)
+        XCTAssertNil(try transformer.transform(scroll, in: .init(device: nil)))
+        assertScrollKeyEvents(simulator, equal: [.press([.a])])
     }
 
     func testDelayedDeadlineReleasesAnchorBeforeForwardingMovement() throws {

@@ -89,4 +89,33 @@ final class KeySimulatorEventFieldsTests: XCTestCase {
         XCTAssertTrue(restored.flags.contains([.maskAlternate, rightOption]))
         XCTAssertTrue(restored.flags.isDisjoint(with: [.maskCommand, .maskShift]))
     }
+
+    func testHeldModifierFlagsAreAppliedToMouseAndScrollEventsUntilReleased() throws {
+        let simulator = KeySimulator { _, _ in }
+        try simulator.down(keys: [.shift], tap: nil)
+
+        let click = try XCTUnwrap(CGEvent(
+            mouseEventSource: nil,
+            mouseType: .leftMouseDown,
+            mouseCursorPosition: .zero,
+            mouseButton: .left
+        ))
+        click.flags = .maskCommand
+        let clickFlags = try XCTUnwrap(simulator.modifiedCGEventFlags(of: click))
+        XCTAssertTrue(clickFlags.contains([.maskCommand, .maskShift]))
+
+        let scroll = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: 1,
+            wheel2: 0,
+            wheel3: 0
+        ))
+        let scrollFlags = try XCTUnwrap(simulator.modifiedCGEventFlags(of: scroll))
+        XCTAssertTrue(scrollFlags.contains(.maskShift))
+
+        try simulator.up(keys: [.shift], tap: nil)
+        XCTAssertNil(simulator.modifiedCGEventFlags(of: click))
+    }
 }
