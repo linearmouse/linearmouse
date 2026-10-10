@@ -1,0 +1,7 @@
+- After changing `Documentation/Configuration.d.ts`: `npm run generate:json-schema`
+- Preserve support for the minimum macOS deployment target.
+- Prefer discussing an issue first; feature requests must start with an issue before a PR. Link it in the PR.
+- Use plain-language PR titles describing the user-facing change or the purpose of internal changes.
+- Label issues and PRs: `bug` for fixes, `enhancement` for features or improvements, `documentation` for docs.
+- Before every PR, a human must run the app on macOS and manually test the affected workflow end to end, verifying new features or bug fixes. Web/cloud changes require local human testing too; CI and AI testing are not substitutes. Record the environment, steps, and results in the PR; never claim testing without confirmation.
+- Credit contributing agents in commit trailers and PR descriptions using native defaults where available. Preserve existing attribution and the user's Git identity; avoid agent branding in titles and branch names.

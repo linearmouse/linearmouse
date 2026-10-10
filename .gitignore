@@ -35,3 +35,7 @@ DerivedData/
 
 # Node.js
 node_modules
+
+# Local VS Code settings
+.vscode/
+*.code-workspace
