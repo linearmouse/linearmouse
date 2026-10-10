@@ -140,6 +140,38 @@ final class ButtonMappingTransformerTests: XCTestCase {
         assertScrollKeyEvents(simulator, equal: [.press([.a])])
     }
 
+    func testModifierChangesClearPartialWheelMovementBeforeModifiersReturn() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let simulator = ButtonMappingTestKeySimulator()
+        let transformer = ButtonMappingTransformer(
+            mappings: [Mapping(trigger: .init(input: .wheel(.up)), action: .arg1(.keyPress([.a])))],
+            scheduleTimer: scheduler.schedule,
+            monotonicClock: { scheduler.now },
+            keySimulator: simulator,
+            highResolutionWheelMultiplier: { _ in 8 },
+            warpPointer: { _ in },
+            eventSink: { _ in },
+            syntheticClickEventSink: { _ in }
+        )
+        let context = EventTransformerContext(device: nil)
+        let partial = try scrollEvent(vertical: 1)
+        ScrollWheelEventView(partial).deltaYFixedPt = 0.375
+        XCTAssertNil(transformer.transform(partial, in: context))
+        assertScrollKeyEvents(simulator, equal: [])
+
+        let modifiers = try XCTUnwrap(CGEvent(keyboardEventSource: nil, virtualKey: 56, keyDown: true))
+        modifiers.type = .flagsChanged
+        modifiers.flags = .maskShift
+        XCTAssertNotNil(transformer.transform(modifiers, in: context))
+        modifiers.flags = []
+        XCTAssertNotNil(transformer.transform(modifiers, in: context))
+
+        let next = try scrollEvent(vertical: 1)
+        ScrollWheelEventView(next).deltaYFixedPt = 0.125
+        XCTAssertNil(transformer.transform(next, in: context))
+        assertScrollKeyEvents(simulator, equal: [])
+    }
+
     func testDelayedDeadlineReleasesAnchorBeforeForwardingMovement() throws {
         let mappings: [Mapping] = [
             .init(

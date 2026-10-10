@@ -186,7 +186,7 @@ final class ButtonMappingTransformer: EventTransformer {
             break
         }
 
-        if [.keyDown, .keyUp, .flagsChanged].contains(event.type) {
+        if [.keyDown, .keyUp].contains(event.type) {
             return event
         }
 
