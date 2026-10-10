@@ -601,9 +601,10 @@ final class ButtonMappingTransformer: EventTransformer {
         }
     }
 
-    /// A completed fallback is a semantic click, not a delayed copy of the
-    /// physical stream. Rebuild it at delivery time so stale timestamps,
-    /// annotations, and sub-threshold drag events do not reach the target app.
+    /// Rebuild stationary fallbacks as fresh clicks for applications that reject
+    /// delayed physical click events. Swipe recognition anchors event locations,
+    /// so its captured motion can also collapse into a click. Preserve the physical
+    /// stream when the pointer actually moved, including movement back to the start.
     private func syntheticClickRequest(from events: [DeferredEvent]) -> SyntheticClickRequest? {
         guard events.count >= 2,
               let down = events.first?.event,
@@ -611,14 +612,16 @@ final class ButtonMappingTransformer: EventTransformer {
               let button = MouseEventView(down).mouseButton,
               down.type == button.fixedCGEventType(of: .otherMouseDown),
               up.type == button.fixedCGEventType(of: .otherMouseUp),
-              MouseEventView(up).mouseButton == button else {
+              MouseEventView(up).mouseButton == button,
+              up.location == down.location else {
             return nil
         }
 
         let draggedType = button.fixedCGEventType(of: .otherMouseDragged)
         guard events.dropFirst().dropLast().allSatisfy({ deferredEvent in
             deferredEvent.event.type == draggedType &&
-                MouseEventView(deferredEvent.event).mouseButton == button
+                MouseEventView(deferredEvent.event).mouseButton == button &&
+                deferredEvent.event.location == down.location
         }) else {
             return nil
         }

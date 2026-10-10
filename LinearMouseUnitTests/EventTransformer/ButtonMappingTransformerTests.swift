@@ -560,7 +560,59 @@ final class ButtonMappingTransformerTests: XCTestCase {
         XCTAssertEqual(replayed, [.otherMouseDown, .otherMouseUp])
     }
 
-    func testUndefinedShortPressRebuildsFreshClickAfterCallbackAndDropsDrag() throws {
+    func testHeldWheelFallbackPreservesPointerMovement() throws {
+        for distance in [3.0, 100.0] {
+            for returnsToStart in [false, true] {
+                let scheduler = ButtonMappingTestTimerScheduler()
+                var replayed = [CGEvent]()
+                var syntheticClicks = [CGEvent]()
+                let transformer = ButtonMappingTransformer(
+                    mappings: [
+                        Mapping(
+                            trigger: .init(input: .wheel(.up), whileHeld: [.mouse(2)]),
+                            action: .arg0(.none)
+                        )
+                    ],
+                    scheduleTimer: scheduler.schedule,
+                    monotonicClock: { scheduler.now },
+                    eventSink: { replayed.append($0) },
+                    syntheticClickScheduler: { $0() },
+                    syntheticClickReleaseScheduler: { _, handler in handler() },
+                    syntheticClickEventSink: { syntheticClicks.append($0) }
+                )
+                let start = CGPoint(x: 120, y: 80)
+                let destination = CGPoint(x: start.x + distance, y: start.y)
+                let down = try buttonEvent(button: 2, pressed: true)
+                down.location = start
+                let drag = try draggedEvent(button: 2, deltaX: distance)
+                drag.location = destination
+                let up = try buttonEvent(button: 2, pressed: false)
+                up.location = returnsToStart ? start : destination
+                var events = [down, drag]
+                if returnsToStart {
+                    let returnDrag = try draggedEvent(button: 2, deltaX: -distance)
+                    returnDrag.location = start
+                    events.append(returnDrag)
+                }
+                events.append(up)
+
+                for event in events {
+                    XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+                }
+
+                XCTAssertTrue(syntheticClicks.isEmpty)
+                XCTAssertEqual(replayed.map(\.type), events.map(\.type))
+                XCTAssertEqual(replayed.map(\.location), events.map(\.location))
+                XCTAssertEqual(
+                    replayed.map { $0.getDoubleValueField(.mouseEventDeltaX) },
+                    events.map { $0.getDoubleValueField(.mouseEventDeltaX) }
+                )
+                XCTAssertFalse(transformer.hasActiveInteraction)
+            }
+        }
+    }
+
+    func testUnmatchedSwipeRebuildsFreshClickAfterCallbackAndDropsAnchoredDrag() throws {
         let scheduler = ButtonMappingTestTimerScheduler()
         var scheduledReplay: (() -> Void)?
         var scheduledRelease: (() -> Void)?
@@ -568,7 +620,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
         var replayed = [CGEvent]()
         let mapping = Mapping(
             trigger: .init(input: .button(.mouse(1)), modifiers: [.shift]),
-            outcomes: .init(longPress: .arg0(.none))
+            outcomes: .init(swipe: .init(right: .arg0(.none)))
         )
         let transformer = ButtonMappingTransformer(
             mappings: [mapping],
