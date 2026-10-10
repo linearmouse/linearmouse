@@ -3,5 +3,5 @@
 - Prefer discussing an issue first; feature requests must start with an issue before a PR. Link it in the PR.
 - Use plain-language PR titles describing the user-facing change or the purpose of internal changes.
 - Label issues and PRs: `bug` for fixes, `enhancement` for features or improvements, `documentation` for docs.
-- Before every PR, a human must run the app on macOS and manually test the affected workflow end to end, verifying new features or bug fixes. Web/cloud changes require local human testing too; CI and AI testing are not substitutes. Record the environment, steps, and results in the PR; never claim testing without confirmation.
+- Before creating a PR, ask whether the user has manually tested the change, using a simple Yes/No question tool when available. If already confirmed or the answer is Yes, proceed directly; no environment, steps, or detailed results are required.
 - Credit contributing agents in commit trailers and PR descriptions using native defaults where available. Preserve existing attribution and the user's Git identity; avoid agent branding in titles and branch names.
