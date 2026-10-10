@@ -1328,13 +1328,54 @@ final class ButtonMappingScrollRecordingTransformer: EventTransformer {
         false
     }
 
-    func transform(_ event: CGEvent, in _: EventTransformerContext) -> CGEvent? {
+    private let highResolutionWheelMultiplier: (EventTransformerContext) -> Int?
+    private let now: () -> UInt64
+    private let movement = ScrollMovementAccumulator()
+    private var sessionID: UUID?
+    private var modifierFlags: CGEventFlags?
+    private var multiplier: Int?
+
+    init(
+        highResolutionWheelMultiplier: @escaping (EventTransformerContext) -> Int? = {
+            $0.device?.highResolutionWheelNormalizationMultiplier
+        },
+        now: @escaping () -> UInt64 = { DispatchTime.now().uptimeNanoseconds }
+    ) {
+        self.highResolutionWheelMultiplier = highResolutionWheelMultiplier
+        self.now = now
+    }
+
+    func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent? {
         guard SettingsState.shared.recording,
               let recordingSessionID = SettingsState.shared.buttonMappingRecordingSessionID,
               event.type == .scrollWheel,
               !event.isLinearMouseSyntheticEvent,
               let scroll = Self.scrollDirection(of: event) else {
             return event
+        }
+
+        let multiplier = highResolutionWheelMultiplier(context)
+        if sessionID != recordingSessionID || modifierFlags != event.flags || self.multiplier != multiplier {
+            movement.discard()
+        }
+        sessionID = recordingSessionID
+        modifierFlags = event.flags
+        self.multiplier = multiplier
+
+        if let multiplier, multiplier > 1, scroll == .up || scroll == .down {
+            let view = ScrollWheelEventView(event)
+            if let input = ScrollInput.read(from: view, highResolutionMultiplier: multiplier, axis: .vertical),
+               input.units == .detents {
+                // Match by-lines scrolling: require half a detent before recording,
+                // then a full detent between subsequent recognitions.
+                guard movement.consume(input, mapping: 0, roundToNearestStep: true, at: now()) > 0 else {
+                    return nil
+                }
+            } else {
+                movement.discard()
+            }
+        } else {
+            movement.discard()
         }
 
         let modifierFlags = event.flags
