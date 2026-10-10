@@ -1,0 +1,5 @@
+# Enable the desktop app's native commit attribution, using its default identity.
+# Current Codex CLI versions mark this legacy feature as removed; see AGENTS.md
+# for the contribution requirements that also apply to CLI workflows.
+[features]
+codex_git_commit = true
