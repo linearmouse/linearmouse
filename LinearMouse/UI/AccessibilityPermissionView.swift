@@ -56,9 +56,9 @@ struct AccessibilityPermissionView: View {
             comment: "%@ is the localized system permission name."
         ).components(separatedBy: "%@")
         let permission = Text(NSLocalizedString(permissionNaming.settingsPaneKey, comment: "")).bold()
-        var marker = Text("")
+        var marker = Text(verbatim: "")
         if permissionNaming.formerNameKey != nil {
-            marker = Text("1").font(.system(size: 10)).baselineOffset(5)
+            marker = Text(verbatim: "1").font(.system(size: 10)).baselineOffset(5)
         }
         return Text(parts[0]) + permission + marker + Text(parts.dropFirst().joined(separator: "%@"))
     }
