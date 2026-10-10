@@ -8,21 +8,49 @@ typealias MouseButtonEmitter = (_ button: Int, _ down: Bool) -> Void
 
 enum SyntheticMouseButtonEventEmitter {
     static func post(button: Int, down: Bool) {
+        post(button: button, down: down, isHIDButton: false)
+    }
+
+    static func postHIDButton(button: Int, down: Bool) {
+        post(button: button, down: down, isHIDButton: true)
+    }
+
+    private static func post(button: Int, down: Bool, isHIDButton: Bool) {
         guard let location = CGEvent(source: nil)?.location,
-              let mouseButton = CGMouseButton(rawValue: UInt32(button)),
+              let event = makeEvent(
+                  button: button,
+                  down: down,
+                  location: location,
+                  flags: ModifierState.normalize(ModifierState.shared.currentFlags),
+                  isHIDButton: isHIDButton
+              ) else {
+            return
+        }
+        event.post(tap: .cghidEventTap)
+    }
+
+    static func makeEvent(
+        button: Int, down: Bool, location: CGPoint, flags: CGEventFlags, isHIDButton: Bool
+    ) -> CGEvent? {
+        guard let buttonNumber = UInt32(exactly: button),
+              let mouseButton = CGMouseButton(rawValue: buttonNumber),
               let event = CGEvent(
                   mouseEventSource: nil,
                   mouseType: down ? .otherMouseDown : .otherMouseUp,
                   mouseCursorPosition: location,
                   mouseButton: mouseButton
               ) else {
-            return
+            return nil
         }
 
-        event.flags = ModifierState.normalize(ModifierState.shared.currentFlags)
+        event.flags = flags
         event.setIntegerValueField(.mouseEventButtonNumber, value: Int64(button))
-        event.isLinearMouseSyntheticEvent = true
-        event.post(tap: .cghidEventTap)
+        if isHIDButton {
+            event.isLinearMouseHIDButtonEvent = true
+        } else {
+            event.isLinearMouseSyntheticEvent = true
+        }
+        return event
     }
 }
 

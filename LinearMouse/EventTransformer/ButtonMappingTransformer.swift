@@ -148,7 +148,7 @@ final class ButtonMappingTransformer: EventTransformer {
         if isRecording {
             scrollRecognizer.reset()
         }
-        guard !event.isLinearMouseSyntheticEvent,
+        guard !event.isLinearMouseSyntheticEvent || event.isLinearMouseHIDButtonEvent,
               !isRecording || hasActiveInteraction else {
             return event
         }

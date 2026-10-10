@@ -124,17 +124,30 @@ extension LogitechControlIdentity {
 
 extension CGEvent {
     static let linearMouseSyntheticEventUserData: Int64 = 0x534D_4F4F_5448
+    private static let hidButtonEventUserData: Int64 = 0x4849_4442_544E
     private static let gestureCleanupReleaseUserData: Int64 = 0x4745_5354_5552
 
     var isLinearMouseSyntheticEvent: Bool {
         get {
             getIntegerValueField(.eventSourceUserData) == Self.linearMouseSyntheticEventUserData
+                || isLinearMouseHIDButtonEvent
         }
         set {
             setIntegerValueField(
                 .eventSourceUserData,
                 value: newValue ? Self.linearMouseSyntheticEventUserData : 0
             )
+        }
+    }
+
+    /// A physical button reconstructed from a HID report still needs button mapping.
+    /// Keep it synthetic for source filtering, unlike an event from another application.
+    var isLinearMouseHIDButtonEvent: Bool {
+        get {
+            getIntegerValueField(.eventSourceUserData) == Self.hidButtonEventUserData
+        }
+        set {
+            setIntegerValueField(.eventSourceUserData, value: newValue ? Self.hidButtonEventUserData : 0)
         }
     }
 
