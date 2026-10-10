@@ -340,11 +340,24 @@ public extension KeySimulator {
                 return nil
             }
 
-            guard event.type == .keyDown || event.type == .keyUp else {
+            guard Self.supportsModifierFlags(event.type) else {
                 return nil
             }
 
             return event.flags.union(flags)
+        }
+    }
+
+    private static func supportsModifierFlags(_ type: CGEventType) -> Bool {
+        switch type {
+        case .keyDown, .keyUp, .flagsChanged,
+             .mouseMoved, .leftMouseDown, .leftMouseUp, .leftMouseDragged,
+             .rightMouseDown, .rightMouseUp, .rightMouseDragged,
+             .otherMouseDown, .otherMouseUp, .otherMouseDragged,
+             .scrollWheel:
+            true
+        default:
+            false
         }
     }
 
