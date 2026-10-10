@@ -115,6 +115,94 @@ final class ButtonMappingTransformerTests: XCTestCase {
         super.tearDown()
     }
 
+    func testHIDSideButtonReportsExecuteMappingsWithAndWithoutOption() throws {
+        for button in 3 ... 4 {
+            for flags: CGEventFlags in [[], .maskAlternate] {
+                let scheduler = ButtonMappingTestTimerScheduler()
+                let simulator = ButtonMappingTestKeySimulator()
+                let transformer = makeTransformer(
+                    mappings: [
+                        Mapping(
+                            trigger: .init(
+                                input: .button(.mouse(button)),
+                                modifiers: flags.isEmpty ? nil : [.option]
+                            ),
+                            outcomes: .init(shortPress: .arg1(.keyPress([.a])))
+                        )
+                    ],
+                    scheduler: scheduler,
+                    keySimulator: simulator
+                )
+                var events = [CGEvent]()
+                let handler = GenericSideButtonHandler { button, down in
+                    if let event = SyntheticMouseButtonEventEmitter.makeEvent(
+                        button: button, down: down, location: .zero, flags: flags, isHIDButton: true
+                    ) {
+                        events.append(event)
+                    }
+                }
+                let pressedState = UInt8(1 << button)
+                handler.handleReport(.init(report: Data([1, pressedState]), lastButtonStates: 0)) { _ in }
+                handler.handleReport(.init(report: Data([1, 0]), lastButtonStates: pressedState)) { _ in }
+                XCTAssertEqual(events.count, 2)
+                for event in events {
+                    XCTAssertTrue(event.isLinearMouseSyntheticEvent)
+                    XCTAssertTrue(event.isLinearMouseHIDButtonEvent)
+                    XCTAssertEqual(event.flags, flags)
+                    XCTAssertNil(try transformer.transform(event, in: .init(device: nil)))
+                    scheduler.advance(to: scheduler.now + 100_000_000)
+                }
+                assertScrollKeyEvents(simulator, equal: [.press([.a])])
+                XCTAssertFalse(transformer.hasActiveInteraction)
+            }
+        }
+    }
+
+    func testHIDButtonFallbackIsReplayedWithoutRemapping() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        var replayed = [CGEvent]()
+        let transformer = makeTransformer(
+            mappings: [buttonMapping(long: .arg0(.none))],
+            scheduler: scheduler
+        ) { replayed.append($0) }
+
+        for down in [true, false] {
+            let event = try XCTUnwrap(SyntheticMouseButtonEventEmitter.makeEvent(
+                button: 4, down: down, location: .zero, flags: [], isHIDButton: true
+            ))
+            XCTAssertNil(try transformer.transform(event, in: .init(device: nil)))
+            scheduler.advance(to: scheduler.now + 100_000_000)
+        }
+        XCTAssertEqual(replayed.map(\.type), [.otherMouseDown, .otherMouseUp])
+        for event in replayed {
+            XCTAssertTrue(event.isLinearMouseSyntheticEvent)
+            XCTAssertFalse(event.isLinearMouseHIDButtonEvent)
+            XCTAssertNotNil(try transformer.transform(event, in: .init(device: nil)))
+        }
+        XCTAssertFalse(transformer.hasActiveInteraction)
+    }
+
+    func testSyntheticFallbackButtonsStillBypassMappings() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let simulator = ButtonMappingTestKeySimulator()
+        let transformer = makeTransformer(
+            mappings: [buttonMapping(short: .arg1(.keyPress([.a])))],
+            scheduler: scheduler,
+            keySimulator: simulator
+        )
+        for down in [true, false] {
+            let event = try XCTUnwrap(SyntheticMouseButtonEventEmitter.makeEvent(
+                button: 4, down: down, location: .zero, flags: [], isHIDButton: false
+            ))
+            XCTAssertTrue(event.isLinearMouseSyntheticEvent)
+            XCTAssertFalse(event.isLinearMouseHIDButtonEvent)
+            XCTAssertNotNil(try transformer.transform(event, in: .init(device: nil)))
+            scheduler.advance(to: scheduler.now + 100_000_000)
+        }
+        XCTAssertTrue(simulator.events.isEmpty)
+        XCTAssertFalse(transformer.hasActiveInteraction)
+    }
+
     func testHeldModifierFlagsReachMouseEventsAndScrollMappings() throws {
         let scheduler = ButtonMappingTestTimerScheduler()
         let simulator = ButtonMappingTestKeySimulator()

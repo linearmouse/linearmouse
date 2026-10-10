@@ -20,7 +20,7 @@ struct KensingtonSlimbladeHandler: InputReportHandler {
 
     private let emit: MouseButtonEmitter
 
-    init(emit: @escaping MouseButtonEmitter = SyntheticMouseButtonEventEmitter.post) {
+    init(emit: @escaping MouseButtonEmitter = SyntheticMouseButtonEventEmitter.postHIDButton) {
         self.emit = emit
     }
 
