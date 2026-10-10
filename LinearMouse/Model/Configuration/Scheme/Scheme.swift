@@ -41,6 +41,9 @@ struct Scheme: Codable, Equatable {
 extension Scheme {
     struct MatchContext {
         var device: DeviceMatcher?
+        /// The raw HID identity of a device whose `device` matcher is a
+        /// resolved receiver identity; schemes written against it still apply.
+        var deviceFallback: DeviceMatcher?
         var app: String?
         var parentApp: String?
         var groupApp: String?
@@ -50,6 +53,7 @@ extension Scheme {
 
         init(
             deviceMatcher: DeviceMatcher? = nil,
+            deviceFallback: DeviceMatcher? = nil,
             app: String? = nil,
             parentApp: String? = nil,
             groupApp: String? = nil,
@@ -58,6 +62,7 @@ extension Scheme {
             processPath: String? = nil
         ) {
             device = deviceMatcher
+            self.deviceFallback = deviceFallback
             self.app = app
             self.parentApp = parentApp
             self.groupApp = groupApp
@@ -75,8 +80,10 @@ extension Scheme {
             processName: String? = nil,
             processPath: String? = nil
         ) {
+            let candidates = device?.matchCandidates
             self.init(
-                deviceMatcher: device.map { DeviceMatcher(of: $0) },
+                deviceMatcher: candidates?.primary,
+                deviceFallback: candidates?.fallback,
                 app: app,
                 parentApp: parentApp,
                 groupApp: groupApp,
@@ -208,7 +215,12 @@ extension Scheme: CustomStringConvertible {
 
 extension [Scheme] {
     func allDeviceSpecficSchemes(of device: Device) -> [EnumeratedSequence<[Scheme]>.Element] {
-        allDeviceMatcherSpecificSchemes(of: DeviceMatcher(of: device))
+        let candidates = device.matchCandidates.all
+        var seen = Set<Int>()
+        return candidates
+            .flatMap { allDeviceMatcherSpecificSchemes(of: $0) }
+            .filter { seen.insert($0.offset).inserted }
+            .sorted { $0.offset < $1.offset }
     }
 
     func allDeviceMatcherSpecificSchemes(of matcher: DeviceMatcher) -> [EnumeratedSequence<[Scheme]>.Element] {
