@@ -15,6 +15,26 @@ class GlobalEventTap {
     private var motionObservationToken: ObservationToken?
     private let motionControl = EventTap.Control(isEnabled: false)
     private lazy var watchdog = GlobalEventTapWatchdog()
+
+    private var observationID = 0
+    private lazy var recovery = EventTapRecovery(attempt: { [weak self] completion in
+        guard let self else {
+            return
+        }
+        let expectedObservationID = observationID
+        AccessibilityPermission.check { [weak self] snapshot in
+            guard let self, shouldRun, observationID == expectedObservationID else {
+                return
+            }
+            guard snapshot.enabled else {
+                completion(.permissionRequired)
+                return
+            }
+            completion(startObservation() ? .started : .failed)
+        }
+    }, onFailure: { result in
+        AccessibilityPermissionWindow.shared.show(eventTapFailed: result == .failed)
+    })
     private let eventThread = EventThread.shared
     private var shouldRun = false
     /// Read and updated only on EventThread; disabled events never enter the focus controller.
@@ -74,22 +94,12 @@ class GlobalEventTap {
     func start() {
         shouldRun = true
 
-        startObservation()
+        recovery.start()
     }
 
-    private func startObservation() {
+    private func startObservation() -> Bool {
         guard observationToken == nil else {
-            return
-        }
-
-        guard AccessibilityPermission.enabled else {
-            let alert = NSAlert()
-            alert.messageText = NSLocalizedString(
-                "Failed to create GlobalEventTap: Accessibility permission not granted",
-                comment: ""
-            )
-            alert.runModal()
-            return
+            return true
         }
 
         let eventTypes = EventType.all.filter { !$0.isPointerMotion }
@@ -135,7 +145,7 @@ class GlobalEventTap {
             }
         }) else {
             eventThread.stop()
-            return
+            return false
         }
 
         switch observationResult {
@@ -144,11 +154,13 @@ class GlobalEventTap {
             motionObservationToken = motionToken
         case let .failure(error):
             eventThread.stop()
-            NSAlert(error: error).runModal()
-            return
+            os_log("Failed to create event tap: %{public}@", log: Self.log, type: .error, String(describing: error))
+            return false
         }
 
         watchdog.start()
+        AccessibilityPermissionWindow.shared.dismiss()
+        return true
     }
 
     func stop() {
@@ -157,6 +169,8 @@ class GlobalEventTap {
     }
 
     private func stopObservation() {
+        observationID += 1
+        recovery.stop()
         // Release the observation token, which dispatches timer invalidation
         // to the event RunLoop (see EventTap.observe).
         observationToken = nil
@@ -176,6 +190,6 @@ class GlobalEventTap {
 
         os_log("Restart GlobalEventTap: %{public}@", log: Self.log, type: .info, String(describing: reason))
         stopObservation()
-        startObservation()
+        recovery.start()
     }
 }

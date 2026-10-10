@@ -70,7 +70,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         #endif
 
         guard AccessibilityPermission.enabled else {
-            AccessibilityPermissionWindow.shared.bringToFront()
+            AccessibilityPermissionWindow.shared.show()
             return
         }
 

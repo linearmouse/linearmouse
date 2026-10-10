@@ -75350,6 +75350,1734 @@
           }
         }
       }
+    },
+    "Accessibility" : {
+      "comment" : "System permission pane name. Apple terminology where macOS supplies this language; English fallback for af, bs, my and sr, which have no corresponding macOS UI localization.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessibility"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تسهيلات الاستخدام"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessibility"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessibilitat"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zpřístupnění"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tilgængelighed"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedienungshilfen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Προσβασιμότητα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessibility"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accesibilidad"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Käyttöapu"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessibilité"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נגישות"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kisegítő lehetőségek"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aksesibilitas"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessibilità"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アクセシビリティ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "손쉬운 사용"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessibility"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tilgjengelighet"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toegankelijkheid"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dostępność"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acessibilidade"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acessibilidade"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accesibilitate"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Универсальный доступ"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prístupnosť"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessibility"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hjälpmedel"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erişilebilirlik"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Доступність"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trợ năng"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "辅助功能"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "輔助使用"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "輔助使用"
+          }
+        }
+      }
+    },
+    "Device Control and Data Access" : {
+      "comment" : "System permission pane name. Apple terminology where macOS supplies this language; English fallback for af, bs, my and sr, which have no corresponding macOS UI localization.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Device Control and Data Access"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التحكم في الأجهزة والوصول إلى البيانات"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Device Control and Data Access"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Control de dispositius i accés a les dades"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ovládání zařízení a přístup k datům"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Styring af enhed og adgang til data"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gerätesteuerung und Datenzugriff"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Έλεγχος συσκευής και πρόσβαση σε δεδομένα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Device Control and Data Access"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Control de dispositivos y acceso a datos"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laitehallinta ja tietojen käyttö"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contrôle de l’appareil et accès aux données"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שליטה במכשיר וגישה לנתונים"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eszközvezérlés és adathozzáférés"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontrol Perangkat dan Akses Data"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controllo del dispositivo e accesso ai dati"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "デバイスの制御とデータへのアクセス"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기기 제어 및 데이터 접근"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Device Control and Data Access"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enhetskontroll og datatilgang"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apparaatbeheer en gegevenstoegang"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sterowanie urządzeniami i dostęp do danych"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controlo do dispositivo e acesso a dados"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controle do Dispositivo e Acesso a Dados"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Control al dispozitivului și acces la date"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Управление устройством и доступ к данным"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ovládanie zariadenia a prístup k dátam"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Device Control and Data Access"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enhetskontroll och dataåtkomst"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aygıt Denetimi ve Veri Erişimi"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Керування пристроями й доступ до даних"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Điều khiển thiết bị và truy cập dữ liệu"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设备控制和数据访问"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "裝置控制和資料取用"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "裝置控制和資料取用權限"
+          }
+        }
+      }
+    },
+    "LinearMouse could not start mouse input processing. Restart LinearMouse. If the problem persists, get more help." : {
+      "comment" : "Permission recovery window.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse kon nie muisinvoer begin verwerk nie. Herbegin LinearMouse. Kry meer hulp as die probleem voortduur."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تعذر على LinearMouse بدء معالجة إدخال الماوس. أعد تشغيل LinearMouse. إذا استمرت المشكلة، فراجع المزيد من المساعدة."
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse nije mogao pokrenuti obradu unosa miša. Ponovo pokrenite LinearMouse. Ako problem potraje, potražite dodatnu pomoć."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El LinearMouse no ha pogut iniciar el processament de l’entrada del ratolí. Reinicieu el LinearMouse. Si el problema continua, consulteu l’ajuda."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse nemohl zahájit zpracování vstupu myši. Restartujte LinearMouse. Pokud problém přetrvává, vyhledejte další pomoc."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse kunne ikke starte behandlingen af museinput. Genstart LinearMouse. Se hjælpen, hvis problemet fortsætter."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse konnte die Verarbeitung der Mauseingaben nicht starten. Starte LinearMouse neu. Falls das Problem weiterhin besteht, rufe die Hilfe auf."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το LinearMouse δεν μπόρεσε να ξεκινήσει την επεξεργασία εισόδου του ποντικιού. Επανεκκινήστε το LinearMouse. Αν το πρόβλημα παραμένει, ανατρέξτε στη βοήθεια."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse could not start mouse input processing. Restart LinearMouse. If the problem persists, get more help."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse no pudo iniciar el procesamiento de la entrada del ratón. Reinicia LinearMouse. Si el problema persiste, consulta la ayuda."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse ei voinut aloittaa hiirisyötteen käsittelyä. Käynnistä LinearMouse uudelleen. Jos ongelma jatkuu, katso lisäohjeita."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse n’a pas pu démarrer le traitement des entrées de la souris. Redémarrez LinearMouse. Si le problème persiste, consultez l’aide."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse לא הצליח להתחיל לעבד קלט עכבר. יש להפעיל מחדש את LinearMouse. אם הבעיה נמשכת, ניתן לקבל עזרה נוספת."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A LinearMouse nem tudta elindítani az egérbevitel feldolgozását. Indítsa újra a LinearMouse-t. Ha a probléma továbbra is fennáll, tekintse meg a súgót."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse tidak dapat mulai memproses input tetikus. Mulai ulang LinearMouse. Jika masalah berlanjut, lihat bantuan lebih lanjut."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse non ha potuto avviare l’elaborazione degli input del mouse. Riavvia LinearMouse. Se il problema persiste, consulta l’aiuto."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マウス入力の処理を開始できませんでした。LinearMouse を再起動してください。問題が解決しない場合は、ヘルプを参照してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse가 마우스 입력 처리를 시작하지 못했습니다. LinearMouse를 재시동하세요. 문제가 계속되면 추가 도움말을 확인하세요."
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse သည် မောက်စ်ထည့်သွင်းမှုကို စတင်မလုပ်ဆောင်နိုင်ပါ။ LinearMouse ကို ပြန်လည်စတင်ပါ။ ပြဿနာဆက်ရှိနေပါက နောက်ထပ်အကူအညီ ရယူပါ။"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse kunne ikke starte behandlingen av museinndata. Start LinearMouse på nytt. Se hjelpen hvis problemet vedvarer."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse kon de verwerking van muisinvoer niet starten. Start LinearMouse opnieuw. Raadpleeg de hulp als het probleem aanhoudt."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse nie mógł rozpocząć przetwarzania danych myszy. Uruchom LinearMouse ponownie. Jeśli problem nie ustąpi, skorzystaj z pomocy."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O LinearMouse não conseguiu iniciar o processamento da entrada do rato. Reinicie o LinearMouse. Se o problema persistir, consulte a ajuda."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O LinearMouse não conseguiu iniciar o processamento da entrada do mouse. Reinicie o LinearMouse. Se o problema persistir, consulte a ajuda."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse nu a putut începe procesarea intrărilor mouse-ului. Reporniți LinearMouse. Dacă problema persistă, consultați ajutorul."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse не удалось начать обработку ввода мыши. Перезапустите LinearMouse. Если проблема сохраняется, обратитесь к справке."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse nemohol spustiť spracovanie vstupu myši. Reštartujte LinearMouse. Ak problém pretrváva, vyhľadajte ďalšiu pomoc."
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse није могао да покрене обраду уноса миша. Поново покрените LinearMouse. Ако проблем потраје, потражите додатну помоћ."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse kunde inte börja bearbeta musinmatning. Starta om LinearMouse. Se hjälpen om problemet kvarstår."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse fare girdisini işlemeye başlayamadı. LinearMouse’u yeniden başlatın. Sorun devam ederse yardım alın."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse не вдалося розпочати обробку введення миші. Перезапустіть LinearMouse. Якщо проблема не зникне, зверніться до довідки."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse không thể bắt đầu xử lý đầu vào chuột. Hãy khởi động lại LinearMouse. Nếu sự cố vẫn tiếp diễn, hãy xem trợ giúp thêm."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse 无法开始处理鼠标输入。请重新启动 LinearMouse。如果问题仍然存在，请获取更多帮助。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse 無法開始處理滑鼠輸入。請重新啟動 LinearMouse。如果問題持續發生，請取得更多協助。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse 無法開始處理滑鼠輸入。請重新啟動 LinearMouse。如果問題持續發生，請取得更多協助。"
+          }
+        }
+      }
+    },
+    "Open Settings" : {
+      "comment" : "Permission recovery window.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maak instellings oop"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فتح الإعدادات"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otvori postavke"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obre la configuració"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otevřít nastavení"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Åbn indstillinger"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen öffnen"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Άνοιγμα ρυθμίσεων"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Settings"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir ajustes"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avaa asetukset"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrir les réglages"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פתיחת ההגדרות"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beállítások megnyitása"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buka Pengaturan"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri impostazioni"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定を開く"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설정 열기"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ဆက်တင်များကို ဖွင့်ရန်"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Åpne innstillinger"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open instellingen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otwórz ustawienia"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir definições"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir Ajustes"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deschide configurările"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть настройки"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otvoriť nastavenia"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отвори подешавања"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öppna inställningar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarları Aç"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відкрити параметри"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mở cài đặt"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开设置"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打開設定"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開啟設定"
+          }
+        }
+      }
+    },
+    "Restart LinearMouse" : {
+      "comment" : "Permission recovery window.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Herbegin LinearMouse"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إعادة تشغيل LinearMouse"
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ponovo pokreni LinearMouse"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reinicia el LinearMouse"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restartovat LinearMouse"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genstart LinearMouse"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse neu starten"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Επανεκκίνηση LinearMouse"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restart LinearMouse"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reiniciar LinearMouse"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Käynnistä LinearMouse uudelleen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redémarrer LinearMouse"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הפעלה מחדש של LinearMouse"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse újraindítása"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mulai Ulang LinearMouse"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riavvia LinearMouse"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse を再起動"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse 재시동"
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse ကို ပြန်လည်စတင်ရန်"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start LinearMouse på nytt"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Herstart LinearMouse"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uruchom LinearMouse ponownie"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reiniciar LinearMouse"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reiniciar LinearMouse"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repornește LinearMouse"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перезапустить LinearMouse"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reštartovať LinearMouse"
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поново покрени LinearMouse"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starta om LinearMouse"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse’u Yeniden Başlat"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перезапустити LinearMouse"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khởi động lại LinearMouse"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新启动 LinearMouse"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新啟動 LinearMouse"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新啟動 LinearMouse"
+          }
+        }
+      }
+    },
+    "LinearMouse needs %@ permission to customize scrolling, pointer movement, and mouse buttons." : {
+      "comment" : "%@ is the localized system permission name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse benodig die %@-toestemming om blaai, wyserbeweging en muisknoppies aan te pas."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يحتاج LinearMouse إلى إذن %@ لتخصيص التمرير وحركة المؤشر وأزرار الماوس."
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse treba dozvolu %@ za prilagođavanje pomjeranja sadržaja, kretanja pokazivača i dugmadi miša."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El LinearMouse necessita el permís %@ per personalitzar el desplaçament, el moviment del punter i els botons del ratolí."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse potřebuje oprávnění %@ k přizpůsobení posouvání, pohybu ukazatele a tlačítek myši."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse skal have tilladelsen %@ for at tilpasse rulning, markørbevægelse og museknapper."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse benötigt die Berechtigung %@, um Scrollen, Zeigerbewegungen und Maustasten anzupassen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το LinearMouse χρειάζεται την άδεια %@ για την προσαρμογή της κύλισης, της κίνησης του δείκτη και των κουμπιών του ποντικιού."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse needs %@ permission to customize scrolling, pointer movement, and mouse buttons."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse necesita el permiso %@ para personalizar el desplazamiento, el movimiento del puntero y los botones del ratón."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse tarvitsee luvan %@ vierityksen, osoittimen liikkeen ja hiiren painikkeiden mukauttamiseen."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse a besoin de l’autorisation %@ pour personnaliser le défilement, le déplacement du pointeur et les boutons de la souris."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ל־LinearMouse נדרשת הרשאת %@ כדי להתאים אישית את הגלילה, תנועת המצביע וכפתורי העכבר."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A LinearMouse-nak a görgetés, a mutatómozgás és az egérgombok testreszabásához a(z) %@ engedélyre van szüksége."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse memerlukan izin %@ untuk menyesuaikan pengguliran, gerakan penunjuk, dan tombol mouse."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse richiede il permesso %@ per personalizzare lo scorrimento, il movimento del puntatore e i pulsanti del mouse."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スクロール、ポインタの移動、マウスボタンをカスタマイズするには、LinearMouse に%@の権限が必要です。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "스크롤, 포인터 이동 및 마우스 버튼을 사용자화하려면 LinearMouse에 %@ 권한이 필요합니다."
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "လှိမ့်ခြင်း၊ ညွှန်ပြချက်ရွှေ့ခြင်းနှင့် မောက်စ်ခလုတ်များကို စိတ်ကြိုက်ပြင်ဆင်ရန် LinearMouse သည် %@ ခွင့်ပြုချက် လိုအပ်ပါသည်။"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse trenger tillatelsen %@ for å tilpasse rulling, pekerbevegelser og museknapper."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse heeft de toestemming %@ nodig om scrollen, aanwijzerbewegingen en muisknoppen aan te passen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse potrzebuje uprawnienia %@, aby dostosować przewijanie, ruch wskaźnika i przyciski myszy."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O LinearMouse precisa da permissão %@ para personalizar a deslocação, o movimento do ponteiro e os botões do rato."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O LinearMouse precisa da permissão %@ para personalizar a rolagem, o movimento do cursor e os botões do mouse."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse are nevoie de permisiunea %@ pentru a personaliza derularea, mișcarea cursorului și butoanele mouse-ului."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для настройки прокрутки, движения указателя и кнопок мыши LinearMouse требуется разрешение %@."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse potrebuje povolenie %@ na prispôsobenie rolovania, pohybu kurzora a tlačidiel myši."
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse захтева дозволу %@ за прилагођавање померања садржаја, кретања показивача и дугмади миша."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse behöver behörigheten %@ för att anpassa rullning, pekarrörelser och musknappar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse’un kaydırmayı, işaretçi hareketini ve fare düğmelerini özelleştirmesi için %@ izni gerekir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для налаштування прокручування, руху вказівника та кнопок миші LinearMouse потрібен дозвіл %@."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse cần quyền %@ để tùy chỉnh thao tác cuộn, chuyển động con trỏ và các nút chuột."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse 需要%@权限来自定义滚动、指针移动和鼠标按键。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse 需要%@權限來自訂捲動、游標移動和滑鼠按鍵。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LinearMouse 需要%@權限來自訂捲動、游標移動和滑鼠按鍵。"
+          }
+        }
+      }
+    },
+    "Called %@ in earlier versions of macOS." : {
+      "comment" : "Footnote explaining the system permission name in earlier macOS versions.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In vroeëre weergawes van macOS %@ genoem."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كان يُسمى %@ في الإصدارات السابقة من macOS."
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "U ranijim verzijama macOS-a zvalo se %@."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anomenat %@ en versions anteriors del macOS."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "V dřívějších verzích macOS pod názvem %@."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaldet %@ i tidligere versioner af macOS."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In früheren macOS-Versionen als %@ bezeichnet."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ονομαζόταν %@ σε παλαιότερες εκδόσεις του macOS."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Called %@ in earlier versions of macOS."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Llamado %@ en versiones anteriores de macOS."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aiemmissa macOS-versioissa nimeltään %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appelée %@ dans les versions précédentes de macOS."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נקרא %@ בגרסאות קודמות של macOS."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A macOS korábbi verzióiban %@ néven szerepelt."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disebut %@ di versi macOS sebelumnya."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiamato %@ nelle versioni precedenti di macOS."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "以前の macOS では%@という名称。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이전 macOS 버전에서는 %@으로 불림."
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ယခင် macOS ဗားရှင်းများတွင် %@ ဟု ခေါ်ပါသည်။"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kalt %@ i tidligere versjoner av macOS."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In eerdere versies van macOS %@ genoemd."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We wcześniejszych wersjach macOS pod nazwą %@."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chamada %@ nas versões anteriores do macOS."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chamada %@ nas versões anteriores do macOS."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Numită %@ în versiunile anterioare de macOS."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В предыдущих версиях macOS называлось %@."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "V starších verziách macOS pod názvom %@."
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У ранијим верзијама macOS-а звало се %@."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kallades %@ i tidigare versioner av macOS."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önceki macOS sürümlerinde %@ olarak adlandırılıyordu."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У попередніх версіях macOS мало назву %@."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Được gọi là %@ trong các phiên bản macOS trước."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在此前的 macOS 版本中被称为%@。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在較早的 macOS 版本中被稱為%@。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在較早的 macOS 版本中被稱為%@。"
+          }
+        }
+      }
+    },
+    "Drag the LinearMouse icon below into the list above." : {
+      "comment" : "Drag-to-authorize instruction, also used as the app icon accessibility hint.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "af" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sleep die LinearMouse-ikoon hieronder na die lys hierbo."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اسحب أيقونة LinearMouse أدناه إلى القائمة أعلاه."
+          }
+        },
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prevucite ikonu LinearMouse ispod u listu iznad."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrossegueu la icona del LinearMouse de sota a la llista de sobre."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Přetáhněte ikonu LinearMouse níže do seznamu výše."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Træk LinearMouse-symbolet nedenfor ind på listen ovenfor."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ziehe das LinearMouse-Symbol unten in die Liste darüber."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Σύρετε το παρακάτω εικονίδιο του LinearMouse στην παραπάνω λίστα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drag the LinearMouse icon below into the list above."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrastra el icono de LinearMouse de abajo a la lista de arriba."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vedä alla oleva LinearMouse-kuvake yllä olevaan luetteloon."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faites glisser l’icône LinearMouse ci-dessous dans la liste au-dessus."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יש לגרור את סמל LinearMouse שלמטה לרשימה שלמעלה."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Húzza az alábbi LinearMouse-ikont a fenti listába."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seret ikon LinearMouse di bawah ke daftar di atas."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trascina l’icona di LinearMouse qui sotto nell’elenco in alto."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下の LinearMouse アイコンを上の一覧にドラッグしてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "아래의 LinearMouse 아이콘을 위의 목록으로 드래그하세요."
+          }
+        },
+        "my" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "အောက်ရှိ LinearMouse အိုင်ကွန်ကို အပေါ်ရှိ စာရင်းထဲသို့ ဆွဲထည့်ပါ။"
+          }
+        },
+        "nb-NO" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dra LinearMouse-symbolet nedenfor inn i listen ovenfor."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sleep het LinearMouse-symbool hieronder naar de lijst erboven."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przeciągnij poniższą ikonę LinearMouse na listę powyżej."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arraste o ícone do LinearMouse abaixo para a lista acima."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arraste o ícone do LinearMouse abaixo para a lista acima."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trageți pictograma LinearMouse de mai jos în lista de mai sus."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перетащите значок LinearMouse снизу в список выше."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Potiahnite ikonu LinearMouse nižšie do zoznamu vyššie."
+          }
+        },
+        "sr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Превуците икону LinearMouse испод у листу изнад."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dra LinearMouse-symbolen nedan till listan ovanför."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aşağıdaki LinearMouse simgesini yukarıdaki listeye sürükleyin."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перетягніть значок LinearMouse знизу до списку вище."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kéo biểu tượng LinearMouse bên dưới vào danh sách phía trên."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将下方的 LinearMouse 图标拖入上方列表。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "將下方的 LinearMouse 圖像拖入上方列表。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "將下方的 LinearMouse 圖像拖入上方列表。"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
