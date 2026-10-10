@@ -2098,6 +2098,91 @@ final class EventTransformerManagerTests: XCTestCase {
         cancellable.cancel()
     }
 
+    func testHighResolutionScrollRecordingRequiresHalfDetent() throws {
+        try checkHighResolutionScrollRecording()
+    }
+
+    func testHighResolutionScrollRecordingDiscardsMovementOnReversal() throws {
+        try checkHighResolutionScrollRecording(change: { event in
+            let view = ScrollWheelEventView(event)
+            view.deltaY = -1
+            view.deltaYFixedPt = -0.125
+            view.deltaYPt = -1.25
+        }, expected: .down)
+    }
+
+    func testHighResolutionScrollRecordingDiscardsMovementOnNewSession() throws {
+        try checkHighResolutionScrollRecording { _ in
+            SettingsState.shared.beginButtonMappingRecording(sessionID: UUID())
+        }
+    }
+
+    func testHighResolutionScrollRecordingDiscardsMovementOnModifierChange() throws {
+        try checkHighResolutionScrollRecording { $0.flags = .maskShift }
+    }
+
+    func testHighResolutionScrollRecordingDiscardsMovementAfterPause() throws {
+        try checkHighResolutionScrollRecording(pause: true)
+    }
+
+    private func checkHighResolutionScrollRecording(
+        change: ((CGEvent) -> Void)? = nil,
+        expected: Scheme.Buttons.Mapping.ScrollDirection = .up,
+        pause: Bool = false
+    ) throws {
+        var time: UInt64 = 0
+        let transformer = ButtonMappingScrollRecordingTransformer(
+            highResolutionWheelMultiplier: { _ in 8 },
+            now: { time }
+        )
+        SettingsState.shared.beginButtonMappingRecording(sessionID: UUID())
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: 1,
+            wheel2: 0,
+            wheel3: 0
+        ))
+        let view = ScrollWheelEventView(event)
+        view.deltaYFixedPt = 0.125
+        view.deltaYPt = 1.25
+        let context = EventTransformerContext(device: nil)
+
+        func assertRecorded(_ direction: Scheme.Buttons.Mapping.ScrollDirection?) {
+            let drained = expectation(description: "Recording events delivered")
+            DispatchQueue.main.async {
+                XCTAssertEqual(SettingsState.shared.recordedButtonMappingEvent?.scroll, direction)
+                drained.fulfill()
+            }
+            wait(for: [drained], timeout: 1)
+        }
+
+        if change != nil || pause {
+            for _ in 0 ..< 3 {
+                XCTAssertNil(transformer.transform(event, in: context))
+            }
+            assertRecorded(nil)
+            change?(event)
+            if pause {
+                time = 1_000_000_001
+            }
+        }
+        for _ in 0 ..< 3 {
+            XCTAssertNil(transformer.transform(event, in: context))
+        }
+        assertRecorded(nil)
+        XCTAssertNil(transformer.transform(event, in: context))
+        assertRecorded(expected)
+        SettingsState.shared.recordedButtonMappingEvent = nil
+        for _ in 0 ..< 7 {
+            XCTAssertNil(transformer.transform(event, in: context))
+        }
+        assertRecorded(nil)
+        XCTAssertNil(transformer.transform(event, in: context))
+        assertRecorded(expected)
+    }
+
     func testScrollButtonRecordingIgnoresStaleAsyncEventAfterSessionChanges() throws {
         let staleSessionID = UUID()
         let currentSessionID = UUID()
