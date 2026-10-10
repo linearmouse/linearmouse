@@ -25,44 +25,49 @@ final class EventTransformerManagerTests: XCTestCase {
     }
 
     func testRightSwipeEnablesMotionOnlyForItsTriggerAndDisablesOnRelease() throws {
-        var scheme = Scheme()
-        scheme.buttons.mappings = [
-            .init(
-                trigger: .init(input: .button(.mouse(1))),
-                outcomes: .init(swipe: .init(left: .arg0(.none)))
-            )
-        ]
-        ConfigurationState.shared.configuration = .init(schemes: [scheme])
-        let manager = makeManager()
-        var changes: [PointerMotionRequirements] = []
-        manager.onPointerMotionRequirementsChanged = { changes.append($0) }
-        func send(_ type: CGEventType, button: CGMouseButton, deltaX: Double = 0) throws {
-            let event = try mouseEvent(type: type, button: button)
-            event.setDoubleValueField(.mouseEventDeltaX, value: deltaX)
-            _ = manager.resolve(
-                withCGEvent: event,
-                withSourcePid: nil,
-                withTargetPid: nil,
-                withMouseLocationPid: nil,
-                withDisplay: nil
-            )
-            .transform(event) { _ in }
-        }
-        XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
-        try send(.leftMouseDown, button: .left)
-        XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
-        try send(.leftMouseUp, button: .left)
-        XCTAssertTrue(changes.isEmpty)
-        for _ in 0 ..< 3 {
-            try send(.rightMouseDown, button: .right)
-            XCTAssertEqual(manager.pointerMotionRequirements, .all)
-            try send(.rightMouseDragged, button: .right, deltaX: -60)
-            try send(.rightMouseUp, button: .right)
+        for lockPointer in [false, true] {
+            warpedPositions.removeAll()
+            postedEvents.removeAll()
+            var scheme = Scheme()
+            scheme.buttons.swipe.lockPointer = lockPointer
+            scheme.buttons.mappings = [
+                .init(
+                    trigger: .init(input: .button(.mouse(1))),
+                    outcomes: .init(swipe: .init(left: .arg0(.none)))
+                )
+            ]
+            ConfigurationState.shared.configuration = .init(schemes: [scheme])
+            let manager = makeManager()
+            var changes: [PointerMotionRequirements] = []
+            manager.onPointerMotionRequirementsChanged = { changes.append($0) }
+            func send(_ type: CGEventType, button: CGMouseButton, deltaX: Double = 0) throws {
+                let event = try mouseEvent(type: type, button: button)
+                event.setDoubleValueField(.mouseEventDeltaX, value: deltaX)
+                _ = manager.resolve(
+                    withCGEvent: event,
+                    withSourcePid: nil,
+                    withTargetPid: nil,
+                    withMouseLocationPid: nil,
+                    withDisplay: nil
+                )
+                .transform(event) { _ in }
+            }
             XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
+            try send(.leftMouseDown, button: .left)
+            XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
+            try send(.leftMouseUp, button: .left)
+            XCTAssertTrue(changes.isEmpty)
+            for _ in 0 ..< 3 {
+                try send(.rightMouseDown, button: .right)
+                XCTAssertEqual(manager.pointerMotionRequirements, .all)
+                try send(.rightMouseDragged, button: .right, deltaX: -60)
+                try send(.rightMouseUp, button: .right)
+                XCTAssertTrue(manager.pointerMotionRequirements.isEmpty)
+            }
+            XCTAssertEqual(changes, [.all, [], .all, [], .all, []])
+            XCTAssertEqual(warpedPositions.isEmpty, !lockPointer)
+            XCTAssertTrue(postedEvents.isEmpty)
         }
-        XCTAssertEqual(changes, [.all, [], .all, [], .all, []])
-        XCTAssertFalse(warpedPositions.isEmpty, "The gesture must use the injected cursor output")
-        XCTAssertTrue(postedEvents.isEmpty)
     }
 
     func testPointerScrollRoutesUseInjectedCursorAndScrollOutputs() throws {

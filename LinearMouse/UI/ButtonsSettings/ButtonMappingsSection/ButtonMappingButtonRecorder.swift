@@ -154,7 +154,7 @@ struct ButtonMappingButtonRecorder: View {
 
         if recording {
             mapping = .init()
-            advancedEngine.reset()
+            advancedEngine = .init(policy: .configured(by: SchemeState.shared.mergedScheme.buttons.swipe))
             advancedSnapshot = advancedEngine.snapshot
             startEventObservation()
         }

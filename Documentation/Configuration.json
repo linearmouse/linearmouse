@@ -142,6 +142,11 @@
           "title": "Button mappings",
           "type": "array"
         },
+        "swipe": {
+          "$ref": "#/definitions/Scheme.Buttons.Swipe",
+          "description": "Recognition settings shared by all swipe mappings in this scheme.",
+          "title": "Swipe settings"
+        },
         "switchPrimaryButtonAndSecondaryButtons": {
           "default": false,
           "description": "If the value is true, the primary button will be the right button and the secondary button will be the left button.",
@@ -1006,7 +1011,7 @@
         },
         "swipe": {
           "$ref": "#/definitions/Scheme.Buttons.Mapping.SwipeActions",
-          "description": "Execute when pointer movement crosses the global swipe threshold while the trigger is held."
+          "description": "Execute when pointer movement crosses the configured swipe threshold while the trigger is held."
         }
       },
       "type": "object"
@@ -1178,7 +1183,7 @@
           "properties": {
             "outcomes": {
               "$ref": "#/definitions/Scheme.Buttons.Mapping.Outcomes",
-              "description": "Actions selected by how the button or chord is used. Timing and movement thresholds are global application policy.",
+              "description": "Actions selected by how the button or chord is used. Timing thresholds use application policy; swipe behavior is configured in buttons.swipe.",
               "title": "Outcomes"
             },
             "trigger": {
@@ -1276,6 +1281,26 @@
       "const": "window.minimize",
       "description": "Window: Minimize.",
       "type": "string"
+    },
+    "Scheme.Buttons.Swipe": {
+      "additionalProperties": false,
+      "properties": {
+        "lockPointer": {
+          "default": false,
+          "description": "Keep the pointer at its starting position while recognizing a button swipe and until the captured interaction releases it.",
+          "title": "Lock pointer during swipes",
+          "type": "boolean"
+        },
+        "threshold": {
+          "default": 50,
+          "description": "Minimum accumulated pointer displacement in pixels required to recognize a swipe. Values outside the range are clamped.",
+          "maximum": 200,
+          "minimum": 10,
+          "title": "Swipe trigger distance",
+          "type": "number"
+        }
+      },
+      "type": "object"
     },
     "Scheme.Buttons.UniversalBackForward": {
       "anyOf": [

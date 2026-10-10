@@ -15,8 +15,47 @@ final class ButtonMappingEngineTests: XCTestCase {
     private let chordAction: Action = .arg0(.showDesktop)
     private let wheelAction: Action = .arg0(.appExpose)
 
+    func testSwipeDoesNotLockPointerByDefault() {
+        var engine = ButtonMappingEngine(mappings: [buttonMapping(1, swipe: .init(right: chordAction))])
+        _ = engine.buttonDown(.mouse(1), modifierFlags: [], at: 0)
+        XCTAssertFalse(engine.locksPointer)
+        XCTAssertEqual(engine.pointerMoved(deltaX: 50, deltaY: 0, at: ms(10)).actions, [chordAction])
+        XCTAssertFalse(engine.locksPointer)
+        XCTAssertTrue(engine.buttonUp(.mouse(1), modifierFlags: [], at: ms(20)).consumesEvent)
+    }
+
+    func testConfiguredThresholdChangesWhenSwipeCommits() {
+        for threshold in [20.0, 100.0] {
+            var engine = ButtonMappingEngine(
+                mappings: [buttonMapping(1, short: shortAction, swipe: .init(right: chordAction))],
+                policy: .configured(by: .init(threshold: threshold))
+            )
+            _ = engine.buttonDown(.mouse(1), modifierFlags: [], at: 0)
+            XCTAssertTrue(engine.pointerMoved(deltaX: threshold - 1, deltaY: 0, at: ms(10)).actions.isEmpty)
+            XCTAssertEqual(engine.pointerMoved(deltaX: 1, deltaY: 0, at: ms(20)).actions, [chordAction])
+            XCTAssertTrue(engine.buttonUp(.mouse(1), modifierFlags: [], at: ms(30)).actions.isEmpty)
+        }
+    }
+
+    func testPointerLockDoesNotChangeSwipeDistanceOrDirection() {
+        for lockPointer in [false, true] {
+            for sign in [-1.0, 1.0] {
+                var engine = ButtonMappingEngine(
+                    mappings: [buttonMapping(1, swipe: .init(left: chordAction, right: chordAction))],
+                    policy: .configured(by: .init(threshold: 20, lockPointer: lockPointer))
+                )
+                _ = engine.buttonDown(.mouse(1), modifierFlags: [], at: 0)
+                // Backtracking cancels displacement; distance is not total path length.
+                for delta in [15.0, -10.0, 14.0] {
+                    XCTAssertTrue(engine.pointerMoved(deltaX: sign * delta, deltaY: 0, at: ms(10)).actions.isEmpty)
+                }
+                XCTAssertEqual(engine.pointerMoved(deltaX: sign, deltaY: 0, at: ms(20)).actions, [chordAction])
+            }
+        }
+    }
+
     func testLongPressCommitReleasesPendingSwipePointerLock() {
-        var engine = engine([buttonMapping(1, long: longAction, swipe: .init(right: chordAction))])
+        var engine = engine([buttonMapping(1, long: longAction, swipe: .init(right: chordAction))], lockPointer: true)
         _ = engine.buttonDown(.mouse(1), modifierFlags: [], at: 0)
         XCTAssertTrue(engine.locksPointer)
         XCTAssertEqual(engine.advance(to: ms(500)).actions, [longAction])
@@ -28,7 +67,7 @@ final class ButtonMappingEngineTests: XCTestCase {
         var engine = engine([
             buttonMapping(1, simultaneous: [4], swipe: .init(right: chordAction)),
             wheelMapping(.up, whileHeld: [1], action: wheelAction)
-        ])
+        ], lockPointer: true)
         _ = engine.buttonDown(.mouse(1), modifierFlags: [], at: 0)
         _ = engine.buttonDown(.mouse(4), modifierFlags: [], at: ms(10))
         XCTAssertTrue(engine.locksPointer)
@@ -38,7 +77,7 @@ final class ButtonMappingEngineTests: XCTestCase {
     }
 
     func testSwipePointerLockSurvivesRecognitionUntilRelease() {
-        var engine = engine([buttonMapping(1, swipe: .init(right: chordAction))])
+        var engine = engine([buttonMapping(1, swipe: .init(right: chordAction))], lockPointer: true)
         _ = engine.buttonDown(.mouse(1), modifierFlags: [], at: ms(0))
         XCTAssertTrue(engine.locksPointer)
         XCTAssertEqual(engine.pointerMoved(deltaX: 30, deltaY: 0, at: ms(10)).actions, [])
@@ -49,7 +88,7 @@ final class ButtonMappingEngineTests: XCTestCase {
     }
 
     func testSwipeChordLocksFromFirstButtonAndUnlocksOnTimeout() {
-        var engine = engine([buttonMapping(1, simultaneous: [4], swipe: .init(right: chordAction))])
+        var engine = engine([buttonMapping(1, simultaneous: [4], swipe: .init(right: chordAction))], lockPointer: true)
         _ = engine.buttonDown(.mouse(1), modifierFlags: [], at: ms(0))
         XCTAssertTrue(engine.locksPointer)
         XCTAssertTrue(engine.advance(to: ms(80)).replaysBufferedEvents)
@@ -57,7 +96,7 @@ final class ButtonMappingEngineTests: XCTestCase {
     }
 
     func testSwipeChordCancellationUnlocksRemainingButtons() {
-        var engine = engine([buttonMapping(1, simultaneous: [4], swipe: .init(right: chordAction))])
+        var engine = engine([buttonMapping(1, simultaneous: [4], swipe: .init(right: chordAction))], lockPointer: true)
         _ = engine.buttonDown(.mouse(1), modifierFlags: [], at: ms(0))
         _ = engine.buttonDown(.mouse(4), modifierFlags: [], at: ms(10))
         XCTAssertTrue(engine.locksPointer)
@@ -71,7 +110,7 @@ final class ButtonMappingEngineTests: XCTestCase {
                 trigger: .init(input: .button(.mouse(4)), whileHeld: [.mouse(1)]),
                 outcomes: .init(swipe: .init(right: chordAction))
             )
-        ])
+        ], lockPointer: true)
         _ = engine.buttonDown(.mouse(1), modifierFlags: [], at: ms(0))
         XCTAssertFalse(engine.locksPointer)
         _ = engine.buttonDown(.mouse(4), modifierFlags: [], at: ms(100))
@@ -86,7 +125,10 @@ final class ButtonMappingEngineTests: XCTestCase {
     }
 
     func testAutomaticSwipeDoesNotLockPointer() {
-        var engine = engine([buttonMapping(1, short: shortAction, swipe: .init(right: .arg0(.auto)))])
+        var engine = engine(
+            [buttonMapping(1, short: shortAction, swipe: .init(right: .arg0(.auto)))],
+            lockPointer: true
+        )
         _ = engine.buttonDown(.mouse(1), modifierFlags: [], at: ms(0))
         XCTAssertFalse(engine.locksPointer)
     }
@@ -1157,8 +1199,8 @@ final class ButtonMappingEngineTests: XCTestCase {
         XCTAssertTrue(triggerRelease.forwardsCapturedEvent)
     }
 
-    private func engine(_ mappings: [Mapping]) -> ButtonMappingEngine {
-        .init(mappings: mappings, policy: .default)
+    private func engine(_ mappings: [Mapping], lockPointer: Bool = false) -> ButtonMappingEngine {
+        .init(mappings: mappings, policy: .configured(by: .init(lockPointer: lockPointer)))
     }
 
     private func buttonMapping(
