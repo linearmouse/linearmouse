@@ -216,6 +216,14 @@ struct ButtonMappingButtonRecorder: View {
         recordedMappingCancellable = nil
     }
 
+    private var stripsRecordedSerialNumber: Bool {
+        guard let matcher = DeviceState.shared.currentDeviceMatcher else {
+            return true
+        }
+
+        return matcher.categoryOnlyValue != nil
+    }
+
     private func logitechMonitorDevices() -> [Device] {
         guard let currentDevice = DeviceState.shared.currentDeviceRef?.value,
               currentDevice.hasLogitechControlsMonitor else {
@@ -230,8 +238,10 @@ struct ButtonMappingButtonRecorder: View {
             settingsState.recordedButtonMappingEvent = nil
         }
 
+        let recordedButton = stripsRecordedSerialNumber ? event.button?.withoutSerialNumber : event.button
+
         guard mode == .advanced else {
-            mapping.button = event.button
+            mapping.button = recordedButton
             mapping.scroll = event.scroll
             mapping.modifierFlags = event.modifierFlags
             recording = false
@@ -239,7 +249,7 @@ struct ButtonMappingButtonRecorder: View {
         }
 
         let now = DispatchTime.now().uptimeNanoseconds
-        if let button = event.button {
+        if let button = recordedButton {
             if event.isPressed == false {
                 advancedEngine.buttonUp(button, at: now)
             } else {
