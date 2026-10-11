@@ -4206,7 +4206,7 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Accessibility"
           }
         },
@@ -4218,7 +4218,7 @@
         },
         "bs" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Accessibility"
           }
         },
@@ -4314,7 +4314,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Accessibility"
           }
         },
@@ -4368,7 +4368,7 @@
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Accessibility"
           }
         },
@@ -9378,7 +9378,7 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Autoscroll"
           }
         },
@@ -20056,7 +20056,7 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Device Control and Data Access"
           }
         },
@@ -20068,7 +20068,7 @@
         },
         "bs" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Device Control and Data Access"
           }
         },
@@ -20164,7 +20164,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Device Control and Data Access"
           }
         },
@@ -20218,7 +20218,7 @@
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Device Control and Data Access"
           }
         },
@@ -30516,7 +30516,7 @@
         },
         "da" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Hold %@"
           }
         },
@@ -30594,7 +30594,7 @@
         },
         "nb-NO" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Hold %@"
           }
         },
@@ -31767,7 +31767,7 @@
         },
         "da" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Hold:"
           }
         },
@@ -31845,7 +31845,7 @@
         },
         "nb-NO" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Hold:"
           }
         },
@@ -36538,7 +36538,7 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
@@ -36550,7 +36550,7 @@
         },
         "bs" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
@@ -36562,19 +36562,19 @@
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
         "da" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
@@ -36616,13 +36616,13 @@
         },
         "id" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
         "it" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
@@ -36646,7 +36646,7 @@
         },
         "nb-NO" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
@@ -36658,25 +36658,25 @@
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
@@ -36688,7 +36688,7 @@
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
@@ -36706,7 +36706,7 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
@@ -42886,7 +42886,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mp"
+            "value" : "ms"
           }
         },
         "id" : {
@@ -46817,7 +46817,7 @@
         },
         "da" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "pixels"
           }
         },
@@ -46853,7 +46853,7 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "pixels"
           }
         },
@@ -46907,7 +46907,7 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "pixels"
           }
         },
@@ -46925,7 +46925,7 @@
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "pixels"
           }
         },
@@ -49187,7 +49187,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Primary"
           }
         },
@@ -61565,7 +61565,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Secondary"
           }
         },
