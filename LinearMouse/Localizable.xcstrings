@@ -9378,7 +9378,7 @@
         },
         "sv" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Autoscroll"
           }
         },
@@ -30516,7 +30516,7 @@
         },
         "da" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Hold %@"
           }
         },
@@ -30594,7 +30594,7 @@
         },
         "nb-NO" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Hold %@"
           }
         },
@@ -31767,7 +31767,7 @@
         },
         "da" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Hold:"
           }
         },
@@ -31845,7 +31845,7 @@
         },
         "nb-NO" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Hold:"
           }
         },
@@ -36538,7 +36538,7 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
@@ -36550,7 +36550,7 @@
         },
         "bs" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
@@ -36562,19 +36562,19 @@
         },
         "cs" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
         "da" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
         "de" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
@@ -36616,13 +36616,13 @@
         },
         "id" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
         "it" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
@@ -36646,7 +36646,7 @@
         },
         "nb-NO" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
@@ -36658,25 +36658,25 @@
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
         "ro" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
@@ -36688,7 +36688,7 @@
         },
         "sk" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
@@ -36706,7 +36706,7 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "libinput (Beta)"
           }
         },
@@ -49187,7 +49187,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Primary"
           }
         },
@@ -61565,7 +61565,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Secondary"
           }
         },
