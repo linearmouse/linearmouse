@@ -17815,7 +17815,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Diariamente"
+            "value" : "Cada día"
           }
         },
         "fi" : {
@@ -41612,7 +41612,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mensual"
+            "value" : "Cada mes"
           }
         },
         "fi" : {
@@ -75489,7 +75489,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Semanal"
+            "value" : "Cada semana"
           }
         },
         "fi" : {
