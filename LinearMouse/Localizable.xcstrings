@@ -432,13 +432,13 @@
                   "one" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%.1f pikselsnelheid"
+                      "value" : "%.1f piksel"
                     }
                   },
                   "other" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%.1f pikselsnelhede"
+                      "value" : "%.1f piksels"
                     }
                   }
                 }
@@ -1128,7 +1128,7 @@
                   "other" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%.1f pixeli"
+                      "value" : "%.1f de pixeli"
                     }
                   }
                 }
@@ -1293,7 +1293,7 @@
                   "other" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%.1f pikseller"
+                      "value" : "%.1f piksel"
                     }
                   }
                 }
@@ -2326,7 +2326,7 @@
               "few" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%d linija"
+                  "value" : "%d linije"
                 }
               },
               "one" : {
@@ -2656,7 +2656,7 @@
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%d regel"
+                  "value" : "%d regels"
                 }
               }
             }
@@ -2746,7 +2746,7 @@
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%d linii"
+                  "value" : "%d de linii"
                 }
               }
             }
@@ -2764,7 +2764,7 @@
               "many" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%d линии"
+                  "value" : "%d линий"
                 }
               },
               "one" : {
@@ -2818,7 +2818,7 @@
               "few" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%d linija"
+                  "value" : "%d linije"
                 }
               },
               "one" : {
@@ -2866,7 +2866,7 @@
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%d satırlar"
+                  "value" : "%d satır"
                 }
               }
             }
@@ -6319,7 +6319,7 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Změna oriantace"
+            "value" : "Změna orientace"
           }
         },
         "da" : {
@@ -8242,7 +8242,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "מחליף..."
+            "value" : "מחיל..."
           }
         },
         "hu" : {
@@ -12236,7 +12236,7 @@
         "my" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "တခြား အက်ပ်ပလီကေးရှင်း များမှ"
+            "value" : "တခြား အက်ပ်ပလီကေးရှင်း များမှ ဖြစ်ရပ်များကို မပြုပြင်ရန်"
           }
         },
         "nb-NO" : {
@@ -12248,7 +12248,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Instellingen van andere toepassingen negeren"
+            "value" : "Gebeurtenissen van andere toepassingen negeren"
           }
         },
         "pl" : {
@@ -12266,7 +12266,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sobreponha eventos de outras aplicações"
+            "value" : "Ignorar eventos de outras aplicações"
           }
         },
         "ro" : {
@@ -13179,7 +13179,7 @@
         "zh-Hant-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "啟用自動更新"
+            "value" : "自動檢查更新"
           }
         }
       }
@@ -13397,7 +13397,7 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kies 'n voorgevoel-voorinstelling."
+            "value" : "Kies 'n voorinstelling vir die blaaigevoel."
           }
         },
         "ar" : {
@@ -14854,97 +14854,97 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Neem 'n sneller opdrag op om 'n aksie te kies."
+            "value" : "Deur Primêr met 'n ander knoppie te kombineer, kan normale klikke kortliks vertraag."
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "سجّل مشغّلًا لاختيار إجراء."
+            "value" : "قد يؤدي الجمع بين الأساسي وزر آخر إلى تأخير النقرات العادية لفترة وجيزة."
           }
         },
         "bs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Snimite okidač da biste izabrali radnju."
+            "value" : "Kombinovanje Primarnog s drugim dugmetom može nakratko odgoditi normalne klikove."
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enregistra un activador per triar una acció."
+            "value" : "Combinar el botó Primari amb un altre botó pot retardar breument els clics normals."
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zaznamenejte spouštěč a vyberte akci."
+            "value" : "Kombinace primárního tlačítka s jiným může krátce zpozdit běžná kliknutí."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Optag en udløser for at vælge en handling."
+            "value" : "Kombination af Primær med en anden knap kan kortvarigt forsinke normale klik."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nimm einen Auslöser auf, um eine Aktion auszuwählen."
+            "value" : "Das Kombinieren von Primär mit einer anderen Taste kann normale Klicks kurz verzögern."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Καταγράψτε μια σκανδάλη για να επιλέξετε μια ενέργεια."
+            "value" : "Ο συνδυασμός του κύριου με άλλο κουμπί μπορεί να καθυστερήσει προσωρινά τα κανονικά κλικ."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Graba un activador para elegir una acción."
+            "value" : "Combinar el botón Primario con otro puede retrasar brevemente los clics normales."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tallenna laukaisin valitaksesi toiminnon."
+            "value" : "Ensisijaisen painikkeen yhdistäminen toiseen voi viivästyttää tavallisia napsautuksia hetkeksi."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enregistrez un déclencheur pour choisir une action."
+            "value" : "Associer le bouton principal à un autre bouton peut retarder brièvement les clics normaux."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "הקלטת גורם מפעיל לבחירת פעולה."
+            "value" : "שילוב הלחצן הראשי עם לחצן אחר עלול לעכב מעט לחיצות רגילות."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rögzítsen egy eseményindítót a művelet kiválasztásához."
+            "value" : "Az Elsődleges és egy másik gomb kombinálása röviden késleltetheti a normál kattintásokat."
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rekam pemicu untuk memilih tindakan."
+            "value" : "Menggabungkan tombol Utama dengan tombol lain dapat menunda klik normal sesaat."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registra un trigger per scegliere un’azione."
+            "value" : "Combinare il pulsante primario con un altro può ritardare brevemente i clic normali."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "トリガーを記録してアクションを選択します。"
+            "value" : "プライマリボタンを別のボタンと組み合わせると、通常のクリックが一時的に遅延することがあります。"
           }
         },
         "ko" : {
@@ -14956,85 +14956,85 @@
         "my" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "လုပ်ဆောင်ချက်ရွေးရန် အစပျိုးမှုကို မှတ်တမ်းတင်ပါ။"
+            "value" : "အဓိကခလုတ်ကို အခြားခလုတ်နှင့် ပေါင်းစပ်ပါက ပုံမှန်နှိပ်မှုများ ခဏတာ နှောင့်နှေးနိုင်သည်။"
           }
         },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ta opp en utløser for å velge en handling."
+            "value" : "Hvis Primær kombineres med en annen knapp, kan normale klikk bli kortvarig forsinket."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Neem een trigger op om een actie te kiezen."
+            "value" : "Het combineren van de primaire knop met een andere knop kan normale klikken kort vertragen."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nagraj wyzwalacz, aby wybrać działanie."
+            "value" : "Połączenie przycisku głównego z innym przyciskiem może na chwilę opóźnić zwykłe kliknięcia."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Grave um acionador para escolher uma ação."
+            "value" : "Combinar o botão principal com outro botão pode atrasar brevemente os cliques normais."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Grave um acionador para escolher uma ação."
+            "value" : "Combinar o botão primário com outro botão pode atrasar brevemente os cliques normais."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Înregistrați un declanșator pentru a alege o acțiune."
+            "value" : "Combinarea butonului principal cu alt buton poate întârzia pentru scurt timp clicurile normale."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Запишите триггер, чтобы выбрать действие."
+            "value" : "Сочетание основной кнопки с другой может ненадолго задержать обычные щелчки."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nahrajte spúšťač a vyberte akciu."
+            "value" : "Kombinácia primárneho tlačidla s iným môže krátko oneskoriť bežné kliknutia."
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Snimite okidač da biste izabrali radnju."
+            "value" : "Kombinovanje primarnog sa drugim dugmetom može nakratko odložiti normalne klikove."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Spela in en utlösare för att välja en åtgärd."
+            "value" : "Om Primär kombineras med en annan knapp kan vanliga klick fördröjas kortvarigt."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bir eylem seçmek için tetikleyiciyi kaydedin."
+            "value" : "Birincil düğmeyi başka bir düğmeyle birleştirmek normal tıklamaları kısa süreliğine geciktirebilir."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Запишіть тригер, щоб вибрати дію."
+            "value" : "Поєднання основної кнопки з іншою може ненадовго затримати звичайні клацання."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ghi lại bộ kích hoạt để chọn tác vụ."
+            "value" : "Kết hợp nút Chính với một nút khác có thể tạm thời trì hoãn các lần nhấp bình thường."
           }
         },
         "zh-Hans" : {
@@ -15478,7 +15478,7 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stel op virr"
+            "value" : "Stel op vir"
           }
         },
         "ar" : {
@@ -15686,7 +15686,7 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stel op virr %@…"
+            "value" : "Stel op vir %@…"
           }
         },
         "ar" : {
@@ -16102,97 +16102,97 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Begin om 'n knoppiegebaar op te neem."
+            "value" : "Die opstel van Lang druk kan hierdie knoppie se normale klikke vertraag."
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ابدأ تسجيل إيماءة زر."
+            "value" : "قد يؤدي إعداد الضغط المطوّل إلى تأخير النقرات العادية لهذا الزر."
           }
         },
         "bs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Započnite snimanje pokreta dugmeta."
+            "value" : "Podešavanje dugog pritiska može odgoditi normalne klikove ovog dugmeta."
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Comença a enregistrar un gest de botó."
+            "value" : "Configurar una pulsació llarga pot retardar els clics normals d’aquest botó."
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Začněte zaznamenávat gesto tlačítka."
+            "value" : "Nastavení dlouhého stisku může zpozdit běžná kliknutí tohoto tlačítka."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start optagelse af en knapbevægelse."
+            "value" : "Konfiguration af Langt tryk kan forsinke denne knaps normale klik."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aufnahme einer Tastengeste starten."
+            "value" : "Das Einrichten von Lang drücken kann die normalen Klicks dieser Taste verzögern."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ξεκινήστε την καταγραφή μιας χειρονομίας κουμπιού."
+            "value" : "Η ρύθμιση παρατεταμένου πατήματος μπορεί να καθυστερήσει τα κανονικά κλικ αυτού του κουμπιού."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Empieza a grabar un gesto de botón."
+            "value" : "Configurar una pulsación larga puede retrasar los clics normales de este botón."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aloita painike-eleen tallennus."
+            "value" : "Pitkän painalluksen määrittäminen voi viivästyttää tämän painikkeen tavallisia napsautuksia."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Commencez à enregistrer un geste de bouton."
+            "value" : "Configurer une pression longue peut retarder les clics normaux de ce bouton."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "התחלת הקלטה של מחוות לחצן."
+            "value" : "הגדרת לחיצה ממושכת עלולה לעכב את הלחיצות הרגילות של לחצן זה."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kezdje el egy gombmozdulat rögzítését."
+            "value" : "A Hosszú lenyomás beállítása késleltetheti ennek a gombnak a normál kattintásait."
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mulai merekam gestur tombol."
+            "value" : "Mengatur Tekan Lama dapat menunda klik normal tombol ini."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Inizia a registrare un gesto del pulsante."
+            "value" : "Configurare una pressione prolungata può ritardare i clic normali di questo pulsante."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ボタンジェスチャの記録を開始します。"
+            "value" : "長押しを設定すると、このボタンの通常のクリックが遅延することがあります。"
           }
         },
         "ko" : {
@@ -16204,85 +16204,85 @@
         "my" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ခလုတ်လက်ဟန်ကို စတင်မှတ်တမ်းတင်ပါ။"
+            "value" : "ကြာရှည်နှိပ်ခြင်းကို ပြင်ဆင်ပါက ဤခလုတ်၏ ပုံမှန်နှိပ်မှုများ နှောင့်နှေးနိုင်သည်။"
           }
         },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start opptak av en knappebevegelse."
+            "value" : "Konfigurering av Langt trykk kan forsinke denne knappens normale klikk."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Begin met het opnemen van een knopgebaar."
+            "value" : "Het instellen van Lang indrukken kan de normale klikken van deze knop vertragen."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rozpocznij nagrywanie gestu przycisku."
+            "value" : "Skonfigurowanie długiego naciśnięcia może opóźnić zwykłe kliknięcia tego przycisku."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Comece a gravar um gesto de botão."
+            "value" : "Configurar uma pressão longa pode atrasar os cliques normais deste botão."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Comece a gravar um gesto de botão."
+            "value" : "Configurar uma pressão longa pode atrasar os cliques normais deste botão."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Începeți înregistrarea unui gest de buton."
+            "value" : "Configurarea apăsării lungi poate întârzia clicurile normale ale acestui buton."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Начните запись жеста кнопки."
+            "value" : "Настройка долгого нажатия может задержать обычные щелчки этой кнопки."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Začnite zaznamenávať gesto tlačidla."
+            "value" : "Nastavenie dlhého stlačenia môže oneskoriť bežné kliknutia tohto tlačidla."
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Započnite snimanje pokreta dugmeta."
+            "value" : "Podešavanje dugog pritiska može odložiti normalne klikove ovog dugmeta."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Börja spela in en knappgest."
+            "value" : "Om Långt tryck konfigureras kan knappens vanliga klick fördröjas."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bir düğme hareketini kaydetmeye başlayın."
+            "value" : "Uzun Basma'yı yapılandırmak bu düğmenin normal tıklamalarını geciktirebilir."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Почніть запис жесту кнопки."
+            "value" : "Налаштування довгого натискання може затримати звичайні клацання цієї кнопки."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bắt đầu ghi cử chỉ nút."
+            "value" : "Thiết lập Nhấn giữ có thể trì hoãn các lần nhấp bình thường của nút này."
           }
         },
         "zh-Hans" : {
@@ -16799,7 +16799,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alakítsa át a bal és jobb oldali gombokat ellopási gesztusokká az univerzális előre és hátra funkció engedélyezéséhez."
+            "value" : "Alakítsa át a vissza és előre oldalgombok megnyomását csúsztatási gesztusokká az univerzális vissza és előre funkció engedélyezéséhez."
           }
         },
         "id" : {
@@ -17115,7 +17115,7 @@
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sao chép cài đặt"
+            "value" : "Sao chép cài đặt từ chiều dọc"
           }
         },
         "zh-Hans" : {
@@ -17981,19 +17981,19 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "تأخير نقرات الأزرار"
+            "value" : "إزالة ارتداد نقرات الأزرار"
           }
         },
         "bs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Klikovi na dugme za ublažavanje odskoka"
+            "value" : "Suzbij neželjene klikove zbog odskakanja kontakata"
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Retarda els clics dels botons"
+            "value" : "Aplica antirebot als clics dels botons"
           }
         },
         "cs" : {
@@ -18041,13 +18041,13 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "התעלם מלחיצות כפתור"
+            "value" : "סינון קפיצות מגע בלחיצות לחצן"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gombkattintások késleltetése"
+            "value" : "Gombkattintások pergésmentesítése"
           }
         },
         "id" : {
@@ -18071,7 +18071,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "버튼 클릭 간격"
+            "value" : "버튼 클릭 채터링 방지"
           }
         },
         "my" : {
@@ -18083,7 +18083,7 @@
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Filtrer knappedobbeltklikk"
+            "value" : "Filtrer kontaktsprett ved knappeklikk"
           }
         },
         "nl" : {
@@ -18113,43 +18113,43 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Amânați apăsările de butoane"
+            "value" : "Eliminarea oscilațiilor la apăsarea butoanelor"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Пропускать нажатие кнопок"
+            "value" : "Подавлять дребезг кнопок мыши"
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Čas odozvy kliknutia na tlačidlá"
+            "value" : "Potlačiť zákmity tlačidiel myši"
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Odloži klikove na dugmad"
+            "value" : "Suzbij neželjene klikove zbog odskakanja kontakata"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Avvisa knappklick"
+            "value" : "Filtrera kontaktstuds vid knappklick"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Buton arkını engelle"
+            "value" : "Fare düğmelerinde kontak sıçramasını önle"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Пропускати клацання кнопок"
+            "value" : "Усувати брязкіт контактів кнопок миші"
           }
         },
         "vi" : {
@@ -18867,7 +18867,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Baisser la luminosité d'affichage"
+            "value" : "Baisser la luminosité du clavier"
           }
         },
         "he" : {
@@ -18897,7 +18897,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ディスプレイの明るさを下げる"
+            "value" : "キーボードの明るさを下げる"
           }
         },
         "ko" : {
@@ -20587,7 +20587,7 @@
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Deaktiver pekeraksellerasjon"
+            "value" : "Deaktiver pekerakselerasjon"
           }
         },
         "nl" : {
@@ -20641,7 +20641,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Inaktivera pekarkacceleration"
+            "value" : "Inaktivera pekaracceleration"
           }
         },
         "tr" : {
@@ -20747,7 +20747,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Afficher"
+            "value" : "Écran"
           }
         },
         "he" : {
@@ -21199,7 +21199,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "간격은 \"자동\"이거나 값과 단위를 나타내는 숫자 또는 문자열이어야 합니다"
+            "value" : "간격은 \"auto\"이거나 값과 단위를 나타내는 숫자 또는 문자열이어야 합니다"
           }
         },
         "my" : {
@@ -21271,7 +21271,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mesafe \"otomatik\" veya bir sayı veya değeri ve birimi temsil eden bir dize olmalıdır"
+            "value" : "Mesafe \"auto\" veya bir sayı veya değeri ve birimi temsil eden bir dize olmalıdır"
           }
         },
         "uk" : {
@@ -21849,7 +21849,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vanwege systeemprestaties ondersteunt dit apparaat mogelijk niet het aanpassen van de aanwijzersnelheid op nieuwere versies van macOS."
+            "value" : "Vanwege systeembeperkingen ondersteunt dit apparaat mogelijk niet het aanpassen van de aanwijzersnelheid op nieuwere versies van macOS."
           }
         },
         "pl" : {
@@ -24053,7 +24053,7 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kubisk blød start met een sterker progressiewe opbou."
+            "value" : "Kubisk blød start med en stærkere progressiv opbygning."
           }
         },
         "de" : {
@@ -25237,7 +25237,7 @@
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Редаговано"
+            "value" : "Можна редагувати"
           }
         },
         "vi" : {
@@ -25961,7 +25961,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "הפעל לוגים מילוליים"
+            "value" : "הפעל לוגים מפורטים"
           }
         },
         "hu" : {
@@ -26235,7 +26235,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Habilitar esta opção irá registrar todos os eventos de entrada, o que pode aumnetar o uso de CPU enquanto utiliza %@ mas pode ser útil para solução de problemas."
+            "value" : "Habilitar esta opção irá registrar todos os eventos de entrada, o que pode aumentar o uso de CPU enquanto utiliza %@ mas pode ser útil para solução de problemas."
           }
         },
         "ro" : {
@@ -28391,7 +28391,7 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gaan-na-funksie versoek"
+            "value" : "Funksieversoek"
           }
         },
         "ar" : {
@@ -28565,7 +28565,7 @@
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Запропонувати фунцкію"
+            "value" : "Запропонувати функцію"
           }
         },
         "vi" : {
@@ -31501,7 +31501,7 @@
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Giữ cò khi di chuyển để cuộn, sau đó nhả ra để dừng."
+            "value" : "Giữ nút kích hoạt khi di chuyển để cuộn, sau đó thả ra để dừng."
           }
         },
         "zh-Hans" : {
@@ -31536,7 +31536,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "اضغط للتمرير"
+            "value" : "اضغط باستمرار للتمرير"
           }
         },
         "bs" : {
@@ -32483,7 +32483,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Indien ingeschakeld, zal %@ instellingen die door andere applicaties worden beheerd, zoals Logi Options+, niet wijzigen."
+            "value" : "Indien ingeschakeld, zal %@ gebeurtenissen die door andere applicaties worden verzonden, zoals Logi Options+, niet wijzigen."
           }
         },
         "pl" : {
@@ -32607,7 +32607,7 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hvis du rapporterer en fejl, er det være nyttigt at vedhæfte logfilerne."
+            "value" : "Hvis du rapporterer en fejl, vil det være nyttigt at vedhæfte logfilerne."
           }
         },
         "de" : {
@@ -32828,7 +32828,7 @@
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Αγνόηση μεταβλητής"
+            "value" : "Αγνόηση τροποποιητή"
           }
         },
         "en" : {
@@ -32906,7 +32906,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aanpassing negeren"
+            "value" : "Modificatietoets negeren"
           }
         },
         "pl" : {
@@ -33477,7 +33477,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Augmenter la luminosité d'affichage"
+            "value" : "Augmenter la luminosité du clavier"
           }
         },
         "he" : {
@@ -33507,7 +33507,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ディスプレイの明るさを上げる"
+            "value" : "キーボードの明るさを上げる"
           }
         },
         "ko" : {
@@ -39129,7 +39129,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "לחץ בחוזקה על ה-Trackpad"
+            "value" : "חיפוש וגלאי נתונים"
           }
         },
         "hu" : {
@@ -40742,13 +40742,13 @@
         "bs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nedostaje tipka %1$@ kod %2$@"
+            "value" : "Nedostaje ključ %1$@ kod %2$@"
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Funció %1$@ inexistent a %2$@"
+            "value" : "Falta la clau %1$@ a %2$@"
           }
         },
         "cs" : {
@@ -40922,13 +40922,13 @@
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "遺失金鑰 %1$@，位置：%2$@"
+            "value" : "缺少鍵 %1$@，位置：%2$@"
           }
         },
         "zh-Hant-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "遺失金鑰 %1$@，位置：%2$@"
+            "value" : "缺少鍵 %1$@，位置：%2$@"
           }
         }
       }
@@ -41422,7 +41422,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "קיצורי מקלדת"
+            "value" : "מקשי שינוי"
           }
         },
         "hu" : {
@@ -42577,7 +42577,7 @@
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Di chuyển sang trái một dấu cách"
+            "value" : "Chuyển sang không gian làm việc bên trái"
           }
         },
         "zh-Hans" : {
@@ -42786,7 +42786,7 @@
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Di chuyển sang phải một dấu cách"
+            "value" : "Chuyển sang không gian làm việc bên phải"
           }
         },
         "zh-Hans" : {
@@ -42886,7 +42886,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mp"
+            "value" : "ms"
           }
         },
         "id" : {
@@ -46419,7 +46419,7 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tyyppi ja zoomaa"
+            "value" : "Nipistyszoomaus"
           }
         },
         "fr" : {
@@ -46533,13 +46533,13 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Belirli alanı yakınlaştır"
+            "value" : "Kıstırarak yakınlaştırma"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Збільшення пальцем"
+            "value" : "Масштабування щипком"
           }
         },
         "vi" : {
@@ -47002,7 +47002,7 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Speel / breek"
+            "value" : "Speel / pouse"
           }
         },
         "ar" : {
@@ -47068,7 +47068,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "נגן\\עצור"
+            "value" : "נגן / השהה"
           }
         },
         "hu" : {
@@ -47176,7 +47176,7 @@
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Відтворити / зупинити"
+            "value" : "Відтворити / призупинити"
           }
         },
         "vi" : {
@@ -47526,7 +47526,7 @@
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pekeraksellerasjon"
+            "value" : "Pekerakselerasjon"
           }
         },
         "nl" : {
@@ -48669,97 +48669,97 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gebruik Hou, dan druk"
+            "value" : "Druk, hou, kombineer knoppies, sleep of blaai; die herkende sneller word intyds opgedateer."
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "استخدم الضغط المطوّل ثم الضغط"
+            "value" : "اضغط أو اضغط مطولًا أو اجمع الأزرار أو اسحب أو مرّر؛ يتحدّث المشغّل المتعرّف عليه مباشرةً."
           }
         },
         "bs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Koristi Drži, pa pritisni"
+            "value" : "Pritisnite, držite, kombinujte dugmad, prevucite ili pomjerite; prepoznati okidač se ažurira uživo."
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fes servir Mantén premut i prem"
+            "value" : "Prem, mantén premut, combina botons, arrossega o desplaça’t; l’activador reconegut s’actualitza en directe."
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Použít Podržet a stisknout"
+            "value" : "Stiskněte, podržte, kombinujte tlačítka, táhněte nebo posouvejte; rozpoznaný spouštěč se průběžně aktualizuje."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Brug Hold, derefter tryk"
+            "value" : "Tryk, hold, kombiner knapper, træk eller rul; den genkendte udløser opdateres live."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Halten, dann drücken verwenden"
+            "value" : "Drücken, halten, Tasten kombinieren, ziehen oder scrollen; der erkannte Auslöser wird live aktualisiert."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Χρήση Κράτημα και μετά πάτημα"
+            "value" : "Πατήστε, κρατήστε, συνδυάστε κουμπιά, σύρετε ή κάντε κύλιση· η αναγνωρισμένη σκανδάλη ενημερώνεται ζωντανά."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Usar Mantener y pulsar"
+            "value" : "Pulsa, mantén, combina botones, arrastra o desplázate; el activador reconocido se actualiza en directo."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Käytä Pidä pohjassa, sitten paina"
+            "value" : "Paina, pidä pohjassa, yhdistä painikkeita, vedä tai vieritä; tunnistettu laukaisin päivittyy reaaliajassa."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Utiliser Maintenir puis appuyer"
+            "value" : "Appuyez, maintenez, combinez des boutons, faites glisser ou défiler ; le déclencheur reconnu se met à jour en direct."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "שימוש בהחזקה ולאחר מכן לחיצה"
+            "value" : "לחצו, החזיקו, שלבו לחצנים, גררו או גללו; גורם המפעיל שזוהה מתעדכן בזמן אמת."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Használja a Tartás, majd lenyomás lehetőséget"
+            "value" : "Nyomja meg, tartsa lenyomva, kombinálja a gombokat, húzza vagy görgessen; a felismert eseményindító élőben frissül."
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gunakan Tahan, Lalu Tekan"
+            "value" : "Tekan, tahan, gabungkan tombol, seret, atau gulir; pemicu yang dikenali diperbarui secara langsung."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Usa Tieni premuto, poi premi"
+            "value" : "Premi, tieni premuto, combina pulsanti, trascina o scorri; il trigger riconosciuto si aggiorna in tempo reale."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "長押ししてから押すを使用"
+            "value" : "押す、長押しする、ボタンを組み合わせる、ドラッグする、スクロールする操作を行うと、認識されたトリガーがリアルタイムで更新されます。"
           }
         },
         "ko" : {
@@ -48771,85 +48771,85 @@
         "my" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ဖိထားပြီးနောက် နှိပ်ခြင်းကို အသုံးပြုပါ"
+            "value" : "နှိပ်ပါ၊ ဖိထားပါ၊ ခလုတ်များ ပေါင်းစပ်ပါ၊ ဆွဲပါ သို့မဟုတ် လှိမ့်ပါ။ မှတ်မိသော အစပျိုးမှုကို တိုက်ရိုက် အပ်ဒိတ်လုပ်သည်။"
           }
         },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bruk Hold, deretter trykk"
+            "value" : "Trykk, hold, kombiner knapper, dra eller rull; den gjenkjente utløseren oppdateres direkte."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Houd ingedrukt en druk gebruiken"
+            "value" : "Druk, houd ingedrukt, combineer knoppen, sleep of scroll; de herkende trigger wordt live bijgewerkt."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Użyj Przytrzymaj, a następnie naciśnij"
+            "value" : "Naciśnij, przytrzymaj, połącz przyciski, przeciągnij lub przewiń; rozpoznany wyzwalacz jest aktualizowany na żywo."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Usar Manter premido e premir"
+            "value" : "Prima, mantenha premido, combine botões, arraste ou desloque; o acionador reconhecido é atualizado em direto."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Usar Manter pressionado e pressionar"
+            "value" : "Pressione, mantenha pressionado, combine botões, arraste ou role; o acionador reconhecido é atualizado ao vivo."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Folosiți Țineți apăsat, apoi apăsați"
+            "value" : "Apăsați, țineți apăsat, combinați butoane, trageți sau derulați; declanșatorul recunoscut se actualizează în timp real."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Использовать «Удерживать, затем нажать»"
+            "value" : "Нажимайте, удерживайте, сочетайте кнопки, перетаскивайте или прокручивайте; распознанный триггер обновляется в реальном времени."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Použiť Podržať a potom stlačiť"
+            "value" : "Stlačte, podržte, kombinujte tlačidlá, ťahajte alebo posúvajte; rozpoznaný spúšťač sa aktualizuje priebežne."
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Koristi Drži, pa pritisni"
+            "value" : "Pritisnite, držite, kombinujte dugmad, prevucite ili pomerajte; prepoznati okidač se ažurira uživo."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Använd Håll ned, tryck sedan"
+            "value" : "Tryck, håll ned, kombinera knappar, dra eller rulla; den identifierade utlösaren uppdateras direkt."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Basılı Tut, Sonra Bas kullan"
+            "value" : "Basın, basılı tutun, düğmeleri birleştirin, sürükleyin veya kaydırın; tanınan tetikleyici canlı olarak güncellenir."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Використати «Утримувати, потім натиснути»"
+            "value" : "Натискайте, утримуйте, поєднуйте кнопки, перетягуйте або прокручуйте; розпізнаний тригер оновлюється в реальному часі."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dùng Giữ, rồi nhấn"
+            "value" : "Nhấn, giữ, kết hợp các nút, kéo hoặc cuộn; bộ kích hoạt được nhận dạng sẽ cập nhật trực tiếp."
           }
         },
         "zh-Hans" : {
@@ -49294,97 +49294,97 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "As Primêr die ingehoue knoppie is, word normale klikke vertraag totdat jy dit loslaat."
+            "value" : "Primêr alleen ondersteun slegs Lang druk. Voeg 'n wysiger of nog 'n knoppie by vir ander aksies."
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "يؤدي استخدام الأساسي كزر مضغوط إلى تأخير النقرات العادية حتى تحرره."
+            "value" : "يدعم الأساسي وحده الضغط المطوّل فقط. أضف مفتاح تعديل أو زرًا آخر لإجراءات أخرى."
           }
         },
         "bs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Korištenje Primarnog kao dugmeta koje držite odgađa normalne klikove dok ga ne otpustite."
+            "value" : "Samo Primarno podržava samo dugi pritisak. Dodajte modifikator ili drugo dugme za druge radnje."
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fer servir el botó Primari com a botó mantingut premut retarda els clics normals fins que el deixes anar."
+            "value" : "El botó Primari sol només admet pulsacions llargues. Afegeix un modificador o un altre botó per a altres accions."
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Použití primárního tlačítka jako drženého zpozdí běžná kliknutí, dokud ho neuvolníte."
+            "value" : "Samotné primární tlačítko podporuje jen dlouhý stisk. Pro jiné akce přidejte modifikátor nebo další tlačítko."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hvis Primær bruges som den knap, der holdes nede, forsinkes normale klik, indtil du slipper den."
+            "value" : "Primær alene understøtter kun Langt tryk. Tilføj en modifikator eller en anden knap for andre handlinger."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wenn Primär als gehaltene Taste verwendet wird, werden normale Klicks verzögert, bis du sie loslässt."
+            "value" : "Primär allein unterstützt nur Lang drücken. Füge für andere Aktionen einen Modifikator oder eine weitere Taste hinzu."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Η χρήση του κύριου κουμπιού ως κουμπιού που κρατιέται καθυστερεί τα κανονικά κλικ μέχρι να το αφήσετε."
+            "value" : "Το κύριο μόνο του υποστηρίζει μόνο παρατεταμένο πάτημα. Προσθέστε τροποποιητή ή άλλο κουμπί για άλλες ενέργειες."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Usar el botón Primario como botón mantenido retrasa los clics normales hasta que lo sueltas."
+            "value" : "El botón Primario por sí solo solo admite pulsación larga. Añade un modificador u otro botón para otras acciones."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kun ensisijaista painiketta pidetään pohjassa, tavalliset napsautukset viivästyvät, kunnes vapautat painikkeen."
+            "value" : "Pelkkä ensisijainen painike tukee vain pitkää painallusta. Lisää muunnin tai toinen painike muita toimintoja varten."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Utiliser le bouton principal comme bouton maintenu retarde les clics normaux jusqu’à ce que vous le relâchiez."
+            "value" : "Le bouton principal seul ne prend en charge que la pression longue. Ajoutez un modificateur ou un autre bouton pour les autres actions."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "שימוש בלחצן הראשי כלחצן מוחזק מעכב לחיצות רגילות עד שמשחררים אותו."
+            "value" : "הלחצן הראשי לבדו תומך רק בלחיצה ממושכת. הוסיפו מקש שינוי או לחצן נוסף לפעולות אחרות."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ha az Elsődleges gombot lenyomva tartott gombként használja, a normál kattintások a felengedésig késnek."
+            "value" : "Az Elsődleges gomb önmagában csak a hosszú lenyomást támogatja. Más műveletekhez adjon hozzá módosítót vagy másik gombot."
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Menggunakan tombol Utama sebagai tombol yang ditahan akan menunda klik normal hingga Anda melepaskannya."
+            "value" : "Tombol Utama saja hanya mendukung Tekan Lama. Tambahkan modifier atau tombol lain untuk tindakan lainnya."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Usare il pulsante primario come pulsante tenuto premuto ritarda i clic normali finché non lo rilasci."
+            "value" : "Il pulsante primario da solo supporta solo la pressione prolungata. Aggiungi un modificatore o un altro pulsante per altre azioni."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "プライマリボタンを押し続けるボタンとして使うと、離すまで通常のクリックが遅延します。"
+            "value" : "プライマリボタン単独では長押しだけを使用できます。他の操作には修飾キーまたは別のボタンを追加してください。"
           }
         },
         "ko" : {
@@ -49396,85 +49396,85 @@
         "my" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "အဓိကခလုတ်ကို ဖိထားသည့်ခလုတ်အဖြစ် အသုံးပြုပါက လွှတ်သည်အထိ ပုံမှန်နှိပ်မှုများ နှောင့်နှေးမည်။"
+            "value" : "အဓိကခလုတ်တစ်ခုတည်းသည် ကြာရှည်နှိပ်ခြင်းကိုသာ ပံ့ပိုးသည်။ အခြားလုပ်ဆောင်ချက်များအတွက် ပြုပြင်မွမ်းမံခလုတ် သို့မဟုတ် အခြားခလုတ်တစ်ခု ထည့်ပါ။"
           }
         },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Når Primær brukes som knappen som holdes inne, forsinkes normale klikk til du slipper den."
+            "value" : "Primær alene støtter bare Langt trykk. Legg til en modifikator eller en annen knapp for andre handlinger."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Als je de primaire knop als ingedrukte knop gebruikt, worden normale klikken vertraagd totdat je de knop loslaat."
+            "value" : "De primaire knop alleen ondersteunt alleen Lang indrukken. Voeg een modificatietoets of een andere knop toe voor andere acties."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Używanie przycisku głównego jako przytrzymywanego opóźnia zwykłe kliknięcia do czasu jego zwolnienia."
+            "value" : "Sam przycisk główny obsługuje tylko długie naciśnięcie. Dodaj modyfikator lub inny przycisk, aby używać innych działań."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Usar o botão principal como botão mantido premido atrasa os cliques normais até o libertar."
+            "value" : "O botão principal sozinho só suporta pressão longa. Adicione um modificador ou outro botão para outras ações."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Usar o botão primário como botão pressionado atrasa os cliques normais até você soltá-lo."
+            "value" : "O botão primário sozinho só é compatível com pressão longa. Adicione um modificador ou outro botão para outras ações."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Folosirea butonului principal ca buton ținut apăsat întârzie clicurile normale până când îl eliberați."
+            "value" : "Butonul principal singur acceptă doar apăsarea lungă. Adăugați un modificator sau alt buton pentru alte acțiuni."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Использование основной кнопки в качестве удерживаемой задерживает обычные щелчки, пока вы её не отпустите."
+            "value" : "Основная кнопка сама по себе поддерживает только долгое нажатие. Для других действий добавьте модификатор или другую кнопку."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Použitie primárneho tlačidla ako podržaného oneskorí bežné kliknutia, kým ho neuvoľníte."
+            "value" : "Samotné primárne tlačidlo podporuje iba dlhé stlačenie. Pre iné akcie pridajte modifikátor alebo ďalšie tlačidlo."
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Korišćenje primarnog dugmeta kao dugmeta koje držite odlaže normalne klikove dok ga ne otpustite."
+            "value" : "Samo primarno dugme podržava samo dugi pritisak. Dodajte modifikator ili drugo dugme za druge radnje."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Om Primär används som knappen som hålls ned fördröjs vanliga klick tills du släpper den."
+            "value" : "Primär ensam stöder endast Långt tryck. Lägg till en specialtangent eller en annan knapp för andra åtgärder."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Birincil düğmeyi basılı tutulan düğme olarak kullanmak, siz bırakana kadar normal tıklamaları geciktirir."
+            "value" : "Birincil tek başına yalnızca Uzun Basma'yı destekler. Diğer eylemler için bir değiştirici veya başka bir düğme ekleyin."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Використання основної кнопки як утримуваної затримує звичайні клацання, доки ви її не відпустите."
+            "value" : "Основна кнопка сама підтримує лише довге натискання. Для інших дій додайте модифікатор або іншу кнопку."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dùng nút Chính làm nút được giữ sẽ trì hoãn các lần nhấp bình thường cho đến khi bạn thả nút."
+            "value" : "Chỉ dùng nút Chính chỉ hỗ trợ Nhấn giữ. Hãy thêm phím bổ trợ hoặc nút khác cho các tác vụ khác."
           }
         },
         "zh-Hans" : {
@@ -49949,7 +49949,7 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kvartisk blød start og afslutning met den mest markante midterkurve."
+            "value" : "Kvartisk blød start og afslutning med den mest markante midterkurve."
           }
         },
         "de" : {
@@ -50139,7 +50139,7 @@
         "bs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Izlađi iz %@"
+            "value" : "Izađi iz %@"
           }
         },
         "ca" : {
@@ -50543,97 +50543,97 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Deur Primêr met 'n ander knoppie te kombineer, kan normale klikke kortliks vertraag."
+            "value" : "Neem 'n sneller opdrag op om 'n aksie te kies."
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "قد يؤدي الجمع بين الأساسي وزر آخر إلى تأخير النقرات العادية لفترة وجيزة."
+            "value" : "سجّل مشغّلًا لاختيار إجراء."
           }
         },
         "bs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kombinovanje Primarnog s drugim dugmetom može nakratko odgoditi normalne klikove."
+            "value" : "Snimite okidač da biste izabrali radnju."
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Combinar el botó Primari amb un altre botó pot retardar breument els clics normals."
+            "value" : "Enregistra un activador per triar una acció."
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kombinace primárního tlačítka s jiným může krátce zpozdit běžná kliknutí."
+            "value" : "Zaznamenejte spouštěč a vyberte akci."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kombination af Primær med en anden knap kan kortvarigt forsinke normale klik."
+            "value" : "Optag en udløser for at vælge en handling."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Das Kombinieren von Primär mit einer anderen Taste kann normale Klicks kurz verzögern."
+            "value" : "Nimm einen Auslöser auf, um eine Aktion auszuwählen."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ο συνδυασμός του κύριου με άλλο κουμπί μπορεί να καθυστερήσει προσωρινά τα κανονικά κλικ."
+            "value" : "Καταγράψτε μια σκανδάλη για να επιλέξετε μια ενέργεια."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Combinar el botón Primario con otro puede retrasar brevemente los clics normales."
+            "value" : "Graba un activador para elegir una acción."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ensisijaisen painikkeen yhdistäminen toiseen voi viivästyttää tavallisia napsautuksia hetkeksi."
+            "value" : "Tallenna laukaisin valitaksesi toiminnon."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Associer le bouton principal à un autre bouton peut retarder brièvement les clics normaux."
+            "value" : "Enregistrez un déclencheur pour choisir une action."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "שילוב הלחצן הראשי עם לחצן אחר עלול לעכב מעט לחיצות רגילות."
+            "value" : "הקלטת גורם מפעיל לבחירת פעולה."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Az Elsődleges és egy másik gomb kombinálása röviden késleltetheti a normál kattintásokat."
+            "value" : "Rögzítsen egy eseményindítót a művelet kiválasztásához."
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Menggabungkan tombol Utama dengan tombol lain dapat menunda klik normal sesaat."
+            "value" : "Rekam pemicu untuk memilih tindakan."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Combinare il pulsante primario con un altro può ritardare brevemente i clic normali."
+            "value" : "Registra un trigger per scegliere un’azione."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "プライマリボタンを別のボタンと組み合わせると、通常のクリックが一時的に遅延することがあります。"
+            "value" : "トリガーを記録してアクションを選択します。"
           }
         },
         "ko" : {
@@ -50645,85 +50645,85 @@
         "my" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "အဓိကခလုတ်ကို အခြားခလုတ်နှင့် ပေါင်းစပ်ပါက ပုံမှန်နှိပ်မှုများ ခဏတာ နှောင့်နှေးနိုင်သည်။"
+            "value" : "လုပ်ဆောင်ချက်ရွေးရန် အစပျိုးမှုကို မှတ်တမ်းတင်ပါ။"
           }
         },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hvis Primær kombineres med en annen knapp, kan normale klikk bli kortvarig forsinket."
+            "value" : "Ta opp en utløser for å velge en handling."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Het combineren van de primaire knop met een andere knop kan normale klikken kort vertragen."
+            "value" : "Neem een trigger op om een actie te kiezen."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Połączenie przycisku głównego z innym przyciskiem może na chwilę opóźnić zwykłe kliknięcia."
+            "value" : "Nagraj wyzwalacz, aby wybrać działanie."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Combinar o botão principal com outro botão pode atrasar brevemente os cliques normais."
+            "value" : "Grave um acionador para escolher uma ação."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Combinar o botão primário com outro botão pode atrasar brevemente os cliques normais."
+            "value" : "Grave um acionador para escolher uma ação."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Combinarea butonului principal cu alt buton poate întârzia pentru scurt timp clicurile normale."
+            "value" : "Înregistrați un declanșator pentru a alege o acțiune."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сочетание основной кнопки с другой может ненадолго задержать обычные щелчки."
+            "value" : "Запишите триггер, чтобы выбрать действие."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kombinácia primárneho tlačidla s iným môže krátko oneskoriť bežné kliknutia."
+            "value" : "Nahrajte spúšťač a vyberte akciu."
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kombinovanje primarnog sa drugim dugmetom može nakratko odložiti normalne klikove."
+            "value" : "Snimite okidač da biste izabrali radnju."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Om Primär kombineras med en annan knapp kan vanliga klick fördröjas kortvarigt."
+            "value" : "Spela in en utlösare för att välja en åtgärd."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Birincil düğmeyi başka bir düğmeyle birleştirmek normal tıklamaları kısa süreliğine geciktirebilir."
+            "value" : "Bir eylem seçmek için tetikleyiciyi kaydedin."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Поєднання основної кнопки з іншою може ненадовго затримати звичайні клацання."
+            "value" : "Запишіть тригер, щоб вибрати дію."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kết hợp nút Chính với một nút khác có thể tạm thời trì hoãn các lần nhấp bình thường."
+            "value" : "Ghi lại bộ kích hoạt để chọn tác vụ."
           }
         },
         "zh-Hans" : {
@@ -51966,7 +51966,7 @@
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Перепризначати кнопку, док її натиснуто"
+            "value" : "Перепризначати кнопку, доки її натиснуто"
           }
         },
         "vi" : {
@@ -52382,7 +52382,7 @@
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Повторювати, док натиснуто"
+            "value" : "Повторювати, доки натиснуто"
           }
         },
         "vi" : {
@@ -52839,7 +52839,7 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Herstel timer met muis op"
+            "value" : "Stel die tydhouer terug wanneer die muisknoppie losgelaat word"
           }
         },
         "ar" : {
@@ -52851,7 +52851,7 @@
         "bs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Resetiraj tajmer kada se miš podigne"
+            "value" : "Resetiraj tajmer pri otpuštanju dugmeta miša"
           }
         },
         "ca" : {
@@ -52869,7 +52869,7 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nulstil timer ved mus op"
+            "value" : "Nulstil timer, når museknappen slippes"
           }
         },
         "de" : {
@@ -52881,13 +52881,13 @@
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Επαναφορά χρονομέτρου κατά την άνοδο του ποντικιού"
+            "value" : "Επαναφορά χρονομέτρου κατά την απελευθέρωση του κουμπιού του ποντικιού"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Resetear temporizador al subir el ratón"
+            "value" : "Reiniciar el temporizador al soltar el botón del ratón"
           }
         },
         "fi" : {
@@ -52905,7 +52905,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "אפס טיממר כאשר עכבר לא לחוץ"
+            "value" : "אפס טיימר בעת שחרור לחצן העכבר"
           }
         },
         "hu" : {
@@ -52923,7 +52923,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ripristina il timer allo spostamento in su del mouse"
+            "value" : "Reimposta il timer al rilascio del pulsante del mouse"
           }
         },
         "ja" : {
@@ -52935,7 +52935,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "마우스를 올리면 타이머 재설정"
+            "value" : "마우스 버튼을 놓으면 타이머 재설정"
           }
         },
         "my" : {
@@ -52953,7 +52953,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reset timer bij muis omhoog"
+            "value" : "Timer resetten bij loslaten van de muisknop"
           }
         },
         "pl" : {
@@ -52965,25 +52965,25 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reiniciar o temporizador ao subir o rato"
+            "value" : "Reiniciar o temporizador ao soltar o botão do rato"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reinicia o temporizador ao subir o mouse"
+            "value" : "Reiniciar o temporizador ao soltar o botão do mouse"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Resetare temporizator la ridicarea mouse-ului"
+            "value" : "Resetare temporizator la eliberarea butonului mouse-ului"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сбросить таймер по нажатию кнопки мыши"
+            "value" : "Сбросить таймер при отпускании кнопки мыши"
           }
         },
         "sk" : {
@@ -52995,7 +52995,7 @@
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poništi tajmer kada se miš podigne"
+            "value" : "Poništi tajmer pri otpuštanju dugmeta miša"
           }
         },
         "sv" : {
@@ -53013,7 +53013,7 @@
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Скинути таймер при миші вгору"
+            "value" : "Скинути таймер при відпусканні кнопки миші"
           }
         },
         "vi" : {
@@ -53495,7 +53495,7 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Přenačíst konfiguraci ve Finderu…"
+            "value" : "Zobrazit konfiguraci ve Finderu…"
           }
         },
         "da" : {
@@ -53561,7 +53561,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Finderの設定を表示…"
+            "value" : "Finderで設定ファイルを表示…"
           }
         },
         "ko" : {
@@ -53679,7 +53679,7 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Onthul in Vinder"
+            "value" : "Wys in Finder"
           }
         },
         "ar" : {
@@ -55647,7 +55647,7 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Spusit shell příkaz…"
+            "value" : "Spustit shell příkaz…"
           }
         },
         "da" : {
@@ -56564,7 +56564,7 @@
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rulleaksellerasjon"
+            "value" : "Rulleakselerasjon"
           }
         },
         "nl" : {
@@ -57390,7 +57390,7 @@
         "my" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "… အား အောက််သို့ ရွေ့ရန်"
+            "value" : "… အား အောက်သို့ ရွေ့ရန်"
           }
         },
         "nb-NO" : {
@@ -57837,7 +57837,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rolar para a esqueda"
+            "value" : "Rolar para a esquerda"
           }
         },
         "ro" : {
@@ -58223,7 +58223,7 @@
         "my" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "… အား ဘက်ဘက်သို့ ရွေ့ရန်"
+            "value" : "… အား ဘယ်ဘက်သို့ ရွေ့ရန်"
           }
         },
         "nb-NO" : {
@@ -59834,7 +59834,7 @@
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Κλήση επάνω…"
+            "value" : "Κύλιση προς τα πάνω…"
           }
         },
         "es" : {
@@ -60316,7 +60316,7 @@
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rulleaksellerasjon"
+            "value" : "Rulleakselerasjon"
           }
         },
         "nl" : {
@@ -60787,7 +60787,7 @@
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Srolovanje je onemogućeno na osnovu trenutnih postavki."
+            "value" : "Skrolovanje je onemogućeno na osnovu trenutnih postavki."
           }
         },
         "sv" : {
@@ -64074,7 +64074,7 @@
         "my" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Screen အားပြရန်"
+            "value" : "Desktop အားပြရန်"
           }
         },
         "nb-NO" : {
@@ -64455,7 +64455,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "הצג בשורת המצב"
+            "value" : "הצג בשורת התפריטים"
           }
         },
         "hu" : {
@@ -64527,7 +64527,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Arată in bara de meniu"
+            "value" : "Arată în bara de meniu"
           }
         },
         "ru" : {
@@ -66529,7 +66529,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Démarrer à l''ouverture de session"
+            "value" : "Démarrer à l'ouverture de session"
           }
         },
         "he" : {
@@ -66677,97 +66677,97 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die opstel van Lang druk kan hierdie knoppie se normale klikke vertraag."
+            "value" : "Begin om 'n knoppiegebaar op te neem."
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "قد يؤدي إعداد الضغط المطوّل إلى تأخير النقرات العادية لهذا الزر."
+            "value" : "ابدأ تسجيل إيماءة زر."
           }
         },
         "bs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Podešavanje dugog pritiska može odgoditi normalne klikove ovog dugmeta."
+            "value" : "Započnite snimanje pokreta dugmeta."
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Configurar una pulsació llarga pot retardar els clics normals d’aquest botó."
+            "value" : "Comença a enregistrar un gest de botó."
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nastavení dlouhého stisku může zpozdit běžná kliknutí tohoto tlačítka."
+            "value" : "Začněte zaznamenávat gesto tlačítka."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Konfiguration af Langt tryk kan forsinke denne knaps normale klik."
+            "value" : "Start optagelse af en knapbevægelse."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Das Einrichten von Lang drücken kann die normalen Klicks dieser Taste verzögern."
+            "value" : "Aufnahme einer Tastengeste starten."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Η ρύθμιση παρατεταμένου πατήματος μπορεί να καθυστερήσει τα κανονικά κλικ αυτού του κουμπιού."
+            "value" : "Ξεκινήστε την καταγραφή μιας χειρονομίας κουμπιού."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Configurar una pulsación larga puede retrasar los clics normales de este botón."
+            "value" : "Empieza a grabar un gesto de botón."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pitkän painalluksen määrittäminen voi viivästyttää tämän painikkeen tavallisia napsautuksia."
+            "value" : "Aloita painike-eleen tallennus."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Configurer une pression longue peut retarder les clics normaux de ce bouton."
+            "value" : "Commencez à enregistrer un geste de bouton."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "הגדרת לחיצה ממושכת עלולה לעכב את הלחיצות הרגילות של לחצן זה."
+            "value" : "התחלת הקלטה של מחוות לחצן."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A Hosszú lenyomás beállítása késleltetheti ennek a gombnak a normál kattintásait."
+            "value" : "Kezdje el egy gombmozdulat rögzítését."
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mengatur Tekan Lama dapat menunda klik normal tombol ini."
+            "value" : "Mulai merekam gestur tombol."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Configurare una pressione prolungata può ritardare i clic normali di questo pulsante."
+            "value" : "Inizia a registrare un gesto del pulsante."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "長押しを設定すると、このボタンの通常のクリックが遅延することがあります。"
+            "value" : "ボタンジェスチャの記録を開始します。"
           }
         },
         "ko" : {
@@ -66779,85 +66779,85 @@
         "my" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ကြာရှည်နှိပ်ခြင်းကို ပြင်ဆင်ပါက ဤခလုတ်၏ ပုံမှန်နှိပ်မှုများ နှောင့်နှေးနိုင်သည်။"
+            "value" : "ခလုတ်လက်ဟန်ကို စတင်မှတ်တမ်းတင်ပါ။"
           }
         },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Konfigurering av Langt trykk kan forsinke denne knappens normale klikk."
+            "value" : "Start opptak av en knappebevegelse."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Het instellen van Lang indrukken kan de normale klikken van deze knop vertragen."
+            "value" : "Begin met het opnemen van een knopgebaar."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Skonfigurowanie długiego naciśnięcia może opóźnić zwykłe kliknięcia tego przycisku."
+            "value" : "Rozpocznij nagrywanie gestu przycisku."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Configurar uma pressão longa pode atrasar os cliques normais deste botão."
+            "value" : "Comece a gravar um gesto de botão."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Configurar uma pressão longa pode atrasar os cliques normais deste botão."
+            "value" : "Comece a gravar um gesto de botão."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Configurarea apăsării lungi poate întârzia clicurile normale ale acestui buton."
+            "value" : "Începeți înregistrarea unui gest de buton."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Настройка долгого нажатия может задержать обычные щелчки этой кнопки."
+            "value" : "Начните запись жеста кнопки."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nastavenie dlhého stlačenia môže oneskoriť bežné kliknutia tohto tlačidla."
+            "value" : "Začnite zaznamenávať gesto tlačidla."
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Podešavanje dugog pritiska može odložiti normalne klikove ovog dugmeta."
+            "value" : "Započnite snimanje pokreta dugmeta."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Om Långt tryck konfigureras kan knappens vanliga klick fördröjas."
+            "value" : "Börja spela in en knappgest."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uzun Basma'yı yapılandırmak bu düğmenin normal tıklamalarını geciktirebilir."
+            "value" : "Bir düğme hareketini kaydetmeye başlayın."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Налаштування довгого натискання може затримати звичайні клацання цієї кнопки."
+            "value" : "Почніть запис жесту кнопки."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Thiết lập Nhấn giữ có thể trì hoãn các lần nhấp bình thường của nút này."
+            "value" : "Bắt đầu ghi cử chỉ nút."
           }
         },
         "zh-Hans" : {
@@ -71296,7 +71296,7 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chcete-li povolit vodorovné posouvání se Shiftem, nastavte Shift na Změna oriantace v Modifikačních klávesách."
+            "value" : "Chcete-li povolit vodorovné posouvání se Shiftem, nastavte Shift na Změna orientace v Modifikačních klávesách."
           }
         },
         "da" : {
@@ -71338,7 +71338,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "כדי לאפשר גלילה אופקית עם Shift, הגדר את Shift ל־שנה כיוון גלילה בקיצורי מקלדת."
+            "value" : "כדי לאפשר גלילה אופקית עם Shift, הגדר את Shift ל־שנה כיוון גלילה במקשי שינוי."
           }
         },
         "hu" : {
@@ -71504,7 +71504,7 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rychlost vzorkování"
+            "value" : "Rychlost sledování"
           }
         },
         "da" : {
@@ -71540,7 +71540,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vitesse de défilement"
+            "value" : "Vitesse de déplacement"
           }
         },
         "he" : {
@@ -72475,7 +72475,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Typmatchning: förväntade %1$@ vid %2$@"
+            "value" : "Typfel: förväntade %1$@ vid %2$@"
           }
         },
         "tr" : {
@@ -72499,13 +72499,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "输入不匹配：预期 %1$@ 在 %2$@"
+            "value" : "类型不匹配：在 %2$@ 预期为 %1$@"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "類型不符：預期為 %1$@，但收到 %2$@"
+            "value" : "類型不符：在 %2$@ 預期為 %1$@"
           }
         },
         "zh-Hant-HK" : {
@@ -72729,7 +72729,7 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "UniversalBackForward moet waar, onwaar, \"backOnly\" of \"forwardOnly\" wees"
+            "value" : "UniversalBackForward moet true, false, \"backOnly\" of \"forwardOnly\" wees"
           }
         },
         "ar" : {
@@ -72741,7 +72741,7 @@
         "bs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "UniversalBackForward mora biti tačno, netačno, \"backOnly\" ili \"forwardOnly\""
+            "value" : "UniversalBackForward mora biti true, false, \"backOnly\" ili \"forwardOnly\""
           }
         },
         "ca" : {
@@ -73401,7 +73401,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Actualizar el intervalo de verificación"
+            "value" : "Intervalo de búsqueda de actualizaciones"
           }
         },
         "fi" : {
@@ -73485,7 +73485,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Atualizar intervalo de verificação"
+            "value" : "Intervalo de verificação de atualizações"
           }
         },
         "ro" : {
@@ -73769,97 +73769,97 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Druk, hou, kombineer knoppies, sleep of blaai; die herkende sneller word intyds opgedateer."
+            "value" : "Gebruik Hou, dan druk"
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "اضغط أو اضغط مطولًا أو اجمع الأزرار أو اسحب أو مرّر؛ يتحدّث المشغّل المتعرّف عليه مباشرةً."
+            "value" : "استخدم الضغط المطوّل ثم الضغط"
           }
         },
         "bs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pritisnite, držite, kombinujte dugmad, prevucite ili pomjerite; prepoznati okidač se ažurira uživo."
+            "value" : "Koristi Drži, pa pritisni"
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prem, mantén premut, combina botons, arrossega o desplaça’t; l’activador reconegut s’actualitza en directe."
+            "value" : "Fes servir Mantén premut i prem"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stiskněte, podržte, kombinujte tlačítka, táhněte nebo posouvejte; rozpoznaný spouštěč se průběžně aktualizuje."
+            "value" : "Použít Podržet a stisknout"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tryk, hold, kombiner knapper, træk eller rul; den genkendte udløser opdateres live."
+            "value" : "Brug Hold, derefter tryk"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Drücken, halten, Tasten kombinieren, ziehen oder scrollen; der erkannte Auslöser wird live aktualisiert."
+            "value" : "Halten, dann drücken verwenden"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Πατήστε, κρατήστε, συνδυάστε κουμπιά, σύρετε ή κάντε κύλιση· η αναγνωρισμένη σκανδάλη ενημερώνεται ζωντανά."
+            "value" : "Χρήση Κράτημα και μετά πάτημα"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pulsa, mantén, combina botones, arrastra o desplázate; el activador reconocido se actualiza en directo."
+            "value" : "Usar Mantener y pulsar"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Paina, pidä pohjassa, yhdistä painikkeita, vedä tai vieritä; tunnistettu laukaisin päivittyy reaaliajassa."
+            "value" : "Käytä Pidä pohjassa, sitten paina"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Appuyez, maintenez, combinez des boutons, faites glisser ou défiler ; le déclencheur reconnu se met à jour en direct."
+            "value" : "Utiliser Maintenir puis appuyer"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "לחצו, החזיקו, שלבו לחצנים, גררו או גללו; גורם המפעיל שזוהה מתעדכן בזמן אמת."
+            "value" : "שימוש בהחזקה ולאחר מכן לחיצה"
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nyomja meg, tartsa lenyomva, kombinálja a gombokat, húzza vagy görgessen; a felismert eseményindító élőben frissül."
+            "value" : "Használja a Tartás, majd lenyomás lehetőséget"
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tekan, tahan, gabungkan tombol, seret, atau gulir; pemicu yang dikenali diperbarui secara langsung."
+            "value" : "Gunakan Tahan, Lalu Tekan"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Premi, tieni premuto, combina pulsanti, trascina o scorri; il trigger riconosciuto si aggiorna in tempo reale."
+            "value" : "Usa Tieni premuto, poi premi"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "押す、長押しする、ボタンを組み合わせる、ドラッグする、スクロールする操作を行うと、認識されたトリガーがリアルタイムで更新されます。"
+            "value" : "長押ししてから押すを使用"
           }
         },
         "ko" : {
@@ -73871,85 +73871,85 @@
         "my" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "နှိပ်ပါ၊ ဖိထားပါ၊ ခလုတ်များ ပေါင်းစပ်ပါ၊ ဆွဲပါ သို့မဟုတ် လှိမ့်ပါ။ မှတ်မိသော အစပျိုးမှုကို တိုက်ရိုက် အပ်ဒိတ်လုပ်သည်။"
+            "value" : "ဖိထားပြီးနောက် နှိပ်ခြင်းကို အသုံးပြုပါ"
           }
         },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trykk, hold, kombiner knapper, dra eller rull; den gjenkjente utløseren oppdateres direkte."
+            "value" : "Bruk Hold, deretter trykk"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Druk, houd ingedrukt, combineer knoppen, sleep of scroll; de herkende trigger wordt live bijgewerkt."
+            "value" : "Houd ingedrukt en druk gebruiken"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Naciśnij, przytrzymaj, połącz przyciski, przeciągnij lub przewiń; rozpoznany wyzwalacz jest aktualizowany na żywo."
+            "value" : "Użyj Przytrzymaj, a następnie naciśnij"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prima, mantenha premido, combine botões, arraste ou desloque; o acionador reconhecido é atualizado em direto."
+            "value" : "Usar Manter premido e premir"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pressione, mantenha pressionado, combine botões, arraste ou role; o acionador reconhecido é atualizado ao vivo."
+            "value" : "Usar Manter pressionado e pressionar"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apăsați, țineți apăsat, combinați butoane, trageți sau derulați; declanșatorul recunoscut se actualizează în timp real."
+            "value" : "Folosiți Țineți apăsat, apoi apăsați"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Нажимайте, удерживайте, сочетайте кнопки, перетаскивайте или прокручивайте; распознанный триггер обновляется в реальном времени."
+            "value" : "Использовать «Удерживать, затем нажать»"
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stlačte, podržte, kombinujte tlačidlá, ťahajte alebo posúvajte; rozpoznaný spúšťač sa aktualizuje priebežne."
+            "value" : "Použiť Podržať a potom stlačiť"
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pritisnite, držite, kombinujte dugmad, prevucite ili pomerajte; prepoznati okidač se ažurira uživo."
+            "value" : "Koristi Drži, pa pritisni"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tryck, håll ned, kombinera knappar, dra eller rulla; den identifierade utlösaren uppdateras direkt."
+            "value" : "Använd Håll ned, tryck sedan"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Basın, basılı tutun, düğmeleri birleştirin, sürükleyin veya kaydırın; tanınan tetikleyici canlı olarak güncellenir."
+            "value" : "Basılı Tut, Sonra Bas kullan"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Натискайте, утримуйте, поєднуйте кнопки, перетягуйте або прокручуйте; розпізнаний тригер оновлюється в реальному часі."
+            "value" : "Використати «Утримувати, потім натиснути»"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nhấn, giữ, kết hợp các nút, kéo hoặc cuộn; bộ kích hoạt được nhận dạng sẽ cập nhật trực tiếp."
+            "value" : "Dùng Giữ, rồi nhấn"
           }
         },
         "zh-Hans" : {
@@ -74394,97 +74394,97 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Primêr alleen ondersteun slegs Lang druk. Voeg 'n wysiger of nog 'n knoppie by vir ander aksies."
+            "value" : "As Primêr die ingehoue knoppie is, word normale klikke vertraag totdat jy dit loslaat."
           }
         },
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "يدعم الأساسي وحده الضغط المطوّل فقط. أضف مفتاح تعديل أو زرًا آخر لإجراءات أخرى."
+            "value" : "يؤدي استخدام الأساسي كزر مضغوط إلى تأخير النقرات العادية حتى تحرره."
           }
         },
         "bs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Samo Primarno podržava samo dugi pritisak. Dodajte modifikator ili drugo dugme za druge radnje."
+            "value" : "Korištenje Primarnog kao dugmeta koje držite odgađa normalne klikove dok ga ne otpustite."
           }
         },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El botó Primari sol només admet pulsacions llargues. Afegeix un modificador o un altre botó per a altres accions."
+            "value" : "Fer servir el botó Primari com a botó mantingut premut retarda els clics normals fins que el deixes anar."
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Samotné primární tlačítko podporuje jen dlouhý stisk. Pro jiné akce přidejte modifikátor nebo další tlačítko."
+            "value" : "Použití primárního tlačítka jako drženého zpozdí běžná kliknutí, dokud ho neuvolníte."
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Primær alene understøtter kun Langt tryk. Tilføj en modifikator eller en anden knap for andre handlinger."
+            "value" : "Hvis Primær bruges som den knap, der holdes nede, forsinkes normale klik, indtil du slipper den."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Primär allein unterstützt nur Lang drücken. Füge für andere Aktionen einen Modifikator oder eine weitere Taste hinzu."
+            "value" : "Wenn Primär als gehaltene Taste verwendet wird, werden normale Klicks verzögert, bis du sie loslässt."
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Το κύριο μόνο του υποστηρίζει μόνο παρατεταμένο πάτημα. Προσθέστε τροποποιητή ή άλλο κουμπί για άλλες ενέργειες."
+            "value" : "Η χρήση του κύριου κουμπιού ως κουμπιού που κρατιέται καθυστερεί τα κανονικά κλικ μέχρι να το αφήσετε."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El botón Primario por sí solo solo admite pulsación larga. Añade un modificador u otro botón para otras acciones."
+            "value" : "Usar el botón Primario como botón mantenido retrasa los clics normales hasta que lo sueltas."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pelkkä ensisijainen painike tukee vain pitkää painallusta. Lisää muunnin tai toinen painike muita toimintoja varten."
+            "value" : "Kun ensisijaista painiketta pidetään pohjassa, tavalliset napsautukset viivästyvät, kunnes vapautat painikkeen."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le bouton principal seul ne prend en charge que la pression longue. Ajoutez un modificateur ou un autre bouton pour les autres actions."
+            "value" : "Utiliser le bouton principal comme bouton maintenu retarde les clics normaux jusqu’à ce que vous le relâchiez."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "הלחצן הראשי לבדו תומך רק בלחיצה ממושכת. הוסיפו מקש שינוי או לחצן נוסף לפעולות אחרות."
+            "value" : "שימוש בלחצן הראשי כלחצן מוחזק מעכב לחיצות רגילות עד שמשחררים אותו."
           }
         },
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Az Elsődleges gomb önmagában csak a hosszú lenyomást támogatja. Más műveletekhez adjon hozzá módosítót vagy másik gombot."
+            "value" : "Ha az Elsődleges gombot lenyomva tartott gombként használja, a normál kattintások a felengedésig késnek."
           }
         },
         "id" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tombol Utama saja hanya mendukung Tekan Lama. Tambahkan modifier atau tombol lain untuk tindakan lainnya."
+            "value" : "Menggunakan tombol Utama sebagai tombol yang ditahan akan menunda klik normal hingga Anda melepaskannya."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Il pulsante primario da solo supporta solo la pressione prolungata. Aggiungi un modificatore o un altro pulsante per altre azioni."
+            "value" : "Usare il pulsante primario come pulsante tenuto premuto ritarda i clic normali finché non lo rilasci."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "プライマリボタン単独では長押しだけを使用できます。他の操作には修飾キーまたは別のボタンを追加してください。"
+            "value" : "プライマリボタンを押し続けるボタンとして使うと、離すまで通常のクリックが遅延します。"
           }
         },
         "ko" : {
@@ -74496,85 +74496,85 @@
         "my" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "အဓိကခလုတ်တစ်ခုတည်းသည် ကြာရှည်နှိပ်ခြင်းကိုသာ ပံ့ပိုးသည်။ အခြားလုပ်ဆောင်ချက်များအတွက် ပြုပြင်မွမ်းမံခလုတ် သို့မဟုတ် အခြားခလုတ်တစ်ခု ထည့်ပါ။"
+            "value" : "အဓိကခလုတ်ကို ဖိထားသည့်ခလုတ်အဖြစ် အသုံးပြုပါက လွှတ်သည်အထိ ပုံမှန်နှိပ်မှုများ နှောင့်နှေးမည်။"
           }
         },
         "nb-NO" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Primær alene støtter bare Langt trykk. Legg til en modifikator eller en annen knapp for andre handlinger."
+            "value" : "Når Primær brukes som knappen som holdes inne, forsinkes normale klikk til du slipper den."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "De primaire knop alleen ondersteunt alleen Lang indrukken. Voeg een modificatietoets of een andere knop toe voor andere acties."
+            "value" : "Als je de primaire knop als ingedrukte knop gebruikt, worden normale klikken vertraagd totdat je de knop loslaat."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sam przycisk główny obsługuje tylko długie naciśnięcie. Dodaj modyfikator lub inny przycisk, aby używać innych działań."
+            "value" : "Używanie przycisku głównego jako przytrzymywanego opóźnia zwykłe kliknięcia do czasu jego zwolnienia."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O botão principal sozinho só suporta pressão longa. Adicione um modificador ou outro botão para outras ações."
+            "value" : "Usar o botão principal como botão mantido premido atrasa os cliques normais até o libertar."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O botão primário sozinho só é compatível com pressão longa. Adicione um modificador ou outro botão para outras ações."
+            "value" : "Usar o botão primário como botão pressionado atrasa os cliques normais até você soltá-lo."
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Butonul principal singur acceptă doar apăsarea lungă. Adăugați un modificator sau alt buton pentru alte acțiuni."
+            "value" : "Folosirea butonului principal ca buton ținut apăsat întârzie clicurile normale până când îl eliberați."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Основная кнопка сама по себе поддерживает только долгое нажатие. Для других действий добавьте модификатор или другую кнопку."
+            "value" : "Использование основной кнопки в качестве удерживаемой задерживает обычные щелчки, пока вы её не отпустите."
           }
         },
         "sk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Samotné primárne tlačidlo podporuje iba dlhé stlačenie. Pre iné akcie pridajte modifikátor alebo ďalšie tlačidlo."
+            "value" : "Použitie primárneho tlačidla ako podržaného oneskorí bežné kliknutia, kým ho neuvoľníte."
           }
         },
         "sr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Samo primarno dugme podržava samo dugi pritisak. Dodajte modifikator ili drugo dugme za druge radnje."
+            "value" : "Korišćenje primarnog dugmeta kao dugmeta koje držite odlaže normalne klikove dok ga ne otpustite."
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Primär ensam stöder endast Långt tryck. Lägg till en specialtangent eller en annan knapp för andra åtgärder."
+            "value" : "Om Primär används som knappen som hålls ned fördröjs vanliga klick tills du släpper den."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Birincil tek başına yalnızca Uzun Basma'yı destekler. Diğer eylemler için bir değiştirici veya başka bir düğme ekleyin."
+            "value" : "Birincil düğmeyi basılı tutulan düğme olarak kullanmak, siz bırakana kadar normal tıklamaları geciktirir."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Основна кнопка сама підтримує лише довге натискання. Для інших дій додайте модифікатор або іншу кнопку."
+            "value" : "Використання основної кнопки як утримуваної затримує звичайні клацання, доки ви її не відпустите."
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chỉ dùng nút Chính chỉ hỗ trợ Nhấn giữ. Hãy thêm phím bổ trợ hoặc nút khác cho các tác vụ khác."
+            "value" : "Dùng nút Chính làm nút được giữ sẽ trì hoãn các lần nhấp bình thường cho đến khi bạn thả nút."
           }
         },
         "zh-Hans" : {
@@ -76240,7 +76240,7 @@
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Дія, док натиснуто"
+            "value" : "Дія, доки натиснуто"
           }
         },
         "vi" : {
@@ -76572,7 +76572,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "<unk> ⌘Z を押してデフォルトに戻れます。"
+            "value" : "⌃⇧⌘Z を押してシステムのデフォルトに戻すこともできます。"
           }
         },
         "ko" : {
