@@ -1,6 +1,6 @@
 <h1 align="center">
   <a href="https://linearmouse.app">
-    <img src="logo.svg" width="128" height="128" />
+    <img src="logo.svg" alt="LinearMouse" width="128" height="128" />
     <br />
     LinearMouse
   </a>
@@ -10,7 +10,6 @@
   <a href="https://github.com/linearmouse/linearmouse/releases/latest"><img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/linearmouse/linearmouse?sort=semver"></a>
   <a href="https://github.com/linearmouse/linearmouse/releases/latest/download/LinearMouse.dmg"><img src="https://img.shields.io/github/downloads/linearmouse/linearmouse/total" alt="Downloads" /></a>
   <img src="https://img.shields.io/github/license/linearmouse/linearmouse" alt="MIT License" />
-  <a href="https://crowdin.com/project/linearmouse"><img src="https://badges.crowdin.net/linearmouse/localized.svg" alt="Crowdin" /></a>
 </p>
 
 <p align="center">
@@ -19,24 +18,31 @@ The mouse and trackpad utility for Mac.
 
 ## Get started
 
-Please visit https://linearmouse.app.
+[Download LinearMouse](https://github.com/linearmouse/linearmouse/releases/latest/download/LinearMouse.dmg) or visit [linearmouse.app](https://linearmouse.app) to learn more.
 
 ## Contribute
 
-Please read the [contributing guide](CONTRIBUTING.md) before making a pull request.
+Bug reports and pull requests are welcome. See the [contributing guide](CONTRIBUTING.md) to get started.
 
 ## Help translate
 
-Please sign up for Crowdin and join our [Crowdin project](https://crowdin.com/project/linearmouse) to translate LinearMouse into supported languages. It is recommended to sign in Crowdin using GitHub, so that I can add you as a co-author when I merge the pull request.
+Found a translation that could be better? Copy this prompt into your coding agent and add the language and what you'd like to fix:
 
-If you want to add a new language, please [create a new issue](https://github.com/linearmouse/linearmouse/issues/new) and I will be happy to enable that language for you to translate.
+```text
+Fix the translation issues below in https://github.com/linearmouse/linearmouse.
+Check where the text is used in the app, make the corrections, and open a pull request.
 
-I'm not a native English speaker, so if you find any English localization issues, feel free to correct me by [creating a pull request](https://github.com/linearmouse/linearmouse/edit/main/LinearMouse/en.lproj/Localizable.strings).
+[Describe the language and translation issues here.]
+```
+
+Prefer a translation editor? You can also contribute through [Crowdin](https://crowdin.com/project/linearmouse).
 
 ## Sponsors
 
-Please visit https://go.linearmouse.app/donate.
+Thank you to everyone who supports LinearMouse.
+
+You can support the project through [GitHub Sponsors](https://github.com/sponsors/linearmouse), [Open Collective](https://opencollective.com/linearmouse), or [Ko-fi](https://ko-fi.com/lujjjh).
 
 ## Credits
 
-- [Mac Mouse Fix](https://github.com/noah-nuebling/mac-mouse-fix) - The way to modify the pointer speed (sensitivity) is inspired by Mac Mouse Fix.
+See [LinearMouse/ThirdPartyNotices](LinearMouse/ThirdPartyNotices) for the projects that LinearMouse builds on and their licenses.

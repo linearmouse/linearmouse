@@ -13,7 +13,7 @@ Instructions for building LinearMouse on macOS.
 - [Xcode](https://apps.apple.com/app/xcode/id497799835), with a Swift 6.0 or newer toolchain
 - [SwiftLint](https://github.com/realm/SwiftLint), used to lint Swift files
 - [SwiftFormat](https://github.com/nicklockwood/SwiftFormat), used to format Swift files
-- `npm` & [ts-json-schema-generator](https://www.npmjs.com/package/ts-json-schema-generator), used to generate and document the custom configuration JSON scheme
+- `npm` & [ts-json-schema-generator](https://www.npmjs.com/package/ts-json-schema-generator), used to generate the configuration JSON schema
 
 Install tools using brew:
 
@@ -21,17 +21,12 @@ Install tools using brew:
 $ brew install npm swiftlint swiftformat
 ```
 
-Install npm dependencies from the [package.json](./package.json)
-
-```bash
-$ npm install
-```
-
-### Setup the repository
+### Set up the repository
 
 ```sh
 $ git clone https://github.com/linearmouse/linearmouse.git
 $ cd linearmouse
+$ npm install
 ```
 
 ### Configure code signing
@@ -46,7 +41,7 @@ $ make configure
 
 If there are no available code signing certificates in your Keychain, it will generate a configuration that uses ad-hoc certificates to sign the app.
 
-By using ad-hoc certificates, you'll have to [grant accessibility permissions](https://github.com/linearmouse/linearmouse#accessibility-permission) for each build.
+When using ad-hoc signing, you may need to grant accessibility permission again after rebuilding the app.
 In that case, using Apple Development certificates is recommended.
 You can create an Apple Development certificate [in Xcode](https://help.apple.com/xcode/mac/current/#/dev154b28f09), which is totally free.
 
