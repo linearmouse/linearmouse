@@ -4206,7 +4206,7 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Accessibility"
           }
         },
@@ -4218,7 +4218,7 @@
         },
         "bs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Accessibility"
           }
         },
@@ -4314,7 +4314,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Accessibility"
           }
         },
@@ -4368,7 +4368,7 @@
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Accessibility"
           }
         },
@@ -9682,7 +9682,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Botón atrás"
+            "value" : "Botón volver"
           }
         },
         "fi" : {
@@ -17815,7 +17815,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cada día"
+            "value" : "Diariamente"
           }
         },
         "fi" : {
@@ -20056,7 +20056,7 @@
       "localizations" : {
         "af" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Device Control and Data Access"
           }
         },
@@ -20068,7 +20068,7 @@
         },
         "bs" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Device Control and Data Access"
           }
         },
@@ -20164,7 +20164,7 @@
         },
         "my" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Device Control and Data Access"
           }
         },
@@ -20218,7 +20218,7 @@
         },
         "sr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "Device Control and Data Access"
           }
         },
@@ -41612,7 +41612,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cada mes"
+            "value" : "Mensual"
           }
         },
         "fi" : {
@@ -42886,7 +42886,7 @@
         "hu" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ms"
+            "value" : "mp"
           }
         },
         "id" : {
@@ -46817,7 +46817,7 @@
         },
         "da" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "pixels"
           }
         },
@@ -46853,7 +46853,7 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "pixels"
           }
         },
@@ -46907,7 +46907,7 @@
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "pixels"
           }
         },
@@ -46925,7 +46925,7 @@
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "new",
             "value" : "pixels"
           }
         },
@@ -75489,7 +75489,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cada semana"
+            "value" : "Semanal"
           }
         },
         "fi" : {
