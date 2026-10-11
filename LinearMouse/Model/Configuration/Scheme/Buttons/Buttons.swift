@@ -7,6 +7,8 @@ extension Scheme {
     struct Buttons: Codable, Equatable, ImplicitInitable {
         var mappings: [Mapping]?
 
+        @ImplicitOptional var swipe: Swipe
+
         enum UniversalBackForward {
             case none
             case both
@@ -32,6 +34,10 @@ extension Scheme.Buttons {
     func merge(into buttons: inout Self) {
         if let mappings, !mappings.isEmpty {
             buttons.mappings = (buttons.mappings ?? []) + mappings
+        }
+
+        if let swipe = $swipe {
+            swipe.merge(into: &buttons.swipe)
         }
 
         if let universalBackForward {
@@ -67,6 +73,7 @@ extension Scheme.Buttons {
 extension Scheme.Buttons {
     private enum CodingKeys: String, CodingKey {
         case mappings
+        case swipe
         case universalBackForward
         case switchPrimaryButtonAndSecondaryButtons
         case clickDebouncing
@@ -81,6 +88,7 @@ extension Scheme.Buttons {
             mapping.normalizeAsStructured()
             return mapping
         }
+        _swipe = try container.decode(ImplicitOptional<Swipe>.self, forKey: .swipe)
         universalBackForward = try container.decodeIfPresent(
             UniversalBackForward.self,
             forKey: .universalBackForward
@@ -105,6 +113,7 @@ extension Scheme.Buttons {
             return mapping
         }
         try container.encodeIfPresent(normalizedMappings, forKey: .mappings)
+        try container.encode(_swipe, forKey: .swipe)
         try container.encodeIfPresent(universalBackForward, forKey: .universalBackForward)
         try container.encodeIfPresent(
             switchPrimaryButtonAndSecondaryButtons,

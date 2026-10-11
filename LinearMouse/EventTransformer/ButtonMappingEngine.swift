@@ -6,14 +6,13 @@ import Foundation
 
 /// Shared timing and movement policy for structured button mappings.
 ///
-/// These values intentionally live outside individual mappings. They can be
-/// promoted to application preferences later without changing the mapping
-/// schema.
+/// These values live outside individual mappings. Configurable swipe settings
+/// come from the matched scheme and are shared with the recorder.
 struct ButtonMappingPolicy: Equatable {
     static let `default` = Self(
         chordWindow: 0.08,
         longPressDuration: 0.5,
-        swipeThreshold: 50,
+        swipeThreshold: Scheme.Buttons.Swipe.defaultThreshold,
         swipeDeadZone: 40
     )
 
@@ -21,6 +20,14 @@ struct ButtonMappingPolicy: Equatable {
     var longPressDuration: TimeInterval
     var swipeThreshold: Double
     var swipeDeadZone: Double
+    var lockPointer = false
+
+    static func configured(by swipe: Scheme.Buttons.Swipe) -> Self {
+        var policy = Self.default
+        policy.swipeThreshold = swipe.effectiveThreshold
+        policy.lockPointer = swipe.lockPointer ?? false
+        return policy
+    }
 
     var chordWindowNanoseconds: UInt64 {
         UInt64(chordWindow * 1_000_000_000)
@@ -253,7 +260,8 @@ struct ButtonMappingEngine {
 
     /// Motion is still fed to the recognizer while the visible pointer is anchored.
     var locksPointer: Bool {
-        activeCaptures.contains(where: \.locksPointer) || session.map(locksPointer(in:)) == true
+        policy.lockPointer &&
+            (activeCaptures.contains(where: \.locksPointer) || session.map(locksPointer(in:)) == true)
     }
 
     private func locksPointer(in session: Session) -> Bool {

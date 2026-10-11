@@ -7,6 +7,17 @@ import XCTest
 final class ButtonMappingRecordingEngineTests: XCTestCase {
     private typealias Mapping = Scheme.Buttons.Mapping
 
+    func testRecordsSwipeAtConfiguredThreshold() {
+        for threshold in [20.0, 100.0] {
+            var recorder = ButtonMappingRecordingEngine(policy: .configured(by: .init(threshold: threshold)))
+            recorder.buttonDown(.mouse(1), modifierFlags: [], at: ms(0))
+            recorder.pointerMoved(deltaX: threshold - 1, deltaY: 0, at: ms(10))
+            XCTAssertNil(recorder.snapshot.recognition)
+            recorder.pointerMoved(deltaX: 1, deltaY: 0, at: ms(20))
+            XCTAssertEqual(recorder.snapshot.recognition, .swipe(.right))
+        }
+    }
+
     func testRecordsShortPress() {
         var recorder = ButtonMappingRecordingEngine()
 

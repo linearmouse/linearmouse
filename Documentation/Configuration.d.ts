@@ -489,6 +489,12 @@ declare namespace Scheme {
     mappings?: Buttons.Mapping[];
 
     /**
+     * @title Swipe settings
+     * @description Recognition settings shared by all swipe mappings in this scheme.
+     */
+    swipe?: Buttons.Swipe;
+
+    /**
      * @title Universal back and forward
      * @description If the value is true, the back and forward side buttons will be enabled in Safari and some other apps that do not handle these side buttons correctly. If the value is "backOnly" or "forwardOnly", only universal back or universal forward will be enabled.
      * @default false
@@ -523,6 +529,24 @@ declare namespace Scheme {
   };
 
   namespace Buttons {
+    type Swipe = {
+      /**
+       * @title Swipe trigger distance
+       * @description Minimum accumulated pointer displacement in pixels required to recognize a swipe. Values outside the range are clamped.
+       * @default 50
+       * @minimum 10
+       * @maximum 200
+       */
+      threshold?: number;
+
+      /**
+       * @title Lock pointer during swipes
+       * @description Keep the pointer at its starting position while recognizing a button swipe and until the captured interaction releases it.
+       * @default false
+       */
+      lockPointer?: boolean;
+    };
+
     type AutoScroll = {
       /**
        * @description Indicates if auto scroll is enabled.
@@ -678,7 +702,7 @@ declare namespace Scheme {
 
             /**
              * @title Outcomes
-             * @description Actions selected by how the button or chord is used. Timing and movement thresholds are global application policy.
+             * @description Actions selected by how the button or chord is used. Timing thresholds use application policy; swipe behavior is configured in buttons.swipe.
              */
             outcomes: Outcomes;
           }
@@ -747,7 +771,7 @@ declare namespace Scheme {
         longPress?: Action;
 
         /**
-         * @description Execute when pointer movement crosses the global swipe threshold while the trigger is held.
+         * @description Execute when pointer movement crosses the configured swipe threshold while the trigger is held.
          */
         swipe?: SwipeActions;
       };

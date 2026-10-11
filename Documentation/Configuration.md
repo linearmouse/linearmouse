@@ -511,15 +511,49 @@ The following table lists all the buttons:
 `{ "action": { "run": "open -a Launchpad" } }` assigns a shell command `open -a LaunchPad` to
 the button. When the button is clicked, the shell command will be executed.
 
+### Swipe settings
+
+In **Buttons → Button Mappings**, swipe settings apply to all swipe mappings for the selected
+device and app. In the configuration file, put `swipe` alongside `mappings` inside `buttons`:
+
+```json
+{
+  "schemes": [
+    {
+      "buttons": {
+        "swipe": { "threshold": 50, "lockPointer": false }
+      }
+    },
+    {
+      "if": { "device": { "category": "trackpad" } },
+      "buttons": {
+        "swipe": { "threshold": 20 }
+      }
+    }
+  ]
+}
+```
+
+`threshold` defaults to 50 pixels and is clamped to 10–200 pixels. It measures the magnitude of
+accumulated pointer movement deltas (net displacement, not total path length). `lockPointer`
+defaults to `false`; enabling it keeps the pointer at its starting position during a swipe.
+Both modes use the same movement deltas and recognize the same swipe at the same distance,
+independently of the pointer's screen position.
+
+Each field inherits independently from earlier matching schemes. In this example, trackpads use
+20 pixels and inherit `lockPointer: false`. Resetting the settings in the UI removes the selected
+scheme's overrides and restores inherited values, or the built-in defaults if none are inherited.
+These settings affect button-held swipes, not native multi-finger trackpad gestures.
+
 ### Advanced triggers
 
 The structured `trigger` format supports chords, long presses, swipes, pressed/released action
 lifecycles, and a wheel gesture while buttons are held. Existing flat `button` and `scroll` mappings
 remain accepted and are migrated to the structured representation when the configuration is loaded.
 
-Timing and movement thresholds are global LinearMouse policy rather than values stored in each
-mapping. The current policy uses an 80 ms chord window, a 500 ms long-press duration, a 50-point
-swipe threshold, and a 40-point perpendicular dead zone. When several structured outcomes share a
+The current policy uses an 80 ms chord window, a 500 ms long-press duration, and a 40-pixel
+perpendicular dead zone. Swipe distance and pointer locking can be configured per scheme in
+`buttons.swipe` (see [Swipe settings](#swipe-settings)). When several structured outcomes share a
 trigger, they belong in the same `outcomes` object:
 
 ```json
@@ -1043,9 +1077,9 @@ Migration is detected by the presence of the old field, not the `$schema` versio
 Hot reload does not perform this migration.
 
 The migration preserves trigger buttons, modifiers, and directional actions.
-Legacy custom distances are not migrated: button mappings continue to use their
-fixed 50-pixel threshold and 40-pixel perpendicular dead zone (strictly less than
-40). The original custom values remain in the backup.
+Legacy custom distances are not migrated: button mappings use a default 50-pixel threshold,
+configurable in `buttons.swipe.threshold`, and a fixed 40-pixel perpendicular dead zone
+(strictly less than 40). The original custom values remain in the backup.
 Explicit existing outcomes for the same trigger take priority. Disabled gesture
 rules remove inherited gestures while restoring ordinary mappings under their
 original conditions, using additional rules in the existing scheme format. Unsupported legacy triggers remain unchanged.

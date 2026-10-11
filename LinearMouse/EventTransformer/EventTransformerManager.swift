@@ -911,6 +911,7 @@ class EventTransformerManager {
             eventTransformer.append(ButtonMappingTransformer(
                 mappings: buttonMappings,
                 universalBackForward: scheme.buttons.universalBackForward,
+                policy: .configured(by: scheme.buttons.swipe),
                 scrollRecognizer: scrollRecognizer,
                 gestureTransformer: gestureTransformer,
                 warpPointer: warpPointer,

@@ -161,6 +161,8 @@ final class ButtonMappingTransformer: EventTransformer {
         let now = monotonicClock()
         advanceRecognitionLanes(to: now)
         if let pointerAnchor {
+            // Anchor only the absolute position. Keep movement deltas unchanged so
+            // locked and unlocked swipes measure the same displacement.
             event.location = pointerAnchor
             if isPointerMotion {
                 warpPointer(pointerAnchor)

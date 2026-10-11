@@ -277,6 +277,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
             let transformer = ButtonMappingTransformer(
                 mappings: [mapping],
                 // Retain the deadline without firing its timer callback.
+                policy: .configured(by: .init(lockPointer: true)),
                 scheduleTimer: { _, _ in .init {} },
                 monotonicClock: { now },
                 warpPointer: { warped.append($0) },
@@ -311,6 +312,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
                     outcomes: .init(swipe: .init(right: .arg0(.none)))
                 )
             ],
+            policy: .configured(by: .init(lockPointer: true)),
             scheduleTimer: { _, _ in .init {} },
             monotonicClock: { now },
             warpPointer: { warped.append($0) },
@@ -330,6 +332,104 @@ final class ButtonMappingTransformerTests: XCTestCase {
         XCTAssertEqual(warped, [location])
     }
 
+    func testLockedAndUnlockedSwipesRecognizeIdenticalDeltasAtTheSameEvent() throws {
+        for lockPointer in [false, true] {
+            for usesMouseMoved in [false, true] {
+                let scheduler = ButtonMappingTestTimerScheduler()
+                let simulator = ButtonMappingTestKeySimulator()
+                var warped = [CGPoint]()
+                let transformer = makeTransformer(
+                    mappings: [
+                        .init(
+                            trigger: .init(input: .button(.mouse(1))),
+                            outcomes: .init(swipe: .init(right: .arg1(.keyPress([.a]))))
+                        )
+                    ],
+                    policy: .configured(by: .init(threshold: 20, lockPointer: lockPointer)),
+                    scheduler: scheduler,
+                    keySimulator: simulator,
+                    warpPointer: { warped.append($0) }
+                ) { _ in }
+                let down = try buttonEvent(button: 1, pressed: true)
+                down.location = .init(x: 300, y: 200)
+                _ = transformer.transform(down, in: .init(device: nil))
+                // Screen coordinates deliberately disagree with the movement deltas,
+                // as they can at display edges or when the pointer is locked.
+                for (index, delta) in [12.0, -5.0, 12.0, 1.0].enumerated() {
+                    let event = try usesMouseMoved
+                        ? mouseMovedEvent(deltaX: delta)
+                        : draggedEvent(button: 1, deltaX: delta)
+                    let location = CGPoint(x: 100, y: 100)
+                    event.location = location
+                    _ = transformer.transform(event, in: .init(device: nil))
+                    XCTAssertEqual(event.getDoubleValueField(.mouseEventDeltaX), delta)
+                    XCTAssertEqual(event.location, lockPointer ? down.location : location)
+                    assertScrollKeyEvents(simulator, equal: index == 3 ? [.press([.a])] : [])
+                }
+                XCTAssertEqual(warped.count, lockPointer ? 4 : 0)
+                XCTAssertNil(try transformer.transform(buttonEvent(button: 1, pressed: false), in: .init(device: nil)))
+            }
+        }
+    }
+
+    func testUnlockedSwipePreservesPointerLocationAndSuppressesClickFallback() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        let simulator = ButtonMappingTestKeySimulator()
+        var warped = [CGPoint]()
+        var replayed = [CGEvent]()
+        let transformer = makeTransformer(
+            mappings: [
+                .init(
+                    trigger: .init(input: .button(.mouse(1))),
+                    outcomes: .init(swipe: .init(right: .arg1(.keyPress([.a]))))
+                )
+            ],
+            scheduler: scheduler,
+            keySimulator: simulator,
+            warpPointer: { warped.append($0) },
+            eventSink: { replayed.append($0) }
+        )
+        let down = try buttonEvent(button: 1, pressed: true)
+        down.location = .init(x: 100, y: 100)
+        XCTAssertNil(transformer.transform(down, in: .init(device: nil)))
+        for index in 1 ... 3 {
+            let drag = try draggedEvent(button: 1, deltaX: 30)
+            let location = CGPoint(x: 100 + 30 * index, y: 100)
+            drag.location = location
+            XCTAssertNil(transformer.transform(drag, in: .init(device: nil)))
+            XCTAssertEqual(drag.location, location)
+        }
+        XCTAssertNil(try transformer.transform(buttonEvent(button: 1, pressed: false), in: .init(device: nil)))
+        XCTAssertTrue(warped.isEmpty)
+        XCTAssertTrue(replayed.isEmpty)
+        assertScrollKeyEvents(simulator, equal: [.press([.a])])
+    }
+
+    func testUnlockedSwipeBelowThresholdReplaysOriginalClickAndMovement() throws {
+        let scheduler = ButtonMappingTestTimerScheduler()
+        var replayed = [CGEvent]()
+        let transformer = makeTransformer(
+            mappings: [
+                .init(
+                    trigger: .init(input: .button(.mouse(1))),
+                    outcomes: .init(swipe: .init(right: .arg0(.none)))
+                )
+            ],
+            scheduler: scheduler
+        ) { replayed.append($0) }
+        let down = try buttonEvent(button: 1, pressed: true)
+        down.location = .init(x: 100, y: 100)
+        let drag = try draggedEvent(button: 1, deltaX: 10)
+        drag.location = .init(x: 110, y: 100)
+        let up = try buttonEvent(button: 1, pressed: false)
+        up.location = drag.location
+        for event in [down, drag, up] {
+            XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+        }
+        XCTAssertEqual(replayed.map(\.type), [.rightMouseDown, .rightMouseDragged, .rightMouseUp])
+        XCTAssertEqual(replayed.map(\.location), [down.location, drag.location, up.location])
+    }
+
     func testSwipeAnchorsPointerWithoutChangingDirectionDeltas() throws {
         let scheduler = ButtonMappingTestTimerScheduler()
         let simulator = ButtonMappingTestKeySimulator()
@@ -341,6 +441,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
                     outcomes: .init(swipe: .init(right: .arg1(.keyPress([.a]))))
                 )
             ],
+            policy: .configured(by: .init(lockPointer: true)),
             scheduler: scheduler,
             keySimulator: simulator,
             warpPointer: { warped.append($0) }
@@ -374,6 +475,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
                     outcomes: .init(swipe: .init(right: .arg0(.none)))
                 )
             },
+            policy: .configured(by: .init(lockPointer: true)),
             scheduler: scheduler,
             warpPointer: { warped.append($0) }
         ) { _ in }
@@ -401,6 +503,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
                     outcomes: .init(swipe: .init(right: .arg0(.none)))
                 )
             ],
+            policy: .configured(by: .init(lockPointer: true)),
             scheduler: scheduler,
             warpPointer: { warped.append($0) },
             eventSink: { replayed.append($0) }
@@ -427,6 +530,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
                     outcomes: .init(swipe: .init(right: .arg0(.none)))
                 )
             ],
+            policy: .configured(by: .init(lockPointer: true)),
             scheduler: scheduler,
             warpPointer: { warped.append($0) }
         ) { _ in }
@@ -770,6 +874,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
         )
         let transformer = ButtonMappingTransformer(
             mappings: [mapping],
+            policy: .configured(by: .init(lockPointer: true)),
             scheduleTimer: scheduler.schedule,
             monotonicClock: { scheduler.now },
             warpPointer: { _ in },
@@ -2786,6 +2891,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
 
     private func makeTransformer(
         mappings: [Mapping],
+        policy: ButtonMappingPolicy = .default,
         scheduler: ButtonMappingTestTimerScheduler,
         swapsPrimaryAndSecondaryButtons: Bool = false,
         keySimulator: KeySimulating? = nil,
@@ -2796,6 +2902,7 @@ final class ButtonMappingTransformerTests: XCTestCase {
     ) -> ButtonMappingTransformer {
         .init(
             mappings: mappings,
+            policy: policy,
             swapsPrimaryAndSecondaryButtons: swapsPrimaryAndSecondaryButtons,
             scheduleTimer: scheduler.schedule,
             monotonicClock: { scheduler.now },

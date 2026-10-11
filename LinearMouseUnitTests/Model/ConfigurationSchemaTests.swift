@@ -5,6 +5,16 @@ import Foundation
 import XCTest
 
 final class ConfigurationSchemaTests: XCTestCase {
+    func testSwipeSettingsDeclareDefaultsAndThresholdBounds() throws {
+        let swipe = try definition(named: "Scheme.Buttons.Swipe")
+        let properties = try XCTUnwrap(swipe["properties"] as? [String: [String: Any]])
+        let threshold = try XCTUnwrap(properties["threshold"])
+        XCTAssertEqual(threshold["default"] as? Double, 50)
+        XCTAssertEqual(threshold["minimum"] as? Double, 10)
+        XCTAssertEqual(threshold["maximum"] as? Double, 200)
+        XCTAssertEqual(properties["lockPointer"]?["default"] as? Bool, false)
+    }
+
     func testLegacyGestureConfigurationIsDeprecated() throws {
         let buttons = try definition(named: "Scheme.Buttons")
         let properties = try XCTUnwrap(buttons["properties"] as? [String: [String: Any]])
