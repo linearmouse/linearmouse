@@ -197,6 +197,13 @@ I would create two schemes and specify the vendor ID and product ID:
 Then, the pointer speed of my Logitech mouse and Microsoft mouse will be set to 0.36 and 0.4
 respectively.
 
+A Logitech mouse connected through a Bolt, Unifying or Lightspeed receiver is reported by macOS
+as the receiver, with the receiver's product ID and name. Once LinearMouse has identified the
+paired mouse, the device is matched by the mouse's own product ID, name and serial number, which
+are the same values it reports over Bluetooth. A scheme created while the mouse is on the
+receiver therefore keeps applying when it switches to Bluetooth, and the other way round. A
+scheme written against the receiver's product ID keeps applying as well.
+
 ### Unsetting values
 
 LinearMouse supports a special "unset" value to explicitly restore settings back to their system or

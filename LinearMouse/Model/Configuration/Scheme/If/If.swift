@@ -39,7 +39,9 @@ extension Scheme.If {
                 return false
             }
 
-            guard device.isSatisfied(by: targetDevice) else {
+            let satisfied = device.isSatisfied(by: targetDevice)
+                || context.deviceFallback.map { device.isSatisfied(by: $0) } == true
+            guard satisfied else {
                 return false
             }
         }
