@@ -46503,7 +46503,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zoom prin pensetă"
+            "value" : "Zoom prin ciupire"
           }
         },
         "ru" : {
@@ -46717,7 +46717,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zoom prin pensetă (inversat)"
+            "value" : "Zoom prin ciupire (inversat)"
           }
         },
         "ru" : {
