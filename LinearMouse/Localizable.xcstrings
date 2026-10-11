@@ -14374,7 +14374,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Нажать и отпустить для режима автопрокрутки, либо нажмите и удерживайте, чтобы прокручивать только во время удержания."
+            "value" : "Нажмите и отпустите, чтобы автопрокрутка оставалась активной, либо удерживайте кнопку и перетаскивайте указатель, чтобы прокручивать только до отпускания."
           }
         },
         "sk" : {
@@ -27987,7 +27987,7 @@
         "bs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ubrzaj"
+            "value" : "Premotaj unaprijed"
           }
         },
         "ca" : {
@@ -28774,7 +28774,7 @@
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Плавно"
+            "value" : "Без прискорення"
           }
         },
         "vi" : {
@@ -28798,7 +28798,7 @@
         "zh-Hant-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "平滑"
+            "value" : "平坦"
           }
         }
       }
@@ -31369,19 +31369,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mantén presionado el gatillo mientras te mueves para desplazarte, luego suéltalo para detenerte."
+            "value" : "Mantén presionado el disparador mientras te mueves para desplazarte, luego suéltalo para detenerte."
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pidä liipaisinta painettuna vierittäessäsi, vapauta se pysäyttääksesi."
+            "value" : "Pidä laukaisinta painettuna ja liikuta hiirtä vierittääksesi. Pysäytä vieritys vapauttamalla laukaisin."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Maintenez la gâchette enfoncée pendant le déplacement pour faire défiler, puis relâchez-la pour arrêter."
+            "value" : "Maintenez le déclencheur enfoncé pendant le déplacement pour faire défiler, puis relâchez-le pour arrêter."
           }
         },
         "he" : {
@@ -31405,7 +31405,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tieni premuto il grilletto mentre ti muovi per scorrere, quindi rilascialo per fermarti."
+            "value" : "Tieni premuto il trigger mentre ti muovi per scorrere, quindi rilascialo per fermarti."
           }
         },
         "ja" : {
@@ -31620,7 +31620,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "長押しでスクロール"
+            "value" : "押している間スクロール"
           }
         },
         "ko" : {
@@ -39195,7 +39195,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Visão geral & detectores de dados"
+            "value" : "Pesquisa e detectores de dados"
           }
         },
         "ro" : {
@@ -42403,7 +42403,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "نقل لليسار مسافة واحدة"
+            "value" : "الانتقال إلى مساحة العمل على اليسار"
           }
         },
         "bs" : {
@@ -42511,7 +42511,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ga een spatie naar links"
+            "value" : "Ga één space naar links"
           }
         },
         "pl" : {
@@ -42565,7 +42565,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bir boşluk sola git"
+            "value" : "Soldaki masaüstüne geç"
           }
         },
         "uk" : {
@@ -42612,7 +42612,7 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "نقل لليمين مسافة واحدة"
+            "value" : "الانتقال إلى مساحة العمل على اليمين"
           }
         },
         "bs" : {
@@ -42720,7 +42720,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ga een spatie naar rechts"
+            "value" : "Ga één space naar rechts"
           }
         },
         "pl" : {
@@ -42774,7 +42774,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bir boşluk sağa git"
+            "value" : "Sağdaki masaüstüne geç"
           }
         },
         "uk" : {
@@ -46545,7 +46545,7 @@
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Thu phóng"
+            "value" : "Thu phóng bằng cử chỉ chụm"
           }
         },
         "zh-Hans" : {
@@ -46759,7 +46759,7 @@
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Thu phóng (đảo ngược)"
+            "value" : "Thu phóng bằng cử chỉ chụm (đảo ngược)"
           }
         },
         "zh-Hans" : {
@@ -46788,7 +46788,7 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "pieksels"
+            "value" : "piksels"
           }
         },
         "ar" : {
@@ -52941,7 +52941,7 @@
         "my" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mouse နှိပ်ပြီးချိန်တွင် Timer ပြန်စရန်"
+            "value" : "Mouse ခလုတ်ကို လွှတ်သည့်အခါ Timer ပြန်စရန်"
           }
         },
         "nb-NO" : {
@@ -55677,7 +55677,7 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Suorita komentokehote…"
+            "value" : "Suorita komentotulkin komento…"
           }
         },
         "fr" : {
@@ -57266,7 +57266,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "向上滚动 %@"
+            "value" : "向下滚动 %@"
           }
         },
         "zh-Hant" : {
@@ -70493,7 +70493,7 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Liipasin on jo määritetty."
+            "value" : "Laukaisin on jo määritetty."
           }
         },
         "fr" : {
@@ -71492,7 +71492,7 @@
         "bs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Brzina trekpeda"
+            "value" : "Brzina praćenja"
           }
         },
         "ca" : {
@@ -71688,7 +71688,7 @@
         "af" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toetsblok"
+            "value" : "Stuurvlak"
           }
         },
         "ar" : {
