@@ -156,19 +156,34 @@ extension Scheme {
 
         func isEquivalent(to other: Self) -> Bool {
             guard Set(modifiers ?? []) == Set(other.modifiers ?? []),
-                  Set(whileHeld ?? []) == Set(other.whileHeld ?? []) else {
+                  Self.buttonsRepresentSamePhysicalInputs(Set(whileHeld ?? []), Set(other.whileHeld ?? [])) else {
                 return false
             }
 
             switch (input, other.input) {
             case (.button, .button):
-                return chordButtons == other.chordButtons
+                return Self.buttonsRepresentSamePhysicalInputs(chordButtons, other.chordButtons)
             case let (.wheel(direction), .wheel(otherDirection)):
                 return direction == otherDirection &&
                     (simultaneous ?? []).isEmpty &&
                     (other.simultaneous ?? []).isEmpty
             default:
                 return false
+            }
+        }
+
+        private static func buttonsRepresentSamePhysicalInputs(
+            _ lhs: Set<Button>,
+            _ rhs: Set<Button>
+        ) -> Bool {
+            guard lhs.count == rhs.count else {
+                return false
+            }
+
+            return lhs.allSatisfy { button in
+                rhs.contains { $0.canRepresentSamePhysicalInput(as: button) }
+            } && rhs.allSatisfy { button in
+                lhs.contains { $0.canRepresentSamePhysicalInput(as: button) }
             }
         }
     }
