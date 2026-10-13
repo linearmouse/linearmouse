@@ -214,6 +214,12 @@ declare namespace Scheme {
      * @title Modifier keys settings
      */
     modifiers?: Scrolling.Bidirectional<Scrolling.Modifiers>;
+
+    /**
+     * @title Require two fingers to scroll
+     * @description Only applies to devices with a multitouch surface, such as the Apple Magic Mouse. Requires two fingers to be touching the surface before scrolling starts, matching trackpad behavior, instead of scrolling on any single finger contact.
+     */
+    requireTwoFingerScroll?: boolean;
   };
 
   namespace Scrolling {

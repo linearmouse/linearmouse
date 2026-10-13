@@ -845,6 +845,12 @@ class EventTransformerManager {
         scrollGestures[scrollKey] = scrollGesture
         var eventTransformer: [EventTransformer] = [ScrollGestureTransformer(ownership: scrollGesture)]
 
+        // Must run before every other scroll transformer: a one-finger Magic
+        // Mouse scroll should never reach smoothing/reverse/acceleration.
+        if device?.isAppleMagicMouse == true, scheme.scrolling.requireTwoFingerScroll == true {
+            eventTransformer.append(RequireTwoFingerScrollTransformer())
+        }
+
         if let reverse = scheme.scrolling.$reverse {
             let vertical = reverse.vertical ?? false
             let horizontal = reverse.horizontal ?? false
