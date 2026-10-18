@@ -93,6 +93,35 @@ final class SpaceSwipeTransformerTests: XCTestCase {
         XCTAssertFalse(transformer.hasActiveInteraction)
     }
 
+    func testTimerDrivenReleaseNotifiesInteractionStateChange() throws {
+        let transformer = makeTransformer(distance: 10, releaseDelay: 0.2)
+        var notifications = 0
+        transformer.onInteractionStateChanged = { notifications += 1 }
+
+        _ = try transformer.transform(scrollEvent(horizontal: 3), in: EventTransformerContext(device: nil))
+        runFrames(transformer, for: 0.15)
+        XCTAssertEqual(notifications, 0)
+
+        runFrames(transformer, for: 0.3)
+        XCTAssertFalse(transformer.hasActiveInteraction)
+        XCTAssertEqual(notifications, 1, "the manager must hear about a release no event passed through")
+
+        // A deactivation of an idle transformer has nothing to report.
+        transformer.deactivate()
+        XCTAssertEqual(notifications, 1)
+    }
+
+    func testDeactivateNotifiesInteractionStateChange() throws {
+        let transformer = makeTransformer()
+        var notifications = 0
+        transformer.onInteractionStateChanged = { notifications += 1 }
+
+        _ = try transformer.transform(scrollEvent(horizontal: 3), in: EventTransformerContext(device: nil))
+        transformer.deactivate()
+
+        XCTAssertEqual(notifications, 1)
+    }
+
     func testFurtherInputKeepsTheSwipeAlive() throws {
         let transformer = makeTransformer(distance: 10, releaseDelay: 0.2)
 

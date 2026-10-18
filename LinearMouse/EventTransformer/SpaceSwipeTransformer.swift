@@ -69,6 +69,10 @@ final class SpaceSwipeTransformer: EventTransformer, EventTransformerInteraction
     private var frameTimer: EventThreadTimer?
     private var resendTimers: [EventThreadTimer] = []
 
+    /// Called when a swipe ends on a timer, without another event passing
+    /// through the manager, so it can release the interaction lease.
+    var onInteractionStateChanged: (() -> Void)?
+
     init(
         distance: Double,
         releaseDelay: TimeInterval,
@@ -119,9 +123,13 @@ final class SpaceSwipeTransformer: EventTransformer, EventTransformerInteraction
         if state == .swiping {
             finish(phase: .cancelled)
         }
+        let wasActive = state != .idle
         state = .idle
         target = 0
         progress = 0
+        if wasActive {
+            onInteractionStateChanged?()
+        }
     }
 
     /// Prefer the device's raw value: the system accelerates horizontal lines,
@@ -177,6 +185,11 @@ final class SpaceSwipeTransformer: EventTransformer, EventTransformerInteraction
 
     /// Advances the follow animation by one frame. Driven by a timer while active.
     func frame() {
+        guard state != .idle else {
+            stopFrames()
+            return
+        }
+
         let time = now()
         let elapsed = min(max(time - lastFrameTime, 0), 0.1)
         lastFrameTime = time
@@ -213,6 +226,7 @@ final class SpaceSwipeTransformer: EventTransformer, EventTransformerInteraction
                 finish(phase: .ended)
             }
             state = .idle
+            onInteractionStateChanged?()
         }
     }
 

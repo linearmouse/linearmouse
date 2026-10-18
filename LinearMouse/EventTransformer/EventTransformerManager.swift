@@ -1049,13 +1049,18 @@ class EventTransformerManager {
         let route = TransformerRoute(transformer: eventTransformer)
         // Recognition can finish on a timer without another physical event.
         // Release its motion demand then as well, without retaining the route.
-        for case let mapping as ButtonMappingTransformer in eventTransformer {
-            mapping.onInteractionStateChanged = { [weak self, weak route] in
-                guard let self, let route else {
-                    return
-                }
-                let selection = RouteSelection(device: device, process: process, display: display)
-                didProcessRoute(on: route, selection: selection, interactionKey: selection.interactionKey)
+        let onInteractionStateChanged = { [weak self, weak route] in
+            guard let self, let route else {
+                return
+            }
+            let selection = RouteSelection(device: device, process: process, display: display)
+            didProcessRoute(on: route, selection: selection, interactionKey: selection.interactionKey)
+        }
+        for transformer in eventTransformer {
+            if let mapping = transformer as? ButtonMappingTransformer {
+                mapping.onInteractionStateChanged = onInteractionStateChanged
+            } else if let spaceSwipe = transformer as? SpaceSwipeTransformer {
+                spaceSwipe.onInteractionStateChanged = onInteractionStateChanged
             }
         }
         eventTransformerCache.setValue(route, forKey: cacheKey)
