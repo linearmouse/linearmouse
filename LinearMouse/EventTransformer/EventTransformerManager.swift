@@ -854,6 +854,17 @@ class EventTransformerManager {
             }
         }
 
+        // Claims horizontal wheel movement before button mappings can turn it
+        // into discrete space-switching shortcuts.
+        if let spaceSwipe = scheme.scrolling.$spaceSwipe, spaceSwipe.isEnabled {
+            eventTransformer.append(SpaceSwipeTransformer(
+                distance: spaceSwipe.effectiveDistance,
+                releaseDelay: spaceSwipe.effectiveReleaseDelay
+            ) { [postEvent] output in
+                output.gestureEvent?.send { postEvent($0, .cgSessionEventTap) }
+            })
+        }
+
         let smoothed = Scheme.Scrolling.Bidirectional(
             vertical: scheme.scrolling.smoothed.vertical?.isEnabled == true ? scheme.scrolling.smoothed.vertical : nil,
             horizontal: scheme.scrolling.smoothed.horizontal?.isEnabled == true ? scheme.scrolling.smoothed

@@ -1648,6 +1648,11 @@
           "description": "Use a preset curve or fine-tune response, speed, acceleration, and inertia.",
           "title": "Smoothed scrolling"
         },
+        "spaceSwipe": {
+          "$ref": "#/definitions/Scheme.Scrolling.SpaceSwipe",
+          "description": "Turn horizontal scrolling into the interactive trackpad swipe between spaces (desktops). The space follows the wheel and snaps to the nearest space once the wheel stops.",
+          "title": "Swipe between spaces"
+        },
         "speed": {
           "anyOf": [
             {
@@ -1962,6 +1967,31 @@
         "smooth"
       ],
       "type": "string"
+    },
+    "Scheme.Scrolling.SpaceSwipe": {
+      "additionalProperties": false,
+      "properties": {
+        "distance": {
+          "default": 12,
+          "description": "The number of horizontal wheel steps that drag one full space. Lower values switch spaces with less wheel movement.",
+          "maximum": 200,
+          "minimum": 1,
+          "type": "number"
+        },
+        "enabled": {
+          "default": false,
+          "description": "Set to `true` to swipe between spaces with horizontal scrolling.",
+          "type": "boolean"
+        },
+        "releaseDelay": {
+          "$ref": "#/definitions/Int",
+          "default": 160,
+          "description": "How long the wheel must be idle, in milliseconds, before the swipe is released and snaps to the nearest space.",
+          "maximum": 1000,
+          "minimum": 50
+        }
+      },
+      "type": "object"
     },
     "Secondary": {
       "const": 1,

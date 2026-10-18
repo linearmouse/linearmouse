@@ -39,6 +39,7 @@ enum IOHIDEventType: UInt32 {
     case digitizer = 11
     case navigationSwipe = 16
     case zoomToggle = 22
+    case dockSwipe = 23
     case force = 32
     case gestureStarted = 61
     case gestureEnded = 62

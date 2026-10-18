@@ -11,6 +11,7 @@ extension Scheme {
         @ImplicitOptional var speed: Bidirectional<Decimal>
         @ImplicitOptional var smoothed: Bidirectional<Smoothed>
         @ImplicitOptional var modifiers: Bidirectional<Modifiers>
+        @ImplicitOptional var spaceSwipe: SpaceSwipe
 
         init() {}
 
@@ -20,7 +21,8 @@ extension Scheme {
             acceleration: Bidirectional<Decimal>? = nil,
             speed: Bidirectional<Decimal>? = nil,
             smoothed: Bidirectional<Smoothed>? = nil,
-            modifiers: Bidirectional<Modifiers>? = nil
+            modifiers: Bidirectional<Modifiers>? = nil,
+            spaceSwipe: SpaceSwipe? = nil
         ) {
             $reverse = reverse
             $distance = distance
@@ -28,6 +30,7 @@ extension Scheme {
             $speed = speed
             $smoothed = smoothed
             $modifiers = modifiers
+            $spaceSwipe = spaceSwipe
         }
     }
 }
@@ -40,6 +43,7 @@ extension Scheme.Scrolling {
         $speed?.merge(into: &scrolling.speed)
         merge(smoothed: $smoothed, into: &scrolling.smoothed)
         $modifiers?.merge(into: &scrolling.modifiers)
+        $spaceSwipe?.merge(into: &scrolling.spaceSwipe)
     }
 
     func merge(into scrolling: inout Self?) {
