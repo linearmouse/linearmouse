@@ -108,11 +108,7 @@ extension Scheme.Buttons.Mapping {
             }
         }
 
-        guard button != nil || scroll != nil else {
-            return false
-        }
-
-        guard !(button?.mouseButtonNumber == 0 && modifierFlags.isEmpty) else {
+        guard button != nil || scroll != nil, !(button?.mouseButtonNumber == 0 && modifierFlags.isEmpty) else {
             return false
         }
 
@@ -175,7 +171,14 @@ extension Scheme.Buttons.Mapping {
             return false
         }
 
-        return button == mapping.button
+        switch (button, mapping.button) {
+        case (nil, nil):
+            return true
+        case let (button?, otherButton?):
+            return button.canRepresentSamePhysicalInput(as: otherButton)
+        default:
+            return false
+        }
     }
 
     func matches(modifierFlags eventFlags: CGEventFlags) -> Bool {
