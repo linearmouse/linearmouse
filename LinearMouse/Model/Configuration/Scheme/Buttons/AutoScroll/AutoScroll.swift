@@ -27,6 +27,7 @@ extension Scheme.Buttons {
         var toggleActivation: ToggleActivation?
         var modes: [Mode]?
         var speed: Decimal?
+        var exponent: Decimal?
         var trigger: Mapping?
 
         init() {}
@@ -39,6 +40,7 @@ extension Scheme.Buttons.AutoScroll: Codable {
         case toggleActivation
         case mode
         case speed
+        case exponent
         case trigger
     }
 
@@ -49,6 +51,7 @@ extension Scheme.Buttons.AutoScroll: Codable {
         toggleActivation = try container.decodeIfPresent(ToggleActivation.self, forKey: .toggleActivation)
         modes = try container.decodeIfPresent(SingleValueOrArray<Mode>.self, forKey: .mode)?.wrappedValue
         speed = try container.decodeIfPresent(Decimal.self, forKey: .speed)
+        exponent = try container.decodeIfPresent(Decimal.self, forKey: .exponent)
         trigger = try container.decodeIfPresent(Scheme.Buttons.Mapping.self, forKey: .trigger)
     }
 
@@ -59,6 +62,7 @@ extension Scheme.Buttons.AutoScroll: Codable {
         try container.encodeIfPresent(toggleActivation, forKey: .toggleActivation)
         try container.encode(SingleValueOrArray(wrappedValue: modes), forKey: .mode)
         try container.encodeIfPresent(speed, forKey: .speed)
+        try container.encodeIfPresent(exponent, forKey: .exponent)
         try container.encodeIfPresent(trigger, forKey: .trigger)
     }
 }
@@ -96,6 +100,10 @@ extension Scheme.Buttons.AutoScroll {
 
         if let speed {
             autoScroll.speed = speed
+        }
+
+        if let exponent {
+            autoScroll.exponent = exponent
         }
 
         if let trigger {

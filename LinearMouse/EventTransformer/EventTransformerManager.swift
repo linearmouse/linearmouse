@@ -1097,13 +1097,15 @@ class EventTransformerManager {
         let modes = autoScroll.normalizedModes
         let toggleActivation = autoScroll.normalizedToggleActivation
         let speed = autoScroll.speed?.asTruncatedDouble ?? 1
+        let exponent = autoScroll.exponent?.asTruncatedDouble ?? 2.2
 
         if let sharedAutoScrollTransformer,
            sharedAutoScrollTransformer.matchesConfiguration(
                trigger: trigger,
                modes: modes,
                toggleActivation: toggleActivation,
-               speed: speed
+               speed: speed,
+               exponent: exponent
            ) {
             return sharedAutoScrollTransformer
         }
@@ -1114,8 +1116,9 @@ class EventTransformerManager {
             trigger: trigger,
             modes: modes,
             toggleActivation: toggleActivation,
-            speed: speed
-        ) { [postEvent] in postEvent($0, .cgSessionEventTap) }
+            speed: speed,
+            exponent: exponent
+        )            { [postEvent] in postEvent($0, .cgSessionEventTap) }
         transformer.onPointerMotionRequirementChanged = { [weak self] in
             self?.publishPointerMotionRequirements()
         }

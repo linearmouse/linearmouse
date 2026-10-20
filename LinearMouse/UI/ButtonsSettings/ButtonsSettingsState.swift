@@ -179,6 +179,9 @@ extension ButtonsSettingsState {
                 if scheme.buttons.autoScroll.speed == nil {
                     scheme.buttons.autoScroll.speed = 1
                 }
+                if scheme.buttons.autoScroll.exponent == nil {
+                    scheme.buttons.autoScroll.exponent = 2.2
+                }
             } else {
                 scheme.buttons.autoScroll.enabled = false
             }
@@ -245,6 +248,19 @@ extension ButtonsSettingsState {
 
     var autoScrollSpeedText: String {
         String(format: "%.1fx", autoScrollSpeed)
+    }
+
+    var autoScrollExponent: Double {
+        get {
+            mergedScheme.buttons.autoScroll.exponent?.asTruncatedDouble ?? 2.2
+        }
+        set {
+            scheme.buttons.autoScroll.exponent = Decimal(newValue).rounded(1)
+        }
+    }
+
+    var autoScrollExponentText: String {
+        String(format: "%.1f", autoScrollExponent)
     }
 
     var autoScrollTrigger: Scheme.Buttons.Mapping {
