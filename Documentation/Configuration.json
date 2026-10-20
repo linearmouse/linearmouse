@@ -170,6 +170,12 @@
           "description": "Indicates if auto scroll is enabled.",
           "type": "boolean"
         },
+        "iconSize": {
+          "$ref": "#/definitions/Scheme.Buttons.AutoScroll.IconSize",
+          "default": "regular",
+          "description": "Choose the size of the autoscroll icon shown while autoscrolling.",
+          "title": "Autoscroll icon size"
+        },
         "mode": {
           "$ref": "#/definitions/SingleValueOrArray%3CScheme.Buttons.AutoScroll.Mode%3E",
           "description": "Use \\\"toggle\\\" to keep scrolling active until the trigger is pressed again, \\\"hold\\\" to scroll only while the trigger stays pressed, or provide both to support both behaviors.",
@@ -199,6 +205,24 @@
       "description": "Auto scroll is active only while the trigger button remains pressed.",
       "type": "string"
     },
+    "Scheme.Buttons.AutoScroll.IconSize": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Scheme.Buttons.AutoScroll.Small"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.AutoScroll.Regular"
+        },
+        {
+          "$ref": "#/definitions/Scheme.Buttons.AutoScroll.Large"
+        }
+      ]
+    },
+    "Scheme.Buttons.AutoScroll.Large": {
+      "const": "large",
+      "description": "Use the large autoscroll icon.",
+      "type": "string"
+    },
     "Scheme.Buttons.AutoScroll.LongPress": {
       "const": "longPress",
       "description": "Activate toggle mode after the button mapping long-press threshold.",
@@ -214,9 +238,19 @@
         }
       ]
     },
+    "Scheme.Buttons.AutoScroll.Regular": {
+      "const": "regular",
+      "description": "Use the regular-sized autoscroll icon.",
+      "type": "string"
+    },
     "Scheme.Buttons.AutoScroll.ShortPress": {
       "const": "shortPress",
       "description": "Activate toggle mode with a short press.",
+      "type": "string"
+    },
+    "Scheme.Buttons.AutoScroll.Small": {
+      "const": "small",
+      "description": "Use the small autoscroll icon.",
       "type": "string"
     },
     "Scheme.Buttons.AutoScroll.Toggle": {

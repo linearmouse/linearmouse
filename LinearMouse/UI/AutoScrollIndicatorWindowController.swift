@@ -3,12 +3,25 @@
 
 import AppKit
 
-private let autoScrollIndicatorSize = CGSize(width: 48, height: 48)
+private let regularAutoScrollIndicatorSize = CGSize(width: 48, height: 48)
 
 final class AutoScrollIndicatorWindowController {
+    private let indicatorSize: CGSize
+
+    init(iconSize: Scheme.Buttons.AutoScroll.IconSize) {
+        switch iconSize {
+        case .small:
+            indicatorSize = CGSize(width: 36, height: 36)
+        case .regular:
+            indicatorSize = regularAutoScrollIndicatorSize
+        case .large:
+            indicatorSize = CGSize(width: 60, height: 60)
+        }
+    }
+
     private lazy var window: NSPanel = {
         let panel = NSPanel(
-            contentRect: CGRect(origin: .zero, size: autoScrollIndicatorSize),
+            contentRect: CGRect(origin: .zero, size: indicatorSize),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -19,16 +32,16 @@ final class AutoScrollIndicatorWindowController {
         panel.level = .statusBar
         panel.ignoresMouseEvents = true
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
-        panel.contentView = AutoScrollIndicatorView(frame: CGRect(origin: .zero, size: autoScrollIndicatorSize))
+        panel.contentView = AutoScrollIndicatorView(frame: CGRect(origin: .zero, size: indicatorSize))
         return panel
     }()
 
     func show(at point: CGPoint) {
         let origin = CGPoint(
-            x: point.x - autoScrollIndicatorSize.width / 2,
-            y: point.y - autoScrollIndicatorSize.height / 2
+            x: point.x - indicatorSize.width / 2,
+            y: point.y - indicatorSize.height / 2
         )
-        window.setFrame(CGRect(origin: origin, size: autoScrollIndicatorSize), display: true)
+        window.setFrame(CGRect(origin: origin, size: indicatorSize), display: true)
         window.orderFrontRegardless()
     }
 
@@ -55,27 +68,31 @@ private final class AutoScrollIndicatorView: NSView {
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
 
-        let bounds = bounds
+        guard let context = NSGraphicsContext.current?.cgContext else {
+            return
+        }
+
+        context.saveGState()
+        let scale = bounds.width / regularAutoScrollIndicatorSize.width
+        context.scaleBy(x: scale, y: scale)
+
+        let bounds = CGRect(origin: .zero, size: regularAutoScrollIndicatorSize)
         let circleRect = bounds.insetBy(dx: 4, dy: 4)
         let ringPath = NSBezierPath(ovalIn: circleRect)
 
-        if let context = NSGraphicsContext.current?.cgContext {
-            context.saveGState()
-            context.setShadow(
-                offset: CGSize(width: 0, height: -1),
-                blur: 10,
-                color: NSColor.black.withAlphaComponent(0.18).cgColor
-            )
+        context.setShadow(
+            offset: CGSize(width: 0, height: -1),
+            blur: 10,
+            color: NSColor.black.withAlphaComponent(0.18).cgColor
+        )
 
-            let gradient = NSGradient(
-                colors: [
-                    NSColor(white: 1.0, alpha: 0.97),
-                    NSColor(white: 0.93, alpha: 0.95)
-                ]
-            )
-            gradient?.draw(in: ringPath, angle: 90)
-            context.restoreGState()
-        }
+        let gradient = NSGradient(
+            colors: [
+                NSColor(white: 1.0, alpha: 0.97),
+                NSColor(white: 0.93, alpha: 0.95)
+            ]
+        )
+        gradient?.draw(in: ringPath, angle: 90)
 
         NSColor(white: 0.12, alpha: 0.48).setStroke()
         ringPath.lineWidth = 1
@@ -134,6 +151,8 @@ private final class AutoScrollIndicatorView: NSView {
         let highlightPath = NSBezierPath(ovalIn: highlightRect)
         NSColor.white.withAlphaComponent(0.28).setFill()
         highlightPath.fill()
+
+        context.restoreGState()
     }
 
     private func drawArrow(at center: CGPoint, direction: Direction, intensity: CGFloat) {

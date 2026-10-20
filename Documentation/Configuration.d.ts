@@ -574,6 +574,13 @@ declare namespace Scheme {
       speed?: number;
 
       /**
+       * @title Autoscroll icon size
+       * @description Choose the size of the autoscroll icon shown while autoscrolling.
+       * @default "regular"
+       */
+      iconSize?: AutoScroll.IconSize;
+
+      /**
        * @title Trigger
        * @description Choose the mouse button and modifier keys used to activate auto scroll.
        */
@@ -604,6 +611,23 @@ declare namespace Scheme {
       type Hold = "hold";
 
       type Mode = Toggle | Hold;
+
+      /**
+       * @description Use the small autoscroll icon.
+       */
+      type Small = "small";
+
+      /**
+       * @description Use the regular-sized autoscroll icon.
+       */
+      type Regular = "regular";
+
+      /**
+       * @description Use the large autoscroll icon.
+       */
+      type Large = "large";
+
+      type IconSize = Small | Regular | Large;
 
       type Trigger = {
         /**
