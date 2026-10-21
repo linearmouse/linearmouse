@@ -117,10 +117,13 @@ struct HoverWindowQuery {
     /// unanswered (kAXErrorNoValue) while frontmost. Fall back to the frontmost
     /// application, or hover focus could never leave them.
     private func focusedApplication() -> AXUIElement? {
-        if let app = element(kAXFocusedApplicationAttribute, on: system) {
-            return app
+        let (status, result) = copyValue(kAXFocusedApplicationAttribute, on: system)
+        if status == .success, let result, CFGetTypeID(result) == AXUIElementGetTypeID() {
+            return (result as! AXUIElement)
         }
-        guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier else {
+        // Other failures (e.g. a timeout) leave the focus unverified; keep suspending.
+        guard status == .noValue,
+              let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier else {
             return nil
         }
         return AXUIElementCreateApplication(pid)
@@ -150,15 +153,18 @@ struct HoverWindowQuery {
         }
     }
 
-    private func value(_ attribute: String, on element: AXUIElement) -> CFTypeRef? {
+    private func copyValue(_ attribute: String, on element: AXUIElement) -> (AXError, CFTypeRef?) {
         Self.performAXQuery(on: element) {
             AXUIElementSetMessagingTimeout(element, 0.05)
             var result: CFTypeRef?
-            guard AXUIElementCopyAttributeValue(element, attribute as CFString, &result) == .success else {
-                return nil
-            }
-            return result
+            let status = AXUIElementCopyAttributeValue(element, attribute as CFString, &result)
+            return (status, result)
         }
+    }
+
+    private func value(_ attribute: String, on element: AXUIElement) -> CFTypeRef? {
+        let (status, result) = copyValue(attribute, on: element)
+        return status == .success ? result : nil
     }
 
     private func element(_ attribute: String, on element: AXUIElement) -> AXUIElement? {
