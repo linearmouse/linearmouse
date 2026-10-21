@@ -52,7 +52,7 @@ struct HoverWindowQuery {
     }
 
     func currentFocus() -> Focus? {
-        guard let app = element(kAXFocusedApplicationAttribute, on: system) else {
+        guard let app = focusedApplication() else {
             return nil
         }
         AXUIElementSetMessagingTimeout(app, 0.05)
@@ -111,6 +111,19 @@ struct HoverWindowQuery {
             return false
         }
         return rect.contains(point)
+    }
+
+    /// Some Electron apps (e.g. VS Code) leave the system-wide focused application
+    /// unanswered (kAXErrorNoValue) while frontmost. Fall back to the frontmost
+    /// application, or hover focus could never leave them.
+    private func focusedApplication() -> AXUIElement? {
+        if let app = element(kAXFocusedApplicationAttribute, on: system) {
+            return app
+        }
+        guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier else {
+            return nil
+        }
+        return AXUIElementCreateApplication(pid)
     }
 
     private func hasSheet(on window: AXUIElement) -> Bool {
