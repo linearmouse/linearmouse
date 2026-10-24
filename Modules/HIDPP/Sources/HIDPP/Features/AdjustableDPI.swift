@@ -117,13 +117,13 @@ public struct AdjustableDPI: HIDPPFeature {
         until shouldContinue: @escaping () -> Bool
     ) -> Int? {
         guard let response = transport.request(
-            featureIndex: featureIndex,
-            function: Constants.getSensorDPIFunction,
-            parameters: [],
-            deadline: deadline,
-            until: shouldContinue
-        ),
-            response.payload.count >= 5
+                  featureIndex: featureIndex,
+                  function: Constants.getSensorDPIFunction,
+                  parameters: [],
+                  deadline: deadline,
+                  until: shouldContinue
+              ),
+              response.payload.count >= 5
         else {
             return nil
         }
@@ -231,13 +231,13 @@ public struct AdjustableDPI: HIDPPFeature {
 
         for index in UInt8.min ... UInt8.max {
             guard let response = transport.request(
-                featureIndex: featureIndex,
-                function: Constants.getSensorDPIListFunction,
-                parameters: [0x00, 0x00, index],
-                deadline: deadline,
-                until: shouldContinue
-            ),
-                response.payload.count > 1
+                      featureIndex: featureIndex,
+                      function: Constants.getSensorDPIListFunction,
+                      parameters: [0x00, 0x00, index],
+                      deadline: deadline,
+                      until: shouldContinue
+                  ),
+                  response.payload.count > 1
             else {
                 break
             }

@@ -3,9 +3,9 @@
 
 import Foundation
 
+@available(*, deprecated, message: "Use Scheme.Buttons.Mapping with swipe outcomes instead.")
 extension Scheme.Buttons {
     /// Deprecated. Read only for migrating older configurations and compatibility fallback.
-    @available(*, deprecated, message: "Use Scheme.Buttons.Mapping with swipe outcomes instead.")
     struct Gesture: Equatable, ImplicitInitable {
         var enabled: Bool?
         var trigger: Mapping?

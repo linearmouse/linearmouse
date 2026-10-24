@@ -79,10 +79,8 @@ struct HoverWindowQuery {
         guard
             string(kAXSubroleAttribute, on: window) == kAXStandardWindowSubrole,
             (value(kAXModalAttribute, on: window) as? Bool) != true,
-            !hasSheet(on: window) else {
-            return nil
-        }
-        guard let id = windowID(of: window) else {
+            !hasSheet(on: window),
+            let id = windowID(of: window) else {
             return nil
         }
         return Focus(pid: pid, windowID: id)

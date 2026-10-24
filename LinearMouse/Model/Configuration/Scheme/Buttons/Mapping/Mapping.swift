@@ -99,11 +99,7 @@ extension Scheme.Buttons.Mapping {
             }
         }
 
-        guard button != nil || scroll != nil else {
-            return false
-        }
-
-        guard !(button?.mouseButtonNumber == 0 && modifierFlags.isEmpty) else {
+        guard button != nil || scroll != nil, !(button?.mouseButtonNumber == 0 && modifierFlags.isEmpty) else {
             return false
         }
 

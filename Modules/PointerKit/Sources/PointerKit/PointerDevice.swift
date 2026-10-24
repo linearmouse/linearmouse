@@ -626,10 +626,8 @@ extension PointerDevice {
                 self.synchronousReportRequestGate.signal()
             }
         ) {
-            guard requestShouldContinue() else {
-                return nil
-            }
-            guard ensureInputReportCallbackRegistered(minimumReportLength: max(report.count, maxInputReportSize ?? 0)),
+            guard requestShouldContinue(),
+                  ensureInputReportCallbackRegistered(minimumReportLength: max(report.count, maxInputReportSize ?? 0)),
                   valid
             else {
                 return nil

@@ -35,11 +35,7 @@ extension Scheme.If {
 
     func isSatisfied(in context: Scheme.MatchContext) -> Bool {
         if let device {
-            guard let targetDevice = context.device else {
-                return false
-            }
-
-            guard device.isSatisfied(by: targetDevice) else {
+            guard let targetDevice = context.device, device.isSatisfied(by: targetDevice) else {
                 return false
             }
         }
@@ -75,11 +71,7 @@ extension Scheme.If {
         }
 
         if let display {
-            guard let targetDisplay = context.display else {
-                return false
-            }
-
-            guard display == targetDisplay else {
+            guard let targetDisplay = context.display, display == targetDisplay else {
                 return false
             }
         }

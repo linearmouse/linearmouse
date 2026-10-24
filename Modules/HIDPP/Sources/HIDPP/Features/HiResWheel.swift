@@ -54,13 +54,13 @@ public struct HiResWheel: HIDPPFeature {
         until shouldContinue: @escaping () -> Bool
     ) -> Capabilities? {
         guard let response = transport.request(
-            featureIndex: featureIndex,
-            function: Constants.getCapabilitiesFunction,
-            parameters: [],
-            deadline: deadline,
-            until: shouldContinue
-        ),
-            response.payload.count >= 2
+                  featureIndex: featureIndex,
+                  function: Constants.getCapabilitiesFunction,
+                  parameters: [],
+                  deadline: deadline,
+                  until: shouldContinue
+              ),
+              response.payload.count >= 2
         else {
             return nil
         }
@@ -144,13 +144,13 @@ public struct HiResWheel: HIDPPFeature {
         until shouldContinue: @escaping () -> Bool
     ) -> UInt8? {
         guard let response = transport.request(
-            featureIndex: featureIndex,
-            function: Constants.getModeFunction,
-            parameters: [],
-            deadline: deadline,
-            until: shouldContinue
-        ),
-            let mode = response.payload.first
+                  featureIndex: featureIndex,
+                  function: Constants.getModeFunction,
+                  parameters: [],
+                  deadline: deadline,
+                  until: shouldContinue
+              ),
+              let mode = response.payload.first
         else {
             return nil
         }
