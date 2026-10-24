@@ -161,11 +161,8 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
                 if let level = identity.batteryLevel {
                     fallback.append(.init(id: id, name: identity.name, batteryLevel: level))
                 }
-                guard let channel = LogitechReceiverChannel.existingChannel(locationID: identity.receiverLocationID)
-                else {
-                    continue
-                }
-                guard present.insert(id).inserted else {
+                guard let channel = LogitechReceiverChannel.existingChannel(locationID: identity.receiverLocationID),
+                      present.insert(id).inserted else {
                     continue
                 }
                 observe(
@@ -193,10 +190,8 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
             guard device.vendorID == HIDPPConstants.vendorID,
                   !LogitechHIDPPDeviceMetadataProvider.isKnownReceiver(
                       vendorID: device.vendorID, productID: device.productID
-                  ) else {
-                continue
-            }
-            guard present.insert(id).inserted else {
+                  ),
+                  present.insert(id).inserted else {
                 continue
             }
             observe(
@@ -217,7 +212,7 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
         let targets = DeviceManager.shared.devices.compactMap { device -> GATTBatteryTarget? in
             guard !device.isRemoved,
                   [PointerDeviceTransportName.bluetooth, PointerDeviceTransportName.bluetoothLowEnergy]
-                  .contains(device.pointerDevice.transport ?? "") else {
+                      .contains(device.pointerDevice.transport ?? "") else {
                 return nil
             }
             return GATTBatteryTarget(
