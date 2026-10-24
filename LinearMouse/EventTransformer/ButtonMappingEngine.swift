@@ -619,11 +619,8 @@ struct ButtonMappingEngine {
         session.deltaY += deltaY
         self.session = session
 
-        guard session.resolution != nil else {
-            return output
-        }
-
-        guard let direction = swipeDirection(deltaX: session.deltaX, deltaY: session.deltaY),
+        guard session.resolution != nil,
+              let direction = swipeDirection(deltaX: session.deltaX, deltaY: session.deltaY),
               let action = configuredAction(swipeAction(in: session, direction: direction)) else {
             return output
         }

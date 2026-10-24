@@ -315,11 +315,10 @@ extension Device {
 
         let cachedDPI = logitechSession.sensorDPI
 
-        if cachedDPI == targetDPI {
-            if !verifiesCachedValue
-                || controller.currentDPI(until: operationIsAdmitted) == targetDPI {
-                return targetDPI
-            }
+        if cachedDPI == targetDPI,
+           !verifiesCachedValue
+           || controller.currentDPI(until: operationIsAdmitted) == targetDPI {
+            return targetDPI
         }
 
         guard let appliedDPI = controller.setDPI(
@@ -476,13 +475,13 @@ extension Device {
     @discardableResult
     private func seedStoredSensorDPIBaseline(receiverSlot: UInt8?) -> Bool {
         guard let lease = logitechSession.dpiTargetLease(
-            receiverSlot: receiverSlot,
-            stableTargetKey: { [weak self] route, slot in
-                self?.logitechHardwareTargetKey(for: route, receiverSlot: slot)
-            }
-        ),
-            let target = lease.stableTargetKey,
-            let claim = logitechHardwareBaselineStore?.dpiBaseline(for: target) else {
+                  receiverSlot: receiverSlot,
+                  stableTargetKey: { [weak self] route, slot in
+                      self?.logitechHardwareTargetKey(for: route, receiverSlot: slot)
+                  }
+              ),
+              let target = lease.stableTargetKey,
+              let claim = logitechHardwareBaselineStore?.dpiBaseline(for: target) else {
             return false
         }
         _ = logitechSession.seedInitialSensorDPI(claim, for: lease)

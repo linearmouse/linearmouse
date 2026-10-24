@@ -89,10 +89,7 @@ extension PointerDeviceManager {
 
     private static let propertyChangedCallback: IOHIDEventSystemClientPropertyChangedCallback =
         { target, _, property, value in
-            guard let target else {
-                return
-            }
-            guard let property else {
+            guard let target, let property else {
                 return
             }
 
@@ -106,11 +103,7 @@ extension PointerDeviceManager {
      Registered `DeviceAddedClosure`s will be notified immediately with all the current devices.
      */
     public func startObservation() {
-        guard eventSystemClient == nil else {
-            return
-        }
-
-        guard let eventSystemClient = IOHIDEventSystemClientCreate(kCFAllocatorDefault) else {
+        guard eventSystemClient == nil, let eventSystemClient = IOHIDEventSystemClientCreate(kCFAllocatorDefault) else {
             return
         }
 
@@ -201,14 +194,7 @@ extension PointerDeviceManager {
         _ client: IOHIDServiceClient?,
         event: IOHIDEvent?
     ) {
-        guard let client else {
-            return
-        }
-        guard let event else {
-            return
-        }
-
-        guard let device = serviceClientToPointerDevice[client] else {
+        guard let client, let event, let device = serviceClientToPointerDevice[client] else {
             return
         }
 

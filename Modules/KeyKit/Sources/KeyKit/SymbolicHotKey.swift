@@ -87,10 +87,7 @@ public enum CGSError: Error {
 /// without a key equivalent. Posting those would send a stray keystroke (`0` is the A key) rather
 /// than trigger the hot key.
 func symbolicHotKeyVirtualKeyCode(keyEquivalent: unichar, virtualKeyCode: unichar) -> CGKeyCode? {
-    guard virtualKeyCode != 0xFFFF else {
-        return nil
-    }
-    guard virtualKeyCode != 0 || keyEquivalent != 0xFFFF else {
+    guard virtualKeyCode != 0xFFFF, virtualKeyCode != 0 || keyEquivalent != 0xFFFF else {
         return nil
     }
     return CGKeyCode(virtualKeyCode)

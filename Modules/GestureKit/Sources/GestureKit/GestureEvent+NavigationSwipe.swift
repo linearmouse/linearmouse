@@ -5,11 +5,8 @@ import CoreGraphics
 
 public extension GestureEvent {
     convenience init?(navigationSwipeSource: CGEventSource?, direction: IOHIDSwipeMask) {
-        guard let swipeBeganEvent = CGEvent(source: navigationSwipeSource) else {
-            return nil
-        }
-
-        guard let swipeEndedEvent = CGEvent(source: navigationSwipeSource) else {
+        guard let swipeBeganEvent = CGEvent(source: navigationSwipeSource),
+              let swipeEndedEvent = CGEvent(source: navigationSwipeSource) else {
             return nil
         }
 

@@ -146,16 +146,10 @@ extension Scheme {
     /// A scheme is device-specific if and only if a) it has only one `if` and
     /// b) the `if` contains conditions that specifies both vendorID and productID.
     var isDeviceSpecific: Bool {
-        guard let conditions = `if` else {
-            return false
-        }
-
-        guard conditions.count == 1,
-              let condition = conditions.first else {
-            return false
-        }
-
-        guard condition.device?.vendorID != nil,
+        guard let conditions = `if`,
+              conditions.count == 1,
+              let condition = conditions.first,
+              condition.device?.vendorID != nil,
               condition.device?.productID != nil else {
             return false
         }
@@ -164,11 +158,8 @@ extension Scheme {
     }
 
     var isDeviceCategorySpecific: Bool {
-        guard let conditions = `if` else {
-            return false
-        }
-
-        guard conditions.count == 1,
+        guard let conditions = `if`,
+              conditions.count == 1,
               let condition = conditions.first else {
             return false
         }
@@ -213,13 +204,8 @@ extension [Scheme] {
 
     func allDeviceMatcherSpecificSchemes(of matcher: DeviceMatcher) -> [EnumeratedSequence<[Scheme]>.Element] {
         self.enumerated().filter { _, scheme in
-            guard scheme.isDeviceSpecific else {
-                return false
-            }
-            guard scheme.if?.count == 1, let `if` = scheme.if?.first else {
-                return false
-            }
-            guard `if`.device?.isSatisfied(by: matcher) == true else {
+            guard scheme.isDeviceSpecific, scheme.if?.count == 1, let `if` = scheme.if?.first,
+                  `if`.device?.isSatisfied(by: matcher) == true else {
                 return false
             }
             return true
@@ -230,10 +216,7 @@ extension [Scheme] {
         of category: DeviceMatcher.Category
     ) -> [EnumeratedSequence<[Scheme]>.Element] {
         self.enumerated().filter { _, scheme in
-            guard scheme.isDeviceCategorySpecific else {
-                return false
-            }
-            guard scheme.if?.first?.device?.categoryOnlyValue == category else {
+            guard scheme.isDeviceCategorySpecific, scheme.if?.first?.device?.categoryOnlyValue == category else {
                 return false
             }
             return true
