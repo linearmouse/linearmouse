@@ -46,6 +46,15 @@ extension Scheme.Buttons.Mapping {
             return identity
         }
 
+        var withoutSerialNumber: Self {
+            guard case var .logitechControl(identity) = self else {
+                return self
+            }
+
+            identity.serialNumber = nil
+            return .logitechControl(identity)
+        }
+
         var syntheticMouseButtonNumber: Int {
             switch self {
             case let .mouse(buttonNumber):
