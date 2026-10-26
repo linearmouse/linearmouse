@@ -19,6 +19,7 @@ final class AutoScrollTransformer {
     private let modes: [Scheme.Buttons.AutoScroll.Mode]
     private let toggleActivation: Scheme.Buttons.AutoScroll.ToggleActivation
     private let speed: Double
+    private let iconSize: Scheme.Buttons.AutoScroll.IconSize
     private let scheduleLongPressTimer: LongPressTimerScheduler
     private let activationHitProvider: ActivationHitProvider?
     private let fallbackEventSink: (CGEvent) -> Void
@@ -92,7 +93,7 @@ final class AutoScrollTransformer {
     private var longPressTimerCancellation: (() -> Void)?
     private var longPressTimerGeneration: UInt64 = 0
     private var timer: EventThreadTimer?
-    private let indicatorController = AutoScrollIndicatorWindowController()
+    private lazy var indicatorController = AutoScrollIndicatorWindowController(iconSize: iconSize)
     private var lastIndicatorLocation: CGPoint?
     private let accessibilityActivationClassifier = AutoScrollAccessibilityActivationClassifier()
 
@@ -105,6 +106,7 @@ final class AutoScrollTransformer {
         modes: [Scheme.Buttons.AutoScroll.Mode],
         toggleActivation: Scheme.Buttons.AutoScroll.ToggleActivation = .shortPress,
         speed: Double,
+        iconSize: Scheme.Buttons.AutoScroll.IconSize = .regular,
         longPressTimerScheduler: @escaping LongPressTimerScheduler = AutoScrollTransformer
             .scheduleEventThreadLongPressTimer,
         activationHitProvider: ActivationHitProvider? = nil,
@@ -114,6 +116,7 @@ final class AutoScrollTransformer {
         self.modes = modes
         self.toggleActivation = toggleActivation
         self.speed = speed
+        self.iconSize = iconSize
         scheduleLongPressTimer = longPressTimerScheduler
         self.activationHitProvider = activationHitProvider
         fallbackEventSink = eventSink
@@ -842,11 +845,13 @@ extension AutoScrollTransformer {
         trigger: Scheme.Buttons.Mapping,
         modes: [Scheme.Buttons.AutoScroll.Mode],
         toggleActivation: Scheme.Buttons.AutoScroll.ToggleActivation,
-        speed: Double
+        speed: Double,
+        iconSize: Scheme.Buttons.AutoScroll.IconSize
     ) -> Bool {
         self.trigger == trigger &&
             self.modes == modes &&
             self.toggleActivation == toggleActivation &&
-            abs(self.speed - speed) < 0.0001
+            abs(self.speed - speed) < 0.0001 &&
+            self.iconSize == iconSize
     }
 }

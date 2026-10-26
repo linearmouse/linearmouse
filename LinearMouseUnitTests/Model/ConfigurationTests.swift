@@ -211,6 +211,7 @@ final class ConfigurationTests: XCTestCase {
         scheme.buttons.autoScroll.toggleActivation = .longPress
         scheme.buttons.autoScroll.modes = [.toggle]
         scheme.buttons.autoScroll.speed = 1
+        scheme.buttons.autoScroll.iconSize = .small
 
         var trigger = Scheme.Buttons.Mapping()
         trigger.button = .mouse(2)
@@ -220,12 +221,14 @@ final class ConfigurationTests: XCTestCase {
         var override = Scheme()
         override.buttons.autoScroll.speed = 2
         override.buttons.autoScroll.modes = [.toggle, .hold]
+        override.buttons.autoScroll.iconSize = .large
         override.merge(into: &scheme)
 
         XCTAssertEqual(scheme.buttons.autoScroll.enabled, true)
         XCTAssertEqual(scheme.buttons.autoScroll.toggleActivation, .longPress)
         XCTAssertEqual(scheme.buttons.autoScroll.modes, [.toggle, .hold])
         XCTAssertEqual(scheme.buttons.autoScroll.speed, 2)
+        XCTAssertEqual(scheme.buttons.autoScroll.iconSize, .large)
         XCTAssertEqual(scheme.buttons.autoScroll.trigger?.button, .mouse(2))
         XCTAssertEqual(scheme.buttons.autoScroll.trigger?.modifierFlags.contains(.maskCommand), true)
     }
