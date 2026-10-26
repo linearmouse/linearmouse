@@ -97,10 +97,8 @@ extension AppPickerState {
                 .contentsOfDirectory(at: appDirURL, includingPropertiesForKeys: nil)
             ) ?? []
             for appURL in appURLs {
-                guard let installedApp = try? readInstalledApp(at: appURL) else {
-                    continue
-                }
-                guard !seenBundleIdentifiers.contains(installedApp.bundleIdentifier) else {
+                guard let installedApp = try? readInstalledApp(at: appURL),
+                      !seenBundleIdentifiers.contains(installedApp.bundleIdentifier) else {
                     continue
                 }
                 installedApps.append(installedApp)

@@ -82,11 +82,8 @@ enum ConnectedBatteryDeviceInventory {
         let appleBatterySnapshots = appleBluetoothBatterySnapshots()
 
         for hidDevice in hidDevices {
-            guard let result = batteryDeviceInfo(for: hidDevice, appleBatterySnapshots: appleBatterySnapshots) else {
-                continue
-            }
-
-            guard seen.insert(result.id).inserted else {
+            guard let result = batteryDeviceInfo(for: hidDevice, appleBatterySnapshots: appleBatterySnapshots),
+                  seen.insert(result.id).inserted else {
                 continue
             }
 
@@ -231,27 +228,27 @@ enum ConnectedBatteryDeviceInventory {
             }
 
             guard let vendorIDNumber = IORegistryEntryCreateCFProperty(
-                service,
-                kIOHIDVendorIDKey as CFString,
-                kCFAllocatorDefault,
-                0
-            )?.takeRetainedValue() as? NSNumber,
-                let transport = IORegistryEntryCreateCFProperty(
-                    service,
-                    "Transport" as CFString,
-                    kCFAllocatorDefault,
-                    0
-                )?.takeRetainedValue() as? String,
-                let batteryLevel = IORegistryEntryCreateCFProperty(
-                    service,
-                    "BatteryPercent" as CFString,
-                    kCFAllocatorDefault,
-                    0
-                )?.takeRetainedValue() as? NSNumber,
-                ConnectedBatteryDeviceInfo.isAppleBluetoothDevice(
-                    vendorID: vendorIDNumber.intValue,
-                    transport: transport
-                )
+                      service,
+                      kIOHIDVendorIDKey as CFString,
+                      kCFAllocatorDefault,
+                      0
+                  )?.takeRetainedValue() as? NSNumber,
+                  let transport = IORegistryEntryCreateCFProperty(
+                      service,
+                      "Transport" as CFString,
+                      kCFAllocatorDefault,
+                      0
+                  )?.takeRetainedValue() as? String,
+                  let batteryLevel = IORegistryEntryCreateCFProperty(
+                      service,
+                      "BatteryPercent" as CFString,
+                      kCFAllocatorDefault,
+                      0
+                  )?.takeRetainedValue() as? NSNumber,
+                  ConnectedBatteryDeviceInfo.isAppleBluetoothDevice(
+                      vendorID: vendorIDNumber.intValue,
+                      transport: transport
+                  )
             else {
                 continue
             }

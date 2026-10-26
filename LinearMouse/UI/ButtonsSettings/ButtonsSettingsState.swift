@@ -31,6 +31,24 @@ extension ButtonsSettingsState {
         return mapping
     }
 
+    var swipeThreshold: Double {
+        get { mergedScheme.buttons.swipe.effectiveThreshold }
+        set { scheme.buttons.swipe.threshold = newValue }
+    }
+
+    var lockPointerDuringSwipe: Bool {
+        get { mergedScheme.buttons.swipe.lockPointer ?? false }
+        set { scheme.buttons.swipe.lockPointer = newValue }
+    }
+
+    var hasSwipeSettingsOverride: Bool {
+        scheme.buttons.$swipe != nil
+    }
+
+    func resetSwipeSettings() {
+        scheme.buttons.$swipe = nil
+    }
+
     var universalBackForward: Bool {
         get {
             mergedScheme.buttons.universalBackForward ?? .none != .none

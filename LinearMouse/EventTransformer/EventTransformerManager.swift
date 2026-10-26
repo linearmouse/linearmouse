@@ -693,10 +693,10 @@ class EventTransformerManager {
         var canceled = sharedAutoScrollTransformer?.cancelLogitechControlInteraction(context) == true
 
         guard let (interactionKey, interaction) = activeInteraction(
-            for: selection,
-            allowsUnidentifiedOwnerForIdentifiedSelection: true
-        ),
-            let canceler = interaction.transformer as? LogitechControlInteractionCanceling else {
+                  for: selection,
+                  allowsUnidentifiedOwnerForIdentifiedSelection: true
+              ),
+              let canceler = interaction.transformer as? LogitechControlInteractionCanceling else {
             return canceled
         }
 
@@ -911,6 +911,7 @@ class EventTransformerManager {
             eventTransformer.append(ButtonMappingTransformer(
                 mappings: buttonMappings,
                 universalBackForward: scheme.buttons.universalBackForward,
+                policy: .configured(by: scheme.buttons.swipe),
                 scrollRecognizer: scrollRecognizer,
                 gestureTransformer: gestureTransformer,
                 warpPointer: warpPointer,

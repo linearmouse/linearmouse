@@ -148,11 +148,8 @@ class SettingsState: ObservableObject {
 
     func finishVirtualButtonRecordingPreparation(for deviceID: Int32, sessionID: UUID) {
         guard var session = currentButtonMappingRecordingSession,
-              session.id == sessionID else {
-            return
-        }
-
-        guard session.pendingVirtualButtonDeviceIDs.remove(deviceID) != nil else {
+              session.id == sessionID,
+              session.pendingVirtualButtonDeviceIDs.remove(deviceID) != nil else {
             return
         }
 

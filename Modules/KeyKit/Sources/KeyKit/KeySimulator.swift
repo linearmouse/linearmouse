@@ -206,11 +206,8 @@ public class KeySimulator: KeySimulating {
                   in: isRestoring ? restoringModifierFlags : simulatedModifierFlags,
                   matching: isRestoring ? genericFlagsToRestore : genericFlagsToRelease
               ),
-              let keyCode = keyCodeResolver.keyCode(for: key) else {
-            return
-        }
-
-        guard let event = CGEvent.makeHardwareLikeKeyEvent(virtualKey: keyCode, keyDown: isRestoring) else {
+              let keyCode = keyCodeResolver.keyCode(for: key),
+              let event = CGEvent.makeHardwareLikeKeyEvent(virtualKey: keyCode, keyDown: isRestoring) else {
             return
         }
 
@@ -336,11 +333,7 @@ public extension KeySimulator {
 
     func modifiedCGEventFlags(of event: CGEvent) -> CGEventFlags? {
         lock.withLock {
-            guard !flags.isEmpty else {
-                return nil
-            }
-
-            guard Self.supportsModifierFlags(event.type) else {
+            guard !flags.isEmpty, Self.supportsModifierFlags(event.type) else {
                 return nil
             }
 

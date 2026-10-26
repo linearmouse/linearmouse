@@ -647,11 +647,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             )
         }
 
-        guard let slotInfo else {
-            return nil
-        }
-
-        guard let kind = resolveReceiverPointingIdentityKind(
+        guard let slotInfo, let kind = resolveReceiverPointingIdentityKind(
             snapshotRaw: connectionSnapshot?.kind,
             pairingRaw: slotInfo.kind
         ), kind.isPointingDevice else {
@@ -944,7 +940,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         let pointingSlotsWithCandidates = Set(activeSlots.filter { slot in
             guard resolvedKinds[slot]?.isPointingDevice == true,
                   let candidateKind = candidatesBySlot[slot]
-                  .flatMap({ ReceiverLogicalDeviceKind(rawValue: $0.kind) })
+                      .flatMap({ ReceiverLogicalDeviceKind(rawValue: $0.kind) })
             else {
                 return false
             }
@@ -1754,10 +1750,8 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         notificationOwnershipResolution: ReceiverNotificationOwnershipSessionRegistry.OpenResolution
     ) -> LogitechReceiverChannel? {
         let adopted = sharedChannelsLock.withLock { () -> Bool in
-            guard openingChannels.isOwned(locationID: locationID, by: openingOwnership) else {
-                return false
-            }
-            guard let channel,
+            guard openingChannels.isOwned(locationID: locationID, by: openingOwnership),
+                  let channel,
                   sharedChannels[locationID]?.channel == nil,
                   !closingChannels.isClaimed(locationID: locationID),
                   !terminalChannels.isClaimed(locationID: locationID),
@@ -1875,10 +1869,8 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         accept: (LogitechReceiverChannel) -> Bool
     ) -> LogitechReceiverChannel? {
         let adopted = sharedChannelsLock.withLock { () -> Bool in
-            guard openingChannels.isOwned(locationID: locationID, by: openingOwnership) else {
-                return false
-            }
-            guard let channel,
+            guard openingChannels.isOwned(locationID: locationID, by: openingOwnership),
+                  let channel,
                   terminalChannels.isOwned(locationID: locationID, by: terminalOwnership),
                   sharedChannels[locationID]?.channel == nil,
                   !closingChannels.isClaimed(locationID: locationID),
@@ -2482,16 +2474,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         until shouldContinue: @escaping () -> Bool = { true }
     ) -> LogitechHIDPPDeviceMetadataProvider
         .ReceiverPointingDeviceDiscovery {
-        guard let locationID else {
-            return .init(
-                identities: [],
-                connectionSnapshots: [:],
-                liveReachableSlots: [],
-                inventoryAvailable: false
-            )
-        }
-
-        guard let discovery = discoverMatchCandidates(
+        guard let locationID, let discovery = discoverMatchCandidates(
             baseName: baseName,
             until: shouldContinue
         ) else {
@@ -2545,14 +2528,14 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         until shouldContinue: (() -> Bool)? = nil
     ) -> LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotBatch {
         guard let report = waitForInputReport(
-            timeout: timeout,
-            matching: { response in
-                LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(Array(response)) != nil
-            },
-            until: shouldContinue
-        ),
-            let initialNotification = LogitechHIDPPDeviceMetadataProvider
-            .parseReceiverConnectionNotification(Array(report))
+                  timeout: timeout,
+                  matching: { response in
+                      LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(Array(response)) != nil
+                  },
+                  until: shouldContinue
+              ),
+              let initialNotification = LogitechHIDPPDeviceMetadataProvider
+                  .parseReceiverConnectionNotification(Array(report))
         else {
             return .empty
         }
@@ -2564,14 +2547,15 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         let deadline = Date().addingTimeInterval(0.1)
         while Date() < deadline {
             guard let followup = waitForInputReport(
-                timeout: 0.02,
-                matching: { response in
-                    LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(Array(response)) != nil
-                },
-                until: shouldContinue
-            ),
-                let notification = LogitechHIDPPDeviceMetadataProvider
-                .parseReceiverConnectionNotification(Array(followup))
+                      timeout: 0.02,
+                      matching: { response in
+                          LogitechHIDPPDeviceMetadataProvider
+                              .parseReceiverConnectionNotification(Array(response)) != nil
+                      },
+                      until: shouldContinue
+                  ),
+                  let notification = LogitechHIDPPDeviceMetadataProvider
+                      .parseReceiverConnectionNotification(Array(followup))
             else {
                 continue
             }
@@ -3174,11 +3158,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             timeout: timeout,
             matching: { report in
                 let reply = [UInt8](report)
-                guard reply.count >= LogitechHIDPPDeviceMetadataProvider.Constants.shortReportLength else {
-                    return false
-                }
-
-                guard [
+                guard reply.count >= LogitechHIDPPDeviceMetadataProvider.Constants.shortReportLength, [
                     LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
                     LogitechHIDPPDeviceMetadataProvider.Constants.longReportID
                 ].contains(reply[0]), reply[1] == LogitechHIDPPDeviceMetadataProvider.Constants.receiverIndex else {
@@ -3235,11 +3215,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             timeout: timeout,
             matching: { report in
                 let reply = [UInt8](report)
-                guard reply.count >= 5 else {
-                    return false
-                }
-
-                guard [
+                guard reply.count >= 5, [
                     LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
                     LogitechHIDPPDeviceMetadataProvider.Constants.longReportID
                 ].contains(reply[0]), reply[1] == LogitechHIDPPDeviceMetadataProvider.Constants.receiverIndex else {
@@ -4353,11 +4329,11 @@ final class LogitechReprogrammableControlsMonitor {
 
     private func buildDirectMonitorTarget() -> MonitorTarget? {
         guard let transport = HIDPPTransport(
-            device: device.pointerDevice,
-            deviceIndex: nil,
-            shouldContinue: { [weak self] in self?.shouldAllowTeardownIO() == true }
-        ),
-            let featureIndex = transport.featureIndex(for: .reprogControlsV4) else {
+                  device: device.pointerDevice,
+                  deviceIndex: nil,
+                  shouldContinue: { [weak self] in self?.shouldAllowTeardownIO() == true }
+              ),
+              let featureIndex = transport.featureIndex(for: .reprogControlsV4) else {
             return nil
         }
 
@@ -4405,11 +4381,11 @@ final class LogitechReprogrammableControlsMonitor {
         using receiverChannel: LogitechReceiverChannel
     ) -> MonitorTarget? {
         guard let transport = HIDPPTransport(
-            device: receiverChannel,
-            deviceIndex: slot,
-            shouldContinue: { [weak self] in self?.shouldAllowTeardownIO() == true }
-        ),
-            let featureIndex = transport.featureIndex(for: .reprogControlsV4)
+                  device: receiverChannel,
+                  deviceIndex: slot,
+                  shouldContinue: { [weak self] in self?.shouldAllowTeardownIO() == true }
+              ),
+              let featureIndex = transport.featureIndex(for: .reprogControlsV4)
         else {
             return nil
         }
@@ -4437,12 +4413,9 @@ final class LogitechReprogrammableControlsMonitor {
         }
 
         let isDivertable = control.flags.contains(.divertable) || control.flags.contains(.persistentlyDivertable)
-        guard isDivertable else {
-            return false
-        }
-
-        guard !LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.nativeControlIDs
-            .contains(control.controlID) else {
+        guard isDivertable,
+              !LogitechHIDPPDeviceMetadataProvider.ReprogControlsV4.nativeControlIDs
+                  .contains(control.controlID) else {
             return false
         }
 

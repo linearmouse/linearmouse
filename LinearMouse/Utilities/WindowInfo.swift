@@ -75,16 +75,10 @@ final class WindowInfoCache {
             // Only consider normal application windows (NSWindow.Level.normal == 0) so that
             // overlays such as the menu bar, Dock, status-bar panels, and click-through HUDs
             // (including our own auto-scroll indicator) don't take precedence.
-            guard let layer = windowInfo[kCGWindowLayer as String] as? Int, layer == 0 else {
-                return nil
-            }
-
-            guard let boundsDictionary = windowInfo[kCGWindowBounds as String] as? NSDictionary,
-                  let bounds = CGRect(dictionaryRepresentation: boundsDictionary) else {
-                return nil
-            }
-
-            guard let ownerPid = windowInfo[kCGWindowOwnerPID as String] as? pid_t else {
+            guard let layer = windowInfo[kCGWindowLayer as String] as? Int, layer == 0,
+                  let boundsDictionary = windowInfo[kCGWindowBounds as String] as? NSDictionary,
+                  let bounds = CGRect(dictionaryRepresentation: boundsDictionary),
+                  let ownerPid = windowInfo[kCGWindowOwnerPID as String] as? pid_t else {
                 return nil
             }
 

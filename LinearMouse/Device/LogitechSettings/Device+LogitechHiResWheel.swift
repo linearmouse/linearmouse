@@ -370,11 +370,11 @@ extension Device {
         }
 
         guard let access = logitechHiResWheel(
-            for: expectedToken,
-            deadline: attempt.deadline,
-            until: shouldContinue
-        ),
-            let initialEnabled = logitechSession.initialHiResWheelEnabled(for: access)
+                  for: expectedToken,
+                  deadline: attempt.deadline,
+                  until: shouldContinue
+              ),
+              let initialEnabled = logitechSession.initialHiResWheelEnabled(for: access)
         else {
             logitechSession.invalidateHiResWheel(for: expectedToken)
             return false
@@ -568,13 +568,13 @@ extension Device {
     @discardableResult
     private func seedStoredHiResWheelBaseline(receiverSlot: UInt8?) -> Bool {
         guard let lease = logitechSession.hiResWheelTargetLease(
-            receiverSlot: receiverSlot,
-            stableTargetKey: { [weak self] route, slot in
-                self?.logitechHardwareTargetKey(for: route, receiverSlot: slot)
-            }
-        ),
-            let target = lease.stableTargetKey,
-            let claim = logitechHardwareBaselineStore?.hiResBaseline(for: target) else {
+                  receiverSlot: receiverSlot,
+                  stableTargetKey: { [weak self] route, slot in
+                      self?.logitechHardwareTargetKey(for: route, receiverSlot: slot)
+                  }
+              ),
+              let target = lease.stableTargetKey,
+              let claim = logitechHardwareBaselineStore?.hiResBaseline(for: target) else {
             return false
         }
         _ = logitechSession.seedInitialHiResWheelState(claim, for: lease)
