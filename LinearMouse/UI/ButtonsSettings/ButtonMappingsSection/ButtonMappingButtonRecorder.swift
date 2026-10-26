@@ -216,12 +216,12 @@ struct ButtonMappingButtonRecorder: View {
         recordedMappingCancellable = nil
     }
 
+    /// Strip the serial number only for a category-only scope such as "All Mice".
+    /// When a specific device is selected, keep it: the scheme can't tell apart
+    /// mice behind the same receiver, so the serial number is the only way to
+    /// distinguish units of the same model.
     private var stripsRecordedSerialNumber: Bool {
-        guard let matcher = DeviceState.shared.currentDeviceMatcher else {
-            return true
-        }
-
-        return matcher.categoryOnlyValue != nil
+        DeviceState.shared.currentDeviceMatcher?.categoryOnlyValue != nil
     }
 
     private func logitechMonitorDevices() -> [Device] {

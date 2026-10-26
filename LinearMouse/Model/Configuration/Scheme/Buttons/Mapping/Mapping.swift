@@ -171,14 +171,7 @@ extension Scheme.Buttons.Mapping {
             return false
         }
 
-        switch (button, mapping.button) {
-        case (nil, nil):
-            return true
-        case let (button?, otherButton?):
-            return button.canRepresentSamePhysicalInput(as: otherButton)
-        default:
-            return false
-        }
+        return button == mapping.button
     }
 
     func matches(modifierFlags eventFlags: CGEventFlags) -> Bool {
