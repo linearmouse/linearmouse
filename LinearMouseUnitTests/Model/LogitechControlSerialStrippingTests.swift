@@ -8,7 +8,7 @@ final class LogitechControlSerialStrippingTests: XCTestCase {
     private typealias Button = Scheme.Buttons.Mapping.Button
 
     private let controlID = 0x00FD
-    private let productID = 16507
+    private let productID = 16_507
     private let serialA = "2DBD340E"
     private let serialB = "EA2DBD34"
     private let otherProductID = 0x405E
