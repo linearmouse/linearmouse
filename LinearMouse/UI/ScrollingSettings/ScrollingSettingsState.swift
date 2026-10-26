@@ -97,6 +97,15 @@ extension ScrollingSettingsState {
         highResolutionWheelInfo?.supportsHighResolutionWheel == true
     }
 
+    var showsRequireTwoFingerScrollControl: Bool {
+        currentDevice?.isAppleMagicMouse == true
+    }
+
+    var requireTwoFingerScroll: Bool {
+        get { mergedScheme.scrolling.requireTwoFingerScroll ?? false }
+        set { scheme.scrolling.requireTwoFingerScroll = newValue }
+    }
+
     var highResolutionWheel: Bool {
         get {
             schemeState.deviceScheme.logitech.highResolutionWheel

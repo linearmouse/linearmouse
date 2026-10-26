@@ -14,6 +14,10 @@ struct ScrollingSettings: View {
                 Form {
                     ReverseScrollingSection()
 
+                    if state.showsRequireTwoFingerScrollControl {
+                        RequireTwoFingerScrollSection()
+                    }
+
                     if state.showsHighResolutionWheelControl {
                         LogitechHighResolutionWheelSection()
                     }
