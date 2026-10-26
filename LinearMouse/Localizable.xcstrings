@@ -2952,6 +2952,15 @@
         }
       }
     },
+    "Spaces follow the wheel like a trackpad swipe and snap to the nearest one when the wheel stops. Horizontal scrolling no longer scrolls content." : {
+
+    },
+    "Swipe between spaces" : {
+
+    },
+    "Wheel steps per space" : {
+
+    },
     "⇧ (Shift)" : {
       "localizations" : {
         "af" : {

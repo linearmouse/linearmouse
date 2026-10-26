@@ -214,6 +214,12 @@ declare namespace Scheme {
      * @title Modifier keys settings
      */
     modifiers?: Scrolling.Bidirectional<Scrolling.Modifiers>;
+
+    /**
+     * @title Swipe between spaces
+     * @description Turn horizontal scrolling into the interactive trackpad swipe between spaces (desktops). The space follows the wheel and snaps to the nearest space once the wheel stops.
+     */
+    spaceSwipe?: Scrolling.SpaceSwipe;
   };
 
   namespace Scrolling {
@@ -301,6 +307,30 @@ declare namespace Scheme {
         | "easeInOutQuartic"
         | "smooth";
     }
+
+    type SpaceSwipe = {
+      /**
+       * @description Set to `true` to swipe between spaces with horizontal scrolling.
+       * @default false
+       */
+      enabled?: boolean;
+
+      /**
+       * @description The number of horizontal wheel steps that drag one full space. Lower values switch spaces with less wheel movement.
+       * @minimum 1
+       * @maximum 200
+       * @default 12
+       */
+      distance?: number;
+
+      /**
+       * @description How long the wheel must be idle, in milliseconds, before the swipe is released and snaps to the nearest space.
+       * @minimum 50
+       * @maximum 1000
+       * @default 160
+       */
+      releaseDelay?: Int;
+    };
 
     type Modifiers = {
       /**

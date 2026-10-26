@@ -93,6 +93,20 @@ extension ScrollingSettingsState {
         set { scheme.scrolling.reverse[direction] = newValue }
     }
 
+    var spaceSwipe: Bool {
+        get { mergedScheme.scrolling.spaceSwipe.isEnabled }
+        set { scheme.scrolling.spaceSwipe.enabled = newValue }
+    }
+
+    var spaceSwipeDistance: Double {
+        get { mergedScheme.scrolling.spaceSwipe.effectiveDistance }
+        set { scheme.scrolling.spaceSwipe.distance = newValue.rounded() }
+    }
+
+    var spaceSwipeDistanceFormatter: NumberFormatter {
+        decimalFormatter(maxFractionDigits: 0)
+    }
+
     var showsHighResolutionWheelControl: Bool {
         highResolutionWheelInfo?.supportsHighResolutionWheel == true
     }

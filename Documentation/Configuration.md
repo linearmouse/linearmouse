@@ -120,6 +120,64 @@ For example, to use a smoother scrolling profile for a mouse:
 If you want different tuning for each direction, provide `vertical` and `horizontal` values under
 `smoothed`.
 
+## Swipe between spaces
+
+`scrolling.spaceSwipe` turns horizontal scrolling, such as a side (thumb) wheel or a tilt wheel,
+into the interactive trackpad swipe between spaces (desktops). Instead of jumping a whole space per
+wheel step, the space follows the wheel while it turns. When the wheel stops, the space snaps to
+the nearest one, so turning less than halfway returns to the current space.
+
+`distance` is the number of wheel steps that drag one full space, and `releaseDelay` is how long,
+in milliseconds, the wheel must be idle before the swipe is released.
+
+```json
+{
+  "schemes": [
+    {
+      "if": {
+        "device": {
+          "category": "mouse"
+        }
+      },
+      "scrolling": {
+        "spaceSwipe": {
+          "enabled": true
+        }
+      }
+    }
+  ]
+}
+```
+
+Wheels differ in how many steps they report per turn. Use a device-specific scheme to tune one
+mouse. For example, the free-spinning thumb wheel of a Logitech MX Master 3S reports many small
+steps, so a longer distance feels better:
+
+```json
+{
+  "schemes": [
+    {
+      "if": {
+        "device": {
+          "vendorID": "0x046d",
+          "productID": "0xb034"
+        }
+      },
+      "scrolling": {
+        "spaceSwipe": {
+          "enabled": true,
+          "distance": 24,
+          "releaseDelay": 200
+        }
+      }
+    }
+  ]
+}
+```
+
+While enabled, horizontal scrolling no longer scrolls content, and horizontal scroll button
+mappings do not fire for that device.
+
 ## Click debouncing
 
 `buttons.clickDebouncing` filters electrical chatter from worn or noisy mouse switches. Existing
