@@ -269,6 +269,15 @@ declare namespace Scheme {
       speed?: number;
 
       /**
+       * @title Scroll acceleration exponent
+       * @description Controls the shape of the distance-based auto scroll acceleration curve.
+       * @default 2.2
+       * @minimum 1
+       * @maximum 3
+       */
+      exponent?: number;
+
+      /**
        * @description The scrolling acceleration.
        */
       acceleration?: number;

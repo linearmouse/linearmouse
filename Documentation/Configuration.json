@@ -1925,6 +1925,14 @@
           "description": "Set to `false` to explicitly disable inherited smoothed scrolling for this direction.",
           "type": "boolean"
         },
+        "exponent": {
+          "default": 2.2,
+          "description": "Controls the shape of the distance-based auto scroll acceleration curve.",
+          "maximum": 3,
+          "minimum": 1,
+          "title": "Scroll acceleration exponent",
+          "type": "number"
+        },
         "inertia": {
           "description": "The scrolling inertia.",
           "type": "number"

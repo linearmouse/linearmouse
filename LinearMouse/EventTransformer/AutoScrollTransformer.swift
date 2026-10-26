@@ -11,14 +11,19 @@ final class AutoScrollTransformer {
 
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "AutoScroll")
 
-    private static let deadZone: Double = 10
-    private static let maxScrollStep: Double = 160
+    private static let activationDeadZone: Double = 10
+    private static let deadZone: Double = 15
+    private static let curveMultiplier = 0.008
+    private static let maxScrollVelocity: Double = 30_000
+    private static let maxEffectiveDisplacement: Double = 1200
     private static let timerInterval: TimeInterval = 1.0 / 60.0
 
     private let trigger: Scheme.Buttons.Mapping
     private let modes: [Scheme.Buttons.AutoScroll.Mode]
     private let toggleActivation: Scheme.Buttons.AutoScroll.ToggleActivation
     private let speed: Double
+    private let exponent: Double
+    private let now: () -> TimeInterval
     private let scheduleLongPressTimer: LongPressTimerScheduler
     private let activationHitProvider: ActivationHitProvider?
     private let fallbackEventSink: (CGEvent) -> Void
@@ -92,6 +97,9 @@ final class AutoScrollTransformer {
     private var longPressTimerCancellation: (() -> Void)?
     private var longPressTimerGeneration: UInt64 = 0
     private var timer: EventThreadTimer?
+    private var lastTickTime: TimeInterval?
+    private var pendingHorizontalScroll: Double = 0
+    private var pendingVerticalScroll: Double = 0
     private let indicatorController = AutoScrollIndicatorWindowController()
     private var lastIndicatorLocation: CGPoint?
     private let accessibilityActivationClassifier = AutoScrollAccessibilityActivationClassifier()
@@ -105,18 +113,36 @@ final class AutoScrollTransformer {
         modes: [Scheme.Buttons.AutoScroll.Mode],
         toggleActivation: Scheme.Buttons.AutoScroll.ToggleActivation = .shortPress,
         speed: Double,
+        exponent: Double = 2.2,
         longPressTimerScheduler: @escaping LongPressTimerScheduler = AutoScrollTransformer
             .scheduleEventThreadLongPressTimer,
         activationHitProvider: ActivationHitProvider? = nil,
+        now: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime },
         eventSink: @escaping (CGEvent) -> Void = { $0.post(tap: .cgSessionEventTap) }
     ) {
         self.trigger = trigger
         self.modes = modes
         self.toggleActivation = toggleActivation
         self.speed = speed
+        self.exponent = exponent
+        self.now = now
         scheduleLongPressTimer = longPressTimerScheduler
         self.activationHitProvider = activationHitProvider
         fallbackEventSink = eventSink
+    }
+
+    static func scrollVelocity(for offset: Double, speed: Double, exponent: Double) -> Double {
+        let magnitude = abs(offset)
+        guard magnitude > deadZone else {
+            return 0
+        }
+
+        let effectiveDisplacement = min(magnitude, maxEffectiveDisplacement)
+        let velocity = min(
+            curveMultiplier * speed * pow(effectiveDisplacement, exponent),
+            maxScrollVelocity
+        )
+        return offset.sign == .minus ? -velocity : velocity
     }
 
     deinit {
@@ -547,6 +573,9 @@ extension AutoScrollTransformer: EventTransformer {
         suppressedExitMouseButton = nil
         let current = current ?? point
         state = .active(anchor: point, current: current, session: session)
+        lastTickTime = now()
+        pendingHorizontalScroll = 0
+        pendingVerticalScroll = 0
         lastIndicatorLocation = current
         let delta = CGVector(dx: current.x - point.x, dy: current.y - point.y)
         DispatchQueue.main.async { [indicatorController] in
@@ -574,6 +603,10 @@ extension AutoScrollTransformer: EventTransformer {
             return
         }
 
+        let currentTime = now()
+        let elapsed = max(0, currentTime - (lastTickTime ?? currentTime))
+        lastTickTime = currentTime
+
         // Input stays at full precision; the HUD only needs the latest position
         // at the existing scroll timer's 60 Hz, not a main-queue task per report.
         if lastIndicatorLocation != current {
@@ -584,27 +617,24 @@ extension AutoScrollTransformer: EventTransformer {
             }
         }
 
-        let horizontal = scrollAmount(for: anchor.x - current.x)
-        let vertical = scrollAmount(for: current.y - anchor.y)
+        pendingHorizontalScroll += Self.scrollVelocity(
+            for: anchor.x - current.x,
+            speed: speed,
+            exponent: exponent
+        ) * elapsed
+        pendingVerticalScroll += Self.scrollVelocity(
+            for: current.y - anchor.y,
+            speed: speed,
+            exponent: exponent
+        ) * elapsed
 
-        guard horizontal != 0 || vertical != 0 else {
+        guard pendingHorizontalScroll != 0 || pendingVerticalScroll != 0 else {
             return
         }
 
-        postContinuousScrollEvent(horizontal: horizontal, vertical: vertical)
-    }
-
-    private func scrollAmount(for delta: Double) -> Double {
-        let adjusted = abs(delta) - Self.deadZone
-        guard adjusted > 0 else {
-            return 0
-        }
-
-        let base = adjusted * speed * 0.12
-        let boost = sqrt(adjusted) * speed * 0.6
-        let value = min(Self.maxScrollStep, base + boost)
-
-        return delta.sign == .minus ? -value : value
+        postContinuousScrollEvent(horizontal: pendingHorizontalScroll, vertical: pendingVerticalScroll)
+        pendingHorizontalScroll = 0
+        pendingVerticalScroll = 0
     }
 
     private func postContinuousScrollEvent(horizontal: Double, vertical: Double) {
@@ -659,7 +689,8 @@ extension AutoScrollTransformer: EventTransformer {
     }
 
     private func exceedsDeadZone(from anchor: CGPoint, to point: CGPoint) -> Bool {
-        abs(point.x - anchor.x) > Self.deadZone || abs(point.y - anchor.y) > Self.deadZone
+        abs(point.x - anchor.x) > Self.activationDeadZone ||
+            abs(point.y - anchor.y) > Self.activationDeadZone
     }
 
     private func cancelInteractionForButtonMappingRecording() {
@@ -827,6 +858,9 @@ extension AutoScrollTransformer: Deactivatable {
         }
 
         state = .idle
+        lastTickTime = nil
+        pendingHorizontalScroll = 0
+        pendingVerticalScroll = 0
         suppressTriggerUp = false
         DispatchQueue.main.async { [indicatorController] in
             indicatorController.hide()
@@ -842,11 +876,13 @@ extension AutoScrollTransformer {
         trigger: Scheme.Buttons.Mapping,
         modes: [Scheme.Buttons.AutoScroll.Mode],
         toggleActivation: Scheme.Buttons.AutoScroll.ToggleActivation,
-        speed: Double
+        speed: Double,
+        exponent: Double
     ) -> Bool {
         self.trigger == trigger &&
             self.modes == modes &&
             self.toggleActivation == toggleActivation &&
-            abs(self.speed - speed) < 0.0001
+            abs(self.speed - speed) < 0.0001 &&
+            abs(self.exponent - exponent) < 0.0001
     }
 }

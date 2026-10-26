@@ -8,6 +8,36 @@ import XCTest
 final class AutoScrollTransformerTests: XCTestCase {
     private typealias Mapping = Scheme.Buttons.Mapping
 
+    func testScrollVelocityUsesDistanceBasedExponentCurve() {
+        XCTAssertEqual(
+            AutoScrollTransformer.scrollVelocity(for: 15, speed: 1, exponent: 2.2),
+            0
+        )
+        XCTAssertEqual(
+            AutoScrollTransformer.scrollVelocity(for: 100, speed: 1, exponent: 2),
+            80,
+            accuracy: 0.0001
+        )
+        XCTAssertEqual(
+            AutoScrollTransformer.scrollVelocity(for: -100, speed: 2, exponent: 2),
+            -160,
+            accuracy: 0.0001
+        )
+    }
+
+    func testScrollVelocityIsCappedAndEffectiveDisplacementIsLimited() {
+        XCTAssertEqual(
+            AutoScrollTransformer.scrollVelocity(for: 1200, speed: 1, exponent: 2.2),
+            30_000,
+            accuracy: 0.0001
+        )
+        XCTAssertEqual(
+            AutoScrollTransformer.scrollVelocity(for: 10_000, speed: 1, exponent: 2.2),
+            30_000,
+            accuracy: 0.0001
+        )
+    }
+
     override func tearDown() {
         SettingsState.shared.endButtonMappingRecording()
         super.tearDown()
