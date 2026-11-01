@@ -23,6 +23,9 @@ final class AutoScrollTransformer {
     private static let accelerationInterval: TimeInterval = 0.02
     /// Caps the time a single tick may cover so a stall doesn't cause a jump.
     private static let maxTickInterval: TimeInterval = 0.1
+    /// Keeps each event's delta well inside the signed 16.16 fixed-point
+    /// scroll fields, which overflow past 32,767.
+    static let maxScrollDeltaPerEvent: Double = 10_000
 
     private let trigger: Scheme.Buttons.Mapping
     private let modes: [Scheme.Buttons.AutoScroll.Mode]
@@ -616,15 +619,13 @@ extension AutoScrollTransformer: EventTransformer {
         let elapsed = min(Self.maxTickInterval, max(0, now - (lastTickTime ?? now)))
         lastTickTime = now
 
-        // Scroll whole pixels and carry the fraction, so slow speeds still
-        // move steadily instead of being rounded away.
-        let desiredHorizontal = scrollRemainder.dx
-            + Self.scrollDistance(forOffset: anchor.x - current.x, over: elapsed)
-        let desiredVertical = scrollRemainder.dy
-            + Self.scrollDistance(forOffset: current.y - anchor.y, over: elapsed)
-        let horizontal = desiredHorizontal.rounded(.towardZero)
-        let vertical = desiredVertical.rounded(.towardZero)
-        scrollRemainder = CGVector(dx: desiredHorizontal - horizontal, dy: desiredVertical - vertical)
+        let (horizontal, horizontalRemainder) = Self.scrollDelta(
+            for: scrollRemainder.dx + Self.scrollDistance(forOffset: anchor.x - current.x, over: elapsed)
+        )
+        let (vertical, verticalRemainder) = Self.scrollDelta(
+            for: scrollRemainder.dy + Self.scrollDistance(forOffset: current.y - anchor.y, over: elapsed)
+        )
+        scrollRemainder = CGVector(dx: horizontalRemainder, dy: verticalRemainder)
 
         guard horizontal != 0 || vertical != 0 else {
             return
@@ -642,6 +643,19 @@ extension AutoScrollTransformer: EventTransformer {
 
         let distancePerInterval = steps * abs(steps).squareRoot() - (steps > 0 ? 1 : -1)
         return distancePerInterval * elapsed / accelerationInterval
+    }
+
+    /// Splits a desired distance into the whole pixels to scroll now and the
+    /// fraction to carry, so slow speeds still move steadily instead of being
+    /// rounded away. Distance beyond the per-event limit is dropped.
+    static func scrollDelta(for distance: Double) -> (delta: Double, remainder: Double) {
+        let limit = maxScrollDeltaPerEvent
+        guard abs(distance) <= limit else {
+            return (distance > 0 ? limit : -limit, 0)
+        }
+
+        let delta = distance.rounded(.towardZero)
+        return (delta, distance - delta)
     }
 
     private func postContinuousScrollEvent(horizontal: Double, vertical: Double) {

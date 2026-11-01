@@ -31,6 +31,23 @@ final class AutoScrollTransformerTests: XCTestCase {
         XCTAssertGreaterThan(far, near * 4)
     }
 
+    func testScrollDeltaCarriesFractionsAndStaysWithinFixedPointRange() {
+        let slow = AutoScrollTransformer.scrollDelta(for: 2.75)
+        XCTAssertEqual(slow.delta, 2)
+        XCTAssertEqual(slow.remainder, 0.75, accuracy: 0.0001)
+
+        let reverse = AutoScrollTransformer.scrollDelta(for: -2.75)
+        XCTAssertEqual(reverse.delta, -2)
+        XCTAssertEqual(reverse.remainder, -0.75, accuracy: 0.0001)
+
+        // A far offset after a stalled tick would overflow the 16.16 fields.
+        let distance = AutoScrollTransformer.scrollDistance(forOffset: 5000, over: 0.1)
+        XCTAssertGreaterThan(distance, 32_767)
+        let clamped = AutoScrollTransformer.scrollDelta(for: -distance)
+        XCTAssertEqual(clamped.delta, -AutoScrollTransformer.maxScrollDeltaPerEvent)
+        XCTAssertEqual(clamped.remainder, 0)
+    }
+
     func testButtonMappingRecordingBypassesAutoScrollTrigger() throws {
         var trigger = Scheme.Buttons.Mapping()
         trigger.button = .mouse(2)
