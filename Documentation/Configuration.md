@@ -197,6 +197,46 @@ I would create two schemes and specify the vendor ID and product ID:
 Then, the pointer speed of my Logitech mouse and Microsoft mouse will be set to 0.36 and 0.4
 respectively.
 
+### Devices behind a receiver
+
+A Logitech Unifying or Bolt receiver passes on the events of the devices paired to it. When a
+pointing device behind a receiver is in use, LinearMouse matches it by the product ID and serial
+number the receiver reports for it, with the receiver's vendor ID, so the device picker and schemes
+refer to the mouse rather than to the receiver. If the receiver reports neither a product ID nor a
+serial number for the device, only schemes that match the receiver apply.
+
+Devices paired to a Bolt receiver report the same product ID and serial number as over Bluetooth,
+so one scheme covers such a mouse whether it is connected through the receiver or over Bluetooth.
+Unifying receivers report a different product ID than Bluetooth does, so a mouse connected both
+ways has a scheme for each.
+
+```json
+{
+  "schemes": [
+    {
+      "if": {
+        "device": {
+          "vendorID": "0x046d",
+          "productID": "0xb034",
+          "serialNumber": "1A2B3C4D"
+        }
+      },
+      "pointer": {
+        "acceleration": 0,
+        "speed": 0.36
+      }
+    }
+  ]
+}
+```
+
+Schemes that match the receiver itself, such as `"productID": "0xc548"`, keep applying to every
+device behind it. When both match, they are merged in file order like any other schemes.
+
+A receiver passes on the events of all of its devices together, so LinearMouse can tell which
+device is in use only when one pointing device is connected to the receiver. While several are
+connected at once, only schemes that match the receiver apply.
+
 ### Unsetting values
 
 LinearMouse supports a special "unset" value to explicitly restore settings back to their system or

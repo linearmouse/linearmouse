@@ -10,7 +10,7 @@ struct DevicePickerSection: View {
     var title: LocalizedStringKey
     var devices: [DeviceModel]
     var onSelectCategory: (DeviceMatcher.Category) -> Void
-    var onSelectDevice: (WeakRef<Device>) -> Void
+    var onSelectDevice: (DevicePickerEntry) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -27,18 +27,22 @@ struct DevicePickerSection: View {
                     onSelectCategory(category)
                 }
 
-                ForEach(devices) { deviceModel in
+                ForEach(entries) { entry in
                     DevicePickerSectionItem(
-                        deviceModel: deviceModel,
-                        isSelected: isSelected(deviceModel)
+                        entry: entry,
+                        isSelected: isSelected(entry)
                     ) {
-                        selection = .device(deviceModel.deviceRef)
-                        onSelectDevice(deviceModel.deviceRef)
+                        selection = .device(entry.deviceRef, entry.matcher)
+                        onSelectDevice(entry)
                     }
                 }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var entries: [DevicePickerEntry] {
+        devices.flatMap(\.pickerEntries)
     }
 
     private var isCategorySelected: Bool {
@@ -49,12 +53,13 @@ struct DevicePickerSection: View {
         return selectedCategory == category
     }
 
-    private func isSelected(_ deviceModel: DeviceModel) -> Bool {
-        guard case let .device(selectedDeviceRef) = selection,
-              let selectedDevice = selectedDeviceRef.value else {
+    private func isSelected(_ entry: DevicePickerEntry) -> Bool {
+        guard case let .device(selectedDeviceRef, matcher) = selection,
+              let selectedDevice = selectedDeviceRef.value,
+              entry.deviceRef.value === selectedDevice else {
             return false
         }
 
-        return deviceModel.deviceRef.value === selectedDevice
+        return matcher.condition.isSatisfied(by: entry.matcher)
     }
 }

@@ -4,79 +4,53 @@
 import SwiftUI
 
 struct DevicePickerSectionItem: View {
-    @ObservedObject var deviceModel: DeviceModel
+    var entry: DevicePickerEntry
     var isSelected: Bool
     var action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 12) {
-                    HStack(alignment: .firstTextBaseline, spacing: 6) {
-                        Text(deviceModel.pairedReceiverDevices.isEmpty ? deviceModel.displayName : deviceModel.name)
-                            .font(.body)
+            HStack(spacing: 12) {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(entry.name)
+                        .font(.body)
 
-                        if let batteryLevel = deviceModel.batteryLevel,
-                           deviceModel.pairedReceiverDevices.isEmpty {
-                            BatteryLevelIndicator(level: batteryLevel)
-                        }
-
-                        if deviceModel.isActive {
-                            Text("(active)")
-                                .font(.body)
-                                .foregroundColor(.secondary)
-                        }
+                    if let batteryLevel = entry.batteryLevel {
+                        BatteryLevelIndicator(level: batteryLevel)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
 
-                    if isSelected, #available(macOS 11.0, *) {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(.accentColor)
-                            .accessibilityHidden(true)
+                    if entry.isActive {
+                        Text("(active)")
+                            .font(.body)
+                            .foregroundColor(.secondary)
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-                if !deviceModel.pairedReceiverDevices.isEmpty {
-                    VStack(alignment: .leading, spacing: 4) {
-                        ForEach(deviceModel.pairedReceiverDevices, id: \.slot) { device in
-                            HStack(spacing: 6) {
-                                Text(String(format: NSLocalizedString("- %@", comment: ""), device.name))
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-
-                                if let batteryLevel = deviceModel.pairedReceiverDeviceBatteryLevels[device.slot] {
-                                    BatteryLevelIndicator(level: batteryLevel, compact: true)
-                                }
-                            }
-                        }
-                    }
-                    .padding(.leading, 12)
-                    .transition(
-                        .asymmetric(
-                            insertion: .opacity.combined(with: .move(edge: .top)),
-                            removal: .opacity.combined(with: .move(edge: .top))
-                        )
-                    )
+                if isSelected {
+                    DevicePickerCheckmark()
                 }
             }
-            .transition(
-                .asymmetric(
-                    insertion: .opacity.combined(with: .scale(scale: 0.97, anchor: .top)),
-                    removal: .opacity
-                )
-            )
-            .frame(
-                maxWidth: .infinity,
-                minHeight: deviceModel.pairedReceiverDevices.isEmpty ? 38 : 58,
-                alignment: .leading
-            )
-            .animation(
-                .spring(response: 0.26, dampingFraction: 0.88),
-                value: deviceModel.pairedReceiverDevices.map(\.slot)
-            )
+            .frame(maxWidth: .infinity, minHeight: 38, alignment: .leading)
         }
         .buttonStyle(DeviceButtonStyle(isSelected: isSelected))
+        .transition(
+            .asymmetric(
+                insertion: .opacity.combined(with: .scale(scale: 0.97, anchor: .top)),
+                removal: .opacity
+            )
+        )
+    }
+}
+
+private struct DevicePickerCheckmark: View {
+    var body: some View {
+        if #available(macOS 11.0, *) {
+            Image(systemName: "checkmark")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(.accentColor)
+                .accessibilityHidden(true)
+        }
     }
 }
 
@@ -97,11 +71,8 @@ struct DevicePickerCategoryItem: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                if isSelected, #available(macOS 11.0, *) {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.accentColor)
-                        .accessibilityHidden(true)
+                if isSelected {
+                    DevicePickerCheckmark()
                 }
             }
             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)

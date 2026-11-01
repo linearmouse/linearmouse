@@ -840,7 +840,7 @@ class EventTransformerManager {
 
         let cacheKey = CacheKey(
             deviceID: device?.id,
-            deviceMatcher: device.map { DeviceMatcher(of: $0) },
+            deviceMatcher: device.map { DeviceMatcher(activeOf: $0) },
             process: process,
             screen: display
         )
