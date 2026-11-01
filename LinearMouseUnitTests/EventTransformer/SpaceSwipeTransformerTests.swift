@@ -7,25 +7,30 @@ import XCTest
 
 final class SpaceSwipeTransformerTests: XCTestCase {
     private var time: TimeInterval = 0
-    private var outputs: [SpaceSwipeTransformer.Output] = []
+    private var outputs: [SpaceSwipeSession.Output] = []
     private var recording = false
+    private var session: SpaceSwipeSession!
 
     override func setUp() {
         super.setUp()
         time = 0
         outputs = []
         recording = false
+        session = makeSession()
+    }
+
+    private static let noTimers: SpaceSwipeSession.Scheduler = { _, _, _ in nil }
+
+    private func makeSession(schedule: @escaping SpaceSwipeSession.Scheduler = noTimers) -> SpaceSwipeSession {
+        SpaceSwipeSession(now: { [weak self] in self?.time ?? 0 }, schedule: schedule) { [weak self] in
+            self?.outputs.append($0)
+        }
     }
 
     private func makeTransformer(distance: Double = 10, releaseDelay: TimeInterval = 0.2) -> SpaceSwipeTransformer {
-        SpaceSwipeTransformer(
-            distance: distance,
-            releaseDelay: releaseDelay,
-            now: { [weak self] in self?.time ?? 0 },
-            schedule: { _, _, _ in nil },
-            isRecording: { [weak self] in self?.recording ?? false },
-            sink: { [weak self] in self?.outputs.append($0) }
-        )
+        SpaceSwipeTransformer(distance: distance, releaseDelay: releaseDelay, session: session) { [weak self] in
+            self?.recording ?? false
+        }
     }
 
     private func scrollEvent(horizontal: Int32 = 0, vertical: Int32 = 0) throws -> CGEvent {
@@ -40,13 +45,13 @@ final class SpaceSwipeTransformerTests: XCTestCase {
     }
 
     /// Advances the clock in animation frames, running the follow animation.
-    private func runFrames(_ transformer: SpaceSwipeTransformer, for duration: TimeInterval) {
+    private func runFrames(_: SpaceSwipeTransformer? = nil, for duration: TimeInterval) {
         let frame = 1.0 / 120
         var elapsed = 0.0
         while elapsed < duration {
             time += frame
             elapsed += frame
-            transformer.frame()
+            session.frame()
         }
     }
 
@@ -61,14 +66,14 @@ final class SpaceSwipeTransformerTests: XCTestCase {
         XCTAssertNotNil(transformer.transform(event, in: EventTransformerContext(device: nil)))
         runFrames(transformer, for: 0.5)
         XCTAssertTrue(outputs.isEmpty)
-        XCTAssertFalse(transformer.hasActiveInteraction)
+        XCTAssertFalse(session.isActive)
     }
 
     func testHorizontalScrollingIsConsumedAndEasesTowardTarget() throws {
         let transformer = makeTransformer(distance: 10, releaseDelay: 1)
 
         XCTAssertNil(try transformer.transform(scrollEvent(horizontal: 3), in: EventTransformerContext(device: nil)))
-        XCTAssertTrue(transformer.hasActiveInteraction)
+        XCTAssertTrue(session.isActive)
 
         runFrames(transformer, for: 0.3)
         XCTAssertEqual(phases.first, .began)
@@ -93,71 +98,36 @@ final class SpaceSwipeTransformerTests: XCTestCase {
         let last = try XCTUnwrap(outputs.last)
         XCTAssertEqual(last.phase, .ended)
         XCTAssertEqual(last.progress, -0.6, accuracy: 0.001)
-        XCTAssertFalse(transformer.hasActiveInteraction)
+        XCTAssertFalse(session.isActive)
     }
 
-    func testTimerDrivenReleaseNotifiesInteractionStateChange() throws {
-        let transformer = makeTransformer(distance: 10, releaseDelay: 0.2)
-        var notifications = 0
-        transformer.onInteractionStateChanged = { notifications += 1 }
-
-        _ = try transformer.transform(scrollEvent(horizontal: 3), in: EventTransformerContext(device: nil))
-        runFrames(transformer, for: 0.15)
-        XCTAssertEqual(notifications, 0)
-
-        runFrames(transformer, for: 0.3)
-        XCTAssertFalse(transformer.hasActiveInteraction)
-        XCTAssertEqual(notifications, 1, "the manager must hear about a release no event passed through")
-
-        // A deactivation of an idle transformer has nothing to report.
-        transformer.deactivate()
-        XCTAssertEqual(notifications, 1)
-    }
-
-    func testDeactivatingAfterReleaseCancelsPendingEndEventResends() throws {
+    func testCancelingAfterReleaseDropsPendingEndEventResends() throws {
         // Records one-shot timers so the test can fire the ones still valid.
         var oneShots: [(timer: EventThreadTimer, handler: () -> Void)] = []
         let idleThread = EventThread()
-        let transformer = SpaceSwipeTransformer(
-            distance: 10,
-            releaseDelay: 0.2,
-            now: { [weak self] in self?.time ?? 0 },
-            schedule: { _, repeats, handler in
-                let timer = EventThreadTimer(
-                    timer: Timer(timeInterval: 1, repeats: false) { _ in },
-                    eventThread: idleThread
-                )
-                if !repeats {
-                    oneShots.append((timer, handler))
-                }
-                return timer
-            },
-            isRecording: { false },
-            sink: { [weak self] in self?.outputs.append($0) }
-        )
+        session = makeSession { _, repeats, handler in
+            let timer = EventThreadTimer(
+                timer: Timer(timeInterval: 1, repeats: false) { _ in },
+                eventThread: idleThread
+            )
+            if !repeats {
+                oneShots.append((timer, handler))
+            }
+            return timer
+        }
+        let transformer = makeTransformer()
 
         _ = try transformer.transform(scrollEvent(horizontal: 3), in: EventTransformerContext(device: nil))
         runFrames(transformer, for: 0.5)
         XCTAssertEqual(phases.last, .ended)
         XCTAssertFalse(oneShots.isEmpty, "a release schedules end event resends")
 
-        transformer.deactivate()
+        session.cancel()
         let endedBefore = phases.filter { $0 == .ended }.count
         for oneShot in oneShots where oneShot.timer.isValid {
             oneShot.handler()
         }
         XCTAssertEqual(phases.filter { $0 == .ended }.count, endedBefore)
-    }
-
-    func testDeactivateNotifiesInteractionStateChange() throws {
-        let transformer = makeTransformer()
-        var notifications = 0
-        transformer.onInteractionStateChanged = { notifications += 1 }
-
-        _ = try transformer.transform(scrollEvent(horizontal: 3), in: EventTransformerContext(device: nil))
-        transformer.deactivate()
-
-        XCTAssertEqual(notifications, 1)
     }
 
     func testFurtherInputKeepsTheSwipeAlive() throws {
@@ -219,7 +189,7 @@ final class SpaceSwipeTransformerTests: XCTestCase {
         XCTAssertNotNil(try transformer.transform(scrollEvent(horizontal: 3), in: EventTransformerContext(device: nil)))
         runFrames(transformer, for: 0.5)
         XCTAssertTrue(outputs.isEmpty)
-        XCTAssertFalse(transformer.hasActiveInteraction)
+        XCTAssertFalse(session.isActive)
     }
 
     func testRecordingLetsAnActiveSwipeFinish() throws {
@@ -236,7 +206,7 @@ final class SpaceSwipeTransformerTests: XCTestCase {
         runFrames(transformer, for: 0.5)
         XCTAssertEqual(phases.last, .ended)
         XCTAssertEqual(try XCTUnwrap(outputs.last).progress, -0.3, accuracy: 0.001)
-        XCTAssertFalse(transformer.hasActiveInteraction)
+        XCTAssertFalse(session.isActive)
 
         XCTAssertNotNil(try transformer.transform(scrollEvent(horizontal: 3), in: EventTransformerContext(device: nil)))
     }
@@ -250,15 +220,39 @@ final class SpaceSwipeTransformerTests: XCTestCase {
         XCTAssertTrue(outputs.isEmpty)
     }
 
-    func testDeactivateCancelsActiveSwipe() throws {
+    func testCancelAbandonsActiveSwipe() throws {
         let transformer = makeTransformer()
 
         _ = try transformer.transform(scrollEvent(horizontal: 3), in: EventTransformerContext(device: nil))
         runFrames(transformer, for: 0.05)
-        transformer.deactivate()
+        session.cancel()
 
         XCTAssertEqual(phases.last, .cancelled)
-        XCTAssertFalse(transformer.hasActiveInteraction)
+        XCTAssertFalse(session.isActive)
+    }
+
+    func testTransformerClaimsNoRouteInteraction() {
+        // The session releases itself on a timer, so routes never pin mouse
+        // buttons to a swipe or strip the transformer while a button is held.
+        let transformer = makeTransformer()
+        XCTAssertFalse(transformer is EventTransformerInteractionTracking)
+        XCTAssertFalse(transformer is Deactivatable)
+    }
+
+    func testRoutesSharingASessionContinueOneSwipe() throws {
+        // A swipe changes the app under the pointer, so the next wheel step can
+        // arrive through another route with its own scheme settings.
+        let firstRoute = makeTransformer(distance: 10, releaseDelay: 0.2)
+        let secondRoute = makeTransformer(distance: 20, releaseDelay: 0.2)
+
+        _ = try firstRoute.transform(scrollEvent(horizontal: 3), in: EventTransformerContext(device: nil))
+        runFrames(for: 0.1)
+        _ = try secondRoute.transform(scrollEvent(horizontal: 4), in: EventTransformerContext(device: nil))
+        runFrames(for: 0.5)
+
+        XCTAssertEqual(phases.filter { $0 == .began }.count, 1)
+        XCTAssertEqual(phases.filter { $0 == .ended }.count, 1)
+        XCTAssertEqual(try XCTUnwrap(outputs.last).progress, -0.5, accuracy: 0.001)
     }
 
     func testStepsPreferRawDeviceDeltaOverAcceleratedLines() {
