@@ -75,6 +75,13 @@ struct AutoScrollSection: View {
                     Text("Uses the same long-press threshold as button mappings.")
                         .settingsDescriptionStyle()
                 }
+
+                Toggle(isOn: $state.autoScrollReverse) {
+                    withDescription {
+                        Text("Reverse direction")
+                        Text("Move the pointer the way you want the content to go.")
+                    }
+                }
             }
         }
         .modifier(SectionViewModifier())

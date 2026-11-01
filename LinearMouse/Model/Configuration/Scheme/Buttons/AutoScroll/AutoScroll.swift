@@ -27,6 +27,7 @@ extension Scheme.Buttons {
         var toggleActivation: ToggleActivation?
         var modes: [Mode]?
         var trigger: Mapping?
+        var reverse: Bool?
 
         init() {}
     }
@@ -38,6 +39,7 @@ extension Scheme.Buttons.AutoScroll: Codable {
         case toggleActivation
         case mode
         case trigger
+        case reverse
     }
 
     init(from decoder: Decoder) throws {
@@ -47,6 +49,7 @@ extension Scheme.Buttons.AutoScroll: Codable {
         toggleActivation = try container.decodeIfPresent(ToggleActivation.self, forKey: .toggleActivation)
         modes = try container.decodeIfPresent(SingleValueOrArray<Mode>.self, forKey: .mode)?.wrappedValue
         trigger = try container.decodeIfPresent(Scheme.Buttons.Mapping.self, forKey: .trigger)
+        reverse = try container.decodeIfPresent(Bool.self, forKey: .reverse)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -56,6 +59,7 @@ extension Scheme.Buttons.AutoScroll: Codable {
         try container.encodeIfPresent(toggleActivation, forKey: .toggleActivation)
         try container.encode(SingleValueOrArray(wrappedValue: modes), forKey: .mode)
         try container.encodeIfPresent(trigger, forKey: .trigger)
+        try container.encodeIfPresent(reverse, forKey: .reverse)
     }
 }
 
@@ -92,6 +96,10 @@ extension Scheme.Buttons.AutoScroll {
 
         if let trigger {
             autoScroll.trigger = trigger
+        }
+
+        if let reverse {
+            autoScroll.reverse = reverse
         }
     }
 

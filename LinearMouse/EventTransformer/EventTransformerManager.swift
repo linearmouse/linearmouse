@@ -1096,12 +1096,14 @@ class EventTransformerManager {
 
         let modes = autoScroll.normalizedModes
         let toggleActivation = autoScroll.normalizedToggleActivation
+        let reverse = autoScroll.reverse ?? false
 
         if let sharedAutoScrollTransformer,
            sharedAutoScrollTransformer.matchesConfiguration(
                trigger: trigger,
                modes: modes,
-               toggleActivation: toggleActivation
+               toggleActivation: toggleActivation,
+               reverse: reverse
            ) {
             return sharedAutoScrollTransformer
         }
@@ -1112,6 +1114,7 @@ class EventTransformerManager {
             trigger: trigger,
             modes: modes,
             toggleActivation: toggleActivation,
+            reverse: reverse,
             scrollTargetResolver: AutoScrollScrollTarget.resolve
         ) { [postEvent] in postEvent($0, .cgSessionEventTap) }
         transformer.onPointerMotionRequirementChanged = { [weak self] in

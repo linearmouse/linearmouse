@@ -175,6 +175,12 @@
           "description": "Use \\\"toggle\\\" to keep scrolling active until the trigger is pressed again, \\\"hold\\\" to scroll only while the trigger stays pressed, or provide both to support both behaviors.",
           "title": "Activation mode"
         },
+        "reverse": {
+          "default": false,
+          "description": "Scroll the content in the direction the pointer moves, like dragging it, instead of moving the view toward the pointer.",
+          "title": "Reverse direction",
+          "type": "boolean"
+        },
         "toggleActivation": {
           "$ref": "#/definitions/Scheme.Buttons.AutoScroll.ToggleActivation",
           "default": "shortPress",

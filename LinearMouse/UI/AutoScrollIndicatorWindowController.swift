@@ -3,7 +3,7 @@
 
 import AppKit
 
-private let autoScrollIndicatorDiameter: CGFloat = 30
+private let autoScrollIndicatorDiameter: CGFloat = 34
 // Leave room around the disc so its shadow isn't clipped by the panel bounds.
 private let autoScrollIndicatorMargin: CGFloat = 10
 private let autoScrollIndicatorPanelSize = CGSize(
@@ -137,7 +137,7 @@ private final class AutoScrollIndicatorGlyphView: NSView {
         drawChevron(center: center, direction: .down, intensity: delta.dy < 0 ? verticalIntensity : 0)
         drawChevron(center: center, direction: .left, intensity: delta.dx < 0 ? horizontalIntensity : 0)
 
-        let dotRadius: CGFloat = 1.75
+        let dotRadius: CGFloat = 2
         let dot = NSBezierPath(ovalIn: CGRect(
             x: center.x - dotRadius,
             y: center.y - dotRadius,
@@ -153,9 +153,9 @@ private final class AutoScrollIndicatorGlyphView: NSView {
     }
 
     private func drawChevron(center: CGPoint, direction: Direction, intensity: CGFloat) {
-        let distance: CGFloat = 9
-        let halfWidth: CGFloat = 3.25
-        let depth: CGFloat = 2.75
+        let distance: CGFloat = 10.25
+        let halfWidth: CGFloat = 3.75
+        let depth: CGFloat = 3.125
 
         let (axis, normal): (CGVector, CGVector) = switch direction {
         case .up:
@@ -175,7 +175,7 @@ private final class AutoScrollIndicatorGlyphView: NSView {
         path.move(to: CGPoint(x: base.x + normal.dx * halfWidth, y: base.y + normal.dy * halfWidth))
         path.line(to: tip)
         path.line(to: CGPoint(x: base.x - normal.dx * halfWidth, y: base.y - normal.dy * halfWidth))
-        path.lineWidth = 1.5
+        path.lineWidth = 1.75
         path.lineCapStyle = .round
         path.lineJoinStyle = .round
 
