@@ -708,7 +708,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             receiverLocationID: locationID,
             slot: slot,
             kind: kind,
-            name: device.product ?? device.name,
+            name: slotInfo.name ?? device.product ?? device.name,
             serialNumber: slotInfo.serialNumber,
             productID: slotInfo.productID,
             batteryLevel: nil
@@ -2276,11 +2276,21 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         guard shouldContinue() else {
             return nil
         }
+        // The receiver keeps the paired name itself; see validateBoltSlotIdentity.
+        let nameResponse = hidpp10LongRequest(
+            register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverInfoRegister,
+            subregister: UInt8(0x40 + Int(slot) - 1),
+            deadline: deadline,
+            until: shouldContinue
+        )
+        guard shouldContinue() else {
+            return nil
+        }
 
         return .init(
             slot: slot,
             kind: Self.parseReceiverKind(pairingResponse) ?? 0,
-            name: nil,
+            name: nameResponse.flatMap(Self.parseReceiverName),
             productID: Self.parseReceiverProductID(pairingResponse),
             serialNumber: extendedPairingResponse.flatMap(Self.parseReceiverSerialNumber),
             batteryLevel: nil,

@@ -357,6 +357,42 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertEqual(LogitechReceiverChannel.parseBoltReceiverName(response), "MX Ergo S Plu")
     }
 
+    func testBoltReceiverNameAssemblesAllFragments() {
+        // Captured from a Bolt receiver with "MX Master 3S B" in slot 2. The
+        // first fragment carries 13 of the 14 bytes; the second has no length.
+        let first: [UInt8] = [
+            0x11, 0xFF, 0x83, 0xB5, 0x62, 0x01, 0x0E, 0x4D, 0x58, 0x20,
+            0x4D, 0x61, 0x73, 0x74, 0x65, 0x72, 0x20, 0x33, 0x53, 0x20
+        ]
+        let second: [UInt8] = [0x11, 0xFF, 0x83, 0xB5, 0x62, 0x02, 0x42] + Array(repeating: 0, count: 13)
+        var requestedParts = [UInt8]()
+
+        let name = LogitechReceiverChannel.assembleBoltReceiverName(firstFragment: first) { part in
+            requestedParts.append(part)
+            return part == 2 ? second : nil
+        }
+
+        XCTAssertEqual(name, "MX Master 3S B")
+        XCTAssertEqual(requestedParts, [2])
+    }
+
+    func testBoltReceiverNameKeepsFirstFragmentWhenLaterFragmentIsMissing() {
+        let first: [UInt8] = [0x11, 0xFF, 0x83, 0xB5, 0x62, 0x01, 0x0E] + Array("MX Master 3S ".utf8)
+
+        let name = LogitechReceiverChannel.assembleBoltReceiverName(firstFragment: first) { _ in nil }
+
+        XCTAssertEqual(name, "MX Master 3S")
+    }
+
+    func testBoltReceiverNameIgnoresFragmentForAnotherPart() {
+        let first: [UInt8] = [0x11, 0xFF, 0x83, 0xB5, 0x62, 0x01, 0x0E] + Array("MX Master 3S ".utf8)
+        let repeated = first
+
+        let name = LogitechReceiverChannel.assembleBoltReceiverName(firstFragment: first) { _ in repeated }
+
+        XCTAssertEqual(name, "MX Master 3S")
+    }
+
     func testBoltReceiverParsersRejectShortResponses() {
         XCTAssertNil(LogitechReceiverChannel.parseBoltReceiverKind([0x11, 0xFF, 0x83]))
         XCTAssertNil(LogitechReceiverChannel.parseBoltReceiverProductID([0x11, 0xFF, 0x83]))
