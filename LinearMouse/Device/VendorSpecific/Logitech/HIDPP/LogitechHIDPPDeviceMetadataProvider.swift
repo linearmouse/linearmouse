@@ -151,6 +151,8 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         let serialNumber: String?
         let batteryLevel: Int?
         let hasLiveMetadata: Bool
+        /// False when only part of `name` could be read.
+        var hasCompleteName = true
     }
 
     struct ReceiverSlotMetadata {
@@ -253,6 +255,8 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         /// and other non-pointing devices that are intentionally absent from
         /// `identities`.
         let observedSlotKinds: [UInt8: UInt8]
+        /// Slots whose identity carries only part of the device's name.
+        let incompleteNameSlots: Set<UInt8>
 
         var hasCompletePresence: Bool {
             inventoryAvailable && expectedDeviceCount?.hasCompletePresence(
@@ -268,7 +272,8 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             liveReachableSlots: Set<UInt8>,
             expectedDeviceCount: ReceiverDeviceCount? = nil,
             inventoryAvailable: Bool = true,
-            observedSlotKinds: [UInt8: UInt8] = [:]
+            observedSlotKinds: [UInt8: UInt8] = [:],
+            incompleteNameSlots: Set<UInt8> = []
         ) {
             self.identities = identities
             self.connectionSnapshots = connectionSnapshots
@@ -276,6 +281,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             self.expectedDeviceCount = expectedDeviceCount
             self.inventoryAvailable = inventoryAvailable
             self.observedSlotKinds = observedSlotKinds
+            self.incompleteNameSlots = incompleteNameSlots
         }
     }
 

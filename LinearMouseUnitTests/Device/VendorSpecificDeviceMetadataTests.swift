@@ -374,14 +374,19 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
 
         XCTAssertEqual(name, "MX Master 3S B")
         XCTAssertEqual(requestedParts, [2])
+        XCTAssertEqual(
+            LogitechReceiverChannel.assembleBoltReceiverNameFragments(firstFragment: first) { _ in second }?.isComplete,
+            true
+        )
     }
 
     func testBoltReceiverNameKeepsFirstFragmentWhenLaterFragmentIsMissing() {
         let first: [UInt8] = [0x11, 0xFF, 0x83, 0xB5, 0x62, 0x01, 0x0E] + Array("MX Master 3S ".utf8)
 
-        let name = LogitechReceiverChannel.assembleBoltReceiverName(firstFragment: first) { _ in nil }
+        let name = LogitechReceiverChannel.assembleBoltReceiverNameFragments(firstFragment: first) { _ in nil }
 
-        XCTAssertEqual(name, "MX Master 3S")
+        XCTAssertEqual(name?.name, "MX Master 3S")
+        XCTAssertEqual(name?.isComplete, false)
     }
 
     func testBoltReceiverNameIgnoresFragmentForAnotherPart() {
@@ -498,14 +503,17 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
                 batteryLevel: nil
             )
         }
-        func discovery(_ identity: ReceiverLogicalDeviceIdentity)
-            -> LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery {
+        func discovery(
+            _ identity: ReceiverLogicalDeviceIdentity,
+            hasCompleteName: Bool = true
+        ) -> LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery {
             .init(
                 identities: [identity],
                 connectionSnapshots: [2: .init(isConnected: true, kind: 0x02)],
                 liveReachableSlots: [2],
                 expectedDeviceCount: .paired(1),
-                observedSlotKinds: [2: 0x02]
+                observedSlotKinds: [2: 0x02],
+                incompleteNameSlots: hasCompleteName ? [] : [2]
             )
         }
         var store = ReceiverSlotStateStore()
@@ -532,10 +540,19 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             "MX Master 3S B"
         )
 
-        // A name discovery read only part of gives way to the fuller one.
-        _ = store.mergeDiscovery(discovery(identity(name: "MX Master 3S")))
-        XCTAssertEqual(store.updateSlotIdentity(identity(name: "MX Master 3S B")).name, "MX Master 3S B")
-        XCTAssertEqual(store.updateSlotIdentity(identity(name: "MX Master 3S")).name, "MX Master 3S B")
+        // A complete name is kept even if the receiver stores a longer one.
+        _ = store.mergeDiscovery(discovery(identity(name: "Work Mouse")))
+        XCTAssertEqual(store.updateSlotIdentity(identity(name: "Work Mouse Pro")).name, "Work Mouse")
+
+        // When discovery later reads only part of a name, the full one known wins.
+        _ = store.mergeDiscovery(discovery(identity(name: "MX Master 3S"), hasCompleteName: false))
+        XCTAssertEqual(store.currentPublishedIdentities().map(\.name), ["Work Mouse"])
+
+        // A name discovery read only part of is not kept.
+        var freshStore = ReceiverSlotStateStore()
+        _ = freshStore.mergeDiscovery(discovery(identity(name: "MX Master 3S"), hasCompleteName: false))
+        XCTAssertEqual(freshStore.currentPublishedIdentities().map(\.name), ["MX Master 3S"])
+        XCTAssertEqual(freshStore.updateSlotIdentity(identity(name: "MX Master 3S B")).name, "MX Master 3S B")
 
         // Without a serial number, another device of the same model could be in the slot.
         _ = store.mergeDiscovery(discovery(identity(name: "Work Mouse", serialNumber: nil)))

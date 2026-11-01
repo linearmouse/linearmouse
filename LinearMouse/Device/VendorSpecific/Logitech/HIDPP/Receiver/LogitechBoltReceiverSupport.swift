@@ -722,7 +722,7 @@ extension LogitechReceiverMonitoringChannel {
         let kind = pairingResponse.flatMap { Self.parseBoltReceiverKind($0.bytes) }
             ?? connectionSnapshot?.kind
             ?? 0
-        let name = routedName ?? receiverName
+        let name = routedName ?? receiverName?.name
 
         return .init(
             slot: slot,
@@ -731,7 +731,8 @@ extension LogitechReceiverMonitoringChannel {
             productID: pairingResponse.flatMap { Self.parseBoltReceiverProductID($0.bytes) },
             serialNumber: pairingResponse.flatMap { Self.parseBoltReceiverSerialNumber($0.bytes) },
             batteryLevel: batteryLevel,
-            hasLiveMetadata: routedName != nil || batteryLevel != nil
+            hasLiveMetadata: routedName != nil || batteryLevel != nil,
+            hasCompleteName: routedName != nil || receiverName?.isComplete != false
         )
     }
 
@@ -760,20 +761,22 @@ extension LogitechReceiverMonitoringChannel {
         guard shouldContinue() else {
             return nil
         }
+        let receiverName = boltReceiverName(
+            slot: slot,
+            firstFragment: nameResponse?.bytes,
+            deadline: deadline,
+            until: shouldContinue
+        )
 
         return .init(
             slot: slot,
             kind: Self.parseBoltReceiverKind(pairingResponse.bytes) ?? 0,
-            name: boltReceiverName(
-                slot: slot,
-                firstFragment: nameResponse?.bytes,
-                deadline: deadline,
-                until: shouldContinue
-            ),
+            name: receiverName?.name,
             productID: Self.parseBoltReceiverProductID(pairingResponse.bytes),
             serialNumber: Self.parseBoltReceiverSerialNumber(pairingResponse.bytes),
             batteryLevel: nil,
-            hasLiveMetadata: false
+            hasLiveMetadata: false,
+            hasCompleteName: receiverName?.isComplete != false
         )
     }
 
@@ -784,8 +787,8 @@ extension LogitechReceiverMonitoringChannel {
         firstFragment: [UInt8]?,
         deadline: Date,
         until shouldContinue: @escaping () -> Bool
-    ) -> String? {
-        Self.assembleBoltReceiverName(firstFragment: firstFragment) { part in
+    ) -> (name: String, isComplete: Bool)? {
+        Self.assembleBoltReceiverNameFragments(firstFragment: firstFragment) { part in
             boltReceiverInfoRequest(
                 subregister: UInt8(0x60 + Int(slot)),
                 parameters: [part],
@@ -814,12 +817,16 @@ extension LogitechReceiverMonitoringChannel {
             slot.hasLiveMetadata ? slot.slot : nil
         })
 
+        var incompleteNameSlots = Set<UInt8>()
         let identities = discovery.slots.compactMap { slot -> ReceiverLogicalDeviceIdentity? in
             guard let kind = resolveReceiverPointingIdentityKind(
                 snapshotRaw: discovery.connectionSnapshots[slot.slot]?.kind,
                 pairingRaw: slot.kind
             ), kind.isPointingDevice else {
                 return nil
+            }
+            if slot.name != nil, !slot.hasCompleteName {
+                incompleteNameSlots.insert(slot.slot)
             }
 
             return ReceiverLogicalDeviceIdentity(
@@ -841,7 +848,8 @@ extension LogitechReceiverMonitoringChannel {
             inventoryAvailable: discovery.inventoryAvailable,
             observedSlotKinds: Dictionary(uniqueKeysWithValues: discovery.slots.map {
                 ($0.slot, $0.kind)
-            })
+            }),
+            incompleteNameSlots: incompleteNameSlots
         )
     }
 
@@ -1180,6 +1188,15 @@ extension LogitechReceiverMonitoringChannel {
         firstFragment: [UInt8]?,
         readFragment: (UInt8) -> [UInt8]?
     ) -> String? {
+        assembleBoltReceiverNameFragments(firstFragment: firstFragment, readFragment: readFragment)?.name
+    }
+
+    /// Like `assembleBoltReceiverName`, also telling whether every fragment
+    /// up to the reported length was read.
+    static func assembleBoltReceiverNameFragments(
+        firstFragment: [UInt8]?,
+        readFragment: (UInt8) -> [UInt8]?
+    ) -> (name: String, isComplete: Bool)? {
         guard let firstFragment, firstFragment.count >= 7 else {
             return nil
         }
@@ -1203,6 +1220,6 @@ extension LogitechReceiverMonitoringChannel {
             !name.isEmpty else {
             return nil
         }
-        return name
+        return (name, bytes.count >= length)
     }
 }
