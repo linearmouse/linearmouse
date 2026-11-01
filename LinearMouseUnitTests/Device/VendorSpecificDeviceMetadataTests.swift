@@ -548,6 +548,10 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         _ = store.mergeDiscovery(discovery(identity(name: "MX Master 3S"), hasCompleteName: false))
         XCTAssertEqual(store.currentPublishedIdentities().map(\.name), ["Work Mouse"])
 
+        // So does it when discovery read no name and fell back to the receiver's.
+        _ = store.mergeDiscovery(discovery(identity(name: "USB Receiver"), hasCompleteName: false))
+        XCTAssertEqual(store.currentPublishedIdentities().map(\.name), ["Work Mouse"])
+
         // A name discovery read only part of is not kept.
         var freshStore = ReceiverSlotStateStore()
         _ = freshStore.mergeDiscovery(discovery(identity(name: "MX Master 3S"), hasCompleteName: false))

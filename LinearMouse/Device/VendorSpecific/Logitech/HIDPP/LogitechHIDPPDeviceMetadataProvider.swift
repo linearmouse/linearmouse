@@ -293,6 +293,8 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         let productID: Int?
         let batteryLevel: Int?
         let hasLiveMetadata: Bool
+        /// False when `name` is the receiver's fallback rather than one read for the slot.
+        var hasSlotName = true
     }
 
     private enum ApproximateBatteryLevel: UInt8 {
@@ -2384,7 +2386,8 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
                     shouldContinue: shouldContinue
                 )
                 .flatMap { provider.readReceiverBatteryLevel(using: $0) },
-                hasLiveMetadata: slot.hasLiveMetadata
+                hasLiveMetadata: slot.hasLiveMetadata,
+                hasSlotName: slot.name != nil
             )
         }
 
@@ -2516,12 +2519,16 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             slot.hasLiveMetadata ? slot.slot : nil
         })
 
+        var incompleteNameSlots = Set<UInt8>()
         let identities = slots.compactMap { slot -> ReceiverLogicalDeviceIdentity? in
             guard let kind = resolveReceiverPointingIdentityKind(
                 snapshotRaw: connectionSnapshots[slot.slot]?.kind,
                 pairingRaw: slot.kind
             ), kind.isPointingDevice else {
                 return nil
+            }
+            if !slot.hasSlotName {
+                incompleteNameSlots.insert(slot.slot)
             }
 
             return ReceiverLogicalDeviceIdentity(
@@ -2543,7 +2550,8 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             inventoryAvailable: discovery.inventoryAvailable,
             observedSlotKinds: Dictionary(uniqueKeysWithValues: slots.map {
                 ($0.slot, $0.kind)
-            })
+            }),
+            incompleteNameSlots: incompleteNameSlots
         )
     }
 

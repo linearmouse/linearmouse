@@ -732,7 +732,7 @@ extension LogitechReceiverMonitoringChannel {
             serialNumber: pairingResponse.flatMap { Self.parseBoltReceiverSerialNumber($0.bytes) },
             batteryLevel: batteryLevel,
             hasLiveMetadata: routedName != nil || batteryLevel != nil,
-            hasCompleteName: routedName != nil || receiverName?.isComplete != false
+            hasCompleteName: routedName != nil || receiverName?.isComplete == true
         )
     }
 
@@ -825,7 +825,9 @@ extension LogitechReceiverMonitoringChannel {
             ), kind.isPointingDevice else {
                 return nil
             }
-            if slot.name != nil, !slot.hasCompleteName {
+            // Without a complete name, the identity falls back to `baseName`
+            // or part of the name; a complete one known for the device wins.
+            if !slot.hasCompleteName {
                 incompleteNameSlots.insert(slot.slot)
             }
 

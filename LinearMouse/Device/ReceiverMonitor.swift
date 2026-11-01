@@ -451,7 +451,8 @@ struct ReceiverSlotStateStore {
                 discoveredNames[device] = identity.name
                 return identity
             }
-            // A partial name is not kept; a full one known for the device wins.
+            // A partial or fallback name is not kept; a complete one known
+            // for the device wins.
             return discoveredNames[device].map { identity.renamed($0) } ?? identity
         }
         let latestIdentitiesBySlot = Dictionary(uniqueKeysWithValues: identities.map {
