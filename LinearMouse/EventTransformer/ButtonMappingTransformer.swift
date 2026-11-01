@@ -314,10 +314,11 @@ final class ButtonMappingTransformer: EventTransformer {
                 engine.wheel(direction, modifierFlags: event.flags, at: now)
             }
             if let index = result.output.wheelMappingIndex, let action = result.output.actions.popLast() {
+                let policy = action.scrollActionPolicy
                 let count = view.scrollPhase == .cancelled ? 0 : scrollRecognizer.consume(
                     input,
                     mapping: index,
-                    repeats: action.repeatsWithScrollMovement,
+                    policy: policy,
                     at: now
                 )
                 if action.repeatsWithScrollMovement, view.scrollPhase != .cancelled {
@@ -333,7 +334,9 @@ final class ButtonMappingTransformer: EventTransformer {
                         executor.perform(action, targetBundleIdentifier: target)
                     }
                 }
-                if count > 0 {
+                if policy == .steps {
+                    result.output.actions.append(contentsOf: repeatElement(action, count: count))
+                } else if count > 0 {
                     result.output.actions.append(action.coalescingScrollSteps(count))
                 }
             } else {

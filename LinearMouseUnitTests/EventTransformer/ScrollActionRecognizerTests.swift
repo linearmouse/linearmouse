@@ -389,9 +389,7 @@ final class ScrollActionRecognizerTests: XCTestCase {
         typealias Action = Scheme.Buttons.Mapping.Action
         let actions: [Action] = [
             .arg0(.missionControl), .arg0(.missionControlSpaceLeft), .arg1(.keyPress([])),
-            .arg0(.mediaVolumeUp), .arg0(.mediaVolumeDown),
-            .arg0(.displayBrightnessUp), .arg0(.displayBrightnessDown),
-            .arg0(.keyboardBrightnessUp), .arg0(.keyboardBrightnessDown)
+            .arg0(.mediaMute), .arg0(.mediaNext)
         ]
         for action in actions {
             for axis in [ScrollActionRecognizer.Axis.horizontal, .vertical] {
@@ -403,7 +401,7 @@ final class ScrollActionRecognizerTests: XCTestCase {
                             counts.append(recognizer.consume(
                                 Input(axis: axis, delta: 1, units: units, hasPhase: hasPhase),
                                 mapping: 0,
-                                repeats: action.repeatsWithScrollMovement,
+                                policy: action.scrollActionPolicy,
                                 at: time * 1_200_000
                             ))
                         }
@@ -414,15 +412,25 @@ final class ScrollActionRecognizerTests: XCTestCase {
         }
     }
 
-    func testEveryBuiltInActionExceptScrollOutputUsesThrottlePolicy() {
+    func testEveryBuiltInActionExceptScrollOutputAndIncrementalControlsUsesThrottlePolicy() {
         typealias Action = Scheme.Buttons.Mapping.Action
         let scrollActions: Set<Action.Arg0> = [
             .mouseWheelScrollUp, .mouseWheelScrollDown, .mouseWheelScrollLeft, .mouseWheelScrollRight
         ]
+        let steppingActions: Set<Action.Arg0> = [
+            .mediaVolumeUp, .mediaVolumeDown,
+            .displayBrightnessUp, .displayBrightnessDown,
+            .keyboardBrightnessUp, .keyboardBrightnessDown
+        ]
         for action in Action.Arg0.allCases {
             XCTAssertEqual(Action.arg0(action).repeatsWithScrollMovement, scrollActions.contains(action))
+            let expected: ScrollActionRecognizer.Policy = scrollActions.contains(action) ? .distance :
+                steppingActions.contains(action) ? .steps : .throttled
+            XCTAssertEqual(Action.arg0(action).scrollActionPolicy, expected, "\(action)")
         }
         XCTAssertFalse(Action.arg1(.run("echo example")).repeatsWithScrollMovement)
+        XCTAssertEqual(Action.arg1(.run("echo example")).scrollActionPolicy, .throttled)
+        XCTAssertEqual(Action.arg1(.keyPress([])).scrollActionPolicy, .throttled)
         for action: Action in [
             .arg1(.mouseWheelScrollUp(.line(3))), .arg1(.mouseWheelScrollDown(.line(3))),
             .arg1(.mouseWheelScrollLeft(.pixel(10))), .arg1(.mouseWheelScrollRight(.pixel(10)))
@@ -440,5 +448,79 @@ final class ScrollActionRecognizerTests: XCTestCase {
         XCTAssertFalse(Action.arg0(.mediaVolumeUp).repeatsWithScrollMovement)
         XCTAssertFalse(Action.arg0(.displayBrightnessDown).repeatsWithScrollMovement)
         XCTAssertTrue(Action.arg0(.mouseWheelScrollUp).repeatsWithScrollMovement)
+    }
+
+    func testIncrementalControlsStepOncePerLegacyWheelEventWithoutCooldown() {
+        let recognizer = ScrollActionRecognizer()
+        let counts = (0 ..< 10).map { index in
+            recognizer.consume(
+                Input(axis: .vertical, delta: 1, units: .detents),
+                mapping: 0,
+                policy: .steps,
+                at: UInt64(index) * 20_000_000
+            )
+        }
+        XCTAssertEqual(counts, Array(repeating: 1, count: 10))
+    }
+
+    func testIncrementalControlsStepByHighResolutionDetentIndependentOfEventSplitting() {
+        for pieces in [1, 2, 8, 120] {
+            let recognizer = ScrollActionRecognizer()
+            var counts = [Int]()
+            for index in 0 ..< pieces * 4 {
+                counts.append(recognizer.consume(
+                    Input(axis: .vertical, delta: 1 / Double(pieces), units: .detents),
+                    mapping: 0,
+                    policy: .steps,
+                    at: UInt64(index) * 1_000_000
+                ))
+            }
+            XCTAssertEqual(counts.reduce(0, +), 4, "pieces per detent: \(pieces)")
+            XCTAssertEqual(counts.max(), 1, "pieces per detent: \(pieces)")
+        }
+    }
+
+    func testIncrementalControlsDoNotConsumeOrAdvanceTheSharedCooldown() {
+        let throttle = ScrollActionThrottle()
+        let volume = ScrollActionRecognizer(throttle: throttle)
+        let navigation = ScrollActionRecognizer(throttle: throttle)
+        let input = Input(axis: .vertical, delta: 1, units: .detents)
+        XCTAssertEqual(volume.consume(input, mapping: 0, policy: .steps, at: 0), 1)
+        XCTAssertEqual(navigation.consume(input, mapping: 1, policy: .throttled, at: 10_000_000), 1)
+        XCTAssertEqual(volume.consume(input, mapping: 0, policy: .steps, at: 20_000_000), 1)
+        XCTAssertEqual(navigation.consume(input, mapping: 1, policy: .throttled, at: 30_000_000), 0)
+    }
+
+    func testIncrementalControlsUseLongerStepsForContinuousInput() {
+        for pieces in [1, 4, 32] {
+            let recognizer = ScrollActionRecognizer()
+            var count = 0
+            for index in 0 ..< pieces {
+                count += recognizer.consume(
+                    Input(axis: .vertical, delta: 144 / Double(pieces), units: .points, hasPhase: true),
+                    mapping: 0,
+                    policy: .steps,
+                    at: UInt64(index)
+                )
+            }
+            // Half a step, then every 32 points: 16, 48, 80, 112, 144.
+            XCTAssertEqual(count, 5, "pieces: \(pieces)")
+        }
+    }
+
+    func testIncrementalControlsBoundStepsPerEvent() {
+        let recognizer = ScrollActionRecognizer()
+        XCTAssertEqual(recognizer.consume(
+            Input(axis: .vertical, delta: 1e12, units: .detents),
+            mapping: 0,
+            policy: .steps,
+            at: 0
+        ), 16)
+        XCTAssertEqual(recognizer.consume(
+            Input(axis: .vertical, delta: .infinity, units: .detents),
+            mapping: 0,
+            policy: .steps,
+            at: 1
+        ), 0)
     }
 }
