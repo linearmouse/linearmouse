@@ -13,13 +13,20 @@ final class AutoScrollTransformer {
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "AutoScroll")
 
     private static let deadZone: Double = 10
-    private static let maxScrollStep: Double = 160
     private static let timerInterval: TimeInterval = 1.0 / 60.0
+
+    // Follows Firefox's autoscroll curve, implemented independently: the offset
+    // is divided into 12px steps, and past the first step the speed grows with
+    // the offset to the power of 1.5, in pixels per 20ms.
+    // See ThirdPartyNotices/Firefox.txt for the source reference.
+    private static let accelerationStep: Double = 12
+    private static let accelerationInterval: TimeInterval = 0.02
+    /// Caps the time a single tick may cover so a stall doesn't cause a jump.
+    private static let maxTickInterval: TimeInterval = 0.1
 
     private let trigger: Scheme.Buttons.Mapping
     private let modes: [Scheme.Buttons.AutoScroll.Mode]
     private let toggleActivation: Scheme.Buttons.AutoScroll.ToggleActivation
-    private let speed: Double
     private let scheduleLongPressTimer: LongPressTimerScheduler
     private let activationHitProvider: ActivationHitProvider?
     private let scrollTargetResolver: ScrollTargetResolver?
@@ -98,6 +105,9 @@ final class AutoScrollTransformer {
     private var timer: EventThreadTimer?
     private let indicatorController = AutoScrollIndicatorWindowController()
     private var lastIndicatorLocation: CGPoint?
+    private var lastTickTime: TimeInterval?
+    /// Sub-pixel scroll distance carried over to the next tick, per axis.
+    private var scrollRemainder = CGVector.zero
     private var scrollTarget: AutoScrollScrollTarget?
     private let accessibilityActivationClassifier = AutoScrollAccessibilityActivationClassifier()
 
@@ -109,7 +119,6 @@ final class AutoScrollTransformer {
         trigger: Scheme.Buttons.Mapping,
         modes: [Scheme.Buttons.AutoScroll.Mode],
         toggleActivation: Scheme.Buttons.AutoScroll.ToggleActivation = .shortPress,
-        speed: Double,
         longPressTimerScheduler: @escaping LongPressTimerScheduler = AutoScrollTransformer
             .scheduleEventThreadLongPressTimer,
         activationHitProvider: ActivationHitProvider? = nil,
@@ -119,7 +128,6 @@ final class AutoScrollTransformer {
         self.trigger = trigger
         self.modes = modes
         self.toggleActivation = toggleActivation
-        self.speed = speed
         scheduleLongPressTimer = longPressTimerScheduler
         self.activationHitProvider = activationHitProvider
         self.scrollTargetResolver = scrollTargetResolver
@@ -566,6 +574,8 @@ extension AutoScrollTransformer: EventTransformer {
         let current = current ?? point
         state = .active(anchor: point, current: current, session: session)
         lastIndicatorLocation = current
+        lastTickTime = ProcessInfo.processInfo.systemUptime
+        scrollRemainder = .zero
         let delta = CGVector(dx: current.x - point.x, dy: current.y - point.y)
         DispatchQueue.main.async { [indicatorController] in
             indicatorController.show(at: point)
@@ -602,8 +612,19 @@ extension AutoScrollTransformer: EventTransformer {
             }
         }
 
-        let horizontal = scrollAmount(for: anchor.x - current.x)
-        let vertical = scrollAmount(for: current.y - anchor.y)
+        let now = ProcessInfo.processInfo.systemUptime
+        let elapsed = min(Self.maxTickInterval, max(0, now - (lastTickTime ?? now)))
+        lastTickTime = now
+
+        // Scroll whole pixels and carry the fraction, so slow speeds still
+        // move steadily instead of being rounded away.
+        let desiredHorizontal = scrollRemainder.dx
+            + Self.scrollDistance(forOffset: anchor.x - current.x, over: elapsed)
+        let desiredVertical = scrollRemainder.dy
+            + Self.scrollDistance(forOffset: current.y - anchor.y, over: elapsed)
+        let horizontal = desiredHorizontal.rounded(.towardZero)
+        let vertical = desiredVertical.rounded(.towardZero)
+        scrollRemainder = CGVector(dx: desiredHorizontal - horizontal, dy: desiredVertical - vertical)
 
         guard horizontal != 0 || vertical != 0 else {
             return
@@ -612,17 +633,15 @@ extension AutoScrollTransformer: EventTransformer {
         postContinuousScrollEvent(horizontal: horizontal, vertical: vertical)
     }
 
-    private func scrollAmount(for delta: Double) -> Double {
-        let adjusted = abs(delta) - Self.deadZone
-        guard adjusted > 0 else {
+    /// The distance, in pixels, to scroll for a pointer offset over a period of time.
+    static func scrollDistance(forOffset offset: Double, over elapsed: TimeInterval) -> Double {
+        let steps = offset / accelerationStep
+        guard abs(steps) > 1 else {
             return 0
         }
 
-        let base = adjusted * speed * 0.12
-        let boost = sqrt(adjusted) * speed * 0.6
-        let value = min(Self.maxScrollStep, base + boost)
-
-        return delta.sign == .minus ? -value : value
+        let distancePerInterval = steps * abs(steps).squareRoot() - (steps > 0 ? 1 : -1)
+        return distancePerInterval * elapsed / accelerationInterval
     }
 
     private func postContinuousScrollEvent(horizontal: Double, vertical: Double) {
@@ -871,6 +890,8 @@ extension AutoScrollTransformer: Deactivatable {
 
         timer?.invalidate()
         timer = nil
+        lastTickTime = nil
+        scrollRemainder = .zero
     }
 }
 
@@ -878,12 +899,10 @@ extension AutoScrollTransformer {
     func matchesConfiguration(
         trigger: Scheme.Buttons.Mapping,
         modes: [Scheme.Buttons.AutoScroll.Mode],
-        toggleActivation: Scheme.Buttons.AutoScroll.ToggleActivation,
-        speed: Double
+        toggleActivation: Scheme.Buttons.AutoScroll.ToggleActivation
     ) -> Bool {
         self.trigger == trigger &&
             self.modes == modes &&
-            self.toggleActivation == toggleActivation &&
-            abs(self.speed - speed) < 0.0001
+            self.toggleActivation == toggleActivation
     }
 }

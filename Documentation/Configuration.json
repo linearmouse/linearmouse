@@ -175,11 +175,6 @@
           "description": "Use \\\"toggle\\\" to keep scrolling active until the trigger is pressed again, \\\"hold\\\" to scroll only while the trigger stays pressed, or provide both to support both behaviors.",
           "title": "Activation mode"
         },
-        "speed": {
-          "default": 1,
-          "description": "Adjust the auto scroll speed multiplier.",
-          "type": "number"
-        },
         "toggleActivation": {
           "$ref": "#/definitions/Scheme.Buttons.AutoScroll.ToggleActivation",
           "default": "shortPress",

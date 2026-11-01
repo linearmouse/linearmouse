@@ -568,12 +568,6 @@ declare namespace Scheme {
       mode?: SingleValueOrArray<AutoScroll.Mode>;
 
       /**
-       * @description Adjust the auto scroll speed multiplier.
-       * @default 1
-       */
-      speed?: number;
-
-      /**
        * @title Trigger
        * @description Choose the mouse button and modifier keys used to activate auto scroll.
        */
