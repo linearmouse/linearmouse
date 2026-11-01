@@ -114,6 +114,10 @@ final class BatteryDeviceMonitor: NSObject, ObservableObject {
         propertyRefreshInFlight = false
     }
 
+    func batteryLevel(of identity: ReceiverLogicalDeviceIdentity) -> Int? {
+        ConnectedBatteryDeviceInfo.batteryLevel(of: identity, inventory: devices)
+    }
+
     func currentDeviceBatteryLevel(for device: Device) -> Int? {
         ConnectedBatteryDeviceInfo.currentDeviceBatteryLevel(
             pairedDevices: DeviceManager.shared.pairedReceiverDevices(for: device),

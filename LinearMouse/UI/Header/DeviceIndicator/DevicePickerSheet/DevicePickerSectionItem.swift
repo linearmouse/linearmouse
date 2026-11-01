@@ -45,7 +45,7 @@ struct DevicePickerSectionItem: View {
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
 
-                                if let batteryLevel = device.batteryLevel {
+                                if let batteryLevel = deviceModel.pairedReceiverDeviceBatteryLevels[device.slot] {
                                     BatteryLevelIndicator(level: batteryLevel, compact: true)
                                 }
                             }
