@@ -413,16 +413,18 @@ struct ReceiverSlotStateStore {
     private struct DiscoveredDevice: Hashable {
         let slot: UInt8
         let productID: Int?
-        let serialNumber: String?
+        let serialNumber: String
 
+        /// Two devices of the same model may be paired to a slot in turn, so
+        /// only a stable serial number tells them apart.
         init?(_ identity: ReceiverLogicalDeviceIdentity) {
-            guard identity.productID != nil || identity.serialNumber != nil else {
+            guard let serialNumber = LogitechStableSerial.normalize(identity.serialNumber) else {
                 return nil
             }
 
             slot = identity.slot
             productID = identity.productID
-            serialNumber = identity.serialNumber
+            self.serialNumber = serialNumber
         }
     }
 
@@ -550,10 +552,18 @@ struct ReceiverSlotStateStore {
         fallbackName: String? = nil
     ) -> ReceiverLogicalDeviceIdentity {
         var identity = identity
-        if let device = DiscoveredDevice(identity),
+        let device = DiscoveredDevice(identity)
+        if let device,
            let name = discoveredNames[device],
-           name != fallbackName,
-           name != identity.name {
+           identity.name.count > name.count,
+           identity.name.hasPrefix(name) {
+            // Discovery read only part of the name, such as the first Bolt
+            // fragment; the refresh read more of it.
+            discoveredNames[device] = identity.name
+        } else if let device,
+                  let name = discoveredNames[device],
+                  name != fallbackName,
+                  name != identity.name {
             identity = ReceiverLogicalDeviceIdentity(
                 receiverLocationID: identity.receiverLocationID,
                 slot: identity.slot,

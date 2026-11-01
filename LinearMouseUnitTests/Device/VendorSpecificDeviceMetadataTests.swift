@@ -531,6 +531,18 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
             store.updateSlotIdentity(identity(name: "MX Master 3S B"), fallbackName: "USB Receiver").name,
             "MX Master 3S B"
         )
+
+        // A name discovery read only part of gives way to the fuller one.
+        _ = store.mergeDiscovery(discovery(identity(name: "MX Master 3S")))
+        XCTAssertEqual(store.updateSlotIdentity(identity(name: "MX Master 3S B")).name, "MX Master 3S B")
+        XCTAssertEqual(store.updateSlotIdentity(identity(name: "MX Master 3S")).name, "MX Master 3S B")
+
+        // Without a serial number, another device of the same model could be in the slot.
+        _ = store.mergeDiscovery(discovery(identity(name: "Work Mouse", serialNumber: nil)))
+        XCTAssertEqual(
+            store.updateSlotIdentity(identity(name: "MX Master 3S B", serialNumber: nil)).name,
+            "MX Master 3S B"
+        )
     }
 
     func testConnectedCountInventoryIgnoresOfflinePairedSlots() {
