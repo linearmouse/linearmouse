@@ -3,12 +3,20 @@
 
 import AppKit
 
-private let autoScrollIndicatorSize = CGSize(width: 48, height: 48)
+private let autoScrollIndicatorDiameter: CGFloat = 30
+// Leave room around the disc so its shadow isn't clipped by the panel bounds.
+private let autoScrollIndicatorMargin: CGFloat = 10
+private let autoScrollIndicatorPanelSize = CGSize(
+    width: autoScrollIndicatorDiameter + autoScrollIndicatorMargin * 2,
+    height: autoScrollIndicatorDiameter + autoScrollIndicatorMargin * 2
+)
 
 final class AutoScrollIndicatorWindowController {
+    private let glyphView = AutoScrollIndicatorGlyphView()
+
     private lazy var window: NSPanel = {
         let panel = NSPanel(
-            contentRect: CGRect(origin: .zero, size: autoScrollIndicatorSize),
+            contentRect: CGRect(origin: .zero, size: autoScrollIndicatorPanelSize),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -19,31 +27,81 @@ final class AutoScrollIndicatorWindowController {
         panel.level = .statusBar
         panel.ignoresMouseEvents = true
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
-        panel.contentView = AutoScrollIndicatorView(frame: CGRect(origin: .zero, size: autoScrollIndicatorSize))
+        panel.animationBehavior = .none
+        panel.contentView = makeContentView()
         return panel
     }()
 
+    private func makeContentView() -> NSView {
+        let discFrame = CGRect(
+            x: autoScrollIndicatorMargin,
+            y: autoScrollIndicatorMargin,
+            width: autoScrollIndicatorDiameter,
+            height: autoScrollIndicatorDiameter
+        )
+
+        let container = NSView(frame: CGRect(origin: .zero, size: autoScrollIndicatorPanelSize))
+        container.wantsLayer = true
+
+        // The effect view clips to the circle, so the shadow lives on a separate layer.
+        let shadowLayer = CALayer()
+        shadowLayer.frame = discFrame
+        shadowLayer.shadowPath = CGPath(ellipseIn: CGRect(origin: .zero, size: discFrame.size), transform: nil)
+        shadowLayer.shadowColor = NSColor.black.cgColor
+        shadowLayer.shadowOpacity = 0.16
+        shadowLayer.shadowRadius = 3
+        shadowLayer.shadowOffset = CGSize(width: 0, height: -1)
+        container.layer?.addSublayer(shadowLayer)
+
+        // A plain HUD material reads consistently on SDR and HDR displays, unlike
+        // Liquid Glass, whose refraction looks muddy without HDR headroom.
+        let effect = NSVisualEffectView(frame: discFrame)
+        effect.material = .hudWindow
+        effect.blendingMode = .behindWindow
+        effect.state = .active
+        effect.maskImage = .circleMask(diameter: autoScrollIndicatorDiameter)
+        container.addSubview(effect)
+
+        glyphView.frame = effect.bounds
+        glyphView.autoresizingMask = [.width, .height]
+        effect.addSubview(glyphView)
+
+        return container
+    }
+
     func show(at point: CGPoint) {
         let origin = CGPoint(
-            x: point.x - autoScrollIndicatorSize.width / 2,
-            y: point.y - autoScrollIndicatorSize.height / 2
+            x: point.x - autoScrollIndicatorPanelSize.width / 2,
+            y: point.y - autoScrollIndicatorPanelSize.height / 2
         )
-        window.setFrame(CGRect(origin: origin, size: autoScrollIndicatorSize), display: true)
+        window.setFrame(CGRect(origin: origin, size: autoScrollIndicatorPanelSize), display: false)
+        glyphView.delta = .zero
+
+        window.alphaValue = 0
         window.orderFrontRegardless()
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.12
+            window.animator().alphaValue = 1
+        }
     }
 
     func update(delta: CGVector) {
-        (window.contentView as? AutoScrollIndicatorView)?.delta = delta
+        glyphView.delta = delta
     }
 
     func hide() {
+        // Hide immediately; a lingering HUD reads as if Auto Scroll were still active.
+        window.alphaValue = 0
         window.orderOut(nil)
     }
 }
 
-private final class AutoScrollIndicatorView: NSView {
+private final class AutoScrollIndicatorGlyphView: NSView {
     var delta: CGVector = .zero {
         didSet {
+            guard delta != oldValue else {
+                return
+            }
             needsDisplay = true
         }
     }
@@ -52,120 +110,77 @@ private final class AutoScrollIndicatorView: NSView {
         false
     }
 
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        needsDisplay = true
+    }
+
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
 
-        let bounds = bounds
-        let circleRect = bounds.insetBy(dx: 4, dy: 4)
-        let ringPath = NSBezierPath(ovalIn: circleRect)
+        let isDark = effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+        // A light tint keeps the glyphs legible whatever is behind the material.
+        (isDark ? NSColor.black.withAlphaComponent(0.3) : NSColor.white.withAlphaComponent(0.3)).setFill()
+        NSBezierPath(ovalIn: bounds).fill()
 
-        if let context = NSGraphicsContext.current?.cgContext {
-            context.saveGState()
-            context.setShadow(
-                offset: CGSize(width: 0, height: -1),
-                blur: 10,
-                color: NSColor.black.withAlphaComponent(0.18).cgColor
-            )
-
-            let gradient = NSGradient(
-                colors: [
-                    NSColor(white: 1.0, alpha: 0.97),
-                    NSColor(white: 0.93, alpha: 0.95)
-                ]
-            )
-            gradient?.draw(in: ringPath, angle: 90)
-            context.restoreGState()
-        }
-
-        NSColor(white: 0.12, alpha: 0.48).setStroke()
-        ringPath.lineWidth = 1
-        ringPath.stroke()
-
-        let innerRingPath = NSBezierPath(ovalIn: circleRect.insetBy(dx: 1.5, dy: 1.5))
-        NSColor.white.withAlphaComponent(0.45).setStroke()
-        innerRingPath.lineWidth = 1
-        innerRingPath.stroke()
+        let rim = NSBezierPath(ovalIn: bounds.insetBy(dx: 0.5, dy: 0.5))
+        rim.lineWidth = 1
+        (isDark ? NSColor.white.withAlphaComponent(0.16) : NSColor.black.withAlphaComponent(0.1)).setStroke()
+        rim.stroke()
 
         let center = CGPoint(x: bounds.midX, y: bounds.midY)
-        let horizontalIntensity = CGFloat(min(1, max(0, (abs(delta.dx) - 10) / 44)))
-        let verticalIntensity = CGFloat(min(1, max(0, (abs(delta.dy) - 10) / 44)))
+        let horizontalIntensity = intensity(for: delta.dx)
+        let verticalIntensity = intensity(for: delta.dy)
 
-        drawArrow(
-            at: CGPoint(x: center.x, y: bounds.maxY - 13),
-            direction: .up,
-            intensity: delta.dy > 0 ? verticalIntensity : 0
-        )
-        drawArrow(
-            at: CGPoint(x: bounds.maxX - 13, y: center.y),
-            direction: .right,
-            intensity: delta.dx > 0 ? horizontalIntensity : 0
-        )
-        drawArrow(
-            at: CGPoint(x: center.x, y: bounds.minY + 13),
-            direction: .down,
-            intensity: delta.dy < 0 ? verticalIntensity : 0
-        )
-        drawArrow(
-            at: CGPoint(x: bounds.minX + 13, y: center.y),
-            direction: .left,
-            intensity: delta.dx < 0 ? horizontalIntensity : 0
-        )
+        drawChevron(center: center, direction: .up, intensity: delta.dy > 0 ? verticalIntensity : 0)
+        drawChevron(center: center, direction: .right, intensity: delta.dx > 0 ? horizontalIntensity : 0)
+        drawChevron(center: center, direction: .down, intensity: delta.dy < 0 ? verticalIntensity : 0)
+        drawChevron(center: center, direction: .left, intensity: delta.dx < 0 ? horizontalIntensity : 0)
 
-        let crosshair = NSBezierPath()
-        crosshair.move(to: CGPoint(x: center.x, y: bounds.minY + 11))
-        crosshair.line(to: CGPoint(x: center.x, y: bounds.maxY - 11))
-        crosshair.move(to: CGPoint(x: bounds.minX + 11, y: center.y))
-        crosshair.line(to: CGPoint(x: bounds.maxX - 11, y: center.y))
-        NSColor(white: 0.1, alpha: 0.14).setStroke()
-        crosshair.lineWidth = 1
-        crosshair.stroke()
-
-        let centerShadowRect = CGRect(x: center.x - 5, y: center.y - 5, width: 10, height: 10)
-        let centerShadowPath = NSBezierPath(ovalIn: centerShadowRect)
-        NSColor.black.withAlphaComponent(0.14).setFill()
-        centerShadowPath.fill()
-
-        let dotRect = CGRect(x: center.x - 4, y: center.y - 4, width: 8, height: 8)
-        let dotPath = NSBezierPath(ovalIn: dotRect)
-        NSColor(white: 0.07, alpha: 0.96).setFill()
-        dotPath.fill()
-
-        let highlightRect = CGRect(x: center.x - 1.5, y: center.y + 1, width: 3, height: 2)
-        let highlightPath = NSBezierPath(ovalIn: highlightRect)
-        NSColor.white.withAlphaComponent(0.28).setFill()
-        highlightPath.fill()
+        let dotRadius: CGFloat = 1.75
+        let dot = NSBezierPath(ovalIn: CGRect(
+            x: center.x - dotRadius,
+            y: center.y - dotRadius,
+            width: dotRadius * 2,
+            height: dotRadius * 2
+        ))
+        NSColor.labelColor.withAlphaComponent(0.7).setFill()
+        dot.fill()
     }
 
-    private func drawArrow(at center: CGPoint, direction: Direction, intensity: CGFloat) {
-        let path = NSBezierPath()
+    private func intensity(for value: CGFloat) -> CGFloat {
+        min(1, max(0, (abs(value) - 10) / 44))
+    }
 
-        switch direction {
+    private func drawChevron(center: CGPoint, direction: Direction, intensity: CGFloat) {
+        let distance: CGFloat = 9
+        let halfWidth: CGFloat = 3.25
+        let depth: CGFloat = 2.75
+
+        let (axis, normal): (CGVector, CGVector) = switch direction {
         case .up:
-            path.move(to: CGPoint(x: center.x, y: center.y + 6))
-            path.line(to: CGPoint(x: center.x - 4.5, y: center.y - 3))
-            path.line(to: CGPoint(x: center.x + 4.5, y: center.y - 3))
-        case .right:
-            path.move(to: CGPoint(x: center.x + 6, y: center.y))
-            path.line(to: CGPoint(x: center.x - 3, y: center.y + 4.5))
-            path.line(to: CGPoint(x: center.x - 3, y: center.y - 4.5))
+            (CGVector(dx: 0, dy: 1), CGVector(dx: 1, dy: 0))
         case .down:
-            path.move(to: CGPoint(x: center.x, y: center.y - 6))
-            path.line(to: CGPoint(x: center.x - 4.5, y: center.y + 3))
-            path.line(to: CGPoint(x: center.x + 4.5, y: center.y + 3))
+            (CGVector(dx: 0, dy: -1), CGVector(dx: 1, dy: 0))
+        case .right:
+            (CGVector(dx: 1, dy: 0), CGVector(dx: 0, dy: 1))
         case .left:
-            path.move(to: CGPoint(x: center.x - 6, y: center.y))
-            path.line(to: CGPoint(x: center.x + 3, y: center.y + 4.5))
-            path.line(to: CGPoint(x: center.x + 3, y: center.y - 4.5))
+            (CGVector(dx: -1, dy: 0), CGVector(dx: 0, dy: 1))
         }
 
-        path.close()
+        let tip = CGPoint(x: center.x + axis.dx * distance, y: center.y + axis.dy * distance)
+        let base = CGPoint(x: tip.x - axis.dx * depth, y: tip.y - axis.dy * depth)
 
-        let alpha = 0.26 + Double(intensity) * 0.68
-        NSColor(white: 0.04, alpha: alpha).setFill()
-        path.fill()
+        let path = NSBezierPath()
+        path.move(to: CGPoint(x: base.x + normal.dx * halfWidth, y: base.y + normal.dy * halfWidth))
+        path.line(to: tip)
+        path.line(to: CGPoint(x: base.x - normal.dx * halfWidth, y: base.y - normal.dy * halfWidth))
+        path.lineWidth = 1.5
+        path.lineCapStyle = .round
+        path.lineJoinStyle = .round
 
-        NSColor.white.withAlphaComponent(0.18 + Double(intensity) * 0.12).setStroke()
-        path.lineWidth = 0.7
+        let alpha = 0.25 + Double(intensity) * 0.7
+        NSColor.labelColor.withAlphaComponent(alpha).setStroke()
         path.stroke()
     }
 
@@ -174,5 +189,15 @@ private final class AutoScrollIndicatorView: NSView {
         case right
         case down
         case left
+    }
+}
+
+private extension NSImage {
+    static func circleMask(diameter: CGFloat) -> NSImage {
+        NSImage(size: CGSize(width: diameter, height: diameter), flipped: false) { rect in
+            NSColor.black.setFill()
+            NSBezierPath(ovalIn: rect).fill()
+            return true
+        }
     }
 }
