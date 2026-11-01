@@ -317,7 +317,7 @@ final class ButtonMappingTransformer: EventTransformer {
                 let count = view.scrollPhase == .cancelled ? 0 : scrollRecognizer.consume(
                     input,
                     mapping: index,
-                    repeats: action.repeatsWithScrollMovement,
+                    policy: action.scrollActionPolicy,
                     at: now
                 )
                 if action.repeatsWithScrollMovement, view.scrollPhase != .cancelled {
@@ -333,9 +333,7 @@ final class ButtonMappingTransformer: EventTransformer {
                         executor.perform(action, targetBundleIdentifier: target)
                     }
                 }
-                if count > 0 {
-                    result.output.actions.append(action.coalescingScrollSteps(count))
-                }
+                result.output.actions.append(contentsOf: action.scrollActions(steps: count))
             } else {
                 scrollRecognizer.discardMovement(on: input.axis)
             }

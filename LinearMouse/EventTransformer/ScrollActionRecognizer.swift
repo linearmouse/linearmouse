@@ -9,6 +9,20 @@ final class ScrollActionRecognizer {
     typealias Axis = ScrollInput.Axis
     typealias Input = ScrollInput
 
+    enum Policy {
+        /// Scroll output follows movement distance, including its momentum tail.
+        case distance
+        /// Incremental commands, such as volume, step once per detent without a cooldown.
+        case steps
+        /// Discrete commands, such as switching tabs, share a leading-edge cooldown.
+        case throttled
+    }
+
+    private static let pointsPerStep = 32.0
+    /// Covers the full range of a volume or brightness control; also bounds
+    /// the work a single malformed event can request.
+    private static let maximumStepsPerEvent = 16
+
     private let throttle: ScrollActionThrottle
     private let gesture: ScrollGestureOwnership
     private let movement = ScrollMovementAccumulator()
@@ -80,13 +94,31 @@ final class ScrollActionRecognizer {
     }
 
     func consume(_ input: Input, mapping: Int, repeats: Bool, at now: UInt64) -> Int {
+        consume(input, mapping: mapping, policy: repeats ? .distance : .throttled, at: now)
+    }
+
+    func consume(_ input: Input, mapping: Int, policy: Policy, at now: UInt64) -> Int {
         guard input.delta.isFinite, input.delta != 0 else {
             return 0
         }
         // Ownership follows consumption, not resolution or a guessed detent type.
         gesture.claim()
-        if repeats {
+        switch policy {
+        case .distance:
             return movement.consume(input, mapping: mapping, at: now)
+        case .steps:
+            // Like line scrolling: step at half a detent, then every full detent.
+            // Continuous input needs a longer step than scroll output does.
+            let count = movement.consume(
+                input,
+                mapping: mapping,
+                roundToNearestStep: true,
+                threshold: input.units == .points ? Self.pointsPerStep : nil,
+                at: now
+            )
+            return min(count, Self.maximumStepsPerEvent)
+        case .throttled:
+            break
         }
         if input.units == .detents {
             // Match line scrolling: trigger at half a detent, then every full
@@ -111,6 +143,36 @@ extension Scheme.Buttons.Mapping.Action {
             true
         default:
             false
+        }
+    }
+}
+
+extension Scheme.Buttons.Mapping.Action {
+    var scrollActionPolicy: ScrollActionRecognizer.Policy {
+        if repeatsWithScrollMovement {
+            return .distance
+        }
+        switch self {
+        case .arg0(.mediaVolumeUp), .arg0(.mediaVolumeDown),
+             .arg0(.displayBrightnessUp), .arg0(.displayBrightnessDown),
+             .arg0(.keyboardBrightnessUp), .arg0(.keyboardBrightnessDown):
+            return .steps
+        default:
+            return .throttled
+        }
+    }
+
+    /// The actions to perform for `count` recognized steps: one per step for
+    /// incremental controls, otherwise a single coalesced action.
+    func scrollActions(steps count: Int) -> [Self] {
+        guard count > 0 else {
+            return []
+        }
+        switch scrollActionPolicy {
+        case .steps:
+            return Array(repeating: self, count: count)
+        case .distance, .throttled:
+            return [coalescingScrollSteps(count)]
         }
     }
 }
