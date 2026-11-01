@@ -114,6 +114,41 @@ final class SpaceSwipeTransformerTests: XCTestCase {
         XCTAssertEqual(notifications, 1)
     }
 
+    func testDeactivatingAfterReleaseCancelsPendingEndEventResends() throws {
+        // Records one-shot timers so the test can fire the ones still valid.
+        var oneShots: [(timer: EventThreadTimer, handler: () -> Void)] = []
+        let idleThread = EventThread()
+        let transformer = SpaceSwipeTransformer(
+            distance: 10,
+            releaseDelay: 0.2,
+            now: { [weak self] in self?.time ?? 0 },
+            schedule: { _, repeats, handler in
+                let timer = EventThreadTimer(
+                    timer: Timer(timeInterval: 1, repeats: false) { _ in },
+                    eventThread: idleThread
+                )
+                if !repeats {
+                    oneShots.append((timer, handler))
+                }
+                return timer
+            },
+            isRecording: { false },
+            sink: { [weak self] in self?.outputs.append($0) }
+        )
+
+        _ = try transformer.transform(scrollEvent(horizontal: 3), in: EventTransformerContext(device: nil))
+        runFrames(transformer, for: 0.5)
+        XCTAssertEqual(phases.last, .ended)
+        XCTAssertFalse(oneShots.isEmpty, "a release schedules end event resends")
+
+        transformer.deactivate()
+        let endedBefore = phases.filter { $0 == .ended }.count
+        for oneShot in oneShots where oneShot.timer.isValid {
+            oneShot.handler()
+        }
+        XCTAssertEqual(phases.filter { $0 == .ended }.count, endedBefore)
+    }
+
     func testDeactivateNotifiesInteractionStateChange() throws {
         let transformer = makeTransformer()
         var notifications = 0

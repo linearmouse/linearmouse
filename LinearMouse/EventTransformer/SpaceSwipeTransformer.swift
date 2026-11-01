@@ -132,6 +132,10 @@ final class SpaceSwipeTransformer: EventTransformer, EventTransformerInteraction
         stopFrames()
         if state == .swiping {
             finish(phase: .cancelled)
+        } else {
+            // A finished swipe's delayed end events would otherwise reach the
+            // Dock after another route has started a new swipe.
+            cancelResends()
         }
         let wasActive = state != .idle
         state = .idle
