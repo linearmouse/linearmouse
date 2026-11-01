@@ -37,6 +37,38 @@ final class AutoScrollTransformerTests: XCTestCase {
         XCTAssertFalse(transformer.isAutoscrollActive)
     }
 
+    func testScrollTargetIsResolvedAtTheTriggerScreenLocation() throws {
+        var trigger = Scheme.Buttons.Mapping()
+        trigger.button = .mouse(2)
+        var resolvedLocations: [CGPoint] = []
+        let transformer = AutoScrollTransformer(
+            trigger: trigger,
+            modes: [.toggle],
+            speed: 1,
+            activationHitProvider: { _ in nil },
+            scrollTargetResolver: { location in
+                resolvedLocations.append(location)
+                return nil
+            }
+        ) { _ in }
+        let location = CGPoint(x: 320, y: 240)
+        let event = try XCTUnwrap(CGEvent(
+            mouseEventSource: nil,
+            mouseType: .otherMouseDown,
+            mouseCursorPosition: location,
+            mouseButton: .center
+        ))
+        event.setIntegerValueField(.mouseEventButtonNumber, value: 2)
+
+        XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+        XCTAssertTrue(transformer.isAutoscrollActive)
+        // Window hit testing uses global display coordinates, not the unflipped
+        // coordinates Auto Scroll measures pointer travel in.
+        XCTAssertEqual(resolvedLocations, [location])
+
+        transformer.deactivate()
+    }
+
     func testLogitechModifierMismatchAllowsLowerPriorityRecognizer() {
         let identity = LogitechControlIdentity(controlID: 0xC4)
         var trigger = Scheme.Buttons.Mapping()
