@@ -186,6 +186,7 @@ final class SpaceSwipeTransformerTests: XCTestCase {
         let last = try XCTUnwrap(outputs.last)
         XCTAssertEqual(last.phase, .ended)
         XCTAssertEqual(last.progress, -0.6, accuracy: 0.001)
+        XCTAssertEqual(last.velocity, 0, "a settled release carries no fling")
     }
 
     func testLongSpinChainsIntoTheNextSpace() throws {

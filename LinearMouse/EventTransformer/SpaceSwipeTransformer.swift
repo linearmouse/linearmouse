@@ -237,6 +237,9 @@ final class SpaceSwipeTransformer: EventTransformer, EventTransformerInteraction
         if inputIdle, progress == target {
             stopFrames()
             if state == .swiping {
+                // Settled: the last easing step is not a fling, so the Dock
+                // decides by position alone.
+                velocity = 0
                 finish(phase: .ended)
             }
             state = .idle
