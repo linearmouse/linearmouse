@@ -35,6 +35,28 @@ final class ButtonMappingConfigurationTests: XCTestCase {
         XCTAssertNil(encoded["hold"])
     }
 
+    func testConfigurationLoadIgnoresRemovedAutoScrollSpeed() throws {
+        let configuration = try Configuration.load(from: #"""
+        {
+          "schemes": [{
+            "buttons": {
+              "autoScroll": { "enabled": true, "speed": 2 }
+            }
+          }]
+        }
+        """#)
+
+        XCTAssertEqual(configuration.schemes.first?.buttons.autoScroll.enabled, true)
+
+        let root = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: configuration.dump()) as? [String: Any]
+        )
+        let schemes = try XCTUnwrap(root["schemes"] as? [[String: Any]])
+        let buttons = try XCTUnwrap(schemes.first?["buttons"] as? [String: Any])
+        let autoScroll = try XCTUnwrap(buttons["autoScroll"] as? [String: Any])
+        XCTAssertNil(autoScroll["speed"])
+    }
+
     func testConfigurationLoadAndDumpMigratesLegacyLifecycleFields() throws {
         let configuration = try Configuration.load(from: #"""
         {

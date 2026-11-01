@@ -66,17 +66,6 @@ struct AutoScrollSection: View {
                     }
                 }
 
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text("Speed")
-                        Spacer()
-                        Text(state.autoScrollSpeedText)
-                            .foregroundColor(.secondary)
-                    }
-
-                    Slider(value: $state.autoScrollSpeed, in: 0.3 ... 3.0, step: 0.1)
-                }
-
                 Text(modeDescription)
                     .settingsDescriptionStyle()
                     .padding(.top, 4)

@@ -13,13 +13,47 @@ final class AutoScrollTransformerTests: XCTestCase {
         super.tearDown()
     }
 
+    func testScrollDistanceFollowsFirefoxCurve() {
+        // Within one 12px step of the anchor, nothing scrolls.
+        XCTAssertEqual(AutoScrollTransformer.scrollDistance(forOffset: 12, over: 0.02), 0)
+        XCTAssertEqual(AutoScrollTransformer.scrollDistance(forOffset: -12, over: 0.02), 0)
+
+        // 48px is 4 steps: 4 * sqrt(4) - 1 = 7px per 20ms.
+        XCTAssertEqual(AutoScrollTransformer.scrollDistance(forOffset: 48, over: 0.02), 7, accuracy: 0.0001)
+        XCTAssertEqual(AutoScrollTransformer.scrollDistance(forOffset: -48, over: 0.02), -7, accuracy: 0.0001)
+
+        // The distance scales with elapsed time.
+        XCTAssertEqual(AutoScrollTransformer.scrollDistance(forOffset: 48, over: 0.01), 3.5, accuracy: 0.0001)
+
+        // Farther offsets accelerate faster than linearly.
+        let near = AutoScrollTransformer.scrollDistance(forOffset: 100, over: 1)
+        let far = AutoScrollTransformer.scrollDistance(forOffset: 400, over: 1)
+        XCTAssertGreaterThan(far, near * 4)
+    }
+
+    func testScrollDeltaCarriesFractionsAndStaysWithinFixedPointRange() {
+        let slow = AutoScrollTransformer.scrollDelta(for: 2.75)
+        XCTAssertEqual(slow.delta, 2)
+        XCTAssertEqual(slow.remainder, 0.75, accuracy: 0.0001)
+
+        let reverse = AutoScrollTransformer.scrollDelta(for: -2.75)
+        XCTAssertEqual(reverse.delta, -2)
+        XCTAssertEqual(reverse.remainder, -0.75, accuracy: 0.0001)
+
+        // A far offset after a stalled tick would overflow the 16.16 fields.
+        let distance = AutoScrollTransformer.scrollDistance(forOffset: 5000, over: 0.1)
+        XCTAssertGreaterThan(distance, 32_767)
+        let clamped = AutoScrollTransformer.scrollDelta(for: -distance)
+        XCTAssertEqual(clamped.delta, -AutoScrollTransformer.maxScrollDeltaPerEvent)
+        XCTAssertEqual(clamped.remainder, 0)
+    }
+
     func testButtonMappingRecordingBypassesAutoScrollTrigger() throws {
         var trigger = Scheme.Buttons.Mapping()
         trigger.button = .mouse(2)
         let transformer = AutoScrollTransformer(
             trigger: trigger,
-            modes: [.toggle, .hold],
-            speed: 1
+            modes: [.toggle, .hold]
         ) { _ in }
         let event = try XCTUnwrap(CGEvent(
             mouseEventSource: nil,
@@ -44,7 +78,6 @@ final class AutoScrollTransformerTests: XCTestCase {
         let transformer = AutoScrollTransformer(
             trigger: trigger,
             modes: [.toggle],
-            speed: 1,
             activationHitProvider: { _ in nil },
             scrollTargetResolver: { location in
                 resolvedLocations.append(location)
@@ -76,8 +109,7 @@ final class AutoScrollTransformerTests: XCTestCase {
         trigger.command = true
         let transformer = AutoScrollTransformer(
             trigger: trigger,
-            modes: [.hold],
-            speed: 1
+            modes: [.hold]
         ) { _ in }
 
         XCTAssertEqual(
@@ -101,8 +133,7 @@ final class AutoScrollTransformerTests: XCTestCase {
         trigger.button = .logitechControl(identity)
         let transformer = AutoScrollTransformer(
             trigger: trigger,
-            modes: [.hold],
-            speed: 1
+            modes: [.hold]
         ) { _ in }
         let press = LogitechEventContext(
             device: nil,
@@ -148,8 +179,7 @@ final class AutoScrollTransformerTests: XCTestCase {
         trigger.button = .logitechControl(identity)
         let transformer = AutoScrollTransformer(
             trigger: trigger,
-            modes: [.hold],
-            speed: 1
+            modes: [.hold]
         ) { _ in }
         let context = LogitechEventContext(
             device: nil,
@@ -185,8 +215,7 @@ final class AutoScrollTransformerTests: XCTestCase {
         trigger.button = .logitechControl(identity)
         let transformer = AutoScrollTransformer(
             trigger: trigger,
-            modes: [.hold],
-            speed: 1
+            modes: [.hold]
         ) { _ in }
         let press = LogitechEventContext(
             device: nil,
@@ -222,7 +251,6 @@ final class AutoScrollTransformerTests: XCTestCase {
             trigger: trigger,
             modes: [.toggle],
             toggleActivation: .longPress,
-            speed: 1,
             longPressTimerScheduler: timer.schedule
         ) { _ in }
         let press = logitechContext(identity: identity, pressed: true)
@@ -244,7 +272,6 @@ final class AutoScrollTransformerTests: XCTestCase {
             trigger: trigger,
             modes: [.toggle],
             toggleActivation: .longPress,
-            speed: 1,
             longPressTimerScheduler: timer.schedule
         ) { _ in }
         let press = logitechContext(identity: identity, pressed: true)
@@ -265,7 +292,6 @@ final class AutoScrollTransformerTests: XCTestCase {
         let transformer = AutoScrollTransformer(
             trigger: trigger,
             modes: [.hold],
-            speed: 1,
             activationHitProvider: { _ in
                 XCTFail("Hold-only activation should not depend on accessibility hit testing")
                 return .nonPressable(diagnostic: nil, path: [])
@@ -294,7 +320,6 @@ final class AutoScrollTransformerTests: XCTestCase {
         let transformer = AutoScrollTransformer(
             trigger: trigger,
             modes: [.hold],
-            speed: 1,
             activationHitProvider: { _ in
                 XCTFail("Hold-only activation should not depend on accessibility hit testing")
                 return nil
@@ -335,7 +360,6 @@ final class AutoScrollTransformerTests: XCTestCase {
             trigger: trigger,
             modes: [.toggle],
             toggleActivation: .longPress,
-            speed: 1,
             longPressTimerScheduler: timer.schedule,
             activationHitProvider: { _ in
                 XCTFail("Long-press toggle should not depend on accessibility hit testing")
@@ -369,7 +393,6 @@ final class AutoScrollTransformerTests: XCTestCase {
             trigger: trigger,
             modes: [.toggle],
             toggleActivation: .longPress,
-            speed: 1,
             longPressTimerScheduler: timer.schedule,
             activationHitProvider: nil
         ) { replayedEvents.append($0.type) }
@@ -399,7 +422,6 @@ final class AutoScrollTransformerTests: XCTestCase {
             trigger: trigger,
             modes: [.hold],
             toggleActivation: .longPress,
-            speed: 1,
             longPressTimerScheduler: timer.schedule
         ) { _ in }
 
@@ -430,7 +452,6 @@ final class AutoScrollTransformerTests: XCTestCase {
             trigger: trigger,
             modes: [.toggle, .hold],
             toggleActivation: .longPress,
-            speed: 1,
             longPressTimerScheduler: timer.schedule
         ) { _ in }
 
@@ -462,7 +483,6 @@ final class AutoScrollTransformerTests: XCTestCase {
             trigger: trigger,
             modes: [.toggle, .hold],
             toggleActivation: .longPress,
-            speed: 1,
             longPressTimerScheduler: timer.schedule
         ) { _ in }
 
@@ -588,7 +608,6 @@ final class AutoScrollTransformerTests: XCTestCase {
         let transformer = AutoScrollTransformer(
             trigger: trigger,
             modes: [.toggle],
-            speed: 1,
             activationHitProvider: activationHitProvider
         ) { replayedEvents.append($0.type) }
 
@@ -619,7 +638,6 @@ final class AutoScrollTransformerTests: XCTestCase {
         return AutoScrollTransformer(
             trigger: trigger,
             modes: [.toggle, .hold],
-            speed: 1,
             activationHitProvider: { _ in .pressable(path: ["AXLink"]) },
             eventSink: eventSink
         )
