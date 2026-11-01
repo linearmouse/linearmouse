@@ -738,6 +738,7 @@ extension LogitechReceiverMonitoringChannel {
     func validateBoltSlotIdentity(
         _ slot: UInt8,
         deadline: Date,
+        readsName: Bool = true,
         until shouldContinue: @escaping () -> Bool
     ) -> LogitechHIDPPDeviceMetadataProvider.ReceiverSlotInfo? {
         guard let pairingResponse = boltReceiverInfoRequest(
@@ -750,12 +751,12 @@ extension LogitechReceiverMonitoringChannel {
         // The receiver keeps the paired name itself, so reading it does not
         // wait on the device. Without it the slot falls back to the receiver's
         // name, which a scheme written for the device would not match.
-        let nameResponse = boltReceiverInfoRequest(
+        let nameResponse = readsName ? boltReceiverInfoRequest(
             subregister: UInt8(0x60 + Int(slot)),
             parameters: [0x01],
             deadline: deadline,
             until: shouldContinue
-        )
+        ) : nil
         guard shouldContinue() else {
             return nil
         }

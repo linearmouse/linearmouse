@@ -665,12 +665,15 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         )
     }
 
+    /// `readsName` can be turned off by callers that compare only stable
+    /// identifiers, so the optional name read does not spend their deadline.
     func validateReceiverSlotIdentity(
         for device: VendorSpecificDeviceContext,
         slot: UInt8,
         connectionSnapshot: ReceiverConnectionSnapshot? = nil,
         using receiverChannel: LogitechReceiverChannel,
         deadline: Date,
+        readsName: Bool = true,
         until shouldContinue: @escaping () -> Bool
     ) -> ReceiverLogicalDeviceIdentity? {
         guard let locationID = receiverChannel.locationID else {
@@ -685,12 +688,14 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             slotInfo = receiverChannel.validateBoltSlotIdentity(
                 slot,
                 deadline: deadline,
+                readsName: readsName,
                 until: shouldContinue
             )
         } else {
             slotInfo = receiverChannel.validateSlotIdentity(
                 slot,
                 deadline: deadline,
+                readsName: readsName,
                 until: shouldContinue
             )
         }
@@ -1425,6 +1430,8 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
                         slot: slot,
                         using: channel,
                         deadline: deadline,
+                        // Only the serial number is compared before restoring settings.
+                        readsName: false,
                         until: shouldContinue
                     )
                 LogitechReceiverChannel.deliverOnMainRunLoop {
@@ -2256,6 +2263,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
     func validateSlotIdentity(
         _ slot: UInt8,
         deadline: Date,
+        readsName: Bool = true,
         until shouldContinue: @escaping () -> Bool
     ) -> LogitechHIDPPDeviceMetadataProvider.ReceiverSlotInfo? {
         let pairingResponse = hidpp10LongRequest(
@@ -2277,12 +2285,12 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             return nil
         }
         // The receiver keeps the paired name itself; see validateBoltSlotIdentity.
-        let nameResponse = hidpp10LongRequest(
+        let nameResponse = readsName ? hidpp10LongRequest(
             register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverInfoRegister,
             subregister: UInt8(0x40 + Int(slot) - 1),
             deadline: deadline,
             until: shouldContinue
-        )
+        ) : nil
         guard shouldContinue() else {
             return nil
         }
