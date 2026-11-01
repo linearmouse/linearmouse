@@ -138,6 +138,21 @@ final class SpaceSwipeTransformerTests: XCTestCase {
         XCTAssertEqual(try XCTUnwrap(outputs.last).progress, -0.3, accuracy: 0.01)
     }
 
+    func testTurningBackPastHalfwayStillEndsTheSwipe() throws {
+        let transformer = makeTransformer(distance: 10, releaseDelay: 0.2)
+
+        _ = try transformer.transform(scrollEvent(horizontal: 8), in: EventTransformerContext(device: nil))
+        runFrames(transformer, for: 0.1)
+        _ = try transformer.transform(scrollEvent(horizontal: -2), in: EventTransformerContext(device: nil))
+        runFrames(transformer, for: 0.5)
+
+        // The Dock decides by position, so a release past halfway switches spaces.
+        XCTAssertFalse(phases.contains(.cancelled))
+        let last = try XCTUnwrap(outputs.last)
+        XCTAssertEqual(last.phase, .ended)
+        XCTAssertEqual(last.progress, -0.6, accuracy: 0.001)
+    }
+
     func testLongSpinChainsIntoTheNextSpace() throws {
         let transformer = makeTransformer(distance: 10)
 
@@ -178,13 +193,14 @@ final class SpaceSwipeTransformerTests: XCTestCase {
         runFrames(transformer, for: 0.05)
         recording = true
 
-        XCTAssertNil(
+        XCTAssertNotNil(
             try transformer.transform(scrollEvent(horizontal: 1), in: EventTransformerContext(device: nil)),
-            "the swipe already in progress keeps owning the wheel"
+            "recording receives the wheel even while a swipe finishes"
         )
         runFrames(transformer, for: 0.5)
         XCTAssertEqual(phases.last, .ended)
-        XCTAssertEqual(try XCTUnwrap(outputs.last).progress, -0.4, accuracy: 0.001)
+        XCTAssertEqual(try XCTUnwrap(outputs.last).progress, -0.3, accuracy: 0.001)
+        XCTAssertFalse(transformer.hasActiveInteraction)
 
         XCTAssertNotNil(try transformer.transform(scrollEvent(horizontal: 3), in: EventTransformerContext(device: nil)))
     }

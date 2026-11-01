@@ -104,8 +104,9 @@ final class SpaceSwipeTransformer: EventTransformer, EventTransformerInteraction
         }
 
         // Let button mapping recording see the wheel. A swipe already in
-        // progress still finishes, so the space never stays half-switched.
-        if isRecording(), !hasActiveInteraction {
+        // progress still eases to its target and releases on its own, so the
+        // space never stays half-switched.
+        if isRecording() {
             return event
         }
 
@@ -252,11 +253,9 @@ final class SpaceSwipeTransformer: EventTransformer, EventTransformerInteraction
 
     // MARK: - Output
 
-    private func finish(phase requestedPhase: CGSGesturePhase) {
-        // Like lifting the fingers after reversing a trackpad swipe: moving
-        // back toward the start while releasing abandons the switch.
-        let reversing = velocity != 0 && velocity.sign != progress.sign
-        let phase: CGSGesturePhase = requestedPhase == .ended && reversing ? .cancelled : requestedPhase
+    /// A swipe is only released once the animation has settled, so the Dock
+    /// decides by position: past halfway it switches, otherwise it snaps back.
+    private func finish(phase: CGSGesturePhase) {
         let output = Output(phase: phase, progress: progress, velocity: velocity)
         sink(output)
         scheduleResends(of: output)
