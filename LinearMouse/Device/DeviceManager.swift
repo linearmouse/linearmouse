@@ -281,6 +281,9 @@ class DeviceManager: ObservableObject {
             receiverPairedDeviceIdentities.removeValue(forKey: locationID)
             receiverWakeRediscoveryRequests[locationID] = ReceiverRediscoveryRequest()
         }
+        for device in receiverDevices {
+            device.setLogicalDeviceRouteSuspended(true)
+        }
 
         lastActiveDeviceId = nil
         lastActiveDeviceRef = nil
@@ -983,19 +986,26 @@ class DeviceManager: ObservableObject {
         device.logitechSettingsReconciler.apply(configuredLogitechScheme(for: device))
     }
 
+    /// Hardware settings of the physical device, overridden by those of the
+    /// device behind it that is currently in use.
     private func configuredLogitechScheme(for device: Device) -> Scheme {
         let schemes = ConfigurationState.shared.configuration.schemes
-        guard case let .at(index) = schemes.schemeIndex(
-            ofDevice: device,
-            ofApp: nil,
-            ofProcessPath: nil,
-            ofProcessName: nil,
-            ofDisplay: nil
-        ) else {
-            return Scheme()
+        var mergedScheme = Scheme()
+        for matcher in DeviceMatcher.candidates(of: device).reversed() {
+            guard case let .at(index) = schemes.schemeIndex(
+                ofDeviceMatcher: matcher,
+                ofApp: nil,
+                ofProcessPath: nil,
+                ofProcessName: nil,
+                ofDisplay: nil
+            ) else {
+                continue
+            }
+
+            schemes[index].merge(into: &mergedScheme)
         }
 
-        return schemes[index]
+        return mergedScheme
     }
 
     private func finishDeviceLifecycleTeardown() {
@@ -1119,6 +1129,18 @@ class DeviceManager: ObservableObject {
         return receiverPairedDeviceIdentities[locationID] ?? []
     }
 
+    /// Whether receiver discovery has published the devices behind `device`,
+    /// even if there are none. False for devices that are not receivers.
+    func hasDiscoveredReceiverDevices(for device: Device) -> Bool {
+        guard shouldMonitorReceiver(device),
+              let locationID = device.pointerDevice.locationID
+        else {
+            return false
+        }
+
+        return receiverPairedDeviceIdentities[locationID] != nil
+    }
+
     func preferredName(for device: Device, fallback: String? = nil) -> String {
         fallback ?? device.name
     }
@@ -1166,7 +1188,9 @@ class DeviceManager: ObservableObject {
 
         let identitiesDescription = identities.map { identity in
             let battery = identity.batteryLevel.map(String.init) ?? "(nil)"
-            return "slot=\(identity.slot) name=\(identity.name) battery=\(battery)"
+            let productID = identity.productID.map { String(format: "0x%04X", $0) } ?? "(nil)"
+            let serialNumber = identity.serialNumber ?? "(nil)"
+            return "slot=\(identity.slot) name=\(identity.name) productID=\(productID) serial=\(serialNumber) battery=\(battery)"
         }
         .joined(separator: ", ")
 
@@ -1188,6 +1212,9 @@ class DeviceManager: ObservableObject {
 
             let previousRoute = device.logitechReceiverRouteSnapshot
             let discovery = updateLogitechReceiverDiscovery(for: device)
+            if completedWakeRediscovery {
+                device.setLogicalDeviceRouteSuspended(false)
+            }
             let deviceIdentifier = ObjectIdentifier(device)
             let wakeRecoveryPending = receiverWakeHardwareSuspensions[deviceIdentifier] != nil
             let resumedAfterWake: Bool
@@ -1203,6 +1230,10 @@ class DeviceManager: ObservableObject {
 
             guard allowsDeviceWork else {
                 continue
+            }
+            if previousRoute != device.logitechReceiverRouteSnapshot || completedWakeRediscovery {
+                // Schemes may match the device behind the receiver.
+                updatePointerSpeed(for: device)
             }
             guard discovery.isReady, let route = device.logitechReceiverRouteSnapshot else {
                 if !wakeRecoveryPending, !identities.isEmpty {

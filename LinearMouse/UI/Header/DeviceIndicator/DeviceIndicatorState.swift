@@ -63,7 +63,7 @@ extension DeviceIndicatorState {
         }
 
         if let deviceModel = DevicePickerState.shared.devices.first(where: { $0.deviceRef.value === device }) {
-            activeDeviceName = deviceModel.displayName
+            activeDeviceName = deviceState.currentDeviceMatcher.map(deviceModel.name(for:)) ?? deviceModel.displayName
             return
         }
 

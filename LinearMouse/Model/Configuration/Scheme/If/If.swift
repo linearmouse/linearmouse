@@ -35,7 +35,7 @@ extension Scheme.If {
 
     func isSatisfied(in context: Scheme.MatchContext) -> Bool {
         if let device {
-            guard let targetDevice = context.device, device.isSatisfied(by: targetDevice) else {
+            guard context.devices.contains(where: { device.isSatisfied(by: $0) }) else {
                 return false
             }
         }

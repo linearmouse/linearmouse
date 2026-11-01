@@ -219,6 +219,27 @@ class Device {
         logitechSession.discoverySnapshot
     }
 
+    private let logicalDeviceRouteLock = NSLock()
+    private var logicalDeviceRouteSuspended = false
+
+    /// The logical device this physical device currently routes events from,
+    /// such as the only pointing device connected to a receiver. Nil when the
+    /// device has no logical devices, the route is ambiguous, or the route is
+    /// suspended. Read from the event thread.
+    var activeLogicalDeviceIdentity: ReceiverLogicalDeviceIdentity? {
+        guard !logicalDeviceRouteLock.withLock({ logicalDeviceRouteSuspended }) else {
+            return nil
+        }
+        return logitechReceiverRouteSnapshot?.identity
+    }
+
+    /// After wake, a receiver keeps its last route as dormant state, but the
+    /// device in its slot may have changed during sleep. Schemes must not
+    /// follow that route until rediscovery confirms it.
+    func setLogicalDeviceRouteSuspended(_ suspended: Bool) {
+        logicalDeviceRouteLock.withLock { logicalDeviceRouteSuspended = suspended }
+    }
+
     func logitechHardwareTargetKey(receiverSlot: UInt8? = nil) -> LogitechHardwareTargetKey? {
         logitechHardwareTargetKey(for: logitechReceiverRouteSnapshot, receiverSlot: receiverSlot)
     }

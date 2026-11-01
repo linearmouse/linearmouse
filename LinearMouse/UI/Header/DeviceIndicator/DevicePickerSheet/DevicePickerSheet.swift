@@ -107,7 +107,13 @@ struct DevicePickerSheet: View {
         }
         .onReceive(deviceManager.$lastActiveDeviceRef.receive(on: RunLoop.main)) { lastActiveDeviceRef in
             if autoSwitchToActiveDevice {
-                selection = lastActiveDeviceRef.map { .device($0) }
+                selection = lastActiveDeviceRef.flatMap(DevicePickerSelection.activeDevice)
+            }
+        }
+        // The device in use behind a receiver changes without a new active device.
+        .onReceive(deviceManager.$receiverPairedDeviceIdentities.receive(on: RunLoop.main)) { _ in
+            if autoSwitchToActiveDevice {
+                syncSelectionWithActiveDevice()
             }
         }
         .alert(isPresented: $showDeleteAlert) {
@@ -131,11 +137,10 @@ struct DevicePickerSheet: View {
         autoSwitchToActiveDevice = false
     }
 
-    private func handleDeviceSelection(_ deviceRef: WeakRef<Device>) {
-        selection = .device(deviceRef)
+    private func handleDeviceSelection(_ entry: DevicePickerEntry) {
+        selection = .device(entry.deviceRef, entry.matcher)
 
-        let isSelectingActiveDevice = deviceRef.value === DeviceManager.shared.lastActiveDeviceRef?.value
-        if isSelectingActiveDevice {
+        if entry.isActive {
             autoSwitchToActiveDevice = true
             syncSelectionWithActiveDevice()
         } else if autoSwitchToActiveDevice {
@@ -144,11 +149,16 @@ struct DevicePickerSheet: View {
     }
 
     private func syncSelectionWithActiveDevice() {
-        selection = deviceManager.lastActiveDeviceRef.map { .device($0) }
+        selection = deviceManager.lastActiveDeviceRef.flatMap(DevicePickerSelection.activeDevice)
     }
 
     private func syncSelectionWithCurrentDevice() {
-        selection = deviceState.currentDeviceRef.map { .device($0) }
+        if let currentDeviceMatcher = deviceState.currentDeviceMatcher {
+            selection = selection(for: currentDeviceMatcher)
+            return
+        }
+
+        selection = deviceState.currentDeviceRef.flatMap(DevicePickerSelection.activeDevice)
     }
 
     private func selection(for matcher: DeviceMatcher) -> DevicePickerSelection? {
@@ -163,9 +173,9 @@ struct DevicePickerSheet: View {
                     return false
                 }
 
-                return matcher.match(with: device)
+                return matcher.condition.match(with: device)
             }
-            .map { .device($0.deviceRef) }
+            .map { .device($0.deviceRef, matcher) }
     }
 
     private func onOK() {

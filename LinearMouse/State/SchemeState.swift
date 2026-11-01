@@ -185,7 +185,7 @@ extension SchemeState {
                 return schemes[index]
             }
 
-            var ifCondition = Scheme.If(device: deviceMatcher)
+            var ifCondition = Scheme.If(device: deviceMatcher.condition)
             ifCondition.app = app
             ifCondition.processPath = processPath
             ifCondition.processName = processName
@@ -211,19 +211,57 @@ extension SchemeState {
             case let .at(index):
                 schemes[index] = newValue
             case let .insertAt(index):
-                schemes.insert(newValue, at: index)
+                let isDeviceWide = app == nil && processPath == nil && processName == nil && currentDisplay == nil
+                schemes.insert(
+                    newValue,
+                    at: insertionIndex(index, for: deviceMatcher, isDeviceWide: isDeviceWide)
+                )
             }
         }
     }
 
+    /// The first device-wide scheme of a device behind a receiver goes between
+    /// the receiver's device-wide and app or display schemes.
+    private func insertionIndex(_ index: Int, for matcher: DeviceMatcher, isDeviceWide: Bool) -> Int {
+        guard isDeviceWide,
+              let device,
+              matcher.categoryOnlyValue == nil,
+              schemes.allDeviceMatcherSpecificSchemes(of: matcher).isEmpty else {
+            return index
+        }
+
+        let physicalDeviceMatcher = DeviceMatcher(of: device)
+        guard physicalDeviceMatcher != matcher else {
+            return index
+        }
+
+        return schemes.insertionIndex(ofDeviceWideSchemeBehind: physicalDeviceMatcher)
+    }
+
+    /// Hardware settings belong to the selected device, which may be a device
+    /// behind a receiver, rather than to the receiver.
+    private var deviceSchemeMatcher: DeviceMatcher? {
+        guard let device else {
+            return nil
+        }
+
+        if let deviceMatcher,
+           deviceMatcher.categoryOnlyValue == nil,
+           deviceMatcher.condition.match(with: device) {
+            return deviceMatcher
+        }
+
+        return DeviceMatcher(activeOf: device)
+    }
+
     var deviceScheme: Scheme {
         get {
-            guard let device else {
+            guard let deviceSchemeMatcher else {
                 return Scheme()
             }
 
             if case let .at(index) = schemes.schemeIndex(
-                ofDevice: device,
+                ofDeviceMatcher: deviceSchemeMatcher,
                 ofApp: nil,
                 ofProcessPath: nil,
                 ofProcessName: nil,
@@ -232,16 +270,16 @@ extension SchemeState {
                 return schemes[index]
             }
 
-            return Scheme(if: [Scheme.If(device: .init(of: device))])
+            return Scheme(if: [Scheme.If(device: deviceSchemeMatcher.condition)])
         }
 
         set {
-            guard let device else {
+            guard let deviceSchemeMatcher else {
                 return
             }
 
             switch schemes.schemeIndex(
-                ofDevice: device,
+                ofDeviceMatcher: deviceSchemeMatcher,
                 ofApp: nil,
                 ofProcessPath: nil,
                 ofProcessName: nil,
@@ -250,7 +288,7 @@ extension SchemeState {
             case let .at(index):
                 schemes[index] = newValue
             case let .insertAt(index):
-                schemes.insert(newValue, at: index)
+                schemes.insert(newValue, at: insertionIndex(index, for: deviceSchemeMatcher, isDeviceWide: true))
             }
         }
     }
@@ -277,13 +315,22 @@ extension SchemeState {
 
         let (app, processPath, processName) = extractAppComponents(from: currentApp)
 
-        return configurationState.configuration.matchScheme(
-            withDeviceMatcher: deviceMatcher,
-            withApp: app,
-            withDisplay: currentDisplay,
-            withProcessName: processName,
-            withProcessPath: processPath
+        var context = Scheme.MatchContext(
+            deviceMatcher: deviceMatcher,
+            app: app,
+            display: currentDisplay,
+            processName: processName,
+            processPath: processPath
         )
+        // A device behind a receiver also inherits the receiver's schemes.
+        if let device, deviceMatcher.categoryOnlyValue == nil, deviceMatcher.condition.match(with: device) {
+            let physicalDeviceMatcher = DeviceMatcher(of: device)
+            if physicalDeviceMatcher != deviceMatcher {
+                context.devices.append(physicalDeviceMatcher)
+            }
+        }
+
+        return configurationState.configuration.matchScheme(in: context)
     }
 
     var hasMatchingSchemes: Bool {

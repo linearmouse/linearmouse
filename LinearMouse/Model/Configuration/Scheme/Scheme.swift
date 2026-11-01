@@ -40,7 +40,9 @@ struct Scheme: Codable, Equatable {
 
 extension Scheme {
     struct MatchContext {
-        var device: DeviceMatcher?
+        /// Every identity of the device, most specific first. See
+        /// `DeviceMatcher.candidates(of:)`.
+        var devices: [DeviceMatcher]
         var app: String?
         var parentApp: String?
         var groupApp: String?
@@ -57,7 +59,7 @@ extension Scheme {
             processName: String? = nil,
             processPath: String? = nil
         ) {
-            device = deviceMatcher
+            devices = deviceMatcher.map { [$0] } ?? []
             self.app = app
             self.parentApp = parentApp
             self.groupApp = groupApp
@@ -76,7 +78,6 @@ extension Scheme {
             processPath: String? = nil
         ) {
             self.init(
-                deviceMatcher: device.map { DeviceMatcher(of: $0) },
                 app: app,
                 parentApp: parentApp,
                 groupApp: groupApp,
@@ -84,6 +85,11 @@ extension Scheme {
                 processName: processName,
                 processPath: processPath
             )
+            devices = device.map { DeviceMatcher.candidates(of: $0) } ?? []
+        }
+
+        var device: DeviceMatcher? {
+            devices.first
         }
     }
 }
@@ -349,6 +355,25 @@ extension [Scheme] {
         }
 
         return .insertAt(last.offset + 1)
+    }
+
+    /// Where the first device-wide scheme of a device behind `parent`, such
+    /// as a mouse behind a receiver, goes: after the parent's device-wide
+    /// schemes so that it overrides them, but before the parent's app and
+    /// display schemes so that those stay more specific.
+    func insertionIndex(ofDeviceWideSchemeBehind parent: DeviceMatcher) -> Int {
+        func isDeviceWide(_ scheme: Scheme) -> Bool {
+            guard let condition = scheme.if?.first else {
+                return true
+            }
+            return condition.app == nil && condition.processPath == nil
+                && condition.processName == nil && condition.display == nil
+        }
+
+        let parentSchemes = allDeviceMatcherSpecificSchemes(of: parent)
+        let lastDeviceWideIndex = parentSchemes.last { isDeviceWide($0.element) }?.offset ?? -1
+        return parentSchemes.first { $0.offset > lastDeviceWideIndex && !isDeviceWide($0.element) }?.offset
+            ?? endIndex
     }
 
     private func firstDeviceSpecificSchemeIndex(of category: DeviceMatcher.Category) -> Int? {

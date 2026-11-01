@@ -5,10 +5,12 @@ import SwiftUI
 
 enum DevicePickerSelection {
     case category(DeviceMatcher.Category)
-    case device(WeakRef<Device>)
+    /// A device on `deviceRef`: the physical device itself or a device behind
+    /// it. The matcher is kept so that the selection survives reconnection.
+    case device(WeakRef<Device>, DeviceMatcher)
 
     var deviceRef: WeakRef<Device>? {
-        guard case let .device(deviceRef) = self else {
+        guard case let .device(deviceRef, _) = self else {
             return nil
         }
 
@@ -19,9 +21,13 @@ enum DevicePickerSelection {
         switch self {
         case let .category(category):
             return DeviceMatcher(category: category)
-        case let .device(deviceRef):
-            return deviceRef.value.map { DeviceMatcher(of: $0) }
+        case let .device(_, matcher):
+            return matcher
         }
+    }
+
+    static func activeDevice(_ deviceRef: WeakRef<Device>) -> Self? {
+        deviceRef.value.map { .device(deviceRef, DeviceMatcher(activeOf: $0)) }
     }
 }
 
@@ -30,7 +36,7 @@ struct DevicePicker: View {
 
     @Binding var selection: DevicePickerSelection?
     var onSelectCategory: (DeviceMatcher.Category) -> Void
-    var onSelectDevice: (WeakRef<Device>) -> Void
+    var onSelectDevice: (DevicePickerEntry) -> Void
 
     var body: some View {
         ScrollView {

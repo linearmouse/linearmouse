@@ -25,7 +25,7 @@ class DeviceState: ObservableObject {
                 return
             }
 
-            let currentDeviceMatcher = currentDeviceRef?.value.map { DeviceMatcher(of: $0) }
+            let currentDeviceMatcher = currentDeviceRef?.value.map { DeviceMatcher(activeOf: $0) }
             guard Defaults[.selectedDevice] != currentDeviceMatcher else {
                 return
             }
@@ -61,6 +61,14 @@ class DeviceState: ObservableObject {
                 self?.updateCurrentDevice()
             }
             .store(in: &subscriptions)
+
+        // The device in use behind a receiver changes with its connections.
+        deviceManager.$receiverPairedDeviceIdentities
+            .debounce(for: 0.1, scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.updateCurrentDevice()
+            }
+            .store(in: &subscriptions)
     }
 }
 
@@ -79,8 +87,9 @@ extension DeviceState {
         isUpdatingCurrentDeviceRef = false
     }
 
+    /// The device in use, which may be a device behind a receiver.
     private func exactMatcher(of deviceRef: WeakRef<Device>?) -> DeviceMatcher? {
-        deviceRef?.value.map { DeviceMatcher(of: $0) }
+        deviceRef?.value.map { DeviceMatcher(activeOf: $0) }
     }
 
     private func updateCurrentDeviceRef(lastActiveDeviceRef: WeakRef<Device>?) {
@@ -91,7 +100,8 @@ extension DeviceState {
         }
 
         let matchedDeviceRef = deviceManager.devices
-            .first { userSelectedDevice.match(with: $0) }
+            // The saved selection may carry the name one connection reported.
+            .first { userSelectedDevice.condition.match(with: $0) }
             .map { WeakRef($0) }
 
         setCurrentDeviceRef(matchedDeviceRef ?? lastActiveDeviceRef)
