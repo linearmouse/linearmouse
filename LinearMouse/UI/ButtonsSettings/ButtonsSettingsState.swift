@@ -231,6 +231,15 @@ extension ButtonsSettingsState {
         }
     }
 
+    var autoScrollReverse: Bool {
+        get {
+            mergedScheme.buttons.autoScroll.reverse ?? false
+        }
+        set {
+            scheme.buttons.autoScroll.reverse = newValue
+        }
+    }
+
     var autoScrollTrigger: Scheme.Buttons.Mapping {
         get {
             mergedScheme.buttons.autoScroll.trigger ?? defaultAutoScrollTrigger

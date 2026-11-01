@@ -572,6 +572,13 @@ declare namespace Scheme {
        * @description Choose the mouse button and modifier keys used to activate auto scroll.
        */
       trigger?: AutoScroll.Trigger;
+
+      /**
+       * @title Reverse direction
+       * @description Scroll the content in the direction the pointer moves, like dragging it, instead of moving the view toward the pointer.
+       * @default false
+       */
+      reverse?: boolean;
     };
 
     namespace AutoScroll {

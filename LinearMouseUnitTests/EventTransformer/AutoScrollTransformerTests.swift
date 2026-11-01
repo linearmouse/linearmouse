@@ -31,6 +31,20 @@ final class AutoScrollTransformerTests: XCTestCase {
         XCTAssertGreaterThan(far, near * 4)
     }
 
+    func testReverseScrollsTheOppositeWay() {
+        let anchor = CGPoint(x: 100, y: 100)
+        // Unflipped coordinates: up and to the right of the anchor.
+        let current = CGPoint(x: 148, y: 148)
+
+        let normal = AutoScrollTransformer.scrollDistance(from: anchor, to: current, over: 0.02, reverse: false)
+        XCTAssertEqual(normal.dx, -7, accuracy: 0.0001)
+        XCTAssertEqual(normal.dy, 7, accuracy: 0.0001)
+
+        let reversed = AutoScrollTransformer.scrollDistance(from: anchor, to: current, over: 0.02, reverse: true)
+        XCTAssertEqual(reversed.dx, 7, accuracy: 0.0001)
+        XCTAssertEqual(reversed.dy, -7, accuracy: 0.0001)
+    }
+
     func testScrollDeltaCarriesFractionsAndStaysWithinFixedPointRange() {
         let slow = AutoScrollTransformer.scrollDelta(for: 2.75)
         XCTAssertEqual(slow.delta, 2)

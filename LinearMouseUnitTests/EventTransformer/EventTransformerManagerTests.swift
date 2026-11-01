@@ -1318,6 +1318,58 @@ final class EventTransformerManagerTests: XCTestCase {
         ))
     }
 
+    func testCachedRoutesFollowTheSharedAutoScrollTransformer() throws {
+        func scheme(display: String, reverse: Bool) -> Scheme {
+            var scheme = Scheme(if: [.init(display: display)])
+            scheme.buttons.autoScroll.enabled = true
+            scheme.buttons.autoScroll.modes = [.hold]
+            scheme.buttons.autoScroll.trigger = .init(button: .mouse(2))
+            scheme.buttons.autoScroll.reverse = reverse
+            return scheme
+        }
+        ConfigurationState.shared.configuration = .init(schemes: [
+            scheme(display: "Display A", reverse: true),
+            scheme(display: "Display B", reverse: false)
+        ])
+        let manager = makeManager()
+        func route(_ display: String) throws -> [EventTransformer] {
+            try XCTUnwrap(manager.get(withDevice: nil, withPid: nil, withDisplay: display) as? [EventTransformer])
+        }
+        func autoScroll(_ display: String) throws -> AutoScrollTransformer {
+            try XCTUnwrap(route(display).compactMap { $0 as? AutoScrollTransformer }.first)
+        }
+
+        // Display B replaces the shared transformer, so Display A's cached one is stale.
+        let staleA = try autoScroll("Display A")
+        XCTAssertNotIdentical(try autoScroll("Display B"), staleA)
+        let currentA = try autoScroll("Display A")
+        XCTAssertNotIdentical(currentA, staleA)
+        XCTAssertIdentical(try autoScroll("Display A"), currentA)
+
+        let routeA = try route("Display A")
+        XCTAssertNil(try routeA.transform(
+            mouseEvent(type: .otherMouseDown, button: .center),
+            in: .init(device: nil)
+        ))
+        _ = try routeA.transform(
+            mouseEvent(type: .otherMouseDragged, button: .center, location: CGPoint(x: 40, y: 0)),
+            in: .init(device: nil)
+        )
+        XCTAssertTrue(currentA.isAutoscrollActive)
+
+        // The session keeps receiving events after the pointer enters Display B.
+        XCTAssertIdentical(try autoScroll("Display B"), currentA)
+
+        _ = try route("Display B").transform(
+            mouseEvent(type: .otherMouseUp, button: .center, location: CGPoint(x: 40, y: 0)),
+            in: .init(device: nil)
+        )
+        XCTAssertFalse(currentA.isAutoscrollActive)
+
+        // Once the session ends, Display B gets its own configuration back.
+        XCTAssertNotIdentical(try autoScroll("Display B"), currentA)
+    }
+
     func testCancelingLostLogitechControlStopsAutoScrollWithoutMappingOwner() throws {
         let identity = LogitechControlIdentity(controlID: 0x00C4)
         var scheme = Scheme()

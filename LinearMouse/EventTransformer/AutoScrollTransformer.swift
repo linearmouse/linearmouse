@@ -30,6 +30,7 @@ final class AutoScrollTransformer {
     private let trigger: Scheme.Buttons.Mapping
     private let modes: [Scheme.Buttons.AutoScroll.Mode]
     private let toggleActivation: Scheme.Buttons.AutoScroll.ToggleActivation
+    private let reverse: Bool
     private let scheduleLongPressTimer: LongPressTimerScheduler
     private let activationHitProvider: ActivationHitProvider?
     private let scrollTargetResolver: ScrollTargetResolver?
@@ -122,6 +123,7 @@ final class AutoScrollTransformer {
         trigger: Scheme.Buttons.Mapping,
         modes: [Scheme.Buttons.AutoScroll.Mode],
         toggleActivation: Scheme.Buttons.AutoScroll.ToggleActivation = .shortPress,
+        reverse: Bool = false,
         longPressTimerScheduler: @escaping LongPressTimerScheduler = AutoScrollTransformer
             .scheduleEventThreadLongPressTimer,
         activationHitProvider: ActivationHitProvider? = nil,
@@ -131,6 +133,7 @@ final class AutoScrollTransformer {
         self.trigger = trigger
         self.modes = modes
         self.toggleActivation = toggleActivation
+        self.reverse = reverse
         scheduleLongPressTimer = longPressTimerScheduler
         self.activationHitProvider = activationHitProvider
         self.scrollTargetResolver = scrollTargetResolver
@@ -619,12 +622,9 @@ extension AutoScrollTransformer: EventTransformer {
         let elapsed = min(Self.maxTickInterval, max(0, now - (lastTickTime ?? now)))
         lastTickTime = now
 
-        let (horizontal, horizontalRemainder) = Self.scrollDelta(
-            for: scrollRemainder.dx + Self.scrollDistance(forOffset: anchor.x - current.x, over: elapsed)
-        )
-        let (vertical, verticalRemainder) = Self.scrollDelta(
-            for: scrollRemainder.dy + Self.scrollDistance(forOffset: current.y - anchor.y, over: elapsed)
-        )
+        let distance = Self.scrollDistance(from: anchor, to: current, over: elapsed, reverse: reverse)
+        let (horizontal, horizontalRemainder) = Self.scrollDelta(for: scrollRemainder.dx + distance.dx)
+        let (vertical, verticalRemainder) = Self.scrollDelta(for: scrollRemainder.dy + distance.dy)
         scrollRemainder = CGVector(dx: horizontalRemainder, dy: verticalRemainder)
 
         guard horizontal != 0 || vertical != 0 else {
@@ -632,6 +632,22 @@ extension AutoScrollTransformer: EventTransformer {
         }
 
         postContinuousScrollEvent(horizontal: horizontal, vertical: vertical)
+    }
+
+    /// The scroll wheel distance on each axis for the pointer's offset from the anchor.
+    /// Unreversed, the view moves toward the pointer; reversed, the content follows
+    /// the pointer as if it were being dragged.
+    static func scrollDistance(
+        from anchor: CGPoint,
+        to current: CGPoint,
+        over elapsed: TimeInterval,
+        reverse: Bool
+    ) -> CGVector {
+        let direction: Double = reverse ? -1 : 1
+        return CGVector(
+            dx: direction * scrollDistance(forOffset: anchor.x - current.x, over: elapsed),
+            dy: direction * scrollDistance(forOffset: current.y - anchor.y, over: elapsed)
+        )
     }
 
     /// The distance, in pixels, to scroll for a pointer offset over a period of time.
@@ -913,10 +929,12 @@ extension AutoScrollTransformer {
     func matchesConfiguration(
         trigger: Scheme.Buttons.Mapping,
         modes: [Scheme.Buttons.AutoScroll.Mode],
-        toggleActivation: Scheme.Buttons.AutoScroll.ToggleActivation
+        toggleActivation: Scheme.Buttons.AutoScroll.ToggleActivation,
+        reverse: Bool
     ) -> Bool {
         self.trigger == trigger &&
             self.modes == modes &&
-            self.toggleActivation == toggleActivation
+            self.toggleActivation == toggleActivation &&
+            self.reverse == reverse
     }
 }
