@@ -8,6 +8,7 @@ import os.log
 final class AutoScrollTransformer {
     typealias ActivationHitProvider = (CGEvent) -> AutoScrollActivationHit?
     typealias LongPressTimerScheduler = (TimeInterval, @escaping () -> Void) -> (() -> Void)?
+    typealias ScrollTargetResolver = (CGPoint) -> AutoScrollScrollTarget?
 
     static let log = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "AutoScroll")
 
@@ -21,6 +22,7 @@ final class AutoScrollTransformer {
     private let speed: Double
     private let scheduleLongPressTimer: LongPressTimerScheduler
     private let activationHitProvider: ActivationHitProvider?
+    private let scrollTargetResolver: ScrollTargetResolver?
     private let fallbackEventSink: (CGEvent) -> Void
 
     private enum Session {
@@ -56,6 +58,8 @@ final class AutoScrollTransformer {
 
     private struct PendingActivation {
         var anchor: CGPoint
+        /// The anchor in global display coordinates, for resolving the scroll target.
+        var targetLocation: CGPoint
         var current: CGPoint
         var bufferedEvents: [DeferredEvent]
         var strategy: PendingActivationStrategy
@@ -94,6 +98,7 @@ final class AutoScrollTransformer {
     private var timer: EventThreadTimer?
     private let indicatorController = AutoScrollIndicatorWindowController()
     private var lastIndicatorLocation: CGPoint?
+    private var scrollTarget: AutoScrollScrollTarget?
     private let accessibilityActivationClassifier = AutoScrollAccessibilityActivationClassifier()
 
     static func shouldStartAutoScroll(for hit: AutoScrollActivationHit?) -> Bool {
@@ -108,6 +113,7 @@ final class AutoScrollTransformer {
         longPressTimerScheduler: @escaping LongPressTimerScheduler = AutoScrollTransformer
             .scheduleEventThreadLongPressTimer,
         activationHitProvider: ActivationHitProvider? = nil,
+        scrollTargetResolver: ScrollTargetResolver? = nil,
         eventSink: @escaping (CGEvent) -> Void = { $0.post(tap: .cgSessionEventTap) }
     ) {
         self.trigger = trigger
@@ -116,6 +122,7 @@ final class AutoScrollTransformer {
         self.speed = speed
         scheduleLongPressTimer = longPressTimerScheduler
         self.activationHitProvider = activationHitProvider
+        self.scrollTargetResolver = scrollTargetResolver
         fallbackEventSink = eventSink
     }
 
@@ -257,7 +264,7 @@ extension AutoScrollTransformer: EventTransformer {
             return nil
         }
 
-        activate(at: pointerLocation(for: event), session: activationSession)
+        activate(at: pointerLocation(for: event), targetLocation: event.location, session: activationSession)
         suppressTriggerUp = true
         return nil
     }
@@ -383,6 +390,7 @@ extension AutoScrollTransformer: EventTransformer {
         let point = pointerLocation(for: event)
         beginPendingActivation(
             at: point,
+            targetLocation: event.location,
             bufferedEvents: [deferredEvent(event, in: context)],
             strategy: strategy,
             isPhysicalTrigger: true
@@ -391,6 +399,7 @@ extension AutoScrollTransformer: EventTransformer {
 
     private func beginPendingActivation(
         at point: CGPoint,
+        targetLocation: CGPoint,
         bufferedEvents: [DeferredEvent],
         strategy: PendingActivationStrategy,
         isPhysicalTrigger: Bool
@@ -398,6 +407,7 @@ extension AutoScrollTransformer: EventTransformer {
         cancelLongPressTimer()
         state = .pending(.init(
             anchor: point,
+            targetLocation: targetLocation,
             current: point,
             bufferedEvents: bufferedEvents,
             strategy: strategy,
@@ -449,6 +459,7 @@ extension AutoScrollTransformer: EventTransformer {
         activate(
             at: pending.anchor,
             current: pending.current,
+            targetLocation: pending.targetLocation,
             session: session
         )
         return true
@@ -535,7 +546,12 @@ extension AutoScrollTransformer: EventTransformer {
         }
     }
 
-    private func activate(at point: CGPoint, current: CGPoint? = nil, session: Session) {
+    private func activate(
+        at point: CGPoint,
+        current: CGPoint? = nil,
+        targetLocation: CGPoint,
+        session: Session
+    ) {
         os_log(
             "Auto scroll activated (modes=%{public}@, button=%{public}d)",
             log: Self.log,
@@ -545,6 +561,8 @@ extension AutoScrollTransformer: EventTransformer {
         )
 
         suppressedExitMouseButton = nil
+        // Resolve before the indicator appears so the hit test cannot land on it.
+        scrollTarget = scrollTargetResolver?(targetLocation)
         let current = current ?? point
         state = .active(anchor: point, current: current, session: session)
         lastIndicatorLocation = current
@@ -624,7 +642,11 @@ extension AutoScrollTransformer: EventTransformer {
         event.setDoubleValueField(.scrollWheelEventPointDeltaAxis2, value: horizontal)
         event.setDoubleValueField(.scrollWheelEventFixedPtDeltaAxis2, value: horizontal)
         event.flags = []
-        fallbackEventSink(event)
+        if let scrollTarget {
+            scrollTarget.post(event)
+        } else {
+            fallbackEventSink(event)
+        }
     }
 
     private var hasToggleMode: Bool {
@@ -765,6 +787,7 @@ extension AutoScrollTransformer: LogitechControlEventHandling {
                     : .longPress(.toggle)
                 beginPendingActivation(
                     at: pointerLocation(for: context),
+                    targetLocation: context.mouseLocation,
                     bufferedEvents: [],
                     strategy: strategy,
                     isPhysicalTrigger: false
@@ -775,6 +798,7 @@ extension AutoScrollTransformer: LogitechControlEventHandling {
             if isHoldOnlyMode {
                 beginPendingActivation(
                     at: pointerLocation(for: context),
+                    targetLocation: context.mouseLocation,
                     bufferedEvents: [],
                     strategy: .movement(.hold),
                     isPhysicalTrigger: false
@@ -782,7 +806,11 @@ extension AutoScrollTransformer: LogitechControlEventHandling {
                 return .handledDeferringSyntheticFallback
             }
 
-            activate(at: pointerLocation(for: context), session: activationSession)
+            activate(
+                at: pointerLocation(for: context),
+                targetLocation: context.mouseLocation,
+                session: activationSession
+            )
             return .handled
         }
 
@@ -835,6 +863,7 @@ extension AutoScrollTransformer: Deactivatable {
         }
 
         state = .idle
+        scrollTarget = nil
         suppressTriggerUp = false
         DispatchQueue.main.async { [indicatorController] in
             indicatorController.hide()

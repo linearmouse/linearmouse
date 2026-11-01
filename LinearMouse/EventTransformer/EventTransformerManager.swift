@@ -1114,7 +1114,8 @@ class EventTransformerManager {
             trigger: trigger,
             modes: modes,
             toggleActivation: toggleActivation,
-            speed: speed
+            speed: speed,
+            scrollTargetResolver: AutoScrollScrollTarget.resolve
         ) { [postEvent] in postEvent($0, .cgSessionEventTap) }
         transformer.onPointerMotionRequirementChanged = { [weak self] in
             self?.publishPointerMotionRequirements()

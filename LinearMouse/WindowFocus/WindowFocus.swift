@@ -71,6 +71,12 @@ final class WindowFocus {
     }
 
     func window(at point: CGPoint) -> Target? {
+        windowHit(at: point)?.target
+    }
+
+    /// Returns the topmost window at a screen point, plus that point in the
+    /// window's own top-left-origin coordinates.
+    func windowHit(at point: CGPoint) -> (target: Target, windowLocation: CGPoint)? {
         guard let mainConnection, let findWindow, let connectionPID else {
             return nil
         }
@@ -84,7 +90,7 @@ final class WindowFocus {
             return nil
         }
         // Do not skip an interactive hit to focus another window underneath it.
-        return Target(pid: pid, windowID: id)
+        return (Target(pid: pid, windowID: id), local)
     }
 
     func focus(_ target: Target, from previous: Target, isCurrent: () -> Bool) -> Bool {
