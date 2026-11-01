@@ -63,6 +63,53 @@ final class AutoScrollTransformerTests: XCTestCase {
         XCTAssertFalse(transformer.isAutoscrollActive)
     }
 
+    func testLogitechHoldAnchorsAtTheCursorPosition() throws {
+        let identity = LogitechControlIdentity(controlID: 0xC4)
+        var trigger = Scheme.Buttons.Mapping()
+        trigger.button = .logitechControl(identity)
+        let transformer = AutoScrollTransformer(
+            trigger: trigger,
+            modes: [.hold],
+            speed: 1
+        ) { _ in }
+        let press = LogitechEventContext(
+            device: nil,
+            pid: nil,
+            display: nil,
+            mouseLocation: CGPoint(x: 500, y: 300),
+            controlIdentity: identity,
+            isPressed: true,
+            modifierFlags: []
+        )
+
+        XCTAssertEqual(transformer.handleLogitechControlEvent(press), .handledDeferringSyntheticFallback)
+
+        // A small move stays inside the dead zone around the press location.
+        try XCTAssertNotNil(transformer.transform(
+            XCTUnwrap(CGEvent(
+                mouseEventSource: nil,
+                mouseType: .mouseMoved,
+                mouseCursorPosition: CGPoint(x: 502, y: 302),
+                mouseButton: .center
+            )),
+            in: .init(device: nil)
+        ))
+        XCTAssertFalse(transformer.isAutoscrollActive)
+
+        try XCTAssertNotNil(transformer.transform(
+            XCTUnwrap(CGEvent(
+                mouseEventSource: nil,
+                mouseType: .mouseMoved,
+                mouseCursorPosition: CGPoint(x: 500, y: 320),
+                mouseButton: .center
+            )),
+            in: .init(device: nil)
+        ))
+        XCTAssertTrue(transformer.isAutoscrollActive)
+
+        transformer.deactivate()
+    }
+
     func testCancelingLostLogitechHoldStopsAutoScroll() throws {
         let identity = LogitechControlIdentity(controlID: 0xC4)
         var trigger = Scheme.Buttons.Mapping()

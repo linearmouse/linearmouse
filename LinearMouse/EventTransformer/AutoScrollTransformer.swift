@@ -658,6 +658,14 @@ extension AutoScrollTransformer: EventTransformer {
         event.unflippedLocation
     }
 
+    /// Logitech contexts carry the cursor in global display coordinates
+    /// (top-left origin). Convert it to the space `unflippedLocation` uses so
+    /// the anchor matches the pointer events that follow.
+    private func pointerLocation(for context: LogitechEventContext) -> CGPoint {
+        let mainDisplayHeight = CGDisplayBounds(CGMainDisplayID()).height
+        return CGPoint(x: context.mouseLocation.x, y: mainDisplayHeight - context.mouseLocation.y)
+    }
+
     private func exceedsDeadZone(from anchor: CGPoint, to point: CGPoint) -> Bool {
         abs(point.x - anchor.x) > Self.deadZone || abs(point.y - anchor.y) > Self.deadZone
     }
@@ -756,7 +764,7 @@ extension AutoScrollTransformer: LogitechControlEventHandling {
                     ? .movementOrLongPress
                     : .longPress(.toggle)
                 beginPendingActivation(
-                    at: context.mouseLocation,
+                    at: pointerLocation(for: context),
                     bufferedEvents: [],
                     strategy: strategy,
                     isPhysicalTrigger: false
@@ -766,7 +774,7 @@ extension AutoScrollTransformer: LogitechControlEventHandling {
 
             if isHoldOnlyMode {
                 beginPendingActivation(
-                    at: context.mouseLocation,
+                    at: pointerLocation(for: context),
                     bufferedEvents: [],
                     strategy: .movement(.hold),
                     isPhysicalTrigger: false
@@ -774,7 +782,7 @@ extension AutoScrollTransformer: LogitechControlEventHandling {
                 return .handledDeferringSyntheticFallback
             }
 
-            activate(at: context.mouseLocation, session: activationSession)
+            activate(at: pointerLocation(for: context), session: activationSession)
             return .handled
         }
 
