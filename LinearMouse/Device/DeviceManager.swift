@@ -1189,7 +1189,8 @@ class DeviceManager: ObservableObject {
         let identitiesDescription = identities.map { identity in
             let battery = identity.batteryLevel.map(String.init) ?? "(nil)"
             let productID = identity.productID.map { String(format: "0x%04X", $0) } ?? "(nil)"
-            let serialNumber = identity.serialNumber ?? "(nil)"
+            // Enough to tell devices apart in shared logs.
+            let serialNumber = identity.serialNumber.map { "…" + $0.suffix(4) } ?? "(nil)"
             return "slot=\(identity.slot) name=\(identity.name) productID=\(productID) serial=\(serialNumber) battery=\(battery)"
         }
         .joined(separator: ", ")

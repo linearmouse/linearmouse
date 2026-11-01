@@ -200,9 +200,10 @@ respectively.
 ### Devices behind a receiver
 
 A Logitech Unifying or Bolt receiver passes on the events of the devices paired to it. When a
-pointing device behind a receiver is in use, LinearMouse matches it by its own vendor ID, product
-ID and serial number as the receiver reports them, so the device picker and schemes refer to the
-mouse rather than to the receiver.
+pointing device behind a receiver is in use, LinearMouse matches it by the product ID and serial
+number the receiver reports for it, with the receiver's vendor ID, so the device picker and schemes
+refer to the mouse rather than to the receiver. If the receiver reports neither a product ID nor a
+serial number for the device, only schemes that match the receiver apply.
 
 Devices paired to a Bolt receiver report the same product ID and serial number as over Bluetooth,
 so one scheme covers such a mouse whether it is connected through the receiver or over Bluetooth.
