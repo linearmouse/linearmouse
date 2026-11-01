@@ -49,6 +49,7 @@ final class SpaceSwipeTransformer: EventTransformer, EventTransformerInteraction
     private let sink: (Output) -> Void
     private let now: () -> TimeInterval
     private let schedule: Scheduler
+    private let isRecording: () -> Bool
 
     private enum State {
         case idle
@@ -78,12 +79,14 @@ final class SpaceSwipeTransformer: EventTransformer, EventTransformerInteraction
         releaseDelay: TimeInterval,
         now: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime },
         schedule: @escaping Scheduler = { EventThread.shared.scheduleTimer(interval: $0, repeats: $1, handler: $2) },
+        isRecording: @escaping () -> Bool = { SettingsState.shared.recording },
         sink: @escaping (Output) -> Void
     ) {
         self.distance = distance
         self.releaseDelay = releaseDelay
         self.now = now
         self.schedule = schedule
+        self.isRecording = isRecording
         self.sink = sink
     }
 
@@ -97,6 +100,12 @@ final class SpaceSwipeTransformer: EventTransformer, EventTransformerInteraction
 
     func transform(_ event: CGEvent, in _: EventTransformerContext) -> CGEvent? {
         guard event.type == .scrollWheel, !event.isLinearMouseSyntheticEvent else {
+            return event
+        }
+
+        // Let button mapping recording see the wheel. A swipe already in
+        // progress still finishes, so the space never stays half-switched.
+        if isRecording(), !hasActiveInteraction {
             return event
         }
 

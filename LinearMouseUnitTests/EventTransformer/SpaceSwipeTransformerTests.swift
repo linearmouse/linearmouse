@@ -8,11 +8,13 @@ import XCTest
 final class SpaceSwipeTransformerTests: XCTestCase {
     private var time: TimeInterval = 0
     private var outputs: [SpaceSwipeTransformer.Output] = []
+    private var recording = false
 
     override func setUp() {
         super.setUp()
         time = 0
         outputs = []
+        recording = false
     }
 
     private func makeTransformer(distance: Double = 10, releaseDelay: TimeInterval = 0.2) -> SpaceSwipeTransformer {
@@ -21,6 +23,7 @@ final class SpaceSwipeTransformerTests: XCTestCase {
             releaseDelay: releaseDelay,
             now: { [weak self] in self?.time ?? 0 },
             schedule: { _, _, _ in nil },
+            isRecording: { [weak self] in self?.recording ?? false },
             sink: { [weak self] in self?.outputs.append($0) }
         )
     }
@@ -156,6 +159,34 @@ final class SpaceSwipeTransformerTests: XCTestCase {
         XCTAssertNotNil(transformer.transform(event, in: EventTransformerContext(device: nil)))
         runFrames(transformer, for: 0.5)
         XCTAssertTrue(outputs.isEmpty)
+    }
+
+    func testRecordingPassesHorizontalScrollingThrough() throws {
+        let transformer = makeTransformer()
+        recording = true
+
+        XCTAssertNotNil(try transformer.transform(scrollEvent(horizontal: 3), in: EventTransformerContext(device: nil)))
+        runFrames(transformer, for: 0.5)
+        XCTAssertTrue(outputs.isEmpty)
+        XCTAssertFalse(transformer.hasActiveInteraction)
+    }
+
+    func testRecordingLetsAnActiveSwipeFinish() throws {
+        let transformer = makeTransformer(distance: 10, releaseDelay: 0.2)
+
+        _ = try transformer.transform(scrollEvent(horizontal: 3), in: EventTransformerContext(device: nil))
+        runFrames(transformer, for: 0.05)
+        recording = true
+
+        XCTAssertNil(
+            try transformer.transform(scrollEvent(horizontal: 1), in: EventTransformerContext(device: nil)),
+            "the swipe already in progress keeps owning the wheel"
+        )
+        runFrames(transformer, for: 0.5)
+        XCTAssertEqual(phases.last, .ended)
+        XCTAssertEqual(try XCTUnwrap(outputs.last).progress, -0.4, accuracy: 0.001)
+
+        XCTAssertNotNil(try transformer.transform(scrollEvent(horizontal: 3), in: EventTransformerContext(device: nil)))
     }
 
     func testSyntheticScrollingPassesThrough() throws {

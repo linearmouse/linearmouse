@@ -1650,9 +1650,7 @@
           "title": "Smoothed scrolling"
         },
         "spaceSwipe": {
-          "$ref": "#/definitions/Scheme.Scrolling.SpaceSwipe",
-          "description": "Turn horizontal scrolling into the interactive trackpad swipe between spaces (desktops). The space follows the wheel and snaps to the nearest space once the wheel stops.",
-          "title": "Swipe between spaces"
+          "$ref": "#/definitions/Scheme.Scrolling.SpaceSwipe"
         },
         "speed": {
           "anyOf": [
@@ -1971,6 +1969,7 @@
     },
     "Scheme.Scrolling.SpaceSwipe": {
       "additionalProperties": false,
+      "description": "Turn horizontal scrolling into the interactive trackpad swipe between spaces (desktops). The space follows the wheel and snaps to the nearest space once the wheel stops.",
       "properties": {
         "distance": {
           "default": 12,
@@ -1985,13 +1984,14 @@
           "type": "boolean"
         },
         "releaseDelay": {
-          "$ref": "#/definitions/Int",
           "default": 160,
           "description": "How long the wheel must be idle, in milliseconds, before the swipe is released and snaps to the nearest space.",
           "maximum": 1000,
-          "minimum": 50
+          "minimum": 50,
+          "type": "integer"
         }
       },
+      "title": "Swipe between spaces",
       "type": "object"
     },
     "Secondary": {

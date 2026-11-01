@@ -215,10 +215,6 @@ declare namespace Scheme {
      */
     modifiers?: Scrolling.Bidirectional<Scrolling.Modifiers>;
 
-    /**
-     * @title Swipe between spaces
-     * @description Turn horizontal scrolling into the interactive trackpad swipe between spaces (desktops). The space follows the wheel and snaps to the nearest space once the wheel stops.
-     */
     spaceSwipe?: Scrolling.SpaceSwipe;
   };
 
@@ -308,6 +304,10 @@ declare namespace Scheme {
         | "smooth";
     }
 
+    /**
+     * @title Swipe between spaces
+     * @description Turn horizontal scrolling into the interactive trackpad swipe between spaces (desktops). The space follows the wheel and snaps to the nearest space once the wheel stops.
+     */
     type SpaceSwipe = {
       /**
        * @description Set to `true` to swipe between spaces with horizontal scrolling.
@@ -328,8 +328,9 @@ declare namespace Scheme {
        * @minimum 50
        * @maximum 1000
        * @default 160
+       * @asType integer
        */
-      releaseDelay?: Int;
+      releaseDelay?: number;
     };
 
     type Modifiers = {
