@@ -151,6 +151,8 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         let serialNumber: String?
         let batteryLevel: Int?
         let hasLiveMetadata: Bool
+        /// False when only part of `name` could be read.
+        var hasCompleteName = true
     }
 
     struct ReceiverSlotMetadata {
@@ -253,6 +255,8 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         /// and other non-pointing devices that are intentionally absent from
         /// `identities`.
         let observedSlotKinds: [UInt8: UInt8]
+        /// Slots whose identity carries only part of the device's name.
+        let incompleteNameSlots: Set<UInt8>
 
         var hasCompletePresence: Bool {
             inventoryAvailable && expectedDeviceCount?.hasCompletePresence(
@@ -268,7 +272,8 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             liveReachableSlots: Set<UInt8>,
             expectedDeviceCount: ReceiverDeviceCount? = nil,
             inventoryAvailable: Bool = true,
-            observedSlotKinds: [UInt8: UInt8] = [:]
+            observedSlotKinds: [UInt8: UInt8] = [:],
+            incompleteNameSlots: Set<UInt8> = []
         ) {
             self.identities = identities
             self.connectionSnapshots = connectionSnapshots
@@ -276,6 +281,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             self.expectedDeviceCount = expectedDeviceCount
             self.inventoryAvailable = inventoryAvailable
             self.observedSlotKinds = observedSlotKinds
+            self.incompleteNameSlots = incompleteNameSlots
         }
     }
 
@@ -287,6 +293,8 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         let productID: Int?
         let batteryLevel: Int?
         let hasLiveMetadata: Bool
+        /// False when `name` is the receiver's fallback rather than one read for the slot.
+        var hasSlotName = true
     }
 
     private enum ApproximateBatteryLevel: UInt8 {
@@ -665,12 +673,15 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         )
     }
 
+    /// `readsName` can be turned off by callers that compare only stable
+    /// identifiers, so the optional name read does not spend their deadline.
     func validateReceiverSlotIdentity(
         for device: VendorSpecificDeviceContext,
         slot: UInt8,
         connectionSnapshot: ReceiverConnectionSnapshot? = nil,
         using receiverChannel: LogitechReceiverChannel,
         deadline: Date,
+        readsName: Bool = true,
         until shouldContinue: @escaping () -> Bool
     ) -> ReceiverLogicalDeviceIdentity? {
         guard let locationID = receiverChannel.locationID else {
@@ -685,12 +696,14 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             slotInfo = receiverChannel.validateBoltSlotIdentity(
                 slot,
                 deadline: deadline,
+                readsName: readsName,
                 until: shouldContinue
             )
         } else {
             slotInfo = receiverChannel.validateSlotIdentity(
                 slot,
                 deadline: deadline,
+                readsName: readsName,
                 until: shouldContinue
             )
         }
@@ -708,7 +721,7 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
             receiverLocationID: locationID,
             slot: slot,
             kind: kind,
-            name: device.product ?? device.name,
+            name: slotInfo.name ?? device.product ?? device.name,
             serialNumber: slotInfo.serialNumber,
             productID: slotInfo.productID,
             batteryLevel: nil
@@ -1425,6 +1438,8 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
                         slot: slot,
                         using: channel,
                         deadline: deadline,
+                        // Only the serial number is compared before restoring settings.
+                        readsName: false,
                         until: shouldContinue
                     )
                 LogitechReceiverChannel.deliverOnMainRunLoop {
@@ -2256,6 +2271,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
     func validateSlotIdentity(
         _ slot: UInt8,
         deadline: Date,
+        readsName: Bool = true,
         until shouldContinue: @escaping () -> Bool
     ) -> LogitechHIDPPDeviceMetadataProvider.ReceiverSlotInfo? {
         let pairingResponse = hidpp10LongRequest(
@@ -2276,11 +2292,21 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         guard shouldContinue() else {
             return nil
         }
+        // The receiver keeps the paired name itself; see validateBoltSlotIdentity.
+        let nameResponse = readsName ? hidpp10LongRequest(
+            register: LogitechHIDPPDeviceMetadataProvider.Constants.receiverInfoRegister,
+            subregister: UInt8(0x40 + Int(slot) - 1),
+            deadline: deadline,
+            until: shouldContinue
+        ) : nil
+        guard shouldContinue() else {
+            return nil
+        }
 
         return .init(
             slot: slot,
             kind: Self.parseReceiverKind(pairingResponse) ?? 0,
-            name: nil,
+            name: nameResponse.flatMap(Self.parseReceiverName),
             productID: Self.parseReceiverProductID(pairingResponse),
             serialNumber: extendedPairingResponse.flatMap(Self.parseReceiverSerialNumber),
             batteryLevel: nil,
@@ -2360,7 +2386,8 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
                     shouldContinue: shouldContinue
                 )
                 .flatMap { provider.readReceiverBatteryLevel(using: $0) },
-                hasLiveMetadata: slot.hasLiveMetadata
+                hasLiveMetadata: slot.hasLiveMetadata,
+                hasSlotName: slot.name != nil
             )
         }
 
@@ -2492,12 +2519,16 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             slot.hasLiveMetadata ? slot.slot : nil
         })
 
+        var incompleteNameSlots = Set<UInt8>()
         let identities = slots.compactMap { slot -> ReceiverLogicalDeviceIdentity? in
             guard let kind = resolveReceiverPointingIdentityKind(
                 snapshotRaw: connectionSnapshots[slot.slot]?.kind,
                 pairingRaw: slot.kind
             ), kind.isPointingDevice else {
                 return nil
+            }
+            if !slot.hasSlotName {
+                incompleteNameSlots.insert(slot.slot)
             }
 
             return ReceiverLogicalDeviceIdentity(
@@ -2519,7 +2550,8 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
             inventoryAvailable: discovery.inventoryAvailable,
             observedSlotKinds: Dictionary(uniqueKeysWithValues: slots.map {
                 ($0.slot, $0.kind)
-            })
+            }),
+            incompleteNameSlots: incompleteNameSlots
         )
     }
 
@@ -3248,7 +3280,11 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
 
         let length = Int(response[5])
         let bytes = Array(response.dropFirst(6).prefix(length))
-        return String(bytes: bytes, encoding: .utf8)
+        // An empty stored name is no name, so callers can fall back.
+        guard let name = String(bytes: bytes, encoding: .utf8), !name.isEmpty else {
+            return nil
+        }
+        return name
     }
 
     private static func parseReceiverKind(_ response: [UInt8]) -> UInt8? {

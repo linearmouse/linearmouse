@@ -404,6 +404,29 @@ struct ReceiverSlotStateStore {
     private var pairedIdentitiesBySlot = [UInt8: ReceiverLogicalDeviceIdentity]()
     private var slotPresenceBySlot = [UInt8: SlotPresenceState]()
     private var slotsRequiringIdentityResolution = Set<UInt8>()
+    /// Names found by discovery, which prefers the name the device reports.
+    /// A refresh after reconnection only reads the name the receiver stored
+    /// at pairing, so it keeps these to publish the same name for the device.
+    /// Kept across resets, because they are keyed by the device's identity.
+    private var discoveredNames = [DiscoveredDevice: String]()
+
+    private struct DiscoveredDevice: Hashable {
+        let slot: UInt8
+        let productID: Int?
+        let serialNumber: String
+
+        /// Two devices of the same model may be paired to a slot in turn, so
+        /// only a stable serial number tells them apart.
+        init?(_ identity: ReceiverLogicalDeviceIdentity) {
+            guard let serialNumber = LogitechStableSerial.normalize(identity.serialNumber) else {
+                return nil
+            }
+
+            slot = identity.slot
+            productID = identity.productID
+            self.serialNumber = serialNumber
+        }
+    }
 
     mutating func reset() {
         pairedIdentitiesBySlot = [:]
@@ -420,7 +443,19 @@ struct ReceiverSlotStateStore {
     mutating func mergeDiscovery(
         _ discovery: LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery
     ) -> DiscoveryMergeResult {
-        let latestIdentitiesBySlot = Dictionary(uniqueKeysWithValues: discovery.identities.map {
+        let identities = discovery.identities.map { identity in
+            guard let device = DiscoveredDevice(identity) else {
+                return identity
+            }
+            guard discovery.incompleteNameSlots.contains(identity.slot) else {
+                discoveredNames[device] = identity.name
+                return identity
+            }
+            // A partial or fallback name is not kept; a complete one known
+            // for the device wins.
+            return discoveredNames[device].map { identity.renamed($0) } ?? identity
+        }
+        let latestIdentitiesBySlot = Dictionary(uniqueKeysWithValues: identities.map {
             ($0.slot, $0)
         })
         pairedIdentitiesBySlot = latestIdentitiesBySlot
@@ -516,10 +551,24 @@ struct ReceiverSlotStateStore {
         }
     }
 
-    mutating func updateSlotIdentity(_ identity: ReceiverLogicalDeviceIdentity) {
+    /// `fallbackName` is the receiver's own name, which discovery uses when
+    /// it could not read any name for the slot; it is never kept.
+    @discardableResult
+    mutating func updateSlotIdentity(
+        _ identity: ReceiverLogicalDeviceIdentity,
+        fallbackName: String? = nil
+    ) -> ReceiverLogicalDeviceIdentity {
+        var identity = identity
+        if let device = DiscoveredDevice(identity),
+           let name = discoveredNames[device],
+           name != fallbackName,
+           name != identity.name {
+            identity = identity.renamed(name)
+        }
         pairedIdentitiesBySlot[identity.slot] = identity
         slotPresenceBySlot[identity.slot] = .connected
         slotsRequiringIdentityResolution.remove(identity.slot)
+        return identity
     }
 
     func needsIdentityRefresh(slot: UInt8) -> Bool {
@@ -1171,11 +1220,14 @@ private final class ReceiverContext {
         ) else {
             return false
         }
-        guard let identity = admitted.value else {
+        guard let validatedIdentity = admitted.value else {
             return true
         }
 
-        stateStore.updateSlotIdentity(identity)
+        let identity = stateStore.updateSlotIdentity(
+            validatedIdentity,
+            fallbackName: device.pointerDevice.product ?? device.pointerDevice.name
+        )
 
         os_log(
             "Refreshed slot identity: locationID=%{public}d slot=%{public}u name=%{public}@ battery=%{public}@",
@@ -1199,5 +1251,19 @@ private final class ReceiverContext {
 
     private func currentPublishedIdentities() -> [ReceiverLogicalDeviceIdentity] {
         stateStore.currentPublishedIdentities()
+    }
+}
+
+private extension ReceiverLogicalDeviceIdentity {
+    func renamed(_ name: String) -> Self {
+        .init(
+            receiverLocationID: receiverLocationID,
+            slot: slot,
+            kind: kind,
+            name: name,
+            serialNumber: serialNumber,
+            productID: productID,
+            batteryLevel: batteryLevel
+        )
     }
 }

@@ -700,6 +700,12 @@ extension LogitechReceiverMonitoringChannel {
         guard pairingResponse != nil || nameResponse != nil else {
             return nil
         }
+        let receiverName = boltReceiverName(
+            slot: slot,
+            firstFragment: nameResponse?.bytes,
+            deadline: deadline,
+            until: shouldContinue
+        )
 
         let routedTransport = HIDPPTransport(
             device: self,
@@ -716,7 +722,7 @@ extension LogitechReceiverMonitoringChannel {
         let kind = pairingResponse.flatMap { Self.parseBoltReceiverKind($0.bytes) }
             ?? connectionSnapshot?.kind
             ?? 0
-        let name = routedName ?? nameResponse.flatMap { Self.parseBoltReceiverName($0.bytes) }
+        let name = routedName ?? receiverName?.name
 
         return .init(
             slot: slot,
@@ -725,13 +731,15 @@ extension LogitechReceiverMonitoringChannel {
             productID: pairingResponse.flatMap { Self.parseBoltReceiverProductID($0.bytes) },
             serialNumber: pairingResponse.flatMap { Self.parseBoltReceiverSerialNumber($0.bytes) },
             batteryLevel: batteryLevel,
-            hasLiveMetadata: routedName != nil || batteryLevel != nil
+            hasLiveMetadata: routedName != nil || batteryLevel != nil,
+            hasCompleteName: routedName != nil || receiverName?.isComplete == true
         )
     }
 
     func validateBoltSlotIdentity(
         _ slot: UInt8,
         deadline: Date,
+        readsName: Bool = true,
         until shouldContinue: @escaping () -> Bool
     ) -> LogitechHIDPPDeviceMetadataProvider.ReceiverSlotInfo? {
         guard let pairingResponse = boltReceiverInfoRequest(
@@ -741,16 +749,53 @@ extension LogitechReceiverMonitoringChannel {
         ), shouldContinue() else {
             return nil
         }
+        // The receiver keeps the paired name itself, so reading it does not
+        // wait on the device. Without it the slot falls back to the receiver's
+        // name, which a scheme written for the device would not match.
+        let nameResponse = readsName ? boltReceiverInfoRequest(
+            subregister: UInt8(0x60 + Int(slot)),
+            parameters: [0x01],
+            deadline: deadline,
+            until: shouldContinue
+        ) : nil
+        guard shouldContinue() else {
+            return nil
+        }
+        let receiverName = boltReceiverName(
+            slot: slot,
+            firstFragment: nameResponse?.bytes,
+            deadline: deadline,
+            until: shouldContinue
+        )
 
         return .init(
             slot: slot,
             kind: Self.parseBoltReceiverKind(pairingResponse.bytes) ?? 0,
-            name: nil,
+            name: receiverName?.name,
             productID: Self.parseBoltReceiverProductID(pairingResponse.bytes),
             serialNumber: Self.parseBoltReceiverSerialNumber(pairingResponse.bytes),
             batteryLevel: nil,
-            hasLiveMetadata: false
+            hasLiveMetadata: false,
+            hasCompleteName: receiverName?.isComplete != false
         )
+    }
+
+    /// Bolt receivers return a paired device's name in fragments: the first
+    /// fragment carries the full length and each holds up to 13 bytes.
+    private func boltReceiverName(
+        slot: UInt8,
+        firstFragment: [UInt8]?,
+        deadline: Date,
+        until shouldContinue: @escaping () -> Bool
+    ) -> (name: String, isComplete: Bool)? {
+        Self.assembleBoltReceiverNameFragments(firstFragment: firstFragment) { part in
+            boltReceiverInfoRequest(
+                subregister: UInt8(0x60 + Int(slot)),
+                parameters: [part],
+                deadline: deadline,
+                until: shouldContinue
+            )?.bytes
+        }
     }
 
     func discoverBoltPointingDeviceDiscovery(
@@ -772,12 +817,18 @@ extension LogitechReceiverMonitoringChannel {
             slot.hasLiveMetadata ? slot.slot : nil
         })
 
+        var incompleteNameSlots = Set<UInt8>()
         let identities = discovery.slots.compactMap { slot -> ReceiverLogicalDeviceIdentity? in
             guard let kind = resolveReceiverPointingIdentityKind(
                 snapshotRaw: discovery.connectionSnapshots[slot.slot]?.kind,
                 pairingRaw: slot.kind
             ), kind.isPointingDevice else {
                 return nil
+            }
+            // Without a complete name, the identity falls back to `baseName`
+            // or part of the name; a complete one known for the device wins.
+            if !slot.hasCompleteName {
+                incompleteNameSlots.insert(slot.slot)
             }
 
             return ReceiverLogicalDeviceIdentity(
@@ -799,7 +850,8 @@ extension LogitechReceiverMonitoringChannel {
             inventoryAvailable: discovery.inventoryAvailable,
             observedSlotKinds: Dictionary(uniqueKeysWithValues: discovery.slots.map {
                 ($0.slot, $0.kind)
-            })
+            }),
+            incompleteNameSlots: incompleteNameSlots
         )
     }
 
@@ -1128,16 +1180,48 @@ extension LogitechReceiverMonitoringChannel {
     }
 
     static func parseBoltReceiverName(_ response: [UInt8]) -> String? {
-        guard response.count >= 7 else {
+        assembleBoltReceiverName(firstFragment: response) { _ in nil }
+    }
+
+    /// Bolt name fragments are `[report, device, 0x83, 0xB5, sub, part, ...]`.
+    /// The first fragment then carries the full length and up to 13 name
+    /// bytes; each later fragment carries up to 14 name bytes and no length.
+    static func assembleBoltReceiverName(
+        firstFragment: [UInt8]?,
+        readFragment: (UInt8) -> [UInt8]?
+    ) -> String? {
+        assembleBoltReceiverNameFragments(firstFragment: firstFragment, readFragment: readFragment)?.name
+    }
+
+    /// Like `assembleBoltReceiverName`, also telling whether every fragment
+    /// up to the reported length was read.
+    static func assembleBoltReceiverNameFragments(
+        firstFragment: [UInt8]?,
+        readFragment: (UInt8) -> [UInt8]?
+    ) -> (name: String, isComplete: Bool)? {
+        guard let firstFragment, firstFragment.count >= 7 else {
             return nil
         }
 
-        let length = Int(response[6])
-        let bytes = Array(response.dropFirst(7).prefix(length))
-        guard !bytes.isEmpty else {
-            return nil
+        let part = firstFragment[5]
+        let length = Int(firstFragment[6])
+        var bytes = Array(firstFragment.dropFirst(7).prefix(length))
+        var nextPart = part
+        while bytes.count < length, nextPart < UInt8.max {
+            nextPart += 1
+            guard let response = readFragment(nextPart),
+                  response.count > 6,
+                  response[5] == nextPart else {
+                break
+            }
+            bytes += response.dropFirst(6).prefix(length - bytes.count)
         }
 
-        return String(bytes: bytes, encoding: .utf8)
+        guard let name = String(bytes: bytes, encoding: .utf8)?
+            .trimmingCharacters(in: .whitespaces),
+            !name.isEmpty else {
+            return nil
+        }
+        return (name, bytes.count >= length)
     }
 }
