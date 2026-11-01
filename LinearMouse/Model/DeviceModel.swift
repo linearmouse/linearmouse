@@ -18,6 +18,8 @@ class DeviceModel: ObservableObject, Identifiable {
     @Published var displayName: String
     @Published var batteryLevel: Int?
     @Published var pairedReceiverDevices: [ReceiverLogicalDeviceIdentity] = []
+    /// Battery levels of `pairedReceiverDevices`, by slot.
+    @Published var pairedReceiverDeviceBatteryLevels: [UInt8: Int] = [:]
     let category: Device.Category
 
     init(deviceRef: WeakRef<Device>) {
@@ -74,15 +76,20 @@ class DeviceModel: ObservableObject, Identifiable {
         name = preferredName
         pairedReceiverDevices = pairedDevices
         displayName = DeviceManager.displayName(baseName: preferredName, pairedDevices: pairedDevices)
+        refreshBatteryLevel()
     }
 
     private func refreshBatteryLevel() {
         guard let device = deviceRef.value else {
             batteryLevel = nil
+            pairedReceiverDeviceBatteryLevels = [:]
             return
         }
 
         batteryLevel = BatteryDeviceMonitor.shared.currentDeviceBatteryLevel(for: device) ?? device.batteryLevel
+        pairedReceiverDeviceBatteryLevels = pairedReceiverDevices.reduce(into: [:]) { levels, identity in
+            levels[identity.slot] = BatteryDeviceMonitor.shared.batteryLevel(of: identity)
+        }
     }
 }
 

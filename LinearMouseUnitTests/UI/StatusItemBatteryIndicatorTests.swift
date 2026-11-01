@@ -147,6 +147,25 @@ final class StatusItemBatteryIndicatorTests: XCTestCase {
         )
     }
 
+    func testReceiverDeviceBatteryLevelPrefersTheSlotObservation() {
+        // A refresh after reconnection publishes the identity without a level.
+        let identity = ReceiverLogicalDeviceIdentity(
+            receiverLocationID: 1,
+            slot: 2,
+            kind: .mouse,
+            name: "Mouse B",
+            serialNumber: nil,
+            productID: nil,
+            batteryLevel: nil
+        )
+        let inventory = [
+            ConnectedBatteryDeviceInfo(id: "receiver|1|2", name: "Mouse B", batteryLevel: 45)
+        ]
+
+        XCTAssertEqual(ConnectedBatteryDeviceInfo.batteryLevel(of: identity, inventory: inventory), 45)
+        XCTAssertNil(ConnectedBatteryDeviceInfo.batteryLevel(of: identity, inventory: []))
+    }
+
     func testCurrentDeviceBatteryLevelFallsBackToDirectDeviceInventory() {
         let inventory = [
             ConnectedBatteryDeviceInfo(id: "device-1", name: "MX Master 3", batteryLevel: 18)

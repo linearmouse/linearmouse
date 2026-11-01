@@ -40,10 +40,7 @@ struct ConnectedBatteryDeviceInfo: Hashable {
         directDeviceIdentity: String?,
         inventory: [Self]
     ) -> Int? {
-        let pairedBatteryLevels = pairedDevices.compactMap { identity in
-            let id = receiverIdentity(receiverLocationID: identity.receiverLocationID, slot: identity.slot)
-            return inventory.first { $0.id == id }?.batteryLevel ?? identity.batteryLevel
-        }
+        let pairedBatteryLevels = pairedDevices.compactMap { batteryLevel(of: $0, inventory: inventory) }
         if let lowestPairedBatteryLevel = pairedBatteryLevels.min() {
             return lowestPairedBatteryLevel
         }
@@ -53,6 +50,14 @@ struct ConnectedBatteryDeviceInfo: Hashable {
         }
 
         return inventory.first { $0.id == directDeviceIdentity }?.batteryLevel
+    }
+
+    /// The battery level of a device behind a receiver. The identity only
+    /// carries a level when discovery could read one, and a refresh after
+    /// reconnection never reads it, so the slot's live observation comes first.
+    static func batteryLevel(of identity: ReceiverLogicalDeviceIdentity, inventory: [Self]) -> Int? {
+        let id = receiverIdentity(receiverLocationID: identity.receiverLocationID, slot: identity.slot)
+        return inventory.first { $0.id == id }?.batteryLevel ?? identity.batteryLevel
     }
 
     static func isAppleBluetoothDevice(vendorID: Int?, transport: String?) -> Bool {
