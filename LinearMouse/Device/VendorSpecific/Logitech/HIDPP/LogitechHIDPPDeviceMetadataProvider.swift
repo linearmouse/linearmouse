@@ -3258,7 +3258,11 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
 
         let length = Int(response[5])
         let bytes = Array(response.dropFirst(6).prefix(length))
-        return String(bytes: bytes, encoding: .utf8)
+        // An empty stored name is no name, so callers can fall back.
+        guard let name = String(bytes: bytes, encoding: .utf8), !name.isEmpty else {
+            return nil
+        }
+        return name
     }
 
     private static func parseReceiverKind(_ response: [UInt8]) -> UInt8? {

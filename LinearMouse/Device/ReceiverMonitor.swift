@@ -404,6 +404,27 @@ struct ReceiverSlotStateStore {
     private var pairedIdentitiesBySlot = [UInt8: ReceiverLogicalDeviceIdentity]()
     private var slotPresenceBySlot = [UInt8: SlotPresenceState]()
     private var slotsRequiringIdentityResolution = Set<UInt8>()
+    /// Names found by discovery, which prefers the name the device reports.
+    /// A refresh after reconnection only reads the name the receiver stored
+    /// at pairing, so it keeps these to publish the same name for the device.
+    /// Kept across resets, because they are keyed by the device's identity.
+    private var discoveredNames = [DiscoveredDevice: String]()
+
+    private struct DiscoveredDevice: Hashable {
+        let slot: UInt8
+        let productID: Int?
+        let serialNumber: String?
+
+        init?(_ identity: ReceiverLogicalDeviceIdentity) {
+            guard identity.productID != nil || identity.serialNumber != nil else {
+                return nil
+            }
+
+            slot = identity.slot
+            productID = identity.productID
+            serialNumber = identity.serialNumber
+        }
+    }
 
     mutating func reset() {
         pairedIdentitiesBySlot = [:]
@@ -423,6 +444,11 @@ struct ReceiverSlotStateStore {
         let latestIdentitiesBySlot = Dictionary(uniqueKeysWithValues: discovery.identities.map {
             ($0.slot, $0)
         })
+        for identity in discovery.identities {
+            if let device = DiscoveredDevice(identity) {
+                discoveredNames[device] = identity.name
+            }
+        }
         pairedIdentitiesBySlot = latestIdentitiesBySlot
         slotPresenceBySlot = [:]
         slotsRequiringIdentityResolution = []
@@ -516,10 +542,32 @@ struct ReceiverSlotStateStore {
         }
     }
 
-    mutating func updateSlotIdentity(_ identity: ReceiverLogicalDeviceIdentity) {
+    /// `fallbackName` is the receiver's own name, which discovery uses when
+    /// it could not read any name for the slot; it is never kept.
+    @discardableResult
+    mutating func updateSlotIdentity(
+        _ identity: ReceiverLogicalDeviceIdentity,
+        fallbackName: String? = nil
+    ) -> ReceiverLogicalDeviceIdentity {
+        var identity = identity
+        if let device = DiscoveredDevice(identity),
+           let name = discoveredNames[device],
+           name != fallbackName,
+           name != identity.name {
+            identity = ReceiverLogicalDeviceIdentity(
+                receiverLocationID: identity.receiverLocationID,
+                slot: identity.slot,
+                kind: identity.kind,
+                name: name,
+                serialNumber: identity.serialNumber,
+                productID: identity.productID,
+                batteryLevel: identity.batteryLevel
+            )
+        }
         pairedIdentitiesBySlot[identity.slot] = identity
         slotPresenceBySlot[identity.slot] = .connected
         slotsRequiringIdentityResolution.remove(identity.slot)
+        return identity
     }
 
     func needsIdentityRefresh(slot: UInt8) -> Bool {
@@ -1171,11 +1219,14 @@ private final class ReceiverContext {
         ) else {
             return false
         }
-        guard let identity = admitted.value else {
+        guard let validatedIdentity = admitted.value else {
             return true
         }
 
-        stateStore.updateSlotIdentity(identity)
+        let identity = stateStore.updateSlotIdentity(
+            validatedIdentity,
+            fallbackName: device.pointerDevice.product ?? device.pointerDevice.name
+        )
 
         os_log(
             "Refreshed slot identity: locationID=%{public}d slot=%{public}u name=%{public}@ battery=%{public}@",

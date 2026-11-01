@@ -486,6 +486,53 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertFalse(store.mergeDiscovery(discovery()).inventoryComplete)
     }
 
+    func testReconnectKeepsTheNameFoundByDiscovery() {
+        func identity(name: String, serialNumber: String? = "513BBE34") -> ReceiverLogicalDeviceIdentity {
+            ReceiverLogicalDeviceIdentity(
+                receiverLocationID: 0x1234,
+                slot: 2,
+                kind: .mouse,
+                name: name,
+                serialNumber: serialNumber,
+                productID: 0xB035,
+                batteryLevel: nil
+            )
+        }
+        func discovery(_ identity: ReceiverLogicalDeviceIdentity)
+            -> LogitechHIDPPDeviceMetadataProvider.ReceiverPointingDeviceDiscovery {
+            .init(
+                identities: [identity],
+                connectionSnapshots: [2: .init(isConnected: true, kind: 0x02)],
+                liveReachableSlots: [2],
+                expectedDeviceCount: .paired(1),
+                observedSlotKinds: [2: 0x02]
+            )
+        }
+        var store = ReceiverSlotStateStore()
+
+        // Discovery read the name the device reports; the receiver stored another.
+        _ = store.mergeDiscovery(discovery(identity(name: "Work Mouse")))
+        store.mergeConnectionSnapshots([2: .init(isConnected: false, kind: 0x02)])
+        store.mergeConnectionSnapshots([2: .init(isConnected: true, kind: 0x02)])
+        XCTAssertEqual(
+            store.updateSlotIdentity(identity(name: "MX Master 3S B"), fallbackName: "USB Receiver").name,
+            "Work Mouse"
+        )
+
+        // Another device in the same slot gets its own name.
+        XCTAssertEqual(
+            store.updateSlotIdentity(identity(name: "MX Anywhere 3", serialNumber: "OTHER")).name,
+            "MX Anywhere 3"
+        )
+
+        // The receiver's own name, used when discovery read none, is never kept.
+        _ = store.mergeDiscovery(discovery(identity(name: "USB Receiver")))
+        XCTAssertEqual(
+            store.updateSlotIdentity(identity(name: "MX Master 3S B"), fallbackName: "USB Receiver").name,
+            "MX Master 3S B"
+        )
+    }
+
     func testConnectedCountInventoryIgnoresOfflinePairedSlots() {
         var store = ReceiverSlotStateStore()
         let mouse = receiverIdentity(slot: 1, name: "Online Mouse")
