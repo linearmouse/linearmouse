@@ -21,11 +21,7 @@ class DeviceState: ObservableObject {
 
     @Published var currentDeviceRef: WeakRef<Device>? {
         didSet {
-            guard !isUpdatingCurrentDeviceRef else {
-                return
-            }
-
-            guard !Defaults[.autoSwitchToActiveDevice] else {
+            guard !isUpdatingCurrentDeviceRef, !Defaults[.autoSwitchToActiveDevice] else {
                 return
             }
 
@@ -88,13 +84,7 @@ extension DeviceState {
     }
 
     private func updateCurrentDeviceRef(lastActiveDeviceRef: WeakRef<Device>?) {
-        guard !Defaults[.autoSwitchToActiveDevice] else {
-            setCurrentDeviceRef(lastActiveDeviceRef)
-            currentDeviceMatcher = exactMatcher(of: lastActiveDeviceRef)
-            return
-        }
-
-        guard let userSelectedDevice = Defaults[.selectedDevice] else {
+        guard !Defaults[.autoSwitchToActiveDevice], let userSelectedDevice = Defaults[.selectedDevice] else {
             setCurrentDeviceRef(lastActiveDeviceRef)
             currentDeviceMatcher = exactMatcher(of: lastActiveDeviceRef)
             return

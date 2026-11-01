@@ -80,11 +80,8 @@ struct PermissionAppDragSource: NSViewRepresentable {
 
         override func mouseDragged(with event: NSEvent) {
             guard let origin = mouseDownPoint,
-                  hypot(event.locationInWindow.x - origin.x, event.locationInWindow.y - origin.y) >= 4
-            else {
-                return
-            }
-            guard let bitmap = bitmapImageRepForCachingDisplay(in: bounds) else {
+                  hypot(event.locationInWindow.x - origin.x, event.locationInWindow.y - origin.y) >= 4,
+                  let bitmap = bitmapImageRepForCachingDisplay(in: bounds) else {
                 return
             }
             cacheDisplay(in: bounds, to: bitmap)

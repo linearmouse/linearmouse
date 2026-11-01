@@ -15,10 +15,7 @@ struct InstalledApp: Identifiable {
 }
 
 func readInstalledApp(at url: URL) throws -> InstalledApp? {
-    guard let bundle = Bundle(url: url) else {
-        return nil
-    }
-    guard let bundleIdentifier = bundle.bundleIdentifier else {
+    guard let bundle = Bundle(url: url), let bundleIdentifier = bundle.bundleIdentifier else {
         return nil
     }
     let bundleName = bundle.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ??

@@ -324,11 +324,8 @@ final class ReceiverMonitor {
         device: Device,
         request: ReceiverRediscoveryRequest = .init()
     ) {
-        guard let locationID = device.pointerDevice.locationID else {
-            return
-        }
-
-        guard pendingRediscoveryRequests[locationID] !== request else {
+        guard let locationID = device.pointerDevice.locationID,
+              pendingRediscoveryRequests[locationID] !== request else {
             return
         }
         pendingRediscoveryRequests[locationID] = request

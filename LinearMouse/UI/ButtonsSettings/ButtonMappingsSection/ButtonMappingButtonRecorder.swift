@@ -216,6 +216,14 @@ struct ButtonMappingButtonRecorder: View {
         recordedMappingCancellable = nil
     }
 
+    /// Strip the serial number only for a category-only scope such as "All Mice".
+    /// When a specific device is selected, keep it: the scheme can't tell apart
+    /// mice behind the same receiver, so the serial number is the only way to
+    /// distinguish units of the same model.
+    private var stripsRecordedSerialNumber: Bool {
+        DeviceState.shared.currentDeviceMatcher?.categoryOnlyValue != nil
+    }
+
     private func logitechMonitorDevices() -> [Device] {
         guard let currentDevice = DeviceState.shared.currentDeviceRef?.value,
               currentDevice.hasLogitechControlsMonitor else {
@@ -230,8 +238,10 @@ struct ButtonMappingButtonRecorder: View {
             settingsState.recordedButtonMappingEvent = nil
         }
 
+        let recordedButton = stripsRecordedSerialNumber ? event.button?.withoutSerialNumber : event.button
+
         guard mode == .advanced else {
-            mapping.button = event.button
+            mapping.button = recordedButton
             mapping.scroll = event.scroll
             mapping.modifierFlags = event.modifierFlags
             recording = false
@@ -239,7 +249,7 @@ struct ButtonMappingButtonRecorder: View {
         }
 
         let now = DispatchTime.now().uptimeNanoseconds
-        if let button = event.button {
+        if let button = recordedButton {
             if event.isPressed == false {
                 advancedEngine.buttonUp(button, at: now)
             } else {

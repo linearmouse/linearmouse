@@ -61,14 +61,14 @@ public struct HIDPPTransport {
         until operationShouldContinue: @escaping () -> Bool
     ) -> UInt8? {
         guard let response = request(
-            featureIndex: 0x00,
-            function: 0x00,
-            parameters: featureID.bytes,
-            deadline: deadline,
-            until: operationShouldContinue
-        ),
-            let featureIndex = response.payload.first,
-            featureIndex != 0
+                  featureIndex: 0x00,
+                  function: 0x00,
+                  parameters: featureID.bytes,
+                  deadline: deadline,
+                  until: operationShouldContinue
+              ),
+              let featureIndex = response.payload.first,
+              featureIndex != 0
         else {
             return nil
         }

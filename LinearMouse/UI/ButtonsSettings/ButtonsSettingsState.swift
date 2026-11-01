@@ -176,9 +176,6 @@ extension ButtonsSettingsState {
                 if scheme.buttons.autoScroll.modes == nil {
                     scheme.buttons.autoScroll.modes = defaultAutoScrollModes
                 }
-                if scheme.buttons.autoScroll.speed == nil {
-                    scheme.buttons.autoScroll.speed = 1
-                }
             } else {
                 scheme.buttons.autoScroll.enabled = false
             }
@@ -234,17 +231,13 @@ extension ButtonsSettingsState {
         }
     }
 
-    var autoScrollSpeed: Double {
+    var autoScrollReverse: Bool {
         get {
-            mergedScheme.buttons.autoScroll.speed?.asTruncatedDouble ?? 1
+            mergedScheme.buttons.autoScroll.reverse ?? false
         }
         set {
-            scheme.buttons.autoScroll.speed = Decimal(newValue).rounded(1)
+            scheme.buttons.autoScroll.reverse = newValue
         }
-    }
-
-    var autoScrollSpeedText: String {
-        String(format: "%.1fx", autoScrollSpeed)
     }
 
     var autoScrollTrigger: Scheme.Buttons.Mapping {

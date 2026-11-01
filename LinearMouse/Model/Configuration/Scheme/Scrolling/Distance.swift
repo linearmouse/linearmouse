@@ -49,15 +49,11 @@ extension Scheme.Scrolling.Distance: Codable {
                 in: stringValue,
                 range: NSRange(stringValue.startIndex ..< stringValue.endIndex, in: stringValue)
             )
-            guard let match = matches.first else {
-                throw CustomDecodingError(in: container, error: ValueError.invalidValue)
-            }
-
-            guard let valueRange = Range(match.range(at: 1), in: stringValue) else {
-                throw CustomDecodingError(in: container, error: ValueError.invalidValue)
-            }
-
-            guard let unitRange = Range(match.range(at: 2), in: stringValue) else {
+            guard let match = matches.first, let valueRange = Range(match.range(at: 1), in: stringValue),
+                  let unitRange = Range(
+                      match.range(at: 2),
+                      in: stringValue
+                  ) else {
                 throw CustomDecodingError(in: container, error: ValueError.invalidValue)
             }
 

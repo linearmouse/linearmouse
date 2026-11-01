@@ -311,11 +311,8 @@ extension GestureButtonTransformer: EventTransformer {
 
 extension GestureButtonTransformer: LogitechControlEventHandling {
     func handleLogitechControlEvent(_ context: LogitechEventContext) -> LogitechControlEventHandlingResult {
-        guard !SettingsState.shared.recording || hasActiveInteraction else {
-            return .notHandled
-        }
-
-        guard let triggerLogitechControl = trigger.button?.logitechControl,
+        guard !SettingsState.shared.recording || hasActiveInteraction,
+              let triggerLogitechControl = trigger.button?.logitechControl,
               context.matches(triggerLogitechControl) else {
             return .notHandled
         }

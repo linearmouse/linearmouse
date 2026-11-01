@@ -25,15 +25,8 @@ struct AppPicker: View {
                 if #available(macOS 11.0, *) {
                     panel.allowedContentTypes = [.applicationBundle]
                 }
-                guard panel.runModal() == .OK else {
-                    return
-                }
-
-                guard let url = panel.url else {
-                    return
-                }
-
-                guard let installedApp = try? readInstalledApp(at: url) else {
+                guard panel.runModal() == .OK, let url = panel.url,
+                      let installedApp = try? readInstalledApp(at: url) else {
                     return
                 }
 
@@ -47,11 +40,7 @@ struct AppPicker: View {
                 panel.canChooseDirectories = false
                 panel.allowsOtherFileTypes = true
                 panel.message = NSLocalizedString("Select an executable file", comment: "")
-                guard panel.runModal() == .OK else {
-                    return
-                }
-
-                guard let url = panel.url else {
+                guard panel.runModal() == .OK, let url = panel.url else {
                     return
                 }
 

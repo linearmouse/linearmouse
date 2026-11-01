@@ -52,7 +52,7 @@ struct HoverWindowQuery {
     }
 
     func currentFocus() -> Focus? {
-        guard let app = element(kAXFocusedApplicationAttribute, on: system) else {
+        guard let app = focusedApplication() else {
             return nil
         }
         AXUIElementSetMessagingTimeout(app, 0.05)
@@ -79,10 +79,8 @@ struct HoverWindowQuery {
         guard
             string(kAXSubroleAttribute, on: window) == kAXStandardWindowSubrole,
             (value(kAXModalAttribute, on: window) as? Bool) != true,
-            !hasSheet(on: window) else {
-            return nil
-        }
-        guard let id = windowID(of: window) else {
+            !hasSheet(on: window),
+            let id = windowID(of: window) else {
             return nil
         }
         return Focus(pid: pid, windowID: id)
@@ -113,6 +111,22 @@ struct HoverWindowQuery {
         return rect.contains(point)
     }
 
+    /// Some Electron apps (e.g. VS Code) leave the system-wide focused application
+    /// unanswered (kAXErrorNoValue) while frontmost. Fall back to the frontmost
+    /// application, or hover focus could never leave them.
+    private func focusedApplication() -> AXUIElement? {
+        let (status, result) = copyValue(kAXFocusedApplicationAttribute, on: system)
+        if status == .success, let result, CFGetTypeID(result) == AXUIElementGetTypeID() {
+            return (result as! AXUIElement)
+        }
+        // Other failures (e.g. a timeout) leave the focus unverified; keep suspending.
+        guard status == .noValue,
+              let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier else {
+            return nil
+        }
+        return AXUIElementCreateApplication(pid)
+    }
+
     private func hasSheet(on window: AXUIElement) -> Bool {
         let children = value(kAXChildrenAttribute, on: window) as? [AXUIElement] ?? []
         return children.contains { string(kAXRoleAttribute, on: $0) == kAXSheetRole }
@@ -137,15 +151,18 @@ struct HoverWindowQuery {
         }
     }
 
-    private func value(_ attribute: String, on element: AXUIElement) -> CFTypeRef? {
+    private func copyValue(_ attribute: String, on element: AXUIElement) -> (AXError, CFTypeRef?) {
         Self.performAXQuery(on: element) {
             AXUIElementSetMessagingTimeout(element, 0.05)
             var result: CFTypeRef?
-            guard AXUIElementCopyAttributeValue(element, attribute as CFString, &result) == .success else {
-                return nil
-            }
-            return result
+            let status = AXUIElementCopyAttributeValue(element, attribute as CFString, &result)
+            return (status, result)
         }
+    }
+
+    private func value(_ attribute: String, on element: AXUIElement) -> CFTypeRef? {
+        let (status, result) = copyValue(attribute, on: element)
+        return status == .success ? result : nil
     }
 
     private func element(_ attribute: String, on element: AXUIElement) -> AXUIElement? {

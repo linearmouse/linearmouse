@@ -15,6 +15,7 @@ final class ScrollMovementAccumulator {
         var lastTime: UInt64
         var hasPhase: Bool
         var roundToNearestStep: Bool
+        var threshold: Double
     }
 
     private var states: [Axis: State] = [:]
@@ -34,16 +35,23 @@ final class ScrollMovementAccumulator {
         }
     }
 
-    func consume(_ input: ScrollInput, mapping: Int, roundToNearestStep: Bool = false, at now: UInt64) -> Int {
+    func consume(
+        _ input: ScrollInput,
+        mapping: Int,
+        roundToNearestStep: Bool = false,
+        threshold: Double? = nil,
+        at now: UInt64
+    ) -> Int {
         guard input.delta.isFinite, input.delta != 0 else {
             return 0
         }
+        let threshold = threshold ?? input.units.threshold
         let direction = input.delta > 0 ? 1.0 : -1.0
         let delta = input.delta
         var state = states[input.axis]
         if let previous = state,
            previous.units != input.units || previous.hasPhase != input.hasPhase ||
-           previous.roundToNearestStep != roundToNearestStep ||
+           previous.roundToNearestStep != roundToNearestStep || previous.threshold != threshold ||
            previous.mapping != mapping || previous.direction != direction || now < previous.lastTime ||
            (!input.hasPhase && now - previous.lastTime >
                (input.units == .detents ? 1_000_000_000 : 500_000_000)) {
@@ -55,11 +63,11 @@ final class ScrollMovementAccumulator {
             direction: direction,
             lastTime: now,
             hasPhase: input.hasPhase,
-            roundToNearestStep: roundToNearestStep
+            roundToNearestStep: roundToNearestStep,
+            threshold: threshold
         )
         current.lastTime = now
         current.remainder += delta
-        let threshold = input.units.threshold
         let offset = roundToNearestStep ? threshold / 2 : 0
         // Measure in the input direction: a negative remainder after rounding
         // is distance owed, not fresh movement in the opposite direction.

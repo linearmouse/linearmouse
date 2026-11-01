@@ -596,11 +596,8 @@ class Device {
     private func updateLogitechControlsMonitorRunning() {
         guard !isRemoved,
               allowsDeviceWork,
-              logitechSession.allowsOrdinaryHardwareIO else {
-            return
-        }
-
-        guard let logitechReprogrammableControlsMonitor else {
+              logitechSession.allowsOrdinaryHardwareIO,
+              let logitechReprogrammableControlsMonitor else {
             return
         }
 

@@ -24,7 +24,7 @@ enum LogitechHIDPPFeatureTargetResolver {
     ) -> Target? {
         guard device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID,
               [PointerDeviceTransportName.usb, PointerDeviceTransportName.bluetoothLowEnergy]
-              .contains(device.transport)
+                  .contains(device.transport)
         else {
             return nil
         }
@@ -110,15 +110,15 @@ enum LogitechHIDPPFeatureTargetResolver {
         shouldContinue: @escaping () -> Bool = { true }
     ) -> Target? {
         guard let transport = HIDPPTransport(
-            device: device,
-            deviceIndex: nil,
-            shouldContinue: shouldContinue
-        ),
-            let featureIndex = transport.featureIndex(
-                for: featureID,
-                deadline: requestDeadline,
-                until: requestShouldContinue
-            )
+                  device: device,
+                  deviceIndex: nil,
+                  shouldContinue: shouldContinue
+              ),
+              let featureIndex = transport.featureIndex(
+                  for: featureID,
+                  deadline: requestDeadline,
+                  until: requestShouldContinue
+              )
         else {
             return nil
         }
@@ -160,15 +160,15 @@ enum LogitechHIDPPFeatureTargetResolver {
         shouldContinue: @escaping () -> Bool = { true }
     ) -> Target? {
         guard let transport = HIDPPTransport(
-            device: receiverChannel,
-            deviceIndex: slot,
-            shouldContinue: shouldContinue
-        ),
-            let featureIndex = transport.featureIndex(
-                for: featureID,
-                deadline: requestDeadline,
-                until: requestShouldContinue
-            )
+                  device: receiverChannel,
+                  deviceIndex: slot,
+                  shouldContinue: shouldContinue
+              ),
+              let featureIndex = transport.featureIndex(
+                  for: featureID,
+                  deadline: requestDeadline,
+                  until: requestShouldContinue
+              )
         else {
             return nil
         }

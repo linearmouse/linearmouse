@@ -228,12 +228,8 @@ class StatusItem: NSObject, NSMenuDelegate {
 
     static func menuBarBatteryTitle(currentBatteryLevel: Int?, mode: MenuBarBatteryDisplayMode) -> String? {
         guard let threshold = mode.threshold,
-              let currentBatteryLevel
-        else {
-            return nil
-        }
-
-        guard currentBatteryLevel <= threshold else {
+              let currentBatteryLevel,
+              currentBatteryLevel <= threshold else {
             return nil
         }
 

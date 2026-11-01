@@ -902,11 +902,8 @@ class DeviceManager: ObservableObject {
     /// It seems that extenal Trackpads do not trigger to `IOHIDDevice`'s inputValueCallback.
     /// That's why we need to observe events from `DeviceManager` too.
     private func eventReceived(_: PointerDeviceManager, _ pointerDevice: PointerDevice, _ event: IOHIDEvent) {
-        guard let physicalDevice = pointerDeviceToDevice[pointerDevice] else {
-            return
-        }
-
-        guard IOHIDEventGetType(event) == kIOHIDEventTypeScroll else {
+        guard let physicalDevice = pointerDeviceToDevice[pointerDevice],
+              IOHIDEventGetType(event) == kIOHIDEventTypeScroll else {
             return
         }
 
@@ -925,11 +922,8 @@ class DeviceManager: ObservableObject {
 
     func deviceFromCGEvent(_ cgEvent: CGEvent) -> Device? {
         // Issue: https://github.com/linearmouse/linearmouse/issues/677#issuecomment-1938208542
-        guard ![.flagsChanged, .keyDown, .keyUp].contains(cgEvent.type) else {
-            return eventDeviceSnapshot.device(for: nil)
-        }
-
-        guard let ioHIDEvent = CGEventCopyIOHIDEvent(cgEvent) else {
+        guard ![.flagsChanged, .keyDown, .keyUp].contains(cgEvent.type),
+              let ioHIDEvent = CGEventCopyIOHIDEvent(cgEvent) else {
             return eventDeviceSnapshot.device(for: nil)
         }
 
@@ -981,12 +975,8 @@ class DeviceManager: ObservableObject {
 
     func updateLogitechDeviceSettings(for device: Device) {
         guard state == .running,
-              device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID
-        else {
-            return
-        }
-
-        guard updateLogitechReceiverDiscovery(for: device).isReady else {
+              device.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID,
+              updateLogitechReceiverDiscovery(for: device).isReady else {
             return
         }
 
@@ -1031,13 +1021,8 @@ class DeviceManager: ObservableObject {
         defer { IOServiceClose(handle) }
 
         var valueRef: Unmanaged<CFTypeRef>?
-        guard IOHIDCopyCFTypeParameter(handle, key as CFString, &valueRef) == KERN_SUCCESS else {
-            return nil
-        }
-        guard let valueRefUnwrapped = valueRef else {
-            return nil
-        }
-        guard let value = valueRefUnwrapped.takeRetainedValue() as? T else {
+        guard IOHIDCopyCFTypeParameter(handle, key as CFString, &valueRef) == KERN_SUCCESS,
+              let valueRefUnwrapped = valueRef, let value = valueRefUnwrapped.takeRetainedValue() as? T else {
             return nil
         }
         return value
@@ -1094,10 +1079,8 @@ class DeviceManager: ObservableObject {
             return (true, device.updateLogitechReceiverDiscovery(nil))
         }
 
-        guard let locationID = device.pointerDevice.locationID else {
-            return (false, nil)
-        }
-        guard receiverWakeRediscoveryRequests[locationID] == nil else {
+        guard let locationID = device.pointerDevice.locationID,
+              receiverWakeRediscoveryRequests[locationID] == nil else {
             return (false, nil)
         }
         guard let identities = receiverPairedDeviceIdentities[locationID] else {

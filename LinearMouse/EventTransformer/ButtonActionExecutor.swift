@@ -207,12 +207,12 @@ extension ButtonActionExecutor {
 
         var value: CFTypeRef?
         guard AXUIElementCopyAttributeValue(
-            appElement,
-            kAXFocusedWindowAttribute as CFString,
-            &value
-        ) == .success,
-            let value,
-            CFGetTypeID(value) == AXUIElementGetTypeID() else {
+                  appElement,
+                  kAXFocusedWindowAttribute as CFString,
+                  &value
+              ) == .success,
+              let value,
+              CFGetTypeID(value) == AXUIElementGetTypeID() else {
             return nil
         }
 
@@ -224,19 +224,19 @@ extension ButtonActionExecutor {
         var sizeValue: CFTypeRef?
 
         guard AXUIElementCopyAttributeValue(
-            window,
-            kAXPositionAttribute as CFString,
-            &positionValue
-        ) == .success,
-            AXUIElementCopyAttributeValue(
-                window,
-                kAXSizeAttribute as CFString,
-                &sizeValue
-            ) == .success,
-            let positionValue,
-            let sizeValue,
-            CFGetTypeID(positionValue) == AXValueGetTypeID(),
-            CFGetTypeID(sizeValue) == AXValueGetTypeID() else {
+                  window,
+                  kAXPositionAttribute as CFString,
+                  &positionValue
+              ) == .success,
+              AXUIElementCopyAttributeValue(
+                  window,
+                  kAXSizeAttribute as CFString,
+                  &sizeValue
+              ) == .success,
+              let positionValue,
+              let sizeValue,
+              CFGetTypeID(positionValue) == AXValueGetTypeID(),
+              CFGetTypeID(sizeValue) == AXValueGetTypeID() else {
             return nil
         }
 
@@ -252,15 +252,15 @@ extension ButtonActionExecutor {
         var size = CGSize.zero
 
         guard AXValueGetValue(
-            axPositionValue,
-            .cgPoint,
-            &position
-        ),
-            AXValueGetValue(
-                axSizeValue,
-                .cgSize,
-                &size
-            ) else {
+                  axPositionValue,
+                  .cgPoint,
+                  &position
+              ),
+              AXValueGetValue(
+                  axSizeValue,
+                  .cgSize,
+                  &size
+              ) else {
             return nil
         }
 
@@ -413,12 +413,12 @@ extension ButtonActionExecutor {
     private func enhancedUserInterfaceEnabled(for application: AXUIElement) -> Bool? {
         var value: CFTypeRef?
         guard AXUIElementCopyAttributeValue(
-            application,
-            Self.enhancedUserInterfaceAttribute,
-            &value
-        ) == .success,
-            let value,
-            CFGetTypeID(value) == CFBooleanGetTypeID() else {
+                  application,
+                  Self.enhancedUserInterfaceAttribute,
+                  &value
+              ) == .success,
+              let value,
+              CFGetTypeID(value) == CFBooleanGetTypeID() else {
             return nil
         }
 
@@ -735,19 +735,12 @@ extension ButtonActionExecutor {
     }
 
     private func postClickEvent(mouseButton: CGMouseButton, clickState: Int64? = nil) {
-        guard let location = CGEvent(source: nil)?.location else {
-            return
-        }
-
-        guard let mouseDownEvent = CGEvent(
+        guard let location = CGEvent(source: nil)?.location, let mouseDownEvent = CGEvent(
             mouseEventSource: nil,
             mouseType: mouseButton.fixedCGEventType(of: .leftMouseDown),
             mouseCursorPosition: location,
             mouseButton: mouseButton
-        ) else {
-            return
-        }
-        guard let mouseUpEvent = CGEvent(
+        ), let mouseUpEvent = CGEvent(
             mouseEventSource: nil,
             mouseType: mouseButton.fixedCGEventType(of: .leftMouseUp),
             mouseCursorPosition: location,

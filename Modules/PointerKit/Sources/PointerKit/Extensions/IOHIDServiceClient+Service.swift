@@ -5,11 +5,8 @@ import Foundation
 
 extension IOHIDServiceClient {
     private func getService() -> io_service_t? {
-        guard let registryID = IOHIDServiceClientGetRegistryID(self) as? UInt64 else {
-            return nil
-        }
-
-        guard let matching = IORegistryEntryIDMatching(registryID) else {
+        guard let registryID = IOHIDServiceClientGetRegistryID(self) as? UInt64,
+              let matching = IORegistryEntryIDMatching(registryID) else {
             return nil
         }
 

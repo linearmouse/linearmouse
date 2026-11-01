@@ -16,10 +16,7 @@ func hidPropertyValue<T>(_ value: T) -> CFTypeRef? {
 
 extension IOHIDServiceClient {
     func getProperty<T>(_ key: String) -> T? {
-        guard let valueRef = IOHIDServiceClientCopyProperty(self, key as CFString) else {
-            return nil
-        }
-        guard let value = valueRef as? T else {
+        guard let valueRef = IOHIDServiceClientCopyProperty(self, key as CFString), let value = valueRef as? T else {
             return nil
         }
         return value

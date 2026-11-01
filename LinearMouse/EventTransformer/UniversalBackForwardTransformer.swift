@@ -101,11 +101,7 @@ class UniversalBackForwardTransformer: EventTransformer {
             for: mouseButton,
             universalBackForward: universalBackForward,
             targetBundleIdentifier: targetBundleIdentifier
-        ) else {
-            return false
-        }
-
-        guard let event = GestureEvent(
+        ), let event = GestureEvent(
             navigationSwipeSource: nil,
             direction: direction.hidDirection
         ) else {

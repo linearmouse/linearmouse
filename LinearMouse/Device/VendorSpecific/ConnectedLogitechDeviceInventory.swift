@@ -30,11 +30,11 @@ enum ConnectedLogitechDeviceInventory {
             }
 
             guard let metadata = VendorSpecificDeviceMetadataRegistry.metadata(
-                for: device,
-                deadline: deadline,
-                until: shouldContinue
-            ),
-                let batteryLevel = metadata.batteryLevel
+                      for: device,
+                      deadline: deadline,
+                      until: shouldContinue
+                  ),
+                  let batteryLevel = metadata.batteryLevel
             else {
                 continue
             }

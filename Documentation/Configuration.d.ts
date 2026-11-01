@@ -598,16 +598,17 @@ declare namespace Scheme {
       mode?: SingleValueOrArray<AutoScroll.Mode>;
 
       /**
-       * @description Adjust the auto scroll speed multiplier.
-       * @default 1
-       */
-      speed?: number;
-
-      /**
        * @title Trigger
        * @description Choose the mouse button and modifier keys used to activate auto scroll.
        */
       trigger?: AutoScroll.Trigger;
+
+      /**
+       * @title Reverse direction
+       * @description Scroll the content in the direction the pointer moves, like dragging it, instead of moving the view toward the pointer.
+       * @default false
+       */
+      reverse?: boolean;
     };
 
     namespace AutoScroll {

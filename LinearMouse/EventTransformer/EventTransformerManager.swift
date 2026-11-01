@@ -16,9 +16,38 @@ class EventTransformerManager {
     private final class TransformerRoute {
         let id = UUID()
         let transformer: EventTransformer
+        let autoScroll: AutoScrollTransformer?
+        let autoScrollConfiguration: AutoScrollConfiguration?
 
-        init(transformer: EventTransformer) {
+        init(
+            transformer: EventTransformer,
+            autoScroll: AutoScrollTransformer?,
+            autoScrollConfiguration: AutoScrollConfiguration?
+        ) {
             self.transformer = transformer
+            self.autoScroll = autoScroll
+            self.autoScrollConfiguration = autoScrollConfiguration
+        }
+    }
+
+    private struct AutoScrollConfiguration: Equatable {
+        var trigger: Scheme.Buttons.Mapping
+        var modes: [Scheme.Buttons.AutoScroll.Mode]
+        var toggleActivation: Scheme.Buttons.AutoScroll.ToggleActivation
+        var reverse: Bool
+
+        init?(_ autoScroll: Scheme.Buttons.AutoScroll?) {
+            guard let autoScroll,
+                  autoScroll.enabled ?? false,
+                  let trigger = autoScroll.trigger,
+                  trigger.valid else {
+                return nil
+            }
+
+            self.trigger = trigger
+            modes = autoScroll.normalizedModes
+            toggleActivation = autoScroll.normalizedToggleActivation
+            reverse = autoScroll.reverse ?? false
         }
     }
 
@@ -693,10 +722,10 @@ class EventTransformerManager {
         var canceled = sharedAutoScrollTransformer?.cancelLogitechControlInteraction(context) == true
 
         guard let (interactionKey, interaction) = activeInteraction(
-            for: selection,
-            allowsUnidentifiedOwnerForIdentifiedSelection: true
-        ),
-            let canceler = interaction.transformer as? LogitechControlInteractionCanceling else {
+                  for: selection,
+                  allowsUnidentifiedOwnerForIdentifiedSelection: true
+              ),
+              let canceler = interaction.transformer as? LogitechControlInteractionCanceling else {
             return canceled
         }
 
@@ -815,7 +844,8 @@ class EventTransformerManager {
             process: process,
             screen: display
         )
-        if let route = eventTransformerCache.value(forKey: cacheKey) {
+        if let route = eventTransformerCache.value(forKey: cacheKey),
+           hasCurrentAutoScroll(route) || isRouteOwned(route) || hasActiveInteraction(in: route.transformer) {
             if updateActiveRoute {
                 activeRoute = route
             }
@@ -890,7 +920,8 @@ class EventTransformerManager {
         } else {
             nil
         }
-        let autoScrollTransformer = autoScrollTransformer(for: scheme.buttons.$autoScroll)
+        let autoScrollConfiguration = AutoScrollConfiguration(scheme.buttons.$autoScroll)
+        let autoScrollTransformer = autoScrollTransformer(for: autoScrollConfiguration)
 
         if scheme.buttons.switchPrimaryButtonAndSecondaryButtons == true {
             eventTransformer.append(SwitchPrimaryAndSecondaryButtonsTransformer())
@@ -1046,7 +1077,11 @@ class EventTransformerManager {
             eventTransformer.append(PointerRedirectsToScrollTransformer(redirect: redirectPointerToScroll))
         }
 
-        let route = TransformerRoute(transformer: eventTransformer)
+        let route = TransformerRoute(
+            transformer: eventTransformer,
+            autoScroll: autoScrollTransformer,
+            autoScrollConfiguration: autoScrollConfiguration
+        )
         // Recognition can finish on a timer without another physical event.
         // Release its motion demand then as well, without retaining the route.
         let onInteractionStateChanged = { [weak self, weak route] in
@@ -1096,41 +1131,58 @@ class EventTransformerManager {
         }
     }
 
-    private func autoScrollTransformer(for autoScroll: Scheme.Buttons.AutoScroll?) -> AutoScrollTransformer? {
+    /// A cached route can hold an Auto Scroll transformer that is no longer the
+    /// shared one: another route with a different configuration replaced it, or
+    /// the route was built during a session that has since ended. Events routed
+    /// there would miss the active session or use stale settings.
+    private func hasCurrentAutoScroll(_ route: TransformerRoute) -> Bool {
+        if let sharedAutoScrollTransformer, sharedAutoScrollTransformer.isAutoscrollActive {
+            return route.autoScroll === sharedAutoScrollTransformer
+        }
+
+        guard let configuration = route.autoScrollConfiguration else {
+            return route.autoScroll == nil
+        }
+
+        guard let autoScroll = route.autoScroll, autoScroll === sharedAutoScrollTransformer else {
+            return false
+        }
+
+        return matches(autoScroll, configuration)
+    }
+
+    private func matches(_ transformer: AutoScrollTransformer, _ configuration: AutoScrollConfiguration) -> Bool {
+        transformer.matchesConfiguration(
+            trigger: configuration.trigger,
+            modes: configuration.modes,
+            toggleActivation: configuration.toggleActivation,
+            reverse: configuration.reverse
+        )
+    }
+
+    private func autoScrollTransformer(for configuration: AutoScrollConfiguration?) -> AutoScrollTransformer? {
         if let sharedAutoScrollTransformer, sharedAutoScrollTransformer.isAutoscrollActive {
             return sharedAutoScrollTransformer
         }
 
-        guard let autoScroll,
-              autoScroll.enabled ?? false,
-              let trigger = autoScroll.trigger,
-              trigger.valid else {
+        guard let configuration else {
             sharedAutoScrollTransformer?.deactivate()
             sharedAutoScrollTransformer = nil
             return nil
         }
 
-        let modes = autoScroll.normalizedModes
-        let toggleActivation = autoScroll.normalizedToggleActivation
-        let speed = autoScroll.speed?.asTruncatedDouble ?? 1
-
-        if let sharedAutoScrollTransformer,
-           sharedAutoScrollTransformer.matchesConfiguration(
-               trigger: trigger,
-               modes: modes,
-               toggleActivation: toggleActivation,
-               speed: speed
-           ) {
+        if let sharedAutoScrollTransformer, matches(sharedAutoScrollTransformer, configuration) {
             return sharedAutoScrollTransformer
         }
 
         sharedAutoScrollTransformer?.deactivate()
         sharedAutoScrollTransformer = nil
         let transformer = AutoScrollTransformer(
-            trigger: trigger,
-            modes: modes,
-            toggleActivation: toggleActivation,
-            speed: speed
+            trigger: configuration.trigger,
+            modes: configuration.modes,
+            toggleActivation: configuration.toggleActivation,
+            reverse: configuration.reverse,
+            scrollTargetResolver: AutoScrollScrollTarget.resolve
         ) { [postEvent] in postEvent($0, .cgSessionEventTap) }
         transformer.onPointerMotionRequirementChanged = { [weak self] in
             self?.publishPointerMotionRequirements()

@@ -66,17 +66,6 @@ struct AutoScrollSection: View {
                     }
                 }
 
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text("Speed")
-                        Spacer()
-                        Text(state.autoScrollSpeedText)
-                            .foregroundColor(.secondary)
-                    }
-
-                    Slider(value: $state.autoScrollSpeed, in: 0.3 ... 3.0, step: 0.1)
-                }
-
                 Text(modeDescription)
                     .settingsDescriptionStyle()
                     .padding(.top, 4)
@@ -85,6 +74,13 @@ struct AutoScrollSection: View {
                    state.autoScrollToggleActivation == .longPress {
                     Text("Uses the same long-press threshold as button mappings.")
                         .settingsDescriptionStyle()
+                }
+
+                Toggle(isOn: $state.autoScrollReverse) {
+                    withDescription {
+                        Text("Reverse direction")
+                        Text("Move the pointer the way you want the content to go.")
+                    }
                 }
             }
         }

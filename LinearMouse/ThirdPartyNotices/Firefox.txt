@@ -1,0 +1,15 @@
+Firefox autoscroll acceleration curve
+=====================================
+
+LinearMouse's Auto Scroll speed follows the behavior of Firefox's autoscroll:
+the pointer offset is measured in 12px steps, nothing scrolls within the first
+step, and beyond it the distance per 20ms grows with the number of steps to the
+power of 1.5, minus one. The distance is scaled by the real elapsed time (capped
+at 100ms per frame), and sub-pixel remainders carry over to the next frame.
+
+LinearMouse implements this curve independently in Swift. No Firefox source
+code is included. The behavior was taken from:
+https://github.com/mozilla-firefox/firefox/blob/57c647e76c75cb37fd6f274587b8d1e88b2a3a20/toolkit/actors/AutoScrollChild.sys.mjs
+
+Firefox is distributed under the Mozilla Public License, version 2.0:
+https://mozilla.org/MPL/2.0/
