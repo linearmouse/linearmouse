@@ -161,6 +161,20 @@ extension Scheme.Buttons.Mapping.Action {
             return .throttled
         }
     }
+
+    /// The actions to perform for `count` recognized steps: one per step for
+    /// incremental controls, otherwise a single coalesced action.
+    func scrollActions(steps count: Int) -> [Self] {
+        guard count > 0 else {
+            return []
+        }
+        switch scrollActionPolicy {
+        case .steps:
+            return Array(repeating: self, count: count)
+        case .distance, .throttled:
+            return [coalescingScrollSteps(count)]
+        }
+    }
 }
 
 extension Scheme.Buttons.Mapping.Action {

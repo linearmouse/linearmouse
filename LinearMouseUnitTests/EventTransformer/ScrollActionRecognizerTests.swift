@@ -508,6 +508,24 @@ final class ScrollActionRecognizerTests: XCTestCase {
         }
     }
 
+    func testIncrementalControlsPerformOneActionPerStep() {
+        typealias Action = Scheme.Buttons.Mapping.Action
+        for action: Action in [
+            .arg0(.mediaVolumeUp), .arg0(.mediaVolumeDown),
+            .arg0(.displayBrightnessUp), .arg0(.keyboardBrightnessDown)
+        ] {
+            XCTAssertEqual(action.scrollActions(steps: 0), [])
+            XCTAssertEqual(action.scrollActions(steps: 1), [action])
+            XCTAssertEqual(action.scrollActions(steps: 3), [action, action, action])
+        }
+        XCTAssertEqual(Action.arg0(.missionControl).scrollActions(steps: 3), [.arg0(.missionControl)])
+        XCTAssertEqual(
+            Action.arg0(.mouseWheelScrollUp).scrollActions(steps: 3),
+            [.arg1(.mouseWheelScrollUp(.line(9)))]
+        )
+        XCTAssertEqual(Action.arg0(.mouseWheelScrollUp).scrollActions(steps: 0), [])
+    }
+
     func testIncrementalControlsBoundStepsPerEvent() {
         let recognizer = ScrollActionRecognizer()
         XCTAssertEqual(recognizer.consume(
