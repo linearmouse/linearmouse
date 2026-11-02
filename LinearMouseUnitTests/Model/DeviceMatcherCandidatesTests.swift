@@ -86,6 +86,16 @@ final class DeviceMatcherCandidatesTests: XCTestCase {
         XCTAssertEqual(reordered.insertionIndex(ofDeviceWideSchemeBehind: receiver), 2)
     }
 
+    func testFirstMouseSchemeGoesBeforeReceiverParentAndGroupAppSchemes() {
+        let schemes = [
+            Scheme(if: [.init(device: receiver)]),
+            Scheme(if: [.init(device: receiver, parentApp: "com.apple.Terminal")]),
+            Scheme(if: [.init(device: receiver, groupApp: "com.apple.Safari")])
+        ]
+
+        XCTAssertEqual(schemes.insertionIndex(ofDeviceWideSchemeBehind: receiver), 1)
+    }
+
     func testReceiverSchemeKeepsApplyingToDevicesBehindIt() {
         let scheme = reverseScheme(for: receiver, vertical: true)
 

@@ -366,8 +366,8 @@ extension [Scheme] {
             guard let condition = scheme.if?.first else {
                 return true
             }
-            return condition.app == nil && condition.processPath == nil
-                && condition.processName == nil && condition.display == nil
+            return condition.app == nil && condition.parentApp == nil && condition.groupApp == nil
+                && condition.processPath == nil && condition.processName == nil && condition.display == nil
         }
 
         let parentSchemes = allDeviceMatcherSpecificSchemes(of: parent)
