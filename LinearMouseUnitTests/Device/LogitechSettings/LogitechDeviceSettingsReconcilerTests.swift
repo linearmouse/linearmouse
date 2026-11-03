@@ -10,6 +10,7 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
         var isRemoved = false
         var isLogitechSensorDPIApplyRunning = false
         var isLogitechHighResolutionWheelApplyRunning = false
+        var isLogitechSmartShiftApplyRunning = false
 
         func hasConfirmedLogitechSensorDPI(_ dpi: Int) -> Bool {
             confirmedLogitechSensorDPI == dpi
@@ -17,8 +18,15 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
 
         var confirmedLogitechSensorDPI: Int?
         var confirmedLogitechHighResolutionWheel: Bool?
+        var confirmedLogitechSmartShift: LogitechSmartShiftTarget?
         var needsLogitechSensorDPIRestoreRetry = false
         var needsLogitechHighResolutionWheelRestoreRetry = false
+        var needsLogitechSmartShiftRestoreRetry = false
+
+        func hasConfirmedLogitechSmartShift(_ target: LogitechSmartShiftTarget) -> Bool {
+            confirmedLogitechSmartShift == target
+        }
+
         private(set) var actions = [String]()
 
         func applyConfiguredSensorDPI(_ dpi: Int) {
@@ -27,6 +35,14 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
 
         func applyConfiguredHighResolutionWheel(_ enabled: Bool) {
             actions.append("hiResWheel:\(enabled)")
+        }
+
+        func applyConfiguredSmartShift(_ target: LogitechSmartShiftTarget) {
+            actions.append(
+                "smartShift:\(target.wheelMode.map { "\($0)" } ?? "-")"
+                    + "/\(target.autoDisengage.map { "\($0)" } ?? "-")"
+                    + "/\(target.torque.map { "\($0)" } ?? "-")"
+            )
         }
 
         func requestLogitechControlsForcedReconfiguration() {
@@ -41,6 +57,10 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
             actions.append("prepareHiResWheel")
         }
 
+        func prepareSmartShiftForReconnect() {
+            actions.append("prepareSmartShift")
+        }
+
         func stopManagingSensorDPI() {
             actions.append("restoreDPI")
         }
@@ -49,15 +69,24 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
             actions.append("restoreHiResWheel")
         }
 
+        func stopManagingSmartShift() {
+            actions.append("restoreSmartShift")
+        }
+
         func resetActions() {
             actions.removeAll()
         }
     }
 
-    private func scheme(dpi: Int? = nil, highResolutionWheel: Bool? = nil) -> Scheme {
+    private func scheme(
+        dpi: Int? = nil,
+        highResolutionWheel: Bool? = nil,
+        smartShift: Scheme.Logitech.SmartShift? = nil
+    ) -> Scheme {
         var scheme = Scheme()
         scheme.pointer.hardwareDPI = dpi
         scheme.logitech.highResolutionWheel = highResolutionWheel
+        scheme.logitech.smartShift = smartShift
         return scheme
     }
 
@@ -139,6 +168,7 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
             "prepareHiResWheel",
             "dpi:1200",
             "hiResWheel:true",
+            "restoreSmartShift",
             "controls"
         ])
     }
@@ -155,6 +185,7 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
         XCTAssertEqual(device.actions, [
             "dpi:1200",
             "hiResWheel:true",
+            "restoreSmartShift",
             "controls"
         ])
     }
@@ -170,6 +201,7 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
             "prepareDPI",
             "restoreDPI",
             "restoreHiResWheel",
+            "restoreSmartShift",
             "controls"
         ])
     }
@@ -192,6 +224,64 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
         reconciler.apply(scheme(dpi: nil, highResolutionWheel: nil))
 
         XCTAssertEqual(device.actions, ["restoreHiResWheel"])
+    }
+
+    func testSmartShiftAppliesClampedTargetAndSkipsConfirmedState() {
+        let device = Device()
+        let reconciler = LogitechDeviceSettingsReconciler(device: device)
+        let settings = scheme(smartShift: .init(mode: .ratchet, autoDisengage: .threshold(35), torque: 75))
+
+        reconciler.apply(settings)
+        XCTAssertEqual(device.actions, ["smartShift:ratchet/35/75"])
+
+        device.resetActions()
+        device.confirmedLogitechSmartShift = LogitechSmartShiftTarget(settings.logitech.smartShift)
+        reconciler.apply(settings)
+        XCTAssertTrue(device.actions.isEmpty)
+
+        reconciler.apply(scheme(smartShift: .init(autoDisengage: .never, torque: 500)))
+        XCTAssertEqual(device.actions, ["smartShift:-/255/100"])
+    }
+
+    func testEmptySmartShiftIsUnmanagedAndRestoresTheWheel() {
+        let device = Device()
+        let reconciler = LogitechDeviceSettingsReconciler(device: device)
+
+        reconciler.apply(scheme(smartShift: .init(mode: .freeSpin)))
+        device.resetActions()
+        reconciler.apply(scheme(smartShift: .init()))
+
+        XCTAssertEqual(device.actions, ["restoreSmartShift"])
+    }
+
+    func testReapplyPreparesAndForcesConfiguredSmartShift() {
+        let device = Device()
+        let reconciler = LogitechDeviceSettingsReconciler(device: device)
+        let settings = scheme(smartShift: .init(torque: 40))
+
+        reconciler.apply(settings)
+        device.isLogitechSmartShiftApplyRunning = true
+        device.resetActions()
+        reconciler.reapply(settings)
+
+        XCTAssertEqual(device.actions, [
+            "prepareDPI",
+            "prepareSmartShift",
+            "restoreDPI",
+            "restoreHiResWheel",
+            "smartShift:-/-/40",
+            "controls"
+        ])
+    }
+
+    func testSameNilSettingsRetryAnExhaustedSmartShiftRestore() {
+        let device = Device()
+        device.needsLogitechSmartShiftRestoreRetry = true
+        let reconciler = LogitechDeviceSettingsReconciler(device: device)
+
+        reconciler.apply(scheme())
+
+        XCTAssertEqual(device.actions, ["restoreSmartShift"])
     }
 
     func testRemovedDeviceIgnoresApplyAndReapply() {

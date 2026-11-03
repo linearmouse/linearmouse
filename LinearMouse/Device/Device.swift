@@ -289,6 +289,7 @@ class Device {
         let update = logitechSession.updateDiscovery(discovery)
         promoteSensorDPIBaselineIfPossible()
         promoteHiResWheelBaselineIfPossible()
+        promoteSmartShiftBaselineIfPossible()
         if update.hardwareTargetChanged {
             logitechReprogrammableControlsMonitor?.invalidateTarget()
         }
@@ -491,7 +492,8 @@ class Device {
         )
     }
 
-    /// Restores DPI and Hi-Res Wheel on the existing Logitech session queue.
+    /// Restores DPI, Hi-Res Wheel, and SmartShift on the existing Logitech
+    /// session queue.
     /// Normal apply/retry work is frozen first; completion never depends on a
     /// main-thread HID wait and is safe to race with the outer hard deadline.
     func restoreLogitechSettingsForTeardown(
@@ -505,7 +507,7 @@ class Device {
             }
         }
 
-        logitechSession.runTerminalHardwareRestore { [weak self] dpiToken, wheelToken, ownsTerminalRestore in
+        logitechSession.runTerminalHardwareRestore { [weak self] tokens, ownsTerminalRestore in
             guard let self else {
                 deliver(false)
                 return
@@ -515,26 +517,39 @@ class Device {
                 operations: [
                     .init(
                         shouldContinue: {
-                            dpiToken.shouldContinue
+                            tokens.dpi.shouldContinue
                                 && operationShouldContinue()
                                 && ownsTerminalRestore()
                         },
                         attempt: { attempt in
                             self.restoreSensorDPIForTeardown(
-                                expectedToken: dpiToken,
+                                expectedToken: tokens.dpi,
                                 attempt: attempt
                             )
                         }
                     ),
                     .init(
                         shouldContinue: {
-                            wheelToken.shouldContinue
+                            tokens.wheel.shouldContinue
                                 && operationShouldContinue()
                                 && ownsTerminalRestore()
                         },
                         attempt: { attempt in
                             self.restoreHighResolutionWheelForTeardown(
-                                expectedToken: wheelToken,
+                                expectedToken: tokens.wheel,
+                                attempt: attempt
+                            )
+                        }
+                    ),
+                    .init(
+                        shouldContinue: {
+                            tokens.smartShift.shouldContinue
+                                && operationShouldContinue()
+                                && ownsTerminalRestore()
+                        },
+                        attempt: { attempt in
+                            self.restoreSmartShiftForTeardown(
+                                expectedToken: tokens.smartShift,
                                 attempt: attempt
                             )
                         }
@@ -563,6 +578,7 @@ class Device {
         abandonLogitechControlsMonitoring()
         prepareSensorDPIForReconnect()
         prepareHighResolutionWheelForReconnect()
+        prepareSmartShiftForReconnect()
     }
 
     func requestLogitechControlsForcedReconfiguration() {
@@ -800,6 +816,7 @@ extension Device {
     func finishLifecycleTeardown() {
         prepareSensorDPIForReconnect()
         prepareHighResolutionWheelForReconnect()
+        prepareSmartShiftForReconnect()
         restorePointerAccelerationAndPointerSpeed()
         restoreUseLinearScalingMouseAcceleration()
     }

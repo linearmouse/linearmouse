@@ -2,6 +2,7 @@
 // Copyright (c) 2021-2026 LinearMouse
 
 import Foundation
+import HIDPP
 
 /// A process-lifetime identity for hardware state that must survive a
 /// PointerDevice/session rebuild (notably across system sleep).
@@ -96,6 +97,35 @@ final class LogitechHardwareBaselineStore {
         let handle: HiResHandle
     }
 
+    struct SmartShiftBaseline: Equatable {
+        let status: SmartShift.Status
+    }
+
+    struct SmartShiftHandle: Hashable {
+        fileprivate let target: LogitechHardwareTargetKey
+        fileprivate let ownership: EntryOwnership
+
+        static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.target == rhs.target && lhs.ownership === rhs.ownership
+        }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(target)
+            hasher.combine(ObjectIdentifier(ownership))
+        }
+
+        func belongs(to target: LogitechHardwareTargetKey) -> Bool {
+            self.target == target
+        }
+    }
+
+    struct SmartShiftClaim: Equatable {
+        let baseline: SmartShiftBaseline
+        /// Fields LinearMouse has written since the baseline was captured.
+        let managedFields: LogitechSmartShiftFields
+        let handle: SmartShiftHandle
+    }
+
     struct ControlsReportingBaseline: Equatable {
         let flagsRawValue: UInt16
         let mappedControlID: UInt16
@@ -132,11 +162,14 @@ final class LogitechHardwareBaselineStore {
 
     private typealias DPIEntry = Entry<DPIBaseline>
     private typealias HiResEntry = Entry<HiResBaseline>
+    private typealias SmartShiftEntry = Entry<SmartShiftBaseline>
     private typealias ControlsEntry = Entry<ControlsReportingBaseline>
 
     private let lock = NSLock()
     private var dpiEntries = [LogitechHardwareTargetKey: DPIEntry]()
     private var hiResEntries = [LogitechHardwareTargetKey: HiResEntry]()
+    private var smartShiftEntries = [LogitechHardwareTargetKey: SmartShiftEntry]()
+    private var smartShiftManagedFields = [LogitechHardwareTargetKey: LogitechSmartShiftFields]()
     private var controlsEntries = [LogitechHardwareTargetKey: [UInt16: ControlsEntry]]()
 
     /// First writer wins. A reconstructed Device receives the DPI observed
@@ -230,6 +263,72 @@ final class LogitechHardwareBaselineStore {
                 return false
             }
             hiResEntries.removeValue(forKey: handle.target)
+            return true
+        }
+    }
+
+    /// First writer wins for the wheel state, so a reconstructed Device
+    /// receives the state observed before LinearMouse's first SmartShift
+    /// write. Managed fields accumulate, because a restore must return every
+    /// field LinearMouse changed.
+    func captureSmartShiftBaseline(
+        _ status: SmartShift.Status,
+        managedFields: LogitechSmartShiftFields,
+        for target: LogitechHardwareTargetKey
+    ) -> SmartShiftClaim {
+        lock.withLock {
+            let entry: SmartShiftEntry
+            if let existing = smartShiftEntries[target] {
+                entry = existing
+            } else {
+                entry = SmartShiftEntry(baseline: .init(status: status))
+                smartShiftEntries[target] = entry
+            }
+            smartShiftManagedFields[target, default: []].formUnion(managedFields)
+            return .init(
+                baseline: entry.baseline,
+                managedFields: smartShiftManagedFields[target] ?? [],
+                handle: .init(target: target, ownership: entry.ownership)
+            )
+        }
+    }
+
+    func smartShiftBaseline(for target: LogitechHardwareTargetKey) -> SmartShiftClaim? {
+        lock.withLock {
+            guard let entry = smartShiftEntries[target] else {
+                return nil
+            }
+            return .init(
+                baseline: entry.baseline,
+                managedFields: smartShiftManagedFields[target] ?? [],
+                handle: .init(target: target, ownership: entry.ownership)
+            )
+        }
+    }
+
+    @discardableResult
+    func addSmartShiftManagedFields(
+        _ fields: LogitechSmartShiftFields,
+        to handle: SmartShiftHandle
+    ) -> Bool {
+        lock.withLock {
+            guard smartShiftEntries[handle.target]?.ownership === handle.ownership else {
+                return false
+            }
+            smartShiftManagedFields[handle.target, default: []].formUnion(fields)
+            return true
+        }
+    }
+
+    /// Removes only the exact baseline entry that was confirmed restored.
+    @discardableResult
+    func consumeSmartShiftBaseline(_ handle: SmartShiftHandle) -> Bool {
+        lock.withLock {
+            guard smartShiftEntries[handle.target]?.ownership === handle.ownership else {
+                return false
+            }
+            smartShiftEntries.removeValue(forKey: handle.target)
+            smartShiftManagedFields.removeValue(forKey: handle.target)
             return true
         }
     }
