@@ -1005,6 +1005,13 @@ class DeviceManager: ObservableObject {
             schemes[index].merge(into: &mergedScheme)
         }
 
+        // Reversing in the mouse refines the vertical reverse scrolling that
+        // holds in every app and on every display. App and display schemes
+        // cannot reach the mouse; the scroll pipeline corrects for them.
+        let configuration = ConfigurationState.shared.configuration
+        let schemeInEveryApp = configuration.matchScheme(withDevice: device, withApp: nil)
+        mergedScheme.scrolling.reverse.vertical = schemeInEveryApp.scrolling.reverse.vertical
+
         return mergedScheme
     }
 

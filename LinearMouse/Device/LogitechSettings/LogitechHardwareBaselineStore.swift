@@ -96,6 +96,33 @@ final class LogitechHardwareBaselineStore {
         let handle: HiResHandle
     }
 
+    struct WheelInvertBaseline: Equatable {
+        let inverted: Bool
+    }
+
+    struct WheelInvertHandle: Hashable {
+        fileprivate let target: LogitechHardwareTargetKey
+        fileprivate let ownership: EntryOwnership
+
+        static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.target == rhs.target && lhs.ownership === rhs.ownership
+        }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(target)
+            hasher.combine(ObjectIdentifier(ownership))
+        }
+
+        func belongs(to target: LogitechHardwareTargetKey) -> Bool {
+            self.target == target
+        }
+    }
+
+    struct WheelInvertClaim: Equatable {
+        let baseline: WheelInvertBaseline
+        let handle: WheelInvertHandle
+    }
+
     struct ControlsReportingBaseline: Equatable {
         let flagsRawValue: UInt16
         let mappedControlID: UInt16
@@ -132,11 +159,13 @@ final class LogitechHardwareBaselineStore {
 
     private typealias DPIEntry = Entry<DPIBaseline>
     private typealias HiResEntry = Entry<HiResBaseline>
+    private typealias WheelInvertEntry = Entry<WheelInvertBaseline>
     private typealias ControlsEntry = Entry<ControlsReportingBaseline>
 
     private let lock = NSLock()
     private var dpiEntries = [LogitechHardwareTargetKey: DPIEntry]()
     private var hiResEntries = [LogitechHardwareTargetKey: HiResEntry]()
+    private var wheelInvertEntries = [LogitechHardwareTargetKey: WheelInvertEntry]()
     private var controlsEntries = [LogitechHardwareTargetKey: [UInt16: ControlsEntry]]()
 
     /// First writer wins. A reconstructed Device receives the DPI observed
@@ -230,6 +259,53 @@ final class LogitechHardwareBaselineStore {
                 return false
             }
             hiResEntries.removeValue(forKey: handle.target)
+            return true
+        }
+    }
+
+    /// First writer wins, so a reconstructed Device receives the wheel
+    /// direction observed before LinearMouse's first invert write.
+    func captureWheelInvertBaseline(
+        inverted: Bool,
+        for target: LogitechHardwareTargetKey
+    ) -> WheelInvertClaim {
+        lock.withLock {
+            if let entry = wheelInvertEntries[target] {
+                return .init(
+                    baseline: entry.baseline,
+                    handle: .init(target: target, ownership: entry.ownership)
+                )
+            }
+
+            let entry = WheelInvertEntry(baseline: .init(inverted: inverted))
+            wheelInvertEntries[target] = entry
+            return .init(
+                baseline: entry.baseline,
+                handle: .init(target: target, ownership: entry.ownership)
+            )
+        }
+    }
+
+    func wheelInvertBaseline(for target: LogitechHardwareTargetKey) -> WheelInvertClaim? {
+        lock.withLock {
+            guard let entry = wheelInvertEntries[target] else {
+                return nil
+            }
+            return .init(
+                baseline: entry.baseline,
+                handle: .init(target: target, ownership: entry.ownership)
+            )
+        }
+    }
+
+    /// Removes only the exact baseline entry that was confirmed restored.
+    @discardableResult
+    func consumeWheelInvertBaseline(_ handle: WheelInvertHandle) -> Bool {
+        lock.withLock {
+            guard wheelInvertEntries[handle.target]?.ownership === handle.ownership else {
+                return false
+            }
+            wheelInvertEntries.removeValue(forKey: handle.target)
             return true
         }
     }

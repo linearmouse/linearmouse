@@ -114,6 +114,32 @@ extension ScrollingSettingsState {
         }
     }
 
+    /// Reversing in the mouse refines vertical reverse scrolling. The mouse
+    /// has one direction for every app and display, so the option belongs to
+    /// the device's own settings only.
+    var showsReverseInMouseControl: Bool {
+        direction == .vertical
+            && reverseScrolling
+            && schemeState.currentApp == nil
+            && schemeState.currentDisplay == nil
+            && highResolutionWheelInfo?.supportsWheelInversion == true
+    }
+
+    var invertWheel: Bool {
+        get {
+            schemeState.deviceScheme.logitech.invertWheel ?? false
+        }
+        set {
+            var deviceScheme = schemeState.deviceScheme
+            deviceScheme.logitech.invertWheel = newValue
+            schemeState.deviceScheme = deviceScheme
+
+            if let currentDevice {
+                DeviceManager.shared.updateLogitechDeviceSettings(for: currentDevice)
+            }
+        }
+    }
+
     func refreshHighResolutionWheelInfo() {
         guard !highResolutionWheelInfoRefreshing else {
             highResolutionWheelInfoRefreshPending = true
@@ -163,9 +189,15 @@ extension ScrollingSettingsState {
     }
 
     private func applyConfiguredHighResolutionWheelIfNeeded(info: Device.HighResolutionWheelInfo, device: Device) {
+        let logitech = schemeState.deviceScheme.logitech
+        let highResolutionWheelDiffers = logitech.highResolutionWheel.map { $0 != info.enabled } ?? false
+        let configuration = ConfigurationState.shared.configuration
+        let schemeInEveryApp = configuration.matchScheme(withDevice: device, withApp: nil)
+        let invertWheelDiffers = logitech.invertWheel == true
+            && schemeInEveryApp.scrolling.reverse.vertical == true
+            && info.inverted != true
         guard info.supportsHighResolutionWheel,
-              let configuredHighResolutionWheel = schemeState.deviceScheme.logitech.highResolutionWheel,
-              info.enabled != configuredHighResolutionWheel else {
+              highResolutionWheelDiffers || invertWheelDiffers else {
             return
         }
 
