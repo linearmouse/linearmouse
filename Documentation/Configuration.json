@@ -57,6 +57,9 @@
       "pattern": "^\\d+$",
       "type": "string"
     },
+    "Integer": {
+      "type": "integer"
+    },
     "PhysicalButton": {
       "anyOf": [
         {
@@ -1462,7 +1465,7 @@
         "autoDisengage": {
           "anyOf": [
             {
-              "type": "number"
+              "$ref": "#/definitions/Integer"
             },
             {
               "const": "never",
@@ -1488,7 +1491,7 @@
           "maximum": 100,
           "minimum": 1,
           "title": "Ratchet force",
-          "type": "number"
+          "type": "integer"
         }
       },
       "type": "object"

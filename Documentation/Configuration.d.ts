@@ -3,6 +3,9 @@ type SingleValueOrArray<T> = T | T[];
 /** @asType number */
 type Int = number;
 
+/** @asType integer */
+type Integer = number;
+
 /** @pattern ^\d+$ */
 type IntString = string;
 
@@ -501,13 +504,14 @@ declare namespace Scheme {
        * @minimum 1
        * @maximum 254
        */
-      autoDisengage?: number | "never";
+      autoDisengage?: Integer | "never";
 
       /**
        * @title Ratchet force
        * @description The ratchet torque in percent of the wheel's maximum force, on wheels that support it.
        * @minimum 1
        * @maximum 100
+       * @asType integer
        */
       torque?: number;
     };
