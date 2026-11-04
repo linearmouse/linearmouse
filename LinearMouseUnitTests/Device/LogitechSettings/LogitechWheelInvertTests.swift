@@ -64,6 +64,26 @@ final class LogitechWheelInvertTests: XCTestCase {
         XCTAssertFalse(HiResWheel.Capabilities(multiplier: 8, flags: 0x04).supportsInversion)
     }
 
+    func testUnadvertisedInversionIsNotSupportedAndNothingIsWritten() throws {
+        let (device, wheel) = try wheel(mode: 0x02, capabilityFlags: 0x04)
+
+        XCTAssertFalse(Device.supportsWheelInversion(wheel) { true })
+        XCTAssertEqual(device.sentReports.count, 1)
+        XCTAssertEqual([UInt8](device.sentReports[0])[3], 0x08)
+    }
+
+    func testAdvertisedInversionIsSupported() throws {
+        let (_, wheel) = try wheel(mode: 0x02, capabilityFlags: 0x0C)
+
+        XCTAssertTrue(Device.supportsWheelInversion(wheel) { true })
+    }
+
+    func testUnreadableCapabilityIsNotSupported() throws {
+        let (_, wheel) = try wheel(mode: 0x02, capabilityFlags: 0x0C)
+
+        XCTAssertFalse(Device.supportsWheelInversion(wheel) { false })
+    }
+
     func testSkipsWritingWhenInvertAlreadyMatches() throws {
         let (device, wheel) = try wheel(mode: 0x06)
 
@@ -222,6 +242,7 @@ final class LogitechWheelInvertTests: XCTestCase {
     private func wheel(
         mode: UInt8,
         extensionBytes: [UInt8] = [0x00, 0x00],
+        capabilityFlags: UInt8 = 0x0C,
         onModeRead: @escaping () -> Void = {}
     ) throws -> (MockVendorSpecificDeviceContext, HiResWheel) {
         let device = MockVendorSpecificDeviceContext(
@@ -238,6 +259,8 @@ final class LogitechWheelInvertTests: XCTestCase {
             }
 
             switch bytes[3] {
+            case 0x08:
+                return Self.hidppLongReply(featureIndex: 0x1E, address: 0x08, payload: [8, capabilityFlags])
             case 0x18:
                 onModeRead()
                 return Self.hidppLongReply(featureIndex: 0x1E, address: 0x18, payload: [mode] + extensionBytes)

@@ -986,33 +986,8 @@ class DeviceManager: ObservableObject {
         device.logitechSettingsReconciler.apply(configuredLogitechScheme(for: device))
     }
 
-    /// Hardware settings of the physical device, overridden by those of the
-    /// device behind it that is currently in use.
     private func configuredLogitechScheme(for device: Device) -> Scheme {
-        let schemes = ConfigurationState.shared.configuration.schemes
-        var mergedScheme = Scheme()
-        for matcher in DeviceMatcher.candidates(of: device).reversed() {
-            guard case let .at(index) = schemes.schemeIndex(
-                ofDeviceMatcher: matcher,
-                ofApp: nil,
-                ofProcessPath: nil,
-                ofProcessName: nil,
-                ofDisplay: nil
-            ) else {
-                continue
-            }
-
-            schemes[index].merge(into: &mergedScheme)
-        }
-
-        // Reversing in the mouse refines the vertical reverse scrolling that
-        // holds in every app and on every display. App and display schemes
-        // cannot reach the mouse; the scroll pipeline corrects for them.
-        let configuration = ConfigurationState.shared.configuration
-        let schemeInEveryApp = configuration.matchScheme(withDevice: device, withApp: nil)
-        mergedScheme.scrolling.reverse.vertical = schemeInEveryApp.scrolling.reverse.vertical
-
-        return mergedScheme
+        ConfigurationState.shared.configuration.logitechHardwareScheme(for: device)
     }
 
     private func finishDeviceLifecycleTeardown() {

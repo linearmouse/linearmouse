@@ -145,6 +145,13 @@ extension Device {
                 && self.logitechSession.allowsConfiguredWheelInvertWrite(for: access)
         }
 
+        // A mouse that cannot reverse itself is left alone, before any
+        // baseline is captured, so software reverse scrolling keeps its
+        // direction.
+        guard Self.supportsWheelInversion(controller, until: writeIsAdmitted) else {
+            return nil
+        }
+
         _ = seedStoredWheelInvertBaseline(receiverSlot: controller.receiverSlot)
         // Capture before every possible write. A device may apply a change
         // even when its acknowledgement is lost.
@@ -175,6 +182,15 @@ extension Device {
         // A write reply is advisory, and firmware may reset the mode while it
         // wakes. Leave success to the coordinator's delayed verification read.
         return verifiesCachedValue || applied != inverted ? nil : applied
+    }
+
+    /// Whether the mouse advertises inversion (Hi-Res Wheel capability flag
+    /// bit 3). A capability that cannot be read counts as unsupported.
+    static func supportsWheelInversion(
+        _ controller: HiResWheel,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Bool {
+        controller.capabilities(until: shouldContinue)?.supportsInversion == true
     }
 
     /// Stops managing the wheel direction at runtime. Failed attempts retain
