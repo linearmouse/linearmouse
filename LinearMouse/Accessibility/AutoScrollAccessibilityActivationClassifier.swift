@@ -8,6 +8,8 @@ import Foundation
 struct AutoScrollAccessibilityActivationClassifier {
     private static let domClassListAttribute = "AXDOMClassList" as CFString
     private static let maxParentDepth = 20
+    /// Bounds the sibling scan for an image hit, which crosses the process boundary per child.
+    private static let maxImageSiblingScan = 128
     private static let standardWindowButtonAttributes = [
         kAXCloseButtonAttribute as CFString,
         kAXMinimizeButtonAttribute as CFString,
@@ -129,6 +131,7 @@ struct AutoScrollAccessibilityActivationClassifier {
         var path: [String] = []
         var isInsideWebContent = false
         var hasBrowserAccessibilitySignal = false
+        var hitRole: String?
         for depth in 0 ..< Self.maxParentDepth {
             guard let element = currentElement else {
                 return .init(
@@ -166,6 +169,9 @@ struct AutoScrollAccessibilityActivationClassifier {
             }
 
             path.append(Self.pathEntry(role: role, subrole: subrole, actions: actions))
+            if depth == 0 {
+                hitRole = role
+            }
 
             if let role, Self.webContentRoles.contains(role) {
                 isInsideWebContent = true
@@ -195,6 +201,16 @@ struct AutoScrollAccessibilityActivationClassifier {
                 domClassList: domClassList,
                 at: point
             ) != nil {
+                return .certain(.pressable(path: path))
+            }
+
+            // Safari's Favorites bar hit-tests an icon-only bookmark to its favicon, an
+            // AXImage whose parent is the bar itself rather than the bookmark's button.
+            // The button is a sibling of the image, so look for one under the point.
+            if depth == 1,
+               hitRole == "AXImage",
+               let sibling = pressableChild(of: element, containing: point, excluding: hitElement) {
+                path.append("child:\(sibling)")
                 return .certain(.pressable(path: path))
             }
 
@@ -358,6 +374,29 @@ struct AutoScrollAccessibilityActivationClassifier {
         }
 
         return []
+    }
+
+    /// The path entry of a pressable control among the element's children whose frame
+    /// contains the point, if there is one.
+    private func pressableChild(
+        of element: AXUIElement,
+        containing point: CGPoint,
+        excluding hitElement: AXUIElement
+    ) -> String? {
+        for child in immediateChildren(of: element).prefix(Self.maxImageSiblingScan) {
+            guard !CFEqual(child, hitElement),
+                  let role = role(of: child),
+                  Self.pressableRoles.contains(role),
+                  frame(of: child)?.contains(point) == true,
+                  case let .success(actions) = elementQuery.optionalActionNames(of: child),
+                  Self.isPressableActivationElement(role: role, actions: actions) else {
+                continue
+            }
+
+            return Self.pathEntry(role: role, subrole: nil, actions: actions)
+        }
+
+        return nil
     }
 
     private func childSnapshot(_ element: AXUIElement) -> AccessibilityBypassChildSnapshot {

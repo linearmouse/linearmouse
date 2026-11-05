@@ -179,6 +179,69 @@ final class AutoScrollAccessibilityActivationClassifierTests: XCTestCase {
         XCTAssertEqual(elementQuery.hitTestPoints, [point])
         XCTAssertEqual(retryDelayCount, 0)
     }
+
+    func testFavoritesBarFaviconResolvesToBookmarkButton() {
+        let tree = AccessibilityElementTreeSpy()
+        let window = tree.add(role: "AXWindow")
+        let bar = tree.add(role: "AXGroup", parent: window)
+        tree.add(
+            role: "AXMenuButton",
+            parent: bar,
+            frame: CGRect(x: 0, y: 0, width: 26, height: 22),
+            actions: [kAXPressAction as String]
+        )
+        tree.add(
+            role: "AXMenuButton",
+            parent: bar,
+            frame: CGRect(x: 32, y: 0, width: 26, height: 22),
+            actions: ["AXShowMenu", kAXPressAction as String]
+        )
+        tree.hit = tree.add(role: "AXImage", parent: bar, frame: CGRect(x: 37, y: 3, width: 16, height: 16))
+        let classifier = AutoScrollAccessibilityActivationClassifier(elementQuery: tree) {}
+
+        let classification = classifier.classify(at: CGPoint(x: 45, y: 11))
+
+        XCTAssertTrue(classification.resolved.hit.isPressable)
+        XCTAssertEqual(classification.resolved.hit.path, ["AXImage", "AXGroup", "child:AXMenuButton[press]"])
+    }
+
+    func testImageWithoutPressableSiblingUnderPointStillStartsAutoScroll() {
+        let tree = AccessibilityElementTreeSpy()
+        let window = tree.add(role: "AXWindow")
+        let group = tree.add(role: "AXGroup", parent: window)
+        tree.add(
+            role: "AXButton",
+            parent: group,
+            frame: CGRect(x: 100, y: 0, width: 26, height: 22),
+            actions: [kAXPressAction as String]
+        )
+        tree.add(role: "AXButton", parent: group, frame: CGRect(x: 0, y: 0, width: 60, height: 22))
+        tree.hit = tree.add(role: "AXImage", parent: group, frame: CGRect(x: 5, y: 3, width: 16, height: 16))
+        let classifier = AutoScrollAccessibilityActivationClassifier(elementQuery: tree) {}
+
+        let classification = classifier.classify(at: CGPoint(x: 10, y: 10))
+
+        XCTAssertFalse(classification.resolved.hit.isPressable)
+    }
+
+    func testSiblingScanOnlyAppliesToImageHits() {
+        let tree = AccessibilityElementTreeSpy()
+        let window = tree.add(role: "AXWindow")
+        let group = tree.add(role: "AXGroup", parent: window)
+        tree.add(
+            role: "AXButton",
+            parent: group,
+            frame: CGRect(x: 0, y: 0, width: 60, height: 22),
+            actions: [kAXPressAction as String]
+        )
+        tree.hit = tree.add(role: "AXStaticText", parent: group, frame: CGRect(x: 5, y: 3, width: 40, height: 16))
+        let classifier = AutoScrollAccessibilityActivationClassifier(elementQuery: tree) {}
+
+        let classification = classifier.classify(at: CGPoint(x: 10, y: 10))
+
+        XCTAssertFalse(classification.resolved.hit.isPressable)
+        XCTAssertEqual(tree.childrenQueryCount, 0)
+    }
 }
 
 private final class AccessibilityElementQuerySpy: AccessibilityElementQuerying {
@@ -257,5 +320,114 @@ private final class AccessibilityElementQuerySpy: AccessibilityElementQuerying {
     func optionalActionNames(of _: AXUIElement) -> AccessibilityQueryResult<[String]> {
         actionNamesCount += 1
         return .success([])
+    }
+}
+
+/// An accessibility tree for tests. Each node is an application element for a distinct
+/// fake process identifier, so elements compare unequal without a live process.
+private final class AccessibilityElementTreeSpy: AccessibilityElementQuerying {
+    private struct Node {
+        let role: String
+        let parent: AXUIElement?
+        let frame: CGRect?
+        let actions: [String]
+        var children: [AXUIElement] = []
+    }
+
+    private var nodes: [pid_t: Node] = [:]
+    private var nextProcessIdentifier: pid_t = 900_000
+    var hit: AXUIElement?
+    private(set) var childrenQueryCount = 0
+
+    @discardableResult
+    func add(
+        role: String,
+        parent: AXUIElement? = nil,
+        frame: CGRect? = nil,
+        actions: [String] = []
+    ) -> AXUIElement {
+        let identifier = nextProcessIdentifier
+        nextProcessIdentifier += 1
+        let element = AXUIElementCreateApplication(identifier)
+        nodes[identifier] = Node(role: role, parent: parent, frame: frame, actions: actions)
+        if let parent, let parentIdentifier = processIdentifier(of: parent) {
+            nodes[parentIdentifier]?.children.append(element)
+        }
+        return element
+    }
+
+    private func processIdentifier(of element: AXUIElement) -> pid_t? {
+        var processIdentifier: pid_t = 0
+        guard AXUIElementGetPid(element, &processIdentifier) == .success else {
+            return nil
+        }
+        return processIdentifier
+    }
+
+    private func node(_ element: AXUIElement) -> Node? {
+        processIdentifier(of: element).flatMap { nodes[$0] }
+    }
+
+    func systemWideElement(at _: CGPoint) -> AccessibilityQueryResult<AXUIElement?> {
+        .success(hit)
+    }
+
+    func element(at _: CGPoint, in _: AXUIElement) -> AccessibilityQueryResult<AXUIElement?> {
+        XCTFail("Unexpected rooted hit test")
+        return .success(nil)
+    }
+
+    func requiredStringValue(of attribute: CFString, on element: AXUIElement) -> AccessibilityQueryResult<String?> {
+        XCTAssertEqual(attribute, kAXRoleAttribute as CFString)
+        return .success(node(element)?.role)
+    }
+
+    func optionalStringValue(of _: CFString, on _: AXUIElement) -> AccessibilityQueryResult<String?> {
+        .success(nil)
+    }
+
+    func optionalElementValue(
+        of attribute: CFString,
+        on element: AXUIElement
+    ) -> AccessibilityQueryResult<AXUIElement?> {
+        guard attribute == kAXParentAttribute as CFString else {
+            return .success(nil)
+        }
+        return .success(node(element)?.parent)
+    }
+
+    // swiftlint:disable discouraged_optional_collection
+    func optionalElementArrayValue(
+        of attribute: CFString,
+        on element: AXUIElement
+    ) -> AccessibilityQueryResult<[AXUIElement]?> {
+        guard attribute == kAXVisibleChildrenAttribute as CFString
+            || attribute == kAXChildrenAttribute as CFString else {
+            return .success(nil)
+        }
+        childrenQueryCount += 1
+        return .success(node(element)?.children)
+    }
+
+    // swiftlint:enable discouraged_optional_collection
+
+    func optionalAttributeValue(of _: CFString, on _: AXUIElement) -> AccessibilityQueryResult<CFTypeRef?> {
+        .success(nil)
+    }
+
+    func optionalPointValue(of _: CFString, on _: AXUIElement) -> AccessibilityQueryResult<CGPoint?> {
+        .success(nil)
+    }
+
+    func optionalSizeValue(of _: CFString, on _: AXUIElement) -> AccessibilityQueryResult<CGSize?> {
+        .success(nil)
+    }
+
+    func optionalFrameValue(of element: AXUIElement) -> AccessibilityQueryResult<CGRect?> {
+        .success(node(element)?.frame)
+    }
+
+    func optionalActionNames(of element: AXUIElement) -> AccessibilityQueryResult<[String]> {
+        .success(node(element)?.actions ?? [])
     }
 }
