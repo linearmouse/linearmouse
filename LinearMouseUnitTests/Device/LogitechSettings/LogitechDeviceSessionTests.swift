@@ -64,12 +64,12 @@ final class LogitechDeviceSessionTests: XCTestCase {
         _ = try hiResWheelAccess(for: session)
         let completed = expectation(description: "terminal restore")
 
-        session.runTerminalHardwareRestore { dpiToken, wheelToken, _ in
-            let retainedDPI = session.adjustableDPI(expectedToken: dpiToken) { _, _ in
+        session.runTerminalHardwareRestore { tokens, _ in
+            let retainedDPI = session.adjustableDPI(expectedToken: tokens.dpi) { _, _ in
                 XCTFail("Terminal restore should reuse the current DPI feature")
                 return nil
             }
-            let retainedWheel = session.hiResWheel(expectedToken: wheelToken) { _, _ in
+            let retainedWheel = session.hiResWheel(expectedToken: tokens.wheel) { _, _ in
                 XCTFail("Terminal restore should reuse the current wheel feature")
                 return nil
             }
@@ -89,7 +89,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
         session.freezeTerminalHardwareMutations()
         let completed = expectation(description: "prepared terminal restore")
 
-        session.runTerminalHardwareRestore { _, _, ownsTerminalRestore in
+        session.runTerminalHardwareRestore { _, ownsTerminalRestore in
             XCTAssertTrue(ownsTerminalRestore())
             completed.fulfill()
         } onCancelled: {
@@ -105,9 +105,9 @@ final class LogitechDeviceSessionTests: XCTestCase {
         session.perform { queueGate.wait() }
         let ran = expectation(description: "terminal restore ran")
 
-        session.runTerminalHardwareRestore { dpiToken, wheelToken, _ in
-            XCTAssertFalse(dpiToken.shouldContinue)
-            XCTAssertTrue(wheelToken.shouldContinue)
+        session.runTerminalHardwareRestore { tokens, _ in
+            XCTAssertFalse(tokens.dpi.shouldContinue)
+            XCTAssertTrue(tokens.wheel.shouldContinue)
             ran.fulfill()
         } onCancelled: {
             XCTFail("The terminal owner itself remains current")
@@ -136,7 +136,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
         let terminalStarted = expectation(description: "terminal restore started")
         let releaseTerminal = DispatchSemaphore(value: 0)
 
-        session.runTerminalHardwareRestore { _, _, _ in
+        session.runTerminalHardwareRestore { _, _ in
             terminalStarted.fulfill()
             releaseTerminal.wait()
         } onCancelled: {
@@ -179,7 +179,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
         }
 
         let terminalCompleted = expectation(description: "terminal restore ran")
-        session.runTerminalHardwareRestore { _, _, _ in
+        session.runTerminalHardwareRestore { _, _ in
             terminalCompleted.fulfill()
         } onCancelled: {
             XCTFail("terminal restore must retain ownership")
@@ -204,7 +204,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
         } onCancelled: {
             readCancelled.fulfill()
         }
-        session.runTerminalHardwareRestore { _, _, _ in
+        session.runTerminalHardwareRestore { _, _ in
             terminalRan.fulfill()
         } onCancelled: {
             XCTFail("terminal restore must retain ownership")
@@ -414,7 +414,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
         wait(for: [operationStarted], timeout: 1)
 
         let terminalRan = expectation(description: "terminal restore ran")
-        session.runTerminalHardwareRestore { _, _, ownsTerminalRestore in
+        session.runTerminalHardwareRestore { _, ownsTerminalRestore in
             XCTAssertTrue(ownsTerminalRestore())
             terminalRan.fulfill()
         } onCancelled: {
@@ -472,7 +472,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
         let terminalRan = expectation(description: "terminal restore ran")
         let suspension = try XCTUnwrap(session.suspendHardware())
 
-        session.runTerminalHardwareRestore { _, _, ownsTerminalRestore in
+        session.runTerminalHardwareRestore { _, ownsTerminalRestore in
             XCTAssertTrue(ownsTerminalRestore())
             terminalRan.fulfill()
         } onCancelled: {
@@ -494,14 +494,14 @@ final class LogitechDeviceSessionTests: XCTestCase {
         let suspension = try XCTUnwrap(session.suspendHardware())
         let terminalRan = expectation(description: "terminal restore ran")
 
-        session.runTerminalHardwareRestore { dpiToken, wheelToken, ownsTerminalRestore in
+        session.runTerminalHardwareRestore { tokens, ownsTerminalRestore in
             XCTAssertTrue(ownsTerminalRestore())
             guard let terminalDPIAccess = try? self.adjustableDPIAccess(
                 for: session,
-                expectedToken: dpiToken
+                expectedToken: tokens.dpi
             ), let terminalWheelAccess = try? self.hiResWheelAccess(
                 for: session,
-                expectedToken: wheelToken
+                expectedToken: tokens.wheel
             ) else {
                 XCTFail("terminal owner must recreate both suspended features")
                 terminalRan.fulfill()

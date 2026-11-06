@@ -203,6 +203,10 @@ final class LogitechDeviceSession {
         Bool,
         LogitechHardwareBaselineStore.HiResHandle
     >
+    fileprivate typealias InitialSmartShiftState = InitialTargetState<
+        SmartShift.Status,
+        LogitechHardwareBaselineStore.SmartShiftHandle
+    >
 
     struct DPIBaselinePromotion {
         let dpi: Int
@@ -228,12 +232,27 @@ final class LogitechDeviceSession {
         case rejected
     }
 
+    struct SmartShiftBaselinePromotion {
+        let status: SmartShift.Status
+        let managedFields: LogitechSmartShiftFields
+        let target: LogitechHardwareTargetKey
+        fileprivate let initialState: InitialSmartShiftState
+        fileprivate let currentLease: TargetLease
+    }
+
+    enum SmartShiftCommit {
+        case committed(LogitechHardwareBaselineStore.SmartShiftHandle?)
+        case rejected
+    }
+
     private struct State {
         var discovery: LogitechReceiverDiscovery?
         var adjustableDPI: FeatureAccess<AdjustableDPI>?
         var hiResWheel: FeatureAccess<HiResWheel>?
+        var smartShift: FeatureAccess<SmartShift>?
         var dpiCancellationSource = CancellationSource()
         var hiResWheelCancellationSource = CancellationSource()
+        var smartShiftCancellationSource = CancellationSource()
         var sensorDPI: Int?
         var initialDPIState: InitialDPIState?
         var dpiRestoreRetryNeeded = false
@@ -242,8 +261,21 @@ final class LogitechDeviceSession {
         var provisionalHiResWheelMultiplier: Int?
         var initialHiResWheelState: InitialHiResWheelState?
         var hiResWheelRestoreRetryNeeded = false
+        var smartShiftStatus: SmartShift.Status?
+        var smartShiftSupportsTunableTorque: Bool?
+        var initialSmartShiftState: InitialSmartShiftState?
+        /// Fields LinearMouse has written since the initial state was captured.
+        var smartShiftManagedFields: LogitechSmartShiftFields = []
+        var smartShiftRestoreRetryNeeded = false
         var ordinaryHardwareAccess = CancellationSource()
         var lifecycleOwner: LifecycleOwner?
+    }
+
+    /// Cancellation tokens of the settings a terminal restore returns.
+    struct TerminalRestoreTokens {
+        let dpi: CancellationToken
+        let wheel: CancellationToken
+        let smartShift: CancellationToken
     }
 
     struct DiscoveryUpdate {
@@ -259,6 +291,7 @@ final class LogitechDeviceSession {
 
     private let dpiApplyCoordinator: HardwareSettingApplyCoordinator
     private let hiResWheelApplyCoordinator: HardwareSettingApplyCoordinator
+    private let smartShiftApplyCoordinator: HardwareSettingApplyCoordinator
 
     init(deviceID: Int32) {
         queue = DispatchQueue(
@@ -267,6 +300,7 @@ final class LogitechDeviceSession {
         )
         dpiApplyCoordinator = Self.makeApplyCoordinator(queue: queue)
         hiResWheelApplyCoordinator = Self.makeApplyCoordinator(queue: queue)
+        smartShiftApplyCoordinator = Self.makeApplyCoordinator(queue: queue)
         queue.setSpecific(key: queueContext, value: ())
     }
 
@@ -284,6 +318,21 @@ final class LogitechDeviceSession {
 
     var hiResWheelEnabled: Bool? {
         withState { $0.hiResWheelEnabled }
+    }
+
+    var smartShiftStatus: SmartShift.Status? {
+        withState { $0.smartShiftStatus }
+    }
+
+    /// The confirmed status with the capability of the wheel that reported it.
+    var confirmedSmartShift: (status: SmartShift.Status, supportsTunableTorque: Bool)? {
+        withState { state in
+            guard let status = state.smartShiftStatus,
+                  let supportsTunableTorque = state.smartShiftSupportsTunableTorque else {
+                return nil
+            }
+            return (status, supportsTunableTorque)
+        }
     }
 
     var hiResWheelNormalizationMultiplier: Int? {
@@ -323,6 +372,14 @@ final class LogitechDeviceSession {
             $0.discovery?.route?.slot
                 ?? $0.hiResWheel?.lease.receiverSlot
                 ?? $0.initialHiResWheelState?.lease.receiverSlot
+        }
+    }
+
+    var smartShiftReceiverSlotSnapshot: UInt8? {
+        withState {
+            $0.discovery?.route?.slot
+                ?? $0.smartShift?.lease.receiverSlot
+                ?? $0.initialSmartShiftState?.lease.receiverSlot
         }
     }
 
@@ -377,7 +434,8 @@ final class LogitechDeviceSession {
     func updateDiscovery(_ discovery: LogitechReceiverDiscovery?) -> DiscoveryUpdate {
         let dpiCoordinator = dpiApplyCoordinator
         let wheelCoordinator = hiResWheelApplyCoordinator
-        let update = withState { state -> (DiscoveryUpdate, CancellationSource?, CancellationSource?) in
+        let smartShiftCoordinator = smartShiftApplyCoordinator
+        let update = withState { state -> (DiscoveryUpdate, [CancellationSource]) in
             let previousDiscovery = state.discovery
             let previousRoute = previousDiscovery?.route
             let currentRoute = discovery?.route
@@ -396,11 +454,21 @@ final class LogitechDeviceSession {
                 from: previousRoute,
                 to: currentRoute
             )
+            let smartShiftTransition = Self.transitionInitialState(
+                state.initialSmartShiftState,
+                from: previousRoute,
+                to: currentRoute
+            )
             state.initialDPIState = dpiTransition.state
             state.initialHiResWheelState = wheelTransition.state
+            state.initialSmartShiftState = smartShiftTransition.state
+            if smartShiftTransition.state == nil {
+                state.smartShiftManagedFields = []
+            }
             hardwareTargetChanged = hardwareTargetChanged
                 || dpiTransition.requiresTargetReset
                 || wheelTransition.requiresTargetReset
+                || smartShiftTransition.requiresTargetReset
             state.discovery = discovery
 
             if routeIdentityChanged {
@@ -408,6 +476,7 @@ final class LogitechDeviceSession {
                 // but its immutable lease cannot. Recreate access lazily.
                 state.adjustableDPI = nil
                 state.hiResWheel = nil
+                state.smartShift = nil
             }
 
             guard hardwareTargetChanged else {
@@ -422,6 +491,11 @@ final class LogitechDeviceSession {
                         to: currentRoute,
                         token: state.hiResWheelCancellationSource.token
                     )
+                    Self.rebindStableInitialState(
+                        state.initialSmartShiftState,
+                        to: currentRoute,
+                        token: state.smartShiftCancellationSource.token
+                    )
                 }
                 return (
                     .init(
@@ -429,23 +503,30 @@ final class LogitechDeviceSession {
                         candidateAvailabilityChanged: candidateAvailabilityChanged,
                         hasCandidates: discovery?.identities.isEmpty == false
                     ),
-                    nil,
-                    nil
+                    []
                 )
             }
 
-            let dpiSource = state.dpiCancellationSource
-            let wheelSource = state.hiResWheelCancellationSource
+            let previousSources = [
+                state.dpiCancellationSource,
+                state.hiResWheelCancellationSource,
+                state.smartShiftCancellationSource
+            ]
             state.dpiCancellationSource = CancellationSource()
             state.hiResWheelCancellationSource = CancellationSource()
+            state.smartShiftCancellationSource = CancellationSource()
             state.adjustableDPI = nil
             state.hiResWheel = nil
+            state.smartShift = nil
             state.sensorDPI = nil
             state.hiResWheelEnabled = nil
             state.hiResWheelMultiplier = nil
             state.provisionalHiResWheelMultiplier = nil
+            state.smartShiftStatus = nil
+            state.smartShiftSupportsTunableTorque = nil
             dpiCoordinator.cancel()
             wheelCoordinator.cancel()
+            smartShiftCoordinator.cancel()
             if let currentRoute {
                 Self.rebindStableInitialState(
                     state.initialDPIState,
@@ -457,6 +538,11 @@ final class LogitechDeviceSession {
                     to: currentRoute,
                     token: state.hiResWheelCancellationSource.token
                 )
+                Self.rebindStableInitialState(
+                    state.initialSmartShiftState,
+                    to: currentRoute,
+                    token: state.smartShiftCancellationSource.token
+                )
             }
             return (
                 .init(
@@ -464,13 +550,11 @@ final class LogitechDeviceSession {
                     candidateAvailabilityChanged: candidateAvailabilityChanged,
                     hasCandidates: discovery?.identities.isEmpty == false
                 ),
-                dpiSource,
-                wheelSource
+                previousSources
             )
         }
 
-        update.1?.cancel()
-        update.2?.cancel()
+        update.1.forEach { $0.cancel() }
         return update.0
     }
 
@@ -612,22 +696,24 @@ final class LogitechDeviceSession {
     func suspendHardware() -> LogitechHardwareSuspension? {
         let dpiCoordinator = dpiApplyCoordinator
         let wheelCoordinator = hiResWheelApplyCoordinator
+        let smartShiftCoordinator = smartShiftApplyCoordinator
         let transition = withState { state -> (
             suspension: LogitechHardwareSuspension?,
-            previousSources: (CancellationSource, CancellationSource, CancellationSource)?
+            previousSources: [CancellationSource]
         ) in
             switch state.lifecycleOwner {
             case let .suspension(existing)?:
-                return (existing, nil)
+                return (existing, [])
             case .terminal?:
-                return (nil, nil)
+                return (nil, [])
             case nil:
                 let suspension = LogitechHardwareSuspension()
-                let previousSources = (
+                let previousSources = [
                     state.ordinaryHardwareAccess,
                     state.dpiCancellationSource,
-                    state.hiResWheelCancellationSource
-                )
+                    state.hiResWheelCancellationSource,
+                    state.smartShiftCancellationSource
+                ]
 
                 if state.hiResWheelEnabled == true,
                    let multiplier = state.hiResWheelMultiplier,
@@ -641,13 +727,17 @@ final class LogitechDeviceSession {
                 state.ordinaryHardwareAccess = CancellationSource()
                 state.dpiCancellationSource = CancellationSource()
                 state.hiResWheelCancellationSource = CancellationSource()
+                state.smartShiftCancellationSource = CancellationSource()
                 state.adjustableDPI = nil
                 state.hiResWheel = nil
+                state.smartShift = nil
                 state.sensorDPI = nil
                 state.hiResWheelEnabled = nil
                 state.hiResWheelMultiplier = nil
+                state.smartShiftStatus = nil
                 dpiCoordinator.cancel()
                 wheelCoordinator.cancel()
+                smartShiftCoordinator.cancel()
                 return (suspension, previousSources)
             }
         }
@@ -655,13 +745,7 @@ final class LogitechDeviceSession {
         guard let suspension = transition.suspension else {
             return nil
         }
-        guard let previousSources = transition.previousSources else {
-            return suspension
-        }
-
-        previousSources.0.cancel()
-        previousSources.1.cancel()
-        previousSources.2.cancel()
+        transition.previousSources.forEach { $0.cancel() }
         return suspension
     }
 
@@ -677,7 +761,8 @@ final class LogitechDeviceSession {
         }
     }
 
-    /// Runs the final DPI and wheel restore on the existing per-device queue.
+    /// Runs the final DPI, wheel, and SmartShift restore on the existing
+    /// per-device queue.
     ///
     /// Normal apply/confirmation work is cancelled first, but the current
     /// feature transports and target leases are retained. This avoids
@@ -688,12 +773,12 @@ final class LogitechDeviceSession {
         _ = terminalHardwareRestoreSnapshot()
         dpiApplyCoordinator.cancel()
         hiResWheelApplyCoordinator.cancel()
+        smartShiftApplyCoordinator.cancel()
     }
 
     func runTerminalHardwareRestore(
         _ operation: @escaping (
-            _ dpiToken: CancellationToken,
-            _ wheelToken: CancellationToken,
+            _ tokens: TerminalRestoreTokens,
             _ ownsTerminalRestore: @escaping () -> Bool
         ) -> Void,
         onCancelled: @escaping () -> Void
@@ -704,6 +789,7 @@ final class LogitechDeviceSession {
 
         dpiApplyCoordinator.cancel()
         hiResWheelApplyCoordinator.cancel()
+        smartShiftApplyCoordinator.cancel()
 
         perform { [self] in
             let ownsTerminalRestore = { [weak self] in
@@ -715,13 +801,13 @@ final class LogitechDeviceSession {
                 onCancelled()
                 return
             }
-            operation(tokens.0, tokens.1, ownsTerminalRestore)
+            operation(tokens, ownsTerminalRestore)
         }
     }
 
     private func terminalHardwareRestoreSnapshot() -> (
         request: TerminalHardwareRestoreRequest,
-        tokens: (CancellationToken, CancellationToken),
+        tokens: TerminalRestoreTokens,
         ordinaryAccess: CancellationSource
     ) {
         let snapshot = withState { state in
@@ -734,7 +820,11 @@ final class LogitechDeviceSession {
             }
             return (
                 request: request,
-                tokens: (state.dpiCancellationSource.token, state.hiResWheelCancellationSource.token),
+                tokens: TerminalRestoreTokens(
+                    dpi: state.dpiCancellationSource.token,
+                    wheel: state.hiResWheelCancellationSource.token,
+                    smartShift: state.smartShiftCancellationSource.token
+                ),
                 ordinaryAccess: state.ordinaryHardwareAccess
             )
         }
@@ -1218,6 +1308,336 @@ final class LogitechDeviceSession {
         }
     }
 
+    // MARK: SmartShift
+
+    var isSmartShiftApplyRunning: Bool {
+        smartShiftApplyCoordinator.isRunning
+    }
+
+    func startSmartShiftApply(
+        _ operation: @escaping (HardwareSettingApplyCoordinator.Attempt, CancellationToken) -> Bool
+    ) {
+        let coordinator = smartShiftApplyCoordinator
+        resetFeatureOperation(
+            cache: \State.smartShift,
+            cancellationSource: \State.smartShiftCancellationSource,
+            mutateState: { $0.smartShiftRestoreRetryNeeded = false }
+        ) { token in
+            coordinator.start { attempt in
+                operation(attempt, token)
+            } completion: { [weak self] succeeded in
+                guard !succeeded else {
+                    return
+                }
+                self?.clearSmartShiftStatus(for: token)
+            }
+        }
+    }
+
+    /// Retries a return to the pre-managed wheel state without discarding its
+    /// baseline when the device is temporarily unavailable.
+    @discardableResult
+    func startSmartShiftRestore(
+        _ operation: @escaping (HardwareSettingApplyCoordinator.Attempt, CancellationToken) -> Bool
+    ) -> CancellationToken {
+        let coordinator = smartShiftApplyCoordinator
+        return resetFeatureOperation(
+            cache: \State.smartShift,
+            cancellationSource: \State.smartShiftCancellationSource,
+            mutateState: { $0.smartShiftRestoreRetryNeeded = false }
+        ) { token in
+            coordinator.start { attempt in
+                operation(attempt, token)
+            } completion: { [weak self] succeeded in
+                self?.finishSmartShiftRestore(succeeded: succeeded, for: token)
+            }
+        } ?? Self.cancelledToken()
+    }
+
+    func cancelSmartShiftApply() {
+        let coordinator = smartShiftApplyCoordinator
+        _ = resetFeatureOperation(
+            cache: \State.smartShift,
+            cancellationSource: \State.smartShiftCancellationSource,
+            admittedDuringLifecycle: true
+        ) { _ in coordinator.cancel() }
+    }
+
+    func allowsConfiguredSmartShiftOperation(for token: CancellationToken) -> Bool {
+        withState { state in
+            Self.ordinaryHardwareIOIsAdmitted(state)
+                && state.smartShiftCancellationSource.token == token
+                && token.shouldContinue
+        }
+    }
+
+    func allowsConfiguredSmartShiftWrite(for access: FeatureAccess<SmartShift>) -> Bool {
+        withState { state in
+            Self.ordinaryHardwareIOIsAdmitted(state)
+                && Self.accessIsCurrent(access, in: state)
+        }
+    }
+
+    func updateSmartShiftStatus(_ status: SmartShift.Status?, for access: FeatureAccess<SmartShift>) {
+        withState { state in
+            guard Self.accessIsCurrent(access, in: state) else {
+                return
+            }
+            state.smartShiftStatus = status
+            state.smartShiftSupportsTunableTorque = access.feature.supportsTunableTorque
+        }
+    }
+
+    func clearSmartShiftStatus() {
+        withState { $0.smartShiftStatus = nil }
+    }
+
+    func clearSmartShiftStatus(for token: CancellationToken) {
+        withState { state in
+            guard state.smartShiftCancellationSource.token == token else {
+                return
+            }
+            state.smartShiftStatus = nil
+        }
+    }
+
+    var smartShiftManagedFields: LogitechSmartShiftFields {
+        withState { $0.smartShiftManagedFields }
+    }
+
+    /// Records fields about to be written. Only an operation whose access is
+    /// still current, and whose original state is already known, may widen
+    /// the set that a later restore returns. Returns the process-store handle
+    /// that must record the same fields, if the baseline has one.
+    func addSmartShiftManagedFields(
+        _ fields: LogitechSmartShiftFields,
+        for access: FeatureAccess<SmartShift>
+    ) -> (added: Bool, baselineHandle: LogitechHardwareBaselineStore.SmartShiftHandle?) {
+        withState { state in
+            guard let initialState = state.initialSmartShiftState,
+                  Self.accessIsCurrent(access, in: state) else {
+                return (false, nil)
+            }
+            state.smartShiftManagedFields.formUnion(fields)
+            return (true, initialState.baselineHandle)
+        }
+    }
+
+    @discardableResult
+    func recordInitialSmartShiftState(
+        _ status: SmartShift.Status,
+        for access: FeatureAccess<SmartShift>
+    ) -> Bool {
+        withState { state in
+            guard Self.accessIsCurrent(access, in: state),
+                  state.initialSmartShiftState == nil else {
+                return false
+            }
+            state.initialSmartShiftState = .init(
+                lease: access.lease,
+                value: status,
+                baselineHandle: nil
+            )
+            return true
+        }
+    }
+
+    /// Seeds a rebuilt session only from a baseline whose stable target still
+    /// belongs to the current immutable SmartShift lease.
+    @discardableResult
+    func seedInitialSmartShiftState(
+        _ claim: LogitechHardwareBaselineStore.SmartShiftClaim,
+        for lease: TargetLease
+    ) -> Bool {
+        withState { state in
+            guard state.initialSmartShiftState == nil,
+                  Self.leaseIsCurrent(
+                      lease,
+                      token: state.smartShiftCancellationSource.token,
+                      route: state.discovery?.route
+                  ),
+                  lease.stableTargetKey.map({ claim.handle.belongs(to: $0) }) == true
+            else {
+                return false
+            }
+            state.initialSmartShiftState = .init(
+                lease: lease,
+                value: claim.baseline.status,
+                baselineHandle: claim.handle
+            )
+            state.smartShiftManagedFields.formUnion(claim.managedFields)
+            return true
+        }
+    }
+
+    func initialSmartShiftStatus(for access: FeatureAccess<SmartShift>) -> SmartShift.Status? {
+        withState { state in
+            guard let initialState = state.initialSmartShiftState,
+                  Self.accessIsCurrent(access, in: state),
+                  Self.initialState(initialState, matches: access.lease),
+                  Self.initialStateRelation(initialState, to: state.discovery?.route) == .compatible
+            else {
+                return nil
+            }
+            return initialState.value
+        }
+    }
+
+    func smartShiftTargetLease(
+        receiverSlot: UInt8?,
+        stableTargetKey: (LogitechReceiverRoute?, UInt8?) -> LogitechHardwareTargetKey?
+    ) -> TargetLease? {
+        withState { state in
+            Self.targetLease(
+                receiverSlot: receiverSlot,
+                cachedReceiverSlot: state.smartShift?.lease.receiverSlot,
+                initialReceiverSlot: state.initialSmartShiftState?.lease.receiverSlot,
+                route: state.discovery?.route,
+                token: state.smartShiftCancellationSource.token,
+                stableTargetKey: stableTargetKey
+            )
+        }
+    }
+
+    func smartShiftBaselinePromotion(for lease: TargetLease) -> SmartShiftBaselinePromotion? {
+        withState { state in
+            guard let initialState = state.initialSmartShiftState,
+                  initialState.baselineHandle == nil,
+                  let stableTargetKey = lease.stableTargetKey,
+                  Self.leaseIsCurrent(
+                      lease,
+                      token: state.smartShiftCancellationSource.token,
+                      route: state.discovery?.route
+                  ),
+                  Self.initialStateRelation(initialState, to: lease.route) == .compatible,
+                  Self.initialState(initialState, matches: lease)
+            else {
+                return nil
+            }
+            return .init(
+                status: initialState.value,
+                managedFields: state.smartShiftManagedFields,
+                target: stableTargetKey,
+                initialState: initialState,
+                currentLease: lease
+            )
+        }
+    }
+
+    @discardableResult
+    func attachSmartShiftBaseline(
+        _ claim: LogitechHardwareBaselineStore.SmartShiftClaim,
+        to promotion: SmartShiftBaselinePromotion
+    ) -> Bool {
+        withState { state in
+            guard state.initialSmartShiftState === promotion.initialState,
+                  promotion.initialState.baselineHandle == nil,
+                  claim.handle.belongs(to: promotion.target),
+                  Self.leaseIsCurrent(
+                      promotion.currentLease,
+                      token: state.smartShiftCancellationSource.token,
+                      route: state.discovery?.route
+                  ),
+                  Self.initialStateRelation(
+                      promotion.initialState,
+                      to: state.discovery?.route
+                  ) == .compatible
+            else {
+                return false
+            }
+            promotion.initialState.lease = promotion.currentLease
+            promotion.initialState.value = claim.baseline.status
+            promotion.initialState.baselineHandle = claim.handle
+            state.smartShiftManagedFields.formUnion(claim.managedFields)
+            return true
+        }
+    }
+
+    var hasInitialSmartShiftState: Bool {
+        withState { $0.initialSmartShiftState != nil }
+    }
+
+    var needsSmartShiftRestoreRetry: Bool {
+        withState { $0.initialSmartShiftState != nil && $0.smartShiftRestoreRetryNeeded }
+    }
+
+    /// Commits a read-back-confirmed restore of `fields`. The caller may then
+    /// consume only the exact process-store handle returned here.
+    @discardableResult
+    func completeSmartShiftRestore(
+        _ status: SmartShift.Status,
+        fields: LogitechSmartShiftFields,
+        for access: FeatureAccess<SmartShift>
+    ) -> SmartShiftCommit {
+        withState { state -> SmartShiftCommit in
+            guard let initialState = state.initialSmartShiftState,
+                  Self.accessIsCurrent(access, in: state),
+                  Self.initialState(initialState, matches: access.lease),
+                  Self.initialStateRelation(initialState, to: state.discovery?.route) == .compatible,
+                  state.smartShiftManagedFields.isSubset(of: fields),
+                  LogitechSmartShiftFields.restore(fields, from: initialState.value, matches: status)
+            else {
+                return .rejected
+            }
+            let baselineHandle = initialState.baselineHandle
+            state.smartShiftStatus = status
+            state.initialSmartShiftState = nil
+            state.smartShiftManagedFields = []
+            state.smartShiftRestoreRetryNeeded = false
+            return .committed(baselineHandle)
+        }
+    }
+
+    func invalidateSmartShift(for token: CancellationToken) {
+        withState { state in
+            guard state.smartShiftCancellationSource.token == token else {
+                return
+            }
+            state.smartShift = nil
+        }
+    }
+
+    private func finishSmartShiftRestore(succeeded: Bool, for token: CancellationToken) {
+        withState { state in
+            guard state.smartShiftCancellationSource.token == token else {
+                return
+            }
+            state.smartShiftRestoreRetryNeeded = !succeeded && state.initialSmartShiftState != nil
+        }
+    }
+
+    func smartShift(
+        expectedToken: CancellationToken? = nil,
+        create: (LogitechReceiverRoute?, CancellationToken) -> FeatureBinding<SmartShift>?
+    ) -> FeatureAccess<SmartShift>? {
+        let admitted = withState { state in
+            guard let initialState = state.initialSmartShiftState else {
+                return true
+            }
+            return Self.initialStateRelation(initialState, to: state.discovery?.route) == .compatible
+        }
+        guard admitted else {
+            return nil
+        }
+        return feature(
+            cache: \State.smartShift,
+            cancellationSource: \State.smartShiftCancellationSource,
+            expectedToken: expectedToken,
+            create: create
+        )
+    }
+
+    private static func accessIsCurrent(
+        _ access: FeatureAccess<SmartShift>,
+        in state: State
+    ) -> Bool {
+        accessIsCurrent(
+            access,
+            token: state.smartShiftCancellationSource.token,
+            route: state.discovery?.route
+        )
+    }
+
     @discardableResult
     private func resetFeatureOperation<Feature>(
         cache: WritableKeyPath<State, FeatureAccess<Feature>?>,
@@ -1342,15 +1762,20 @@ final class LogitechDeviceSession {
     func cancelAll() {
         let dpiCoordinator = dpiApplyCoordinator
         let wheelCoordinator = hiResWheelApplyCoordinator
-        let sources = withState { state -> (CancellationSource, CancellationSource) in
-            let sources = (state.dpiCancellationSource, state.hiResWheelCancellationSource)
+        let smartShiftCoordinator = smartShiftApplyCoordinator
+        let sources = withState { state -> [CancellationSource] in
+            let sources = [
+                state.dpiCancellationSource,
+                state.hiResWheelCancellationSource,
+                state.smartShiftCancellationSource
+            ]
             state = State()
             dpiCoordinator.cancel()
             wheelCoordinator.cancel()
+            smartShiftCoordinator.cancel()
             return sources
         }
-        sources.0.cancel()
-        sources.1.cancel()
+        sources.forEach { $0.cancel() }
     }
 
     private func feature<Feature>(
