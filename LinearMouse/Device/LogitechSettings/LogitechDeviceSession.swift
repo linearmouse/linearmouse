@@ -203,6 +203,10 @@ final class LogitechDeviceSession {
         Bool,
         LogitechHardwareBaselineStore.HiResHandle
     >
+    fileprivate typealias InitialWheelInvertState = InitialTargetState<
+        Bool,
+        LogitechHardwareBaselineStore.WheelInvertHandle
+    >
 
     struct DPIBaselinePromotion {
         let dpi: Int
@@ -228,12 +232,28 @@ final class LogitechDeviceSession {
         case rejected
     }
 
+    struct WheelInvertBaselinePromotion {
+        let inverted: Bool
+        let target: LogitechHardwareTargetKey
+        fileprivate let initialState: InitialWheelInvertState
+        fileprivate let currentLease: TargetLease
+    }
+
+    enum WheelInvertCommit {
+        case committed(LogitechHardwareBaselineStore.WheelInvertHandle?)
+        case rejected
+    }
+
     private struct State {
         var discovery: LogitechReceiverDiscovery?
         var adjustableDPI: FeatureAccess<AdjustableDPI>?
         var hiResWheel: FeatureAccess<HiResWheel>?
+        /// The same HID++ feature as `hiResWheel`, under its own lease so the
+        /// invert setting is applied and restored independently.
+        var wheelInvert: FeatureAccess<HiResWheel>?
         var dpiCancellationSource = CancellationSource()
         var hiResWheelCancellationSource = CancellationSource()
+        var wheelInvertCancellationSource = CancellationSource()
         var sensorDPI: Int?
         var initialDPIState: InitialDPIState?
         var dpiRestoreRetryNeeded = false
@@ -242,8 +262,18 @@ final class LogitechDeviceSession {
         var provisionalHiResWheelMultiplier: Int?
         var initialHiResWheelState: InitialHiResWheelState?
         var hiResWheelRestoreRetryNeeded = false
+        var wheelInverted: Bool?
+        var initialWheelInvertState: InitialWheelInvertState?
+        var wheelInvertRestoreRetryNeeded = false
         var ordinaryHardwareAccess = CancellationSource()
         var lifecycleOwner: LifecycleOwner?
+    }
+
+    /// Cancellation tokens of the settings a terminal restore returns.
+    struct TerminalRestoreTokens {
+        let dpi: CancellationToken
+        let wheel: CancellationToken
+        let wheelInvert: CancellationToken
     }
 
     struct DiscoveryUpdate {
@@ -259,6 +289,7 @@ final class LogitechDeviceSession {
 
     private let dpiApplyCoordinator: HardwareSettingApplyCoordinator
     private let hiResWheelApplyCoordinator: HardwareSettingApplyCoordinator
+    private let wheelInvertApplyCoordinator: HardwareSettingApplyCoordinator
 
     init(deviceID: Int32) {
         queue = DispatchQueue(
@@ -267,6 +298,7 @@ final class LogitechDeviceSession {
         )
         dpiApplyCoordinator = Self.makeApplyCoordinator(queue: queue)
         hiResWheelApplyCoordinator = Self.makeApplyCoordinator(queue: queue)
+        wheelInvertApplyCoordinator = Self.makeApplyCoordinator(queue: queue)
         queue.setSpecific(key: queueContext, value: ())
     }
 
@@ -284,6 +316,10 @@ final class LogitechDeviceSession {
 
     var hiResWheelEnabled: Bool? {
         withState { $0.hiResWheelEnabled }
+    }
+
+    var wheelInverted: Bool? {
+        withState { $0.wheelInverted }
     }
 
     var hiResWheelNormalizationMultiplier: Int? {
@@ -323,6 +359,14 @@ final class LogitechDeviceSession {
             $0.discovery?.route?.slot
                 ?? $0.hiResWheel?.lease.receiverSlot
                 ?? $0.initialHiResWheelState?.lease.receiverSlot
+        }
+    }
+
+    var wheelInvertReceiverSlotSnapshot: UInt8? {
+        withState {
+            $0.discovery?.route?.slot
+                ?? $0.wheelInvert?.lease.receiverSlot
+                ?? $0.initialWheelInvertState?.lease.receiverSlot
         }
     }
 
@@ -377,7 +421,8 @@ final class LogitechDeviceSession {
     func updateDiscovery(_ discovery: LogitechReceiverDiscovery?) -> DiscoveryUpdate {
         let dpiCoordinator = dpiApplyCoordinator
         let wheelCoordinator = hiResWheelApplyCoordinator
-        let update = withState { state -> (DiscoveryUpdate, CancellationSource?, CancellationSource?) in
+        let wheelInvertCoordinator = wheelInvertApplyCoordinator
+        let update = withState { state -> (DiscoveryUpdate, [CancellationSource]) in
             let previousDiscovery = state.discovery
             let previousRoute = previousDiscovery?.route
             let currentRoute = discovery?.route
@@ -396,11 +441,18 @@ final class LogitechDeviceSession {
                 from: previousRoute,
                 to: currentRoute
             )
+            let wheelInvertTransition = Self.transitionInitialState(
+                state.initialWheelInvertState,
+                from: previousRoute,
+                to: currentRoute
+            )
             state.initialDPIState = dpiTransition.state
             state.initialHiResWheelState = wheelTransition.state
+            state.initialWheelInvertState = wheelInvertTransition.state
             hardwareTargetChanged = hardwareTargetChanged
                 || dpiTransition.requiresTargetReset
                 || wheelTransition.requiresTargetReset
+                || wheelInvertTransition.requiresTargetReset
             state.discovery = discovery
 
             if routeIdentityChanged {
@@ -408,6 +460,7 @@ final class LogitechDeviceSession {
                 // but its immutable lease cannot. Recreate access lazily.
                 state.adjustableDPI = nil
                 state.hiResWheel = nil
+                state.wheelInvert = nil
             }
 
             guard hardwareTargetChanged else {
@@ -422,6 +475,11 @@ final class LogitechDeviceSession {
                         to: currentRoute,
                         token: state.hiResWheelCancellationSource.token
                     )
+                    Self.rebindStableInitialState(
+                        state.initialWheelInvertState,
+                        to: currentRoute,
+                        token: state.wheelInvertCancellationSource.token
+                    )
                 }
                 return (
                     .init(
@@ -429,23 +487,29 @@ final class LogitechDeviceSession {
                         candidateAvailabilityChanged: candidateAvailabilityChanged,
                         hasCandidates: discovery?.identities.isEmpty == false
                     ),
-                    nil,
-                    nil
+                    []
                 )
             }
 
-            let dpiSource = state.dpiCancellationSource
-            let wheelSource = state.hiResWheelCancellationSource
+            let previousSources = [
+                state.dpiCancellationSource,
+                state.hiResWheelCancellationSource,
+                state.wheelInvertCancellationSource
+            ]
             state.dpiCancellationSource = CancellationSource()
             state.hiResWheelCancellationSource = CancellationSource()
+            state.wheelInvertCancellationSource = CancellationSource()
             state.adjustableDPI = nil
             state.hiResWheel = nil
+            state.wheelInvert = nil
             state.sensorDPI = nil
             state.hiResWheelEnabled = nil
             state.hiResWheelMultiplier = nil
             state.provisionalHiResWheelMultiplier = nil
+            state.wheelInverted = nil
             dpiCoordinator.cancel()
             wheelCoordinator.cancel()
+            wheelInvertCoordinator.cancel()
             if let currentRoute {
                 Self.rebindStableInitialState(
                     state.initialDPIState,
@@ -457,6 +521,11 @@ final class LogitechDeviceSession {
                     to: currentRoute,
                     token: state.hiResWheelCancellationSource.token
                 )
+                Self.rebindStableInitialState(
+                    state.initialWheelInvertState,
+                    to: currentRoute,
+                    token: state.wheelInvertCancellationSource.token
+                )
             }
             return (
                 .init(
@@ -464,13 +533,11 @@ final class LogitechDeviceSession {
                     candidateAvailabilityChanged: candidateAvailabilityChanged,
                     hasCandidates: discovery?.identities.isEmpty == false
                 ),
-                dpiSource,
-                wheelSource
+                previousSources
             )
         }
 
-        update.1?.cancel()
-        update.2?.cancel()
+        update.1.forEach { $0.cancel() }
         return update.0
     }
 
@@ -612,22 +679,24 @@ final class LogitechDeviceSession {
     func suspendHardware() -> LogitechHardwareSuspension? {
         let dpiCoordinator = dpiApplyCoordinator
         let wheelCoordinator = hiResWheelApplyCoordinator
+        let wheelInvertCoordinator = wheelInvertApplyCoordinator
         let transition = withState { state -> (
             suspension: LogitechHardwareSuspension?,
-            previousSources: (CancellationSource, CancellationSource, CancellationSource)?
+            previousSources: [CancellationSource]
         ) in
             switch state.lifecycleOwner {
             case let .suspension(existing)?:
-                return (existing, nil)
+                return (existing, [])
             case .terminal?:
-                return (nil, nil)
+                return (nil, [])
             case nil:
                 let suspension = LogitechHardwareSuspension()
-                let previousSources = (
+                let previousSources = [
                     state.ordinaryHardwareAccess,
                     state.dpiCancellationSource,
-                    state.hiResWheelCancellationSource
-                )
+                    state.hiResWheelCancellationSource,
+                    state.wheelInvertCancellationSource
+                ]
 
                 if state.hiResWheelEnabled == true,
                    let multiplier = state.hiResWheelMultiplier,
@@ -641,13 +710,17 @@ final class LogitechDeviceSession {
                 state.ordinaryHardwareAccess = CancellationSource()
                 state.dpiCancellationSource = CancellationSource()
                 state.hiResWheelCancellationSource = CancellationSource()
+                state.wheelInvertCancellationSource = CancellationSource()
                 state.adjustableDPI = nil
                 state.hiResWheel = nil
+                state.wheelInvert = nil
                 state.sensorDPI = nil
                 state.hiResWheelEnabled = nil
                 state.hiResWheelMultiplier = nil
+                state.wheelInverted = nil
                 dpiCoordinator.cancel()
                 wheelCoordinator.cancel()
+                wheelInvertCoordinator.cancel()
                 return (suspension, previousSources)
             }
         }
@@ -655,13 +728,8 @@ final class LogitechDeviceSession {
         guard let suspension = transition.suspension else {
             return nil
         }
-        guard let previousSources = transition.previousSources else {
-            return suspension
-        }
 
-        previousSources.0.cancel()
-        previousSources.1.cancel()
-        previousSources.2.cancel()
+        transition.previousSources.forEach { $0.cancel() }
         return suspension
     }
 
@@ -677,7 +745,8 @@ final class LogitechDeviceSession {
         }
     }
 
-    /// Runs the final DPI and wheel restore on the existing per-device queue.
+    /// Runs the final DPI, wheel, and wheel invert restore on the existing
+    /// per-device queue.
     ///
     /// Normal apply/confirmation work is cancelled first, but the current
     /// feature transports and target leases are retained. This avoids
@@ -688,12 +757,12 @@ final class LogitechDeviceSession {
         _ = terminalHardwareRestoreSnapshot()
         dpiApplyCoordinator.cancel()
         hiResWheelApplyCoordinator.cancel()
+        wheelInvertApplyCoordinator.cancel()
     }
 
     func runTerminalHardwareRestore(
         _ operation: @escaping (
-            _ dpiToken: CancellationToken,
-            _ wheelToken: CancellationToken,
+            _ tokens: TerminalRestoreTokens,
             _ ownsTerminalRestore: @escaping () -> Bool
         ) -> Void,
         onCancelled: @escaping () -> Void
@@ -704,6 +773,7 @@ final class LogitechDeviceSession {
 
         dpiApplyCoordinator.cancel()
         hiResWheelApplyCoordinator.cancel()
+        wheelInvertApplyCoordinator.cancel()
 
         perform { [self] in
             let ownsTerminalRestore = { [weak self] in
@@ -715,13 +785,13 @@ final class LogitechDeviceSession {
                 onCancelled()
                 return
             }
-            operation(tokens.0, tokens.1, ownsTerminalRestore)
+            operation(tokens, ownsTerminalRestore)
         }
     }
 
     private func terminalHardwareRestoreSnapshot() -> (
         request: TerminalHardwareRestoreRequest,
-        tokens: (CancellationToken, CancellationToken),
+        tokens: TerminalRestoreTokens,
         ordinaryAccess: CancellationSource
     ) {
         let snapshot = withState { state in
@@ -734,7 +804,11 @@ final class LogitechDeviceSession {
             }
             return (
                 request: request,
-                tokens: (state.dpiCancellationSource.token, state.hiResWheelCancellationSource.token),
+                tokens: TerminalRestoreTokens(
+                    dpi: state.dpiCancellationSource.token,
+                    wheel: state.hiResWheelCancellationSource.token,
+                    wheelInvert: state.wheelInvertCancellationSource.token
+                ),
                 ordinaryAccess: state.ordinaryHardwareAccess
             )
         }
@@ -1218,6 +1292,307 @@ final class LogitechDeviceSession {
         }
     }
 
+    // MARK: Wheel invert
+
+    var isWheelInvertApplyRunning: Bool {
+        wheelInvertApplyCoordinator.isRunning
+    }
+
+    func startWheelInvertApply(
+        _ operation: @escaping (HardwareSettingApplyCoordinator.Attempt, CancellationToken) -> Bool
+    ) {
+        let coordinator = wheelInvertApplyCoordinator
+        resetFeatureOperation(
+            cache: \State.wheelInvert,
+            cancellationSource: \State.wheelInvertCancellationSource,
+            mutateState: { $0.wheelInvertRestoreRetryNeeded = false }
+        ) { token in
+            coordinator.start { attempt in
+                operation(attempt, token)
+            } completion: { [weak self] succeeded in
+                guard !succeeded else {
+                    return
+                }
+                self?.clearWheelInverted(for: token)
+            }
+        }
+    }
+
+    /// Retries a return to the pre-managed wheel direction without discarding
+    /// its baseline when the device is temporarily unavailable.
+    @discardableResult
+    func startWheelInvertRestore(
+        _ operation: @escaping (HardwareSettingApplyCoordinator.Attempt, CancellationToken) -> Bool
+    ) -> CancellationToken {
+        let coordinator = wheelInvertApplyCoordinator
+        return resetFeatureOperation(
+            cache: \State.wheelInvert,
+            cancellationSource: \State.wheelInvertCancellationSource,
+            mutateState: { $0.wheelInvertRestoreRetryNeeded = false }
+        ) { token in
+            coordinator.start { attempt in
+                operation(attempt, token)
+            } completion: { [weak self] succeeded in
+                self?.finishWheelInvertRestore(succeeded: succeeded, for: token)
+            }
+        } ?? Self.cancelledToken()
+    }
+
+    func cancelWheelInvertApply() {
+        let coordinator = wheelInvertApplyCoordinator
+        _ = resetFeatureOperation(
+            cache: \State.wheelInvert,
+            cancellationSource: \State.wheelInvertCancellationSource,
+            admittedDuringLifecycle: true
+        ) { _ in coordinator.cancel() }
+    }
+
+    func allowsConfiguredWheelInvertOperation(for token: CancellationToken) -> Bool {
+        withState { state in
+            Self.ordinaryHardwareIOIsAdmitted(state)
+                && state.wheelInvertCancellationSource.token == token
+                && token.shouldContinue
+        }
+    }
+
+    func allowsConfiguredWheelInvertWrite(for access: FeatureAccess<HiResWheel>) -> Bool {
+        withState { state in
+            Self.ordinaryHardwareIOIsAdmitted(state)
+                && Self.wheelInvertAccessIsCurrent(access, in: state)
+        }
+    }
+
+    func updateWheelInverted(_ inverted: Bool?, for access: FeatureAccess<HiResWheel>) {
+        withState { state in
+            guard Self.wheelInvertAccessIsCurrent(access, in: state) else {
+                return
+            }
+            state.wheelInverted = inverted
+        }
+    }
+
+    func clearWheelInverted() {
+        withState { $0.wheelInverted = nil }
+    }
+
+    func clearWheelInverted(for token: CancellationToken) {
+        withState { state in
+            guard state.wheelInvertCancellationSource.token == token else {
+                return
+            }
+            state.wheelInverted = nil
+        }
+    }
+
+    @discardableResult
+    func recordInitialWheelInvertState(
+        inverted: Bool,
+        for access: FeatureAccess<HiResWheel>
+    ) -> Bool {
+        withState { state in
+            guard Self.wheelInvertAccessIsCurrent(access, in: state),
+                  state.initialWheelInvertState == nil else {
+                return false
+            }
+            state.initialWheelInvertState = .init(
+                lease: access.lease,
+                value: inverted,
+                baselineHandle: nil
+            )
+            return true
+        }
+    }
+
+    /// Seeds a rebuilt session only from a baseline whose stable target still
+    /// belongs to the current immutable wheel invert lease.
+    @discardableResult
+    func seedInitialWheelInvertState(
+        _ claim: LogitechHardwareBaselineStore.WheelInvertClaim,
+        for lease: TargetLease
+    ) -> Bool {
+        withState { state in
+            guard state.initialWheelInvertState == nil,
+                  Self.leaseIsCurrent(
+                      lease,
+                      token: state.wheelInvertCancellationSource.token,
+                      route: state.discovery?.route
+                  ),
+                  lease.stableTargetKey.map({ claim.handle.belongs(to: $0) }) == true
+            else {
+                return false
+            }
+            state.initialWheelInvertState = .init(
+                lease: lease,
+                value: claim.baseline.inverted,
+                baselineHandle: claim.handle
+            )
+            return true
+        }
+    }
+
+    func initialWheelInverted(for access: FeatureAccess<HiResWheel>) -> Bool? {
+        withState { state in
+            guard let initialState = state.initialWheelInvertState,
+                  Self.wheelInvertAccessIsCurrent(access, in: state),
+                  Self.initialState(initialState, matches: access.lease),
+                  Self.initialStateRelation(initialState, to: state.discovery?.route) == .compatible
+            else {
+                return nil
+            }
+            return initialState.value
+        }
+    }
+
+    func wheelInvertTargetLease(
+        receiverSlot: UInt8?,
+        stableTargetKey: (LogitechReceiverRoute?, UInt8?) -> LogitechHardwareTargetKey?
+    ) -> TargetLease? {
+        withState { state in
+            Self.targetLease(
+                receiverSlot: receiverSlot,
+                cachedReceiverSlot: state.wheelInvert?.lease.receiverSlot,
+                initialReceiverSlot: state.initialWheelInvertState?.lease.receiverSlot,
+                route: state.discovery?.route,
+                token: state.wheelInvertCancellationSource.token,
+                stableTargetKey: stableTargetKey
+            )
+        }
+    }
+
+    func wheelInvertBaselinePromotion(for lease: TargetLease) -> WheelInvertBaselinePromotion? {
+        withState { state in
+            guard let initialState = state.initialWheelInvertState,
+                  initialState.baselineHandle == nil,
+                  let stableTargetKey = lease.stableTargetKey,
+                  Self.leaseIsCurrent(
+                      lease,
+                      token: state.wheelInvertCancellationSource.token,
+                      route: state.discovery?.route
+                  ),
+                  Self.initialStateRelation(initialState, to: lease.route) == .compatible,
+                  Self.initialState(initialState, matches: lease)
+            else {
+                return nil
+            }
+            return .init(
+                inverted: initialState.value,
+                target: stableTargetKey,
+                initialState: initialState,
+                currentLease: lease
+            )
+        }
+    }
+
+    @discardableResult
+    func attachWheelInvertBaseline(
+        _ claim: LogitechHardwareBaselineStore.WheelInvertClaim,
+        to promotion: WheelInvertBaselinePromotion
+    ) -> Bool {
+        withState { state in
+            guard state.initialWheelInvertState === promotion.initialState,
+                  promotion.initialState.baselineHandle == nil,
+                  claim.handle.belongs(to: promotion.target),
+                  Self.leaseIsCurrent(
+                      promotion.currentLease,
+                      token: state.wheelInvertCancellationSource.token,
+                      route: state.discovery?.route
+                  ),
+                  Self.initialStateRelation(
+                      promotion.initialState,
+                      to: state.discovery?.route
+                  ) == .compatible
+            else {
+                return false
+            }
+            promotion.initialState.lease = promotion.currentLease
+            promotion.initialState.value = claim.baseline.inverted
+            promotion.initialState.baselineHandle = claim.handle
+            return true
+        }
+    }
+
+    var hasInitialWheelInvertState: Bool {
+        withState { $0.initialWheelInvertState != nil }
+    }
+
+    var needsWheelInvertRestoreRetry: Bool {
+        withState { $0.initialWheelInvertState != nil && $0.wheelInvertRestoreRetryNeeded }
+    }
+
+    /// Commits a read-back-confirmed restore. The caller may then consume only
+    /// the exact process-store handle returned here.
+    @discardableResult
+    func completeWheelInvertRestore(
+        inverted: Bool,
+        for access: FeatureAccess<HiResWheel>
+    ) -> WheelInvertCommit {
+        withState { state -> WheelInvertCommit in
+            guard let initialState = state.initialWheelInvertState,
+                  Self.wheelInvertAccessIsCurrent(access, in: state),
+                  Self.initialState(initialState, matches: access.lease),
+                  Self.initialStateRelation(initialState, to: state.discovery?.route) == .compatible,
+                  initialState.value == inverted
+            else {
+                return .rejected
+            }
+            let baselineHandle = initialState.baselineHandle
+            state.wheelInverted = inverted
+            state.initialWheelInvertState = nil
+            state.wheelInvertRestoreRetryNeeded = false
+            return .committed(baselineHandle)
+        }
+    }
+
+    func invalidateWheelInvert(for token: CancellationToken) {
+        withState { state in
+            guard state.wheelInvertCancellationSource.token == token else {
+                return
+            }
+            state.wheelInvert = nil
+        }
+    }
+
+    private func finishWheelInvertRestore(succeeded: Bool, for token: CancellationToken) {
+        withState { state in
+            guard state.wheelInvertCancellationSource.token == token else {
+                return
+            }
+            state.wheelInvertRestoreRetryNeeded = !succeeded && state.initialWheelInvertState != nil
+        }
+    }
+
+    func wheelInvert(
+        expectedToken: CancellationToken? = nil,
+        create: (LogitechReceiverRoute?, CancellationToken) -> FeatureBinding<HiResWheel>?
+    ) -> FeatureAccess<HiResWheel>? {
+        let admitted = withState { state in
+            guard let initialState = state.initialWheelInvertState else {
+                return true
+            }
+            return Self.initialStateRelation(initialState, to: state.discovery?.route) == .compatible
+        }
+        guard admitted else {
+            return nil
+        }
+        return feature(
+            cache: \State.wheelInvert,
+            cancellationSource: \State.wheelInvertCancellationSource,
+            expectedToken: expectedToken,
+            create: create
+        )
+    }
+
+    private static func wheelInvertAccessIsCurrent(
+        _ access: FeatureAccess<HiResWheel>,
+        in state: State
+    ) -> Bool {
+        accessIsCurrent(
+            access,
+            token: state.wheelInvertCancellationSource.token,
+            route: state.discovery?.route
+        )
+    }
+
     @discardableResult
     private func resetFeatureOperation<Feature>(
         cache: WritableKeyPath<State, FeatureAccess<Feature>?>,
@@ -1342,15 +1717,20 @@ final class LogitechDeviceSession {
     func cancelAll() {
         let dpiCoordinator = dpiApplyCoordinator
         let wheelCoordinator = hiResWheelApplyCoordinator
-        let sources = withState { state -> (CancellationSource, CancellationSource) in
-            let sources = (state.dpiCancellationSource, state.hiResWheelCancellationSource)
+        let wheelInvertCoordinator = wheelInvertApplyCoordinator
+        let sources = withState { state -> [CancellationSource] in
+            let sources = [
+                state.dpiCancellationSource,
+                state.hiResWheelCancellationSource,
+                state.wheelInvertCancellationSource
+            ]
             state = State()
             dpiCoordinator.cancel()
             wheelCoordinator.cancel()
+            wheelInvertCoordinator.cancel()
             return sources
         }
-        sources.0.cancel()
-        sources.1.cancel()
+        sources.forEach { $0.cancel() }
     }
 
     private func feature<Feature>(

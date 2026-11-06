@@ -10,6 +10,7 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
         var isRemoved = false
         var isLogitechSensorDPIApplyRunning = false
         var isLogitechHighResolutionWheelApplyRunning = false
+        var isLogitechWheelInvertApplyRunning = false
 
         func hasConfirmedLogitechSensorDPI(_ dpi: Int) -> Bool {
             confirmedLogitechSensorDPI == dpi
@@ -17,8 +18,10 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
 
         var confirmedLogitechSensorDPI: Int?
         var confirmedLogitechHighResolutionWheel: Bool?
+        var confirmedLogitechWheelInvert: Bool?
         var needsLogitechSensorDPIRestoreRetry = false
         var needsLogitechHighResolutionWheelRestoreRetry = false
+        var needsLogitechWheelInvertRestoreRetry = false
         private(set) var actions = [String]()
 
         func applyConfiguredSensorDPI(_ dpi: Int) {
@@ -27,6 +30,10 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
 
         func applyConfiguredHighResolutionWheel(_ enabled: Bool) {
             actions.append("hiResWheel:\(enabled)")
+        }
+
+        func applyConfiguredWheelInvert(_ inverted: Bool) {
+            actions.append("wheelInvert:\(inverted)")
         }
 
         func requestLogitechControlsForcedReconfiguration() {
@@ -41,12 +48,20 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
             actions.append("prepareHiResWheel")
         }
 
+        func prepareWheelInvertForReconnect() {
+            actions.append("prepareWheelInvert")
+        }
+
         func stopManagingSensorDPI() {
             actions.append("restoreDPI")
         }
 
         func stopManagingHighResolutionWheel() {
             actions.append("restoreHiResWheel")
+        }
+
+        func stopManagingWheelInvert() {
+            actions.append("restoreWheelInvert")
         }
 
         func resetActions() {
@@ -139,6 +154,7 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
             "prepareHiResWheel",
             "dpi:1200",
             "hiResWheel:true",
+            "restoreWheelInvert",
             "controls"
         ])
     }
@@ -155,6 +171,7 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
         XCTAssertEqual(device.actions, [
             "dpi:1200",
             "hiResWheel:true",
+            "restoreWheelInvert",
             "controls"
         ])
     }
@@ -170,6 +187,7 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
             "prepareDPI",
             "restoreDPI",
             "restoreHiResWheel",
+            "restoreWheelInvert",
             "controls"
         ])
     }
@@ -203,5 +221,105 @@ final class LogitechDeviceSettingsReconcilerTests: XCTestCase {
         reconciler.reapply(scheme(dpi: 1000, highResolutionWheel: true))
 
         XCTAssertTrue(device.actions.isEmpty)
+    }
+
+    func testWheelInvertAppliesOnlyWhenChangedOrUnconfirmed() {
+        let device = Device()
+        let reconciler = LogitechDeviceSettingsReconciler(device: device)
+        var settings = Scheme()
+        settings.scrolling.reverse.vertical = true
+        settings.logitech.invertWheel = true
+
+        reconciler.apply(settings)
+        XCTAssertEqual(device.actions, ["wheelInvert:true"])
+
+        device.resetActions()
+        device.confirmedLogitechWheelInvert = true
+        reconciler.apply(settings)
+        XCTAssertTrue(device.actions.isEmpty)
+
+        settings.logitech.invertWheel = false
+        reconciler.apply(settings)
+        XCTAssertEqual(device.actions, ["restoreWheelInvert"])
+    }
+
+    func testWheelInvertFollowsVerticalReverseScrolling() {
+        let device = Device()
+        let reconciler = LogitechDeviceSettingsReconciler(device: device)
+        var settings = Scheme()
+        settings.logitech.invertWheel = true
+
+        reconciler.apply(settings)
+        XCTAssertTrue(device.actions.isEmpty)
+
+        settings.scrolling.reverse.vertical = true
+        reconciler.apply(settings)
+        XCTAssertEqual(device.actions, ["wheelInvert:true"])
+
+        device.resetActions()
+        device.confirmedLogitechWheelInvert = true
+        settings.scrolling.reverse.vertical = false
+        reconciler.apply(settings)
+        XCTAssertEqual(device.actions, ["restoreWheelInvert"])
+    }
+
+    func testHorizontalReverseScrollingDoesNotReverseInTheMouse() {
+        let device = Device()
+        let reconciler = LogitechDeviceSettingsReconciler(device: device)
+        var settings = Scheme()
+        settings.scrolling.reverse.horizontal = true
+        settings.logitech.invertWheel = true
+
+        reconciler.apply(settings)
+
+        XCTAssertTrue(device.actions.isEmpty)
+    }
+
+    func testWheelInvertIsIndependentOfHighResolutionWheel() {
+        let device = Device()
+        let reconciler = LogitechDeviceSettingsReconciler(device: device)
+        var settings = scheme(highResolutionWheel: true)
+        settings.scrolling.reverse.vertical = true
+        settings.logitech.invertWheel = true
+        reconciler.apply(settings)
+        device.confirmedLogitechHighResolutionWheel = true
+        device.confirmedLogitechWheelInvert = true
+        device.resetActions()
+
+        settings.logitech.invertWheel = nil
+        reconciler.apply(settings)
+
+        XCTAssertEqual(device.actions, ["restoreWheelInvert"])
+    }
+
+    func testReapplyPreparesAndForcesWheelInvert() {
+        let device = Device()
+        let reconciler = LogitechDeviceSettingsReconciler(device: device)
+        var settings = Scheme()
+        settings.scrolling.reverse.vertical = true
+        settings.logitech.invertWheel = true
+
+        reconciler.apply(settings)
+        device.resetActions()
+        reconciler.reapply(settings)
+
+        XCTAssertEqual(device.actions, [
+            "prepareDPI",
+            "prepareWheelInvert",
+            "restoreDPI",
+            "restoreHiResWheel",
+            "wheelInvert:true",
+            "controls"
+        ])
+    }
+
+    func testSameNilSettingsRetryAnExhaustedWheelInvertRestore() {
+        let device = Device()
+        device.needsLogitechWheelInvertRestoreRetry = true
+        let reconciler = LogitechDeviceSettingsReconciler(device: device)
+
+        reconciler.apply(Scheme())
+
+        XCTAssertEqual(device.actions, ["restoreWheelInvert"])
     }
 }
