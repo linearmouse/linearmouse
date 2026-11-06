@@ -11,6 +11,48 @@ final class AccessibilityBypassRuleTests: XCTestCase {
         scrollableRoles: ["AXWebArea", "AXScrollArea"]
     )
 
+    func testSafariFavoritesBarFaviconRuleMatchesFaviconInFavoritesBar() {
+        let rule = matcher.firstMatchingRule(
+            for: AccessibilityBypassElementSnapshot(
+                depth: 0,
+                role: "AXImage",
+                identifier: "FaviconImageView",
+                parentIdentifier: "FavoritesBarView?DisplayMode=0"
+            ),
+            in: AccessibilityBypassRuleContext(point: CGPoint(x: 130, y: 90))
+        )
+
+        XCTAssertEqual(rule?.name, "safariFavoritesBarFavicon")
+    }
+
+    func testSafariFavoritesBarFaviconRuleRequiresFavoritesBarParent() {
+        let rule = matcher.firstMatchingRule(
+            for: AccessibilityBypassElementSnapshot(
+                depth: 0,
+                role: "AXImage",
+                identifier: "FaviconImageView",
+                parentIdentifier: "TabBar"
+            ),
+            in: AccessibilityBypassRuleContext(point: CGPoint(x: 130, y: 90))
+        )
+
+        XCTAssertNil(rule)
+    }
+
+    func testSafariFavoritesBarFaviconRuleRequiresDirectHit() {
+        let rule = matcher.firstMatchingRule(
+            for: AccessibilityBypassElementSnapshot(
+                depth: 1,
+                role: "AXImage",
+                identifier: "FaviconImageView",
+                parentIdentifier: "FavoritesBarView?DisplayMode=0"
+            ),
+            in: AccessibilityBypassRuleContext(point: CGPoint(x: 130, y: 90))
+        )
+
+        XCTAssertNil(rule)
+    }
+
     func testStandardWindowTitleBarRuleMatchesZoteroTabStrip() {
         let rule = matcher.firstMatchingRule(
             for: zoteroWindowSnapshot(),
