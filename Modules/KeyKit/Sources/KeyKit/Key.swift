@@ -149,8 +149,10 @@ public enum Key: String, Codable {
 }
 
 extension Key {
-    private static let modifiersKeys: Set<Key> = [.command, .shift, .option, .control,
-                                                  .commandRight, .shiftRight, .optionRight, .controlRight]
+    private static let modifiersKeys: Set<Key> = [
+        .command, .shift, .option, .control,
+        .commandRight, .shiftRight, .optionRight, .controlRight
+    ]
 
     public var isModifier: Bool {
         Self.modifiersKeys.contains(self)

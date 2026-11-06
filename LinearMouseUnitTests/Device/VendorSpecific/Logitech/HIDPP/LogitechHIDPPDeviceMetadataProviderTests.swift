@@ -154,16 +154,22 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         let slots = [slot(slot: 2), slot(slot: 3, name: "Online Mouse")]
         func candidate() -> LogitechHIDPPDeviceMetadataProvider.ReceiverSlotMatchCandidate? {
             provider.receiverSlotCandidate(
-                for: mouseDevice(), slots: slots, connectionSnapshots: snapshots,
-                expectedDeviceCount: .paired(2), inventoryAvailable: true
+                for: mouseDevice(),
+                slots: slots,
+                connectionSnapshots: snapshots,
+                expectedDeviceCount: .paired(2),
+                inventoryAvailable: true
             )
         }
         XCTAssertNil(candidate())
         snapshots[2] = .init(isConnected: false, kind: 0x02)
         XCTAssertEqual(candidate()?.slot, 3)
         XCTAssertEqual(provider.receiverSlotCandidate(
-            for: mouseDevice(), slots: slots, connectionSnapshots: snapshots,
-            expectedDeviceCount: .connected(1), inventoryAvailable: true
+            for: mouseDevice(),
+            slots: slots,
+            connectionSnapshots: snapshots,
+            expectedDeviceCount: .connected(1),
+            inventoryAvailable: true
         )?.slot, 3)
     }
 
@@ -307,11 +313,13 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
 
         XCTAssertNil(provider.receiverSlotCandidate(
             for: device,
-            slots: [slot(
-                slot: 1,
-                kind: ReceiverLogicalDeviceKind.keyboard.rawValue,
-                serialNumber: "ABC123"
-            )],
+            slots: [
+                slot(
+                    slot: 1,
+                    kind: ReceiverLogicalDeviceKind.keyboard.rawValue,
+                    serialNumber: "ABC123"
+                )
+            ],
             connectionSnapshots: [1: .init(isConnected: true, kind: ReceiverLogicalDeviceKind.keyboard.rawValue)],
             expectedDeviceCount: .connected(1),
             inventoryAvailable: true
@@ -855,7 +863,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         XCTAssertTrue(admission.begin(ownership: ownership))
         allowReadToReturn.signal()
         XCTAssertEqual(producerFinished.wait(timeout: .now() + 1), .success)
-        XCTAssertEqual(resultLock.withLock { lateProducerResult }, false)
+        XCTAssertFalse(try XCTUnwrap(resultLock.withLock { lateProducerResult }))
 
         XCTAssertTrue(store.restoreOwnedBits(
             for: target,

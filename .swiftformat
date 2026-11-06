@@ -1,9 +1,10 @@
 --commas inline
 --disable wrapMultilineStatementBraces
---enable wrapConditionalBodies
+--enable wrapGuardStatementBodies
 --enable wrapMultilineFunctionChains
 --header "MIT License\nCopyright (c) 2021-{year} LinearMouse"
 --decimalgrouping 3,5
 --maxwidth 120
 --wraparguments before-first
 --wrapparameters before-first
+--exclude build,Modules/*/.build

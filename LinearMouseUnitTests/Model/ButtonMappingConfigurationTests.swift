@@ -69,11 +69,11 @@ final class ButtonMappingConfigurationTests: XCTestCase {
         """#)
 
         let autoScroll = try XCTUnwrap(configuration.schemes.first?.buttons.autoScroll)
-        XCTAssertEqual(autoScroll.reverse, true)
+        XCTAssertTrue(try XCTUnwrap(autoScroll.reverse))
 
         var merged = Scheme.Buttons.AutoScroll()
         autoScroll.merge(into: &merged)
-        XCTAssertEqual(merged.reverse, true)
+        XCTAssertTrue(try XCTUnwrap(merged.reverse))
 
         let root = try XCTUnwrap(
             JSONSerialization.jsonObject(with: configuration.dump()) as? [String: Any]

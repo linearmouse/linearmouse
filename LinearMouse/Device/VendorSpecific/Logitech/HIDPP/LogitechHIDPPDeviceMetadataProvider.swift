@@ -2332,9 +2332,13 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         )
         let deadline = Date().addingTimeInterval(0.5)
         while shouldContinue(), Date() < deadline {
-            guard let report = waitForInputReport(timeout: 0.05, matching: { response in
-                LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(Array(response)) != nil
-            }, until: shouldContinue) else {
+            guard let report = waitForInputReport(
+                timeout: 0.05,
+                matching: { response in
+                    LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(Array(response)) != nil
+                },
+                until: shouldContinue
+            ) else {
                 // No more notifications pending — if we already have enough connected snapshots, exit early
                 if collector.isCompleteAfterQuietWait {
                     break
@@ -4871,7 +4875,9 @@ final class LogitechReprogrammableControlsMonitor {
             ) else {
                 os_log(
                     "Logitech setCidReporting verification failed (read-back error): cid=0x%{public}04X",
-                    log: Self.log, type: .error, controlID
+                    log: Self.log,
+                    type: .error,
+                    controlID
                 )
                 return false
             }
@@ -4879,7 +4885,9 @@ final class LogitechReprogrammableControlsMonitor {
             guard actuallyDiverted == enabled else {
                 os_log(
                     "Logitech setCidReporting verification mismatch: cid=0x%{public}04X wanted=%{public}@ actual=%{public}@",
-                    log: Self.log, type: .error, controlID,
+                    log: Self.log,
+                    type: .error,
+                    controlID,
                     enabled ? "diverted" : "native",
                     actuallyDiverted ? "diverted" : "native"
                 )
@@ -4912,8 +4920,11 @@ final class LogitechReprogrammableControlsMonitor {
 
             os_log(
                 "Logitech setCidReporting retry %{public}d/%{public}d: cid=0x%{public}04X",
-                log: Self.log, type: .info,
-                attempt, maxAttempts, controlID
+                log: Self.log,
+                type: .info,
+                attempt,
+                maxAttempts,
+                controlID
             )
             Thread.sleep(forTimeInterval: retryDelay)
         }
@@ -5087,8 +5098,10 @@ final class LogitechReprogrammableControlsMonitor {
     ) -> Bool {
         guard LogitechHIDPPDeviceMetadataProvider.parseReceiverConnectionNotification(report) == nil,
               report.count >= 4,
-              [LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
-               LogitechHIDPPDeviceMetadataProvider.Constants.longReportID].contains(report[0]),
+              [
+                  LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
+                  LogitechHIDPPDeviceMetadataProvider.Constants.longReportID
+              ].contains(report[0]),
               deviceIndices.contains(report[1]),
               report[2] == featureIndex,
               report[3] & 0x0F == 0
@@ -5971,8 +5984,10 @@ final class HIDPPNotificationBuffer {
 private enum HIDPPUnsolicitedNotification {
     static func matches(_ report: [UInt8]) -> Bool {
         guard report.count >= LogitechHIDPPDeviceMetadataProvider.Constants.shortReportLength,
-              [LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
-               LogitechHIDPPDeviceMetadataProvider.Constants.longReportID].contains(report[0])
+              [
+                  LogitechHIDPPDeviceMetadataProvider.Constants.shortReportID,
+                  LogitechHIDPPDeviceMetadataProvider.Constants.longReportID
+              ].contains(report[0])
         else {
             return false
         }

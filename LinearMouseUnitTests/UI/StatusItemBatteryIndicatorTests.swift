@@ -91,22 +91,24 @@ final class StatusItemBatteryIndicatorTests: XCTestCase {
         let activeDevice = NSObject()
         let selectedDevice = NSObject()
 
-        XCTAssertTrue(
+        XCTAssertIdentical(
             StatusItem.menuBarBatteryDevice(
                 activeDeviceRef: WeakRef(activeDevice),
                 selectedDeviceRef: WeakRef(selectedDevice)
-            ) === activeDevice
+            ),
+            activeDevice
         )
     }
 
     func testMenuBarBatteryDeviceFallsBackToSelectedDevice() {
         let selectedDevice = NSObject()
 
-        XCTAssertTrue(
+        XCTAssertIdentical(
             StatusItem.menuBarBatteryDevice(
                 activeDeviceRef: nil,
                 selectedDeviceRef: WeakRef(selectedDevice)
-            ) === selectedDevice
+            ),
+            selectedDevice
         )
     }
 

@@ -1,3 +1,6 @@
+excluded:
+  - build
+  - Modules/*/.build
 only_rules:
   - accessibility_trait_for_button
   - array_init
@@ -26,9 +29,7 @@ only_rules:
   - discarded_notification_center_observer
   - discouraged_assert
   - discouraged_direct_init
-  - discouraged_none_name
   - discouraged_object_literal
-  - discouraged_optional_collection
   - duplicate_conditions
   - duplicate_enum_cases
   - duplicate_imports
@@ -87,7 +88,7 @@ only_rules:
   - ns_number_init_as_function_reference
   - nsobject_prefer_isequal
   - operator_usage_whitespace
-  - operator_whitespace
+  - function_name_whitespace
   - optional_data_string_conversion
   - overridden_super_call
   - prefer_key_path
@@ -106,7 +107,7 @@ only_rules:
   - redundant_discardable_let
   - redundant_nil_coalescing
   - redundant_objc_attribute
-  - redundant_optional_initialization
+  - implicit_optional_initialization
   - redundant_sendable
   - redundant_set_access_control
   - redundant_string_enum_value

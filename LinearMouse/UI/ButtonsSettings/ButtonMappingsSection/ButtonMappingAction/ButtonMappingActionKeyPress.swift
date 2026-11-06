@@ -72,10 +72,9 @@ struct KeyboardShortcutRecorder: View {
         var keys: [Key] = []
 
         if modifierFlags.contains(.maskControl) {
-            keys
-                .append(modifierFlags
-                    .contains(.init(rawValue: UInt64(NX_DEVICERCTLKEYMASK))) ? .controlRight : .control
-                )
+            keys.append(
+                modifierFlags.contains(.init(rawValue: UInt64(NX_DEVICERCTLKEYMASK))) ? .controlRight : .control
+            )
         }
 
         if modifierFlags.contains(.maskShift) {
@@ -87,10 +86,9 @@ struct KeyboardShortcutRecorder: View {
         }
 
         if modifierFlags.contains(.maskCommand) {
-            keys
-                .append(modifierFlags
-                    .contains(.init(rawValue: UInt64(NX_DEVICERCMDKEYMASK))) ? .commandRight : .command
-                )
+            keys.append(
+                modifierFlags.contains(.init(rawValue: UInt64(NX_DEVICERCMDKEYMASK))) ? .commandRight : .command
+            )
         }
 
         return keys

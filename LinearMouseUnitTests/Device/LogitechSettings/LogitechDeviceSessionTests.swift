@@ -199,8 +199,8 @@ final class LogitechDeviceSessionTests: XCTestCase {
 
         session.runBoundedOrdinaryHardwareRead(
             deadline: Date().addingTimeInterval(1)
-        ) {
-            _ in XCTFail("queued ordinary read must not start")
+        ) { _ in
+            XCTFail("queued ordinary read must not start")
         } onCancelled: {
             readCancelled.fulfill()
         }
@@ -222,8 +222,8 @@ final class LogitechDeviceSessionTests: XCTestCase {
 
         session.runBoundedOrdinaryHardwareRead(
             deadline: Date().addingTimeInterval(1)
-        ) {
-            _ in XCTFail("queued ordinary read must not start")
+        ) { _ in
+            XCTFail("queued ordinary read must not start")
         } onCancelled: {
             readCancelled.fulfill()
         }
@@ -289,8 +289,8 @@ final class LogitechDeviceSessionTests: XCTestCase {
 
         session.runBoundedOrdinaryHardwareRead(
             deadline: Date(timeIntervalSince1970: 0)
-        ) {
-            _ in XCTFail("expired read must not start")
+        ) { _ in
+            XCTFail("expired read must not start")
         } onCancelled: {
             cancelled.fulfill()
         }
@@ -954,7 +954,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
 
         session.completeHiResWheelRestore(enabled: false, multiplier: nil, for: access)
 
-        XCTAssertEqual(session.hiResWheelEnabled, false)
+        XCTAssertFalse(try XCTUnwrap(session.hiResWheelEnabled))
         XCTAssertNil(session.hiResWheelNormalizationMultiplier)
         XCTAssertNil(session.initialHiResWheelEnabled(for: access))
     }
@@ -967,7 +967,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
 
         session.completeHiResWheelRestore(enabled: true, multiplier: 8, for: access)
 
-        XCTAssertEqual(session.hiResWheelEnabled, true)
+        XCTAssertTrue(try XCTUnwrap(session.hiResWheelEnabled))
         XCTAssertEqual(session.hiResWheelNormalizationMultiplier, 8)
     }
 
@@ -1158,7 +1158,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
             receiverSlot: 2,
             stableTargetKey: target
         )
-        XCTAssertEqual(session.initialHiResWheelEnabled(for: reboundAccess), false)
+        XCTAssertFalse(try XCTUnwrap(session.initialHiResWheelEnabled(for: reboundAccess)))
     }
 
     func testSameStableSerialRebindsAcrossReceiverSlots() throws {
@@ -1177,7 +1177,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
             stableTargetKey: targetA
         )
 
-        XCTAssertEqual(session.initialHiResWheelEnabled(for: reboundAccess), false)
+        XCTAssertFalse(try XCTUnwrap(session.initialHiResWheelEnabled(for: reboundAccess)))
     }
 
     func testMissingSerialSentinelCannotCarryBaselineToReplacementProduct() throws {
@@ -1225,7 +1225,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
         XCTAssertEqual(lease.receiverSlot, 2)
         XCTAssertNil(lease.stableTargetKey)
         XCTAssertNil(session.hiResBaselinePromotion(for: lease))
-        XCTAssertEqual(session.initialHiResWheelEnabled(for: access), false)
+        XCTAssertFalse(try XCTUnwrap(session.initialHiResWheelEnabled(for: access)))
     }
 
     func testImplicitLeaseKeepsNilSlotForDirectDevice() throws {
@@ -1253,7 +1253,7 @@ final class LogitechDeviceSessionTests: XCTestCase {
         let store = LogitechHardwareBaselineStore()
         let claim = store.captureHiResBaseline(enabled: promotion.enabled, for: target)
         XCTAssertTrue(session.attachHiResBaseline(claim, to: promotion))
-        XCTAssertEqual(session.initialHiResWheelEnabled(for: access), false)
+        XCTAssertFalse(try XCTUnwrap(session.initialHiResWheelEnabled(for: access)))
     }
 
     private func hiResWheelAccess(

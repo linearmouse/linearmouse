@@ -17,28 +17,28 @@ final class ConfigurationTests: XCTestCase {
             .usesProcessConditions)
     }
 
-    func testMergeScheme() {
+    func testMergeScheme() throws {
         var scheme = Scheme()
 
         XCTAssertNil(scheme.$scrolling)
 
         Scheme(scrolling: .init(reverse: .init(vertical: true))).merge(into: &scheme)
 
-        XCTAssertEqual(scheme.scrolling.reverse.vertical, true)
+        XCTAssertTrue(try XCTUnwrap(scheme.scrolling.reverse.vertical))
         XCTAssertNil(scheme.scrolling.reverse.horizontal)
 
         Scheme(scrolling: .init(reverse: .init(vertical: false, horizontal: true))).merge(into: &scheme)
 
-        XCTAssertEqual(scheme.scrolling.reverse.vertical, false)
-        XCTAssertEqual(scheme.scrolling.reverse.horizontal, true)
+        XCTAssertFalse(try XCTUnwrap(scheme.scrolling.reverse.vertical))
+        XCTAssertTrue(try XCTUnwrap(scheme.scrolling.reverse.horizontal))
 
         Scheme(scrolling: .init(reverse: .init(vertical: true))).merge(into: &scheme)
 
-        XCTAssertEqual(scheme.scrolling.reverse.vertical, true)
-        XCTAssertEqual(scheme.scrolling.reverse.horizontal, true)
+        XCTAssertTrue(try XCTUnwrap(scheme.scrolling.reverse.vertical))
+        XCTAssertTrue(try XCTUnwrap(scheme.scrolling.reverse.horizontal))
     }
 
-    func testMergeLogitechSettings() {
+    func testMergeLogitechSettings() throws {
         var scheme = Scheme()
 
         XCTAssertNil(scheme.$logitech)
@@ -47,16 +47,16 @@ final class ConfigurationTests: XCTestCase {
         base.logitech.highResolutionWheel = true
         base.merge(into: &scheme)
 
-        XCTAssertEqual(scheme.logitech.highResolutionWheel, true)
+        XCTAssertTrue(try XCTUnwrap(scheme.logitech.highResolutionWheel))
 
         var override = Scheme()
         override.logitech.highResolutionWheel = false
         override.merge(into: &scheme)
 
-        XCTAssertEqual(scheme.logitech.highResolutionWheel, false)
+        XCTAssertFalse(try XCTUnwrap(scheme.logitech.highResolutionWheel))
     }
 
-    func testMatchSchemeWithDeviceCategoryDoesNotMergeDeviceSpecificSchemes() {
+    func testMatchSchemeWithDeviceCategoryDoesNotMergeDeviceSpecificSchemes() throws {
         var categoryScheme = Scheme(if: [.init(device: DeviceMatcher(category: .mouse))])
         categoryScheme.pointer.disableAcceleration = true
 
@@ -70,10 +70,10 @@ final class ConfigurationTests: XCTestCase {
         let configuration = Configuration(schemes: [categoryScheme, deviceSpecificScheme])
         let matchedScheme = configuration.matchScheme(withDeviceMatcher: DeviceMatcher(category: .mouse))
 
-        XCTAssertEqual(matchedScheme.pointer.disableAcceleration, true)
+        XCTAssertTrue(try XCTUnwrap(matchedScheme.pointer.disableAcceleration))
     }
 
-    func testMatchSchemeWithSpecificDeviceMatcherMergesDeviceCategorySchemes() {
+    func testMatchSchemeWithSpecificDeviceMatcherMergesDeviceCategorySchemes() throws {
         var categoryScheme = Scheme(if: [.init(device: DeviceMatcher(category: .mouse))])
         categoryScheme.pointer.disableAcceleration = true
         categoryScheme.scrolling.reverse.vertical = true
@@ -88,8 +88,8 @@ final class ConfigurationTests: XCTestCase {
         let configuration = Configuration(schemes: [categoryScheme, deviceSpecificScheme])
         let matchedScheme = configuration.matchScheme(withDeviceMatcher: specificMatcher)
 
-        XCTAssertEqual(matchedScheme.pointer.disableAcceleration, false)
-        XCTAssertEqual(matchedScheme.scrolling.reverse.vertical, true)
+        XCTAssertFalse(try XCTUnwrap(matchedScheme.pointer.disableAcceleration))
+        XCTAssertTrue(try XCTUnwrap(matchedScheme.scrolling.reverse.vertical))
     }
 
     func testDeviceCategorySchemeInsertsBeforeDeviceSpecificSchemes() {
@@ -184,7 +184,7 @@ final class ConfigurationTests: XCTestCase {
         )
     }
 
-    func testMergeAutoScroll() {
+    func testMergeAutoScroll() throws {
         var scheme = Scheme()
         scheme.buttons.autoScroll.enabled = true
         scheme.buttons.autoScroll.modes = [.hold]
@@ -198,14 +198,14 @@ final class ConfigurationTests: XCTestCase {
         override.buttons.autoScroll.toggleActivation = .longPress
         override.merge(into: &scheme)
 
-        XCTAssertEqual(scheme.buttons.autoScroll.enabled, true)
+        XCTAssertTrue(try XCTUnwrap(scheme.buttons.autoScroll.enabled))
         XCTAssertEqual(scheme.buttons.autoScroll.toggleActivation, .longPress)
         XCTAssertEqual(scheme.buttons.autoScroll.modes, [.hold])
         XCTAssertEqual(scheme.buttons.autoScroll.trigger?.button, .mouse(4))
         XCTAssertEqual(scheme.buttons.autoScroll.trigger?.modifierFlags.contains(.maskShift), true)
     }
 
-    func testMergeAutoScrollPreservesInheritedFields() {
+    func testMergeAutoScrollPreservesInheritedFields() throws {
         var scheme = Scheme()
         scheme.buttons.autoScroll.enabled = true
         scheme.buttons.autoScroll.toggleActivation = .longPress
@@ -220,14 +220,14 @@ final class ConfigurationTests: XCTestCase {
         override.buttons.autoScroll.modes = [.toggle, .hold]
         override.merge(into: &scheme)
 
-        XCTAssertEqual(scheme.buttons.autoScroll.enabled, true)
+        XCTAssertTrue(try XCTUnwrap(scheme.buttons.autoScroll.enabled))
         XCTAssertEqual(scheme.buttons.autoScroll.toggleActivation, .longPress)
         XCTAssertEqual(scheme.buttons.autoScroll.modes, [.toggle, .hold])
         XCTAssertEqual(scheme.buttons.autoScroll.trigger?.button, .mouse(2))
         XCTAssertEqual(scheme.buttons.autoScroll.trigger?.modifierFlags.contains(.maskCommand), true)
     }
 
-    func testMergeAutoScrollAllowsDisablingInheritedSetting() {
+    func testMergeAutoScrollAllowsDisablingInheritedSetting() throws {
         var scheme = Scheme()
         scheme.buttons.autoScroll.enabled = true
         scheme.buttons.autoScroll.modes = [.toggle]
@@ -236,27 +236,27 @@ final class ConfigurationTests: XCTestCase {
         override.buttons.autoScroll.enabled = false
         override.merge(into: &scheme)
 
-        XCTAssertEqual(scheme.buttons.autoScroll.enabled, false)
+        XCTAssertFalse(try XCTUnwrap(scheme.buttons.autoScroll.enabled))
         XCTAssertEqual(scheme.buttons.autoScroll.modes, [.toggle])
     }
 
     func testMappingDecodesLegacyGenericModifierFlagsWithoutRawFlags() throws {
         let mapping = try JSONDecoder().decode(
             Scheme.Buttons.Mapping.self,
-            from: XCTUnwrap(#"{"button":3,"command":true}"#.data(using: .utf8))
+            from: Data(#"{"button":3,"command":true}"#.utf8)
         )
 
         XCTAssertEqual(mapping.modifierFlags, [.maskCommand])
-        XCTAssertTrue(mapping.command == true)
-        XCTAssertFalse(mapping.shift == true)
+        XCTAssertTrue(try XCTUnwrap(mapping.command))
+        XCTAssertFalse(mapping.shift ?? false)
     }
 
     func testMappingDecodesLegacyLogitechControlFieldIntoButton() throws {
         let mapping = try JSONDecoder().decode(
             Scheme.Buttons.Mapping.self,
-            from: XCTUnwrap(
+            from: Data(
                 #"{"logiButton":{"controlID":208,"logicalDeviceProductID":16478,"logicalDeviceSerialNumber":"ABC123"}}"#
-                    .data(using: .utf8)
+                    .utf8
             )
         )
 
@@ -284,11 +284,11 @@ final class ConfigurationTests: XCTestCase {
     func testMappingDecodesHoldFlag() throws {
         let mapping = try JSONDecoder().decode(
             Scheme.Buttons.Mapping.self,
-            from: XCTUnwrap(#"{"button":3,"hold":true,"action":{"keyPress":["c"]}}"#.data(using: .utf8))
+            from: Data(#"{"button":3,"hold":true,"action":{"keyPress":["c"]}}"#.utf8)
         )
 
         XCTAssertEqual(mapping.button, .mouse(3))
-        XCTAssertEqual(mapping.hold, true)
+        XCTAssertTrue(try XCTUnwrap(mapping.hold))
         XCTAssertNil(mapping.repeat)
     }
 
@@ -310,10 +310,7 @@ final class ConfigurationTests: XCTestCase {
     func testLogitechControlButtonDecodesHexProductID() throws {
         let mapping = try JSONDecoder().decode(
             Scheme.Buttons.Mapping.self,
-            from: XCTUnwrap(
-                #"{"button":{"kind":"logitechControl","controlID":208,"productID":"0x405E"}}"#
-                    .data(using: .utf8)
-            )
+            from: Data(#"{"button":{"kind":"logitechControl","controlID":208,"productID":"0x405E"}}"#.utf8)
         )
 
         XCTAssertEqual(
@@ -347,7 +344,7 @@ final class ConfigurationTests: XCTestCase {
     func testDecodeAutoScrollSingleMode() throws {
         let autoScroll = try JSONDecoder().decode(
             Scheme.Buttons.AutoScroll.self,
-            from: XCTUnwrap(#"{"enabled":true,"mode":"hold"}"#.data(using: .utf8))
+            from: Data(#"{"enabled":true,"mode":"hold"}"#.utf8)
         )
 
         XCTAssertEqual(autoScroll.modes, [.hold])
@@ -357,7 +354,7 @@ final class ConfigurationTests: XCTestCase {
     func testDecodeAutoScrollMultipleModes() throws {
         let autoScroll = try JSONDecoder().decode(
             Scheme.Buttons.AutoScroll.self,
-            from: XCTUnwrap(#"{"enabled":true,"mode":["toggle","hold"]}"#.data(using: .utf8))
+            from: Data(#"{"enabled":true,"mode":["toggle","hold"]}"#.utf8)
         )
 
         XCTAssertEqual(autoScroll.modes, [.toggle, .hold])
@@ -367,7 +364,7 @@ final class ConfigurationTests: XCTestCase {
     func testDecodeAutoScrollDefaultsToShortPressToggleActivation() throws {
         let autoScroll = try JSONDecoder().decode(
             Scheme.Buttons.AutoScroll.self,
-            from: XCTUnwrap(#"{"enabled":true}"#.data(using: .utf8))
+            from: Data(#"{"enabled":true}"#.utf8)
         )
 
         XCTAssertNil(autoScroll.toggleActivation)
@@ -377,7 +374,7 @@ final class ConfigurationTests: XCTestCase {
     func testAutoScrollLongPressToggleActivationRoundTrips() throws {
         let autoScroll = try JSONDecoder().decode(
             Scheme.Buttons.AutoScroll.self,
-            from: XCTUnwrap(#"{"toggleActivation":"longPress"}"#.data(using: .utf8))
+            from: Data(#"{"toggleActivation":"longPress"}"#.utf8)
         )
 
         XCTAssertEqual(autoScroll.toggleActivation, .longPress)
@@ -391,12 +388,10 @@ final class ConfigurationTests: XCTestCase {
     func testDecodeAutoScrollIgnoresRemovedPreserveNativeMiddleClickOption() throws {
         let autoScroll = try JSONDecoder().decode(
             Scheme.Buttons.AutoScroll.self,
-            from: XCTUnwrap(
-                #"{"enabled":true,"preserveNativeMiddleClick":false}"#.data(using: .utf8)
-            )
+            from: Data(#"{"enabled":true,"preserveNativeMiddleClick":false}"#.utf8)
         )
 
-        XCTAssertEqual(autoScroll.enabled, true)
+        XCTAssertTrue(try XCTUnwrap(autoScroll.enabled))
 
         let encoded = try JSONEncoder().encode(autoScroll)
         let object = try XCTUnwrap(JSONSerialization.jsonObject(with: encoded) as? [String: Any])

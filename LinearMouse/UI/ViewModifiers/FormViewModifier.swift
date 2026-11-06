@@ -73,10 +73,9 @@ func withDescription<View1: View, View2: View>(@ViewBuilder content: () -> Tuple
     }
 }
 
-func labelWithDescription<
-    View1: View,
-    View2: View
->(@ViewBuilder content: () -> TupleView<(View1, View2)>) -> some View {
+func labelWithDescription<View1: View, View2: View>(
+    @ViewBuilder content: () -> TupleView<(View1, View2)>
+) -> some View {
     let c = content()
 
     if #available(macOS 13.0, *) {

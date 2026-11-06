@@ -184,10 +184,14 @@ extension ScrollingSettingsState {
 
         var label: LocalizedStringKey {
             switch self {
-            case .accelerated: "Accelerated"
-            case .smoothed: "Smoothed (Beta)"
-            case .byLines: "By Lines"
-            case .byPixels: "By Pixels"
+            case .accelerated:
+                "Accelerated"
+            case .smoothed:
+                "Smoothed (Beta)"
+            case .byLines:
+                "By Lines"
+            case .byPixels:
+                "By Pixels"
             }
         }
 
