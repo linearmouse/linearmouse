@@ -15,12 +15,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Add co-author to commit
-        uses: actions/github-script@v6
+        uses: actions/github-script@v9
         with:
           script: |
             try {

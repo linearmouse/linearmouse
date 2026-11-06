@@ -23,7 +23,7 @@ jobs:
           brew upgrade swiftformat
           brew install swiftlint
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Install the Apple certificate
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
@@ -65,13 +65,13 @@ jobs:
         run: cd build/LinearMouse.xcarchive/dSYMs && zip -r "$GITHUB_WORKSPACE/build/LinearMouse.dSYM.zip" LinearMouse.app.dSYM
       - name: Upload dmg
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: LinearMouse.dmg
           path: build/LinearMouse.dmg
           retention-days: 7
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         if: startsWith(github.ref, 'refs/tags/')
         with:
           draft: true
