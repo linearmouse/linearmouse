@@ -85,6 +85,7 @@ class EventTransformerManager {
     /// Share its cooldown by physical device rather than by app/display configuration.
     private var scrollThrottles = [InteractionKey: ScrollActionThrottle]()
     private var scrollGestures = [InteractionKey: ScrollGestureOwnership]()
+    private var spaceSwipeSessions = [InteractionKey: SpaceSwipeSession]()
 
     private struct RouteSelection {
         var device: Device?
@@ -884,6 +885,16 @@ class EventTransformerManager {
             }
         }
 
+        // Claims horizontal wheel movement before button mappings can turn it
+        // into discrete space-switching shortcuts.
+        if let spaceSwipe = scheme.scrolling.$spaceSwipe, spaceSwipe.isEnabled {
+            eventTransformer.append(SpaceSwipeTransformer(
+                distance: spaceSwipe.effectiveDistance,
+                releaseDelay: spaceSwipe.effectiveReleaseDelay,
+                session: spaceSwipeSession(for: scrollKey)
+            ))
+        }
+
         let smoothed = Scheme.Scrolling.Bidirectional(
             vertical: scheme.scrolling.smoothed.vertical?.isEnabled == true ? scheme.scrolling.smoothed.vertical : nil,
             horizontal: scheme.scrolling.smoothed.horizontal?.isEnabled == true ? scheme.scrolling.smoothed
@@ -1280,6 +1291,23 @@ class EventTransformerManager {
             gesture.release()
         }
         scrollGestures.removeAll()
+        for session in spaceSwipeSessions.values {
+            session.cancel()
+        }
+        spaceSwipeSessions.removeAll()
+    }
+
+    /// Shared by every route of a device, so a swipe that changes the app
+    /// under the pointer keeps driving the same gesture.
+    private func spaceSwipeSession(for key: InteractionKey) -> SpaceSwipeSession {
+        if let session = spaceSwipeSessions[key] {
+            return session
+        }
+        let session = SpaceSwipeSession { [postEvent] output in
+            output.gestureEvent?.send { postEvent($0, .cgSessionEventTap) }
+        }
+        spaceSwipeSessions[key] = session
+        return session
     }
 
     private func forceResetState() {

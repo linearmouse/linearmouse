@@ -28,6 +28,27 @@ final class GestureKitTests: XCTestCase {
         }
     }
 
+    func testDockSwipeGesture() throws {
+        for phase in [CGSGesturePhase.began, .changed, .ended, .cancelled] {
+            let event = try XCTUnwrap(GestureEvent(
+                dockSwipeSource: nil,
+                motion: .horizontal,
+                phase: phase,
+                progress: -0.4,
+                velocity: phase == .ended ? -2 : 0
+            ))
+            if #available(macOS 27.0, *) {
+                // A single dock control event carrying the attached IOHIDEvent.
+                XCTAssertEqual(event.cgEvents.count, 1)
+                XCTAssertEqual(event.cgEvents[0].type.rawValue, 30)
+            } else {
+                XCTAssertEqual(event.cgEvents.count, 2)
+                XCTAssertEqual(event.cgEvents[0].type.rawValue, 30)
+                XCTAssertEqual(event.cgEvents[1].type.rawValue, 29)
+            }
+        }
+    }
+
     func testScrollGesture() throws {
         guard let event = GestureEvent(
             scrollSource: nil,
