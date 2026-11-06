@@ -37,6 +37,17 @@ extension AccessibilityBypassRule {
             conditions: [
                 .domClassListContains("TabStrip::TabDragContextImpl")
             ]
+        ),
+        // Safari's Favorites bar exposes a bookmark's favicon as a sibling of the bookmark
+        // button, so walking up from the icon never reaches the button.
+        AccessibilityBypassRule(
+            name: "safariFavoritesBarFavicon",
+            conditions: [
+                .depth(0),
+                .role("AXImage"),
+                .identifier("FaviconImageView"),
+                .parentIdentifierHasPrefix("FavoritesBarView")
+            ]
         )
     ]
 }
@@ -45,6 +56,8 @@ enum AccessibilityBypassCondition {
     case depth(Int)
     case role(String)
     case subrole(String?)
+    case identifier(String)
+    case parentIdentifierHasPrefix(String)
     case actionsEmpty
     case noScrollabilitySignal
     case noChildContainingPoint
@@ -63,9 +76,11 @@ struct AccessibilityBypassElementSnapshot {
     let depth: Int
     let role: String?
     let subrole: String?
+    let identifier: String?
     let actions: [String]
     let frame: CGRect?
     let parentRole: String?
+    let parentIdentifier: String?
     let parentFrame: CGRect?
     let children: [AccessibilityBypassChildSnapshot]
     let hasVerticalScrollBar: Bool
@@ -77,9 +92,11 @@ struct AccessibilityBypassElementSnapshot {
         depth: Int,
         role: String?,
         subrole: String? = nil,
+        identifier: String? = nil,
         actions: [String] = [],
         frame: CGRect? = nil,
         parentRole: String? = nil,
+        parentIdentifier: String? = nil,
         parentFrame: CGRect? = nil,
         children: [AccessibilityBypassChildSnapshot] = [],
         hasVerticalScrollBar: Bool = false,
@@ -90,9 +107,11 @@ struct AccessibilityBypassElementSnapshot {
         self.depth = depth
         self.role = role
         self.subrole = subrole
+        self.identifier = identifier
         self.actions = actions
         self.frame = frame
         self.parentRole = parentRole
+        self.parentIdentifier = parentIdentifier
         self.parentFrame = parentFrame
         self.children = children
         self.hasVerticalScrollBar = hasVerticalScrollBar
@@ -147,6 +166,10 @@ struct AccessibilityBypassRuleMatcher {
             return element.role == expectedRole
         case let .subrole(expectedSubrole):
             return element.subrole == expectedSubrole
+        case let .identifier(expectedIdentifier):
+            return element.identifier == expectedIdentifier
+        case let .parentIdentifierHasPrefix(expectedPrefix):
+            return element.parentIdentifier?.hasPrefix(expectedPrefix) == true
         case .actionsEmpty:
             return element.actions.isEmpty
         case .noScrollabilitySignal:

@@ -29,6 +29,10 @@ struct AutoScrollAccessibilityActivationClassifier {
         "AXMenuItem",
         "AXSortButton"
     ]
+    /// Roles whose AXIdentifier a bypass rule can match. Other roles skip the extra query.
+    private static let identifierRoles: Set<String> = [
+        "AXImage"
+    ]
     private static let webContentRoles: Set<String> = [
         "AXWebArea",
         "AXScrollArea"
@@ -286,16 +290,20 @@ struct AutoScrollAccessibilityActivationClassifier {
         let needsWindowSnapshot = role == "AXWindow"
         // Geometry, child enumeration, and scrollbar queries cross the process boundary.
         // Fetch them only when the cheap rule conditions leave a possible match.
-        let parent = needsFullWindowGroupSnapshot ? optionalParent(of: element) : nil
+        let identifier = role.map(Self.identifierRoles.contains) == true ? identifier(of: element) : nil
+        let needsParentIdentifier = depth == 0 && role == "AXImage" && identifier != nil
+        let parent = needsFullWindowGroupSnapshot || needsParentIdentifier ? optionalParent(of: element) : nil
 
         return AccessibilityBypassElementSnapshot(
             depth: depth,
             role: role,
             subrole: subrole,
+            identifier: identifier,
             actions: actions,
             frame: needsFullWindowGroupSnapshot || needsWindowSnapshot ? frame(of: element) : nil,
-            parentRole: parent.flatMap { self.role(of: $0) },
-            parentFrame: parent.flatMap { frame(of: $0) },
+            parentRole: needsFullWindowGroupSnapshot ? parent.flatMap { self.role(of: $0) } : nil,
+            parentIdentifier: needsParentIdentifier ? parent.flatMap { self.identifier(of: $0) } : nil,
+            parentFrame: needsFullWindowGroupSnapshot ? parent.flatMap { frame(of: $0) } : nil,
             children: needsFullWindowGroupSnapshot ? immediateChildren(of: element).map(childSnapshot) : [],
             hasVerticalScrollBar: needsFullWindowGroupSnapshot
                 && hasAttributeValue(kAXVerticalScrollBarAttribute as CFString, on: element),
@@ -376,6 +384,17 @@ struct AutoScrollAccessibilityActivationClassifier {
         }
 
         return parent
+    }
+
+    private func identifier(of element: AXUIElement) -> String? {
+        guard case let .success(value) = elementQuery.optionalStringValue(
+            of: kAXIdentifierAttribute as CFString,
+            on: element
+        ) else {
+            return nil
+        }
+
+        return value
     }
 
     private func role(of element: AXUIElement) -> String? {
