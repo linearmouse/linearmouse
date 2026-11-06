@@ -10,7 +10,7 @@ final class GestureTests: XCTestCase {
     func testDecodeLegacyButtonField() throws {
         let gesture = try JSONDecoder().decode(
             Scheme.Buttons.Gesture.self,
-            from: XCTUnwrap(#"{"button":2,"threshold":60}"#.data(using: .utf8))
+            from: Data(#"{"button":2,"threshold":60}"#.utf8)
         )
 
         XCTAssertEqual(gesture.trigger?.button, .mouse(2))
@@ -20,7 +20,7 @@ final class GestureTests: XCTestCase {
     func testDecodeLegacyButtonFieldWithEnabledTrue() throws {
         let gesture = try JSONDecoder().decode(
             Scheme.Buttons.Gesture.self,
-            from: XCTUnwrap(#"{"enabled":true,"button":2}"#.data(using: .utf8))
+            from: Data(#"{"enabled":true,"button":2}"#.utf8)
         )
 
         XCTAssertEqual(gesture.trigger?.button, .mouse(2))
@@ -29,31 +29,27 @@ final class GestureTests: XCTestCase {
     func testDecodeLegacyButtonFieldWithEnabledFalse() throws {
         let gesture = try JSONDecoder().decode(
             Scheme.Buttons.Gesture.self,
-            from: XCTUnwrap(#"{"enabled":false,"button":2}"#.data(using: .utf8))
+            from: Data(#"{"enabled":false,"button":2}"#.utf8)
         )
 
-        XCTAssertEqual(gesture.enabled, false)
+        XCTAssertFalse(try XCTUnwrap(gesture.enabled))
         XCTAssertEqual(gesture.trigger?.button, .mouse(2), "button should still migrate even when disabled")
     }
 
     func testDecodeLegacyEnabledFalseWithTrigger() throws {
         let gesture = try JSONDecoder().decode(
             Scheme.Buttons.Gesture.self,
-            from: XCTUnwrap(
-                #"{"enabled":false,"trigger":{"button":2}}"#.data(using: .utf8)
-            )
+            from: Data(#"{"enabled":false,"trigger":{"button":2}}"#.utf8)
         )
 
-        XCTAssertEqual(gesture.enabled, false)
+        XCTAssertFalse(try XCTUnwrap(gesture.enabled))
         XCTAssertNotNil(gesture.trigger, "trigger should be preserved even when disabled")
     }
 
     func testDecodeTriggerTakesPriorityOverLegacyButton() throws {
         let gesture = try JSONDecoder().decode(
             Scheme.Buttons.Gesture.self,
-            from: XCTUnwrap(
-                #"{"button":3,"trigger":{"button":4}}"#.data(using: .utf8)
-            )
+            from: Data(#"{"button":3,"trigger":{"button":4}}"#.utf8)
         )
 
         XCTAssertEqual(gesture.trigger?.button, .mouse(4), "trigger should take priority over legacy button")
@@ -62,7 +58,7 @@ final class GestureTests: XCTestCase {
     func testDecodeNeitherButtonNorTrigger() throws {
         let gesture = try JSONDecoder().decode(
             Scheme.Buttons.Gesture.self,
-            from: XCTUnwrap(#"{"threshold":80}"#.data(using: .utf8))
+            from: Data(#"{"threshold":80}"#.utf8)
         )
 
         XCTAssertNil(gesture.trigger)
@@ -118,7 +114,7 @@ final class GestureTests: XCTestCase {
         // Decode from legacy format
         let gesture = try JSONDecoder().decode(
             Scheme.Buttons.Gesture.self,
-            from: XCTUnwrap(#"{"enabled":true,"button":2,"threshold":50}"#.data(using: .utf8))
+            from: Data(#"{"enabled":true,"button":2,"threshold":50}"#.utf8)
         )
 
         // Encode (should write enabled+trigger, not legacy button)

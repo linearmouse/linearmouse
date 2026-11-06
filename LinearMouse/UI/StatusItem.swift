@@ -128,13 +128,14 @@ class StatusItem: NSObject, NSMenuDelegate {
             .store(in: &subscriptions)
 
         updateOpenSettingsForFrontmostApplicationItem()
-        NSWorkspace.shared.notificationCenter.addObserver(
-            forName: NSWorkspace.didActivateApplicationNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            self?.updateOpenSettingsForFrontmostApplicationItem()
-        }
+        NSWorkspace.shared
+            .notificationCenter
+            .publisher(for: NSWorkspace.didActivateApplicationNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.updateOpenSettingsForFrontmostApplicationItem()
+            }
+            .store(in: &subscriptions)
 
         AccessibilityPermission.pollingUntilEnabled { [weak self] in
             self?.setup()

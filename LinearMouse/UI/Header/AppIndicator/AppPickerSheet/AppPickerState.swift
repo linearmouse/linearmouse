@@ -17,21 +17,11 @@ class AppPickerState: ObservableObject {
     }
 
     private var configuredAppSet: Set<String> {
-        Set(schemeState.targetSpecificSchemes.reduce([String]()) { acc, element in
-            guard let app = element.element.if?.first?.app else {
-                return acc
-            }
-            return acc + [app]
-        })
+        Set(schemeState.targetSpecificSchemes.compactMap { $0.element.if?.first?.app })
     }
 
     private var configuredExecutableSet: Set<String> {
-        Set(schemeState.targetSpecificSchemes.reduce([String]()) { acc, element in
-            guard let processPath = element.element.if?.first?.processPath else {
-                return acc
-            }
-            return acc + [processPath]
-        })
+        Set(schemeState.targetSpecificSchemes.compactMap { $0.element.if?.first?.processPath })
     }
 
     var configuredApps: [InstalledApp] {

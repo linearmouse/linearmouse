@@ -69,7 +69,7 @@ struct DisplayPickerSheet: View {
     private func onOK() {
         isPresented = false
         DispatchQueue.main.async {
-            schemeState.currentDisplay = selectedDisplay == "" ? nil : selectedDisplay
+            schemeState.currentDisplay = selectedDisplay.isEmpty ? nil : selectedDisplay
         }
     }
 

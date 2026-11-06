@@ -751,9 +751,8 @@ final class EventTransformerManagerTests: XCTestCase {
             withMouseLocationPid: nil,
             withDisplay: "Display B"
         )
-        XCTAssertTrue((nextResolution.transformer as? [EventTransformer])?
-            .compactMap { $0 as? ButtonMappingTransformer }
-            .isEmpty == true)
+        let nextTransformers = try XCTUnwrap(nextResolution.transformer as? [EventTransformer])
+        XCTAssertTrue(nextTransformers.compactMap { $0 as? ButtonMappingTransformer }.isEmpty)
     }
 
     func testOwnedReleaseUsesOriginalButtonSwapAcrossSchemeBoundary() throws {
