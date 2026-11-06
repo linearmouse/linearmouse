@@ -830,7 +830,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         let producerFinished = DispatchSemaphore(value: 0)
         let resultLock = NSLock()
         var lateProducerResult: Bool?
-        DispatchQueue.global(qos: .utility)
+        DispatchQueue.global(qos: .userInteractive)
             .async {
                 let result = store.enable(
                     lateProducerBit,
@@ -885,7 +885,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         let restoreStarted = DispatchSemaphore(value: 0)
         let restoreFinished = DispatchSemaphore(value: 0)
 
-        DispatchQueue.global(qos: .utility).async {
+        DispatchQueue.global(qos: .userInteractive).async {
             _ = store.enable(
                 ownedBit,
                 for: target,
@@ -901,7 +901,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         }
 
         XCTAssertEqual(writeCommitted.wait(timeout: .now() + 1), .success)
-        DispatchQueue.global(qos: .utility).async {
+        DispatchQueue.global(qos: .userInteractive).async {
             restoreStarted.signal()
             _ = store.restoreOwnedBits(
                 for: target,
@@ -934,7 +934,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
         let enableFinished = DispatchSemaphore(value: 0)
         let restoreFinished = DispatchSemaphore(value: 0)
 
-        DispatchQueue.global(qos: .utility).async {
+        DispatchQueue.global(qos: .userInteractive).async {
             _ = store.enable(
                 0x000800,
                 for: target,
@@ -951,7 +951,7 @@ final class LogitechHIDPPDeviceMetadataProviderTests: XCTestCase {
 
         let checkLock = NSLock()
         var continuationChecks = 0
-        DispatchQueue.global(qos: .utility).async {
+        DispatchQueue.global(qos: .userInteractive).async {
             _ = store.restoreOwnedBits(
                 for: target,
                 read: { 0x000800 },
