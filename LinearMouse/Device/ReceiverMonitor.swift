@@ -497,8 +497,8 @@ struct ReceiverSlotStateStore {
             }
         }
 
-        // Bolt needs presence evidence for each actual paired slot, including
-        // offline devices. Classic/Lightspeed retain their connected-count check.
+        // Bolt and Unifying need presence evidence for each actual paired slot,
+        // including offline devices. Lightspeed retains its connected-count check.
         let inventoryComplete = discovery.hasCompletePresence
             && slotKinds.count == connectedSlots.count
             && !hasUnresolvedConnectedSlot
