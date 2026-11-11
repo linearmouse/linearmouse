@@ -77,11 +77,15 @@ public final class KeyEquivalentResolver {
         }
     }
 
+    /// macOS never unmaps the shared memory backing a private event source, even after the source is
+    /// released, so creating one per resolve leaks 16 KB each time. Create it once and reuse it.
+    private static let eventSource = CGEventSource(stateID: .privateState)
+
     static func resolve(keyEquivalents: [String]) -> [String: Shortcut] {
         precondition(Thread.isMainThread)
         var hotKeys: Unmanaged<CFArray>?
         guard #available(macOS 12, *),
-              let source = CGEventSource(stateID: .privateState),
+              let source = eventSource,
               CopySymbolicHotKeys(&hotKeys) == noErr,
               let entries = hotKeys?.takeRetainedValue() as? [[String: Any]] else {
             return [:]
