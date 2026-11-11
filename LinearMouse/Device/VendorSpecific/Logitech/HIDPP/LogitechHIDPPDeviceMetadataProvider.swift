@@ -352,6 +352,22 @@ struct LogitechHIDPPDeviceMetadataProvider: VendorSpecificDeviceMetadataProvider
         return nil
     }
 
+    /// Interprets the device count a receiver reports in register 0x02.
+    ///
+    /// A Unifying receiver counts every paired device, including offline ones: with four pairings
+    /// and one device online it reports 4. Treating that as a connected count never matches while
+    /// any paired device is offline. Lightspeed receivers keep the connected-count interpretation.
+    static func classicReceiverDeviceCount(
+        _ count: Int,
+        vendorID: Int?,
+        productID: Int?,
+        transport: String?
+    ) -> ReceiverDeviceCount {
+        receiverProtocolFamily(vendorID: vendorID, productID: productID, transport: transport) == .classic
+            ? .paired(count)
+            : .connected(count)
+    }
+
     static func supportsClassicReceiverMonitoring(vendorID: Int?, productID: Int?, transport: String?) -> Bool {
         receiverProtocolFamily(vendorID: vendorID, productID: productID, transport: transport) == .classic
     }
@@ -2188,9 +2204,17 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         return .init(
             slots: pairedSlots,
             connectionSnapshots: connectionSnapshots,
-            expectedDeviceCount: connectedDeviceCount
-                .map(LogitechHIDPPDeviceMetadataProvider.ReceiverDeviceCount.connected),
+            expectedDeviceCount: connectedDeviceCount.map(receiverDeviceCount),
             inventoryAvailable: true
+        )
+    }
+
+    private func receiverDeviceCount(_ count: Int) -> LogitechHIDPPDeviceMetadataProvider.ReceiverDeviceCount {
+        LogitechHIDPPDeviceMetadataProvider.classicReceiverDeviceCount(
+            count,
+            vendorID: vendorID,
+            productID: productID,
+            transport: transport
         )
     }
 
@@ -2328,7 +2352,7 @@ final class LogitechReceiverChannel: VendorSpecificDeviceContext, HIDPPCancellab
         }
 
         var collector = LogitechHIDPPDeviceMetadataProvider.ReceiverConnectionSnapshotCollector(
-            expectedDeviceCount: expectedCount.map(LogitechHIDPPDeviceMetadataProvider.ReceiverDeviceCount.connected)
+            expectedDeviceCount: expectedCount.map(receiverDeviceCount)
         )
         let deadline = Date().addingTimeInterval(0.5)
         while shouldContinue(), Date() < deadline {

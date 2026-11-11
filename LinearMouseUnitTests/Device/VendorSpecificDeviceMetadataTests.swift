@@ -620,6 +620,62 @@ final class VendorSpecificDeviceMetadataTests: XCTestCase {
         XCTAssertEqual(store.currentPublishedIdentities(), [online])
     }
 
+    func testUnifyingReceiverReportsPairedDeviceCount() {
+        let usb = PointerDeviceTransportName.usb
+        for productID in [0xC52B, 0xC532] {
+            XCTAssertEqual(
+                LogitechHIDPPDeviceMetadataProvider.classicReceiverDeviceCount(
+                    4, vendorID: 0x046D, productID: productID, transport: usb
+                ),
+                .paired(4)
+            )
+        }
+        XCTAssertEqual(
+            LogitechHIDPPDeviceMetadataProvider.classicReceiverDeviceCount(
+                1, vendorID: 0x046D, productID: 0xC547, transport: usb
+            ),
+            .connected(1)
+        )
+    }
+
+    func testUnifyingReceiverInventoryCompletesWithOfflinePairedDevices() {
+        // Four pairings with only slot 4 online: the receiver reports 4.
+        let offlineMouseA = receiverIdentity(slot: 1, name: "Offline Mouse A")
+        let offlineMouseB = receiverIdentity(slot: 2, name: "Offline Mouse B")
+        let online = receiverIdentity(slot: 4, name: "Online Mouse")
+        var store = ReceiverSlotStateStore()
+        let result = store.mergeDiscovery(.init(
+            identities: [offlineMouseA, offlineMouseB, online],
+            connectionSnapshots: [
+                1: .init(isConnected: false, kind: 0x02),
+                2: .init(isConnected: false, kind: 0x02),
+                3: .init(isConnected: false, kind: 0x01),
+                4: .init(isConnected: true, kind: 0x02)
+            ],
+            liveReachableSlots: [4],
+            expectedDeviceCount: LogitechHIDPPDeviceMetadataProvider.classicReceiverDeviceCount(
+                4, vendorID: 0x046D, productID: 0xC52B, transport: PointerDeviceTransportName.usb
+            ),
+            observedSlotKinds: [1: 0x02, 2: 0x02, 3: 0x01, 4: 0x02]
+        ))
+        XCTAssertTrue(result.inventoryComplete)
+        XCTAssertEqual(store.currentPublishedIdentities(), [online])
+
+        // A single pairing whose device is offline: the receiver still reports 1.
+        var offlineOnlyStore = ReceiverSlotStateStore()
+        let offlineOnly = offlineOnlyStore.mergeDiscovery(.init(
+            identities: [offlineMouseA],
+            connectionSnapshots: [1: .init(isConnected: false, kind: 0x02)],
+            liveReachableSlots: [],
+            expectedDeviceCount: LogitechHIDPPDeviceMetadataProvider.classicReceiverDeviceCount(
+                1, vendorID: 0x046D, productID: 0xC52B, transport: PointerDeviceTransportName.usb
+            ),
+            observedSlotKinds: [1: 0x02]
+        ))
+        XCTAssertTrue(offlineOnly.inventoryComplete)
+        XCTAssertTrue(offlineOnlyStore.currentPublishedIdentities().isEmpty)
+    }
+
     func testBoltReceiverDiscoveryEnablesNotificationsAndTriggersOneInitialSnapshot() throws {
         let device = MockVendorSpecificDeviceContext(
             vendorID: 0x046D,
