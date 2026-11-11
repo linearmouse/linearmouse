@@ -179,6 +179,8 @@ extension ScrollingSettingsState {
 
         case accelerated = "Accelerated"
         case smoothed = "Smoothed"
+        // Glide scrolling (see ScrollingSettingsState+Glide.swift).
+        case glide = "Glide"
         case byLines = "By Lines"
         case byPixels = "By Pixels"
 
@@ -188,6 +190,8 @@ extension ScrollingSettingsState {
                 "Accelerated"
             case .smoothed:
                 "Smoothed (Beta)"
+            case .glide:
+                "Glide"
             case .byLines:
                 "By Lines"
             case .byPixels:
@@ -197,7 +201,7 @@ extension ScrollingSettingsState {
 
         var sendsContinuousScrollEvents: Bool {
             switch self {
-            case .smoothed, .byPixels:
+            case .smoothed, .glide, .byPixels:
                 true
             case .accelerated, .byLines:
                 false
@@ -207,6 +211,12 @@ extension ScrollingSettingsState {
 
     var scrollingMode: ScrollingMode {
         get {
+            // Glide scrolling: checked first because it takes precedence over
+            // Smoothed for the same direction.
+            if currentGlideConfiguration != nil {
+                return .glide
+            }
+
             if currentSmoothedConfiguration != nil {
                 return .smoothed
             }
@@ -221,6 +231,11 @@ extension ScrollingSettingsState {
             }
         }
         set {
+            // Glide scrolling: leaving Glide turns it off for this direction.
+            if newValue != .glide {
+                clearGlideConfiguration()
+            }
+
             switch newValue {
             case .accelerated:
                 clearSmoothedConfiguration()
@@ -230,6 +245,14 @@ extension ScrollingSettingsState {
             case .smoothed:
                 let smoothed = currentSmoothedConfiguration ?? makeDefaultSmoothedConfiguration()
                 setSmoothedConfiguration(smoothed)
+                scheme.scrolling.distance[direction] = .auto
+                scheme.scrolling.acceleration[direction] = 1
+                scheme.scrolling.speed[direction] = 0
+            case .glide:
+                // Glide scrolling: turn Smoothed off and Glide on, and reset the
+                // plain distance settings Glide replaces.
+                clearSmoothedConfiguration()
+                enableGlideConfiguration()
                 scheme.scrolling.distance[direction] = .auto
                 scheme.scrolling.acceleration[direction] = 1
                 scheme.scrolling.speed[direction] = 0
@@ -363,6 +386,8 @@ extension ScrollingSettingsState {
             return scrollingAcceleration == 0 && scrollingSpeed == 0
         case .smoothed:
             return smoothedResponse == 0 && smoothedSpeed == 0 && smoothedAcceleration == 0 && smoothedInertia == 0
+        case .glide:
+            return glideLines == 0
         case .byLines:
             return scrollingDistanceInLines == 0
         case .byPixels:

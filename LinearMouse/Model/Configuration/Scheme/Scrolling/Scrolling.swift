@@ -10,6 +10,9 @@ extension Scheme {
         @ImplicitOptional var acceleration: Bidirectional<Decimal>
         @ImplicitOptional var speed: Bidirectional<Decimal>
         @ImplicitOptional var smoothed: Bidirectional<Smoothed>
+        // Glide scrolling: destination-based smooth scrolling (see Glide.swift
+        // and Documentation/Glide.md).
+        @ImplicitOptional var glide: Bidirectional<Glide>
         @ImplicitOptional var modifiers: Bidirectional<Modifiers>
 
         init() {}
@@ -20,6 +23,7 @@ extension Scheme {
             acceleration: Bidirectional<Decimal>? = nil,
             speed: Bidirectional<Decimal>? = nil,
             smoothed: Bidirectional<Smoothed>? = nil,
+            glide: Bidirectional<Glide>? = nil,
             modifiers: Bidirectional<Modifiers>? = nil
         ) {
             $reverse = reverse
@@ -27,6 +31,7 @@ extension Scheme {
             $acceleration = acceleration
             $speed = speed
             $smoothed = smoothed
+            $glide = glide
             $modifiers = modifiers
         }
     }
@@ -39,6 +44,8 @@ extension Scheme.Scrolling {
         $acceleration?.merge(into: &scrolling.acceleration)
         $speed?.merge(into: &scrolling.speed)
         merge(smoothed: $smoothed, into: &scrolling.smoothed)
+        // Glide scrolling: field-by-field merge, defined in Glide.swift.
+        merge(glide: $glide, into: &scrolling.glide)
         $modifiers?.merge(into: &scrolling.modifiers)
     }
 
