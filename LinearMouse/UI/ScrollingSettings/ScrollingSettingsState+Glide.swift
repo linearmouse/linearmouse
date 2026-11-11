@@ -120,9 +120,11 @@ extension ScrollingSettingsState {
             scheme.scrolling.smoothed.horizontal = verticalSmoothed?.isEnabled == true
                 ? verticalSmoothed
                 : .init(enabled: false)
-            scheme.scrolling.distance.horizontal = mergedScheme.scrolling.distance.vertical
-            scheme.scrolling.acceleration.horizontal = mergedScheme.scrolling.acceleration.vertical
-            scheme.scrolling.speed.horizontal = mergedScheme.scrolling.speed.vertical
+            // Unset values are written as their defaults (auto, 1 and 0, as
+            // EventTransformerManager treats them) so nothing inherited shows through.
+            scheme.scrolling.distance.horizontal = mergedScheme.scrolling.distance.vertical ?? .auto
+            scheme.scrolling.acceleration.horizontal = mergedScheme.scrolling.acceleration.vertical ?? 1
+            scheme.scrolling.speed.horizontal = mergedScheme.scrolling.speed.vertical ?? 0
             return
         }
         var copied = Scheme.Scrolling.Glide.defaultConfiguration
