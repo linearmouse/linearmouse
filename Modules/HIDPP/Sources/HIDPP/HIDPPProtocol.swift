@@ -24,6 +24,8 @@ public enum HIDPPFeatureID: UInt16, Sendable {
     case unifiedBattery = 0x1004
     case reprogControlsV4 = 0x1B04
     case adcMeasurement = 0x1F20
+    case smartShift = 0x2110
+    case smartShiftEnhanced = 0x2111
     case hiresWheel = 0x2121
     case adjustableDPI = 0x2201
 

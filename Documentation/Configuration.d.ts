@@ -3,6 +3,9 @@ type SingleValueOrArray<T> = T | T[];
 /** @asType number */
 type Int = number;
 
+/** @asType integer */
+type Integer = number;
+
 /** @pattern ^\d+$ */
 type IntString = string;
 
@@ -479,7 +482,40 @@ declare namespace Scheme {
      * @description Enable finer vertical wheel steps on supported Logitech HID++ mice.
      */
     highResolutionWheel?: boolean;
+
+    /**
+     * @title SmartShift
+     * @description Configure the SmartShift scroll wheel on supported Logitech HID++ mice. Unset fields keep the wheel's current value.
+     */
+    smartShift?: Logitech.SmartShift;
   };
+
+  namespace Logitech {
+    type SmartShift = {
+      /**
+       * @title Wheel mode
+       * @description "ratchet" scrolls in clicks; "freeSpin" lets the wheel spin freely.
+       */
+      mode?: "ratchet" | "freeSpin";
+
+      /**
+       * @title Automatic disengage
+       * @description The wheel speed, in quarter turns per second, at which a ratcheted wheel switches to free spin. "never" keeps the ratchet engaged at any speed.
+       * @minimum 1
+       * @maximum 254
+       */
+      autoDisengage?: Integer | "never";
+
+      /**
+       * @title Ratchet force
+       * @description The ratchet torque in percent of the wheel's maximum force, on wheels that support it.
+       * @minimum 1
+       * @maximum 100
+       * @asType integer
+       */
+      torque?: number;
+    };
+  }
 
   type Buttons = {
     /**

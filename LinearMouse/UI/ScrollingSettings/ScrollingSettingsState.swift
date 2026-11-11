@@ -4,6 +4,7 @@
 import AppKit
 import Combine
 import Foundation
+import HIDPP
 import PublishedObject
 import SwiftUI
 
@@ -18,6 +19,9 @@ class ScrollingSettingsState: ObservableObject {
     @Published private(set) var highResolutionWheelInfo: Device.HighResolutionWheelInfo?
     @Published private(set) var highResolutionWheelInfoRefreshing = false
     private var highResolutionWheelInfoRefreshPending = false
+    @Published private(set) var smartShiftInfo: Device.SmartShiftInfo?
+    private var smartShiftInfoRefreshing = false
+    private var smartShiftInfoRefreshPending = false
     private var receiverIdentitiesByLocation = [Int: [ReceiverLogicalDeviceIdentity]]()
 
     private init() {
@@ -27,6 +31,8 @@ class ScrollingSettingsState: ObservableObject {
             .sink { [weak self] _ in
                 self?.resetHighResolutionWheelInfo()
                 self?.refreshHighResolutionWheelInfo()
+                self?.resetSmartShiftInfo()
+                self?.refreshSmartShiftInfo()
             }
             .store(in: &subscriptions)
 
@@ -56,6 +62,7 @@ class ScrollingSettingsState: ObservableObject {
                     }
 
                     self.refreshHighResolutionWheelInfo()
+                    self.refreshSmartShiftInfo()
                 }
             }
             .store(in: &subscriptions)
@@ -67,6 +74,8 @@ class ScrollingSettingsState: ObservableObject {
             .sink { [weak self] _ in
                 self?.resetHighResolutionWheelInfo()
                 self?.refreshHighResolutionWheelInfo()
+                self?.resetSmartShiftInfo()
+                self?.refreshSmartShiftInfo()
             }
             .store(in: &subscriptions)
     }
@@ -170,6 +179,151 @@ extension ScrollingSettingsState {
         }
 
         DeviceManager.shared.updateLogitechDeviceSettings(for: device)
+    }
+
+    /// The slider's usable band, after OpenLogi's: below 8 a wheel can free
+    /// spin during everyday scrolling, and a flick rarely reaches more than 50.
+    /// The configuration still accepts the full 1–254 wire range.
+    static let smartShiftThresholdRange = 8 ... 50
+    private static let fallbackSmartShiftThreshold = 16
+    private static let defaultSmartShiftTorque = 50
+
+    var showsSmartShiftControl: Bool {
+        smartShiftInfo?.supportsSmartShift == true
+    }
+
+    var supportsSmartShiftTorque: Bool {
+        smartShiftInfo?.supportsTunableTorque == true
+    }
+
+    private var configuredSmartShift: Scheme.Logitech.SmartShift? {
+        schemeState.deviceScheme.logitech.smartShift
+    }
+
+    var smartShiftMode: Scheme.Logitech.SmartShift.Mode {
+        get {
+            if let mode = configuredSmartShift?.mode {
+                return mode
+            }
+            return smartShiftInfo?.status?.wheelMode == .freeSpin ? .freeSpin : .ratchet
+        }
+        set {
+            updateSmartShift { $0.mode = newValue }
+        }
+    }
+
+    var smartShiftAutomatic: Bool {
+        get {
+            switch configuredSmartShift?.autoDisengage {
+            case .threshold?:
+                return true
+            case .never?:
+                return false
+            case nil:
+                return smartShiftInfo?.status.map { $0.autoDisengage != SmartShift.permanentRatchet } ?? true
+            }
+        }
+        set {
+            let threshold = smartShiftThreshold
+            updateSmartShift { $0.autoDisengage = newValue ? .threshold(threshold) : .never }
+        }
+    }
+
+    var smartShiftThreshold: Int {
+        get {
+            var configured: Int?
+            if case let .threshold(threshold)? = configuredSmartShift?.autoDisengage {
+                configured = threshold
+            }
+            return Self.smartShiftSliderThreshold(
+                configured: configured,
+                current: smartShiftInfo?.status?.autoDisengage,
+                deviceDefault: smartShiftInfo?.defaultAutoDisengage
+            )
+        }
+        set {
+            updateSmartShift { $0.autoDisengage = .threshold(newValue) }
+        }
+    }
+
+    var smartShiftTorque: Int {
+        get {
+            configuredSmartShift?.torque
+                ?? smartShiftInfo?.status?.torque.map(Int.init)
+                ?? Self.defaultSmartShiftTorque
+        }
+        set {
+            updateSmartShift { $0.torque = newValue }
+        }
+    }
+
+    /// The threshold the slider shows: the configured value, else the wheel's
+    /// current one, else its factory default, kept inside the slider's band.
+    /// A value below the band is replaced rather than clamped, because it is a
+    /// threshold the slider deliberately does not offer.
+    static func smartShiftSliderThreshold(
+        configured: Int?,
+        current: UInt8?,
+        deviceDefault: UInt8?
+    ) -> Int {
+        let range = smartShiftThresholdRange
+        let fallback = deviceDefault.map(Int.init).flatMap { range.contains($0) ? $0 : nil }
+            ?? fallbackSmartShiftThreshold
+        let current = current.flatMap { $0 == SmartShift.permanentRatchet ? nil : Int($0) }
+        let candidate = configured ?? current ?? fallback
+        guard candidate >= range.lowerBound else {
+            return fallback
+        }
+        return min(candidate, range.upperBound)
+    }
+
+    private func updateSmartShift(_ update: (inout Scheme.Logitech.SmartShift) -> Void) {
+        var deviceScheme = schemeState.deviceScheme
+        var smartShift = deviceScheme.logitech.smartShift ?? .init()
+        update(&smartShift)
+        deviceScheme.logitech.smartShift = smartShift
+        schemeState.deviceScheme = deviceScheme
+
+        if let currentDevice {
+            DeviceManager.shared.updateLogitechDeviceSettings(for: currentDevice)
+        }
+    }
+
+    func refreshSmartShiftInfo() {
+        guard !smartShiftInfoRefreshing else {
+            smartShiftInfoRefreshPending = true
+            return
+        }
+
+        guard let device = currentDevice else {
+            resetSmartShiftInfo()
+            return
+        }
+
+        smartShiftInfoRefreshing = true
+        device.refreshSmartShiftInfo { [weak self] info in
+            guard let self else {
+                return
+            }
+
+            self.smartShiftInfoRefreshing = false
+            guard self.currentDevice === device else {
+                self.resetSmartShiftInfo()
+                self.refreshSmartShiftInfo()
+                return
+            }
+
+            self.smartShiftInfo = info
+            if self.smartShiftInfoRefreshPending {
+                self.smartShiftInfoRefreshPending = false
+                self.refreshSmartShiftInfo()
+            }
+        }
+    }
+
+    private func resetSmartShiftInfo() {
+        smartShiftInfo = nil
+        smartShiftInfoRefreshPending = false
     }
 
     enum ScrollingMode: String, Identifiable, CaseIterable {
