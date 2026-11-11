@@ -32,6 +32,7 @@
 //   7. Refresh rate           Finds the display's true full refresh rate
 //                             (60 Hz, 120 Hz ...), ignoring lowered idle rates.
 
+import AppKit
 import CoreGraphics
 import CoreVideo
 import Darwin
@@ -108,6 +109,12 @@ final class GlideDisplayFrameClock: GlideFrameClocking {
     private var observedMinimumInterval: TimeInterval?
     /// Previous display link frame time, for measuring that spacing.
     private var lastRawFrameTime: TimeInterval?
+    /// Set when the display configuration changes (for example a new refresh
+    /// rate in System Settings). The next glide then measures the display
+    /// again instead of using remembered timing.
+    private var displayConfigurationChanged = false
+    /// Observer for `NSApplication.didChangeScreenParametersNotification`.
+    private var screenParametersObserver: NSObjectProtocol?
 
     /// Converts the display link's clock ticks into seconds.
     private static let secondsPerHostTick: Double = {
@@ -118,6 +125,13 @@ final class GlideDisplayFrameClock: GlideFrameClocking {
 
     init(handler: @escaping (TimeInterval) -> Void) {
         self.handler = handler
+        screenParametersObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.didChangeScreenParametersNotification,
+            object: nil,
+            queue: nil
+        ) { [weak self] _ in
+            self?.noteDisplayConfigurationChanged()
+        }
     }
 
     /// One frame at the display's full refresh rate. The reported rate is
@@ -144,6 +158,9 @@ final class GlideDisplayFrameClock: GlideFrameClocking {
             CVDisplayLinkStop(displayLink)
         }
         bridgeTimer?.invalidate()
+        if let screenParametersObserver {
+            NotificationCenter.default.removeObserver(screenParametersObserver)
+        }
     }
 
     // MARK: - 3. Start and stop
@@ -154,6 +171,7 @@ final class GlideDisplayFrameClock: GlideFrameClocking {
             return
         }
         isActive = true
+        forgetTimingIfDisplayChanged()
 
         if displayLinkRunning, let displayLink {
             // Warm start: frames are already arriving. Just make sure they
@@ -235,6 +253,34 @@ final class GlideDisplayFrameClock: GlideFrameClocking {
     }
 
     /// Forgets the refresh grid, for example after moving to another display.
+    /// Called on the main thread when the display configuration changes.
+    private func noteDisplayConfigurationChanged() {
+        lock.lock()
+        displayConfigurationChanged = true
+        lock.unlock()
+    }
+
+    /// Drops the remembered refresh period and frame measurements if the
+    /// display configuration changed, or if the display mode now reports a
+    /// different refresh rate than the one remembered. Runs once per glide.
+    private func forgetTimingIfDisplayChanged() {
+        lock.lock()
+        var changed = displayConfigurationChanged
+        displayConfigurationChanged = false
+        lock.unlock()
+
+        if !changed, let cachedPeriod, cachedPeriod.isFixed,
+           let mode = CGDisplayCopyDisplayMode(cachedPeriod.display), mode.refreshRate > 0 {
+            changed = abs(1 / mode.refreshRate - cachedPeriod.period) > 1e-4
+        }
+
+        guard changed else {
+            return
+        }
+        cachedPeriod = nil
+        resetGrid()
+    }
+
     private func resetGrid() {
         gridAnchor = nil
         lock.lock()

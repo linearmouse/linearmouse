@@ -107,7 +107,8 @@ extension Scheme.Scrolling.Glide {
             lines: Decimal(defaultLines),
             lineHeight: Decimal(defaultLineHeight),
             duration: Decimal(defaultDuration),
-            curve: defaultCurve
+            curve: defaultCurve,
+            gameDetection: true
         )
     }
 
@@ -140,9 +141,12 @@ extension Scheme.Scrolling.Glide {
         gameDetection ?? true
     }
 
-    /// Distance in pixels for one wheel click.
+    /// Distance in pixels for one wheel click. A nonzero distance is at least
+    /// 1 pixel: smaller settings (for example 0.1 lines × 1 px) are reachable
+    /// from the panel but would be too small to scroll at all.
     var pixelsPerDetent: Double {
-        resolvedLines * resolvedLineHeight
+        let pixels = resolvedLines * resolvedLineHeight
+        return pixels > 0 ? max(pixels, 1) : 0
     }
 
     // MARK: - 3. Merging

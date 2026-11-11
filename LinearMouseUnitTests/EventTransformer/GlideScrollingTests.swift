@@ -287,6 +287,9 @@ final class GlideScrollingTransformerTests: XCTestCase {
         let view = ScrollWheelEventView(event)
         XCTAssertFalse(view.continuous)
         XCTAssertEqual(view.deltaY, 1)
+        // The other distance fields describe the same single click.
+        XCTAssertEqual(view.deltaYFixedPt, 1)
+        XCTAssertEqual(view.deltaYPt, 10)
 
         while now < 0.5 {
             now += 1.0 / 120.0
@@ -394,5 +397,17 @@ final class GlideFrameTimingTests: XCTestCase {
         for index in 1 ..< steps.count {
             XCTAssertLessThan(abs(steps[index] - steps[index - 1]), 0.35 * steps[index - 1])
         }
+    }
+}
+
+final class GlideConfigurationTests: XCTestCase {
+    func testRestoreDefaultsTurnsGameDetectionOn() {
+        XCTAssertTrue(Scheme.Scrolling.Glide.defaultConfiguration.gameDetection == true)
+    }
+
+    func testDistancePerClickIsAtLeastOnePixel() {
+        XCTAssertEqual(Scheme.Scrolling.Glide(lines: 0.1, lineHeight: 1).pixelsPerDetent, 1)
+        XCTAssertEqual(Scheme.Scrolling.Glide(lines: 0, lineHeight: 10).pixelsPerDetent, 0)
+        XCTAssertEqual(Scheme.Scrolling.Glide(lines: 3, lineHeight: 10).pixelsPerDetent, 30)
     }
 }

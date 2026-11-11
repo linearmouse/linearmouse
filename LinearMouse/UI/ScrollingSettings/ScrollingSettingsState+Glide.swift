@@ -107,8 +107,16 @@ extension ScrollingSettingsState {
     }
 
     /// "Copy settings from vertical" button (shown on the Horizontal tab).
+    /// Unset vertical values are copied as their defaults, so a value
+    /// inherited by Horizontal from a broader scheme cannot show through.
     func copyGlideConfigurationFromVertical() {
-        scheme.scrolling.glide.horizontal = mergedScheme.scrolling.glide.vertical
+        guard let vertical = mergedScheme.scrolling.glide.vertical else {
+            scheme.scrolling.glide.horizontal = nil
+            return
+        }
+        var copied = Scheme.Scrolling.Glide.defaultConfiguration
+        vertical.merge(into: &copied)
+        scheme.scrolling.glide.horizontal = copied
     }
 
     /// Applies a change from the panel to the scheme being edited. Changing

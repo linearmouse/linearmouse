@@ -351,7 +351,12 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
             return false
         }
         view.continuous = false
+        // Set every distance field, as LogitechHighResolutionWheelNormalizer
+        // does, so apps reading any of them see exactly one click per notch.
         view.deltaX = Int64(detents)
+        view.deltaXPt = Double(detents) * 10
+        view.deltaXFixedPt = Double(detents)
+        view.ioHidScrollX = Double(detents)
         return true
     }
 
@@ -363,6 +368,9 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
         }
         view.continuous = false
         view.deltaY = Int64(detents)
+        view.deltaYPt = Double(detents) * 10
+        view.deltaYFixedPt = Double(detents)
+        view.ioHidScrollY = Double(detents)
         return true
     }
 

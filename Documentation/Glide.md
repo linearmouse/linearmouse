@@ -94,7 +94,7 @@ The existing files only get small, marked connection points. Search for "Glide s
 | Key | Default | Meaning |
 | --- | --- | --- |
 | `enabled` | `true` | `false` turns off a glide setting inherited from a broader scheme. |
-| `lines` | `3` | Lines per wheel click (0 to 20). |
+| `lines` | `3` | Lines per wheel click (0 to 20). A nonzero distance per click is at least 1 pixel. |
 | `lineHeight` | `10` | Pixels per line (1 to 100). macOS uses about 10; Chromium uses 40. |
 | `duration` | `180` | Milliseconds from the latest click until the glide stops (30 to 1000). |
 | `curve` | `"easeOutCubic"` | `easeOutQuart`, `easeOutCubic`, `easeOut` or `easeInOut`. |
@@ -136,6 +136,7 @@ Manual testing so far: Safari, Mail, Finder, Notes and Chromium-based apps on a 
 
 - **The first scroll on a display in a session** may have one uneven frame, while Glide learns that display's refresh timing.
 - **Apps decide how much a pixel of scrolling is worth.** Most Mac apps and browsers scroll one pixel per pixel. GLFW-based games (Minecraft and many others) count 10 pixels as one notch, so their menus scroll much further for the same setting. A per-app scheme with a smaller `lineHeight` (for example 1 line × 10 px = exactly one notch) fixes this.
+- **The "change speed" modifier action** does not change the glide distance yet. Glide counts physical notches, so the factor that `ModifierActionsTransformer` applies to the event is not carried over. Supporting it means passing the factor to Glide separately.
 - **Games that keep the cursor visible** are not detected and still need a line-mode scheme of their own.
 - **Localization:** the new settings labels are English only so far.
 - **`CVDisplayLink` is deprecated** from macOS 15 in favour of `NSScreen.displayLink` / `CADisplayLink` (macOS 14+). It still works, and it is needed for LinearMouse's macOS 10.15 deployment target; switching to the newer API on macOS 14+ could be a follow-up.
