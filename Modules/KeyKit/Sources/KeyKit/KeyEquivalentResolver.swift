@@ -77,16 +77,23 @@ public final class KeyEquivalentResolver {
         }
     }
 
+    /// macOS never unmaps the shared memory backing a private event source, even after the source is
+    /// released, so creating one per resolve leaks 16 KB each time. Create it once and reuse it.
+    private static let eventSource = CGEventSource(stateID: .privateState)
+
     static func resolve(keyEquivalents: [String]) -> [String: Shortcut] {
         precondition(Thread.isMainThread)
         var hotKeys: Unmanaged<CFArray>?
         guard #available(macOS 12, *),
-              let source = CGEventSource(stateID: .privateState),
+              let source = eventSource,
               CopySymbolicHotKeys(&hotKeys) == noErr,
               let entries = hotKeys?.takeRetainedValue() as? [[String: Any]] else {
             return [:]
         }
         let reserved = reservedShortcuts(in: entries)
+        // The long-lived private source may not follow a keyboard hardware change. A HID system state
+        // source does not leak and always reports the current keyboard type.
+        let keyboardType = Int64(CGEventSource(stateID: .hidSystemState)?.keyboardType ?? source.keyboardType)
 
         let target = Target()
         let menu = NSMenu(title: "LinearMouse key equivalents")
@@ -116,7 +123,7 @@ public final class KeyEquivalentResolver {
                 return nil
             }
             event.flags = shortcut.modifierFlags
-            event.setIntegerValueField(.keyboardEventKeyboardType, value: Int64(source.keyboardType))
+            event.setIntegerValueField(.keyboardEventKeyboardType, value: keyboardType)
             guard let nsEvent = NSEvent(cgEvent: event) else {
                 return nil
             }
