@@ -120,6 +120,55 @@ For example, to use a smoother scrolling profile for a mouse:
 If you want different tuning for each direction, provide `vertical` and `horizontal` values under
 `smoothed`.
 
+## Glide scrolling
+
+`scrolling.glide` is a destination-based alternative to `smoothed` (how it works: [Glide.md](Glide.md)). Each wheel click moves a target
+by `lines` × `lineHeight` pixels. The page glides from where it is to that target over `duration`
+milliseconds and stops exactly on it, with no coasting. Clicking again during a glide extends the
+target and keeps the current speed; clicking the other way drops the unfinished distance and turns
+around.
+
+Glide only reshapes notched (discrete) wheel input. Trackpads and other continuous input pass
+through unchanged. It posts plain continuous scroll events without scroll or momentum phases, so
+apps do not add momentum of their own. When both `glide` and `smoothed` are enabled for a direction,
+`glide` wins.
+
+| Key          | Default          | Meaning                                                        |
+| ------------ | ---------------- | -------------------------------------------------------------- |
+| `enabled`    | `true`           | Set to `false` to disable an inherited glide configuration.    |
+| `lines`      | `3`              | Lines per wheel click.                                         |
+| `lineHeight` | `10`             | Pixels per line. macOS uses about 10; Chromium uses 40.        |
+| `duration`   | `180`            | Glide length in milliseconds after the latest click.           |
+| `curve`      | `"easeOutCubic"` | `easeOutQuart`, `easeOutCubic`, `easeOut`, or `easeInOut`.     |
+| `gameDetection` | `true`        | While the cursor is hidden, send one wheel click per notch.    |
+
+Games count every scroll event they receive, so a glide (many small events per click) would move
+them several steps. Games that capture the mouse hide the cursor; with `gameDetection` on, glide
+checks this once per wheel click and sends a plain one-notch wheel event instead. Games that keep
+the cursor visible still need a line-mode scheme of their own.
+
+Values merge field by field across schemes, so an app scheme can override one value. For example,
+glide everywhere with a mouse, but use a taller line in Safari:
+
+```json
+{
+  "schemes": [
+    {
+      "if": { "device": { "category": "mouse" } },
+      "scrolling": {
+        "glide": { "enabled": true, "lines": 3, "duration": 180 }
+      }
+    },
+    {
+      "if": { "device": { "category": "mouse" }, "app": "com.apple.Safari" },
+      "scrolling": {
+        "glide": { "lineHeight": 40 }
+      }
+    }
+  ]
+}
+```
+
 ## Click debouncing
 
 `buttons.clickDebouncing` filters electrical chatter from worn or noisy mouse switches. Existing
