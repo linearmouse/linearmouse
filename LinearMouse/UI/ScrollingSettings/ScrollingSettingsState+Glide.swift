@@ -109,9 +109,20 @@ extension ScrollingSettingsState {
     /// "Copy settings from vertical" button (shown on the Horizontal tab).
     /// Unset vertical values are copied as their defaults, so a value
     /// inherited by Horizontal from a broader scheme cannot show through.
+    /// If Vertical uses another mode, Horizontal Glide is turned off
+    /// explicitly and the settings that define the other modes are copied
+    /// too (as the Accelerated and Smoothed panels' buttons do), so one click
+    /// makes Horizontal match Vertical.
     func copyGlideConfigurationFromVertical() {
-        guard let vertical = mergedScheme.scrolling.glide.vertical else {
-            scheme.scrolling.glide.horizontal = nil
+        guard let vertical = mergedScheme.scrolling.glide.vertical, vertical.isEnabled else {
+            scheme.scrolling.glide.horizontal = .init(enabled: false)
+            let verticalSmoothed = mergedScheme.scrolling.smoothed.vertical
+            scheme.scrolling.smoothed.horizontal = verticalSmoothed?.isEnabled == true
+                ? verticalSmoothed
+                : .init(enabled: false)
+            scheme.scrolling.distance.horizontal = mergedScheme.scrolling.distance.vertical
+            scheme.scrolling.acceleration.horizontal = mergedScheme.scrolling.acceleration.vertical
+            scheme.scrolling.speed.horizontal = mergedScheme.scrolling.speed.vertical
             return
         }
         var copied = Scheme.Scrolling.Glide.defaultConfiguration

@@ -401,8 +401,10 @@ final class GlideFrameTimingTests: XCTestCase {
 }
 
 final class GlideConfigurationTests: XCTestCase {
-    func testRestoreDefaultsTurnsGameDetectionOn() {
-        XCTAssertTrue(Scheme.Scrolling.Glide.defaultConfiguration.gameDetection == true)
+    func testRestoreDefaultsTurnsGameDetectionOn() throws {
+        // Set explicitly (not left to inherit), and on.
+        let gameDetection = try XCTUnwrap(Scheme.Scrolling.Glide.defaultConfiguration.gameDetection)
+        XCTAssertTrue(gameDetection)
     }
 
     func testDistancePerClickIsAtLeastOnePixel() {
