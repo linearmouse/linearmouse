@@ -114,6 +114,53 @@ extension ScrollingSettingsState {
         }
     }
 
+    /// What the apply path writes into the selected device.
+    private var logitechHardwareScheme: Scheme? {
+        currentDevice.map { ConfigurationState.shared.configuration.logitechHardwareScheme(for: $0) }
+    }
+
+    var showsReverseInMouseControl: Bool {
+        Self.showsReverseInMouseControl(
+            direction: direction,
+            editsDeviceWideSettings: schemeState.currentApp == nil && schemeState.currentDisplay == nil,
+            supportsWheelInversion: highResolutionWheelInfo?.supportsWheelInversion == true,
+            hardwareScheme: logitechHardwareScheme
+        )
+    }
+
+    /// Reversing in the mouse refines vertical reverse scrolling. The mouse
+    /// has one direction for every app and display, so the option belongs to
+    /// the device's own settings only, and it shows while the reverse
+    /// scrolling the apply path acts on is on.
+    static func showsReverseInMouseControl(
+        direction: Scheme.Scrolling.BidirectionalDirection,
+        editsDeviceWideSettings: Bool,
+        supportsWheelInversion: Bool,
+        hardwareScheme: Scheme?
+    ) -> Bool {
+        direction == .vertical
+            && editsDeviceWideSettings
+            && supportsWheelInversion
+            && hardwareScheme?.scrolling.reverse.vertical == true
+    }
+
+    /// Shows the value the device inherits, such as one set on its receiver.
+    /// Changes go to the device's own scheme.
+    var invertWheel: Bool {
+        get {
+            logitechHardwareScheme?.logitech.invertWheel ?? false
+        }
+        set {
+            var deviceScheme = schemeState.deviceScheme
+            deviceScheme.logitech.invertWheel = newValue
+            schemeState.deviceScheme = deviceScheme
+
+            if let currentDevice {
+                DeviceManager.shared.updateLogitechDeviceSettings(for: currentDevice)
+            }
+        }
+    }
+
     func refreshHighResolutionWheelInfo() {
         guard !highResolutionWheelInfoRefreshing else {
             highResolutionWheelInfoRefreshPending = true
@@ -163,9 +210,12 @@ extension ScrollingSettingsState {
     }
 
     private func applyConfiguredHighResolutionWheelIfNeeded(info: Device.HighResolutionWheelInfo, device: Device) {
+        let logitech = schemeState.deviceScheme.logitech
+        let highResolutionWheelDiffers = logitech.highResolutionWheel.map { $0 != info.enabled } ?? false
+        let hardwareScheme = ConfigurationState.shared.configuration.logitechHardwareScheme(for: device)
+        let invertWheelDiffers = hardwareScheme.managedLogitechWheelInvert == true && info.inverted != true
         guard info.supportsHighResolutionWheel,
-              let configuredHighResolutionWheel = schemeState.deviceScheme.logitech.highResolutionWheel,
-              info.enabled != configuredHighResolutionWheel else {
+              highResolutionWheelDiffers || invertWheelDiffers else {
             return
         }
 
