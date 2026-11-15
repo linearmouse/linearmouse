@@ -40,6 +40,8 @@ class ConfigurationState: ObservableObject {
             )
         }
 
+        // Deprecated: still read so existing configurations keep working, but no
+        // longer used for new configurations.
         urls.append(
             URL(
                 fileURLWithPath: ".config/linearmouse/linearmouse.json",
@@ -51,8 +53,15 @@ class ConfigurationState: ObservableObject {
     }
 
     var configurationPath: URL {
-        configurationPaths.first { FileManager.default.fileExists(atPath: $0.path) } ?? configurationPaths
-            .last!
+        Self.configurationPath(in: configurationPaths) {
+            FileManager.default.fileExists(atPath: $0)
+        }
+    }
+
+    /// Picks the first existing configuration file in `paths`, which are ordered
+    /// by priority. Without one, a new configuration goes to the first path.
+    static func configurationPath(in paths: [URL], fileExists: (String) -> Bool) -> URL {
+        paths.first { fileExists($0.path) } ?? paths[0]
     }
 
     private var configurationSaveDebounceTimer: Timer?
@@ -92,6 +101,7 @@ class ConfigurationState: ObservableObject {
 
 extension ConfigurationState {
     func reloadFromDisk() {
+        let configurationPath = configurationPath
         do {
             let newConfig = try Configuration.load(from: configurationPath)
             guard newConfig != configuration else {
@@ -101,6 +111,8 @@ extension ConfigurationState {
             loading = true
             configuration = newConfig
             loading = false
+
+            os_log("Reloaded configuration from %{public}@", log: Self.log, type: .info, configurationPath.path)
 
             Notifier.shared.notify(
                 title: NSLocalizedString("Configuration Reloaded", comment: ""),
@@ -164,8 +176,10 @@ extension ConfigurationState {
             loading = false
         }
 
+        let configurationPath = configurationPath
         do {
             configuration = try Configuration.load(from: configurationPath)
+            os_log("Loaded configuration from %{public}@", log: Self.log, type: .info, configurationPath.path)
             // Publish migration only after its backup and atomic write succeed.
             do {
                 try configuration.migrateLegacyGestureButtons(persistingTo: configurationPath)
@@ -199,8 +213,10 @@ extension ConfigurationState {
             return
         }
 
+        let configurationPath = configurationPath
         do {
             try configuration.dump(to: configurationPath)
+            os_log("Saved configuration to %{public}@", log: Self.log, type: .info, configurationPath.path)
         } catch {
             let alert = NSAlert()
             alert.messageText = String(
