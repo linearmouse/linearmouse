@@ -57,6 +57,9 @@
       "pattern": "^\\d+$",
       "type": "string"
     },
+    "Integer": {
+      "type": "integer"
+    },
     "PhysicalButton": {
       "anyOf": [
         {
@@ -1447,6 +1450,48 @@
           "description": "Enable finer vertical wheel steps on supported Logitech HID++ mice.",
           "title": "High resolution wheel",
           "type": "boolean"
+        },
+        "smartShift": {
+          "$ref": "#/definitions/Scheme.Logitech.SmartShift",
+          "description": "Configure the SmartShift scroll wheel on supported Logitech HID++ mice. Unset fields keep the wheel's current value.",
+          "title": "SmartShift"
+        }
+      },
+      "type": "object"
+    },
+    "Scheme.Logitech.SmartShift": {
+      "additionalProperties": false,
+      "properties": {
+        "autoDisengage": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Integer"
+            },
+            {
+              "const": "never",
+              "type": "string"
+            }
+          ],
+          "description": "The wheel speed, in quarter turns per second, at which a ratcheted wheel switches to free spin. \"never\" keeps the ratchet engaged at any speed.",
+          "maximum": 254,
+          "minimum": 1,
+          "title": "Automatic disengage"
+        },
+        "mode": {
+          "description": "\"ratchet\" scrolls in clicks; \"freeSpin\" lets the wheel spin freely.",
+          "enum": [
+            "ratchet",
+            "freeSpin"
+          ],
+          "title": "Wheel mode",
+          "type": "string"
+        },
+        "torque": {
+          "description": "The ratchet torque in percent of the wheel's maximum force, on wheels that support it.",
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Ratchet force",
+          "type": "integer"
         }
       },
       "type": "object"
