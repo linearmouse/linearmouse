@@ -107,6 +107,8 @@ extension Device {
         let supportsHighResolutionWheel: Bool
         let enabled: Bool?
         let multiplier: Int?
+        let supportsWheelInversion: Bool
+        let inverted: Bool?
     }
 
     var isLogitechHighResolutionWheelApplyRunning: Bool {
@@ -190,7 +192,9 @@ extension Device {
         HighResolutionWheelInfo(
             supportsHighResolutionWheel: false,
             enabled: nil,
-            multiplier: nil
+            multiplier: nil,
+            supportsWheelInversion: false,
+            inverted: nil
         )
     }
 
@@ -211,13 +215,16 @@ extension Device {
         let controller = access.feature
         let capabilities = controller.capabilities(deadline: deadline, until: shouldContinue)
         let enabled = controller.isHighResolutionWheelEnabled(deadline: deadline, until: shouldContinue)
+        let inverted = controller.isWheelInverted(deadline: deadline, until: shouldContinue)
         let multiplier = capabilities.map { Int($0.multiplier) }
         updateHighResolutionWheelCache(enabled: enabled, multiplier: multiplier, for: access)
 
         return HighResolutionWheelInfo(
             supportsHighResolutionWheel: true,
             enabled: enabled,
-            multiplier: multiplier
+            multiplier: multiplier,
+            supportsWheelInversion: capabilities?.supportsInversion == true,
+            inverted: inverted
         )
     }
 

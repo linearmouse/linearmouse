@@ -17,6 +17,15 @@ extension ScrollingSettings {
                         }
                     }
                 }
+
+                if state.showsReverseInMouseControl {
+                    Toggle(isOn: $state.invertWheel) {
+                        withDescription {
+                            Text("Reverse in the mouse")
+                            Text("Also reverses scrolling on other devices the mouse controls, like an iPad.")
+                        }
+                    }
+                }
             }
             .modifier(SectionViewModifier())
         }

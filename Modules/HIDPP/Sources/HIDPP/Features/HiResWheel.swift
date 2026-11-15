@@ -11,6 +11,11 @@ public struct HiResWheel: HIDPPFeature {
         static let getModeFunction: UInt8 = 0x01
         static let setModeFunction: UInt8 = 0x02
         static let highResolutionModeBit: UInt8 = 0x02
+        static let invertModeBit: UInt8 = 0x04
+        static let invertCapabilityFlag: UInt8 = 0x08
+        /// The mode is three bytes. Bytes 1 and 2 are undocumented, so a mode
+        /// write echoes them as read rather than clearing them.
+        static let modeLength = 3
     }
 
     public struct Capabilities: Equatable, Sendable {
@@ -20,6 +25,11 @@ public struct HiResWheel: HIDPPFeature {
         public init(multiplier: UInt8, flags: UInt8) {
             self.multiplier = multiplier
             self.flags = flags
+        }
+
+        /// Whether the wheel can invert its direction in native HID mode.
+        public var supportsInversion: Bool {
+            flags & Constants.invertCapabilityFlag != 0
         }
     }
 
@@ -77,7 +87,7 @@ public struct HiResWheel: HIDPPFeature {
         until shouldContinue: @escaping () -> Bool
     ) -> Bool? {
         readMode(deadline: deadline, until: shouldContinue)
-            .map { $0 & Constants.highResolutionModeBit != 0 }
+            .map { $0[0] & Constants.highResolutionModeBit != 0 }
     }
 
     public func setHighResolutionWheelEnabled(_ enabled: Bool) -> Bool? {
@@ -111,25 +121,72 @@ public struct HiResWheel: HIDPPFeature {
         deadline: Date? = nil,
         until shouldContinue: @escaping () -> Bool
     ) -> ApplyResult? {
+        applyModeBit(
+            Constants.highResolutionModeBit,
+            enabled,
+            deadline: deadline,
+            until: shouldContinue
+        )
+    }
+
+    /// Whether the wheel reports its vertical rotation inverted. The inversion
+    /// happens in the device, so every host receives inverted wheel events.
+    public func isWheelInverted() -> Bool? {
+        isWheelInverted(deadline: nil) { true }
+    }
+
+    public func isWheelInverted(
+        deadline: Date? = nil,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Bool? {
+        readMode(deadline: deadline, until: shouldContinue)
+            .map { $0[0] & Constants.invertModeBit != 0 }
+    }
+
+    public func setWheelInverted(_ inverted: Bool) -> Bool? {
+        setWheelInverted(inverted, deadline: nil) { true }
+    }
+
+    /// Changes only the invert bit; the resolution and reporting target bits
+    /// are written back as read.
+    public func setWheelInverted(
+        _ inverted: Bool,
+        deadline: Date? = nil,
+        until shouldContinue: @escaping () -> Bool
+    ) -> Bool? {
+        applyModeBit(
+            Constants.invertModeBit,
+            inverted,
+            deadline: deadline,
+            until: shouldContinue
+        )?.appliedEnabled
+    }
+
+    private func applyModeBit(
+        _ bit: UInt8,
+        _ enabled: Bool,
+        deadline: Date?,
+        until shouldContinue: @escaping () -> Bool
+    ) -> ApplyResult? {
         guard var mode = readMode(deadline: deadline, until: shouldContinue) else {
             return nil
         }
 
-        let currentlyEnabled = mode & Constants.highResolutionModeBit != 0
+        let currentlyEnabled = mode[0] & bit != 0
         guard currentlyEnabled != enabled else {
             return ApplyResult(previousEnabled: currentlyEnabled, appliedEnabled: enabled)
         }
 
         if enabled {
-            mode |= Constants.highResolutionModeBit
+            mode[0] |= bit
         } else {
-            mode &= ~Constants.highResolutionModeBit
+            mode[0] &= ~bit
         }
 
         guard transport.request(
             featureIndex: featureIndex,
             function: Constants.setModeFunction,
-            parameters: [mode],
+            parameters: mode,
             deadline: deadline,
             until: shouldContinue
         ) != nil else {
@@ -142,7 +199,7 @@ public struct HiResWheel: HIDPPFeature {
     private func readMode(
         deadline: Date?,
         until shouldContinue: @escaping () -> Bool
-    ) -> UInt8? {
+    ) -> [UInt8]? {
         guard let response = transport.request(
                   featureIndex: featureIndex,
                   function: Constants.getModeFunction,
@@ -150,11 +207,12 @@ public struct HiResWheel: HIDPPFeature {
                   deadline: deadline,
                   until: shouldContinue
               ),
-              let mode = response.payload.first
+              !response.payload.isEmpty
         else {
             return nil
         }
 
-        return mode
+        let mode = Array(response.payload.prefix(Constants.modeLength))
+        return mode + [UInt8](repeating: 0, count: Constants.modeLength - mode.count)
     }
 }
