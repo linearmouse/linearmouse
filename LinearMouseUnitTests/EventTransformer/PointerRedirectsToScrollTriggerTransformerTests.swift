@@ -7,10 +7,16 @@ import XCTest
 
 final class PointerRedirectsToScrollTriggerTransformerTests: XCTestCase {
     private var redirectedEvents = [CGEvent]()
+    private var sentEvents = [CGEvent]()
+    private var warpedPoints = [CGPoint]()
+    private var now: UInt64 = 0
 
     override func setUp() {
         super.setUp()
         redirectedEvents = []
+        sentEvents = []
+        warpedPoints = []
+        now = 0
     }
 
     override func tearDown() {
@@ -21,9 +27,14 @@ final class PointerRedirectsToScrollTriggerTransformerTests: XCTestCase {
     private func makeTransformer(
         _ trigger: Scheme.Trigger = .init(input: .button(.mouse(3)))
     ) throws -> PointerRedirectsToScrollTriggerTransformer {
-        try XCTUnwrap(PointerRedirectsToScrollTriggerTransformer(trigger: trigger) { [weak self] event in
-            self?.redirectedEvents.append(event)
-        })
+        try XCTUnwrap(PointerRedirectsToScrollTriggerTransformer(
+            trigger: trigger,
+            clickDuration: 0.5,
+            monotonicClock: { [weak self] in self?.now ?? 0 },
+            warpPointer: { [weak self] in self?.warpedPoints.append($0) },
+            eventSink: { [weak self] in self?.sentEvents.append($0) },
+            redirect: { [weak self] in self?.redirectedEvents.append($0) }
+        ))
     }
 
     private func transform(
@@ -33,10 +44,26 @@ final class PointerRedirectsToScrollTriggerTransformerTests: XCTestCase {
         transformer.transform(event, in: .init(device: nil))
     }
 
+    private func advance(by seconds: TimeInterval) {
+        now += UInt64(seconds * 1_000_000_000)
+    }
+
+    private func sentButtonEvents() -> [String] {
+        sentEvents.map { event in
+            "\(event.type.rawValue):\(event.getIntegerValueField(.mouseEventButtonNumber))"
+        }
+    }
+
+    private func buttonString(_ type: CGEventType, _ button: Int) -> String {
+        "\(type.rawValue):\(button)"
+    }
+
     private func buttonEvent(
         _ type: CGEventType,
         button: Int,
-        flags: CGEventFlags = []
+        flags: CGEventFlags = [],
+        deltaX: Double = 0,
+        deltaY: Double = 0
     ) throws -> CGEvent {
         let mouseButton = try XCTUnwrap(CGMouseButton(rawValue: UInt32(button)))
         let event = try XCTUnwrap(CGEvent(
@@ -46,6 +73,8 @@ final class PointerRedirectsToScrollTriggerTransformerTests: XCTestCase {
             mouseButton: mouseButton
         ))
         event.setIntegerValueField(.mouseEventButtonNumber, value: Int64(button))
+        event.setDoubleValueField(.mouseEventDeltaX, value: deltaX)
+        event.setDoubleValueField(.mouseEventDeltaY, value: deltaY)
         event.flags = flags
         return event
     }
@@ -85,17 +114,15 @@ final class PointerRedirectsToScrollTriggerTransformerTests: XCTestCase {
         XCTAssertNil(try transform(transformer, buttonEvent(.otherMouseDown, button: 3)))
         XCTAssertTrue(transformer.hasActiveInteraction)
 
-        let drag = try buttonEvent(.otherMouseDragged, button: 3)
-        drag.setDoubleValueField(.mouseEventDeltaX, value: 4)
-        drag.setDoubleValueField(.mouseEventDeltaY, value: -6)
-        XCTAssertNil(transform(transformer, drag))
+        XCTAssertNil(try transform(transformer, buttonEvent(.otherMouseDragged, button: 3, deltaX: 12, deltaY: -6)))
         XCTAssertNil(try transform(transformer, movedEvent()))
         XCTAssertEqual(redirectedEvents.count, 2)
-        XCTAssertEqual(redirectedEvents.first?.getDoubleValueField(.mouseEventDeltaX), 4)
+        XCTAssertEqual(redirectedEvents.first?.getDoubleValueField(.mouseEventDeltaX), 12)
         XCTAssertEqual(redirectedEvents.first?.getDoubleValueField(.mouseEventDeltaY), -6)
 
         XCTAssertNil(try transform(transformer, buttonEvent(.otherMouseUp, button: 3)))
         XCTAssertFalse(transformer.hasActiveInteraction)
+        XCTAssertTrue(sentEvents.isEmpty)
 
         XCTAssertNotNil(try transform(transformer, movedEvent()))
         XCTAssertEqual(redirectedEvents.count, 2)
@@ -115,6 +142,8 @@ final class PointerRedirectsToScrollTriggerTransformerTests: XCTestCase {
 
         XCTAssertNil(try transform(transformer, buttonEvent(.otherMouseUp, button: 3)))
         XCTAssertFalse(transformer.hasActiveInteraction)
+        // Using the trigger as a hold for another click is not a click itself.
+        XCTAssertTrue(sentEvents.isEmpty)
     }
 
     func testModifiersMustMatchWhenTheTriggerIsPressed() throws {
@@ -133,7 +162,7 @@ final class PointerRedirectsToScrollTriggerTransformerTests: XCTestCase {
         XCTAssertTrue(transformer.hasActiveInteraction)
 
         // Releasing the modifier while the button is held keeps redirecting.
-        XCTAssertNil(try transform(transformer, buttonEvent(.otherMouseDragged, button: 3)))
+        XCTAssertNil(try transform(transformer, buttonEvent(.otherMouseDragged, button: 3, deltaX: 20)))
         XCTAssertNil(try transform(transformer, buttonEvent(.otherMouseUp, button: 3)))
         XCTAssertEqual(redirectedEvents.count, 1)
     }
@@ -145,7 +174,7 @@ final class PointerRedirectsToScrollTriggerTransformerTests: XCTestCase {
         XCTAssertNotNil(try transform(transformer, buttonEvent(.leftMouseUp, button: 0)))
 
         XCTAssertNil(try transform(transformer, buttonEvent(.leftMouseDown, button: 0, flags: .maskCommand)))
-        XCTAssertNil(try transform(transformer, buttonEvent(.leftMouseDragged, button: 0)))
+        XCTAssertNil(try transform(transformer, buttonEvent(.leftMouseDragged, button: 0, deltaY: 20)))
         XCTAssertNil(try transform(transformer, buttonEvent(.leftMouseUp, button: 0)))
         XCTAssertEqual(redirectedEvents.count, 1)
     }
@@ -169,5 +198,91 @@ final class PointerRedirectsToScrollTriggerTransformerTests: XCTestCase {
         XCTAssertFalse(transformer.hasActiveInteraction)
         XCTAssertNotNil(try transform(transformer, movedEvent()))
         XCTAssertTrue(redirectedEvents.isEmpty)
+    }
+
+    func testQuickClickWithoutMovementIsReplayed() throws {
+        let transformer = try makeTransformer()
+
+        XCTAssertNil(try transform(transformer, buttonEvent(.otherMouseDown, button: 3)))
+        XCTAssertTrue(sentEvents.isEmpty)
+        advance(by: 0.2)
+        XCTAssertNil(try transform(transformer, buttonEvent(.otherMouseUp, button: 3)))
+
+        XCTAssertEqual(sentButtonEvents(), [
+            buttonString(.otherMouseDown, 3),
+            buttonString(.otherMouseUp, 3)
+        ])
+        XCTAssertFalse(transformer.hasActiveInteraction)
+        XCTAssertTrue(redirectedEvents.isEmpty)
+    }
+
+    func testSmallMovementStillClicksAndHoldsTheCursor() throws {
+        let transformer = try makeTransformer()
+
+        let down = try buttonEvent(.otherMouseDown, button: 3)
+        down.location = CGPoint(x: 100, y: 200)
+        XCTAssertNil(transform(transformer, down))
+        XCTAssertNil(try transform(transformer, buttonEvent(.otherMouseDragged, button: 3, deltaX: 3, deltaY: 4)))
+        XCTAssertNil(try transform(transformer, buttonEvent(.otherMouseDragged, button: 3, deltaX: 3, deltaY: 4)))
+        XCTAssertEqual(warpedPoints, [CGPoint(x: 100, y: 200), CGPoint(x: 100, y: 200)])
+        XCTAssertNil(try transform(transformer, buttonEvent(.otherMouseUp, button: 3)))
+
+        XCTAssertEqual(sentButtonEvents(), [
+            buttonString(.otherMouseDown, 3),
+            buttonString(.otherMouseUp, 3)
+        ])
+        XCTAssertTrue(redirectedEvents.isEmpty)
+    }
+
+    func testHoldingWithoutMovementThenReleasingDoesNothing() throws {
+        let transformer = try makeTransformer()
+
+        XCTAssertNil(try transform(transformer, buttonEvent(.otherMouseDown, button: 3)))
+        advance(by: 0.5)
+        XCTAssertNil(try transform(transformer, buttonEvent(.otherMouseUp, button: 3)))
+
+        XCTAssertTrue(sentEvents.isEmpty)
+        XCTAssertTrue(redirectedEvents.isEmpty)
+        XCTAssertFalse(transformer.hasActiveInteraction)
+    }
+
+    func testMovementPastToleranceScrollsBufferedMovementInOrder() throws {
+        let transformer = try makeTransformer()
+
+        XCTAssertNil(try transform(transformer, buttonEvent(.otherMouseDown, button: 3)))
+        XCTAssertNil(try transform(transformer, movedEvent(deltaX: 0, deltaY: 6)))
+        XCTAssertTrue(redirectedEvents.isEmpty)
+        XCTAssertNil(try transform(transformer, movedEvent(deltaX: 0, deltaY: 6)))
+        XCTAssertEqual(redirectedEvents.map { $0.getDoubleValueField(.mouseEventDeltaY) }, [6, 6])
+
+        // Moving back does not turn the gesture into a click again.
+        XCTAssertNil(try transform(transformer, movedEvent(deltaX: 0, deltaY: -12)))
+        XCTAssertNil(try transform(transformer, buttonEvent(.otherMouseUp, button: 3)))
+        XCTAssertEqual(redirectedEvents.count, 3)
+        XCTAssertTrue(sentEvents.isEmpty)
+    }
+
+    func testReplayedClickReachesLaterStages() throws {
+        final class Recorder: EventTransformer {
+            var events = [CGEvent]()
+
+            func transform(_ event: CGEvent, in _: EventTransformerContext) -> CGEvent? {
+                events.append(event)
+                return event
+            }
+        }
+
+        let transformer = try makeTransformer()
+        let recorder = Recorder()
+        let chain: [EventTransformer] = [transformer, recorder]
+        var posted = [CGEvent]()
+        let context = EventTransformerContext(device: nil) { posted.append($0) }
+
+        XCTAssertNil(try chain.transform(buttonEvent(.otherMouseDown, button: 3), in: context))
+        XCTAssertNil(try chain.transform(buttonEvent(.otherMouseUp, button: 3), in: context))
+
+        XCTAssertEqual(recorder.events.map(\.type), [.otherMouseDown, .otherMouseUp])
+        XCTAssertEqual(posted.map(\.type), [.otherMouseDown, .otherMouseUp])
+        XCTAssertTrue(sentEvents.isEmpty)
     }
 }

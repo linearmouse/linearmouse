@@ -84,6 +84,10 @@ final class EventTransformerManagerTests: XCTestCase {
                     mouseEvent(type: .otherMouseDown, button: button),
                     in: .init(device: nil)
                 ))
+                // Move past the click tolerance so the trigger is held to scroll.
+                let start = try mouseEvent(type: .otherMouseDragged, button: button)
+                start.setDoubleValueField(.mouseEventDeltaY, value: 20)
+                XCTAssertNil(route.transform(start, in: .init(device: nil)))
             }
             let movement = try mouseEvent(type: .mouseMoved, button: button)
             movement.location = CGPoint(x: 123, y: 456)

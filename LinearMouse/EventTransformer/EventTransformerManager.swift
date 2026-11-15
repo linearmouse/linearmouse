@@ -923,11 +923,14 @@ class EventTransformerManager {
         }
 
         // A held redirects-to-scroll trigger is consumed before button mappings
-        // so the same button does not also click or run a mapping.
+        // so the same button does not also click or run a mapping. A quick
+        // click is replayed through the mappings instead.
         if scheme.pointer.redirectsToScroll == true,
            let trigger = scheme.pointer.redirectsToScrollTrigger,
            let transformer = PointerRedirectsToScrollTriggerTransformer(
                trigger: trigger,
+               warpPointer: warpPointer,
+               eventSink: { [postEvent] in postEvent($0, .cgSessionEventTap) },
                redirect: redirectPointerToScroll
            ) {
             eventTransformer.append(transformer)
