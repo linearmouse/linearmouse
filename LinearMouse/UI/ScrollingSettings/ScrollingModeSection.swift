@@ -138,6 +138,10 @@ extension ScrollingSettings {
                 case .smoothed:
                     ScrollingSettings.SmoothedScrollingSection()
 
+                case .glide:
+                    // Glide scrolling: its own panel (GlideScrollingSection.swift).
+                    ScrollingSettings.GlideScrollingSection()
+
                 case .byLines:
                     Slider(
                         value: $state.scrollingDistanceInLines,

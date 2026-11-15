@@ -884,12 +884,25 @@ class EventTransformerManager {
             }
         }
 
+        // Glide scrolling (see Documentation/Glide.md). Glide takes over an axis
+        // before smoothed scrolling does: where Glide is on, Smoothed is off.
+        let glide = Scheme.Scrolling.Bidirectional(
+            vertical: scheme.scrolling.glide.vertical?.isEnabled == true ? scheme.scrolling.glide.vertical : nil,
+            horizontal: scheme.scrolling.glide.horizontal?.isEnabled == true ? scheme.scrolling.glide.horizontal : nil
+        )
+        let hasGlideScrolling = glide.vertical != nil || glide.horizontal != nil
         let smoothed = Scheme.Scrolling.Bidirectional(
-            vertical: scheme.scrolling.smoothed.vertical?.isEnabled == true ? scheme.scrolling.smoothed.vertical : nil,
-            horizontal: scheme.scrolling.smoothed.horizontal?.isEnabled == true ? scheme.scrolling.smoothed
-                .horizontal : nil
+            vertical: glide.vertical == nil && scheme.scrolling.smoothed.vertical?.isEnabled == true
+                ? scheme.scrolling.smoothed.vertical : nil,
+            horizontal: glide.horizontal == nil && scheme.scrolling.smoothed.horizontal?.isEnabled == true
+                ? scheme.scrolling.smoothed.horizontal : nil
         )
         let hasSmoothedScrolling = smoothed.vertical != nil || smoothed.horizontal != nil
+        // Axes whose wheel input is reshaped by smoothed or glide scrolling.
+        // Line/pixel distance, acceleration and speed are skipped on these axes,
+        // exactly as they already were for smoothed scrolling.
+        let animatesVertical = smoothed.vertical != nil || glide.vertical != nil
+        let animatesHorizontal = smoothed.horizontal != nil || glide.horizontal != nil
         let buttonMappings = (scheme.buttons.mappings ?? []).map { mapping in
             var mapping = mapping
             mapping.normalizeAsStructured()
@@ -958,11 +971,11 @@ class EventTransformerManager {
             let highResolutionWheelNormalizer = LogitechHighResolutionWheelNormalizer(
                 verticalMode: highResolutionWheelNormalizerMode(
                     distance: scheme.scrolling.distance.vertical,
-                    smoothed: smoothed.vertical
+                    animated: animatesVertical
                 ),
                 horizontalMode: highResolutionWheelNormalizerMode(
                     distance: scheme.scrolling.distance.horizontal,
-                    smoothed: smoothed.horizontal
+                    animated: animatesHorizontal
                 )
             )
             if highResolutionWheelNormalizer.normalizesAnyAxis {
@@ -975,11 +988,20 @@ class EventTransformerManager {
         eventTransformer.append(ButtonMappingScrollRecordingTransformer())
 
         if let modifiers = scheme.scrolling.$modifiers,
-           hasSmoothedScrolling {
+           hasSmoothedScrolling || hasGlideScrolling {
             eventTransformer.append(ModifierActionsTransformer(
                 modifiers: modifiers,
                 scrollThrottle: scrollThrottle(for: device),
                 scrollGesture: scrollGesture
+            ))
+        }
+
+        // Glide scrolling: runs at the same point in the pipeline as smoothed
+        // scrolling, after modifier actions (so Shift-to-scroll-sideways applies).
+        if hasGlideScrolling {
+            eventTransformer.append(GlideScrollingTransformer(
+                glide: glide,
+                eventSink: { [postEvent] in postEvent($0, .cgSessionEventTap) }
             ))
         }
 
@@ -990,7 +1012,7 @@ class EventTransformerManager {
         }
 
         if let distance = scheme.scrolling.distance.horizontal {
-            if smoothed.horizontal == nil {
+            if !animatesHorizontal {
                 eventTransformer.append(LinearScrollingHorizontalTransformer(
                     distance: distance
                 ))
@@ -998,7 +1020,7 @@ class EventTransformerManager {
         }
 
         if let distance = scheme.scrolling.distance.vertical {
-            if smoothed.vertical == nil {
+            if !animatesVertical {
                 eventTransformer.append(LinearScrollingVerticalTransformer(
                     distance: distance
                 ))
@@ -1006,12 +1028,12 @@ class EventTransformerManager {
         }
 
         let acceleration = Scheme.Scrolling.Bidirectional<Decimal>(
-            vertical: smoothed.vertical == nil ? scheme.scrolling.acceleration.vertical : nil,
-            horizontal: smoothed.horizontal == nil ? scheme.scrolling.acceleration.horizontal : nil
+            vertical: !animatesVertical ? scheme.scrolling.acceleration.vertical : nil,
+            horizontal: !animatesHorizontal ? scheme.scrolling.acceleration.horizontal : nil
         )
         let speed = Scheme.Scrolling.Bidirectional<Decimal>(
-            vertical: smoothed.vertical == nil ? scheme.scrolling.speed.vertical : nil,
-            horizontal: smoothed.horizontal == nil ? scheme.scrolling.speed.horizontal : nil
+            vertical: !animatesVertical ? scheme.scrolling.speed.vertical : nil,
+            horizontal: !animatesHorizontal ? scheme.scrolling.speed.horizontal : nil
         )
 
         if acceleration.vertical ?? 1 != 1 || acceleration.horizontal ?? 1 != 1 ||
@@ -1047,7 +1069,7 @@ class EventTransformerManager {
         }
 
         if let modifiers = scheme.scrolling.$modifiers,
-           !hasSmoothedScrolling {
+           !hasSmoothedScrolling, !hasGlideScrolling {
             eventTransformer.append(ModifierActionsTransformer(
                 modifiers: modifiers,
                 scrollThrottle: scrollThrottle(for: device),
@@ -1104,9 +1126,9 @@ class EventTransformerManager {
 
     private func highResolutionWheelNormalizerMode(
         distance: Scheme.Scrolling.Distance?,
-        smoothed: Scheme.Scrolling.Smoothed?
+        animated: Bool
     ) -> LogitechHighResolutionWheelNormalizer.AxisMode {
-        if smoothed != nil {
+        if animated {
             return .passthrough
         }
 

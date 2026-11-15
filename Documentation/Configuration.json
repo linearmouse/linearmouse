@@ -1588,6 +1588,27 @@
           "description": "The distance after rolling the wheel.",
           "title": "Scroll distance"
         },
+        "glide": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Scheme.Scrolling.Glide"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "horizontal": {
+                  "$ref": "#/definitions/Scheme.Scrolling.Glide"
+                },
+                "vertical": {
+                  "$ref": "#/definitions/Scheme.Scrolling.Glide"
+                }
+              },
+              "type": "object"
+            }
+          ],
+          "description": "Destination-based smooth scrolling. Each wheel click moves a target by a fixed number of lines and the page glides to it, stopping exactly there. Takes precedence over `smoothed` for the same direction.",
+          "title": "Glide scrolling"
+        },
         "modifiers": {
           "anyOf": [
             {
@@ -1705,6 +1726,57 @@
     "Scheme.Scrolling.Distance.Pixel": {
       "description": "The scrolling distance in pixels.",
       "pattern": "^(?:0|[1-9]\\d*)(?:\\.\\d+)?px$",
+      "type": "string"
+    },
+    "Scheme.Scrolling.Glide": {
+      "additionalProperties": false,
+      "properties": {
+        "curve": {
+          "$ref": "#/definitions/Scheme.Scrolling.Glide.Curve",
+          "default": "easeOutCubic",
+          "description": "The easing curve of the glide."
+        },
+        "duration": {
+          "default": 180,
+          "description": "How long the glide lasts after the latest click, in milliseconds.",
+          "maximum": 1000,
+          "minimum": 30,
+          "type": "number"
+        },
+        "enabled": {
+          "default": true,
+          "description": "Set to `false` to explicitly disable inherited glide scrolling for this direction.",
+          "type": "boolean"
+        },
+        "gameDetection": {
+          "default": true,
+          "description": "While the cursor is hidden (a game has captured the mouse), send one plain wheel click per notch instead of gliding.",
+          "type": "boolean"
+        },
+        "lineHeight": {
+          "default": 10,
+          "description": "Pixels per line. macOS uses about 10; Chromium-based browsers use 40.",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "number"
+        },
+        "lines": {
+          "default": 3,
+          "description": "Lines moved per wheel click.",
+          "maximum": 20,
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "Scheme.Scrolling.Glide.Curve": {
+      "enum": [
+        "easeOutQuart",
+        "easeOutCubic",
+        "easeOut",
+        "easeInOut"
+      ],
       "type": "string"
     },
     "Scheme.Scrolling.Modifiers": {
