@@ -1,8 +1,13 @@
 # Configuration
 
-The LinearMouse configuration is stored in `~/.config/linearmouse/linearmouse.json`.
+The LinearMouse configuration is stored in `~/Library/Application Support/linearmouse/linearmouse.json`.
 
 If the configuration file does not exist, LinearMouse will create an empty configuration automatically.
+
+> **Note**  
+> `~/.config/linearmouse/linearmouse.json` is deprecated but still supported, and LinearMouse keeps using it
+> if it exists. If both files exist, the one in `~/Library/Application Support` is used. To move to the new
+> location, quit LinearMouse and move the file there.
 
 > **Note**  
 > It's preferable to use the GUI to alter settings rather than manually updating configuration
