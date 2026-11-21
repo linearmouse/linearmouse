@@ -24,8 +24,8 @@ class ModifierActionsTransformer {
 
     private let modifiers: Modifiers
     private let keySimulator: KeySimulating
-    private let scrollGesture: ScrollGestureOwnership
-    private let scrollThrottle: ScrollActionThrottle
+    private let zoomSteps: ScrollActionRecognizer
+    private let highResolutionWheelMultiplier: (EventTransformerContext) -> Int?
     private let monotonicClock: () -> UInt64
     private let zoomShortcut: (Bool) -> KeyEquivalentResolver.Shortcut?
 
@@ -35,15 +35,17 @@ class ModifierActionsTransformer {
     init(
         modifiers: Modifiers,
         keySimulator: KeySimulating? = nil,
-        scrollThrottle: ScrollActionThrottle = .init(),
         scrollGesture: ScrollGestureOwnership = .init(),
+        highResolutionWheelMultiplier: @escaping (EventTransformerContext) -> Int? = { _ in nil },
         monotonicClock: @escaping () -> UInt64 = { DispatchTime.now().uptimeNanoseconds },
         zoomShortcut: @escaping (Bool) -> KeyEquivalentResolver.Shortcut? = defaultZoomShortcut
     ) {
         self.modifiers = modifiers
         self.keySimulator = keySimulator ?? Self.defaultKeySimulator
-        self.scrollThrottle = scrollThrottle
-        self.scrollGesture = scrollGesture
+        // Zoom is an incremental control like volume: it steps with the
+        // movement instead of sharing the discrete-command cooldown.
+        zoomSteps = ScrollActionRecognizer(gesture: scrollGesture)
+        self.highResolutionWheelMultiplier = highResolutionWheelMultiplier
         self.monotonicClock = monotonicClock
         self.zoomShortcut = zoomShortcut
     }
@@ -65,7 +67,7 @@ extension ModifierActionsTransformer: EventTransformer {
         false
     }
 
-    func transform(_ event: CGEvent, in _: EventTransformerContext) -> CGEvent? {
+    func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent? {
         if pinchZoomBegan {
             return handlePinchZoom(event, reverse: pinchZoomReversed)
         }
@@ -90,7 +92,7 @@ extension ModifierActionsTransformer: EventTransformer {
         var event = event
         for case let (flag, action) in actions where event.flags.contains(flag) {
             if let action, action != .auto {
-                guard let handledEvent = handleModifierKeyAction(for: event, action: action) else {
+                guard let handledEvent = handleModifierKeyAction(for: event, action: action, in: context) else {
                     return nil
                 }
                 event = handledEvent
@@ -100,7 +102,11 @@ extension ModifierActionsTransformer: EventTransformer {
         return event
     }
 
-    private func handleModifierKeyAction(for event: CGEvent, action: Action) -> CGEvent? {
+    private func handleModifierKeyAction(
+        for event: CGEvent,
+        action: Action,
+        in context: EventTransformerContext
+    ) -> CGEvent? {
         let scrollWheelEventView = ScrollWheelEventView(event)
 
         switch action {
@@ -126,18 +132,17 @@ extension ModifierActionsTransformer: EventTransformer {
                 return nil
             }
             let axis: ScrollInput.Axis = scrollWheelEventView.deltaYSignum != 0 ? .vertical : .horizontal
-            scrollGesture.claim()
+            let steps = zoomSteps(for: scrollWheelEventView, axis: axis, flags: event.flags, in: context)
             let restoringModifierFlags = ModifierState.normalize(event.flags)
-            if let shortcut = zoomShortcut(deltaSignum > 0) {
-                guard scrollThrottle.allowsAction(on: axis, at: monotonicClock()) else {
-                    return nil
+            if steps > 0, let shortcut = zoomShortcut(deltaSignum > 0) {
+                for _ in 0 ..< steps {
+                    try? keySimulator.press(
+                        keyCode: shortcut.keyCode,
+                        modifierFlags: shortcut.modifierFlags,
+                        restoringModifierFlags: restoringModifierFlags,
+                        tap: .cgSessionEventTap
+                    )
                 }
-                try? keySimulator.press(
-                    keyCode: shortcut.keyCode,
-                    modifierFlags: shortcut.modifierFlags,
-                    restoringModifierFlags: restoringModifierFlags,
-                    tap: .cgSessionEventTap
-                )
             }
             return nil
         case .pinchZoom:
@@ -149,6 +154,34 @@ extension ModifierActionsTransformer: EventTransformer {
         }
 
         return event
+    }
+
+    /// One step per wheel event or high-resolution detent, and one per 32 pt
+    /// of continuous input (trackpads, Magic Mouse, pixel-distance scrolling).
+    private func zoomSteps(
+        for view: ScrollWheelEventView,
+        axis: ScrollInput.Axis,
+        flags: CGEventFlags,
+        in context: EventTransformerContext
+    ) -> Int {
+        zoomSteps.updateModifiers(flags.rawValue)
+        if view.scrollPhase == .began {
+            zoomSteps.beginGesture()
+        }
+        defer {
+            if view.scrollPhase == .ended || view.scrollPhase == .cancelled {
+                zoomSteps.endGesture()
+            }
+        }
+        guard view.scrollPhase != .cancelled,
+              let input = ScrollInput.read(
+                  from: view,
+                  highResolutionMultiplier: highResolutionWheelMultiplier(context),
+                  axis: axis
+              ) else {
+            return 0
+        }
+        return zoomSteps.consume(input, mapping: 0, policy: .steps, at: monotonicClock())
     }
 
     private func handlePinchZoom(_ event: CGEvent, reverse: Bool) -> CGEvent? {

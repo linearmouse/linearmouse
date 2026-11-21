@@ -148,18 +148,17 @@ final class ModifierActionsTransformerTests: XCTestCase {
         )
     }
 
-    func testZoomAndMappedCommandsShareDeviceCooldown() throws {
+    func testZoomStepsOncePerWheelEventWithoutSharingTheCommandCooldown() throws {
         let simulator = RecordingModifierKeySimulator()
         let throttle = ScrollActionThrottle()
         let recognizer = ScrollActionRecognizer(throttle: throttle)
         let input = ScrollInput(axis: .vertical, delta: 1, units: .detents)
         XCTAssertEqual(recognizer.consume(input, mapping: 0, repeats: false, at: 0), 1)
-        var now: UInt64 = 60_000_000
+        var now: UInt64 = 0
         let modifiers = Scheme.Scrolling.Modifiers(control: .zoom)
         let transformer = ModifierActionsTransformer(
             modifiers: .init(vertical: modifiers, horizontal: modifiers),
             keySimulator: simulator,
-            scrollThrottle: throttle,
             monotonicClock: { now },
             zoomShortcut: Self.zoomShortcut
         )
@@ -167,12 +166,81 @@ final class ModifierActionsTransformerTests: XCTestCase {
             scrollWheelEvent2Source: nil, units: .line, wheelCount: 1, wheel1: 1, wheel2: 0, wheel3: 0
         ))
         event.flags = .maskControl
+        for index in 1 ... 5 {
+            now = UInt64(index) * 20_000_000
+            XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+            XCTAssertEqual(simulator.modifiedPresses.count, index)
+        }
+        // Zooming neither checks nor advances the cooldown of mapped commands.
+        XCTAssertEqual(recognizer.consume(input, mapping: 0, repeats: false, at: 300_000_000), 1)
+    }
+
+    func testZoomStepsOncePerSideWheelEventRegardlessOfAcceleration() throws {
+        let simulator = RecordingModifierKeySimulator()
+        let modifiers = Scheme.Scrolling.Modifiers(control: .zoom)
+        let transformer = ModifierActionsTransformer(
+            modifiers: .init(vertical: modifiers, horizontal: modifiers),
+            keySimulator: simulator,
+            zoomShortcut: Self.zoomShortcut
+        )
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil, units: .line, wheelCount: 2, wheel1: 0, wheel2: 1, wheel3: 0
+        ))
+        event.flags = .maskControl
+        let view = ScrollWheelEventView(event)
+        for fixed in [0.1, 2.07, 8.29] {
+            view.deltaXFixedPt = fixed
+            XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+        }
+        XCTAssertEqual(simulator.modifiedPresses.count, 3)
+    }
+
+    func testZoomStepsByHighResolutionDetentWhenGivenAMultiplier() throws {
+        let simulator = RecordingModifierKeySimulator()
+        let modifiers = Scheme.Scrolling.Modifiers(control: .zoom)
+        let transformer = ModifierActionsTransformer(
+            modifiers: .init(vertical: modifiers, horizontal: modifiers),
+            keySimulator: simulator,
+            highResolutionWheelMultiplier: { _ in 8 },
+            zoomShortcut: Self.zoomShortcut
+        )
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil, units: .line, wheelCount: 1, wheel1: 1, wheel2: 0, wheel3: 0
+        ))
+        event.flags = .maskControl
+        let view = ScrollWheelEventView(event)
+        view.deltaYFixedPt = 1.0 / 8
+        view.deltaYPt = 1.25
+        view.ioHidScrollY = 0
+        // Half a detent starts, then every full detent: 4, 12, 20 of 24 pieces.
+        for _ in 0 ..< 24 {
+            XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+        }
+        XCTAssertEqual(simulator.modifiedPresses.count, 3)
+    }
+
+    func testZoomStepsEvery32PointsOfContinuousInput() throws {
+        let simulator = RecordingModifierKeySimulator()
+        let modifiers = Scheme.Scrolling.Modifiers(control: .zoom)
+        let transformer = ModifierActionsTransformer(
+            modifiers: .init(vertical: modifiers, horizontal: modifiers),
+            keySimulator: simulator,
+            zoomShortcut: Self.zoomShortcut
+        )
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 1, wheel1: 4, wheel2: 0, wheel3: 0
+        ))
+        event.flags = .maskControl
+        let view = ScrollWheelEventView(event)
+        view.deltaYPt = 4
+        view.scrollPhase = .began
         XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
-        XCTAssertTrue(simulator.modifiedPresses.isEmpty)
-        now = 300_000_000
-        XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
-        XCTAssertEqual(simulator.modifiedPresses.count, 1)
-        XCTAssertEqual(recognizer.consume(input, mapping: 0, repeats: false, at: now), 0)
+        view.scrollPhase = .changed
+        for _ in 1 ..< 36 {
+            XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+        }
+        // 144 points: 16, 48, 80, 112, 144.
+        XCTAssertEqual(simulator.modifiedPresses.count, 5)
     }
 
     func testZoomMomentumStaysConsumedAfterModifierReleaseAndOnAnotherRoute() throws {
@@ -187,7 +255,7 @@ final class ModifierActionsTransformerTests: XCTestCase {
         )
         let pipeline: [EventTransformer] = [ScrollGestureTransformer(ownership: ownership), transformer]
         let event = try XCTUnwrap(CGEvent(
-            scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 1, wheel1: 8, wheel2: 0, wheel3: 0
+            scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 1, wheel1: 16, wheel2: 0, wheel3: 0
         ))
         event.flags = .maskControl
         XCTAssertNil(pipeline.transform(event, in: .init(device: nil)))
@@ -218,7 +286,7 @@ final class ModifierActionsTransformerTests: XCTestCase {
         )
         let pipeline: [EventTransformer] = [ScrollGestureTransformer(ownership: ownership), transformer]
         let event = try XCTUnwrap(CGEvent(
-            scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 1, wheel1: 8, wheel2: 0, wheel3: 0
+            scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 1, wheel1: 16, wheel2: 0, wheel3: 0
         ))
         let view = ScrollWheelEventView(event)
         view.momentumPhase = .none
@@ -235,43 +303,22 @@ final class ModifierActionsTransformerTests: XCTestCase {
         XCTAssertEqual(simulator.modifiedPresses.count, 1)
     }
 
-    func testZoomThrottleSurvivesRouteChangesAndIgnoresMomentum() throws {
+    func testZoomIgnoresMomentum() throws {
         let simulator = RecordingModifierKeySimulator()
-        let throttle = ScrollActionThrottle()
-        var now: UInt64 = 0
         let modifiers = Scheme.Scrolling.Modifiers(control: .zoom)
-        func route() -> ModifierActionsTransformer {
-            ModifierActionsTransformer(
-                modifiers: .init(vertical: modifiers, horizontal: modifiers),
-                keySimulator: simulator,
-                scrollThrottle: throttle,
-                monotonicClock: { now },
-                zoomShortcut: Self.zoomShortcut
-            )
-        }
-        let first = route()
-        let next = route()
+        let transformer = ModifierActionsTransformer(
+            modifiers: .init(vertical: modifiers, horizontal: modifiers),
+            keySimulator: simulator,
+            zoomShortcut: Self.zoomShortcut
+        )
         let event = try XCTUnwrap(CGEvent(
-            scrollWheelEvent2Source: nil,
-            units: .line,
-            wheelCount: 1,
-            wheel1: 1,
-            wheel2: 0,
-            wheel3: 0
+            scrollWheelEvent2Source: nil, units: .line, wheelCount: 1, wheel1: 1, wheel2: 0, wheel3: 0
         ))
         event.flags = .maskControl
-        XCTAssertNil(first.transform(event, in: .init(device: nil)))
-        first.deactivate()
-        now = 120_000_000
-        XCTAssertNil(next.transform(event, in: .init(device: nil)))
-        XCTAssertEqual(simulator.modifiedPresses.count, 1)
-        now = 300_000_000
-        XCTAssertNil(next.transform(event, in: .init(device: nil)))
-        XCTAssertEqual(simulator.modifiedPresses.count, 2)
-        now = 600_000_000
+        XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
         ScrollWheelEventView(event).momentumPhase = .begin
-        XCTAssertNil(next.transform(event, in: .init(device: nil)))
-        XCTAssertEqual(simulator.modifiedPresses.count, 2)
+        XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+        XCTAssertEqual(simulator.modifiedPresses.count, 1)
     }
 
     func testZoomRestoresNonCommandTriggerModifier() throws {
