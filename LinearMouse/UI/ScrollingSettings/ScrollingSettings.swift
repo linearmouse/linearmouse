@@ -18,6 +18,10 @@ struct ScrollingSettings: View {
                         LogitechHighResolutionWheelSection()
                     }
 
+                    if state.showsSmartShiftControl {
+                        LogitechSmartShiftSection()
+                    }
+
                     ScrollingModeSection()
 
                     ModifierKeysSection()
@@ -27,6 +31,7 @@ struct ScrollingSettings: View {
         }
         .onAppear {
             state.refreshHighResolutionWheelInfo()
+            state.refreshSmartShiftInfo()
         }
     }
 }

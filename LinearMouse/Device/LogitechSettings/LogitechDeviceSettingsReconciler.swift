@@ -7,18 +7,24 @@ protocol LogitechDeviceSettingsTarget: AnyObject {
     var isRemoved: Bool { get }
     var isLogitechSensorDPIApplyRunning: Bool { get }
     var isLogitechHighResolutionWheelApplyRunning: Bool { get }
+    var isLogitechSmartShiftApplyRunning: Bool { get }
     func hasConfirmedLogitechSensorDPI(_ dpi: Int) -> Bool
     var confirmedLogitechHighResolutionWheel: Bool? { get }
+    func hasConfirmedLogitechSmartShift(_ target: LogitechSmartShiftTarget) -> Bool
     var needsLogitechSensorDPIRestoreRetry: Bool { get }
     var needsLogitechHighResolutionWheelRestoreRetry: Bool { get }
+    var needsLogitechSmartShiftRestoreRetry: Bool { get }
 
     func applyConfiguredSensorDPI(_ dpi: Int)
     func applyConfiguredHighResolutionWheel(_ enabled: Bool)
+    func applyConfiguredSmartShift(_ target: LogitechSmartShiftTarget)
     func requestLogitechControlsForcedReconfiguration()
     func prepareSensorDPIForReconnect()
     func prepareHighResolutionWheelForReconnect()
+    func prepareSmartShiftForReconnect()
     func stopManagingSensorDPI()
     func stopManagingHighResolutionWheel()
+    func stopManagingSmartShift()
 }
 
 extension Device: LogitechDeviceSettingsTarget {}
@@ -46,6 +52,9 @@ final class LogitechDeviceSettingsReconciler {
         device.prepareSensorDPIForReconnect()
         if scheme.logitech.highResolutionWheel != nil {
             device.prepareHighResolutionWheelForReconnect()
+        }
+        if LogitechSmartShiftTarget(scheme.logitech.smartShift) != nil {
+            device.prepareSmartShiftForReconnect()
         }
         apply(scheme, force: true)
         device.requestLogitechControlsForcedReconfiguration()
@@ -76,6 +85,7 @@ final class LogitechDeviceSettingsReconciler {
 
         let dpiChanged = diff.changed(\.pointer.hardwareDPI)
         let wheelChanged = diff.changed(\.logitech.highResolutionWheel)
+        let smartShiftChanged = diff.changed(\.logitech.smartShift)
 
         // The scheme snapshot records only the request. The feature caches are
         // updated from HID++ reads/writes, and become nil after an exhausted
@@ -98,6 +108,16 @@ final class LogitechDeviceSettingsReconciler {
                   force || wheelChanged
                   || device.needsLogitechHighResolutionWheelRestoreRetry {
             device.stopManagingHighResolutionWheel()
+        }
+        if let smartShift = LogitechSmartShiftTarget(scheme.logitech.smartShift),
+           force || smartShiftChanged
+           || (!device.isLogitechSmartShiftApplyRunning
+               && !device.hasConfirmedLogitechSmartShift(smartShift)) {
+            device.applyConfiguredSmartShift(smartShift)
+        } else if LogitechSmartShiftTarget(scheme.logitech.smartShift) == nil,
+                  force || smartShiftChanged
+                  || device.needsLogitechSmartShiftRestoreRetry {
+            device.stopManagingSmartShift()
         }
     }
 }
