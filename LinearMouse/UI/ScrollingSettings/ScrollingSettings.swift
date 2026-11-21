@@ -14,6 +14,10 @@ struct ScrollingSettings: View {
                 Form {
                     ReverseScrollingSection()
 
+                    if state.direction == .horizontal {
+                        SpaceSwipeSection()
+                    }
+
                     if state.showsHighResolutionWheelControl {
                         LogitechHighResolutionWheelSection()
                     }
