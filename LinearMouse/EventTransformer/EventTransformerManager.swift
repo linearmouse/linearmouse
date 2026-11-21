@@ -976,11 +976,16 @@ class EventTransformerManager {
 
         if let modifiers = scheme.scrolling.$modifiers,
            hasSmoothedScrolling {
+            // Zoom counts high-resolution detents itself only when the vertical
+            // wheel was left unnormalized; normalized events are already per detent.
+            let readsHighResolutionUnits = highResolutionWheelNormalizerMode(
+                distance: scheme.scrolling.distance.vertical,
+                smoothed: smoothed.vertical
+            ) == .passthrough
             eventTransformer.append(ModifierActionsTransformer(
                 modifiers: modifiers,
-                scrollThrottle: scrollThrottle(for: device),
                 scrollGesture: scrollGesture
-            ))
+            ) { readsHighResolutionUnits ? $0.device?.highResolutionWheelNormalizationMultiplier : nil })
         }
 
         if hasSmoothedScrolling {
@@ -1048,9 +1053,10 @@ class EventTransformerManager {
 
         if let modifiers = scheme.scrolling.$modifiers,
            !hasSmoothedScrolling {
+            // Earlier stages already turn high-resolution wheel input into
+            // one event per detent, or into pixel events for pixel distances.
             eventTransformer.append(ModifierActionsTransformer(
                 modifiers: modifiers,
-                scrollThrottle: scrollThrottle(for: device),
                 scrollGesture: scrollGesture
             ))
         }
