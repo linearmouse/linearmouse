@@ -136,7 +136,7 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
 
         // Read (and clear) the modifier speed for this click before any early
         // return, so it never carries over to a later click.
-        let speed = speedFactor?.take() ?? (horizontal: 1, vertical: 1)
+        let speed = speedFactor?.take() ?? 1
 
         let view = ScrollWheelEventView(event)
 
@@ -180,7 +180,7 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
                 // Glide mode: add the click to the glide and remove this axis
                 // from the original event.
                 if detents != 0 {
-                    engine.add(detents: detents, scale: speed.horizontal, on: .horizontal, at: timestamp)
+                    engine.add(detents: detents, scale: speed, on: .horizontal, at: timestamp)
                 }
                 Self.zeroHorizontal(on: view)
             }
@@ -193,7 +193,7 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
                 keepsEvent = Self.setDiscreteVertical(detents, on: view) || keepsEvent
             } else {
                 if detents != 0 {
-                    engine.add(detents: detents, scale: speed.vertical, on: .vertical, at: timestamp)
+                    engine.add(detents: detents, scale: speed, on: .vertical, at: timestamp)
                 }
                 Self.zeroVertical(on: view)
             }
@@ -434,51 +434,52 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
 ///
 /// Glide counts physical notches, not the event's distance, so scaling the
 /// event itself would be lost (and for high-resolution wheels it would change
-/// how notches are counted). Instead, on axes Glide takes over, the modifier
-/// stage leaves the event alone and records the factor here, and Glide
-/// multiplies that click's glide distance by it.
+/// how notches are counted). Instead, for notched wheel input the modifier
+/// stage records the factor here and only applies it once every modifier
+/// action has run, when the event's final direction is known (Shift may turn
+/// it sideways after the speed was set): axes Glide takes over keep the factor
+/// for Glide, which multiplies that click's glide distance by it, and other
+/// axes get it applied to the event as before.
 final class GlideSpeedFactor {
     private let glidesHorizontal: Bool
     private let glidesVertical: Bool
-    private var horizontal = 1.0
-    private var vertical = 1.0
+    private var factor = 1.0
 
     init(glide: Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Glide>) {
         glidesHorizontal = glide.horizontal != nil
         glidesVertical = glide.vertical != nil
     }
 
-    /// Records `factor` for the axes of `view` that Glide will take over and
-    /// returns them; the caller scales the event only on the other axes.
-    func record(_ factor: Double, for view: ScrollWheelEventView) -> (horizontal: Bool, vertical: Bool) {
+    /// Records `factor` for a notched wheel event instead of scaling it now.
+    /// Returns `false` for other input, which the caller scales directly.
+    func record(_ factor: Double, for view: ScrollWheelEventView) -> Bool {
         guard GlideScrollingTransformer.isNotchedWheel(view) else {
-            return (false, false)
+            return false
         }
-        let glidesX = glidesHorizontal && view.deltaXSignum != 0
-        let glidesY = glidesVertical && view.deltaYSignum != 0
-        if glidesX {
-            horizontal *= factor
-        }
-        if glidesY {
-            vertical *= factor
-        }
-        return (glidesX, glidesY)
+        self.factor *= factor
+        return true
     }
 
-    /// Follows the event when a modifier swaps vertical and horizontal.
-    func swapAxes() {
-        (horizontal, vertical) = (vertical, horizontal)
+    /// Called after every modifier action has run. Scales the event on the
+    /// axes Glide does not take over; Glide's axes keep the factor for Glide.
+    func applyToAxesWithoutGlide(of view: ScrollWheelEventView) {
+        guard factor != 1 else {
+            return
+        }
+        view.scale(
+            factorX: glidesHorizontal ? 1 : factor,
+            factorY: glidesVertical ? 1 : factor
+        )
     }
 
     /// Clears any factor left from an earlier event.
     func reset() {
-        horizontal = 1
-        vertical = 1
+        factor = 1
     }
 
-    /// Returns the factors for the current click and clears them.
-    func take() -> (horizontal: Double, vertical: Double) {
+    /// Returns the factor for the current click and clears it.
+    func take() -> Double {
         defer { reset() }
-        return (horizontal, vertical)
+        return factor
     }
 }

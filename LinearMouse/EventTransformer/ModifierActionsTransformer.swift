@@ -120,6 +120,7 @@ extension ModifierActionsTransformer: EventTransformer {
                 event.flags.remove(flag)
             }
         }
+        glideSpeed?.applyToAxesWithoutGlide(of: ScrollWheelEventView(event))
         return event
     }
 
@@ -137,16 +138,13 @@ extension ModifierActionsTransformer: EventTransformer {
             return nil
         case .alterOrientation:
             scrollWheelEventView.swapXY()
-            glideSpeed?.swapAxes()
         case let .changeSpeed(scale: scale):
             let factor = scale.asTruncatedDouble
-            // Glide counts notches, so on its axes the factor is handed over
-            // instead of scaling the event.
-            let glides = glideSpeed?.record(factor, for: scrollWheelEventView) ?? (horizontal: false, vertical: false)
-            scrollWheelEventView.scale(
-                factorX: glides.horizontal ? 1 : factor,
-                factorY: glides.vertical ? 1 : factor
-            )
+            // With Glide, notched wheel input is scaled after all modifier
+            // actions have run (see `GlideSpeedFactor`).
+            if glideSpeed?.record(factor, for: scrollWheelEventView) != true {
+                scrollWheelEventView.scale(factor: factor)
+            }
         case .zoom, .zoomReversed:
             let scrollWheelEventView = ScrollWheelEventView(event)
             var deltaSignum = scrollWheelEventView.deltaYSignum != 0 ? scrollWheelEventView

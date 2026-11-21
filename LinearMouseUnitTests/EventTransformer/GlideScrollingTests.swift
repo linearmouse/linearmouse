@@ -489,6 +489,30 @@ final class GlideChangeSpeedTests: XCTestCase {
         XCTAssertEqual(result.x, 60, accuracy: 1e-9)
         XCTAssertEqual(result.y, 0, accuracy: 1e-9)
     }
+
+    func testChangeSpeedBeforeShiftSidewaysStillReachesHorizontalGlide() throws {
+        // Command (handled before Shift) doubles a vertical click, then Shift
+        // turns it sideways onto the only axis Glide handles.
+        let result = try run(
+            [lineEvent(vertical: 1, flags: [.maskCommand, .maskShift])],
+            modifiers: .init(command: .changeSpeed(scale: 2), shift: .alterOrientation),
+            glide: .init(horizontal: .init(enabled: true, lines: 3, lineHeight: 10, duration: 180))
+        )
+        XCTAssertEqual(result.x, 60, accuracy: 1e-9)
+        XCTAssertTrue(result.passed.isEmpty)
+    }
+
+    func testChangeSpeedBeforeShiftSidewaysScalesTheEventWhenThatAxisDoesNotGlide() throws {
+        // The reverse: Glide is vertical only, so the click that Shift turns
+        // sideways is scaled on the event itself, exactly once.
+        let result = try run(
+            [lineEvent(vertical: 1, flags: [.maskCommand, .maskShift])],
+            modifiers: .init(command: .changeSpeed(scale: 2), shift: .alterOrientation)
+        )
+        let passed = try XCTUnwrap(result.passed.first)
+        XCTAssertEqual(ScrollWheelEventView(passed).deltaX, 2)
+        XCTAssertEqual(result.y, 0)
+    }
 }
 
 /// A frame clock that does nothing; tests call `tick()` themselves.
