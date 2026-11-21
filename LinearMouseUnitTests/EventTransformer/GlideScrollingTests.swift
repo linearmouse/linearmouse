@@ -398,10 +398,12 @@ final class GlideChangeSpeedTests: XCTestCase {
             }
         }
 
+        // Whole pixels add up exactly (the fixed-point field rounds each
+        // frame slightly), as in GlideScrollingTransformerTests.
         let views = emitted.map { ScrollWheelEventView($0) }
         return (
-            views.reduce(0) { $0 + $1.deltaXFixedPt },
-            views.reduce(0) { $0 + $1.deltaYFixedPt },
+            views.reduce(0) { $0 + $1.deltaXPt },
+            views.reduce(0) { $0 + $1.deltaYPt },
             passed
         )
     }
@@ -423,7 +425,7 @@ final class GlideChangeSpeedTests: XCTestCase {
             [lineEvent(vertical: 1, flags: .maskAlternate)],
             modifiers: .init(option: .changeSpeed(scale: 2))
         )
-        XCTAssertEqual(result.y, 60, accuracy: 1e-6)
+        XCTAssertEqual(result.y, 60, accuracy: 1e-9)
         XCTAssertTrue(result.passed.isEmpty)
     }
 
@@ -432,7 +434,7 @@ final class GlideChangeSpeedTests: XCTestCase {
             [lineEvent(vertical: 1, flags: .maskAlternate)],
             modifiers: .init(option: .changeSpeed(scale: 0.5))
         )
-        XCTAssertEqual(result.y, 15, accuracy: 1e-6)
+        XCTAssertEqual(result.y, 15, accuracy: 1e-9)
     }
 
     func testAcceleratedClickStillCountsAsOneNotchWithChangeSpeed() throws {
@@ -442,7 +444,7 @@ final class GlideChangeSpeedTests: XCTestCase {
             [lineEvent(vertical: 5, flags: .maskAlternate)],
             modifiers: .init(option: .changeSpeed(scale: 2))
         )
-        XCTAssertEqual(result.y, 60, accuracy: 1e-6)
+        XCTAssertEqual(result.y, 60, accuracy: 1e-9)
     }
 
     func testSpeedDoesNotCarryOverToTheNextClick() throws {
@@ -450,7 +452,7 @@ final class GlideChangeSpeedTests: XCTestCase {
             [lineEvent(vertical: 1, flags: .maskAlternate), lineEvent(vertical: 1)],
             modifiers: .init(option: .changeSpeed(scale: 2))
         )
-        XCTAssertEqual(result.y, 60 + 30, accuracy: 1e-6)
+        XCTAssertEqual(result.y, 60 + 30, accuracy: 1e-9)
     }
 
     func testChangeSpeedWorksOnHorizontalGlide() throws {
@@ -459,7 +461,7 @@ final class GlideChangeSpeedTests: XCTestCase {
             modifiers: .init(option: .changeSpeed(scale: 2)),
             glide: .init(horizontal: .init(enabled: true, lines: 3, lineHeight: 10, duration: 180))
         )
-        XCTAssertEqual(result.x, 60, accuracy: 1e-6)
+        XCTAssertEqual(result.x, 60, accuracy: 1e-9)
     }
 
     func testAxisWithoutGlideIsStillScaledOnTheEvent() throws {
@@ -484,8 +486,8 @@ final class GlideChangeSpeedTests: XCTestCase {
                 horizontal: .init(enabled: true, lines: 3, lineHeight: 10, duration: 180)
             )
         )
-        XCTAssertEqual(result.x, 60, accuracy: 1e-6)
-        XCTAssertEqual(result.y, 0, accuracy: 1e-6)
+        XCTAssertEqual(result.x, 60, accuracy: 1e-9)
+        XCTAssertEqual(result.y, 0, accuracy: 1e-9)
     }
 }
 
