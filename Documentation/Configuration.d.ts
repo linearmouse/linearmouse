@@ -479,6 +479,12 @@ declare namespace Scheme {
      * @description Enable finer vertical wheel steps on supported Logitech HID++ mice.
      */
     highResolutionWheel?: boolean;
+
+    /**
+     * @title Reverse in the mouse
+     * @description Do vertical reverse scrolling inside supported Logitech HID++ mice. It takes effect while vertical reverse scrolling is on in every app and on every display, and only from schemes without an app or display condition. The mouse itself reports the reversed direction, so it also applies on other hosts it controls, such as an iPad through Universal Control. App and display schemes without vertical reverse scrolling undo it on this Mac. Unset keeps the wheel's own direction.
+     */
+    invertWheel?: boolean;
   };
 
   type Buttons = {

@@ -875,13 +875,18 @@ class EventTransformerManager {
         scrollGestures[scrollKey] = scrollGesture
         var eventTransformer: [EventTransformer] = [ScrollGestureTransformer(ownership: scrollGesture)]
 
-        if let reverse = scheme.scrolling.$reverse {
-            let vertical = reverse.vertical ?? false
-            let horizontal = reverse.horizontal ?? false
-
-            if vertical || horizontal {
-                eventTransformer.append(ReverseScrollingTransformer(vertically: vertical, horizontally: horizontal))
-            }
+        let reverseVertically = scheme.scrolling.$reverse?.vertical ?? false
+        let reverseHorizontally = scheme.scrolling.$reverse?.horizontal ?? false
+        // A Logitech mouse may reverse its wheel itself. Its route always
+        // carries the transformer, so a scheme without vertical reverse
+        // scrolling undoes the mouse's reversal.
+        let mayReverseInMouse = device?.vendorID == LogitechHIDPPDeviceMetadataProvider.Constants.vendorID
+        if reverseVertically || reverseHorizontally || mayReverseInMouse {
+            eventTransformer.append(ReverseScrollingTransformer(
+                vertically: reverseVertically,
+                horizontally: reverseHorizontally,
+                mouseReversesVertically: ReverseScrollingTransformer.logitechMouseReversesVertically
+            ))
         }
 
         let smoothed = Scheme.Scrolling.Bidirectional(
