@@ -227,6 +227,9 @@ extension ModifierActionsTransformer: EventTransformer {
 
 extension ModifierActionsTransformer: Deactivatable {
     func deactivate() {
+        // A reused route must not resume an earlier gesture's zoom progress.
+        // Gesture ownership is shared and stays with the momentum tail.
+        zoomSteps.discardMovement()
         if pinchZoomBegan {
             pinchZoomBegan = false
             pinchZoomReversed = false

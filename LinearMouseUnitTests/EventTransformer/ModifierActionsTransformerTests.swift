@@ -361,6 +361,28 @@ final class ModifierActionsTransformerTests: XCTestCase {
         XCTAssertTrue(simulator.modifiedPresses.isEmpty)
     }
 
+    func testZoomDiscardsProgressWhenDeactivated() throws {
+        let simulator = RecordingModifierKeySimulator()
+        let modifiers = Scheme.Scrolling.Modifiers(control: .zoom)
+        let transformer = ModifierActionsTransformer(
+            modifiers: .init(vertical: modifiers, horizontal: modifiers),
+            keySimulator: simulator,
+            zoomShortcut: Self.zoomShortcut
+        )
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 1, wheel1: 12, wheel2: 0, wheel3: 0
+        ))
+        event.flags = .maskControl
+        let view = ScrollWheelEventView(event)
+        view.deltaYPt = 12
+        view.scrollPhase = .changed
+        XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+        transformer.deactivate()
+        view.deltaYPt = 4
+        XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+        XCTAssertTrue(simulator.modifiedPresses.isEmpty)
+    }
+
     func testZoomIgnoresMomentum() throws {
         let simulator = RecordingModifierKeySimulator()
         let modifiers = Scheme.Scrolling.Modifiers(control: .zoom)
