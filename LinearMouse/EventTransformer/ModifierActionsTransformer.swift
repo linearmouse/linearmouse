@@ -77,6 +77,12 @@ extension ModifierActionsTransformer: EventTransformer {
         }
 
         let scrollWheelEventView = ScrollWheelEventView(event)
+        // Movement-free gesture boundaries never reach the zoom action below,
+        // but must still end the previous gesture's zoom progress.
+        if scrollWheelEventView.deltaYSignum == 0, scrollWheelEventView.deltaXSignum == 0,
+           [.began, .ended, .cancelled].contains(scrollWheelEventView.scrollPhase) {
+            zoomSteps.discardMovement()
+        }
         guard let modifiers = scrollWheelEventView.deltaYSignum != 0
             ? modifiers.vertical
             : modifiers.horizontal else {
