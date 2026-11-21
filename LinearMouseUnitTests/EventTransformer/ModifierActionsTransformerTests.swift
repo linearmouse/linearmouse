@@ -333,6 +333,34 @@ final class ModifierActionsTransformerTests: XCTestCase {
         XCTAssertTrue(simulator.modifiedPresses.isEmpty)
     }
 
+    func testZoomDiscardsProgressAtBoundariesWhileTheModifierIsReleased() throws {
+        let simulator = RecordingModifierKeySimulator()
+        let modifiers = Scheme.Scrolling.Modifiers(control: .zoom)
+        let transformer = ModifierActionsTransformer(
+            modifiers: .init(vertical: modifiers, horizontal: modifiers),
+            keySimulator: simulator,
+            zoomShortcut: Self.zoomShortcut
+        )
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 1, wheel1: 12, wheel2: 0, wheel3: 0
+        ))
+        let view = ScrollWheelEventView(event)
+        view.deltaYPt = 12
+        event.flags = .maskControl
+        view.scrollPhase = .began
+        XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+        event.flags = []
+        for phase: CGScrollPhase in [.ended, .began] {
+            view.scrollPhase = phase
+            XCTAssertNotNil(transformer.transform(event, in: .init(device: nil)))
+        }
+        event.flags = .maskControl
+        view.deltaYPt = 4
+        view.scrollPhase = .changed
+        XCTAssertNil(transformer.transform(event, in: .init(device: nil)))
+        XCTAssertTrue(simulator.modifiedPresses.isEmpty)
+    }
+
     func testZoomIgnoresMomentum() throws {
         let simulator = RecordingModifierKeySimulator()
         let modifiers = Scheme.Scrolling.Modifiers(control: .zoom)
