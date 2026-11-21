@@ -463,6 +463,43 @@ final class ScrollActionRecognizerTests: XCTestCase {
         XCTAssertEqual(counts, Array(repeating: 1, count: 10))
     }
 
+    func testIncrementalControlsStepOncePerSideWheelEventRegardlessOfAcceleration() {
+        // Recorded from an MX Master 3S thumb wheel: slow ticks report 0.1 lines
+        // 250+ ms apart, a fast flick accelerates to 8+ lines per event.
+        for (deltas, interval) in [
+            ([0.1, 0.1, 0.1, 0.1], UInt64(280_000_000)),
+            ([0.1, 0.5, 2.07, 3.73, 5.14, 6.14, 7.35, 8.29], UInt64(8_000_000))
+        ] {
+            for sign in [1.0, -1.0] {
+                let recognizer = ScrollActionRecognizer()
+                let counts = deltas.enumerated().map { index, delta in
+                    recognizer.consume(
+                        Input(axis: .horizontal, delta: sign * delta, units: .lines),
+                        mapping: 0,
+                        policy: .steps,
+                        at: UInt64(index) * interval
+                    )
+                }
+                XCTAssertEqual(counts, Array(repeating: 1, count: deltas.count), "deltas: \(deltas)")
+            }
+        }
+    }
+
+    func testSideWheelStepDiscardsAnotherMappingsRemainder() {
+        let recognizer = ScrollActionRecognizer()
+        func consume(_ delta: Double, mapping: Int, policy: ScrollActionRecognizer.Policy) -> Int {
+            recognizer.consume(
+                Input(axis: .horizontal, delta: delta, units: .lines),
+                mapping: mapping,
+                policy: policy,
+                at: 0
+            )
+        }
+        XCTAssertEqual(consume(0.4, mapping: 0, policy: .distance), 0)
+        XCTAssertEqual(consume(-0.1, mapping: 1, policy: .steps), 1)
+        XCTAssertEqual(consume(0.6, mapping: 0, policy: .distance), 0)
+    }
+
     func testIncrementalControlsStepByHighResolutionDetentIndependentOfEventSplitting() {
         for pieces in [1, 2, 8, 120] {
             let recognizer = ScrollActionRecognizer()

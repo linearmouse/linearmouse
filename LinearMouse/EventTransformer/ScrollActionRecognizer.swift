@@ -107,6 +107,14 @@ final class ScrollActionRecognizer {
         case .distance:
             return movement.consume(input, mapping: mapping, at: now)
         case .steps:
+            // Side wheels report accelerated line deltas (0.1 when slow, 8+ when
+            // fast) without detent metadata. Like the legacy vertical wheel,
+            // step once per event instead of following the accelerated distance.
+            if input.units == .lines, !input.hasPhase {
+                // Do not let another mapping's fraction survive this step.
+                movement.discard(on: input.axis)
+                return 1
+            }
             // Like line scrolling: step at half a detent, then every full detent.
             // Continuous input needs a longer step than scroll output does.
             let count = movement.consume(
