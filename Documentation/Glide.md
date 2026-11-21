@@ -112,6 +112,8 @@ Values merge field by field across schemes, so an app scheme can change only `li
 
 **Distance in lines, counted per physical notch.** One plain wheel event counts as one notch, exactly like line mode, so macOS wheel acceleration does not change the glide distance. High-resolution wheels are counted back into whole notches with the existing `LogitechHighResolutionWheelScrollCounter`.
 
+**"Change speed" modifier keys scale the glide.** Because Glide counts notches, scaling the wheel event would be lost. On axes Glide takes over, `ModifierActionsTransformer` leaves the event alone and hands the factor to Glide through `GlideSpeedFactor`, and that click's glide distance is multiplied by it (Option at 2× glides twice as far). Notch counting stays independent of macOS acceleration.
+
 **Exact fractional output.** The fixed-point delta field carries the exact distance, including fractions of a pixel, which AppKit apps and Safari read for smooth endings. The point delta field carries whole pixels with the remainder carried to the next frame, for apps that only read whole pixels (Chromium). Nothing is lost on either path.
 
 **Synced to the display's refresh.** A free-running timer drifts against the display, so some frames get two steps and some none. That shows as subtle judder, most visibly in Safari. Glide runs from a display link on the display under the cursor. Refinements made while testing on a 60 Hz external display and a 120 Hz ProMotion MacBook:
@@ -128,7 +130,7 @@ Values merge field by field across schemes, so an app scheme can change only `li
 
 ## Tests
 
-`GlideScrollingTests.swift` covers the curve, distances, timing, retargeting, reversal, event output (plain continuous events, no phases), trackpad pass-through, game detection, and frame-to-frame evenness. Time is driven by hand with a fake clock, so the tests are deterministic and need no display. Run them with ⌘U in Xcode or `make test`.
+`GlideScrollingTests.swift` covers the curve, distances, timing, retargeting, reversal, "change speed" modifier keys, event output (plain continuous events, no phases), trackpad pass-through, game detection, and frame-to-frame evenness. Time is driven by hand with a fake clock, so the tests are deterministic and need no display. Run them with ⌘U in Xcode or `make test`.
 
 Manual testing so far: Safari, Mail, Finder, Notes and Chromium-based apps on a 60 Hz Studio Display and a 120 Hz ProMotion MacBook Pro display; Minecraft through Prism Launcher and Modrinth for game detection. Step sizes were checked in the `GlideScrolling` debug log: single clicks produce the identical sequence every time, and glides start and end smoothly on both displays.
 
@@ -136,7 +138,6 @@ Manual testing so far: Safari, Mail, Finder, Notes and Chromium-based apps on a 
 
 - **The first scroll on a display in a session** may have one uneven frame, while Glide learns that display's refresh timing.
 - **Apps decide how much a pixel of scrolling is worth.** Most Mac apps and browsers scroll one pixel per pixel. GLFW-based games (Minecraft and many others) count 10 pixels as one notch, so their menus scroll much further for the same setting. A per-app scheme with a smaller `lineHeight` (for example 1 line × 10 px = exactly one notch) fixes this.
-- **The "change speed" modifier action** does not change the glide distance yet. Glide counts physical notches, so the factor that `ModifierActionsTransformer` applies to the event is not carried over. Supporting it means passing the factor to Glide separately.
 - **Games that keep the cursor visible** are not detected and still need a line-mode scheme of their own.
 - **Localization:** the new settings labels are English only so far.
 - **`CVDisplayLink` is deprecated** from macOS 15 in favour of `NSScreen.displayLink` / `CADisplayLink` (macOS 14+). It still works, and it is needed for LinearMouse's macOS 10.15 deployment target; switching to the newer API on macOS 14+ could be a follow-up.

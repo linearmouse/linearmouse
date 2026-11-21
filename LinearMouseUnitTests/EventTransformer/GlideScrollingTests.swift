@@ -341,6 +341,154 @@ final class GlideScrollingTransformerTests: XCTestCase {
     }
 }
 
+// MARK: - 3b. "Change speed" modifier with Glide
+
+final class GlideChangeSpeedTests: XCTestCase {
+    private typealias Glide = Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Glide>
+
+    private func lineEvent(vertical: Int32, horizontal: Int32 = 0, flags: CGEventFlags = []) throws -> CGEvent {
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: vertical,
+            wheel2: horizontal,
+            wheel3: 0
+        ))
+        event.flags = flags
+        return event
+    }
+
+    /// Runs events through the modifier stage and then Glide, as
+    /// EventTransformerManager does, and lets every glide finish.
+    /// Returns the total glided pixels and the events Glide passed on.
+    private func run(
+        _ events: [CGEvent],
+        modifiers: Scheme.Scrolling.Modifiers,
+        glide: Glide = .init(vertical: .init(enabled: true, lines: 3, lineHeight: 10, duration: 180))
+    ) -> (x: Double, y: Double, passed: [CGEvent]) {
+        var emitted: [CGEvent] = []
+        var now = 0.0
+        let speed = GlideSpeedFactor(glide: glide)
+        let modifierStage = ModifierActionsTransformer(
+            modifiers: .init(vertical: modifiers, horizontal: modifiers),
+            glideSpeed: speed
+        )
+        let glideStage = GlideScrollingTransformer(
+            glide: glide,
+            speedFactor: speed,
+            highResolutionWheelMultiplier: { _ in nil },
+            now: { now },
+            eventSink: { emitted.append($0.copy() ?? $0) },
+            isCursorHidden: { false },
+            makeFrameClock: { _ in ManualFrameClock() }
+        )
+        let context = EventTransformerContext(device: nil)
+
+        var passed: [CGEvent] = []
+        for event in events {
+            if let event = modifierStage.transform(event, in: context),
+               let event = glideStage.transform(event, in: context) {
+                passed.append(event)
+            }
+            let end = now + 0.5
+            while now < end {
+                now += 1.0 / 120.0
+                glideStage.tick()
+            }
+        }
+
+        let views = emitted.map { ScrollWheelEventView($0) }
+        return (
+            views.reduce(0) { $0 + $1.deltaXFixedPt },
+            views.reduce(0) { $0 + $1.deltaYFixedPt },
+            passed
+        )
+    }
+
+    func testScaleMultipliesOneClicksDistance() {
+        var axis = GlideScrollingAxis(settings: .init(pixelsPerDetent: 30, duration: 0.18, initialSlope: 3))
+        axis.add(detents: 1, scale: 2, at: 0)
+        var total = 0.0
+        var time = 0.0
+        while time <= 0.5 {
+            total += axis.advance(to: time)
+            time += 1.0 / 120.0
+        }
+        XCTAssertEqual(total, 60, accuracy: 1e-9)
+    }
+
+    func testChangeSpeedTwoDoublesTheGlide() throws {
+        let result = try run(
+            [lineEvent(vertical: 1, flags: .maskAlternate)],
+            modifiers: .init(option: .changeSpeed(scale: 2))
+        )
+        XCTAssertEqual(result.y, 60, accuracy: 1e-6)
+        XCTAssertTrue(result.passed.isEmpty)
+    }
+
+    func testChangeSpeedHalfHalvesTheGlide() throws {
+        let result = try run(
+            [lineEvent(vertical: 1, flags: .maskAlternate)],
+            modifiers: .init(option: .changeSpeed(scale: 0.5))
+        )
+        XCTAssertEqual(result.y, 15, accuracy: 1e-6)
+    }
+
+    func testAcceleratedClickStillCountsAsOneNotchWithChangeSpeed() throws {
+        // macOS acceleration can report a fast click as 5 lines; it is still
+        // one notch, so 2× gives 60 pixels, not 300.
+        let result = try run(
+            [lineEvent(vertical: 5, flags: .maskAlternate)],
+            modifiers: .init(option: .changeSpeed(scale: 2))
+        )
+        XCTAssertEqual(result.y, 60, accuracy: 1e-6)
+    }
+
+    func testSpeedDoesNotCarryOverToTheNextClick() throws {
+        let result = try run(
+            [lineEvent(vertical: 1, flags: .maskAlternate), lineEvent(vertical: 1)],
+            modifiers: .init(option: .changeSpeed(scale: 2))
+        )
+        XCTAssertEqual(result.y, 60 + 30, accuracy: 1e-6)
+    }
+
+    func testChangeSpeedWorksOnHorizontalGlide() throws {
+        let result = try run(
+            [lineEvent(vertical: 0, horizontal: 1, flags: .maskAlternate)],
+            modifiers: .init(option: .changeSpeed(scale: 2)),
+            glide: .init(horizontal: .init(enabled: true, lines: 3, lineHeight: 10, duration: 180))
+        )
+        XCTAssertEqual(result.x, 60, accuracy: 1e-6)
+    }
+
+    func testAxisWithoutGlideIsStillScaledOnTheEvent() throws {
+        // Glide is vertical only, so a horizontal click keeps the old
+        // behaviour: the modifier scales the event itself.
+        let result = try run(
+            [lineEvent(vertical: 0, horizontal: 1, flags: .maskAlternate)],
+            modifiers: .init(option: .changeSpeed(scale: 2))
+        )
+        let passed = try XCTUnwrap(result.passed.first)
+        XCTAssertEqual(ScrollWheelEventView(passed).deltaX, 2)
+        XCTAssertEqual(result.x, 0)
+    }
+
+    func testShiftSidewaysThenChangeSpeedGlidesHorizontally() throws {
+        // Shift turns the vertical click sideways, then Option doubles it.
+        let result = try run(
+            [lineEvent(vertical: 1, flags: [.maskShift, .maskAlternate])],
+            modifiers: .init(shift: .alterOrientation, option: .changeSpeed(scale: 2)),
+            glide: .init(
+                vertical: .init(enabled: true, lines: 3, lineHeight: 10, duration: 180),
+                horizontal: .init(enabled: true, lines: 3, lineHeight: 10, duration: 180)
+            )
+        )
+        XCTAssertEqual(result.x, 60, accuracy: 1e-6)
+        XCTAssertEqual(result.y, 0, accuracy: 1e-6)
+    }
+}
+
 /// A frame clock that does nothing; tests call `tick()` themselves.
 private final class ManualFrameClock: GlideFrameClocking {
     var frameInterval: TimeInterval {

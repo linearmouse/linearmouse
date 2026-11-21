@@ -891,6 +891,9 @@ class EventTransformerManager {
             horizontal: scheme.scrolling.glide.horizontal?.isEnabled == true ? scheme.scrolling.glide.horizontal : nil
         )
         let hasGlideScrolling = glide.vertical != nil || glide.horizontal != nil
+        // Carries a "change speed" modifier factor to Glide, which counts
+        // notches and would otherwise lose it.
+        let glideSpeed = hasGlideScrolling ? GlideSpeedFactor(glide: glide) : nil
         let smoothed = Scheme.Scrolling.Bidirectional(
             vertical: glide.vertical == nil && scheme.scrolling.smoothed.vertical?.isEnabled == true
                 ? scheme.scrolling.smoothed.vertical : nil,
@@ -997,7 +1000,8 @@ class EventTransformerManager {
             ) == .passthrough
             eventTransformer.append(ModifierActionsTransformer(
                 modifiers: modifiers,
-                scrollGesture: scrollGesture
+                scrollGesture: scrollGesture,
+                glideSpeed: glideSpeed
             ) { readsHighResolutionUnits ? $0.device?.highResolutionWheelNormalizationMultiplier : nil })
         }
 
@@ -1006,6 +1010,7 @@ class EventTransformerManager {
         if hasGlideScrolling {
             eventTransformer.append(GlideScrollingTransformer(
                 glide: glide,
+                speedFactor: glideSpeed,
                 eventSink: { [postEvent] in postEvent($0, .cgSessionEventTap) }
             ))
         }

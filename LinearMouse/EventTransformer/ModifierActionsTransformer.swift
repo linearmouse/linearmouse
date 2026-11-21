@@ -24,6 +24,8 @@ class ModifierActionsTransformer {
 
     private let modifiers: Modifiers
     private let keySimulator: KeySimulating
+    /// Where "change speed" goes on axes Glide takes over (see `GlideSpeedFactor`).
+    private let glideSpeed: GlideSpeedFactor?
     private let zoomSteps: ScrollActionRecognizer
     private let highResolutionWheelMultiplier: (EventTransformerContext) -> Int?
     private let monotonicClock: () -> UInt64
@@ -36,12 +38,14 @@ class ModifierActionsTransformer {
         modifiers: Modifiers,
         keySimulator: KeySimulating? = nil,
         scrollGesture: ScrollGestureOwnership = .init(),
+        glideSpeed: GlideSpeedFactor? = nil,
         highResolutionWheelMultiplier: @escaping (EventTransformerContext) -> Int? = { _ in nil },
         monotonicClock: @escaping () -> UInt64 = { DispatchTime.now().uptimeNanoseconds },
         zoomShortcut: @escaping (Bool) -> KeyEquivalentResolver.Shortcut? = defaultZoomShortcut
     ) {
         self.modifiers = modifiers
         self.keySimulator = keySimulator ?? Self.defaultKeySimulator
+        self.glideSpeed = glideSpeed
         // Zoom is an incremental control like volume: it steps with the
         // movement instead of sharing the discrete-command cooldown.
         zoomSteps = ScrollActionRecognizer(gesture: scrollGesture)
@@ -68,6 +72,11 @@ extension ModifierActionsTransformer: EventTransformer {
     }
 
     func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent? {
+        if event.type == .scrollWheel {
+            // A speed factor only ever applies to the event that set it.
+            glideSpeed?.reset()
+        }
+
         if pinchZoomBegan {
             return handlePinchZoom(event, reverse: pinchZoomReversed)
         }
@@ -128,8 +137,16 @@ extension ModifierActionsTransformer: EventTransformer {
             return nil
         case .alterOrientation:
             scrollWheelEventView.swapXY()
+            glideSpeed?.swapAxes()
         case let .changeSpeed(scale: scale):
-            scrollWheelEventView.scale(factor: scale.asTruncatedDouble)
+            let factor = scale.asTruncatedDouble
+            // Glide counts notches, so on its axes the factor is handed over
+            // instead of scaling the event.
+            let glides = glideSpeed?.record(factor, for: scrollWheelEventView) ?? (horizontal: false, vertical: false)
+            scrollWheelEventView.scale(
+                factorX: glides.horizontal ? 1 : factor,
+                factorY: glides.vertical ? 1 : factor
+            )
         case .zoom, .zoomReversed:
             let scrollWheelEventView = ScrollWheelEventView(event)
             var deltaSignum = scrollWheelEventView.deltaYSignum != 0 ? scrollWheelEventView

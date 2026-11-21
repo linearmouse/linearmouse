@@ -160,9 +160,10 @@ struct GlideScrollingAxis {
 
     /// Handles wheel clicks: moves the target by `detents` clicks and starts a
     /// new glide segment from the current position, carrying the current
-    /// speed. `detents` is negative for the opposite direction.
-    mutating func add(detents: Int, at time: TimeInterval) {
-        let distance = Double(detents) * settings.pixelsPerDetent
+    /// speed. `detents` is negative for the opposite direction. `scale`
+    /// multiplies the distance (a "change speed" modifier key).
+    mutating func add(detents: Int, scale: Double = 1, at time: TimeInterval) {
+        let distance = Double(detents) * settings.pixelsPerDetent * scale
         guard distance != 0, distance.isFinite else {
             return
         }
@@ -326,12 +327,12 @@ struct GlideScrollingEngine {
     }
 
     /// Passes wheel clicks to one axis. See `GlideScrollingAxis.add`.
-    mutating func add(detents: Int, on axis: Axis, at time: TimeInterval) {
+    mutating func add(detents: Int, scale: Double = 1, on axis: Axis, at time: TimeInterval) {
         switch axis {
         case .horizontal:
-            horizontal?.add(detents: detents, at: time)
+            horizontal?.add(detents: detents, scale: scale, at: time)
         case .vertical:
-            vertical?.add(detents: detents, at: time)
+            vertical?.add(detents: detents, scale: scale, at: time)
         }
     }
 

@@ -24,6 +24,7 @@
 //   4. Input              Counts physical wheel clicks.
 //   5. Output             Builds and posts the scroll events.
 //   6. Frame clock        Starts and stops the per-frame callback.
+//   7. Speed factor       Hands a "change speed" modifier factor to Glide.
 
 import Foundation
 import os.log
@@ -52,6 +53,9 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
 
     /// The user's glide settings per axis (`nil` = glide off for that axis).
     private let glide: Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Glide>
+    /// "Change speed" factor for the current click, set by
+    /// `ModifierActionsTransformer` (see section 7).
+    private let speedFactor: GlideSpeedFactor?
 
     /// Dependencies. The defaults are the real implementations; unit tests
     /// pass fakes (a fixed clock, a list instead of posting, a fake cursor
@@ -86,6 +90,7 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
 
     init(
         glide: Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Glide>,
+        speedFactor: GlideSpeedFactor? = nil,
         highResolutionWheelMultiplier: @escaping (EventTransformerContext) -> Int? = {
             $0.device?.highResolutionWheelNormalizationMultiplier
         },
@@ -97,6 +102,7 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
         }
     ) {
         self.glide = glide
+        self.speedFactor = speedFactor
         self.highResolutionWheelMultiplier = highResolutionWheelMultiplier
         self.now = now
         self.eventSink = eventSink
@@ -128,11 +134,15 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
             return event
         }
 
+        // Read (and clear) the modifier speed for this click before any early
+        // return, so it never carries over to a later click.
+        let speed = speedFactor?.take() ?? (horizontal: 1, vertical: 1)
+
         let view = ScrollWheelEventView(event)
 
         // Only notched (discrete) wheel input glides. Trackpads, Magic Mouse
         // and other continuous or phased input already scroll smoothly.
-        guard !view.continuous, view.scrollPhase == nil, view.momentumPhase == .none else {
+        guard Self.isNotchedWheel(view) else {
             return event
         }
 
@@ -170,7 +180,7 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
                 // Glide mode: add the click to the glide and remove this axis
                 // from the original event.
                 if detents != 0 {
-                    engine.add(detents: detents, on: .horizontal, at: timestamp)
+                    engine.add(detents: detents, scale: speed.horizontal, on: .horizontal, at: timestamp)
                 }
                 Self.zeroHorizontal(on: view)
             }
@@ -183,7 +193,7 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
                 keepsEvent = Self.setDiscreteVertical(detents, on: view) || keepsEvent
             } else {
                 if detents != 0 {
-                    engine.add(detents: detents, on: .vertical, at: timestamp)
+                    engine.add(detents: detents, scale: speed.vertical, on: .vertical, at: timestamp)
                 }
                 Self.zeroVertical(on: view)
             }
@@ -232,6 +242,12 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
     }
 
     // MARK: - 4. Input
+
+    /// Whether this is notched (discrete) wheel input, the only kind Glide
+    /// reshapes. Trackpads, Magic Mouse and phased input are left alone.
+    static func isNotchedWheel(_ view: ScrollWheelEventView) -> Bool {
+        !view.continuous && view.scrollPhase == nil && view.momentumPhase == .none
+    }
 
     /// Number of physical wheel notches in this event. One plain wheel event
     /// counts as one notch, exactly like line mode, so macOS wheel
@@ -406,5 +422,63 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
         frameClock?.stop()
         pointRemainderX = 0
         pointRemainderY = 0
+    }
+}
+
+// MARK: - 7. Speed factor
+
+/// Hands a "change speed" modifier factor (for example Option = 2×) from
+/// `ModifierActionsTransformer` to `GlideScrollingTransformer` for the wheel
+/// click being processed. Both run one after the other for the same event,
+/// so a shared object is enough.
+///
+/// Glide counts physical notches, not the event's distance, so scaling the
+/// event itself would be lost (and for high-resolution wheels it would change
+/// how notches are counted). Instead, on axes Glide takes over, the modifier
+/// stage leaves the event alone and records the factor here, and Glide
+/// multiplies that click's glide distance by it.
+final class GlideSpeedFactor {
+    private let glidesHorizontal: Bool
+    private let glidesVertical: Bool
+    private var horizontal = 1.0
+    private var vertical = 1.0
+
+    init(glide: Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Glide>) {
+        glidesHorizontal = glide.horizontal != nil
+        glidesVertical = glide.vertical != nil
+    }
+
+    /// Records `factor` for the axes of `view` that Glide will take over and
+    /// returns them; the caller scales the event only on the other axes.
+    func record(_ factor: Double, for view: ScrollWheelEventView) -> (horizontal: Bool, vertical: Bool) {
+        guard GlideScrollingTransformer.isNotchedWheel(view) else {
+            return (false, false)
+        }
+        let glidesX = glidesHorizontal && view.deltaXSignum != 0
+        let glidesY = glidesVertical && view.deltaYSignum != 0
+        if glidesX {
+            horizontal *= factor
+        }
+        if glidesY {
+            vertical *= factor
+        }
+        return (glidesX, glidesY)
+    }
+
+    /// Follows the event when a modifier swaps vertical and horizontal.
+    func swapAxes() {
+        (horizontal, vertical) = (vertical, horizontal)
+    }
+
+    /// Clears any factor left from an earlier event.
+    func reset() {
+        horizontal = 1
+        vertical = 1
+    }
+
+    /// Returns the factors for the current click and clears them.
+    func take() -> (horizontal: Double, vertical: Double) {
+        defer { reset() }
+        return (horizontal, vertical)
     }
 }
