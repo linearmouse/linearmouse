@@ -936,11 +936,14 @@ class EventTransformerManager {
         }
 
         // A held redirects-to-scroll trigger is consumed before button mappings
-        // so the same button does not also click or run a mapping.
+        // so the same button does not also click or run a mapping. A quick
+        // click is replayed through the mappings instead.
         if scheme.pointer.redirectsToScroll == true,
            let trigger = scheme.pointer.redirectsToScrollTrigger,
            let transformer = PointerRedirectsToScrollTriggerTransformer(
                trigger: trigger,
+               warpPointer: warpPointer,
+               eventSink: { [postEvent] in postEvent($0, .cgSessionEventTap) },
                redirect: redirectPointerToScroll
            ) {
             eventTransformer.append(transformer)
@@ -986,11 +989,16 @@ class EventTransformerManager {
 
         if let modifiers = scheme.scrolling.$modifiers,
            hasSmoothedScrolling || hasGlideScrolling {
+            // Zoom counts high-resolution detents itself only when the vertical
+            // wheel was left unnormalized; normalized events are already per detent.
+            let readsHighResolutionUnits = highResolutionWheelNormalizerMode(
+                distance: scheme.scrolling.distance.vertical,
+                animated: animatesVertical
+            ) == .passthrough
             eventTransformer.append(ModifierActionsTransformer(
                 modifiers: modifiers,
-                scrollThrottle: scrollThrottle(for: device),
                 scrollGesture: scrollGesture
-            ))
+            ) { readsHighResolutionUnits ? $0.device?.highResolutionWheelNormalizationMultiplier : nil })
         }
 
         // Glide scrolling: runs at the same point in the pipeline as smoothed
@@ -1067,9 +1075,10 @@ class EventTransformerManager {
 
         if let modifiers = scheme.scrolling.$modifiers,
            !hasSmoothedScrolling, !hasGlideScrolling {
+            // Earlier stages already turn high-resolution wheel input into
+            // one event per detent, or into pixel events for pixel distances.
             eventTransformer.append(ModifierActionsTransformer(
                 modifiers: modifiers,
-                scrollThrottle: scrollThrottle(for: device),
                 scrollGesture: scrollGesture
             ))
         }

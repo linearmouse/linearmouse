@@ -737,9 +737,19 @@ extension Device {
         1 / (pointerSpeed.normalized(to: pointerSpeedRange))
     }
 
+    /// The device's current speed on LinearMouse's 0...1 scale.
+    ///
+    /// Devices can report resolutions outside the scale (up to 1995, such as a
+    /// Magic Mouse), which would read as a negative speed. Restoring system
+    /// settings writes the original resolution back, so clamping here only
+    /// affects what is shown.
+    static func defaultPointerSpeed(fromPointerResolution pointerResolution: Double) -> Double {
+        pointerSpeed(fromPointerResolution: pointerResolution).clamped(to: 0 ... 1)
+    }
+
     var pointerSpeed: Double {
         device.pointerResolution.map {
-            Self.pointerSpeed(fromPointerResolution: $0)
+            Self.defaultPointerSpeed(fromPointerResolution: $0)
         } ?? Self.fallbackPointerSpeed
     }
 

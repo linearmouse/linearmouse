@@ -508,7 +508,7 @@ declare namespace Scheme {
 
     /**
      * @title Redirects to scroll trigger
-     * @description If set, pointer movements are redirected to scroll events only while this trigger is held. The trigger press is not sent to applications. Requires redirectsToScroll to be true.
+     * @description If set, pointer movements are redirected to scroll events only while this trigger is held. A quick click without moving the pointer is sent as a normal click; otherwise the trigger press is not sent to applications. Requires redirectsToScroll to be true.
      */
     redirectsToScrollTrigger?: Pointer.RedirectsToScrollTrigger;
   };
