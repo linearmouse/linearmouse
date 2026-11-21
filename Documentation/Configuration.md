@@ -141,11 +141,14 @@ apps do not add momentum of their own. When both `glide` and `smoothed` are enab
 | Key          | Default          | Meaning                                                        |
 | ------------ | ---------------- | -------------------------------------------------------------- |
 | `enabled`    | `true`           | Set to `false` to disable an inherited glide configuration.    |
-| `lines`      | `3`              | Lines per wheel click.                                         |
-| `lineHeight` | `10`             | Pixels per line. macOS uses about 10; Chromium uses 40.        |
-| `duration`   | `180`            | Glide length in milliseconds after the latest click.           |
+| `lines`      | `3`              | Lines per wheel click, from 0 to 20.                           |
+| `lineHeight` | `10`             | Pixels per line, from 1 to 100. macOS uses about 10; Chromium uses 40. |
+| `duration`   | `180`            | Glide length in milliseconds after the latest click, from 30 to 1000. |
 | `curve`      | `"easeOutCubic"` | `easeOutQuart`, `easeOutCubic`, `easeOut`, or `easeInOut`.     |
 | `gameDetection` | `true`        | While the cursor is hidden, send one wheel click per notch.    |
+
+Values outside these ranges are clamped to the nearest limit. A nonzero distance per click
+(`lines` × `lineHeight`) is at least 1 pixel.
 
 Games count every scroll event they receive, so a glide (many small events per click) would move
 them several steps. Games that capture the mouse hide the cursor; with `gameDetection` on, glide
