@@ -420,6 +420,37 @@ final class GlideChangeSpeedTests: XCTestCase {
         XCTAssertEqual(total, 60, accuracy: 1e-9)
     }
 
+    func testClicksUnderHalfAPixelAddUpInsteadOfBeingDropped() {
+        // 1 px per click at 0.25× is a quarter pixel per click: too small to
+        // animate alone, but four clicks still move one pixel in total.
+        var axis = GlideScrollingAxis(settings: .init(pixelsPerDetent: 1, duration: 0.18, initialSlope: 3))
+        var total = 0.0
+        var time = 0.0
+        for _ in 0 ..< 4 {
+            axis.add(detents: 1, scale: 0.25, at: time)
+            let end = time + 0.5
+            while time < end {
+                total += axis.advance(to: time)
+                time += 1.0 / 120.0
+            }
+        }
+        XCTAssertEqual(total, 1, accuracy: 1e-9)
+    }
+
+    func testReversalDropsCarriedSubPixelDistance() {
+        var axis = GlideScrollingAxis(settings: .init(pixelsPerDetent: 1, duration: 0.18, initialSlope: 3))
+        axis.add(detents: 1, scale: 0.25, at: 0)
+        _ = axis.advance(to: 0.1)
+        axis.add(detents: -1, at: 0.2)
+        var total = 0.0
+        var time = 0.2
+        while time <= 1 {
+            total += axis.advance(to: time)
+            time += 1.0 / 120.0
+        }
+        XCTAssertEqual(total, -1, accuracy: 1e-9)
+    }
+
     func testChangeSpeedTwoDoublesTheGlide() throws {
         let result = try run(
             [lineEvent(vertical: 1, flags: .maskAlternate)],

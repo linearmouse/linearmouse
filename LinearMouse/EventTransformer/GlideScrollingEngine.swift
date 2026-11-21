@@ -117,6 +117,9 @@ struct GlideScrollingAxis {
     private var origin = 0.0
     /// Exact distance already sent to apps for this glide.
     private var emitted = 0.0
+    /// Clicks too small to animate on their own (under half a pixel, from a
+    /// slow "change speed" factor on a tiny step) add up here until they do.
+    private var carriedDistance = 0.0
     /// Time of the last frame we produced movement for.
     private var lastSampleTime: TimeInterval = 0
     /// Set when a glide starts from rest. Its start time is decided on the
@@ -163,11 +166,12 @@ struct GlideScrollingAxis {
     /// speed. `detents` is negative for the opposite direction. `scale`
     /// multiplies the distance (a "change speed" modifier key).
     mutating func add(detents: Int, scale: Double = 1, at time: TimeInterval) {
-        let distance = Double(detents) * settings.pixelsPerDetent * scale
+        var distance = Double(detents) * settings.pixelsPerDetent * scale
         guard distance != 0, distance.isFinite else {
             return
         }
 
+        let startsFromRest = !isActive
         var time = time
         if isActive {
             // Mid-glide: act as if the click arrived on the last frame shown,
@@ -180,6 +184,12 @@ struct GlideScrollingAxis {
             origin = 0
             emitted = 0
             target = 0
+            // Add up earlier clicks that were too small to move; a click the
+            // other way drops them, like any reversal.
+            if carriedDistance != 0, carriedDistance.sign == distance.sign {
+                distance += carriedDistance
+            }
+            carriedDistance = 0
         }
 
         let current = position(at: time)
@@ -199,8 +209,12 @@ struct GlideScrollingAxis {
         }
 
         let delta = target - current
-        // Less than half a pixel to go: nothing worth animating.
+        // Less than half a pixel to go: nothing worth animating. From rest,
+        // keep it for the next click so tiny clicks still add up.
         guard abs(delta) >= 0.5 else {
+            if startsFromRest {
+                carriedDistance = delta
+            }
             isActive = false
             return
         }
@@ -275,6 +289,7 @@ struct GlideScrollingAxis {
         origin = 0
         target = 0
         emitted = 0
+        carriedDistance = 0
         lastSampleTime = 0
         startsOnNextFrame = false
     }
