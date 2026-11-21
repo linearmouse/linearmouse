@@ -111,6 +111,8 @@ final class ScrollActionRecognizer {
             // fast) without detent metadata. Like the legacy vertical wheel,
             // step once per event instead of following the accelerated distance.
             if input.units == .lines, !input.hasPhase {
+                // Do not let another mapping's fraction survive this step.
+                movement.discard(on: input.axis)
                 return 1
             }
             // Like line scrolling: step at half a detent, then every full detent.

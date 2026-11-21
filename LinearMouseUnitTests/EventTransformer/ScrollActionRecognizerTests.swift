@@ -485,6 +485,21 @@ final class ScrollActionRecognizerTests: XCTestCase {
         }
     }
 
+    func testSideWheelStepDiscardsAnotherMappingsRemainder() {
+        let recognizer = ScrollActionRecognizer()
+        func consume(_ delta: Double, mapping: Int, policy: ScrollActionRecognizer.Policy) -> Int {
+            recognizer.consume(
+                Input(axis: .horizontal, delta: delta, units: .lines),
+                mapping: mapping,
+                policy: policy,
+                at: 0
+            )
+        }
+        XCTAssertEqual(consume(0.4, mapping: 0, policy: .distance), 0)
+        XCTAssertEqual(consume(-0.1, mapping: 1, policy: .steps), 1)
+        XCTAssertEqual(consume(0.6, mapping: 0, policy: .distance), 0)
+    }
+
     func testIncrementalControlsStepByHighResolutionDetentIndependentOfEventSplitting() {
         for pieces in [1, 2, 8, 120] {
             let recognizer = ScrollActionRecognizer()
