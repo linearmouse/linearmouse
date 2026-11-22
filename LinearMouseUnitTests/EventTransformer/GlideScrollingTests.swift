@@ -1,0 +1,662 @@
+// MIT License
+// Copyright (c) 2021-2026 LinearMouse
+
+// GLIDE SCROLLING: TESTS
+//
+// Overview of the feature: Documentation/Glide.md
+//
+// Contents
+//   1. GlideCurveTests              The easing curve starts at 0, ends at 1,
+//                                   lands gently and never goes backwards.
+//   2. GlideScrollingAxisTests      Clicks add up to exact distances, glides
+//                                   end on time, speed carries across clicks,
+//                                   reversing drops the unfinished distance.
+//   3. GlideScrollingTransformerTests
+//                                   Wheel clicks are swallowed and replayed as
+//                                   plain pixel events; trackpad input and
+//                                   other axes pass through; a hidden cursor
+//                                   (game) gets one click per notch.
+//   4. GlideFrameTimingTests        Steps are even from frame to frame, even
+//                                   when clicks arrive between frames.
+//
+// Tests drive time by hand (a fake clock and `tick()`), so they are
+// deterministic and need no display.
+
+import AppKit
+@testable import LinearMouse
+import XCTest
+
+// MARK: - 1. Curve
+
+final class GlideCurveTests: XCTestCase {
+    func testCurveEndpointsAndLanding() {
+        for slope in stride(from: 0.0, through: 4.0, by: 0.5) {
+            let curve = GlideCurve(initialSlope: slope)
+            XCTAssertEqual(curve.value(at: 0), 0, accuracy: 1e-12)
+            XCTAssertEqual(curve.value(at: 1), 1, accuracy: 1e-12)
+            XCTAssertEqual(curve.slope(at: 0), slope, accuracy: 1e-12)
+            XCTAssertEqual(curve.slope(at: 1), 0, accuracy: 1e-12)
+        }
+    }
+
+    func testCurveIsMonotonic() {
+        for slope in stride(from: 0.0, through: 4.0, by: 0.25) {
+            let curve = GlideCurve(initialSlope: slope)
+            var previous = 0.0
+            for step in 1 ... 200 {
+                let value = curve.value(at: Double(step) / 200)
+                XCTAssertGreaterThanOrEqual(value, previous - 1e-12)
+                XCTAssertLessThanOrEqual(value, 1 + 1e-12)
+                previous = value
+            }
+        }
+    }
+
+    func testEaseOutCubicMatchesClosedForm() {
+        let curve = GlideCurve(initialSlope: 3)
+        for step in 0 ... 10 {
+            let s = Double(step) / 10
+            XCTAssertEqual(curve.value(at: s), 1 - pow(1 - s, 3), accuracy: 1e-12)
+        }
+    }
+}
+
+// MARK: - 2. One axis
+
+final class GlideScrollingAxisTests: XCTestCase {
+    private let settings = GlideScrollingAxis.Settings(pixelsPerDetent: 30, duration: 0.18, initialSlope: 3)
+
+    private func run(
+        _ axis: inout GlideScrollingAxis,
+        from start: TimeInterval,
+        to end: TimeInterval,
+        step: TimeInterval = 1.0 / 120.0
+    ) -> [Double] {
+        var deltas: [Double] = []
+        var time = start
+        while time <= end {
+            deltas.append(axis.advance(to: time))
+            time += step
+        }
+        return deltas
+    }
+
+    func testSingleDetentStopsExactlyOnTarget() {
+        var axis = GlideScrollingAxis(settings: settings)
+        axis.add(detents: 1, at: 0)
+        let deltas = run(&axis, from: 0, to: 0.5)
+
+        XCTAssertEqual(deltas.reduce(0, +), 30, accuracy: 1e-9)
+        XCTAssertTrue(deltas.allSatisfy { $0 >= 0 })
+        XCTAssertFalse(axis.isActive)
+    }
+
+    func testGlideEndsAfterDuration() {
+        // A glide from rest starts one frame before its first sampled frame.
+        var axis = GlideScrollingAxis(settings: settings)
+        axis.add(detents: 1, at: 0)
+        _ = axis.advance(to: 0.01, frameInterval: 0.01)
+        _ = axis.advance(to: 0.1, frameInterval: 0.01)
+        XCTAssertTrue(axis.isActive)
+        _ = axis.advance(to: 0.18, frameInterval: 0.01)
+        XCTAssertFalse(axis.isActive)
+    }
+
+    func testRepeatedDetentsExtendTargetWithoutBacktracking() {
+        var axis = GlideScrollingAxis(settings: settings)
+        var total = 0.0
+        var time = 0.0
+        for click in 0 ..< 5 {
+            axis.add(detents: 1, at: Double(click) * 0.04)
+            while time < Double(click + 1) * 0.04 {
+                let delta = axis.advance(to: time)
+                XCTAssertGreaterThanOrEqual(delta, 0)
+                total += delta
+                time += 1.0 / 120.0
+            }
+        }
+        total += run(&axis, from: time, to: time + 0.5).reduce(0, +)
+
+        XCTAssertEqual(total, 150, accuracy: 1e-9)
+    }
+
+    func testRetargetNeverJumpsTheSpeed() {
+        var axis = GlideScrollingAxis(settings: settings)
+        axis.add(detents: 1, at: 0)
+        _ = axis.advance(to: 0)
+        _ = axis.advance(to: 0.06)
+        let before = axis.velocity(at: 0.06)
+        axis.add(detents: 1, at: 0.065)
+        let after = axis.velocity(at: 0.06)
+
+        XCTAssertGreaterThan(before, 0)
+        XCTAssertEqual(after, before, accuracy: before * 1e-6)
+    }
+
+    func testEaseInOutRetargetKeepsCurrentSpeed() {
+        var axis = GlideScrollingAxis(
+            settings: .init(pixelsPerDetent: 30, duration: 0.18, initialSlope: 0)
+        )
+        axis.add(detents: 1, at: 0)
+        _ = axis.advance(to: 0)
+        _ = axis.advance(to: 0.05)
+        let before = axis.velocity(at: 0.05)
+        // Arrives between frames; retargets from the last frame shown.
+        axis.add(detents: 1, at: 0.055)
+        let after = axis.velocity(at: 0.05)
+
+        XCTAssertGreaterThan(before, 0)
+        XCTAssertEqual(after, before, accuracy: 1e-6)
+    }
+
+    func testReversalDropsUnfinishedDistance() {
+        var axis = GlideScrollingAxis(settings: settings)
+        axis.add(detents: 2, at: 0)
+        var total = run(&axis, from: 0, to: 0.05).reduce(0, +)
+        let shown = total
+        axis.add(detents: -1, at: 0.052)
+        total += run(&axis, from: 0.0583, to: 1).reduce(0, +)
+
+        XCTAssertEqual(total, shown - 30, accuracy: 1e-9)
+    }
+}
+
+// MARK: - 3. Transformer (events in, events out)
+
+final class GlideScrollingTransformerTests: XCTestCase {
+    private func lineEvent(vertical: Int32, horizontal: Int32 = 0) throws -> CGEvent {
+        try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: vertical,
+            wheel2: horizontal,
+            wheel3: 0
+        ))
+    }
+
+    func testDetentIsConsumedAndReplayedAsPlainPixelEvents() throws {
+        var emitted: [CGEvent] = []
+        var now = 0.0
+        let transformer = GlideScrollingTransformer(
+            glide: .init(vertical: .init(enabled: true, lines: 3, lineHeight: 10, duration: 180)),
+            highResolutionWheelMultiplier: { _ in nil },
+            now: { now },
+            eventSink: { emitted.append($0.copy() ?? $0) },
+            isCursorHidden: { false },
+            makeFrameClock: { _ in ManualFrameClock() }
+        )
+
+        XCTAssertNil(try transformer.transform(lineEvent(vertical: 1), in: EventTransformerContext(device: nil)))
+
+        while now < 0.5 {
+            now += 1.0 / 120.0
+            transformer.tick()
+        }
+
+        let views = emitted.map { ScrollWheelEventView($0) }
+        XCTAssertFalse(views.isEmpty)
+        XCTAssertEqual(views.reduce(0) { $0 + $1.deltaYPt }, 30)
+        for view in views {
+            XCTAssertTrue(view.continuous)
+            XCTAssertNil(view.scrollPhase)
+            XCTAssertEqual(view.momentumPhase, .none)
+            XCTAssertGreaterThan(view.deltaYFixedPt, 0)
+            XCTAssertGreaterThanOrEqual(view.deltaYPt, 0)
+        }
+    }
+
+    func testAcceleratedLineDeltaStillCountsAsOneDetent() throws {
+        var emitted: [CGEvent] = []
+        var now = 0.0
+        let transformer = GlideScrollingTransformer(
+            glide: .init(vertical: .init(enabled: true, lines: 3, lineHeight: 10, duration: 180)),
+            highResolutionWheelMultiplier: { _ in nil },
+            now: { now },
+            eventSink: { emitted.append($0.copy() ?? $0) },
+            isCursorHidden: { false },
+            makeFrameClock: { _ in ManualFrameClock() }
+        )
+
+        XCTAssertNil(try transformer.transform(lineEvent(vertical: 5), in: EventTransformerContext(device: nil)))
+        while now < 0.5 {
+            now += 1.0 / 120.0
+            transformer.tick()
+        }
+
+        XCTAssertEqual(emitted.map { ScrollWheelEventView($0) }.reduce(0) { $0 + $1.deltaYPt }, 30)
+    }
+
+    func testUnownedAxisPassesThrough() throws {
+        let transformer = GlideScrollingTransformer(
+            glide: .init(vertical: .init(enabled: true)),
+            highResolutionWheelMultiplier: { _ in nil },
+            now: { 0 },
+            eventSink: { _ in },
+            isCursorHidden: { false },
+            makeFrameClock: { _ in ManualFrameClock() }
+        )
+
+        let event = try XCTUnwrap(try transformer.transform(
+            lineEvent(vertical: 1, horizontal: 1),
+            in: EventTransformerContext(device: nil)
+        ))
+        let view = ScrollWheelEventView(event)
+        XCTAssertEqual(view.deltaY, 0)
+        XCTAssertEqual(view.deltaX, 1)
+    }
+
+    func testContinuousInputPassesThrough() throws {
+        let transformer = GlideScrollingTransformer(
+            glide: .init(vertical: .init(enabled: true)),
+            highResolutionWheelMultiplier: { _ in nil },
+            now: { 0 },
+            eventSink: { _ in },
+            isCursorHidden: { false },
+            makeFrameClock: { _ in ManualFrameClock() }
+        )
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .pixel,
+            wheelCount: 1,
+            wheel1: 12,
+            wheel2: 0,
+            wheel3: 0
+        ))
+
+        XCTAssertNotNil(transformer.transform(event, in: EventTransformerContext(device: nil)))
+    }
+
+    func testHiddenCursorSendsOneClickPerNotchInsteadOfGliding() throws {
+        var emitted: [CGEvent] = []
+        var now = 0.0
+        let transformer = GlideScrollingTransformer(
+            glide: .init(vertical: .init(enabled: true, lines: 3, lineHeight: 10, duration: 180)),
+            highResolutionWheelMultiplier: { _ in nil },
+            now: { now },
+            eventSink: { emitted.append($0.copy() ?? $0) },
+            isCursorHidden: { true },
+            makeFrameClock: { _ in ManualFrameClock() }
+        )
+
+        // An accelerated wheel event (delta 4) still becomes exactly one click.
+        let event = try XCTUnwrap(try transformer.transform(
+            lineEvent(vertical: 4),
+            in: EventTransformerContext(device: nil)
+        ))
+        let view = ScrollWheelEventView(event)
+        XCTAssertFalse(view.continuous)
+        XCTAssertEqual(view.deltaY, 1)
+        // The other distance fields describe the same single click.
+        XCTAssertEqual(view.deltaYFixedPt, 1)
+        XCTAssertEqual(view.deltaYPt, 10)
+
+        while now < 0.5 {
+            now += 1.0 / 120.0
+            transformer.tick()
+        }
+        XCTAssertTrue(emitted.isEmpty)
+    }
+
+    func testGameDetectionOffKeepsGlidingWithHiddenCursor() throws {
+        let transformer = GlideScrollingTransformer(
+            glide: .init(vertical: .init(enabled: true, gameDetection: false)),
+            highResolutionWheelMultiplier: { _ in nil },
+            now: { 0 },
+            eventSink: { _ in },
+            isCursorHidden: { true },
+            makeFrameClock: { _ in ManualFrameClock() }
+        )
+
+        XCTAssertNil(try transformer.transform(lineEvent(vertical: 1), in: EventTransformerContext(device: nil)))
+    }
+
+    func testCursorIsCheckedOnlyForWheelEventsGlideHandles() throws {
+        var checks = 0
+        let transformer = GlideScrollingTransformer(
+            glide: .init(vertical: .init(enabled: true)),
+            highResolutionWheelMultiplier: { _ in nil },
+            now: { 0 },
+            eventSink: { _ in },
+            isCursorHidden: {
+                checks += 1
+                return false
+            },
+            makeFrameClock: { _ in ManualFrameClock() }
+        )
+
+        let pixelEvent = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .pixel,
+            wheelCount: 1,
+            wheel1: 12,
+            wheel2: 0,
+            wheel3: 0
+        ))
+        _ = transformer.transform(pixelEvent, in: EventTransformerContext(device: nil))
+        XCTAssertEqual(checks, 0)
+
+        _ = try transformer.transform(lineEvent(vertical: 1), in: EventTransformerContext(device: nil))
+        XCTAssertEqual(checks, 1)
+    }
+}
+
+// MARK: - 3b. "Change speed" modifier with Glide
+
+final class GlideChangeSpeedTests: XCTestCase {
+    private typealias Glide = Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Glide>
+
+    private func lineEvent(vertical: Int32, horizontal: Int32 = 0, flags: CGEventFlags = []) throws -> CGEvent {
+        let event = try XCTUnwrap(CGEvent(
+            scrollWheelEvent2Source: nil,
+            units: .line,
+            wheelCount: 2,
+            wheel1: vertical,
+            wheel2: horizontal,
+            wheel3: 0
+        ))
+        event.flags = flags
+        return event
+    }
+
+    /// Runs events through the modifier stage and then Glide, as
+    /// EventTransformerManager does, and lets every glide finish.
+    /// Returns the total glided pixels and the events Glide passed on.
+    private func run(
+        _ events: [CGEvent],
+        modifiers: Scheme.Scrolling.Modifiers,
+        glide: Glide = .init(vertical: .init(enabled: true, lines: 3, lineHeight: 10, duration: 180)),
+        highResolutionMultiplier: Int? = nil,
+        normalizedWheels: (horizontal: Bool, vertical: Bool) = (false, false)
+    ) -> (x: Double, y: Double, exactY: Double, passed: [CGEvent]) {
+        var emitted: [CGEvent] = []
+        var now = 0.0
+        let handoff = GlideModifierHandoff(glide: glide)
+        let modifierStage = ModifierActionsTransformer(
+            modifiers: .init(vertical: modifiers, horizontal: modifiers),
+            glideHandoff: handoff
+        )
+        let glideStage = GlideScrollingTransformer(
+            glide: glide,
+            modifierHandoff: handoff,
+            normalizedWheels: normalizedWheels,
+            highResolutionWheelMultiplier: { _ in highResolutionMultiplier },
+            now: { now },
+            eventSink: { emitted.append($0.copy() ?? $0) },
+            isCursorHidden: { false },
+            makeFrameClock: { _ in ManualFrameClock() }
+        )
+        let context = EventTransformerContext(device: nil)
+
+        var passed: [CGEvent] = []
+        for event in events {
+            if let event = modifierStage.transform(event, in: context),
+               let event = glideStage.transform(event, in: context) {
+                passed.append(event)
+            }
+            let end = now + 0.5
+            while now < end {
+                now += 1.0 / 120.0
+                glideStage.tick()
+            }
+        }
+
+        // Whole pixels add up exactly (the fixed-point field rounds each
+        // frame slightly), as in GlideScrollingTransformerTests.
+        let views = emitted.map { ScrollWheelEventView($0) }
+        return (
+            views.reduce(0) { $0 + $1.deltaXPt },
+            views.reduce(0) { $0 + $1.deltaYPt },
+            views.reduce(0) { $0 + $1.deltaYFixedPt },
+            passed
+        )
+    }
+
+    func testScaleMultipliesOneClicksDistance() {
+        var axis = GlideScrollingAxis(settings: .init(pixelsPerDetent: 30, duration: 0.18, initialSlope: 3))
+        axis.add(detents: 1, scale: 2, at: 0)
+        var total = 0.0
+        var time = 0.0
+        while time <= 0.5 {
+            total += axis.advance(to: time)
+            time += 1.0 / 120.0
+        }
+        XCTAssertEqual(total, 60, accuracy: 1e-9)
+    }
+
+    func testClicksUnderHalfAPixelAddUpInsteadOfBeingDropped() {
+        // 1 px per click at 0.25× is a quarter pixel per click: too small to
+        // animate alone, but four clicks still move one pixel in total.
+        var axis = GlideScrollingAxis(settings: .init(pixelsPerDetent: 1, duration: 0.18, initialSlope: 3))
+        var total = 0.0
+        var time = 0.0
+        for _ in 0 ..< 4 {
+            axis.add(detents: 1, scale: 0.25, at: time)
+            let end = time + 0.5
+            while time < end {
+                total += axis.advance(to: time)
+                time += 1.0 / 120.0
+            }
+        }
+        XCTAssertEqual(total, 1, accuracy: 1e-9)
+    }
+
+    func testReversalDropsCarriedSubPixelDistance() {
+        var axis = GlideScrollingAxis(settings: .init(pixelsPerDetent: 1, duration: 0.18, initialSlope: 3))
+        axis.add(detents: 1, scale: 0.25, at: 0)
+        _ = axis.advance(to: 0.1)
+        axis.add(detents: -1, at: 0.2)
+        var total = 0.0
+        var time = 0.2
+        while time <= 1 {
+            total += axis.advance(to: time)
+            time += 1.0 / 120.0
+        }
+        XCTAssertEqual(total, -1, accuracy: 1e-9)
+    }
+
+    func testChangeSpeedTwoDoublesTheGlide() throws {
+        let result = try run(
+            [lineEvent(vertical: 1, flags: .maskAlternate)],
+            modifiers: .init(option: .changeSpeed(scale: 2))
+        )
+        XCTAssertEqual(result.y, 60, accuracy: 1e-9)
+        XCTAssertTrue(result.passed.isEmpty)
+    }
+
+    func testChangeSpeedHalfHalvesTheGlide() throws {
+        let result = try run(
+            [lineEvent(vertical: 1, flags: .maskAlternate)],
+            modifiers: .init(option: .changeSpeed(scale: 0.5))
+        )
+        XCTAssertEqual(result.y, 15, accuracy: 1e-9)
+    }
+
+    func testAcceleratedClickStillCountsAsOneNotchWithChangeSpeed() throws {
+        // macOS acceleration can report a fast click as 5 lines; it is still
+        // one notch, so 2× gives 60 pixels, not 300.
+        let result = try run(
+            [lineEvent(vertical: 5, flags: .maskAlternate)],
+            modifiers: .init(option: .changeSpeed(scale: 2))
+        )
+        XCTAssertEqual(result.y, 60, accuracy: 1e-9)
+    }
+
+    func testSpeedDoesNotCarryOverToTheNextClick() throws {
+        let result = try run(
+            [lineEvent(vertical: 1, flags: .maskAlternate), lineEvent(vertical: 1)],
+            modifiers: .init(option: .changeSpeed(scale: 2))
+        )
+        XCTAssertEqual(result.y, 60 + 30, accuracy: 1e-9)
+    }
+
+    func testChangeSpeedWorksOnHorizontalGlide() throws {
+        let result = try run(
+            [lineEvent(vertical: 0, horizontal: 1, flags: .maskAlternate)],
+            modifiers: .init(option: .changeSpeed(scale: 2)),
+            glide: .init(horizontal: .init(enabled: true, lines: 3, lineHeight: 10, duration: 180))
+        )
+        XCTAssertEqual(result.x, 60, accuracy: 1e-9)
+    }
+
+    func testAxisWithoutGlideIsStillScaledOnTheEvent() throws {
+        // Glide is vertical only, so a horizontal click keeps the old
+        // behaviour: the modifier scales the event itself.
+        let result = try run(
+            [lineEvent(vertical: 0, horizontal: 1, flags: .maskAlternate)],
+            modifiers: .init(option: .changeSpeed(scale: 2))
+        )
+        let passed = try XCTUnwrap(result.passed.first)
+        XCTAssertEqual(ScrollWheelEventView(passed).deltaX, 2)
+        XCTAssertEqual(result.x, 0)
+    }
+
+    func testShiftSidewaysThenChangeSpeedGlidesHorizontally() throws {
+        // Shift turns the vertical click sideways, then Option doubles it.
+        let result = try run(
+            [lineEvent(vertical: 1, flags: [.maskShift, .maskAlternate])],
+            modifiers: .init(shift: .alterOrientation, option: .changeSpeed(scale: 2)),
+            glide: .init(
+                vertical: .init(enabled: true, lines: 3, lineHeight: 10, duration: 180),
+                horizontal: .init(enabled: true, lines: 3, lineHeight: 10, duration: 180)
+            )
+        )
+        XCTAssertEqual(result.x, 60, accuracy: 1e-9)
+        XCTAssertEqual(result.y, 0, accuracy: 1e-9)
+    }
+
+    func testChangeSpeedBeforeShiftSidewaysStillReachesHorizontalGlide() throws {
+        // Command (handled before Shift) doubles a vertical click, then Shift
+        // turns it sideways onto the only axis Glide handles.
+        let result = try run(
+            [lineEvent(vertical: 1, flags: [.maskCommand, .maskShift])],
+            modifiers: .init(command: .changeSpeed(scale: 2), shift: .alterOrientation),
+            glide: .init(horizontal: .init(enabled: true, lines: 3, lineHeight: 10, duration: 180))
+        )
+        XCTAssertEqual(result.x, 60, accuracy: 1e-9)
+        XCTAssertTrue(result.passed.isEmpty)
+    }
+
+    func testChangeSpeedBeforeShiftSidewaysScalesTheEventWhenThatAxisDoesNotGlide() throws {
+        // The reverse: Glide is vertical only, so the click that Shift turns
+        // sideways is scaled on the event itself, exactly once.
+        let result = try run(
+            [lineEvent(vertical: 1, flags: [.maskCommand, .maskShift])],
+            modifiers: .init(command: .changeSpeed(scale: 2), shift: .alterOrientation)
+        )
+        let passed = try XCTUnwrap(result.passed.first)
+        XCTAssertEqual(ScrollWheelEventView(passed).deltaX, 2)
+        XCTAssertEqual(result.y, 0)
+    }
+    func testShiftMovesANormalizedWheelStepOntoGlideAsOneNotch() throws {
+        // High-resolution wheel, vertical scrolling not gliding, so the
+        // normalizer already turned each notch into one vertical step. Shift
+        // moves that step onto horizontal Glide, where it is one notch, not
+        // one of the wheel's 120 fine steps.
+        let result = try run(
+            [lineEvent(vertical: 1, flags: .maskShift)],
+            modifiers: .init(shift: .alterOrientation),
+            glide: .init(horizontal: .init(enabled: true, lines: 3, lineHeight: 10, duration: 180)),
+            highResolutionMultiplier: 120,
+            normalizedWheels: (horizontal: false, vertical: true)
+        )
+        XCTAssertEqual(result.x, 30, accuracy: 1e-9)
+    }
+
+    func testFractionalGlidesAddUpInWholePixels() throws {
+        // 1 px per click at 0.3×: four clicks ask for 1.2 px. Apps that read
+        // whole pixels get 1 px in total, not 1 px for every short glide.
+        let event = { try self.lineEvent(vertical: 1, flags: .maskAlternate) }
+        let result = try run(
+            [event(), event(), event(), event()],
+            modifiers: .init(option: .changeSpeed(scale: 0.3)),
+            glide: .init(vertical: .init(enabled: true, lines: 1, lineHeight: 1, duration: 180))
+        )
+        XCTAssertEqual(result.y, 1, accuracy: 1e-9)
+        XCTAssertEqual(result.exactY, 1.2, accuracy: 0.01)
+    }
+
+    func testPendingSpeedIsAppliedBeforeAnActionThatConsumesTheEvent() throws {
+        // Pinch zoom and similar actions read the event and never reach Glide,
+        // so a speed recorded for Glide is applied to the event first.
+        let handoff = GlideModifierHandoff(glide: .init(vertical: .init(enabled: true)))
+        let view = try ScrollWheelEventView(lineEvent(vertical: 1))
+        XCTAssertTrue(handoff.record(2, for: view))
+        handoff.applyPending(to: view)
+        XCTAssertEqual(view.deltaY, 2)
+        XCTAssertEqual(handoff.take().speed, 1)
+    }
+}
+
+/// A frame clock that does nothing; tests call `tick()` themselves.
+private final class ManualFrameClock: GlideFrameClocking {
+    var frameInterval: TimeInterval {
+        1.0 / 120.0
+    }
+
+    func start() {}
+    func stop() {}
+}
+
+// MARK: - 4. Frame timing
+
+final class GlideFrameTimingTests: XCTestCase {
+    func testEvenFramesGiveEvenSteps() {
+        // At a steady 120 Hz frame rate each step follows the curve exactly,
+        // so consecutive steps never jump up (ease-out only slows down).
+        var axis = GlideScrollingAxis(settings: .init(pixelsPerDetent: 30, duration: 0.18, initialSlope: 3))
+        axis.add(detents: 1, at: 0)
+        var previous = Double.infinity
+        for frame in 1 ... 30 {
+            let step = axis.advance(to: Double(frame) / 120)
+            XCTAssertLessThanOrEqual(step, previous + 1e-9)
+            previous = step
+        }
+    }
+
+    func testDetentBetweenFramesNeverStepsBackwards() {
+        var axis = GlideScrollingAxis(settings: .init(pixelsPerDetent: 30, duration: 0.18, initialSlope: 3))
+        axis.add(detents: 1, at: 0)
+        // Frames are sampled at display time, a little ahead of the clock.
+        _ = axis.advance(to: 0.050)
+        axis.add(detents: 1, at: 0.040)
+        for frame in 0 ... 40 {
+            XCTAssertGreaterThanOrEqual(axis.advance(to: 0.058 + Double(frame) / 120), 0)
+        }
+    }
+
+    func testEveryFrameGetsAFullStepAcrossDetents() {
+        // Detents between frames retarget on the frame grid, so steps stay
+        // even: no short step right after a detent, then a catch-up.
+        var axis = GlideScrollingAxis(settings: .init(pixelsPerDetent: 120, duration: 0.18, initialSlope: 3))
+        let frame = 1.0 / 60.0
+        axis.add(detents: 1, at: 0.003)
+        var steps: [Double] = []
+        for index in 1 ... 6 {
+            if index == 3 {
+                axis.add(detents: 1, at: Double(index - 1) * frame + 0.011)
+            }
+            steps.append(axis.advance(to: Double(index) * frame, frameInterval: frame))
+        }
+        // Steps change gradually across the detent: no short step followed
+        // by a catch-up, and no sudden jump.
+        XCTAssertTrue(steps.allSatisfy { $0 > 0 })
+        for index in 1 ..< steps.count {
+            XCTAssertLessThan(abs(steps[index] - steps[index - 1]), 0.35 * steps[index - 1])
+        }
+    }
+}
+
+final class GlideConfigurationTests: XCTestCase {
+    func testRestoreDefaultsTurnsGameDetectionOn() throws {
+        // Set explicitly (not left to inherit), and on.
+        let gameDetection = try XCTUnwrap(Scheme.Scrolling.Glide.defaultConfiguration.gameDetection)
+        XCTAssertTrue(gameDetection)
+    }
+
+    func testDistancePerClickIsAtLeastOnePixel() {
+        XCTAssertEqual(Scheme.Scrolling.Glide(lines: 0.1, lineHeight: 1).pixelsPerDetent, 1)
+        XCTAssertEqual(Scheme.Scrolling.Glide(lines: 0, lineHeight: 10).pixelsPerDetent, 0)
+        XCTAssertEqual(Scheme.Scrolling.Glide(lines: 3, lineHeight: 10).pixelsPerDetent, 30)
+    }
+}

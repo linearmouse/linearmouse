@@ -24,6 +24,8 @@ class ModifierActionsTransformer {
 
     private let modifiers: Modifiers
     private let keySimulator: KeySimulating
+    /// Tells Glide about "change speed" and Shift swaps (see `GlideModifierHandoff`).
+    private let glideHandoff: GlideModifierHandoff?
     private let zoomSteps: ScrollActionRecognizer
     private let highResolutionWheelMultiplier: (EventTransformerContext) -> Int?
     private let monotonicClock: () -> UInt64
@@ -36,12 +38,14 @@ class ModifierActionsTransformer {
         modifiers: Modifiers,
         keySimulator: KeySimulating? = nil,
         scrollGesture: ScrollGestureOwnership = .init(),
+        glideHandoff: GlideModifierHandoff? = nil,
         highResolutionWheelMultiplier: @escaping (EventTransformerContext) -> Int? = { _ in nil },
         monotonicClock: @escaping () -> UInt64 = { DispatchTime.now().uptimeNanoseconds },
         zoomShortcut: @escaping (Bool) -> KeyEquivalentResolver.Shortcut? = defaultZoomShortcut
     ) {
         self.modifiers = modifiers
         self.keySimulator = keySimulator ?? Self.defaultKeySimulator
+        self.glideHandoff = glideHandoff
         // Zoom is an incremental control like volume: it steps with the
         // movement instead of sharing the discrete-command cooldown.
         zoomSteps = ScrollActionRecognizer(gesture: scrollGesture)
@@ -68,6 +72,11 @@ extension ModifierActionsTransformer: EventTransformer {
     }
 
     func transform(_ event: CGEvent, in context: EventTransformerContext) -> CGEvent? {
+        if event.type == .scrollWheel {
+            // A speed factor only ever applies to the event that set it.
+            glideHandoff?.reset()
+        }
+
         if pinchZoomBegan {
             return handlePinchZoom(event, reverse: pinchZoomReversed)
         }
@@ -111,6 +120,7 @@ extension ModifierActionsTransformer: EventTransformer {
                 event.flags.remove(flag)
             }
         }
+        glideHandoff?.applyToAxesWithoutGlide(of: ScrollWheelEventView(event))
         return event
     }
 
@@ -122,14 +132,29 @@ extension ModifierActionsTransformer: EventTransformer {
         let scrollWheelEventView = ScrollWheelEventView(event)
 
         switch action {
+        case .auto, .ignore, .alterOrientation, .changeSpeed:
+            break
+        case .preventDefault, .zoom, .zoomReversed, .pinchZoom, .pinchZoomReversed:
+            // These read or consume the event, which then never reaches
+            // Glide, so a speed recorded for Glide applies to it now.
+            glideHandoff?.applyPending(to: scrollWheelEventView)
+        }
+
+        switch action {
         case .auto, .ignore:
             break
         case .preventDefault:
             return nil
         case .alterOrientation:
             scrollWheelEventView.swapXY()
+            glideHandoff?.noteAxesSwapped()
         case let .changeSpeed(scale: scale):
-            scrollWheelEventView.scale(factor: scale.asTruncatedDouble)
+            let factor = scale.asTruncatedDouble
+            // With Glide, notched wheel input is scaled after all modifier
+            // actions have run (see `GlideModifierHandoff`).
+            if glideHandoff?.record(factor, for: scrollWheelEventView) != true {
+                scrollWheelEventView.scale(factor: factor)
+            }
         case .zoom, .zoomReversed:
             let scrollWheelEventView = ScrollWheelEventView(event)
             var deltaSignum = scrollWheelEventView.deltaYSignum != 0 ? scrollWheelEventView

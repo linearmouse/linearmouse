@@ -4422,6 +4422,10 @@
         }
       }
     },
+    "0" : {},
+    "1" : {},
+    "20" : {},
+    "100" : {},
     "Accelerated" : {
       "localizations" : {
         "af" : {
@@ -17984,6 +17988,7 @@
         }
       }
     },
+    "Curve" : {},
     "Custom" : {
       "localizations" : {
         "af" : {
@@ -20480,6 +20485,7 @@
         }
       }
     },
+    "Detect games" : {},
     "Device Control and Data Access" : {
       "comment" : "System permission pane name. Apple terminology where macOS supplies this language; English fallback for af, bs, my and sr, which have no corresponding macOS UI localization.",
       "extractionState" : "manual",
@@ -21736,6 +21742,7 @@
         }
       }
     },
+    "Distance per click" : {},
     "Donate" : {
       "localizations" : {
         "af" : {
@@ -22368,6 +22375,7 @@
         }
       }
     },
+    "Each wheel click moves a target. The page glides there and stops exactly on it." : {},
     "Ease In" : {
       "localizations" : {
         "af" : {
@@ -24240,6 +24248,7 @@
         }
       }
     },
+    "Ease Out Quart" : {},
     "Ease Out Quartic" : {
       "localizations" : {
         "af" : {
@@ -30495,6 +30504,8 @@
         }
       }
     },
+    "Glide" : {},
+    "Glide duration" : {},
     "Hardware DPI" : {
       "localizations" : {
         "af" : {
@@ -37172,6 +37183,7 @@
         }
       }
     },
+    "Line height" : {},
     "Linear" : {
       "localizations" : {
         "af" : {
@@ -53896,6 +53908,7 @@
         }
       }
     },
+    "Restore defaults" : {},
     "Reveal Config in Finder…" : {
       "localizations" : {
         "af" : {
@@ -66062,6 +66075,7 @@
         }
       }
     },
+    "Snappy" : {},
     "Soft start that builds momentum as you keep scrolling." : {
       "localizations" : {
         "af" : {
@@ -76074,6 +76088,7 @@
         }
       }
     },
+    "When a game hides the cursor, send one wheel click per notch instead of gliding." : {},
     "When needed" : {
       "localizations" : {
         "af" : {

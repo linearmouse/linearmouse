@@ -211,6 +211,12 @@ declare namespace Scheme {
     smoothed?: Scrolling.Bidirectional<Scrolling.Smoothed>;
 
     /**
+     * @title Glide scrolling
+     * @description Destination-based smooth scrolling. Each wheel click moves a target by a fixed number of lines and the page glides to it, stopping exactly there. Takes precedence over `smoothed` for the same direction.
+     */
+    glide?: Scrolling.Bidirectional<Scrolling.Glide>;
+
+    /**
      * @title Modifier keys settings
      */
     modifiers?: Scrolling.Bidirectional<Scrolling.Modifiers>;
@@ -300,6 +306,54 @@ declare namespace Scheme {
         | "easeOutQuartic"
         | "easeInOutQuartic"
         | "smooth";
+    }
+
+    type Glide = {
+      /**
+       * @description Set to `false` to explicitly disable inherited glide scrolling for this direction.
+       * @default true
+       */
+      enabled?: boolean;
+
+      /**
+       * @description Lines moved per wheel click.
+       * @minimum 0
+       * @maximum 20
+       * @default 3
+       */
+      lines?: number;
+
+      /**
+       * @description Pixels per line. macOS uses about 10; Chromium-based browsers use 40.
+       * @minimum 1
+       * @maximum 100
+       * @default 10
+       */
+      lineHeight?: number;
+
+      /**
+       * @description How long the glide lasts after the latest click, in milliseconds.
+       * @minimum 30
+       * @maximum 1000
+       * @default 180
+       */
+      duration?: number;
+
+      /**
+       * @description The easing curve of the glide.
+       * @default "easeOutCubic"
+       */
+      curve?: Glide.Curve;
+
+      /**
+       * @description While the cursor is hidden (a game has captured the mouse), send one plain wheel click per notch instead of gliding.
+       * @default true
+       */
+      gameDetection?: boolean;
+    };
+
+    namespace Glide {
+      type Curve = "easeOutQuart" | "easeOutCubic" | "easeOut" | "easeInOut";
     }
 
     type Modifiers = {
