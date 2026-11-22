@@ -365,19 +365,22 @@ final class GlideChangeSpeedTests: XCTestCase {
     private func run(
         _ events: [CGEvent],
         modifiers: Scheme.Scrolling.Modifiers,
-        glide: Glide = .init(vertical: .init(enabled: true, lines: 3, lineHeight: 10, duration: 180))
-    ) -> (x: Double, y: Double, passed: [CGEvent]) {
+        glide: Glide = .init(vertical: .init(enabled: true, lines: 3, lineHeight: 10, duration: 180)),
+        highResolutionMultiplier: Int? = nil,
+        normalizedWheels: (horizontal: Bool, vertical: Bool) = (false, false)
+    ) -> (x: Double, y: Double, exactY: Double, passed: [CGEvent]) {
         var emitted: [CGEvent] = []
         var now = 0.0
-        let speed = GlideSpeedFactor(glide: glide)
+        let handoff = GlideModifierHandoff(glide: glide)
         let modifierStage = ModifierActionsTransformer(
             modifiers: .init(vertical: modifiers, horizontal: modifiers),
-            glideSpeed: speed
+            glideHandoff: handoff
         )
         let glideStage = GlideScrollingTransformer(
             glide: glide,
-            speedFactor: speed,
-            highResolutionWheelMultiplier: { _ in nil },
+            modifierHandoff: handoff,
+            normalizedWheels: normalizedWheels,
+            highResolutionWheelMultiplier: { _ in highResolutionMultiplier },
             now: { now },
             eventSink: { emitted.append($0.copy() ?? $0) },
             isCursorHidden: { false },
@@ -404,6 +407,7 @@ final class GlideChangeSpeedTests: XCTestCase {
         return (
             views.reduce(0) { $0 + $1.deltaXPt },
             views.reduce(0) { $0 + $1.deltaYPt },
+            views.reduce(0) { $0 + $1.deltaYFixedPt },
             passed
         )
     }
@@ -543,6 +547,44 @@ final class GlideChangeSpeedTests: XCTestCase {
         let passed = try XCTUnwrap(result.passed.first)
         XCTAssertEqual(ScrollWheelEventView(passed).deltaX, 2)
         XCTAssertEqual(result.y, 0)
+    }
+    func testShiftMovesANormalizedWheelStepOntoGlideAsOneNotch() throws {
+        // High-resolution wheel, vertical scrolling not gliding, so the
+        // normalizer already turned each notch into one vertical step. Shift
+        // moves that step onto horizontal Glide, where it is one notch, not
+        // one of the wheel's 120 fine steps.
+        let result = try run(
+            [lineEvent(vertical: 1, flags: .maskShift)],
+            modifiers: .init(shift: .alterOrientation),
+            glide: .init(horizontal: .init(enabled: true, lines: 3, lineHeight: 10, duration: 180)),
+            highResolutionMultiplier: 120,
+            normalizedWheels: (horizontal: false, vertical: true)
+        )
+        XCTAssertEqual(result.x, 30, accuracy: 1e-9)
+    }
+
+    func testFractionalGlidesAddUpInWholePixels() throws {
+        // 1 px per click at 0.3×: four clicks ask for 1.2 px. Apps that read
+        // whole pixels get 1 px in total, not 1 px for every short glide.
+        let event = { try self.lineEvent(vertical: 1, flags: .maskAlternate) }
+        let result = try run(
+            [event(), event(), event(), event()],
+            modifiers: .init(option: .changeSpeed(scale: 0.3)),
+            glide: .init(vertical: .init(enabled: true, lines: 1, lineHeight: 1, duration: 180))
+        )
+        XCTAssertEqual(result.y, 1, accuracy: 1e-9)
+        XCTAssertEqual(result.exactY, 1.2, accuracy: 0.01)
+    }
+
+    func testPendingSpeedIsAppliedBeforeAnActionThatConsumesTheEvent() throws {
+        // Pinch zoom and similar actions read the event and never reach Glide,
+        // so a speed recorded for Glide is applied to the event first.
+        let handoff = GlideModifierHandoff(glide: .init(vertical: .init(enabled: true)))
+        let view = try ScrollWheelEventView(lineEvent(vertical: 1))
+        XCTAssertTrue(handoff.record(2, for: view))
+        handoff.applyPending(to: view)
+        XCTAssertEqual(view.deltaY, 2)
+        XCTAssertEqual(handoff.take().speed, 1)
     }
 }
 

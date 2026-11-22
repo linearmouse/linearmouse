@@ -112,7 +112,9 @@ Values merge field by field across schemes, so an app scheme can change only `li
 
 **Distance in lines, counted per physical notch.** One plain wheel event counts as one notch, exactly like line mode, so macOS wheel acceleration does not change the glide distance. High-resolution wheels are counted back into whole notches with the existing `LogitechHighResolutionWheelScrollCounter`.
 
-**"Change speed" modifier keys scale the glide.** Because Glide counts notches, scaling the wheel event would be lost. On axes Glide takes over, `ModifierActionsTransformer` leaves the event alone and hands the factor to Glide through `GlideSpeedFactor`, and that click's glide distance is multiplied by it (Option at 2× glides twice as far). Notch counting stays independent of macOS acceleration.
+**"Change speed" modifier keys scale the glide.** Because Glide counts notches, scaling the wheel event would be lost. On axes Glide takes over, `ModifierActionsTransformer` records the factor in `GlideModifierHandoff` and applies it once every modifier action has run: Glide's axes keep it, and that click's glide distance is multiplied by it (Option at 2× glides twice as far); other axes get it on the event. Actions that consume the event, such as pinch zoom, get it straight away. Notch counting stays independent of macOS acceleration.
+
+**Shift with a high-resolution wheel.** When a direction does not glide, `LogitechHighResolutionWheelNormalizer` may already turn that wheel's fine steps into one step per notch. If Shift then moves such a step onto a gliding direction, `GlideModifierHandoff` reports the swap and Glide counts the step as one notch instead of as one fine step.
 
 **Exact fractional output.** The fixed-point delta field carries the exact distance, including fractions of a pixel, which AppKit apps and Safari read for smooth endings. The point delta field carries whole pixels with the remainder carried to the next frame, for apps that only read whole pixels (Chromium). Nothing is lost on either path.
 

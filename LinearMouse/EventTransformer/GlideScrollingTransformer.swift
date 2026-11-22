@@ -24,7 +24,7 @@
 //   4. Input              Counts physical wheel clicks.
 //   5. Output             Builds and posts the scroll events.
 //   6. Frame clock        Starts and stops the per-frame callback.
-//   7. Speed factor       Hands a "change speed" modifier factor to Glide.
+//   7. Modifier handoff   What modifier keys did to the click, for Glide.
 
 import Foundation
 import os.log
@@ -53,9 +53,14 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
 
     /// The user's glide settings per axis (`nil` = glide off for that axis).
     private let glide: Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Glide>
-    /// "Change speed" factor for the current click, set by
-    /// `ModifierActionsTransformer` (see section 7).
-    private let speedFactor: GlideSpeedFactor?
+    /// What modifier keys did to the current click (a "change speed" factor,
+    /// a Shift swap), set by `ModifierActionsTransformer` (see section 7).
+    private let modifierHandoff: GlideModifierHandoff?
+    /// Physical wheels whose high-resolution input was already turned into one
+    /// step per notch before Glide (by `LogitechHighResolutionWheelNormalizer`,
+    /// for a direction that does not glide). Shift can move such a step onto
+    /// a gliding direction, where it must count as one notch.
+    private let normalizedWheels: (horizontal: Bool, vertical: Bool)
 
     /// Dependencies. The defaults are the real implementations; unit tests
     /// pass fakes (a fixed clock, a list instead of posting, a fake cursor
@@ -90,7 +95,8 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
 
     init(
         glide: Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Glide>,
-        speedFactor: GlideSpeedFactor? = nil,
+        modifierHandoff: GlideModifierHandoff? = nil,
+        normalizedWheels: (horizontal: Bool, vertical: Bool) = (false, false),
         highResolutionWheelMultiplier: @escaping (EventTransformerContext) -> Int? = {
             $0.device?.highResolutionWheelNormalizationMultiplier
         },
@@ -102,7 +108,8 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
         }
     ) {
         self.glide = glide
-        self.speedFactor = speedFactor
+        self.modifierHandoff = modifierHandoff
+        self.normalizedWheels = normalizedWheels
         self.highResolutionWheelMultiplier = highResolutionWheelMultiplier
         self.now = now
         self.eventSink = eventSink
@@ -134,9 +141,12 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
             return event
         }
 
-        // Read (and clear) the modifier speed for this click before any early
-        // return, so it never carries over to a later click.
-        let speed = speedFactor?.take() ?? 1
+        // Read (and clear) what modifier keys did to this click before any
+        // early return, so it never carries over to a later click.
+        let modifiers = modifierHandoff?.take() ?? (speed: 1, swapsAxes: false)
+        // After a Shift swap, each direction carries the other wheel's input.
+        let horizontalIsPerNotch = modifiers.swapsAxes ? normalizedWheels.vertical : normalizedWheels.horizontal
+        let verticalIsPerNotch = modifiers.swapsAxes ? normalizedWheels.horizontal : normalizedWheels.vertical
 
         let view = ScrollWheelEventView(event)
 
@@ -171,29 +181,31 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
         var keepsEvent = (!interceptsX && view.deltaXSignum != 0) || (!interceptsY && view.deltaYSignum != 0)
 
         if interceptsX {
-            let detents = horizontalDetents(from: view, in: context) ?? 0
+            let detents = horizontalDetents(from: view, alreadyPerNotch: horizontalIsPerNotch, in: context) ?? 0
             if discreteX {
                 // Game mode: cancel any glide and send one clean click.
                 engine.stop(.horizontal)
+                pointRemainderX = 0
                 keepsEvent = Self.setDiscreteHorizontal(detents, on: view) || keepsEvent
             } else {
                 // Glide mode: add the click to the glide and remove this axis
                 // from the original event.
                 if detents != 0 {
-                    engine.add(detents: detents, scale: speed, on: .horizontal, at: timestamp)
+                    engine.add(detents: detents, scale: modifiers.speed, on: .horizontal, at: timestamp)
                 }
                 Self.zeroHorizontal(on: view)
             }
         }
 
         if interceptsY {
-            let detents = verticalDetents(from: view, in: context) ?? 0
+            let detents = verticalDetents(from: view, alreadyPerNotch: verticalIsPerNotch, in: context) ?? 0
             if discreteY {
                 engine.stop(.vertical)
+                pointRemainderY = 0
                 keepsEvent = Self.setDiscreteVertical(detents, on: view) || keepsEvent
             } else {
                 if detents != 0 {
-                    engine.add(detents: detents, scale: speed, on: .vertical, at: timestamp)
+                    engine.add(detents: detents, scale: modifiers.speed, on: .vertical, at: timestamp)
                 }
                 Self.zeroVertical(on: view)
             }
@@ -214,6 +226,8 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
     func deactivate() {
         stopClock()
         engine.stop()
+        pointRemainderX = 0
+        pointRemainderY = 0
         lastFlags = []
         verticalHighResolutionCounter = LogitechHighResolutionWheelScrollCounter()
         horizontalHighResolutionCounter = LogitechHighResolutionWheelScrollCounter()
@@ -233,7 +247,8 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
         let (deltaX, deltaY) = engine.advance(to: frameTime, frameInterval: frameInterval)
         let finished = !engine.isRunning
 
-        // On the last frame, send any leftover pixel fractions too.
+        // On the last frame, round the whole-pixel field to the nearest pixel
+        // (the small rounding error carries over to the next glide).
         post(deltaX: deltaX, deltaY: deltaY, flushRemainders: finished)
 
         if finished {
@@ -253,8 +268,14 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
     /// counts as one notch, exactly like line mode, so macOS wheel
     /// acceleration does not change the glide distance. High-resolution
     /// wheels send many fine steps per notch; those are added up into notches.
-    private func verticalDetents(from view: ScrollWheelEventView, in context: EventTransformerContext) -> Int? {
-        guard let multiplier = highResolutionWheelMultiplier(context), multiplier > 1 else {
+    /// `alreadyPerNotch`: the input is already one step per notch (see
+    /// `normalizedWheels`), so it is counted by sign like a normal wheel.
+    private func verticalDetents(
+        from view: ScrollWheelEventView,
+        alreadyPerNotch: Bool,
+        in context: EventTransformerContext
+    ) -> Int? {
+        guard !alreadyPerNotch, let multiplier = highResolutionWheelMultiplier(context), multiplier > 1 else {
             return Int(view.deltaYSignum)
         }
 
@@ -270,8 +291,12 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
     }
 
     /// Horizontal version of `verticalDetents`.
-    private func horizontalDetents(from view: ScrollWheelEventView, in context: EventTransformerContext) -> Int? {
-        guard let multiplier = highResolutionWheelMultiplier(context), multiplier > 1 else {
+    private func horizontalDetents(
+        from view: ScrollWheelEventView,
+        alreadyPerNotch: Bool,
+        in context: EventTransformerContext
+    ) -> Int? {
+        guard !alreadyPerNotch, let multiplier = highResolutionWheelMultiplier(context), multiplier > 1 else {
             return Int(view.deltaXSignum)
         }
 
@@ -348,12 +373,15 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
     }
 
     /// Whole pixels to send this frame. The fraction left over is kept in
-    /// `remainder` for the next frame; on the last frame (`flush`) it is
-    /// rounded and sent so nothing is lost.
+    /// `remainder` for the next frame; on the last frame (`flush`) the total
+    /// is rounded to the nearest pixel and the rounding error is kept too.
     private static func wholePoints(_ delta: Double, remainder: inout Double, flush: Bool) -> Double {
         let combined = delta + remainder
         let points = flush ? combined.rounded() : combined.rounded(.towardZero)
-        remainder = flush ? 0 : combined - points
+        // Keep the rounding error even after the last frame, so glides of a
+        // fraction of a pixel add up correctly over several clicks. It stays
+        // within half a pixel; a cancelled glide clears it.
+        remainder = combined - points
         return points
     }
 
@@ -420,30 +448,31 @@ final class GlideScrollingTransformer: EventTransformer, Deactivatable {
 
     private func stopClock() {
         frameClock?.stop()
-        pointRemainderX = 0
-        pointRemainderY = 0
     }
 }
 
-// MARK: - 7. Speed factor
+// MARK: - 7. Modifier handoff
 
-/// Hands a "change speed" modifier factor (for example Option = 2×) from
-/// `ModifierActionsTransformer` to `GlideScrollingTransformer` for the wheel
-/// click being processed. Both run one after the other for the same event,
-/// so a shared object is enough.
+/// Carries what `ModifierActionsTransformer` did to the wheel click being
+/// processed over to `GlideScrollingTransformer`. Both run one after the
+/// other for the same event, so a shared object is enough. It carries:
 ///
-/// Glide counts physical notches, not the event's distance, so scaling the
-/// event itself would be lost (and for high-resolution wheels it would change
-/// how notches are counted). Instead, for notched wheel input the modifier
-/// stage records the factor here and only applies it once every modifier
-/// action has run, when the event's final direction is known (Shift may turn
-/// it sideways after the speed was set): axes Glide takes over keep the factor
-/// for Glide, which multiplies that click's glide distance by it, and other
-/// axes get it applied to the event as before.
-final class GlideSpeedFactor {
+/// - a "change speed" factor (for example Option = 2×). Glide counts
+///   physical notches, not the event's distance, so scaling the event itself
+///   would be lost (and for high-resolution wheels it would change how notches
+///   are counted). For notched wheel input the factor is therefore recorded
+///   here and only applied once every modifier action has run, when the
+///   event's final direction is known (Shift may turn it sideways after the
+///   speed was set): axes Glide takes over keep the factor for Glide, which
+///   multiplies that click's glide distance by it, and other axes get it
+///   applied to the event as before.
+/// - whether a modifier swapped vertical and horizontal, so Glide knows which
+///   physical wheel each axis now comes from.
+final class GlideModifierHandoff {
     private let glidesHorizontal: Bool
     private let glidesVertical: Bool
     private var factor = 1.0
+    private var swapsAxes = false
 
     init(glide: Scheme.Scrolling.Bidirectional<Scheme.Scrolling.Glide>) {
         glidesHorizontal = glide.horizontal != nil
@@ -460,6 +489,22 @@ final class GlideSpeedFactor {
         return true
     }
 
+    /// Notes that a modifier swapped vertical and horizontal.
+    func noteAxesSwapped() {
+        swapsAxes.toggle()
+    }
+
+    /// Applies any recorded factor to the whole event now. Used before an
+    /// action that reads or consumes the event (such as pinch zoom), which
+    /// never reaches Glide, so it sees the speed as it would without Glide.
+    func applyPending(to view: ScrollWheelEventView) {
+        guard factor != 1 else {
+            return
+        }
+        view.scale(factor: factor)
+        factor = 1
+    }
+
     /// Called after every modifier action has run. Scales the event on the
     /// axes Glide does not take over; Glide's axes keep the factor for Glide.
     func applyToAxesWithoutGlide(of view: ScrollWheelEventView) {
@@ -472,14 +517,15 @@ final class GlideSpeedFactor {
         )
     }
 
-    /// Clears any factor left from an earlier event.
+    /// Clears anything left from an earlier event.
     func reset() {
         factor = 1
+        swapsAxes = false
     }
 
-    /// Returns the factor for the current click and clears it.
-    func take() -> Double {
+    /// Returns what was recorded for the current click and clears it.
+    func take() -> (speed: Double, swapsAxes: Bool) {
         defer { reset() }
-        return factor
+        return (factor, swapsAxes)
     }
 }

@@ -891,9 +891,10 @@ class EventTransformerManager {
             horizontal: scheme.scrolling.glide.horizontal?.isEnabled == true ? scheme.scrolling.glide.horizontal : nil
         )
         let hasGlideScrolling = glide.vertical != nil || glide.horizontal != nil
-        // Carries a "change speed" modifier factor to Glide, which counts
-        // notches and would otherwise lose it.
-        let glideSpeed = hasGlideScrolling ? GlideSpeedFactor(glide: glide) : nil
+        // Tells Glide what modifier keys did to a click (a "change speed"
+        // factor, which Glide's notch counting would otherwise lose, and
+        // Shift swapping the axes).
+        let glideHandoff = hasGlideScrolling ? GlideModifierHandoff(glide: glide) : nil
         let smoothed = Scheme.Scrolling.Bidirectional(
             vertical: glide.vertical == nil && scheme.scrolling.smoothed.vertical?.isEnabled == true
                 ? scheme.scrolling.smoothed.vertical : nil,
@@ -1001,16 +1002,30 @@ class EventTransformerManager {
             eventTransformer.append(ModifierActionsTransformer(
                 modifiers: modifiers,
                 scrollGesture: scrollGesture,
-                glideSpeed: glideSpeed
+                glideHandoff: glideHandoff
             ) { readsHighResolutionUnits ? $0.device?.highResolutionWheelNormalizationMultiplier : nil })
         }
 
         // Glide scrolling: runs at the same point in the pipeline as smoothed
         // scrolling, after modifier actions (so Shift-to-scroll-sideways applies).
         if hasGlideScrolling {
+            // Wheels the normalizer above already turned into one step per
+            // notch; Shift can move such a step onto a gliding direction.
+            let normalizesWheels = device != nil
+            let normalizedWheels = (
+                horizontal: normalizesWheels && highResolutionWheelNormalizerMode(
+                    distance: scheme.scrolling.distance.horizontal,
+                    animated: animatesHorizontal
+                ) == .lowResolution,
+                vertical: normalizesWheels && highResolutionWheelNormalizerMode(
+                    distance: scheme.scrolling.distance.vertical,
+                    animated: animatesVertical
+                ) == .lowResolution
+            )
             eventTransformer.append(GlideScrollingTransformer(
                 glide: glide,
-                speedFactor: glideSpeed,
+                modifierHandoff: glideHandoff,
+                normalizedWheels: normalizedWheels,
                 eventSink: { [postEvent] in postEvent($0, .cgSessionEventTap) }
             ))
         }
